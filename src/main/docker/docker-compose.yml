@@ -1,0 +1,11 @@
+name: open-asset-allocator
+
+services:
+  db:
+    image: postgres:16.3-bullseye
+    restart: always
+    shm_size: 128mb
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: local
