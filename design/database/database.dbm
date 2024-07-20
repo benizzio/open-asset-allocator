@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+CAUTION: Do not modify this file unless you know what you are doing.
+ Unexpected results may occur if the code is changed deliberately.
+-->
+<dbmodel pgmodeler-ver="1.1.3" use-changelog="false" max-obj-count="4"
+	 last-position="0,0" last-zoom="1"
+	 default-schema="public" default-owner="postgres"
+	 layers="Default layer"
+	 active-layers="0"
+	 layer-name-colors="#000000"
+	 layer-rect-colors="#b4b4b4"
+	 show-layer-names="false" show-layer-rects="false">
+<database name="new_database" is-template="false" allow-conns="true">
+</database>
+
+<schema name="public" layers="0" fill-color="#e1e1e1" name-color="#000000" sql-disabled="true">
+</schema>
+
+<table name="asset_value_fact" layers="0" collapse-mode="2" max-obj-count="6" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<comment> <![CDATA[Fact table for portfolio asset values held]]> </comment>
+	<position x="160" y="480"/>
+	<column name="cash_reserve" not-null="true">
+		<type name="boolean" length="0"/>
+		<comment> <![CDATA[Degenerate dimension informing that the asset is a cash reserve for the classifier]]> </comment>
+	</column>
+	<column name="asset_quantity">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[Helper field for asset unit quantity]]> </comment>
+	</column>
+	<column name="asset_market_price">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[Helper field for aggragated asset price]]> </comment>
+	</column>
+	<column name="total_market_value" not-null="true">
+		<type name="bigint" length="0"/>
+		<comment> <![CDATA[Measure containing total market value of the asset in the portfolio]]> </comment>
+	</column>
+
+	<customidxs object-type="column">
+		<object name="asset_id" index="0"/>
+	</customidxs>
+	<customidxs object-type="constraint">
+		<object name="asset_fk" index="0"/>
+	</customidxs></table>
+
+<table name="asset" layers="0" collapse-mode="2" max-obj-count="4" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="200" y="120"/>
+	<column name="id" not-null="true">
+		<type name="serial" length="0"/>
+	</column>
+	<column name="ticker" not-null="true">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Exchange full identifier, if relevant]]> </comment>
+	</column>
+	<column name="name" not-null="true">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Underlying asset name (company name, fund name, currency name, etc.)]]> </comment>
+	</column>
+	<column name="class" not-null="true">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Asset class classifier]]> </comment>
+	</column>
+	<constraint name="asset_pk" type="pk-constr" table="public.asset">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<relationship name="asset_value_is_identified" type="rel1n" layers="0"
+	 src-col-pattern="{st}_{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#972037"
+	 src-table="public.asset"
+	 dst-table="public.asset_value_fact"
+	 src-required="false" dst-required="false">
+	<label ref-type="name-label">
+		<position x="-15.0278" y="-14.8249"/>
+	</label>
+</relationship>
+
+<table name="asset_allocation_plan" layers="0" collapse-mode="2" max-obj-count="4" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<comment> <![CDATA[Asset allocation planning detail]]> </comment>
+	<position x="620" y="340"/>
+	<column name="cash_reserve" not-null="true">
+		<type name="boolean" length="0"/>
+		<comment> <![CDATA[Informs that the asset is a cash reserve for the lower classifier granularity]]> </comment>
+	</column>
+	<column name="slice" not-null="true">
+		<type name="smallint" length="0"/>
+		<comment> <![CDATA[Allocation slice of the planned asset, bounded to the lower classifier granularity (in %)]]> </comment>
+	</column>
+	<constraint name="slice_percentage_ck" type="ck-constr" table="public.asset_allocation_plan">
+			<expression> <![CDATA[slice BETWEEN 1 AND 100]]> </expression>
+	</constraint>
+
+	<customidxs object-type="column">
+		<object name="allocation_plan_id" index="1"/>
+		<object name="asset_id" index="0"/>
+	</customidxs>
+	<customidxs object-type="constraint">
+		<object name="allocation_plan_fk" index="1"/>
+		<object name="asset_fk" index="0"/>
+	</customidxs></table>
+
+<relationship name="asset_is_planned" type="rel1n" layers="0"
+	 src-col-pattern="{st}_{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#dbc1e5"
+	 src-table="public.asset"
+	 dst-table="public.asset_allocation_plan"
+	 src-required="false" dst-required="false">
+	<label ref-type="name-label">
+		<position x="17.3141" y="-27.3136"/>
+	</label>
+</relationship>
+
+<table name="allocation_plan" layers="0" collapse-mode="2" max-obj-count="3" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<comment> <![CDATA[Asset allocation planning classification]]> </comment>
+	<position x="600" y="60"/>
+	<column name="id" not-null="true">
+		<type name="serial" length="0"/>
+	</column>
+	<column name="name" not-null="true">
+		<type name="text" length="0"/>
+	</column>
+	<column name="planned_execution_date">
+		<type name="date" length="0"/>
+	</column>
+	<constraint name="allocation_plan_pk" type="pk-constr" table="public.allocation_plan">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<relationship name="asset_specifies_allocation_plan" type="rel1n" layers="0"
+	 src-col-pattern="{st}_{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#a9c662"
+	 src-table="public.allocation_plan"
+	 dst-table="public.asset_allocation_plan"
+	 src-required="false" dst-required="false">
+	<label ref-type="name-label">
+		<position x="-7.27763" y="-28.053"/>
+	</label>
+</relationship>
+
+</dbmodel>
