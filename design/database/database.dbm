@@ -17,12 +17,16 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <schema name="public" layers="0" fill-color="#e1e1e1" name-color="#000000" sql-disabled="true">
 </schema>
 
-<table name="asset_value_fact" layers="0" collapse-mode="2" max-obj-count="6" z-value="0">
+<table name="asset_value_fact" layers="0" collapse-mode="2" max-obj-count="7" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
 	<comment> <![CDATA[Fact table for portfolio asset values held]]> </comment>
 	<position x="160" y="480"/>
-	<column name="cash_reserve" not-null="true">
+	<column name="class">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Asset class degenerate dimension]]> </comment>
+	</column>
+	<column name="cash_reserve">
 		<type name="boolean" length="0"/>
 		<comment> <![CDATA[Degenerate dimension informing that the asset is a cash reserve for the classifier]]> </comment>
 	</column>
@@ -46,7 +50,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 		<object name="asset_fk" index="0"/>
 	</customidxs></table>
 
-<table name="asset" layers="0" collapse-mode="2" max-obj-count="4" z-value="0">
+<table name="asset" layers="0" collapse-mode="2" max-obj-count="3" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
 	<position x="200" y="120"/>
@@ -60,10 +64,6 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<column name="name" not-null="true">
 		<type name="text" length="0"/>
 		<comment> <![CDATA[Underlying asset name (company name, fund name, currency name, etc.)]]> </comment>
-	</column>
-	<column name="class" not-null="true">
-		<type name="text" length="0"/>
-		<comment> <![CDATA[Asset class classifier]]> </comment>
 	</column>
 	<constraint name="asset_pk" type="pk-constr" table="public.asset">
 		<columns names="id" ref-type="src-columns"/>
@@ -83,26 +83,40 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	</label>
 </relationship>
 
-<table name="asset_allocation_plan" layers="0" collapse-mode="2" max-obj-count="4" z-value="0">
+<table name="allocation_plan_unit" layers="0" collapse-mode="2" max-obj-count="8" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
 	<comment> <![CDATA[Asset allocation planning detail]]> </comment>
-	<position x="620" y="340"/>
+	<position x="600" y="440"/>
+	<column name="id" not-null="true">
+		<type name="serial" length="0"/>
+	</column>
+	<column name="structural_id" not-null="true">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Identifier of the plan unit inside the hierarchical classification]]> </comment>
+	</column>
 	<column name="cash_reserve" not-null="true">
 		<type name="boolean" length="0"/>
 		<comment> <![CDATA[Informs that the asset is a cash reserve for the lower classifier granularity]]> </comment>
 	</column>
-	<column name="slice" not-null="true">
+	<column name="slice">
 		<type name="smallint" length="0"/>
-		<comment> <![CDATA[Allocation slice of the planned asset, bounded to the lower classifier granularity (in %)]]> </comment>
+		<comment> <![CDATA[Allocation slice of the planned asset, bounded to the lower classifier granularity (in %), for ALLOCATION_PLANs]]> </comment>
 	</column>
-	<constraint name="slice_percentage_ck" type="ck-constr" table="public.asset_allocation_plan">
+	<column name="total_market_value">
+		<type name="smallint" length="0"/>
+		<comment> <![CDATA[Planned allocation size for EXECUTION_PLANs]]> </comment>
+	</column>
+	<constraint name="slice_percentage_ck" type="ck-constr" table="public.allocation_plan_unit">
 			<expression> <![CDATA[slice BETWEEN 1 AND 100]]> </expression>
+	</constraint>
+	<constraint name="allocation_plan_unit_pk" type="pk-constr" table="public.allocation_plan_unit">
+		<columns names="id" ref-type="src-columns"/>
 	</constraint>
 
 	<customidxs object-type="column">
 		<object name="allocation_plan_id" index="1"/>
-		<object name="asset_id" index="0"/>
+		<object name="asset_id" index="3"/>
 	</customidxs>
 	<customidxs object-type="constraint">
 		<object name="allocation_plan_fk" index="1"/>
@@ -115,14 +129,14 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-fk-pattern="{st}_fk"
 	 custom-color="#dbc1e5"
 	 src-table="public.asset"
-	 dst-table="public.asset_allocation_plan"
+	 dst-table="public.allocation_plan_unit"
 	 src-required="false" dst-required="false">
 	<label ref-type="name-label">
 		<position x="17.3141" y="-27.3136"/>
 	</label>
 </relationship>
 
-<table name="allocation_plan" layers="0" collapse-mode="2" max-obj-count="3" z-value="0">
+<table name="allocation_plan" layers="0" collapse-mode="2" max-obj-count="6" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
 	<comment> <![CDATA[Asset allocation planning classification]]> </comment>
@@ -133,6 +147,14 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<column name="name" not-null="true">
 		<type name="text" length="0"/>
 	</column>
+	<column name="type" not-null="true">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Allocation plan type, such as ALLOCATION_PLAN (slice sizing) or EXECUTION_PLAN (real asset positioning)]]> </comment>
+	</column>
+	<column name="structure" not-null="true">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Definition of structure of asset allocation plan in hierarchical levels, using the "|" (pipe) charcter as a divider. Ex: "ASSET_CLASS|ASSET"]]> </comment>
+	</column>
 	<column name="planned_execution_date">
 		<type name="date" length="0"/>
 	</column>
@@ -141,17 +163,21 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	</constraint>
 </table>
 
-<relationship name="asset_specifies_allocation_plan" type="rel1n" layers="0"
+<relationship name="unit_specifies_allocation_plan" type="rel1n" layers="0"
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
 	 custom-color="#a9c662"
 	 src-table="public.allocation_plan"
-	 dst-table="public.asset_allocation_plan"
-	 src-required="false" dst-required="false">
+	 dst-table="public.allocation_plan_unit"
+	 src-required="true" dst-required="false">
 	<label ref-type="name-label">
-		<position x="-7.27763" y="-28.053"/>
+		<position x="81.5204" y="-0.65299"/>
 	</label>
 </relationship>
+
+<constraint name="allocation_plan_unit_uk" type="uq-constr" table="public.allocation_plan_unit">
+	<columns names="allocation_plan_id,structural_id" ref-type="src-columns"/>
+</constraint>
 
 </dbmodel>
