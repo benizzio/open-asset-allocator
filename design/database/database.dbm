@@ -17,16 +17,36 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <schema name="public" layers="0" fill-color="#e1e1e1" name-color="#000000" sql-disabled="true">
 </schema>
 
+<table name="asset" layers="0" collapse-mode="2" max-obj-count="3" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="200" y="120"/>
+	<column name="id" not-null="true">
+		<type name="serial" length="0"/>
+	</column>
+	<column name="ticker" not-null="true">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Exchange full identifier, if relevant]]> </comment>
+	</column>
+	<column name="name" not-null="true">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Underlying asset name (company name, fund name, currency name, etc.)]]> </comment>
+	</column>
+	<constraint name="asset_pk" type="pk-constr" table="public.asset">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
 <table name="asset_value_fact" layers="0" collapse-mode="2" max-obj-count="7" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
 	<comment> <![CDATA[Fact table for portfolio asset values held]]> </comment>
 	<position x="160" y="480"/>
-	<column name="class">
+	<column name="class" not-null="true">
 		<type name="text" length="0"/>
 		<comment> <![CDATA[Asset class degenerate dimension]]> </comment>
 	</column>
-	<column name="cash_reserve">
+	<column name="cash_reserve" not-null="true">
 		<type name="boolean" length="0"/>
 		<comment> <![CDATA[Degenerate dimension informing that the asset is a cash reserve for the classifier]]> </comment>
 	</column>
@@ -50,26 +70,6 @@ CAUTION: Do not modify this file unless you know what you are doing.
 		<object name="asset_fk" index="0"/>
 	</customidxs></table>
 
-<table name="asset" layers="0" collapse-mode="2" max-obj-count="3" z-value="0">
-	<schema name="public"/>
-	<role name="postgres"/>
-	<position x="200" y="120"/>
-	<column name="id" not-null="true">
-		<type name="serial" length="0"/>
-	</column>
-	<column name="ticker" not-null="true">
-		<type name="text" length="0"/>
-		<comment> <![CDATA[Exchange full identifier, if relevant]]> </comment>
-	</column>
-	<column name="name" not-null="true">
-		<type name="text" length="0"/>
-		<comment> <![CDATA[Underlying asset name (company name, fund name, currency name, etc.)]]> </comment>
-	</column>
-	<constraint name="asset_pk" type="pk-constr" table="public.asset">
-		<columns names="id" ref-type="src-columns"/>
-	</constraint>
-</table>
-
 <relationship name="asset_value_is_identified" type="rel1n" layers="0"
 	 src-col-pattern="{st}_{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
@@ -81,6 +81,10 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<label ref-type="name-label">
 		<position x="-15.0278" y="-14.8249"/>
 	</label>
+	<constraint name="asset_value_fact_pk" type="pk-constr" table="public.asset_value_fact">
+		<columns names="class,cash_reserve" ref-type="src-columns"/>
+	</constraint>
+	<special-pk-cols indexes="0"/>
 </relationship>
 
 <table name="allocation_plan_unit" layers="0" collapse-mode="2" max-obj-count="8" z-value="0">
@@ -172,7 +176,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 dst-table="public.allocation_plan_unit"
 	 src-required="true" dst-required="false">
 	<label ref-type="name-label">
-		<position x="81.5204" y="-0.65299"/>
+		<position x="9.88848" y="-15.153"/>
 	</label>
 </relationship>
 
