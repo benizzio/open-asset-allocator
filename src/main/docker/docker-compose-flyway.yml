@@ -1,6 +1,7 @@
 services:
   flyway:
     image: redgate/flyway
-    command: -url=jdbc:postgresql://172.17.0.1:5432/postgres -user=postgres -password=local migrate
+    command: -user=postgres -password=local migrate
     volumes:
-      - ../flyway:/flyway/sql
+      - ../flyway/sql:/flyway/sql
+      - ../flyway/conf:/flyway/conf
