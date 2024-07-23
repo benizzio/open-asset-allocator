@@ -1,0 +1,10 @@
+name: duckdb-cli
+
+services:
+  duckdb-cli:
+    build: .
+    environment:
+      INPUT_FILE: input.sql
+    volumes:
+      - ../../duckdb/input:/duckdb/input
+

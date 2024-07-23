@@ -1,7 +1,9 @@
+name: flyway
+
 services:
   flyway:
     image: redgate/flyway
     command: -user=postgres -password=local migrate
     volumes:
-      - ../flyway/sql:/flyway/sql
-      - ../flyway/conf:/flyway/conf
+      - ../../flyway/sql:/flyway/sql
+      - ../../flyway/conf:/flyway/conf
