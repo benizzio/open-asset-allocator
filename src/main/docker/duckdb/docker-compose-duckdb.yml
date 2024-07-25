@@ -6,5 +6,5 @@ services:
     environment:
       INPUT_FILE: input.sql
     volumes:
-      - ../../duckdb/input:/duckdb/input
+      - ../../../../target/duckdb-input:/duckdb/input
 
