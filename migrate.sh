@@ -1,4 +1,6 @@
 #!/bin/zsh
 
-cd src/main/docker/flyway
-docker compose -f docker-compose-flyway.yml up
+script_dir=$(dirname "$0")
+project_root=$(realpath "$script_dir")
+
+docker compose -f $project_root/src/main/docker/flyway/docker-compose-flyway.yml run --rm flyway
