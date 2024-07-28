@@ -1,0 +1,31 @@
+{
+    "meta": {
+        "date": "2024-07-28T17:16:27.893Z",
+        "version": "2.98.0"
+    },
+    "accounts": [
+        {
+            "balance": 0,
+            "comment": null,
+            "currency": "USD",
+            "id": "2f9dd74a-9c1a-4761-aaa8-1b69439b8420",
+            "isExcluded": false,
+            "name": "Portfolio name",
+            "platformId": null
+        }
+    ],
+    "activities": [
+        {
+            "accountId": "2f9dd74a-9c1a-4761-aaa8-1b69439b8420",
+            "comment": "Initial custody add",
+            "fee": 0,
+            "quantity": 0.21679603,
+            "type": "BUY",
+            "unitPrice": 4910.542616239068,
+            "currency": "USD",
+            "dataSource": "EOD_HISTORICAL_DATA",
+            "date": "2020-12-30T23:00:00.000Z",
+            "symbol": "BTC-USD.CC"
+        }
+    ]
+}
