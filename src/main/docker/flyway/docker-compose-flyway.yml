@@ -2,8 +2,9 @@ name: flyway
 
 services:
   flyway:
-    image: redgate/flyway
-    command: -user=postgres -password=local migrate
+    image: flyway/flyway:10
+    command: -url=$DB_URL -user=$POSTGRES_USER -password=$POSTGRES_PASSWORD migrate
     volumes:
-      - ../../flyway/sql:/flyway/sql
-      - ../../flyway/conf:/flyway/conf
+      - ${HOST_MIGRATIONS_DIR_PATH}:/flyway/sql
+      - ${HOST_CONFIG_DIR_PATH}:/flyway/conf
+    restart: no
