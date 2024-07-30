@@ -18,18 +18,18 @@ CREATE TEMP TABLE sws_summary AS
     WHERE current_value > 0
 ;
 
-install prql FROM community;
+install prql from community;
 install postgres;
 load prql;
 load postgres;
 
-ATTACH 'dbname=postgres user=postgres password=local host=172.17.0.1' AS postgres (TYPE POSTGRES);
+ATTACH '' AS pgsql (TYPE POSTGRES);
 
 BEGIN TRANSACTION;
 
-INSERT INTO postgres.asset (ticker)
+INSERT INTO pgsql.asset (ticker)
     SELECT swss.asset AS ticker FROM sws_summary swss
-    LEFT JOIN postgres.asset ass ON swss.asset = ass.ticker
+    LEFT JOIN pgsql.asset ass ON swss.asset = ass.ticker
     WHERE ass.ticker IS NULL
 ;
 
@@ -43,4 +43,4 @@ INSERT INTO postgres.asset (ticker)
 
 COMMIT;
 
-SELECT * FROM postgres.asset;
+SELECT * FROM pgsql.asset;
