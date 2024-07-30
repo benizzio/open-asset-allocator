@@ -5,6 +5,6 @@ services:
     image: flyway/flyway:10
     command: -url=$DB_URL -user=$POSTGRES_USER -password=$POSTGRES_PASSWORD migrate
     volumes:
-      - ${HOST_MIGRATIONS_DIR_PATH}:/flyway/sql
-      - ${HOST_CONFIG_DIR_PATH}:/flyway/conf
+      - ../../flyway/sql:/flyway/sql
+      - ../../flyway/conf:/flyway/conf
     restart: no
