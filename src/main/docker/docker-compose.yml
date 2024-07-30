@@ -4,6 +4,7 @@ services:
   db:
     image: postgres:16.3-bullseye
     restart: always
+    env_file: .env
     shm_size: 128mb
     ports:
       - "5432:5432"
