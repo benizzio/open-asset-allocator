@@ -93,8 +93,8 @@ SELECT * FROM asset_value_fact_insertion;
 
 COMMIT;
 
-.print '===> DEBUGGING'
-.print 'asset table'
-SELECT * FROM pgsql.asset;
-.print 'asset_value_fact table'
-SELECT * FROM pgsql.asset_value_fact;
+-- .print '===> DEBUGGING'
+-- .print 'asset table'
+-- SELECT * FROM pgsql.asset;
+-- .print 'asset_value_fact table'
+-- SELECT * FROM pgsql.asset_value_fact;
