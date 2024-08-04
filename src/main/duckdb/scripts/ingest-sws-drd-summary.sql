@@ -5,7 +5,7 @@
 CREATE TEMP TABLE sws_summary AS
     SELECT asset, total_shares, current_price, current_value
     FROM read_csv(
-        format('{}/us-complete-portfolio-summary.csv', getenv('INTERNAL_DUCKDB_INPUT_PATH')),
+        format('{}/*-us-complete-portfolio-summary.csv', getenv('INTERNAL_DUCKDB_INPUT_PATH')),
         columns = {
             'asset': 'TEXT',
             'total_bought': 'NUMERIC',
@@ -26,7 +26,7 @@ CREATE TEMP TABLE sws_summary AS
 CREATE TEMP TABLE asset_dimension_mapping AS
     SELECT *
     FROM read_csv(
-        format('{}/us-complete-portfolio-summary.csv', getenv('INTERNAL_DUCKDB_INPUT_PATH')),
+        format('{}/*-asset-dimension-mapping.csv', getenv('INTERNAL_DUCKDB_INPUT_PATH')),
         columns = {
             'ticker': 'TEXT',
             'class': 'TEXT',
