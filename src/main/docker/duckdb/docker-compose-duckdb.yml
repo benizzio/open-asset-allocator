@@ -7,4 +7,4 @@ services:
     environment:
       INPUT_FILE: input.sql
     volumes:
-      - ../../../../target/duckdb-input:/duckdb/input
+      - ../../../../target/duckdb-input:${INTERNAL_DUCKDB_INPUT_PATH}
