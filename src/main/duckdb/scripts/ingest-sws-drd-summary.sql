@@ -37,9 +37,9 @@ CREATE TEMP TABLE asset_dimension_mapping AS
 ;
 
 .print '=> Loading external modules and databases needed for ingestion'
-install prql from community;
+-- install prql from community;
 install postgres;
-load prql;
+-- load prql;
 load postgres;
 
 ATTACH '' AS pgsql (TYPE POSTGRES);
@@ -47,29 +47,40 @@ ATTACH '' AS pgsql (TYPE POSTGRES);
 .print '=> Starting data ingestion transaction'
 BEGIN TRANSACTION;
 
-.print '=> Inserting asset data into the asset table the WHEN it does not exist'
-INSERT INTO pgsql.asset (ticker)
+.print '=> Asset data to be inserted into the asset table the (WHEN it does not exist)'
+CREATE TEMP VIEW asset_insertion AS
     SELECT swss.asset AS ticker FROM sws_summary swss
     LEFT JOIN pgsql.asset ass ON swss.asset = ass.ticker
     WHERE ass.ticker IS NULL
 ;
 
-.print '=> Inserting portfolio data in the asset fact table, joining data classification from asset dimension mapping classifier file'
--- Has to fail when the asset dimension data is missing to indicate that file is broken and needs more data
--- INSERT INTO pgsql.asset_value_fact
-    -- (asset_id, class, cash_reserve, asset_quantity, asset_market_price, total_market_value)
+SELECT * FROM asset_insertion;
 
-    -- TODO fix this query
+.print '=> Inserting asset data'
+INSERT INTO pgsql.asset (ticker)
+    SELECT ticker FROM asset_insertion
+;
+
+.print '=> Portfolio data to be inserted, joining data classification from asset dimension mapping classifier file'
+CREATE TEMP VIEW asset_value_fact_insertion AS
     SELECT
-        ass.id,
-        adm.class,
-        adm.cash_reserve,
-        nullif(adm.asset_quantity, -1),
-        constant_or_null(swss.current_price, adm.asset_quantity),
-        swss.current_value
+        ass.id as asset_id,
+        adm.class as class,
+        adm.cash_reserve as cash_reserve,
+        if(adm.asset_quantity > 0, adm.asset_quantity, swss.total_shares) as asset_quantity,
+        swss.current_price as asset_market_price,
+        if(adm.asset_quantity > 0, adm.asset_quantity * swss.current_price, swss.current_value) as total_market_value
     FROM sws_summary swss
     LEFT JOIN asset_dimension_mapping adm ON adm.ticker = swss.asset
     LEFT JOIN pgsql.asset ass ON ass.ticker = swss.asset
+;
+
+SELECT * FROM asset_value_fact_insertion;
+
+.print '=> Inserting portfolio data in the asset fact table'
+-- Has to fail when the asset dimension data is missing to indicate that file is broken and needs more data
+ INSERT INTO pgsql.asset_value_fact
+    SELECT * FROM asset_value_fact_insertion
 ;
 
 -- (|
@@ -82,4 +93,8 @@ INSERT INTO pgsql.asset (ticker)
 
 COMMIT;
 
+.print '===> DEBUGGING'
+.print 'asset table'
 SELECT * FROM pgsql.asset;
+.print 'asset_value_fact table'
+SELECT * FROM pgsql.asset_value_fact;
