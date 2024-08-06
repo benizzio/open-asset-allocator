@@ -37,9 +37,7 @@ CREATE TEMP TABLE asset_dimension_mapping AS
 ;
 
 .print '=> Loading external modules and databases needed for ingestion'
--- install prql from community;
 install postgres;
--- load prql;
 load postgres;
 
 ATTACH '' AS pgsql (TYPE POSTGRES);
@@ -86,14 +84,6 @@ SELECT * FROM asset_value_fact_insertion;
     SELECT asset_id, class, cash_reserve, asset_quantity, asset_market_price, total_market_value, time_frame_tag
     FROM asset_value_fact_insertion
 ;
-
--- (|
---     from sws_summary
---     select {
---         asset_ticker = asset,
---         total_market_value = current_value
---     }
--- |);
 
 COMMIT;
 
