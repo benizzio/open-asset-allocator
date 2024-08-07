@@ -8,19 +8,45 @@ CREATE TEMP TABLE ghostf_activity AS
     )
 ;
 
--- TODO to debug, remove
-select * from ghostf_activity;
+-- TODO to debug, remove?
+-- select * from ghostf_activity;
+-- select DISTINCT type from ghostf_activity;
+-- select DISTINCT currency from ghostf_activity;
+
+CREATE TEMP TABLE ghostf_datasource AS
+    select DISTINCT symbol, dataSource from ghostf_activity;
+
+-- TODO to debug, remove?
+select * from ghostf_datasource;
 
 install prql from community;
 load prql;
 
 -- TODO PRQL to reduce activities to asset values
--- EX:
--- (|
---     from sws_summary
---     select {
---         asset_ticker = asset,
---         total_market_value = current_value
---     }
--- |);
+CREATE TEMP TABLE ghostf_symbol_aggegation AS
+    (|
+        from ghostf_activity
+        select {
+            symbol,
+            multiplier = case [ `type` == "BUY" => 1, `type` == "SELL" => -1 ],
+            quantity,
+            fee
+        }
+        select {
+            symbol,
+            quantity_mutation = quantity * multiplier,
+            fee
+        }
+        group { symbol } (
+            aggregate {
+                total_quantity = sum quantity_mutation,
+                total_fee = sum fee
+            }
+        )
+|)
+;
 
+-- TODO to debug, remove?
+select * from ghostf_symbol_aggegation;
+
+--TODO continue: fetch prices
