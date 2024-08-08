@@ -1,6 +1,10 @@
 .bail on
 .changes on
 
+.print '=> Loading external modules and databases needed for ingestion'
+install postgres;
+load postgres;
+
 .print '=> Reading the Simply Wall Street Summary file'
 CREATE TEMP TABLE sws_summary AS
     SELECT asset, total_shares, current_price, current_value
@@ -35,10 +39,6 @@ CREATE TEMP TABLE asset_dimension_mapping AS
         }
     )
 ;
-
-.print '=> Loading external modules and databases needed for ingestion'
-install postgres;
-load postgres;
 
 ATTACH '' AS pgsql (TYPE POSTGRES);
 

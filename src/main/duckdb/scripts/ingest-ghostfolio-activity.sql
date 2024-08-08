@@ -1,6 +1,14 @@
 .bail on
 .changes on
 
+.print '=> Loading external modules and databases needed for ingestion'
+install prql from community;
+install scrooge from community;
+install postgres;
+load prql;
+load scrooge;
+load postgres;
+
 CREATE TEMP TABLE ghostf_activity AS
     SELECT activity_struct.* FROM (
         SELECT unnest(activities) as activity_struct
@@ -14,13 +22,11 @@ CREATE TEMP TABLE ghostf_activity AS
 -- select DISTINCT currency from ghostf_activity;
 
 CREATE TEMP TABLE ghostf_datasource AS
-    select DISTINCT symbol, dataSource from ghostf_activity;
+    select DISTINCT symbol, dataSource from ghostf_activity
+;
 
 -- TODO to debug, remove?
 select * from ghostf_datasource;
-
-install prql from community;
-load prql;
 
 -- TODO PRQL to reduce activities to asset values
 CREATE TEMP TABLE ghostf_symbol_aggegation AS
@@ -43,7 +49,7 @@ CREATE TEMP TABLE ghostf_symbol_aggegation AS
                 total_fee = sum fee
             }
         )
-|)
+    |)
 ;
 
 -- TODO to debug, remove?
