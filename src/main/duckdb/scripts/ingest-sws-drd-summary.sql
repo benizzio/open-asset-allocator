@@ -45,7 +45,7 @@ ATTACH '' AS pgsql (TYPE POSTGRES);
 .print '=> Starting data ingestion transaction'
 BEGIN TRANSACTION;
 
-.print '=> Asset data to be inserted into the asset table the (WHEN it does not exist)'
+.print '=> Asset data to be inserted into the asset table (WHEN it does not exist)'
 CREATE TEMP VIEW asset_insertion AS
     SELECT swss.asset AS ticker FROM sws_summary swss
     LEFT JOIN pgsql.asset ass ON swss.asset = ass.ticker
