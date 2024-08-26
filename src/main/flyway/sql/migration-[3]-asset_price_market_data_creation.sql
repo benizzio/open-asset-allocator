@@ -14,6 +14,12 @@ ALTER TABLE asset_market_data_source ADD CONSTRAINT asset_fk FOREIGN KEY (asset_
 
 ALTER TABLE asset_market_data_source ADD CONSTRAINT asset_market_data_source_uk UNIQUE (asset_id, data_source);
 
+CREATE VIEW asset_ticker_market_data_source AS
+	SELECT ass.ticker, amds.data_source
+	FROM asset_market_data_source amds
+	JOIN asset ass ON amds.asset_id = ass.id
+;
+
 CREATE TABLE asset_price_market_data (
 	asset_data_source_id integer NOT NULL,
 	market_date date NOT NULL,
@@ -29,7 +35,7 @@ ALTER TABLE asset_price_market_data ADD CONSTRAINT asset_market_data_source_fk F
 ;
 
 CREATE VIEW asset_price_last_market_data AS
-	SELECT DISTINCT ass.ticker, amds.data_source, apmd.market_date, apmd.market_close_price
+	SELECT DISTINCT ass.id AS asset_id, ass.ticker, amds.id AS asset_data_source_id, amds.data_source, apmd.market_date, apmd.market_close_price
 	FROM asset_market_data_source amds
 	JOIN asset ass ON amds.asset_id = ass.id
 	LEFT JOIN (
