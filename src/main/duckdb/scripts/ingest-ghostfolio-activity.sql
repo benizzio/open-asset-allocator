@@ -29,6 +29,9 @@ CREATE TEMP TABLE ghostf_activity AS
 
 ATTACH '' AS pgsql (TYPE POSTGRES);
 
+.print '=> Starting data ingestion transaction'
+BEGIN TRANSACTION;
+
 .print '=> Asset data to be inserted into the asset table (WHEN it does not exist)'
 CREATE TEMP VIEW asset_insertion AS
    SELECT DISTINCT ga.symbol AS ticker FROM ghostf_activity ga
@@ -43,7 +46,7 @@ INSERT INTO pgsql.asset (ticker)
     SELECT ticker FROM asset_insertion
 ;
 
-.print '=> Asset datasource data to be inserted into the ghostf_datasource table (WHEN it does not exist)'
+.print '=> Inserting asset datasource data'
 CREATE TEMP VIEW asset_market_data_source_insertion AS
    SELECT DISTINCT ass.id AS asset_id, ga.dataSource AS data_source FROM ghostf_activity ga
    JOIN pgsql.asset ass ON ga.symbol = ass.ticker
@@ -51,7 +54,6 @@ CREATE TEMP VIEW asset_market_data_source_insertion AS
    WHERE amds.data_source IS NULL
 ;
 
-.print '=> Inserting asset datasource data'
 INSERT INTO pgsql.asset_market_data_source (asset_id, data_source)
     SELECT asset_id, data_source FROM asset_market_data_source_insertion
     -- Inserting yahoo equivalents to fetch all data from there for now
@@ -70,43 +72,54 @@ CREATE TEMP VIEW yahoo_asset_list AS
 -- to debug if needed
 -- SELECT * FROM yahoo_asset_list;
 
-.print '=> Reading and registering market data from Yahoo'
--- function does not accept dynamic values, constant for now
--- TODO NOOP on conflict because the table is on PGSQL - find solution (table copy?)
-INSERT INTO pgsql.asset_price_market_data (asset_data_source_id, market_date, market_close_price)
-    SELECT yal.asset_data_source_id, yf.Date, yf.Close FROM yahoo_asset_list yal
-    JOIN (
-        SELECT symbol, Date, Close
-        FROM yahoo_finance(
-            [
-                "SOL-USD",
-                "UNI7083-USD",
-                "LINK-USD",
-                "MANA-USD",
-                "BTC-USD",
-                "ETH-USD",
-                "XRP-USD",
-                "AXS-USD",
-                "USDC-USD",
-                "LTC-USD",
-                "XTZ-USD",
-                "XLM-USD",
-                "SAND-USD",
-                "AUDIO-USD",
-                "MATIC-USD",
-                "MKR-USD"
-            ],
-            (current_date() - INTERVAL 1 DAY)::DATE,
-            current_date(),
-            "1d"
-        )
-        WHERE Date = current_date()
-    ) yf ON yf.symbol = yal.yahoo_ticker
-ON CONFLICT
-    DO UPDATE SET market_close_price = EXCLUDED.market_close_price
+.print '=> Creating temporary table and view for market data from Yahoo'
+-- function "yahoo_finance" does not accept dynamic values, constant for now
+CREATE TEMP TABLE yahoo_finance_data AS
+    SELECT symbol, Date, Close
+    FROM yahoo_finance(
+        [
+            "SOL-USD",
+            "UNI7083-USD",
+            "LINK-USD",
+            "MANA-USD",
+            "BTC-USD",
+            "ETH-USD",
+            "XRP-USD",
+            "AXS-USD",
+            "USDC-USD",
+            "LTC-USD",
+            "XTZ-USD",
+            "XLM-USD",
+            "SAND-USD",
+            "AUDIO-USD",
+            "MATIC-USD",
+            "MKR-USD"
+        ],
+        (current_date() - INTERVAL 1 DAY)::DATE,
+        current_date(),
+        "1d"
+    )
 ;
 
-SELECT * FROM pgsql.asset_price_market_data;
+CREATE TEMP VIEW yahoo_current_asset_price AS
+    SELECT yal.asset_data_source_id, yf.Date AS market_date, yf.Close AS close_price FROM yahoo_asset_list yal
+    JOIN yahoo_finance_data yf ON yf.symbol = yal.yahoo_ticker
+    WHERE yf.Date = current_date()
+;
+
+.print '=> Reading and registering (upserting) market data from Yahoo'
+INSERT INTO pgsql.asset_price_market_data (asset_data_source_id, market_date, market_close_price)
+    SELECT ycap.asset_data_source_id, ycap.market_date, ycap.close_price FROM yahoo_current_asset_price ycap
+    LEFT JOIN pgsql.asset_price_market_data apmd ON apmd.asset_data_source_id = ycap.asset_data_source_id AND apmd.market_date = ycap.market_date
+    WHERE apmd.asset_data_source_id IS NULL
+;
+
+UPDATE pgsql.asset_price_market_data apmd SET market_close_price = ycap.close_price
+    FROM yahoo_current_asset_price ycap
+    WHERE apmd.asset_data_source_id = ycap.asset_data_source_id AND apmd.market_date = ycap.market_date
+;
+
+SELECT * FROM pgsql.asset_price_last_market_data;
 
 -- TODO PRQL to reduce activities to asset values
 CREATE TEMP TABLE ghostf_symbol_aggegation AS
@@ -136,3 +149,5 @@ CREATE TEMP TABLE ghostf_symbol_aggegation AS
 select * from ghostf_symbol_aggegation;
 
 -- TODO insert current asset position based on last prices
+
+COMMIT;
