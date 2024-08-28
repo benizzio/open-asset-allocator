@@ -121,8 +121,10 @@ UPDATE pgsql.asset_price_market_data apmd SET market_close_price = ycap.close_pr
 
 SELECT * FROM pgsql.asset_price_last_market_data;
 
--- TODO PRQL to reduce activities to asset values
-CREATE TEMP TABLE ghostf_symbol_aggegation AS
+.print '=> Mapping and reducing ghostfolio data to calculate asset values'
+CREATE TEMP TABLE ghostf_symbol_aggegation (symbol TEXT, total_quantity NUMERIC(18,8), total_fee NUMERIC(18,8));
+
+INSERT INTO ghostf_symbol_aggegation
     (|
         from ghostf_activity
         select {
@@ -147,6 +149,22 @@ CREATE TEMP TABLE ghostf_symbol_aggegation AS
 
 -- TODO to debug, remove?
 select * from ghostf_symbol_aggegation;
+
+.print '=> Creating temporary view for asset value fact insertion'
+-- CREATE TEMP VIEW asset_value_fact_insertion
+    SELECT
+        aplmd.asset_id,
+        'TODO' AS class,
+        'TODO' AS cash_reserve,
+        extract('year' FROM current_date) || lpad(extract('month' FROM current_date)::text, 2, '0') as time_frame_tag,
+        gsa.total_quantity AS asset_quantity,
+        aplmd.market_close_price AS asset_market_price,
+        gsa.total_quantity * aplmd.market_close_price AS total_market_value
+    FROM ghostf_symbol_aggegation gsa
+    LEFT JOIN pgsql.asset_price_last_market_data aplmd ON gsa.symbol = aplmd.ticker
+    JOIN pgsql.asset ass ON aplmd.asset_id = ass.id
+    WHERE aplmd.data_source = 'YAHOO' AND gsa.total_quantity > 0
+;
 
 -- TODO insert current asset position based on last prices
 
