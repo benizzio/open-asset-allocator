@@ -15,10 +15,42 @@ load postgres;
 -- load httpfs;
 
 .print '=> Reading the Ghostfolio activity file'
-CREATE TEMP TABLE ghostf_activity AS
-    SELECT activity_struct.* FROM (
+CREATE TEMP TABLE ghostf_activity (
+    fee NUMERIC(18,8),
+    quantity NUMERIC(18,8),
+    type TEXT,
+    unitPrice NUMERIC(18,8),
+    datasource TEXT,
+    date TIMESTAMP,
+    symbol TEXT
+);
+
+INSERT INTO ghostf_activity
+    SELECT
+        activity_struct.fee,
+        activity_struct.quantity,
+        activity_struct.type,
+        activity_struct.unitPrice,
+        activity_struct.datasource,
+        activity_struct.date,
+        activity_struct.symbol
+    FROM (
         SELECT unnest(activities) AS activity_struct
         FROM read_json(format('{}/ghostfolio-export-*.json', getenv('INTERNAL_DUCKDB_INPUT_PATH')))
+    )
+;
+
+.print '=> Reading the asset dimension mapping classifier file'
+CREATE TEMP TABLE asset_dimension_mapping AS
+    SELECT *
+    FROM read_csv(
+        format('{}/*-asset-dimension-mapping.csv', getenv('INTERNAL_DUCKDB_INPUT_PATH')),
+        columns = {
+            'ticker': 'TEXT',
+            'class': 'TEXT',
+            'asset_quantity': 'NUMERIC(18,8)',
+            'cash_reserve': 'BOOLEAN'
+        }
     )
 ;
 
@@ -26,6 +58,7 @@ CREATE TEMP TABLE ghostf_activity AS
 -- select * from ghostf_activity;
 -- select DISTINCT type from ghostf_activity;
 -- select DISTINCT currency from ghostf_activity;
+-- select * from asset_dimension_mapping;
 
 ATTACH '' AS pgsql (TYPE POSTGRES);
 
@@ -124,7 +157,7 @@ SELECT * FROM pgsql.asset_price_last_market_data;
 .print '=> Mapping and reducing ghostfolio data to calculate asset values'
 CREATE TEMP TABLE ghostf_symbol_aggegation (symbol TEXT, total_quantity NUMERIC(18,8), total_fee NUMERIC(18,8));
 
-INSERT INTO ghostf_symbol_aggegation
+--INSERT INTO ghostf_symbol_aggegation
     (|
         from ghostf_activity
         select {
@@ -144,6 +177,9 @@ INSERT INTO ghostf_symbol_aggegation
                 total_fee = sum fee
             }
         )
+        filter total_quantity > 0
+        join side:left asset_dimension_mapping (ghostf_activity.symbol == asset_dimension_mapping.ticker)
+        #TODO CONTINUE
     |)
 ;
 
@@ -163,7 +199,7 @@ select * from ghostf_symbol_aggegation;
     FROM ghostf_symbol_aggegation gsa
     LEFT JOIN pgsql.asset_price_last_market_data aplmd ON gsa.symbol = aplmd.ticker
     JOIN pgsql.asset ass ON aplmd.asset_id = ass.id
-    WHERE aplmd.data_source = 'YAHOO' AND gsa.total_quantity > 0
+    WHERE aplmd.data_source = 'YAHOO'
 ;
 
 -- TODO insert current asset position based on last prices
