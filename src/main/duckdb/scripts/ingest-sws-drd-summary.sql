@@ -78,7 +78,7 @@ SELECT * FROM asset_value_fact_insertion;
 
 .print '=> Inserting portfolio data in the asset fact table'
 -- Has to fail when the asset dimension data is missing to indicate that file is broken and needs more data
- INSERT INTO pgsql.asset_value_fact (
+INSERT INTO pgsql.asset_value_fact (
         asset_id,
         class,
         cash_reserve,

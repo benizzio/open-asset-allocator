@@ -201,14 +201,14 @@ INSERT INTO ghostf_symbol_aggegation
 select * from ghostf_symbol_aggegation;
 
 .print '=> Creating temporary view for asset value fact insertion'
--- CREATE TEMP VIEW asset_value_fact_insertion
+CREATE TEMP VIEW asset_value_fact_insertion AS
     SELECT
         aplmd.asset_id,
         gsa.class,
         gsa.cash_reserve,
         gsa.total_quantity AS asset_quantity,
         aplmd.market_close_price AS asset_market_price,
-        gsa.total_quantity * aplmd.market_close_price AS total_market_value,
+        gsa.total_quantity::DECIMAL(30,8) * aplmd.market_close_price::DECIMAL(30,8) AS total_market_value,
         extract('year' FROM current_date) || lpad(extract('month' FROM current_date)::text, 2, '0') as time_frame_tag
     FROM ghostf_symbol_aggegation gsa
     LEFT JOIN pgsql.asset_price_last_market_data aplmd ON gsa.symbol = aplmd.ticker
@@ -216,6 +216,10 @@ select * from ghostf_symbol_aggegation;
     WHERE aplmd.data_source = 'YAHOO'
 ;
 
+-- TODO to debug, remove?
+select * from asset_value_fact_insertion;
+
 -- TODO insert current asset position based on last prices
+
 
 COMMIT;
