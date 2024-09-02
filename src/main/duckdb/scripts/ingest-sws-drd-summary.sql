@@ -12,13 +12,13 @@ CREATE TEMP TABLE sws_summary AS
         format('{}/*-us-complete-portfolio-summary.csv', getenv('INTERNAL_DUCKDB_INPUT_PATH')),
         columns = {
             'asset': 'TEXT',
-            'total_bought': 'NUMERIC',
+            'total_bought': 'NUMERIC', --TODO (18,8)
             'total_shares': 'SMALLINT',
-            'current_price': 'NUMERIC',
-            'current_value': 'NUMERIC',
-            'capital_gains': 'NUMERIC',
-            'dividends': 'NUMERIC',
-            'total_gain_currency': 'NUMERIC',
+            'current_price': 'NUMERIC',--TODO (18,8)
+            'current_value': 'NUMERIC',--TODO (18,8)
+            'capital_gains': 'NUMERIC',--TODO (18,8)
+            'dividends': 'NUMERIC',--TODO (18,8)
+            'total_gain_currency': 'NUMERIC',--TODO (18,8)
             'average_years': 'SMALLINT',
             'total_return': 'TEXT'
         }
@@ -34,7 +34,7 @@ CREATE TEMP TABLE asset_dimension_mapping AS
         columns = {
             'ticker': 'TEXT',
             'class': 'TEXT',
-            'asset_quantity': 'NUMERIC',
+            'asset_quantity': 'NUMERIC', --TODO (18,8)
             'cash_reserve': 'BOOLEAN'
         }
     )
@@ -79,7 +79,13 @@ SELECT * FROM asset_value_fact_insertion;
 .print '=> Inserting portfolio data in the asset fact table'
 -- Has to fail when the asset dimension data is missing to indicate that file is broken and needs more data
  INSERT INTO pgsql.asset_value_fact (
-    asset_id, class, cash_reserve, asset_quantity, asset_market_price, total_market_value, time_frame_tag
+        asset_id,
+        class,
+        cash_reserve,
+        asset_quantity,
+        asset_market_price,
+        total_market_value,
+        time_frame_tag
     )
     SELECT asset_id, class, cash_reserve, asset_quantity, asset_market_price, total_market_value, time_frame_tag
     FROM asset_value_fact_insertion

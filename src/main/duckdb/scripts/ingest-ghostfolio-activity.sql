@@ -135,7 +135,8 @@ CREATE TEMP TABLE yahoo_finance_data AS
 ;
 
 CREATE TEMP VIEW yahoo_current_asset_price AS
-    SELECT yal.asset_data_source_id, yf.Date AS market_date, yf.Close AS close_price FROM yahoo_asset_list yal
+    SELECT yal.asset_data_source_id, yf.Date AS market_date, yf.Close AS close_price
+    FROM yahoo_asset_list yal
     JOIN yahoo_finance_data yf ON yf.symbol = yal.yahoo_ticker
     WHERE yf.Date = current_date()
 ;
@@ -154,10 +155,17 @@ UPDATE pgsql.asset_price_market_data apmd SET market_close_price = ycap.close_pr
 
 SELECT * FROM pgsql.asset_price_last_market_data;
 
-.print '=> Mapping and reducing ghostfolio data to calculate asset values'
-CREATE TEMP TABLE ghostf_symbol_aggegation (symbol TEXT, total_quantity NUMERIC(18,8), total_fee NUMERIC(18,8));
+.print '=> Mapping and reducing ghostfolio data to calculate asset values, joining with asset dimension mapping'
+CREATE TEMP TABLE ghostf_symbol_aggegation (
+    symbol TEXT,
+    total_quantity NUMERIC(18,8),
+    total_fee NUMERIC(18,8),
+    class TEXT,
+    cash_reserve BOOLEAN
+    )
+;
 
---INSERT INTO ghostf_symbol_aggegation
+INSERT INTO ghostf_symbol_aggegation
     (|
         from ghostf_activity
         select {
@@ -179,7 +187,13 @@ CREATE TEMP TABLE ghostf_symbol_aggegation (symbol TEXT, total_quantity NUMERIC(
         )
         filter total_quantity > 0
         join side:left asset_dimension_mapping (ghostf_activity.symbol == asset_dimension_mapping.ticker)
-        #TODO CONTINUE
+        select {
+            symbol,
+            total_quantity = case [ `asset_quantity` > 0 => asset_quantity, `asset_quantity` <= 0 => total_quantity ],
+            total_fee,
+            class,
+            cash_reserve
+        }
     |)
 ;
 
@@ -190,12 +204,12 @@ select * from ghostf_symbol_aggegation;
 -- CREATE TEMP VIEW asset_value_fact_insertion
     SELECT
         aplmd.asset_id,
-        'TODO' AS class,
-        'TODO' AS cash_reserve,
-        extract('year' FROM current_date) || lpad(extract('month' FROM current_date)::text, 2, '0') as time_frame_tag,
+        gsa.class,
+        gsa.cash_reserve,
         gsa.total_quantity AS asset_quantity,
         aplmd.market_close_price AS asset_market_price,
-        gsa.total_quantity * aplmd.market_close_price AS total_market_value
+        gsa.total_quantity * aplmd.market_close_price AS total_market_value,
+        extract('year' FROM current_date) || lpad(extract('month' FROM current_date)::text, 2, '0') as time_frame_tag
     FROM ghostf_symbol_aggegation gsa
     LEFT JOIN pgsql.asset_price_last_market_data aplmd ON gsa.symbol = aplmd.ticker
     JOIN pgsql.asset ass ON aplmd.asset_id = ass.id

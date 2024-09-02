@@ -1,0 +1,1 @@
+--TODO fix currencies and quantities numeric(18,8)
