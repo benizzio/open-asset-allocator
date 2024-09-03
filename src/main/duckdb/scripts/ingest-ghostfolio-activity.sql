@@ -4,7 +4,6 @@
 .print '=> Loading external modules and databases needed for ingestion'
 install prql from community;
 install postgres;
--- install httpfs;
 SET custom_extension_repository='https://scrooge-duck.s3.us-west-2.amazonaws.com';
 SET allow_extensions_metadata_mismatch=true;
 install scrooge; -- from community;
@@ -12,7 +11,6 @@ install scrooge; -- from community;
 load prql;
 load scrooge;
 load postgres;
--- load httpfs;
 
 .print '=> Reading the Ghostfolio activity file'
 CREATE TEMP TABLE ghostf_activity (
@@ -220,6 +218,25 @@ CREATE TEMP VIEW asset_value_fact_insertion AS
 select * from asset_value_fact_insertion;
 
 -- TODO insert current asset position based on last prices
-
+.print '=> Inserting portfolio data in the asset fact table'
+-- Has to fail when the asset dimension data is missing to indicate that file is broken and needs more data
+INSERT INTO pgsql.asset_value_fact (
+        asset_id,
+        class,
+        cash_reserve,
+        asset_quantity,
+        asset_market_price,
+        total_market_value,
+        time_frame_tag
+    )
+    SELECT asset_id, class, cash_reserve, asset_quantity, asset_market_price, total_market_value, time_frame_tag
+    FROM asset_value_fact_insertion
+;
 
 COMMIT;
+
+-- .print '===> DEBUGGING'
+-- .print 'asset table'
+-- SELECT * FROM pgsql.asset;
+-- .print 'asset_value_fact table'
+-- SELECT * FROM pgsql.asset_value_fact;
