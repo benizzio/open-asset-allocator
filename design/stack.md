@@ -7,3 +7,6 @@
     - EODHD
         - [Bulk API for EOD, Splits and Dividends](https://eodhd.com/financial-apis/bulk-api-eod-splits-dividends)
         - [Exchanges API. Get List of Tickers](https://eodhd.com/financial-apis/exchanges-api-list-of-tickers-and-trading-hours)
+- langs:
+    - Go
+        - decimals for finance: https://github.com/shopspring/decimal
