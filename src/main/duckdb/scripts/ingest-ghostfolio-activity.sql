@@ -4,9 +4,7 @@
 .print '=> Loading external modules and databases needed for ingestion'
 install prql from community;
 install postgres;
-SET custom_extension_repository='https://scrooge-duck.s3.us-west-2.amazonaws.com';
-SET allow_extensions_metadata_mismatch=true;
-install scrooge; -- from community;
+install scrooge from community;
 
 load prql;
 load scrooge;
@@ -106,7 +104,7 @@ CREATE TEMP VIEW yahoo_asset_list AS
 .print '=> Creating temporary table and view for market data from Yahoo'
 -- function "yahoo_finance" does not accept dynamic values, constant for now
 CREATE TEMP TABLE yahoo_finance_data AS
-    SELECT symbol, Date, Close
+    SELECT symbol, Date[2] as last_date, Close[2] as last_close
     FROM yahoo_finance(
         [
             "SOL-USD",
@@ -133,10 +131,10 @@ CREATE TEMP TABLE yahoo_finance_data AS
 ;
 
 CREATE TEMP VIEW yahoo_current_asset_price AS
-    SELECT yal.asset_data_source_id, yf.Date AS market_date, yf.Close AS close_price
+    SELECT yal.asset_data_source_id, yf.last_date AS market_date, yf.last_close AS close_price
     FROM yahoo_asset_list yal
     JOIN yahoo_finance_data yf ON yf.symbol = yal.yahoo_ticker
-    WHERE yf.Date = current_date()
+    WHERE yf.last_date = current_date()
 ;
 
 .print '=> Reading and registering (upserting) market data from Yahoo'
