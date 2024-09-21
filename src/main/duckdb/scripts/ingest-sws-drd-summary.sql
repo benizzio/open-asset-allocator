@@ -12,13 +12,13 @@ CREATE TEMP TABLE sws_summary AS
         format('{}/*-us-complete-portfolio-summary.csv', getenv('INTERNAL_DUCKDB_INPUT_PATH')),
         columns = {
             'asset': 'TEXT',
-            'total_bought': 'NUMERIC', --TODO (18,8)
+            'total_bought': 'NUMERIC(18,8)',
             'total_shares': 'SMALLINT',
-            'current_price': 'NUMERIC',--TODO (18,8)
-            'current_value': 'NUMERIC',--TODO (18,8)
-            'capital_gains': 'NUMERIC',--TODO (18,8)
-            'dividends': 'NUMERIC',--TODO (18,8)
-            'total_gain_currency': 'NUMERIC',--TODO (18,8)
+            'current_price': 'NUMERIC(18,8)',
+            'current_value': 'NUMERIC(18,8)',
+            'capital_gains': 'NUMERIC(18,8)',
+            'dividends': 'NUMERIC(18,8)',
+            'total_gain_currency': 'NUMERIC(18,8)',
             'average_years': 'SMALLINT',
             'total_return': 'TEXT'
         }
@@ -34,7 +34,7 @@ CREATE TEMP TABLE asset_dimension_mapping AS
         columns = {
             'ticker': 'TEXT',
             'class': 'TEXT',
-            'asset_quantity': 'NUMERIC', --TODO (18,8)
+            'asset_quantity': 'NUMERIC(18,8)',
             'cash_reserve': 'BOOLEAN'
         }
     )
@@ -67,7 +67,7 @@ CREATE TEMP VIEW asset_value_fact_insertion AS
         adm.cash_reserve as cash_reserve,
         if(adm.asset_quantity > 0, adm.asset_quantity, swss.total_shares) as asset_quantity,
         swss.current_price as asset_market_price,
-        if(adm.asset_quantity > 0, adm.asset_quantity * swss.current_price, swss.current_value) as total_market_value,
+        if(adm.asset_quantity > 0, adm.asset_quantity::DECIMAL(30,8) * swss.current_price::DECIMAL(30,8), swss.current_value) as total_market_value,
         extract('year' FROM current_date) || lpad(extract('month' FROM current_date)::text, 2, '0') as time_frame_tag
     FROM sws_summary swss
     LEFT JOIN asset_dimension_mapping adm ON adm.ticker = swss.asset
