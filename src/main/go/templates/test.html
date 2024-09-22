@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Test</title>
+</head>
+<body>
+
+<script src="https://unpkg.com/htmx.org@2.0.2/dist/htmx.js"
+        integrity="sha384-yZq+5izaUBKcRgFbxgkRYwpHhHHCpp5nseXp0MEQ1A4MTWVMnqkmcuFez8x5qfxr"
+        crossorigin="anonymous"></script>
+<script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/client-side-templates.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
+
+<h1>Hello, World!</h1>
+
+<div hx-ext="client-side-templates">
+    <div hx-get="/tests" hx-target="#results" hx-trigger="load" handlebars-template="test-template">
+        <ul id="results">
+            <li>loading...</li>
+        </ul>
+    </div>
+
+    <template id="test-template">
+        <ul>
+            {{#each .}}
+            <li>{{testField1}} - {{testField2}}</li>
+            {{/each}}
+        </ul>
+    </template>
+
+    <!-- TODO research and test charting lib -->
+    <!-- TODO research and javascript packaging tied to lifecycle -->
+</div>
+
+</body>
+</html>
