@@ -4,23 +4,23 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"os"
 )
 
 func main() {
 
-	router := gin.Default()
-	router.Delims("{[{", "}]}")
+	var port = os.Getenv("PORT")
+	var rootHTMLPath = os.Getenv("ROOT_HTML_PATH")
+
+	var router = gin.Default()
+
+	//router.Static("/static", "../web-static")
+	router.StaticFile("/", rootHTMLPath)
 
 	router.GET("/tests", getTests)
 	router.POST("/tests", postTest)
-	router.LoadHTMLGlob("templates/*")
-	router.GET("/index", func(context *gin.Context) {
-		context.HTML(http.StatusOK, "test.html", gin.H{
-			"title": "Main website",
-		})
-	})
 
-	err := router.Run(":8080")
+	err := router.Run(fmt.Sprintf(":%s", port))
 	if err != nil {
 		fmt.Println("Error starting server: ", err)
 	}

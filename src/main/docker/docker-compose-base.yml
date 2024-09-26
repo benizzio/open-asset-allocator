@@ -1,4 +1,4 @@
-name: open-asset-allocator
+name: open-asset-allocator-base
 
 services:
   db:

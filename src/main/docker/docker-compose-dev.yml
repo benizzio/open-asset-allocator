@@ -1,0 +1,23 @@
+name: open-asset-allocator-dev
+
+include:
+  - docker-compose-base.yml
+
+services:
+  backend:
+    image: cosmtrek/air
+    # working_dir value has to be the same of mapped volume
+    working_dir: /project-package
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - ROOT_HTML_PATH=/web-static/test.html
+    volumes:
+      - ../go/:/project-package/
+      - ../web-static/:/web-static/
+    depends_on:
+      db:
+        condition: service_healthy
+      migration-engine:
+        condition: service_completed_successfully
