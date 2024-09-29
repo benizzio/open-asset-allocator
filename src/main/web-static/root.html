@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Test</title>
+</head>
+<body>
+
+<h1>Hello, World!</h1>
+
+<div hx-ext="client-side-templates">
+    <div hx-get="/api/tests" hx-target="#results" hx-trigger="load" handlebars-template="test-template">
+        <ul id="results">
+            <li>loading...</li>
+        </ul>
+    </div>
+
+    <template id="test-template">
+        <ul>
+            {{#each .}}
+            <li>{{testField1}} - {{testField2}}</li>
+            {{/each}}
+        </ul>
+    </template>
+
+    <div>
+        <canvas id="testChart"></canvas>
+    </div>
+
+
+    <!-- TODO research and test charting lib -->
+</div>
+
+<script src="node_modules/htmx.org/dist/htmx.js"></script>
+<script src="node_modules/htmx-ext-client-side-templates/client-side-templates.js"></script>
+<script src="node_modules/handlebars/dist/handlebars.js"></script>
+
+<script src="script/root.ts" type="module"></script>
+
+</body>
+</html>

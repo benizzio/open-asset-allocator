@@ -17,8 +17,8 @@ func main() {
 	//router.Static("/static", "../web-static")
 	router.StaticFile("/", rootHTMLPath)
 
-	router.GET("/tests", getTests)
-	router.POST("/tests", postTest)
+	router.GET("/api/tests", getTests)
+	router.POST("/api/tests", postTest)
 
 	err := router.Run(fmt.Sprintf(":%s", port))
 	if err != nil {

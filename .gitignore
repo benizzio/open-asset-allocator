@@ -1,3 +1,7 @@
 target
 .idea/
 src/main/go/tmp/
+
+**/node_modules/
+**/.parcel-cache/
+src/main/web-static/dist/
