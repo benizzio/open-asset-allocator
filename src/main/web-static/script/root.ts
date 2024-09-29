@@ -14,6 +14,6 @@ const chart = new Chart(chartCanvas, {
     },
     options: {
         responsive: true,
-        maintainAspectRatio: false,
+        maintainAspectRatio: true,
     }
 });
