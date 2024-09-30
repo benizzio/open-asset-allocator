@@ -15,6 +15,8 @@ export default [
 
     {
         plugins: { "@stylistic/ts": stylisticTs },
+        // ESLint rules: https://eslint.org/docs/latest/rules/
+        // ESLint Stylistic rules for typescript: https://eslint.style/packages/ts
         rules: {
             "max-len": ["warn", { code: 120, tabWidth: 4 }],
             "@stylistic/ts/indent": ["warn", 4],

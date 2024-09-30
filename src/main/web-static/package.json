@@ -6,6 +6,7 @@
     "eslint": "^9.11.1",
     "globals": "^15.9.0",
     "parcel": "^2.12.0",
+    "rimraf": "^6.0.1",
     "typescript-eslint": "^8.7.0"
   },
   "dependencies": {
@@ -15,7 +16,7 @@
     "htmx.org": "^2.0.2"
   },
   "scripts": {
-    "dev": "parcel --port 8000",
-    "build": "parcel build"
+    "dev": "rimraf dist && parcel --port 8000",
+    "build": "rimraf dist && parcel build"
   }
 }
