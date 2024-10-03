@@ -22,16 +22,17 @@
         </ul>
     </template>
 
-    <div>
-        <canvas id="testChart"></canvas>
-    </div>
+    <div hx-get="src/chart/chart.html" hx-swap="innerHTML" hx-trigger="load"></div>
+
 </div>
 
-<script src="node_modules/htmx.org/dist/htmx.js"></script>
-<script src="node_modules/htmx-ext-client-side-templates/client-side-templates.js"></script>
-<script src="node_modules/handlebars/dist/handlebars.js"></script>
+<!-- TODO: parcel processing breakes the lib. Find a fix -->
+<script src="https://unpkg.com/htmx.org@2.0.2"
+        integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ"
+        crossorigin="anonymous"></script>
+<script defer src="node_modules/handlebars/dist/handlebars.js"></script>
+<script defer src="node_modules/htmx-ext-client-side-templates/client-side-templates.js"></script>
 
-<script src="script/root.ts" type="module"></script>
 
 </body>
 </html>

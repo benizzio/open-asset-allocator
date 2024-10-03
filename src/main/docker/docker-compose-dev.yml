@@ -7,15 +7,16 @@ services:
   backend:
     image: cosmtrek/air
     # working_dir value has to be the same of mapped volume
+    environment:
+      - PORT=8080
+      - WEB_STATIC_CONTENT_PATH=not-used
+      - WEB_STATIC_COMPONENTS_PATH=not-used
+      - ROOT_HTML_FILENAME=not-used
     working_dir: /project-package
     ports:
       - "8080:8080"
-    environment:
-      - PORT=8080
-      - ROOT_HTML_PATH=/web-static/root.html
     volumes:
       - ../go/:/project-package/
-      - ../web-static/:/web-static/
     depends_on:
       db:
         condition: service_healthy

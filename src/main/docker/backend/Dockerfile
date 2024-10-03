@@ -11,4 +11,6 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o ../bin/open-asset-allocator
 WORKDIR /frontend
 COPY dist-web-static ./dist
 
+ENV WEB_STATIC_CONTENT_PATH=/frontend/dist
+
 CMD ["/backend/bin/open-asset-allocator"]

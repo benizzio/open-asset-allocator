@@ -5,17 +5,30 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 func main() {
 
 	var port = os.Getenv("PORT")
-	var rootHTMLPath = os.Getenv("ROOT_HTML_PATH")
+	var webStaticContentPath = os.Getenv("WEB_STATIC_CONTENT_PATH")
+	var webStatiComponentsPath = os.Getenv("WEB_STATIC_COMPONENTS_PATH")
+	var rootHTMLFilename = os.Getenv("ROOT_HTML_FILENAME")
 
 	var router = gin.Default()
 
-	//router.Static("/static", "../web-static")
-	router.StaticFile("/", rootHTMLPath)
+	router.Static(webStatiComponentsPath, webStaticContentPath+webStatiComponentsPath)
+	router.StaticFile("/", webStaticContentPath+"/"+rootHTMLFilename)
+
+	router.GET("/:filepath", func(c *gin.Context) {
+		file := c.Param("filepath")
+		if strings.HasSuffix(file, ".js") || strings.HasSuffix(file, ".js.map") {
+			c.File(filepath.Join(webStaticContentPath, file))
+		} else {
+			c.Status(http.StatusNotFound)
+		}
+	})
 
 	router.GET("/api/tests", getTests)
 	router.POST("/api/tests", postTest)

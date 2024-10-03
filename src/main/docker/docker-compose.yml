@@ -1,0 +1,21 @@
+name: open-asset-allocator
+
+#include:
+#  - docker-compose-base.yml
+
+services:
+  backend:
+    image: open-asset-allocator:latest
+    # working_dir value has to be the same of mapped volume
+    working_dir: /project-package
+    environment:
+      - PORT=8081
+      - WEB_STATIC_COMPONENTS_PATH=/src
+      - ROOT_HTML_FILENAME=/root.html
+    ports:
+      - "8081:8081"
+#    depends_on:
+#      db:
+#        condition: service_healthy
+#      migration-engine:
+#        condition: service_completed_successfully
