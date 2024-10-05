@@ -9,11 +9,11 @@ services:
     # working_dir value has to be the same of mapped volume
     working_dir: /project-package
     environment:
-      - PORT=8081
+      - PORT=8080
       - WEB_STATIC_COMPONENTS_PATH=/src
       - ROOT_HTML_FILENAME=/root.html
     ports:
-      - "8081:8081"
+      - "80:8080"
 #    depends_on:
 #      db:
 #        condition: service_healthy
