@@ -23,7 +23,9 @@ func main() {
 
 	router.GET("/:filepath", func(c *gin.Context) {
 		file := c.Param("filepath")
-		if strings.HasSuffix(file, ".js") || strings.HasSuffix(file, ".js.map") {
+		if strings.HasSuffix(file, ".js") ||
+			strings.HasSuffix(file, ".js.map") ||
+			strings.HasSuffix(file, ".css") {
 			c.File(filepath.Join(webStaticContentPath, file))
 		} else {
 			c.Status(http.StatusNotFound)

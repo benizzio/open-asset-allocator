@@ -10,7 +10,7 @@ web_static_build_dir="$build_dir/dist-web-static"
 go_build_dir="$build_dir/src-go"
 
 echo "===== Preparing build folders"
-rm -rf "${build_dir:?}/*"
+rm -rf "${build_dir:?}"
 [ -d "$build_dir" ] || mkdir "$build_dir"
 [ -d "$go_build_dir" ] || mkdir "$go_build_dir"
 [ -d "$web_static_build_dir" ] || mkdir "$web_static_build_dir"
