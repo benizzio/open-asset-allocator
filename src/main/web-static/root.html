@@ -1,38 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
 <head>
-    <title>Test</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Open Asset Allocator</title>
+    <link rel="stylesheet" href="src/stylesheet/root.scss">
 </head>
 <body>
 
-<h1>Hello, World!</h1>
+<nav class="navbar bg-body-tertiary">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Open Asset Allocator</a>
+    </div>
+</nav>
 
-<div hx-ext="client-side-templates">
-    <div hx-get="/api/tests" hx-target="#results" hx-trigger="load" handlebars-template="test-template">
-        <ul id="results">
-            <li>loading...</li>
-        </ul>
+<div class="container-fluid">
+
+    <div class="row justify-content-center align-items-center row-cols-auto my-5">
+        <div class="col">
+            <div class="btn-group" role="group">
+
+                <input type="radio" class="btn-check" name="btnradio" id="nav-radio-portfolio" autocomplete="off">
+                <label class="btn btn-outline-primary btn-lg" for="nav-radio-portfolio">Portfolio</label>
+
+                <input type="radio" class="btn-check" name="btnradio" id="nav-radio-allocation-plan" autocomplete="off">
+                <label class="btn btn-outline-primary btn-lg" for="nav-radio-allocation-plan">Allocation Plan</label>
+
+                <input type="radio" class="btn-check" name="btnradio" id="nav-radio-allocation-map"
+                       autocomplete="off">
+                <label class="btn btn-outline-primary btn-lg" for="nav-radio-allocation-map">Allocation Map</label>
+
+            </div>
+        </div>
     </div>
 
-    <template id="test-template">
-        <ul>
-            {{#each .}}
-            <li>{{testField1}} - {{testField2}}</li>
-            {{/each}}
-        </ul>
-    </template>
-
-    <div hx-get="src/chart/chart.html" hx-swap="innerHTML" hx-trigger="load"></div>
-
 </div>
-
 <!-- TODO: parcel processing breakes the lib. Find a fix -->
 <script src="https://unpkg.com/htmx.org@2.0.2"
         integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ"
         crossorigin="anonymous"></script>
-<script defer src="node_modules/handlebars/dist/handlebars.js"></script>
-<script defer src="node_modules/htmx-ext-client-side-templates/client-side-templates.js"></script>
-
+<script src="node_modules/handlebars/dist/handlebars.js"></script>
+<script src="node_modules/htmx-ext-client-side-templates/client-side-templates.js"></script>
+<script src="node_modules/bootstrap/dist/js/bootstrap.bundle.js"></script>
 
 </body>
 </html>
