@@ -19,6 +19,7 @@ export default [
         // ESLint Stylistic rules for typescript: https://eslint.style/packages/ts
         rules: {
             "max-len": ["warn", { code: 120, tabWidth: 4 }],
+            "no-unused-vars": "warn",
             "@stylistic/ts/indent": ["warn", 4],
             "@stylistic/ts/semi": ["error", "always"],
             "@stylistic/ts/quotes": ["warn", "double"],

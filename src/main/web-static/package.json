@@ -1,6 +1,7 @@
 {
   "devDependencies": {
     "@eslint/js": "^9.11.1",
+    "@parcel/transformer-raw": "^2.12.0",
     "@parcel/transformer-sass": "^2.12.0",
     "@stylistic/eslint-plugin-ts": "^2.8.0",
     "eslint": "^9.11.1",
@@ -19,7 +20,7 @@
   },
   "scripts": {
     "clean": "rimraf dist",
-    "dev": "npm run clean && parcel ./*.html ./src/*.html ./src/**/*.html --port 8000",
-    "build": "npm run clean && parcel build ./*.html ./src/*.html ./src/**/*.html"
+    "dev": "npm run clean && parcel ./root.html ./src/**/*.html --port 8000",
+    "build": "npm run clean && parcel ./root.html ./src/**/*.html build"
   }
 }
