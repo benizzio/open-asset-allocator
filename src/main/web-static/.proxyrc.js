@@ -8,6 +8,7 @@ const path = require("path");
 // eslint-disable-next-line no-undef
 module.exports = function (app) {
 
+    // Proxy API requests to the backend
     app.use(
         createProxyMiddleware("/api", {
             target: "http://localhost:8080/",
@@ -15,6 +16,8 @@ module.exports = function (app) {
         }),
     );
 
+    // Override default Parcel behavior to serve static files from the dist folder
+    // return 404 error instead or redirecting to source
     app.use("/", (req, res, next) => {
 
         // eslint-disable-next-line no-undef
