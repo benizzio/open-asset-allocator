@@ -6,6 +6,7 @@
     "@stylistic/eslint-plugin-ts": "^2.8.0",
     "eslint": "^9.11.1",
     "globals": "^15.9.0",
+    "http-proxy-middleware": "^2.0.7",
     "parcel": "^2.12.0",
     "rimraf": "^6.0.1",
     "typescript-eslint": "^8.7.0"
@@ -21,6 +22,6 @@
   "scripts": {
     "clean": "rimraf dist",
     "dev": "npm run clean && parcel ./root.html ./src/**/*.html --port 8000",
-    "build": "npm run clean && parcel ./root.html ./src/**/*.html build"
+    "build": "npm run clean && parcel build ./root.html ./src/**/*.html"
   }
 }
