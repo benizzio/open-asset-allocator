@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func main() {
+func oldmain() {
 
 	var port = os.Getenv("PORT")
 	var webStaticContentPath = os.Getenv("WEB_STATIC_CONTENT_PATH")

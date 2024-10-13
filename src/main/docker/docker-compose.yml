@@ -10,8 +10,8 @@ services:
     working_dir: /project-package
     environment:
       - PORT=8080
-      - WEB_STATIC_COMPONENTS_PATH=/src
-      - ROOT_HTML_FILENAME=/root.html
+      - WEB_STATIC_SOURCE_REL_PATH=/src
+      - ROOT_HTML_FILENAME=root.html
     ports:
       - "80:8080"
 #    depends_on:
