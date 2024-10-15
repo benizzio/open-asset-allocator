@@ -10,7 +10,7 @@ services:
     working_dir: /project-package
     environment:
       - PORT=8080
-      - WEB_STATIC_SOURCE_REL_PATH=/src
+      - WEB_STATIC_SOURCE_REL_PATH=/websrc
       - ROOT_HTML_FILENAME=root.html
     ports:
       - "80:8080"

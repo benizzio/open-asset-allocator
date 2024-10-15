@@ -21,7 +21,7 @@
   },
   "scripts": {
     "clean": "rimraf dist",
-    "dev": "npm run clean && parcel ./root.html ./src/**/*.html --port 8000",
-    "build": "npm run clean && parcel build ./root.html ./src/**/*.html"
+    "dev": "npm run clean && parcel ./root.html websrc/**/*.html --port 8000",
+    "build": "npm run clean && parcel build ./root.html websrc/**/*.html"
   }
 }

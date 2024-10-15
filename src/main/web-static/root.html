@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Open Asset Allocator</title>
-    <link rel="stylesheet" href="src/stylesheet/root.scss">
+    <link rel="stylesheet" href="/websrc/stylesheet/root.scss">
 </head>
 <body>
 
@@ -18,11 +18,11 @@
 
 
     <div class="row justify-content-center align-items-center row-cols-auto my-5">
-        <div class="col" hx-get="src/components/main-navigation.html" hx-trigger="load"></div>
+        <div class="col" hx-get="/websrc/components/main-navigation.html" hx-trigger="load"></div>
     </div>
 
     <div class="row justify-content-center align-items-center">
-        <div class="col" hx-get="src/pages/portfolio.html" hx-trigger="load"></div>
+        <div class="col" hx-get="/websrc/pages/portfolio.html" hx-trigger="load"></div>
     </div>
 
 </div>
@@ -32,7 +32,7 @@
         integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ"
         crossorigin="anonymous"></script>
 
-<script src="src/root.ts" type="module"></script>
+<script src="/websrc/root.ts" type="module"></script>
 
 </body>
 </html>
