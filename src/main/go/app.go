@@ -11,6 +11,6 @@ func main() {
 	}
 
 	var config = infra.ReadConfig()
-	var srvr = infra.BuildGinServer(config)
-	srvr.Init()
+	var server = infra.BuildGinServer(config)
+	server.Init()
 }
