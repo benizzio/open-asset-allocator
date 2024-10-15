@@ -10,17 +10,17 @@ import (
 
 type GinServer struct {
 	router *gin.Engine
-	env    Environment
+	config Configuration
 }
 
 func (server *GinServer) configBasicRoutes() {
 
 	glog.Info("Configuring Gin router")
 
-	glog.Infof("Serving static source files at %s from %s", server.env.webStaticSourceRelPath, server.env.webStaticSourcePath)
-	server.router.Static(server.env.webStaticSourceRelPath, server.env.webStaticSourcePath)
+	glog.Infof("Serving static source files at %s from %s", server.config.webStaticSourceRelPath, server.config.webStaticSourcePath)
+	server.router.Static(server.config.webStaticSourceRelPath, server.config.webStaticSourcePath)
 
-	var rootHTMLPath = server.env.webStaticContentPath + "/" + server.env.rootHTMLFilename
+	var rootHTMLPath = server.config.webStaticContentPath + "/" + server.config.rootHTMLFilename
 	glog.Infof("Serving root HTML file at / from  %s", rootHTMLPath)
 	server.router.StaticFile("/", rootHTMLPath)
 
@@ -30,7 +30,7 @@ func (server *GinServer) configBasicRoutes() {
 		if strings.HasSuffix(file, ".js") ||
 			strings.HasSuffix(file, ".js.map") ||
 			strings.HasSuffix(file, ".css") {
-			context.File(filepath.Join(server.env.webStaticContentPath, file))
+			context.File(filepath.Join(server.config.webStaticContentPath, file))
 		} else {
 			handleGetAsToRoot(context, server)
 		}
@@ -52,7 +52,7 @@ func handleGetAsToRoot(context *gin.Context, srvr *GinServer) {
 }
 
 func (server *GinServer) start() {
-	err := server.router.Run(fmt.Sprintf(":%s", server.env.port))
+	err := server.router.Run(fmt.Sprintf(":%s", server.config.port))
 	if err != nil {
 		glog.Error("Error starting server: ", err)
 	}
@@ -63,9 +63,9 @@ func (server *GinServer) Init() {
 	server.start()
 }
 
-func BuildGinServer(env Environment) *GinServer {
+func BuildGinServer(config Configuration) *GinServer {
 	return &GinServer{
 		router: gin.Default(),
-		env:    env,
+		config: config,
 	}
 }

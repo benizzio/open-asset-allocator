@@ -10,7 +10,7 @@ func main() {
 		return
 	}
 
-	var env = infra.ReadEnvironment()
-	var srvr = infra.BuildGinServer(env)
+	var config = infra.ReadConfig()
+	var srvr = infra.BuildGinServer(config)
 	srvr.Init()
 }

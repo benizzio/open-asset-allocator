@@ -2,7 +2,7 @@ package infra
 
 import "os"
 
-type Environment struct {
+type Configuration struct {
 	port                   string
 	webStaticContentPath   string
 	webStaticSourceRelPath string
@@ -10,12 +10,12 @@ type Environment struct {
 	webStaticSourcePath    string
 }
 
-func ReadEnvironment() Environment {
+func ReadConfig() Configuration {
 
 	var tempWebStaticContentPath = os.Getenv("WEB_STATIC_CONTENT_PATH")
 	var tempWebStaticSourceRelPath = os.Getenv("WEB_STATIC_SOURCE_REL_PATH")
 
-	return Environment{
+	return Configuration{
 		port:                   os.Getenv("PORT"),
 		webStaticContentPath:   tempWebStaticContentPath,
 		webStaticSourceRelPath: tempWebStaticSourceRelPath,
