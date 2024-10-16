@@ -11,7 +11,7 @@ type PortfolioRESTController struct {
 
 func (controller *PortfolioRESTController) BuildRoutes() []infra.RESTRoute {
 	return []infra.RESTRoute{
-		{Method: "GET", Path: "/api/portfolio", Handlers: gin.HandlersChain{controller.getPortfolioHistory}},
+		{Method: http.MethodGet, Path: "/api/portfolio", Handlers: gin.HandlersChain{controller.getPortfolioHistory}},
 	}
 }
 
