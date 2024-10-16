@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/benizzio/open-asset-allocator/api"
 	"github.com/benizzio/open-asset-allocator/infra"
 )
 
@@ -12,5 +13,8 @@ func main() {
 
 	var config = infra.ReadConfig()
 	var server = infra.BuildGinServer(config)
-	server.Init()
+
+	var portfolioRESTController = api.BuildPortfolioRESTController()
+
+	server.Init([]infra.GinServerRESTController{portfolioRESTController})
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang/glog"
 	"path/filepath"
+	"reflect"
 	"strings"
 )
 
@@ -13,9 +14,17 @@ type GinServer struct {
 	config Configuration
 }
 
-func (server *GinServer) configBasicRoutes() {
+type RESTRoute struct {
+	Method   string
+	Path     string
+	Handlers gin.HandlersChain
+}
 
-	glog.Info("Configuring Gin router")
+type GinServerRESTController interface {
+	BuildRoutes() []RESTRoute
+}
+
+func (server *GinServer) configBasicRoutes() {
 
 	glog.Infof("Serving static source files at %s from %s", server.config.webStaticSourceRelPath, server.config.webStaticSourcePath)
 	server.router.Static(server.config.webStaticSourceRelPath, server.config.webStaticSourcePath)
@@ -51,6 +60,19 @@ func handleGetAsToRoot(context *gin.Context, srvr *GinServer) {
 	srvr.router.HandleContext(context)
 }
 
+func (server *GinServer) configRESTRoutes(routes []RESTRoute) {
+	for _, route := range routes {
+		server.router.Handle(route.Method, route.Path, route.Handlers...)
+	}
+}
+
+func (server *GinServer) configControllerRoutes(controllers []GinServerRESTController) {
+	for _, controller := range controllers {
+		glog.Infof("Configuring controller routes for %s", reflect.TypeOf(controller))
+		server.configRESTRoutes(controller.BuildRoutes())
+	}
+}
+
 func (server *GinServer) start() {
 	err := server.router.Run(fmt.Sprintf(":%s", server.config.port))
 	if err != nil {
@@ -58,8 +80,16 @@ func (server *GinServer) start() {
 	}
 }
 
-func (server *GinServer) Init() {
+func (server *GinServer) Init(controllers []GinServerRESTController) {
+
+	glog.Infof("Configuring server before initialization")
+
+	glog.Infof("Configuring basic routes")
 	server.configBasicRoutes()
+
+	glog.Infof("Configuring controller routes")
+	server.configControllerRoutes(controllers)
+
 	server.start()
 }
 
