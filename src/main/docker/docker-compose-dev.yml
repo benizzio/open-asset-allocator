@@ -1,8 +1,5 @@
 name: open-asset-allocator-dev
 
-include:
-  - docker-compose-base.yml
-
 services:
   backend:
     image: cosmtrek/air
@@ -21,3 +18,15 @@ services:
         condition: service_healthy
       migration-engine:
         condition: service_completed_successfully
+
+  db:
+    extends:
+      file: docker-compose-base.yml
+      service: db
+    ports:
+      - "5433:5432"
+
+  migration-engine:
+    extends:
+      file: docker-compose-base.yml
+      service: migration-engine

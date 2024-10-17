@@ -9,6 +9,9 @@ dev-logs:
 dev-migration-logs:
 	@docker logs open-asset-allocator-dev-migration-engine-1
 
+dev-db-logs:
+	@docker logs -f open-asset-allocator-dev-db-1
+
 logs:
 	@docker logs -f open-asset-allocator-backend-1
 

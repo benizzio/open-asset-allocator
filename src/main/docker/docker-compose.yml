@@ -1,8 +1,5 @@
 name: open-asset-allocator
 
-#include:
-#  - docker-compose-base.yml
-
 services:
   backend:
     image: open-asset-allocator:latest
@@ -14,8 +11,20 @@ services:
       - ROOT_HTML_FILENAME=root.html
     ports:
       - "80:8080"
-#    depends_on:
-#      db:
-#        condition: service_healthy
-#      migration-engine:
-#        condition: service_completed_successfully
+    depends_on:
+      db:
+        condition: service_healthy
+      migration-engine:
+        condition: service_completed_successfully
+
+  db:
+    extends:
+      file: docker-compose-base.yml
+      service: db
+    ports:
+      - "5432:5432"
+
+  migration-engine:
+    extends:
+      file: docker-compose-base.yml
+      service: migration-engine
