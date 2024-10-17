@@ -1,17 +1,25 @@
 package infra
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/glog"
+	"net/http"
+	"os"
+	"os/signal"
 	"path/filepath"
 	"reflect"
 	"strings"
+	"syscall"
+	"time"
 )
 
 type GinServer struct {
-	router *gin.Engine
-	config Configuration
+	router     *gin.Engine
+	config     Configuration
+	httpServer *http.Server
 }
 
 type RESTRoute struct {
@@ -74,10 +82,35 @@ func (server *GinServer) configControllerRoutes(controllers []GinServerRESTContr
 }
 
 func (server *GinServer) start() {
-	err := server.router.Run(fmt.Sprintf(":%s", server.config.port))
-	if err != nil {
-		glog.Error("Error starting server: ", err)
+
+	server.httpServer = &http.Server{
+		Addr:    fmt.Sprintf(":%s", server.config.port),
+		Handler: server.router,
 	}
+
+	go func() {
+		if err := server.httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			glog.Fatalf("listen: %s\n", err)
+		}
+	}()
+}
+
+func (server *GinServer) configAndWaitForStopSignal() {
+
+	var stopChannel = make(chan os.Signal, 1)
+	signal.Notify(stopChannel, syscall.SIGINT, syscall.SIGTERM)
+
+	<-stopChannel
+	glog.Info("STOPPING server...")
+
+	contextInstance, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := server.httpServer.Shutdown(contextInstance); err != nil {
+		glog.Fatal("Server forced to shutdown:", err)
+	}
+
+	glog.Info("Exiting application process")
 }
 
 func (server *GinServer) Init(controllers []GinServerRESTController) {
@@ -90,7 +123,10 @@ func (server *GinServer) Init(controllers []GinServerRESTController) {
 	glog.Infof("Configuring controller routes")
 	server.configControllerRoutes(controllers)
 
+	glog.Infof("STARTING server")
 	server.start()
+
+	server.configAndWaitForStopSignal()
 }
 
 func BuildGinServer(config Configuration) *GinServer {
