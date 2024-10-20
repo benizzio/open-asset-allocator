@@ -1,6 +1,19 @@
 name: open-asset-allocator-base
 
 services:
+  backend:
+    env_file: .env
+    environment:
+      - PORT=8080
+      - WEB_STATIC_SOURCE_REL_PATH=/websrc
+      - ROOT_HTML_FILENAME=root.html
+    depends_on:
+      db:
+        condition: service_healthy
+      migration-engine:
+        condition: service_completed_successfully
+
+  #TODO: config DML only user for backend
   db:
     image: postgres:16.3-bullseye
     restart: always
