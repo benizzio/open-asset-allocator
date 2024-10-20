@@ -12,12 +12,14 @@
     "typescript-eslint": "^8.7.0"
   },
   "dependencies": {
+    "bignumber.js": "^9.1.2",
     "bootstrap": "^5.3.3",
     "chart.js": "^4.4.4",
+    "chartjs-plugin-datalabels": "^2.2.0",
     "handlebars": "^4.7.8",
     "htmx-ext-client-side-templates": "^2.0.0",
     "htmx.org": "^2.0.2",
-    "page": "^1.3.7"
+    "navigo": "^8.11.1"
   },
   "scripts": {
     "clean": "rimraf dist",

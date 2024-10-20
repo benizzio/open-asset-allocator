@@ -23,7 +23,7 @@ std_input_file_path=$input_target_dir_path/input.sql
 # ==============================================================================================================
 
 verify_file () {
-    if [ ! -f $1 ]; then
+    if [ ! -f "$1" ]; then
         echo "File $1 does not exist"
         return 1
     fi
@@ -34,23 +34,23 @@ verify_file () {
 # ==============================================================================================================
 
 # checks if the target input path exists in the project
-if [ ! -d $input_target_dir_path ]; then
+if [ ! -d "$input_target_dir_path" ]; then
     # if it does not, create it
-    mkdir $input_target_dir_path
-elseif [ -f $std_input_file_path ]
+    mkdir "$input_target_dir_path"
+elseif [ -f "$std_input_file_path" ]
     # if it exists, try to remove any previous copies of an existent input file
-    rm $std_input_file_path
+    rm "$std_input_file_path"
 fi
 
 # checks the usage of the first argument
 if [ -n "$1" ]; then
 
     # checks if it is a file
-    verify_file $1
+    verify_file "$1"
     if [ ! $? -eq 1 ]; then
         # copies the file to the duckdb input target dir
         echo "Copying main file $1 to DuckDB input"
-        cp $1 $std_input_file_path
+        cp "$1" "$std_input_file_path"
     else
         exit 1
     fi
@@ -69,6 +69,7 @@ while [[ $# -gt 0 ]]; do
 
     # processing each options argument for known ones
     case $1 in
+
         # files argument
         --deps)
             # move positional parameters inside dependencies options (--deps is $0)
@@ -78,20 +79,39 @@ while [[ $# -gt 0 ]]; do
             while [[ $# -gt 0 && ! $1 =~ ^-- ]]; do
 
                 # checks if it is a file
-                verify_file $1
+                verify_file "$1"
                 # if it is copy it with the same name
                 if [ ! $? -eq 1 ]; then
                     echo "Copying dependency file $1 to DuckDB input"
                     dest_file_path=$input_target_dir_path/$(basename "$1")
-                    cp $1 $dest_file_path
-                    dep_file_paths+=($dest_file_path)
+                    cp "$1" "$dest_file_path"
+                    dep_file_paths+=("$dest_file_path")
                 else
                     exit 1
                 fi
 
+                # move to the next positional parameter
                 shift
             done
             ;;
+
+        # Postgres port argument
+        --pg-port)
+            # move positional parameters inside dependencies options (--deps is $0)
+            shift
+
+            # checks if the argument is a number
+            if [[ $1 =~ ^[0-9]+$ ]]; then
+                pgport="$1"
+            else
+                echo "Postgres port must be a number"
+                exit 1
+            fi
+
+            # move to the next positional parameter
+            shift
+            ;;
+
         # default verification
         *)
             echo "Unknown option: $1"
@@ -101,12 +121,13 @@ while [[ $# -gt 0 ]]; do
 done
 
 echo "Executing duckdb script $1"
-docker compose -f $project_root_abs_path/src/main/docker/duckdb/docker-compose-duckdb.yml run --rm duckdb-cli
+export PGPORT=$pgport
+docker compose -f "$project_root_abs_path"/src/main/docker/duckdb/docker-compose-duckdb.yml run --rm duckdb-cli
 
 echo "Cleaning input files"
-rm $std_input_file_path
+rm "$std_input_file_path"
 for file_path in "${dep_file_paths[@]}"; do
-    rm $file_path
+    rm "$file_path"
 done
 
 exit 0

@@ -16,13 +16,14 @@
 
 <div class="container-fluid">
 
-
     <div class="row justify-content-center align-items-center row-cols-auto my-5">
-        <div class="col" hx-get="/websrc/components/main-navigation.html" hx-trigger="load"></div>
+        <div class="col" hx-get="/websrc/components/main-navigation.html" hx-trigger="load"
+             hx-on-htmx-after-on-load="router.bindNavigateTo()"></div>
     </div>
 
-    <div class="row justify-content-center align-items-center">
-        <div class="col" hx-get="/websrc/pages/portfolio.html" hx-trigger="load"></div>
+    <div class="row justify-content-center align-items-center" hx-ext="client-side-templates">
+        <div class="col" data-htmx-event-on-route="/portfolio:load-portfolio"
+             hx-get="/websrc/pages/portfolio.html" hx-trigger="load-portfolio once"></div>
     </div>
 
 </div>

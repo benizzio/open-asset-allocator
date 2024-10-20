@@ -2,22 +2,20 @@ name: open-asset-allocator-dev
 
 services:
   backend:
-    image: cosmtrek/air
+    extends:
+      file: docker-compose-base.yml
+      service: backend
+    build:
+        context: .
+        dockerfile: ./backend/Dockerfile
+        target: dev
     # working_dir value has to be the same of mapped volume
-    environment:
-      - PORT=8080
-      - WEB_STATIC_SOURCE_REL_PATH=/websrc
-      - ROOT_HTML_FILENAME=root.html
     working_dir: /project-package
     ports:
       - "8080:8080"
+      - "2345:2345"
     volumes:
       - ../go/:/project-package/
-    depends_on:
-      db:
-        condition: service_healthy
-      migration-engine:
-        condition: service_completed_successfully
 
   db:
     extends:
@@ -25,8 +23,18 @@ services:
       service: db
     ports:
       - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   migration-engine:
     extends:
       file: docker-compose-base.yml
       service: migration-engine
+
+volumes:
+  postgres_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${POSTGRES_DATA_DIR}
