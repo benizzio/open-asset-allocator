@@ -53,7 +53,7 @@ func (adapter *DatabaseAdapter) Ping() {
 
 	glog.Info("Pinging database to test connection")
 
-	pingContext, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	pingContext, cancel := buildPingContext()
 	defer cancel()
 
 	err := adapter.connectionPool.PingContext(pingContext)
@@ -62,14 +62,18 @@ func (adapter *DatabaseAdapter) Ping() {
 		return
 	}
 
+	glog.Info("Ping successful!")
+}
+
+func buildPingContext() (context.Context, context.CancelFunc) {
+	pingContext, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	go func() {
 		<-pingContext.Done()
 		if errors.Is(pingContext.Err(), context.DeadlineExceeded) {
 			glog.Fatal("Error pinging database connection: timeout")
 		}
 	}()
-
-	glog.Info("Ping successful!")
+	return pingContext, cancel
 }
 
 func BuildDatabaseAdapter(config Configuration) *DatabaseAdapter {

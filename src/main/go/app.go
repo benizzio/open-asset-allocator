@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"github.com/benizzio/open-asset-allocator/api"
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/golang/glog"
@@ -28,11 +29,23 @@ func main() {
 
 	<-stopChannel
 
-	stopContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	stopContext, cancel := buildStopContext()
 	defer cancel()
+
 	closeAppComponents(stopContext, server, databaseAdapter)
 
 	glog.Info("Exiting application process")
+}
+
+func buildStopContext() (context.Context, context.CancelFunc) {
+	stopContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	go func() {
+		<-stopContext.Done()
+		if errors.Is(stopContext.Err(), context.DeadlineExceeded) {
+			glog.Fatal("Error stopping application: timeout")
+		}
+	}()
+	return stopContext, cancel
 }
 
 func buildAppComponents() (*infra.GinServer, *infra.DatabaseAdapter) {
