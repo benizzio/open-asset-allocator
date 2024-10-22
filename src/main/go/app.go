@@ -48,7 +48,7 @@ func buildStopContext() (context.Context, context.CancelFunc) {
 	return stopContext, cancel
 }
 
-func buildAppComponents() (*infra.GinServer, *infra.DatabaseAdapter) {
+func buildAppComponents() (*infra.GinServer, *infra.RDBMSAdapter) {
 	var config = infra.ReadConfig()
 	var server = infra.BuildGinServer(config)
 	var databaseAdapter = infra.BuildDatabaseAdapter(config)
@@ -56,7 +56,7 @@ func buildAppComponents() (*infra.GinServer, *infra.DatabaseAdapter) {
 }
 
 func initializeAppComponents(
-	databaseAdapter *infra.DatabaseAdapter,
+	databaseAdapter *infra.RDBMSAdapter,
 	server *infra.GinServer,
 	restControllers []infra.GinServerRESTController,
 ) {
@@ -74,7 +74,7 @@ func buildStopChannel() chan os.Signal {
 func closeAppComponents(
 	stopContext context.Context,
 	server *infra.GinServer,
-	databaseAdapter *infra.DatabaseAdapter,
+	databaseAdapter *infra.RDBMSAdapter,
 ) {
 	server.Stop(stopContext)
 	databaseAdapter.Stop()
