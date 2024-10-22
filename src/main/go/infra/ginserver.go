@@ -102,8 +102,8 @@ func (server *GinServer) start() {
 	}()
 }
 
-func (server *GinServer) stop(contextInstance context.Context) {
-	if err := server.httpServer.Shutdown(contextInstance); err != nil {
+func (server *GinServer) stop(stopContext context.Context) {
+	if err := server.httpServer.Shutdown(stopContext); err != nil {
 		glog.Fatal("Server forced to shutdown: ", err)
 	}
 }
@@ -122,9 +122,9 @@ func (server *GinServer) Init(controllers []GinServerRESTController) {
 	server.start()
 }
 
-func (server *GinServer) Stop(contextInstance context.Context) {
+func (server *GinServer) Stop(stopContext context.Context) {
 	glog.Info("STOPPING server <==========")
-	server.stop(contextInstance)
+	server.stop(stopContext)
 }
 
 func BuildGinServer(config Configuration) *GinServer {

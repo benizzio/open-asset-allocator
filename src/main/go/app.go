@@ -28,8 +28,9 @@ func main() {
 
 	<-stopChannel
 
-	contextInstance, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	closeAppComponents(contextInstance, server, databaseAdapter, cancel)
+	stopContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	closeAppComponents(stopContext, server, databaseAdapter)
 
 	glog.Info("Exiting application process")
 }
@@ -58,12 +59,10 @@ func buildStopChannel() chan os.Signal {
 }
 
 func closeAppComponents(
-	contextInstance context.Context,
+	stopContext context.Context,
 	server *infra.GinServer,
 	databaseAdapter *infra.DatabaseAdapter,
-	cancel context.CancelFunc,
 ) {
-	defer cancel()
-	server.Stop(contextInstance)
+	server.Stop(stopContext)
 	databaseAdapter.Stop()
 }

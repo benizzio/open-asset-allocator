@@ -3,6 +3,7 @@ package infra
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"github.com/golang/glog"
 	_ "github.com/lib/pq"
 	"time"
@@ -52,14 +53,21 @@ func (adapter *DatabaseAdapter) Ping() {
 
 	glog.Info("Pinging database to test connection")
 
-	contextInstance, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	pingContext, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
-	err := adapter.connectionPool.PingContext(contextInstance)
+	err := adapter.connectionPool.PingContext(pingContext)
 	if err != nil {
 		glog.Fatal("Error pinging database connection: ", err)
 		return
 	}
+
+	go func() {
+		<-pingContext.Done()
+		if errors.Is(pingContext.Err(), context.DeadlineExceeded) {
+			glog.Fatal("Error pinging database connection: timeout")
+		}
+	}()
 
 	glog.Info("Ping successful!")
 }
