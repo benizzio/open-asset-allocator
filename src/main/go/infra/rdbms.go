@@ -10,6 +10,23 @@ import (
 	"time"
 )
 
+type QueryBuilder struct {
+	query *dbx.Query
+}
+
+func (builder *QueryBuilder) AddParam(name string, value any) *QueryBuilder {
+	builder.query.Bind(dbx.Params{name: value})
+	return builder
+}
+
+func (builder *QueryBuilder) FindInto(target any) error {
+	return builder.query.All(target)
+}
+
+func (builder *QueryBuilder) FetchInto(target any) error {
+	return builder.query.One(target)
+}
+
 type RDBMSAdapter struct {
 	config         RDBMSConfiguration
 	connectionPool *sql.DB
@@ -71,6 +88,10 @@ func (adapter *RDBMSAdapter) Ping() {
 	}
 
 	glog.Info("Ping successful!")
+}
+
+func (adapter *RDBMSAdapter) BuildQuery(sql string) *QueryBuilder {
+	return &QueryBuilder{adapter.dbx.NewQuery(sql)}
 }
 
 func buildPingContext() (context.Context, context.CancelFunc) {

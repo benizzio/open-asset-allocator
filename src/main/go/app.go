@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"errors"
-	"github.com/benizzio/open-asset-allocator/api"
+	"github.com/benizzio/open-asset-allocator/api/rest"
+	"github.com/benizzio/open-asset-allocator/application"
+	domain_infra "github.com/benizzio/open-asset-allocator/domain/infra/repository"
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/golang/glog"
 	"os"
@@ -12,6 +14,7 @@ import (
 	"time"
 )
 
+// TODO clean
 func main() {
 
 	if infra.ConfigLogger() {
@@ -20,7 +23,10 @@ func main() {
 
 	server, databaseAdapter := buildAppComponents()
 
-	var portfolioRESTController = api.BuildPortfolioRESTController()
+	var portfolioRepository = domain_infra.BuildPortfolioRepository(databaseAdapter)
+	var portfolioHistoryService = application.BuildPortfolioHistoryService(portfolioRepository)
+	var portfolioRESTController = rest.BuildPortfolioRESTController(portfolioHistoryService)
+
 	initializeAppComponents(databaseAdapter, server, []infra.GinServerRESTController{portfolioRESTController})
 
 	databaseAdapter.Ping()

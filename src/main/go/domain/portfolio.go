@@ -7,3 +7,7 @@ type PortfolioSliceAtTime struct {
 	TimeFrameTag     string
 	TotalMarketValue int
 }
+
+type PortfolioRepository interface {
+	GetAllPortfolioSlices(limit int) ([]PortfolioSliceAtTime, error)
+}
