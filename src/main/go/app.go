@@ -21,15 +21,8 @@ func main() {
 		return
 	}
 
-	server, databaseAdapter := buildAppComponents()
-
-	var portfolioRepository = domain_infra.BuildPortfolioRepository(databaseAdapter)
-	var portfolioHistoryService = application.BuildPortfolioHistoryService(portfolioRepository)
-	var portfolioRESTController = rest.BuildPortfolioRESTController(portfolioHistoryService)
-
-	initializeAppComponents(databaseAdapter, server, []infra.GinServerRESTController{portfolioRESTController})
-
-	databaseAdapter.Ping()
+	//Change this to a fluent API
+	databaseAdapter, server := initializeAppComponents(buildAppComponents())
 
 	stopChannel := buildStopChannel()
 
@@ -54,20 +47,36 @@ func buildStopContext() (context.Context, context.CancelFunc) {
 	return stopContext, cancel
 }
 
-func buildAppComponents() (*infra.GinServer, *infra.RDBMSAdapter) {
+func buildAppComponents() (*infra.RDBMSAdapter, *infra.GinServer, []infra.GinServerRESTController) {
+
 	var config = infra.ReadConfig()
 	var server = infra.BuildGinServer(config)
 	var databaseAdapter = infra.BuildDatabaseAdapter(config)
-	return server, databaseAdapter
+
+	var portfolioRepository = domain_infra.BuildPortfolioRepository(databaseAdapter)
+	var portfolioHistoryService = application.BuildPortfolioHistoryService(portfolioRepository)
+	var portfolioRESTController = rest.BuildPortfolioRESTController(portfolioHistoryService)
+
+	var restControllers = []infra.GinServerRESTController{portfolioRESTController}
+
+	return databaseAdapter, server, restControllers
 }
 
 func initializeAppComponents(
 	databaseAdapter *infra.RDBMSAdapter,
 	server *infra.GinServer,
 	restControllers []infra.GinServerRESTController,
+) (
+	*infra.RDBMSAdapter,
+	*infra.GinServer,
 ) {
+
 	databaseAdapter.Init()
+	databaseAdapter.Ping()
+
 	server.Init(restControllers)
+
+	return databaseAdapter, server
 }
 
 func buildStopChannel() chan os.Signal {
