@@ -10,10 +10,8 @@ const format = {
     formatPercent(value: number, locale = DEFAULT_LOCALE): string {
         return value.toLocaleString(locale, { style: "percent", maximumFractionDigits: 2 });
     },
-    calculateAndFormatPercent(value: number, total: number): string {
-        const valueBignumber = BigNumber(value);
-        const totalBignumber = BigNumber(total);
-        return this.formatPercent(valueBignumber.div(totalBignumber).toNumber());
+    calculateAndFormatPercent(value: BigNumber, total: BigNumber): string {
+        return this.formatPercent(value.div(total).toNumber());
     },
 };
 

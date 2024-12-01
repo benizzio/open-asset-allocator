@@ -7,25 +7,82 @@ import (
 	dbx "github.com/go-ozzo/ozzo-dbx"
 	"github.com/golang/glog"
 	_ "github.com/lib/pq"
+	"strings"
 	"time"
 )
 
-type QueryBuilder struct {
+// ================================================
+// QUERY EXECUTOR
+// ================================================
+
+type QueryExecutor struct {
 	query *dbx.Query
 }
 
+func withParams(query *dbx.Query, params dbx.Params) *QueryExecutor {
+	if len(params) >= 0 {
+		query.Bind(params)
+	}
+	return &QueryExecutor{query: query}
+}
+
+func (executor *QueryExecutor) FindInto(target any) error {
+	return executor.query.All(target)
+}
+
+func (executor *QueryExecutor) FetchInto(target any) error {
+	return executor.query.One(target)
+}
+
+func (executor *QueryExecutor) GetRows() (*dbx.Rows, error) {
+	return executor.query.Rows()
+}
+
+// ================================================
+// QUERY BUILDER
+// ================================================
+
+type QueryBuilder struct {
+	dbx          *dbx.DB
+	querySQL     string
+	whereClauses []string
+	params       dbx.Params
+}
+
+func (builder *QueryBuilder) Build() *QueryExecutor {
+
+	processedSQL := builder.processSQL()
+	// TODO verification for debug logging, this should be logged only in debug mode
+	glog.Infof("Building query for SQL: %s", processedSQL)
+
+	var query = builder.dbx.NewQuery(processedSQL)
+	var queryExecutor = withParams(query, builder.params)
+	return queryExecutor
+}
+
+func (builder *QueryBuilder) processSQL() string {
+	var processedSQL = builder.querySQL
+	if len(builder.whereClauses) > 0 {
+		var whereStatement = " WHERE 1=1 " + strings.Join(builder.whereClauses, " ")
+		processedSQL = strings.Replace(processedSQL, "/*WHERE+PARAMS*/", whereStatement, 1)
+	}
+	return processedSQL
+}
+
 func (builder *QueryBuilder) AddParam(name string, value any) *QueryBuilder {
-	builder.query.Bind(dbx.Params{name: value})
+	builder.params[name] = value
 	return builder
 }
 
-func (builder *QueryBuilder) FindInto(target any) error {
-	return builder.query.All(target)
+func (builder *QueryBuilder) AddWhereClauseAndParam(whereClause string, name string, value any) *QueryBuilder {
+	builder.whereClauses = append(builder.whereClauses, whereClause)
+	builder.params[name] = value
+	return builder
 }
 
-func (builder *QueryBuilder) FetchInto(target any) error {
-	return builder.query.One(target)
-}
+// ================================================
+// DB ADAPTER
+// ================================================
 
 type RDBMSAdapter struct {
 	config         RDBMSConfiguration
@@ -91,7 +148,12 @@ func (adapter *RDBMSAdapter) Ping() {
 }
 
 func (adapter *RDBMSAdapter) BuildQuery(sql string) *QueryBuilder {
-	return &QueryBuilder{adapter.dbx.NewQuery(sql)}
+	return &QueryBuilder{
+		dbx:          adapter.dbx,
+		querySQL:     sql,
+		params:       dbx.Params{},
+		whereClauses: make([]string, 0),
+	}
 }
 
 func buildPingContext() (context.Context, context.CancelFunc) {

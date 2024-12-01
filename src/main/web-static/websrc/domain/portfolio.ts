@@ -1,4 +1,6 @@
-export type PortfolioSlice = {
+import { AllocationStructure } from "./allocation";
+
+export type PortfolioAllocation = {
     assetName: string;
     assetTicker: string;
     class: string;
@@ -8,5 +10,7 @@ export type PortfolioSlice = {
 
 export type PortfolioAtTime = {
     timeFrameTag: string;
-    slices: PortfolioSlice[];
+    //TODO change property name to allocations with back-end
+    slices: PortfolioAllocation[];
+    structure?: AllocationStructure
 };

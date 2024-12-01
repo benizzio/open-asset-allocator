@@ -5,6 +5,12 @@ const DomUtils = {
     queryAll(selector: string): NodeListOf<HTMLElement> {
         return document.querySelectorAll(selector);
     },
+    queryAllInDescendants(element: HTMLElement, selector: string): NodeListOf<HTMLElement> {
+        return element.querySelectorAll(selector);
+    },
+    wasElementRemoved(element: HTMLElement) {
+        return !document.body.contains(element);
+    },
 };
 
 export default DomUtils;

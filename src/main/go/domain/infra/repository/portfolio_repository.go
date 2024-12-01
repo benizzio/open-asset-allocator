@@ -8,13 +8,15 @@ import (
 
 const (
 	portfolioSliceAtTimeTableName = "asset_value_fact"
-	getAllPortfolioSlicesSQL      = `WITH time_frame_tags 
+	getAllPortfolioSlicesSQL      = `
+		WITH time_frame_tags 
 			AS (SELECT DISTINCT time_frame_tag, create_timestamp FROM [table] ORDER BY create_timestamp DESC LIMIT {:timeFrameLimit})
 		SELECT pst.*, ass.ticker as "asset.ticker", COALESCE(ass.name, '') as "asset.name" 
 		FROM [table] pst
 		JOIN asset ass ON ass.id = pst.asset_id
 		WHERE pst.time_frame_tag IN (SELECT time_frame_tag FROM time_frame_tags)
-		ORDER BY pst.time_frame_tag DESC, pst.class ASC, pst.cash_reserve DESC, ass.ticker ASC`
+		ORDER BY pst.time_frame_tag DESC, pst.class ASC, pst.cash_reserve DESC, ass.ticker ASC
+	`
 )
 
 const (
@@ -36,7 +38,7 @@ func (repository *PortfolioRDBMSRepository) GetAllPortfolioSlices(timeFrameLimit
 	)
 
 	var result []domain.PortfolioSliceAtTime
-	err := repository.dbAdapter.BuildQuery(query).AddParam("timeFrameLimit", timeFrameLimit).FindInto(&result)
+	err := repository.dbAdapter.BuildQuery(query).AddParam("timeFrameLimit", timeFrameLimit).Build().FindInto(&result)
 
 	return result, infra.PropagateAsAppErrorWithNewMessage(err, querySlicesError, repository)
 }

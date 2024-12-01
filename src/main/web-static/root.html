@@ -18,12 +18,14 @@
 
     <div class="row justify-content-center align-items-center row-cols-auto my-5">
         <div class="col" hx-get="/websrc/components/main-navigation.html" hx-trigger="load"
-             hx-on-htmx-after-on-load="router.bindNavigateTo()"></div>
+             hx-on-htmx-after-on-load="router.bindDescendantsToRouting(this)"></div>
     </div>
 
     <div class="row justify-content-center align-items-center" hx-ext="client-side-templates">
-        <div class="col" data-htmx-event-on-route="/portfolio:load-portfolio"
-             hx-get="/websrc/pages/portfolio.html" hx-trigger="load-portfolio once"></div>
+        <div class="col" data-htmx-event-on-route="/portfolio:load-portfolio" data-display-on-route="/portfolio"
+             hx-get="/websrc/pages/portfolio.html" hx-trigger="load-portfolio once" style="display: none"></div>
+        <div class="col" data-htmx-event-on-route="/allocation:load-allocation" data-display-on-route="/allocation"
+             hx-get="/websrc/pages/allocation-plan.html" hx-trigger="load-allocation once" style="display: none"></div>
     </div>
 
 </div>

@@ -97,6 +97,7 @@ func (server *GinServer) configRESTRoutes(routes []RESTRoute) {
 }
 
 func (server *GinServer) configControllerRoutes(controllers []GinServerRESTController) {
+	glog.Infof("Received %d controllers to config routes", len(controllers))
 	for _, controller := range controllers {
 		glog.Infof("Configuring controller routes for %s", reflect.TypeOf(controller))
 		server.configRESTRoutes(controller.BuildRoutes())

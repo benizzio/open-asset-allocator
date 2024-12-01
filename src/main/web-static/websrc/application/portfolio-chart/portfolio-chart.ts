@@ -1,0 +1,110 @@
+import { PortfolioAtTime } from "../../domain/portfolio";
+import { ChartContent } from "../../infra/chart/chart-types";
+import { ActiveElement, Chart, ChartEvent } from "chart.js";
+import chartModule from "../../infra/chart/chart";
+import { changeChartDataOnDatasource } from "../../infra/chart/chart-utils";
+import { allocationDomainService } from "../../domain/allocation-service";
+import { FractalPortfolioMultiChartDataSource } from "./portfolio-chart-datasource";
+import { MappedChartData } from "./portfolio-chart-model";
+import { mapChartData } from "./portfolio-chart-mapping";
+import DomUtils from "../../infra/dom-utils";
+
+function changeChartData(
+    dataKey: string,
+    dataSource: FractalPortfolioMultiChartDataSource,
+    chart: Chart,
+    chartContent: ChartContent,
+) {
+    if (dataKey && dataSource.hasChartData(dataKey)) {
+        changeChartDataOnDatasource(chart, chartContent, dataKey);
+    }
+}
+
+function chartDataSelectionEventHandler(_: ChartEvent, elements: ActiveElement[], chart: Chart) {
+
+    const dataIndex = elements.length > 0 ? elements[0].index : null;
+    const currentChartData = chart.data as MappedChartData;
+
+    const { chartContent } = chartModule.getChartContentFromChart(chart);
+    const dataSource = chartContent.chartDataSource as FractalPortfolioMultiChartDataSource;
+
+    let dataKey: string;
+
+    if (dataIndex !== null) {
+        dataKey = dataSource.toNextLevel(currentChartData.keys[dataIndex]);
+        changeChartData(dataKey, dataSource, chart, chartContent);
+    }
+    else {
+        dataKey = dataSource.toPreviousLevel();
+        changeChartData(dataKey, dataSource, chart, chartContent);
+    }
+}
+
+function interactionObserverCallback(event: ChartEvent, elements: ActiveElement[], chart: Chart) {
+
+    const { chartId, chartDataSource } = getChartContent(chart);
+
+    const currentHierarchyLevel = chartDataSource.getCurrentHierarchyLevel();
+
+    const currentAggregatorLevelValue = chartDataSource.getLastAppliedHierarchyLevel();
+
+    const currentAggregatorLevelValueLabel = currentAggregatorLevelValue
+        ? "for " + currentAggregatorLevelValue.value
+        : "";
+    const levelLabel = currentHierarchyLevel.name + " " + currentAggregatorLevelValueLabel;
+
+    if (event.type === "click") {
+        const labelId = `#hierarchy-level-${ chartId }`;
+        DomUtils.queryFirst(labelId).textContent = levelLabel;
+    }
+}
+
+function getChartContent(chart: Chart) {
+
+    const identifiedContent = chartModule.getChartContentFromChart(chart);
+
+    const chartDataSource =
+        identifiedContent.chartContent.chartDataSource as FractalPortfolioMultiChartDataSource;
+
+    return { ...identifiedContent, chartDataSource };
+}
+
+const portfolioChart = {
+
+    toUnidimensionalChartContent(
+        portfolioAtTime: PortfolioAtTime,
+    ): ChartContent {
+
+        //TODO TEST CODE UNTIL BACK END IMPLEMENTATION
+        portfolioAtTime.structure = {
+            hierarchy: [
+                {
+                    name: "Assets",
+                    field: "assetTicker",
+                    index: 0,
+                },
+                {
+                    name: "Classes",
+                    field: "class",
+                    index: 1,
+                },
+            ],
+        };
+
+        const { topLevelIndex } = allocationDomainService.getTopHierarchyLevelInfoFromAllocationStructure(
+            portfolioAtTime.structure);
+
+        const chartData = mapChartData(portfolioAtTime, topLevelIndex);
+
+        return {
+            chartDataSource: new FractalPortfolioMultiChartDataSource(
+                chartData,
+                portfolioAtTime,
+            ),
+            chartInteractions: { onClick: chartDataSelectionEventHandler },
+            interactionObserverCallback,
+        };
+    },
+};
+
+export default portfolioChart;

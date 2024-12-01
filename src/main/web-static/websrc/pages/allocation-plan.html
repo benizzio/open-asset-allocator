@@ -1,5 +1,5 @@
-<div class="accordion" id="accordion-portfolio" handlebars-template="template-portfolio-history"
-     hx-get="/api/portfolio/history"
+<div class="accordion" id="accordion-allocation-plan" handlebars-template="template-allocation-plan-item"
+     hx-get="/api/allocation/plan?planType=ALLOCATION_PLAN"
      hx-trigger="load">
     <div class="accordion-item placeholder-glow">
         <h2 class="accordion-header placeholder col-12">placeholder</h2>
@@ -9,50 +9,45 @@
     </div>
 </div>
 
-<template id="template-portfolio-history">
+<template id="template-allocation-plan-item">
 
     {{#each .}}
     <div class="accordion-item" hx-on-htmx-load="chart.loadDescendantCharts(this)">
 
         <h2 class="accordion-header">
             <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#{{timeFrameTag}}-slice" aria-expanded="true"
-                    aria-controls="{{timeFrameTag}}-slice">
-                {{timeFrameTag}}
+                    data-bs-target="#allocation-plan-{{id}}" aria-expanded="true"
+                    aria-controls="allocation-plan-{{id}}">
+                {{name}}
             </button>
         </h2>
 
-        <div id="{{timeFrameTag}}-slice" class="accordion-collapse collapse show" data-bs-parent="#accordion-portfolio">
+        <div id="allocation-plan-{{id}}" class="accordion-collapse collapse show" data-bs-parent="#accordion-portfolio">
             <div class="accordion-body row justify-content-center">
 
                 <div class="col-12 d-flex flex-column align-items-center">
-
-                    <div><p class="h4">Total market value: {{formatCurrency totalMarketValue}}</p></div>
-
                     <div class="d-flex flex-row">
                         <p class="h4">Level:&nbsp;</p>
-                        <p id="hierarchy-level-portfolio-chart-{{timeFrameTag}}" class="h4">
+                        <p id="hierarchy-level-allocation-plan-chart-{{id}}" class="h4">
                             {{#with structure.hierarchy}}
                             {{#each .}}{{#if @last}}{{name}}{{/if}}{{/each}}
                             {{/with}}
                         </p>
                     </div>
-
                 </div>
 
                 <div class="col-xxl-6 d-flex justify-content-center" style="max-height: 750px">
                     {{{ chart
                     this
-                    "PORTFOLIO_AT_TIME_1D"
-                    (object type="pie" measuramentUnit="CURRENCY")
-                    "portfolio-chart"
-                    timeFrameTag
+                    "ASSET_ALLOCATION_PLAN_1D"
+                    (object type="doughnut" measuramentUnit="PERCENTAGE")
+                    "allocation-plan-chart"
+                    id
                     }}}
                 </div>
-
+                
             </div>
         </div>
-
     </div>
     {{/each}}
 
