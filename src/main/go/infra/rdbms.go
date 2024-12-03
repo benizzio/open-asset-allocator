@@ -27,6 +27,10 @@ func (builder *QueryBuilder) FetchInto(target any) error {
 	return builder.query.One(target)
 }
 
+func (builder *QueryBuilder) GetRows() (*dbx.Rows, error) {
+	return builder.query.Rows()
+}
+
 type RDBMSAdapter struct {
 	config         RDBMSConfiguration
 	connectionPool *sql.DB

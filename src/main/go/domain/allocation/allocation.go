@@ -18,9 +18,9 @@ func (planTypeId PlanType) String() string {
 	return planTypeNames[planTypeId]
 }
 
-func (planTypeId PlanType) Get(id string) (PlanType, error) {
+func GetPlanType(name string) (PlanType, error) {
 	for key, value := range planTypeNames {
-		if value == id {
+		if value == name {
 			return key, nil
 		}
 	}

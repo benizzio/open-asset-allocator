@@ -28,3 +28,7 @@ type AllocationPlan struct {
 	PlannedExecutionDate time.Time
 	Details              []AllocationPlanUnit
 }
+
+type AllocationPlanRepository interface {
+	GetAllAllocationPlans() ([]AllocationPlan, error)
+}
