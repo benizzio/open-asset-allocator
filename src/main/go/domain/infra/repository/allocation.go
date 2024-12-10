@@ -9,6 +9,17 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+type AllocationPlanUnitJoinedRow struct {
+	AllocationPlanId     int
+	Name                 string
+	Type                 allocation.PlanType
+	Structure            domain.AllocationPlanStructure
+	PlannedExecutionDate sqlext.NullTime
+	StructuralId         sqlext.NullStringSlice
+	CashReserve          bool
+	SliceSizePercentage  decimal.Decimal
+}
+
 type AllocationPlanRDBMSRepository struct {
 	dbAdapter *infra.RDBMSAdapter
 }
@@ -40,17 +51,6 @@ func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlans() ([]doma
 		vals = append(vals, *ref)
 	}
 	return vals, err2
-}
-
-type AllocationPlanUnitJoinedRow struct {
-	AllocationPlanId     int
-	Name                 string
-	Type                 allocation.PlanType
-	Structure            domain.AllocationPlanStructure
-	PlannedExecutionDate sqlext.NullTime
-	StructuralId         sqlext.NullStringSlice
-	CashReserve          bool
-	SliceSizePercentage  decimal.Decimal
 }
 
 func (repository *AllocationPlanRDBMSRepository) mapAllocationPlanUnitRows(rows *dbx.Rows) (
