@@ -4,7 +4,9 @@ import (
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/domain/allocation"
 	"github.com/benizzio/open-asset-allocator/infra"
+	"github.com/benizzio/open-asset-allocator/infra/sqlext"
 	dbx "github.com/go-ozzo/ozzo-dbx"
+	"github.com/shopspring/decimal"
 )
 
 type AllocationPlanRDBMSRepository struct {
@@ -32,62 +34,109 @@ func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlans() ([]doma
 		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "Error querying allocation plans", repository)
 	}
 
-	return repository.mapAllocationPlans(result)
+	var refs, err2 = repository.mapAllocationPlanUnitRows(result)
+	var vals []domain.AllocationPlan
+	for _, ref := range refs {
+		vals = append(vals, *ref)
+	}
+	return vals, err2
 }
 
-func (repository *AllocationPlanRDBMSRepository) mapAllocationPlans(rows *dbx.Rows) ([]domain.AllocationPlan, error) {
-	//TODO clean
-	var allocationPlanMap = make(map[int]domain.AllocationPlan)
-	var allocationPlans []domain.AllocationPlan
+type AllocationPlanUnitJoinedRow struct {
+	AllocationPlanId     int
+	Name                 string
+	Type                 allocation.PlanType
+	Structure            domain.AllocationPlanStructure
+	PlannedExecutionDate sqlext.NullTime
+	StructuralId         sqlext.NullStringSlice
+	CashReserve          bool
+	SliceSizePercentage  decimal.Decimal
+}
+
+func (repository *AllocationPlanRDBMSRepository) mapAllocationPlanUnitRows(rows *dbx.Rows) (
+	[]*domain.AllocationPlan,
+	error,
+) {
+
+	var allocationPlanCacheMap = make(map[int]*domain.AllocationPlan)
+	var allocationPlans = make([]*domain.AllocationPlan, 0)
 
 	for rows.Next() {
 
-		var tempAllocationPlan domain.AllocationPlan
-		var allocationPlanUnit domain.AllocationPlanUnit
-		var planId int
-		var planTypeName string
-
-		err := rows.Scan(
-			&planId,
-			&tempAllocationPlan.Name,
-			&planTypeName,
-			&tempAllocationPlan.Structure, //TODO json mapping not working
-			&tempAllocationPlan.PlannedExecutionDate,
-			&allocationPlanUnit.StructuralId,
-			&allocationPlanUnit.CashReserve,
-			&allocationPlanUnit.SliceSizePercentage,
-		)
-
+		allocationPlan, err := repository.mapRow(rows, allocationPlanCacheMap)
 		if err != nil {
-			return nil, infra.PropagateAsAppErrorWithNewMessage(
-				err,
-				"Error mapping allocation plan unit from row",
-				repository,
-			)
+			return nil, err
 		}
-
-		if allocationPlan, exists := allocationPlanMap[planId]; exists {
-			allocationPlan.Details = append(allocationPlan.Details, allocationPlanUnit)
-		} else {
-
-			planType, err := allocation.GetPlanType(planTypeName)
-
-			if err != nil {
-				return nil, infra.PropagateAsAppErrorWithNewMessage(
-					err,
-					"Error mapping allocation plan type",
-					repository,
-				)
-			}
-
-			tempAllocationPlan.PlanType = planType
-			tempAllocationPlan.Details = make([]domain.AllocationPlanUnit, 0)
-			allocationPlanMap[planId] = tempAllocationPlan
+		if allocationPlan != nil {
+			allocationPlans = append(allocationPlans, allocationPlan)
 		}
-
-		allocationPlans = append(allocationPlans, tempAllocationPlan)
 	}
+
 	return allocationPlans, nil
+}
+
+func (repository *AllocationPlanRDBMSRepository) mapRow(
+	rows *dbx.Rows,
+	allocationPlanCacheMap map[int]*domain.AllocationPlan,
+) (*domain.AllocationPlan, error) {
+
+	row, err := repository.mapRowFromScan(rows)
+	if err != nil {
+		return nil, err
+	}
+
+	allocationPlanUnit := mapUnitFromRow(row)
+
+	if cachedAllocationPlan, exists := allocationPlanCacheMap[row.AllocationPlanId]; exists {
+		cachedAllocationPlan.AddDetail(allocationPlanUnit)
+	} else {
+		allocationPlan := mapPlanFromRow(row, allocationPlanUnit)
+		allocationPlanCacheMap[row.AllocationPlanId] = &allocationPlan
+		return &allocationPlan, nil
+	}
+
+	return nil, nil
+}
+
+func (repository *AllocationPlanRDBMSRepository) mapRowFromScan(
+	rows *dbx.Rows,
+) (*AllocationPlanUnitJoinedRow, error) {
+
+	var row AllocationPlanUnitJoinedRow
+	err := rows.ScanStruct(&row)
+
+	if err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(
+			err,
+			"Error mapping allocation plan unit from row",
+			repository,
+		)
+	}
+	return &row, nil
+}
+
+func mapPlanFromRow(
+	row *AllocationPlanUnitJoinedRow,
+	allocationPlanUnit *domain.AllocationPlanUnit,
+) domain.AllocationPlan {
+
+	var allocationPlan = domain.AllocationPlan{
+		Name:                 row.Name,
+		PlanType:             row.Type,
+		Structure:            row.Structure,
+		PlannedExecutionDate: row.PlannedExecutionDate.ToTimeReference(),
+	}
+	allocationPlan.AddDetail(allocationPlanUnit)
+
+	return allocationPlan
+}
+
+func mapUnitFromRow(row *AllocationPlanUnitJoinedRow) *domain.AllocationPlanUnit {
+	return &domain.AllocationPlanUnit{
+		StructuralId:        row.StructuralId.ToStringSlice(),
+		CashReserve:         row.CashReserve,
+		SliceSizePercentage: row.SliceSizePercentage,
+	}
 }
 
 func BuildAllocationPlanRepository(dbAdapter *infra.RDBMSAdapter) *AllocationPlanRDBMSRepository {
