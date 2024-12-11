@@ -9,7 +9,7 @@ import (
 )
 
 type AllocationPlanUnit struct {
-	StructuralId        []string
+	StructuralId        []*string
 	CashReserve         bool
 	SliceSizePercentage decimal.Decimal
 }
@@ -51,5 +51,5 @@ func (allocationPlan *AllocationPlan) AddDetail(detail *AllocationPlanUnit) {
 }
 
 type AllocationPlanRepository interface {
-	GetAllAllocationPlans() ([]AllocationPlan, error)
+	GetAllAllocationPlans() ([]*AllocationPlan, error)
 }

@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"github.com/benizzio/open-asset-allocator/api/rest/model"
 	"github.com/benizzio/open-asset-allocator/application"
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/gin-gonic/gin"
@@ -28,8 +29,10 @@ func (controller *AllocationRESTController) getAllocationPlans(context *gin.Cont
 		return
 	}
 
+	var allocationPlansDTS = model.MapAllocationPlans(allocationPlans)
+
 	//TODO change for JSON call
-	context.IndentedJSON(http.StatusOK, allocationPlans)
+	context.IndentedJSON(http.StatusOK, allocationPlansDTS)
 }
 
 func BuildAllocationRESTController(allocationPlanService *application.AllocationPlanService) *AllocationRESTController {

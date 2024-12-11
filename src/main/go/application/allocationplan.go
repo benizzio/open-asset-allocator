@@ -6,7 +6,7 @@ type AllocationPlanService struct {
 	allocationPlanRepository domain.AllocationPlanRepository
 }
 
-func (service *AllocationPlanService) GetAllocationPlans() ([]domain.AllocationPlan, error) {
+func (service *AllocationPlanService) GetAllocationPlans() ([]*domain.AllocationPlan, error) {
 	return service.allocationPlanRepository.GetAllAllocationPlans()
 }
 

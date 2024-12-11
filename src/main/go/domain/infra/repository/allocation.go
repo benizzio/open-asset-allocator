@@ -24,7 +24,7 @@ type AllocationPlanRDBMSRepository struct {
 	dbAdapter *infra.RDBMSAdapter
 }
 
-func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlans() ([]domain.AllocationPlan, error) {
+func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlans() ([]*domain.AllocationPlan, error) {
 	var query = `
 		SELECT 
 		    ap.id as allocation_plan_id,
@@ -46,9 +46,9 @@ func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlans() ([]doma
 	}
 
 	var refs, err2 = repository.mapAllocationPlanUnitRows(result)
-	var vals []domain.AllocationPlan
+	var vals []*domain.AllocationPlan
 	for _, ref := range refs {
-		vals = append(vals, *ref)
+		vals = append(vals, ref)
 	}
 	return vals, err2
 }
@@ -80,7 +80,7 @@ func (repository *AllocationPlanRDBMSRepository) mapRow(
 	allocationPlanCacheMap map[int]*domain.AllocationPlan,
 ) (*domain.AllocationPlan, error) {
 
-	row, err := repository.mapRowFromScan(rows)
+	row, err := repository.scanRow(rows)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +98,7 @@ func (repository *AllocationPlanRDBMSRepository) mapRow(
 	return nil, nil
 }
 
-func (repository *AllocationPlanRDBMSRepository) mapRowFromScan(
+func (repository *AllocationPlanRDBMSRepository) scanRow(
 	rows *dbx.Rows,
 ) (*AllocationPlanUnitJoinedRow, error) {
 

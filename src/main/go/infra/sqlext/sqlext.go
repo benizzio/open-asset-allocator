@@ -16,12 +16,14 @@ func (nullStringSlice *NullStringSlice) Scan(src interface{}) error {
 	return pq.Array(nullStringSlice).Scan(src)
 }
 
-func (nullStringSlice *NullStringSlice) ToStringSlice() []string {
-	var result = make([]string, 0)
+func (nullStringSlice *NullStringSlice) ToStringSlice() []*string {
+	var result = make([]*string, 0)
 	for _, item := range *nullStringSlice {
+		var itemReference *string
 		if item.Valid {
-			result = append(result, item.String)
+			itemReference = &item.String
 		}
+		result = append(result, itemReference)
 	}
 	return result
 }
