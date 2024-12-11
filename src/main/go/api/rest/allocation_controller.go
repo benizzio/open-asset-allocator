@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"fmt"
 	"github.com/benizzio/open-asset-allocator/api/rest/model"
 	"github.com/benizzio/open-asset-allocator/application"
 	"github.com/benizzio/open-asset-allocator/domain/allocation"
@@ -44,7 +43,6 @@ func (controller *AllocationRESTController) getAllocationPlans(context *gin.Cont
 
 func getQueryParams(context *gin.Context) (*allocation.PlanType, bool) {
 	var planTypeParam = context.Query("planType")
-	fmt.Println("planType=" + planTypeParam)
 	planTypeRef, success := getPlanTypeRef(context, planTypeParam)
 	return planTypeRef, success
 }
