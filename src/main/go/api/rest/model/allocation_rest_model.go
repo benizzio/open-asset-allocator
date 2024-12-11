@@ -36,6 +36,7 @@ type AllocationPlanDTS struct {
 // ================================================
 // MAPPING FUNCTIONS
 // ================================================
+
 func MapAllocationPlans(allocationPlans []*domain.AllocationPlan) []AllocationPlanDTS {
 	var allocationPlansDTS = make([]AllocationPlanDTS, 0)
 	for _, allocationPlan := range allocationPlans {

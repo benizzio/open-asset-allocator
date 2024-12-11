@@ -38,7 +38,7 @@ func (repository *PortfolioRDBMSRepository) GetAllPortfolioSlices(timeFrameLimit
 	)
 
 	var result []domain.PortfolioSliceAtTime
-	err := repository.dbAdapter.BuildQuery(query).AddParam("timeFrameLimit", timeFrameLimit).FindInto(&result)
+	err := repository.dbAdapter.BuildQuery(query).AddParam("timeFrameLimit", timeFrameLimit).Build().FindInto(&result)
 
 	return result, infra.PropagateAsAppErrorWithNewMessage(err, querySlicesError, repository)
 }

@@ -24,7 +24,7 @@ func GetPlanType(name string) (PlanType, error) {
 			return key, nil
 		}
 	}
-	return -1, errors.New("invalid plan type")
+	return -1, errors.New("invalid plan type '" + name + "'")
 }
 
 func (planTypeId *PlanType) Scan(value interface{}) error {

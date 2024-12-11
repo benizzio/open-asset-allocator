@@ -51,5 +51,5 @@ func (allocationPlan *AllocationPlan) AddDetail(detail *AllocationPlanUnit) {
 }
 
 type AllocationPlanRepository interface {
-	GetAllAllocationPlans() ([]*AllocationPlan, error)
+	GetAllAllocationPlans(planType *allocation.PlanType) ([]*AllocationPlan, error)
 }

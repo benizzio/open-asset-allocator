@@ -24,7 +24,10 @@ type AllocationPlanRDBMSRepository struct {
 	dbAdapter *infra.RDBMSAdapter
 }
 
-func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlans() ([]*domain.AllocationPlan, error) {
+func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlans(planType *allocation.PlanType) (
+	[]*domain.AllocationPlan,
+	error,
+) {
 	var query = `
 		SELECT 
 		    ap.id as allocation_plan_id,
@@ -37,10 +40,15 @@ func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlans() ([]*dom
 		    apu.slice_size_percentage
 		FROM allocation_plan_unit apu 
 		JOIN allocation_plan ap ON apu.allocation_plan_id = ap.id
+		/*WHERE+PARAMS*/
 	`
 
-	result, err := repository.dbAdapter.BuildQuery(query).GetRows()
+	var queryBuilder = repository.dbAdapter.BuildQuery(query)
+	if planType != nil {
+		queryBuilder.AddWhereClauseAndParam("AND ap.type = {:planType}", "planType", planType.String())
+	}
 
+	result, err := queryBuilder.Build().GetRows()
 	if err != nil {
 		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "Error querying allocation plans", repository)
 	}
