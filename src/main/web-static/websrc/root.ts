@@ -26,6 +26,7 @@ browserGlobal.loadCharts = (element: HTMLElement) => {
 
 const onPageLoad = () => {
     router.bindHTMXRouting();
+    router.bindDisplayOnRoute();
     router.resolveBrowserRoute();
 };
 document.addEventListener("DOMContentLoaded", onPageLoad);

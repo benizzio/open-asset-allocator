@@ -26,6 +26,7 @@ type AllocationPlanStructureDTS struct {
 }
 
 type AllocationPlanDTS struct {
+	Id                   int                        `json:"id,omitempty"`
 	Name                 string                     `json:"name,omitempty"`
 	Type                 string                     `json:"type,omitempty"`
 	Structure            AllocationPlanStructureDTS `json:"structure,omitempty"`
@@ -52,6 +53,7 @@ func mapAllocationPlan(allocationPlan *domain.AllocationPlan) *AllocationPlanDTS
 	var allocations = mapAllocations(allocationPlan)
 
 	var allocationPlanDTS = AllocationPlanDTS{
+		Id:                   allocationPlan.Id,
 		Name:                 allocationPlan.Name,
 		Type:                 allocationPlan.PlanType.String(),
 		Structure:            structure,

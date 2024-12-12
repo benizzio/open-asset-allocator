@@ -129,6 +129,7 @@ func mapPlanFromRow(
 ) domain.AllocationPlan {
 
 	var allocationPlan = domain.AllocationPlan{
+		Id:                   row.AllocationPlanId,
 		Name:                 row.Name,
 		PlanType:             row.Type,
 		Structure:            row.Structure,

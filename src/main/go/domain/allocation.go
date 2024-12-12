@@ -39,6 +39,7 @@ func (allocationPlanStructure *AllocationPlanStructure) Scan(value interface{}) 
 }
 
 type AllocationPlan struct {
+	Id                   int
 	Name                 string
 	PlanType             allocation.PlanType
 	Structure            AllocationPlanStructure

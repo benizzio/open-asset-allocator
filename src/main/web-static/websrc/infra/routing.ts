@@ -3,6 +3,8 @@ import { LogLevel, logger } from "./logging";
 import DomUtils from "./dom-utils";
 import htmx from "htmx.org";
 
+type HookCleanupFunction = (success?: boolean) => void;
+
 const navigoRouter = new Navigo("/");
 
 // =============================================================================
@@ -22,13 +24,13 @@ function bindRouteToHTMXEventOnElement(element: HTMLElement, route: string, even
 
 function addDisableRouteRemovalObserver(element: HTMLElement, route: string) {
     const observer = new MutationObserver((_, observer) => {
-        if (!document.body.contains(element)) {
+        if(DomUtils.wasElementRemoved(element)) {
             logger(LogLevel.INFO, "Element removed, removing route", element, route);
             observer.disconnect();
             navigoRouter.off(route);
         }
     });
-    observer.observe(element.parentElement, { childList: true });
+    observer.observe(document, { childList: true, subtree: true });
 }
 
 function bindRouteToHTMXEventOnElements(htmxRoutedElements: NodeListOf<HTMLElement>) {
@@ -50,7 +52,7 @@ function bindRouteToHTMXEventOnElements(htmxRoutedElements: NodeListOf<HTMLEleme
 
 // =============================================================================
 // NAVIGATE TO
-// binds elements to trigger navigation to a route
+// triggers navigation to a route on click and enter key press
 // =============================================================================
 
 const NAVIGATE_TO_ATTRIBUTE = "data-navigate-to";
@@ -81,6 +83,69 @@ function bindNavigateToElements(navigationElement: NodeListOf<HTMLElement>) {
     });
 }
 
+// =============================================================================
+// SHOW ON ROUTE
+// binds elements to trigger navigation to a route
+// =============================================================================
+
+const DISPLAY_ON_ROUTE_ATTRIBUTE = "data-display-on-route";
+const DISPLAY_ON_ROUTE_BOUND_FLAG = "display-on-route-bound";
+
+function configDisplayOnRouteHooks(route: string, element: HTMLElement) {
+
+    const afterHookCleanup = navigoRouter.addAfterHook(route, () => {
+        element.style.display = "inline";
+    }) as () => void;
+
+    const leaveHookCleanup = navigoRouter.addLeaveHook(route, (done: HookCleanupFunction) => {
+        element.style.display = "none";
+        done();
+    }) as () => void;
+
+    return { afterHookCleanup, leaveHookCleanup };
+}
+
+function addDisplayOnRouteRemovalObserver(
+    element: HTMLElement,
+    route: string,
+    afterHookCleanup: () => void,
+    leaveHookCleanup: () => void,
+) {
+    const observer = new MutationObserver((_, observer) => {
+        if (DomUtils.wasElementRemoved(element)) {
+            logger(LogLevel.INFO, "Element removed, removing display on route action", element, route);
+            observer.disconnect();
+            afterHookCleanup();
+            leaveHookCleanup();
+        }
+    });
+    observer.observe(document, { childList: true, subtree: true });
+}
+
+function bindDisplayOnRoute(element: HTMLElement) {
+
+    if(!element.getAttribute(DISPLAY_ON_ROUTE_BOUND_FLAG)) {
+
+        const route = element.getAttribute(DISPLAY_ON_ROUTE_ATTRIBUTE);
+        logger(LogLevel.INFO, "Binding display on route hooks for element", element, route);
+
+        const { afterHookCleanup, leaveHookCleanup } = configDisplayOnRouteHooks(route, element);
+        addDisplayOnRouteRemovalObserver(element, route, afterHookCleanup, leaveHookCleanup);
+
+        element.setAttribute(DISPLAY_ON_ROUTE_BOUND_FLAG, "true");
+    }
+}
+
+function bindDisplayOnRouteElements(displayOnRouteElements: NodeListOf<HTMLElement>) {
+    displayOnRouteElements.forEach((element) => {
+        bindDisplayOnRoute(element);
+    });
+}
+
+// =============================================================================
+// Module object
+// =============================================================================
+
 const router = {
     resolveBrowserRoute() {
         navigoRouter.resolve();
@@ -90,8 +155,16 @@ const router = {
         bindRouteToHTMXEventOnElements(htmxRoutedElements);
     },
     bindNavigateTo() {
-        const navigationElement = DomUtils.queryAll(`[${NAVIGATE_TO_ATTRIBUTE}]`);
-        bindNavigateToElements(navigationElement);
+        const navigationElements = DomUtils.queryAll(`[${NAVIGATE_TO_ATTRIBUTE}]`);
+        bindNavigateToElements(navigationElements);
+    },
+    bindNavigateToInDescendants(element: HTMLElement) {
+        const navigationElements = DomUtils.queryAllInDescendants(element, `[${NAVIGATE_TO_ATTRIBUTE}]`);
+        bindNavigateToElements(navigationElements);
+    },
+    bindDisplayOnRoute() {
+        const displayOnRouteElements = DomUtils.queryAll(`[${DISPLAY_ON_ROUTE_ATTRIBUTE}]`);
+        bindDisplayOnRouteElements(displayOnRouteElements);
     },
 };
 

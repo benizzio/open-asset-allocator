@@ -19,7 +19,8 @@ export default [
         // ESLint Stylistic rules for typescript: https://eslint.style/packages/ts
         rules: {
             "max-len": ["warn", { code: 120, tabWidth: 4 }],
-            "no-unused-vars": "warn",
+            "no-unused-vars": "off",
+            "@typescript-eslint/no-unused-vars": ["warn"],
             "@stylistic/ts/indent": ["warn", 4],
             "@stylistic/ts/semi": ["error", "always"],
             "@stylistic/ts/quotes": ["warn", "double"],
@@ -38,6 +39,7 @@ export default [
                 { blankLine: "always", prev: "*", next: "multiline-const" },
                 { blankLine: "always", prev: "*", next: "multiline-let" },
                 { blankLine: "always", prev: "*", next: "multiline-var" }],
+
         },
     },
 ];
