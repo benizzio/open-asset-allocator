@@ -18,7 +18,7 @@
 
     <div class="row justify-content-center align-items-center row-cols-auto my-5">
         <div class="col" hx-get="/websrc/components/main-navigation.html" hx-trigger="load"
-             hx-on-htmx-after-on-load="router.bindNavigateToInDescendants(this)"></div>
+             hx-on-htmx-after-on-load="router.bindDescendantsToRouting(this)"></div>
     </div>
 
     <div class="row justify-content-center align-items-center" hx-ext="client-side-templates">

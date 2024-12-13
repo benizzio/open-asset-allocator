@@ -1,7 +1,7 @@
 import * as clientSideTemplates from "htmx-ext-client-side-templates";
 import * as handlebars from "handlebars";
 import * as bootstrap from "bootstrap";
-import router from "./infra/routing";
+import router from "./infra/routing/router";
 import { Chart, registerables } from "chart.js";
 import chart from "./infra/chart";
 import handlebarsChart from "./infra/handlebars-chart";
@@ -25,9 +25,7 @@ browserGlobal.loadCharts = (element: HTMLElement) => {
 };
 
 const onPageLoad = () => {
-    router.bindHTMXRouting();
-    router.bindDisplayOnRoute();
-    router.resolveBrowserRoute();
+    router.init();
 };
 document.addEventListener("DOMContentLoaded", onPageLoad);
 
