@@ -17,12 +17,7 @@ const browserGlobal = (window as any);
 
 browserGlobal.router = router;
 browserGlobal.Handlebars = handlebars;
-
-browserGlobal.loadCharts = (element: HTMLElement) => {
-    element.querySelectorAll("canvas").forEach((canvas) => {
-        chart.loadChart(canvas);
-    });
-};
+browserGlobal.chart = chart;
 
 const onPageLoad = () => {
     router.init();

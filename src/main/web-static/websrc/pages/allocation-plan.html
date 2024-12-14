@@ -12,7 +12,7 @@
 <template id="template-allocation-plan-item">
 
     {{#each .}}
-    <div class="accordion-item" hx-on-htmx-load="loadCharts(this)">
+    <div class="accordion-item" hx-on-htmx-load="chart.loadDescendantCharts(this)">
         <h2 class="accordion-header">
             <button class="accordion-button" type="button" data-bs-toggle="collapse"
                     data-bs-target="#allocation-plan-{{id}}" aria-expanded="true"

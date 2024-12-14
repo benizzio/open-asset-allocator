@@ -3,6 +3,7 @@ import format from "./format";
 
 const chartData = new Map<string, ChartData>;
 const UNIDIMENSIONAL_DATASET_SUM_FIELD = "sum";
+const CHART_TYPE_ATTRIBUTE = "data-chart-type";
 
 const PIE_CHART_OPTIONS: ChartOptions<"pie"> = {
     plugins: {
@@ -46,6 +47,14 @@ const PIE_CHART_OPTIONS: ChartOptions<"pie"> = {
     responsive: true, maintainAspectRatio: true,
 };
 
+function saveChartData(chartId: string, data: ChartData): void {
+    chartData.set(chartId, data);
+}
+
+function getChartData(chartId: string): ChartData {
+    return chartData.get(chartId);
+}
+
 function getDatasetSum(dataSet: ChartDataset<"pie"|"doughnut">) {
     if(!dataSet[UNIDIMENSIONAL_DATASET_SUM_FIELD]) {
         const data = dataSet.data;
@@ -58,32 +67,34 @@ function getPieChartOptions(): ChartOptions<"pie"> {
     return PIE_CHART_OPTIONS;
 }
 
+function loadChart(canvas: HTMLCanvasElement): void {
+
+    const id = canvas.id;
+    const data = getChartData(id);
+    const chartType = canvas.getAttribute(CHART_TYPE_ATTRIBUTE);
+
+    let options = {};
+
+    if(chartType === "pie") {
+        options = getPieChartOptions();
+    }
+
+    if (data) {
+        new Chart(canvas, {
+            type: chartType as ChartType,
+            data: data,
+            options: options,
+        });
+    }
+}
+
 const chart = {
-    saveChartData(chartId: string, data: ChartData): void {
-        chartData.set(chartId, data);
-    },
-    getChartData(chartId: string): ChartData {
-        return chartData.get(chartId);
-    },
-    loadChart(canvas: HTMLCanvasElement): void {
-
-        const id = canvas.id;
-        const data = this.getChartData(id);
-        const chartType = canvas.getAttribute("data-chart-type");
-
-        let options = {};
-
-        if(chartType === "pie") {
-            options = getPieChartOptions();
-        }
-
-        if (data) {
-            new Chart(canvas, {
-                type: chartType as ChartType,
-                data: data,
-                options: options,
-            });
-        }
+    saveChartData,
+    getChartData,
+    loadDescendantCharts(element: HTMLElement)  {
+        element.querySelectorAll(`canvas[${CHART_TYPE_ATTRIBUTE}]`).forEach((canvas: HTMLCanvasElement) => {
+            loadChart(canvas);
+        });
     },
 };
 
