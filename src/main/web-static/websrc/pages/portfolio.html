@@ -26,7 +26,13 @@
                     <p class="h4">Total market value: {{formatCurrency totalMarketValue}}</p>
                 </div>
                 <div class="col-xxl-6 d-flex justify-content-center" style="max-height: 750px">
-                    {{{chart this "PORTFOLIO_AT_TIME_1D_PROPERTY_CLASS" "pie" timeFrameTag "class-chart"}}}
+                    {{{ chart
+                    this
+                    "PORTFOLIO_AT_TIME_1D_PROPERTY_CLASS"
+                    (object type="pie" measuramentUnit="CURRENCY")
+                    timeFrameTag
+                    "class-chart"
+                    }}}
                 </div>
             </div>
         </div>

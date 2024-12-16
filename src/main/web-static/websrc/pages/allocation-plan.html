@@ -23,7 +23,13 @@
         <div id="allocation-plan-{{id}}" class="accordion-collapse collapse show" data-bs-parent="#accordion-portfolio">
             <div class="accordion-body row justify-content-center">
                 <div class="col-xxl-6 d-flex justify-content-center" style="max-height: 750px">
-                    {{{chart this "ASSET_ALLOCATION_PLAN_1D_TOP_LEVEL" "pie" id "allocation-plan-chart"}}}
+                    {{{ chart
+                    this
+                    "ASSET_ALLOCATION_PLAN_1D_TOP_LEVEL"
+                    (object type="doughnut" measuramentUnit="PERCENTAGE")
+                    id
+                    "allocation-plan-chart"
+                    }}}
                 </div>
             </div>
         </div>
