@@ -10,7 +10,7 @@ export type AllocationPlanHierarchyLevel = {
     field: string;
 };
 
-export type AllocationPlanStructure = { hirearchy: AllocationPlanHierarchyLevel[]; };
+export type AllocationPlanStructure = { hierarchy: AllocationPlanHierarchyLevel[]; };
 
 export type Allocation = {
     structuralId: string[],
@@ -29,3 +29,12 @@ export type AllocationPlan = {
 
 export type AllocationDTO = Omit<Allocation, "sliceSizePercentage"> & { sliceSizePercentage: string, };
 export type AllocationPlanDTO = Omit<AllocationPlan, "details"> & { details: AllocationDTO[], };
+
+export type AllocationPlanHierarchyNode = {
+    level: AllocationPlanHierarchyLevel;
+    value: string;
+    subNodes?: AllocationPlanHierarchyNode[];
+};
+
+export type AllocationPlanFractalHierarchy = { nodes: AllocationPlanHierarchyNode[]; };
+
