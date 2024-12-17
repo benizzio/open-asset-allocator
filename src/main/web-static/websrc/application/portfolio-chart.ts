@@ -1,5 +1,5 @@
 import { PortfolioAtTime } from "../domain/portfolio";
-import { ChartData, ChartType } from "chart.js";
+import { ChartContent } from "../infra/chart/chart-types";
 
 function getAccumulatedSlicesPerProperty(portfolioAtTime: PortfolioAtTime, dimensionProperty: string) {
     return portfolioAtTime.slices.map((slice) => {
@@ -17,10 +17,10 @@ function getAccumulatedSlicesPerProperty(portfolioAtTime: PortfolioAtTime, dimen
 
 const portfolioChart = {
 
-    toUnidimensionalChartData(
+    toUnidimensionalChartContent(
         portfolioAtTime: PortfolioAtTime,
         dimensionProperty: string,
-    ): ChartData<ChartType, number[], string> {
+    ): ChartContent {
 
         const dataSet = { data: [], label: portfolioAtTime.timeFrameTag };
         const chartData = { labels: [], datasets: [dataSet] };
@@ -33,7 +33,7 @@ const portfolioChart = {
             dataSet.data.push(value);
         });
 
-        return chartData;
+        return { chartData };
     },
 };
 

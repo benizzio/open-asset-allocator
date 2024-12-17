@@ -1,4 +1,3 @@
-import { ChartData, ChartType } from "chart.js";
 import {
     Allocation,
     AllocationPlan,
@@ -8,9 +7,10 @@ import {
     AllocationPlanHierarchyNode,
 } from "../domain/allocation";
 import BigNumber from "bignumber.js";
+import { ChartContent } from "../infra/chart/chart-types";
 
 const allocationPlanChart = {
-    toUnidimensionalChartData(allocationPlanDTO: AllocationPlanDTO): ChartData<ChartType, number[], string> {
+    toUnidimensionalChartContent(allocationPlanDTO: AllocationPlanDTO): ChartContent {
 
         const allocations = allocationPlanDTO.details.map((allocation) => {
             return {
@@ -37,7 +37,7 @@ const allocationPlanChart = {
 
         //TODO continue (click on the chart section to view next hierarchy dataset)
 
-        return chartData;
+        return { chartData };
     },
 };
 

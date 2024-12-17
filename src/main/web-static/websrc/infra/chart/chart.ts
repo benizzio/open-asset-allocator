@@ -1,21 +1,21 @@
-import { Chart, ChartData, ChartType } from "chart.js";
+import { Chart, ChartType } from "chart.js";
 import { getDoughnutChartOptions, getPieChartOptions } from "./chart-options";
-import { CHART_DATA_TYPE_ATTRIBUTE, MEASURAMENT_UNIT_ATTRIBUTE, MeasuramentUnit } from "./chart-types";
+import { CHART_DATA_TYPE_ATTRIBUTE, ChartContent, MEASURAMENT_UNIT_ATTRIBUTE, MeasuramentUnit } from "./chart-types";
 
-const chartData = new Map<string, ChartData>;
+const chartContentRepo = new Map<string, ChartContent>;
 
-function saveChartData(chartId: string, data: ChartData): void {
-    chartData.set(chartId, data);
+function saveChartContent(chartId: string, content: ChartContent): void {
+    chartContentRepo.set(chartId, content);
 }
 
-function getChartData(chartId: string): ChartData {
-    return chartData.get(chartId);
+function getChartContent(chartId: string): ChartContent {
+    return chartContentRepo.get(chartId);
 }
 
 function loadChart(canvas: HTMLCanvasElement): void {
 
     const id = canvas.id;
-    const data = getChartData(id);
+    const content = getChartContent(id);
     const chartType = canvas.getAttribute(CHART_DATA_TYPE_ATTRIBUTE);
     const measuramentUnit = canvas.getAttribute(MEASURAMENT_UNIT_ATTRIBUTE) as MeasuramentUnit;
 
@@ -30,18 +30,18 @@ function loadChart(canvas: HTMLCanvasElement): void {
             break;
     }
 
-    if (data) {
+    if (content) {
         new Chart(canvas, {
             type: chartType as ChartType,
-            data: data,
+            data: content.chartData,
             options: options,
         });
     }
 }
 
 const chart = {
-    saveChartData,
-    getChartData,
+    saveChartContent,
+    getChartContent,
     loadDescendantCharts(element: HTMLElement)  {
         element.querySelectorAll(`canvas[${CHART_DATA_TYPE_ATTRIBUTE}]`).forEach((canvas: HTMLCanvasElement) => {
             loadChart(canvas);

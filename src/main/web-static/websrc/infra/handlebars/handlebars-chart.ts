@@ -1,6 +1,5 @@
 import * as handlebars from "handlebars";
 import { PortfolioAtTime } from "../../domain/portfolio";
-import { ChartData } from "chart.js";
 import chart from "../chart/chart";
 import portfolioChart from "../../application/portfolio-chart";
 import { AllocationPlanDTO } from "../../domain/allocation";
@@ -8,6 +7,7 @@ import allocationPlanChart from "../../application/allocation-plan-chart";
 import {
     CanvasChartOptions,
     CHART_DATA_TYPE_ATTRIBUTE,
+    ChartContent,
     ChartDataType,
     MEASURAMENT_UNIT_ATTRIBUTE,
     MeasuramentUnit,
@@ -21,26 +21,26 @@ const handlebarsChartHelper = (
     idSuffix: string,
 ) => {
 
-    let chartData: ChartData;
+    let chartContent: ChartContent;
 
     //TODO apply visitor pattern
     switch (chartDataType) {
 
         case ChartDataType.PORTFOLIO_AT_TIME_1D_PROPERTY_CLASS:
-            chartData = portfolioChart.toUnidimensionalChartData(source as PortfolioAtTime, "class");
+            chartContent = portfolioChart.toUnidimensionalChartContent(source as PortfolioAtTime, "class");
             break;
 
         case ChartDataType.PORTFOLIO_AT_TIME_1D_PROPERTY_ASSET:
-            chartData = portfolioChart.toUnidimensionalChartData(source as PortfolioAtTime, "assetTicker");
+            chartContent = portfolioChart.toUnidimensionalChartContent(source as PortfolioAtTime, "assetTicker");
             break;
 
         case ChartDataType.ASSET_ALLOCATION_PLAN_1D_TOP_LEVEL:
-            chartData = allocationPlanChart.toUnidimensionalChartData(source as AllocationPlanDTO);
+            chartContent = allocationPlanChart.toUnidimensionalChartContent(source as AllocationPlanDTO);
             break;
     }
 
     const id = `${idPrefix}-${idSuffix}`;
-    chart.saveChartData(id, chartData);
+    chart.saveChartContent(id, chartContent);
 
     const measuramentUnit = options.measuramentUnit || MeasuramentUnit.CURRENCY;
 
