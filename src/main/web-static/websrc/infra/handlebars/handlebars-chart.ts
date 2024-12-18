@@ -11,6 +11,7 @@ import {
     ChartDataType,
     MEASURAMENT_UNIT_ATTRIBUTE,
     MeasuramentUnit,
+    MULTI_CHART_DATA_ATTRIBUTE,
 } from "../chart/chart-types";
 
 const handlebarsChartHelper = (
@@ -22,6 +23,7 @@ const handlebarsChartHelper = (
 ) => {
 
     let chartContent: ChartContent;
+    let multiChart = false;
 
     //TODO apply visitor pattern
     switch (chartDataType) {
@@ -36,19 +38,21 @@ const handlebarsChartHelper = (
 
         case ChartDataType.ASSET_ALLOCATION_PLAN_1D_TOP_LEVEL:
             chartContent = allocationPlanChart.toUnidimensionalChartContent(source as AllocationPlanDTO);
+            multiChart = true;
             break;
     }
 
-    const id = `${idPrefix}-${idSuffix}`;
+    const id = `${ idPrefix }-${ idSuffix }`;
     chart.saveChartContent(id, chartContent);
 
     const measuramentUnit = options.measuramentUnit || MeasuramentUnit.CURRENCY;
 
     return `<canvas 
-                id="${id}" 
-                ${CHART_DATA_TYPE_ATTRIBUTE}="${options.type}" 
-                ${MEASURAMENT_UNIT_ATTRIBUTE}="${measuramentUnit}">
-            </canvas>`;
+                id="${ id }" 
+                ${ CHART_DATA_TYPE_ATTRIBUTE }="${ options.type }" 
+                ${ MEASURAMENT_UNIT_ATTRIBUTE }="${ measuramentUnit }"
+                ${ multiChart ? MULTI_CHART_DATA_ATTRIBUTE : "" }
+            ></canvas>`;
 };
 
 export function registerHandlebarsChartHelper() {

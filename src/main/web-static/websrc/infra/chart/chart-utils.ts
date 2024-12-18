@@ -1,9 +1,9 @@
-import { ChartDataset, ChartType, TooltipItem } from "chart.js";
-import { MeasuramentUnit, UNIDIMENSIONAL_DATASET_SUM_FIELD } from "./chart-types";
+import { Chart, ChartDataset, ChartType, TooltipItem } from "chart.js";
+import { ChartContent, MeasuramentUnit, MultiChartDataSource, UNIDIMENSIONAL_DATASET_SUM_FIELD } from "./chart-types";
 import format from "../format";
 
-export function getDatasetSum(dataSet: ChartDataset<"pie"|"doughnut">) {
-    if(!dataSet[UNIDIMENSIONAL_DATASET_SUM_FIELD]) {
+export function getDatasetSum(dataSet: ChartDataset<"pie" | "doughnut">) {
+    if (!dataSet[UNIDIMENSIONAL_DATASET_SUM_FIELD]) {
         const data = dataSet.data;
         dataSet[UNIDIMENSIONAL_DATASET_SUM_FIELD] = data.reduce((accumulator, value) => accumulator + value, 0);
     }
@@ -30,3 +30,24 @@ export const LABEL_CALLBACKS = {
         return label + format.formatPercent(context.parsed);
     },
 };
+
+export function visitMultiChartDataSource(
+    content: ChartContent,
+    dataKey: string,
+    chart: Chart,
+) {
+    content.chartDataSource.accept({
+        visitMultiChartDataSource(dataSource: MultiChartDataSource) {
+            const chartData = dataSource.getChartData(dataKey);
+
+            if (chartData) {
+                chart.data = chartData;
+                chart.update();
+            }
+
+        },
+        visitSingleChartDataSource() {
+            // no op
+        },
+    });
+}

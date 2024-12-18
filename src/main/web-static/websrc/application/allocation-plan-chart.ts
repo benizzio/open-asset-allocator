@@ -1,44 +1,7 @@
-import {
-    Allocation,
-    AllocationPlan,
-    AllocationPlanDTO,
-    AllocationPlanHierarchyLevel,
-    FractalAllocation,
-    FractalAllocationHierarchy,
-} from "../domain/allocation";
-import BigNumber from "bignumber.js";
+import { AllocationPlanDTO, FractalAllocation, FractalAllocationHierarchy } from "../domain/allocation";
 import { ChartContent, MultiChartDataSource } from "../infra/chart/chart-types";
 import { ChartData } from "chart.js";
-
-//TODO clean code
-const allocationPlanChart = {
-    toUnidimensionalChartContent(allocationPlanDTO: AllocationPlanDTO): ChartContent {
-
-        const allocations = allocationPlanDTO.details.map((allocation) => {
-            return {
-                ...allocation,
-                sliceSizePercentage: new BigNumber(allocation.sliceSizePercentage),
-            } as Allocation;
-        });
-
-        const allocationPlan = {
-            ...allocationPlanDTO,
-            details: allocations,
-        };
-
-        const fractalHierarchy = extractAllocationPlanFractalHierarchy(allocationPlan);
-        console.log(fractalHierarchy);
-
-        const chartDataMap = toChartDataMap(fractalHierarchy);
-        console.log(chartDataMap);
-
-        const allocationPlanHierarchy = allocationPlan.structure.hierarchy;
-        const topLevelIndex = allocationPlanHierarchy.length - 1;
-        const topLevelKey = allocationPlanHierarchy[topLevelIndex].name;
-
-        return { chartDataSource: new MultiChartDataSource(chartDataMap, topLevelKey) };
-    },
-};
+import { allocationDomainService } from "../domain/allocation-service";
 
 function mapDataSet(
     dataSetLabel: string,
@@ -50,9 +13,16 @@ function mapDataSet(
     const chartData = { labels: [], datasets: [dataSet] };
 
     fractalAllocations.forEach((fractalAllocation) => {
-
         dataSet.data.push(fractalAllocation.allocation.sliceSizePercentage.toNumber());
         chartData.labels.push(fractalAllocation.key);
+    });
+
+    chartDataMap.set(dataSetLabel, chartData);
+}
+
+function mapChildDatasets(fractalHierarchy: FractalAllocationHierarchy, chartDataMap: Map<string, ChartData>) {
+
+    fractalHierarchy.aggregatorAllocationMap.forEach((fractalAllocation) => {
 
         const subAllocations = fractalAllocation.subAllocations;
 
@@ -60,86 +30,34 @@ function mapDataSet(
             mapDataSet(fractalAllocation.key, subAllocations, chartDataMap);
         }
     });
-    chartDataMap.set(dataSetLabel, chartData);
 }
 
 function toChartDataMap(fractalHierarchy: FractalAllocationHierarchy): Map<string, ChartData> {
 
     const chartDataMap = new Map<string, ChartData>();
-    const fractalAllocations = fractalHierarchy.topAllocations;
+    const topFractalAllocations = fractalHierarchy.topAllocations;
 
-    const dataSetLabel = fractalAllocations[0].level.name;
-    mapDataSet(dataSetLabel, fractalAllocations, chartDataMap);
+    const dataSetLabel = topFractalAllocations[0].level.name;
+    mapDataSet(dataSetLabel, topFractalAllocations, chartDataMap);
+
+    mapChildDatasets(fractalHierarchy, chartDataMap);
 
     return chartDataMap;
 }
 
-function isFromLevel(allocation: Allocation, hierarchyLevelIndex: number) {
-    return allocation.structuralId.every(
-        (value, index) => index < hierarchyLevelIndex ? value == null : value != null,
-    );
-}
+const allocationPlanChart = {
 
-function extractAllocationPlanFractalHierarchy(allocationPlan: AllocationPlan): FractalAllocationHierarchy {
+    toUnidimensionalChartContent(allocationPlanDTO: AllocationPlanDTO): ChartContent {
 
-    const allocationsPerHierarchyLevel = getAllocationsPerHierarchyLevel(allocationPlan);
+        const allocationPlan = allocationDomainService.mapToAllocationPlan(allocationPlanDTO);
+        const fractalHierarchy = allocationDomainService.mapAllocationPlanFractalHierarchy(allocationPlan);
 
-    const rootNodes =
-        mapAllocationPlanHierarchyNodes(
-            allocationPlan.structure.hierarchy,
-            allocationsPerHierarchyLevel,
-            allocationPlan.structure.hierarchy.length - 1,
-        );
+        const chartDataMap = toChartDataMap(fractalHierarchy);
+        const topLevelKey = allocationDomainService.getTopLevelKey(allocationPlan);
 
-    return { topAllocations: rootNodes };
-}
-
-function getAllocationsPerHierarchyLevel(allocationPlan: AllocationPlan) {
-    //TODO map per parent structuralId
-    const allocationsPerHierarchyLevel: Allocation[][] = [];
-
-    allocationPlan.structure.hierarchy.forEach((hierarchyLevel, index) => {
-        allocationsPerHierarchyLevel.push(
-            allocationPlan.details.filter(allocation => isFromLevel(allocation, index)),
-        );
-    });
-    return allocationsPerHierarchyLevel;
-}
-
-function mapAllocationPlanHierarchyNodes(
-    hierarchy: AllocationPlanHierarchyLevel[],
-    allocationsPerHierarchyLevel: Allocation[][],
-    hierarchyLevelIndex: number,
-    parentStructuralId?: string,
-): FractalAllocation[] {
-
-    let allocationsAtHierarchyLevel = allocationsPerHierarchyLevel[hierarchyLevelIndex];
-
-    if (parentStructuralId) {
-        allocationsAtHierarchyLevel = allocationsAtHierarchyLevel.filter(
-            allocation => allocation.structuralId[hierarchyLevelIndex + 1] == parentStructuralId);
-    }
-
-    return allocationsAtHierarchyLevel.map((allocation) => {
-
-        const subNodes =
-            hierarchyLevelIndex > 0 ?
-                mapAllocationPlanHierarchyNodes(
-                    hierarchy,
-                    allocationsPerHierarchyLevel,
-                    hierarchyLevelIndex - 1,
-                    allocation.structuralId[hierarchyLevelIndex],
-                )
-                : undefined;
-
-        return {
-            level: hierarchy[hierarchyLevelIndex],
-            key: allocation.structuralId[hierarchyLevelIndex],
-            allocation: allocation,
-            subAllocations: subNodes,
-        } as FractalAllocation;
-    });
-}
+        return { chartDataSource: new MultiChartDataSource(chartDataMap, topLevelKey) };
+    },
+};
 
 export default allocationPlanChart;
 

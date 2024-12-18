@@ -14,15 +14,27 @@ export enum ChartDataType {
 export type CanvasChartOptions = { type: string, measuramentUnit?: MeasuramentUnit };
 
 export const CHART_DATA_TYPE_ATTRIBUTE = "data-chart-type";
+export const MULTI_CHART_DATA_ATTRIBUTE = "data-multi-chart";
 export const MEASURAMENT_UNIT_ATTRIBUTE = "data-measurament";
 export const UNIDIMENSIONAL_DATASET_SUM_FIELD = "sum";
 
-export type ChartContent = {
-    chartDataSource: ChartDataSource
-    chartInteractions?: Pick<CoreChartOptions<ChartType>, "onClick">
-};
+export type ChartContent = { chartDataSource: ChartDataSource };
 
-export interface ChartDataSource {getChartData(dataKey?: string): ChartData;}
+export type ChartInteractions = Partial<Pick<CoreChartOptions<ChartType>, "onClick" | "onHover">>;
+
+export interface ChartDataSourceVisitor {
+
+    visitSingleChartDataSource(dataSource: SingleChartDataSource): void;
+
+    visitMultiChartDataSource(dataSource: MultiChartDataSource): void;
+}
+
+export interface ChartDataSource {
+
+    getChartData(dataKey?: string): ChartData;
+
+    accept(visitor: ChartDataSourceVisitor): void;
+}
 
 export class SingleChartDataSource implements ChartDataSource {
 
@@ -31,6 +43,10 @@ export class SingleChartDataSource implements ChartDataSource {
 
     getChartData(): ChartData {
         return this.chartData;
+    }
+
+    accept(visitor: ChartDataSourceVisitor): void {
+        visitor.visitSingleChartDataSource(this);
     }
 }
 
@@ -41,5 +57,9 @@ export class MultiChartDataSource implements ChartDataSource {
 
     getChartData(dataKey?: string): ChartData {
         return this.chartDataMap.get(dataKey || this.initialDataKey);
+    }
+
+    accept(visitor: ChartDataSourceVisitor): void {
+        visitor.visitMultiChartDataSource(this);
     }
 }

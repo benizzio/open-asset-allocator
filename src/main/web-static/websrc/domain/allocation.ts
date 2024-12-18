@@ -37,5 +37,7 @@ export type FractalAllocation = {
     subAllocations?: FractalAllocation[];
 };
 
-export type FractalAllocationHierarchy = { topAllocations: FractalAllocation[]; };
-
+export type FractalAllocationHierarchy = {
+    topAllocations: FractalAllocation[];
+    aggregatorAllocationMap: Map<string, FractalAllocation>;
+};

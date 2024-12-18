@@ -1,10 +1,10 @@
 import { ChartDataset, ChartOptions } from "chart.js";
 import format from "../format";
-import { MeasuramentUnit } from "./chart-types";
+import { ChartInteractions, MeasuramentUnit } from "./chart-types";
 import { getDatasetSum, LABEL_CALLBACKS } from "./chart-utils";
 import BigNumber from "bignumber.js";
 
-const PIE_DOUGHNUT_CHART_OPTIONS: ChartOptions<"pie"|"doughnut"> = {
+const PIE_DOUGHNUT_CHART_OPTIONS: ChartOptions<"pie" | "doughnut"> = {
     plugins: {
         legend: {
             position: "right",
@@ -23,7 +23,7 @@ const PIE_DOUGHNUT_CHART_OPTIONS: ChartOptions<"pie"|"doughnut"> = {
             },
             formatter: (value: number, context) => {
                 const valueBigNumber = new BigNumber(value);
-                const total = getDatasetSum(context.chart.data.datasets[0] as ChartDataset<"pie"|"doughnut">);
+                const total = getDatasetSum(context.chart.data.datasets[0] as ChartDataset<"pie" | "doughnut">);
                 const totalBigNumber = new BigNumber(total);
                 return format.calculateAndFormatPercent(valueBigNumber, totalBigNumber);
             },
@@ -32,9 +32,13 @@ const PIE_DOUGHNUT_CHART_OPTIONS: ChartOptions<"pie"|"doughnut"> = {
     responsive: true, maintainAspectRatio: true,
 };
 
-function getPieDoughnutChartOptions(dataType: MeasuramentUnit) {
+function getPieDoughnutChartOptions(
+    dataType: MeasuramentUnit,
+    chartInteractions?: ChartInteractions,
+): ChartOptions<"pie" | "doughnut"> {
     return {
         ...PIE_DOUGHNUT_CHART_OPTIONS,
+        ...chartInteractions,
         plugins: {
             ...PIE_DOUGHNUT_CHART_OPTIONS.plugins,
             tooltip: { callbacks: { label: LABEL_CALLBACKS[dataType] } },
@@ -42,10 +46,14 @@ function getPieDoughnutChartOptions(dataType: MeasuramentUnit) {
     };
 }
 
-export function getPieChartOptions(dataType: MeasuramentUnit): ChartOptions<"pie"> {
-    return getPieDoughnutChartOptions(dataType);
-}
-
-export function getDoughnutChartOptions(dataType: MeasuramentUnit): ChartOptions<"doughnut"> {
-    return getPieDoughnutChartOptions(dataType);
+export function buildChartOptions(
+    chartType: string,
+    dataType: MeasuramentUnit,
+    chartInteractions?: ChartInteractions,
+): ChartOptions<"pie" | "doughnut"> {
+    switch (chartType) {
+        case "pie":
+        case "doughnut":
+            return getPieDoughnutChartOptions(dataType, chartInteractions);
+    }
 }

@@ -1,8 +1,30 @@
-import { Chart, ChartType } from "chart.js";
-import { getDoughnutChartOptions, getPieChartOptions } from "./chart-options";
-import { CHART_DATA_TYPE_ATTRIBUTE, ChartContent, MEASURAMENT_UNIT_ATTRIBUTE, MeasuramentUnit } from "./chart-types";
+import { ActiveElement, Chart, ChartEvent, ChartType } from "chart.js";
+import { buildChartOptions } from "./chart-options";
+import {
+    CHART_DATA_TYPE_ATTRIBUTE,
+    ChartContent,
+    MEASURAMENT_UNIT_ATTRIBUTE,
+    MeasuramentUnit,
+    MULTI_CHART_DATA_ATTRIBUTE,
+} from "./chart-types";
+import { visitMultiChartDataSource } from "./chart-utils";
+
+const MULTI_CHART_INTERACTIONS = { onClick: multiChartDataSelectionEventHandler };
 
 const chartContentRepo = new Map<string, ChartContent>;
+
+function multiChartDataSelectionEventHandler(event: ChartEvent, elements: ActiveElement[], chart: Chart) {
+
+    if (!elements.length) {
+        return;
+    }
+
+    const dataIndex = elements[0].index;
+    const dataKey = chart.data.labels[dataIndex] as string;
+    const chartId = chart.canvas.id;
+    const content = getChartContent(chartId);
+    visitMultiChartDataSource(content, dataKey, chart);
+}
 
 function saveChartContent(chartId: string, content: ChartContent): void {
     chartContentRepo.set(chartId, content);
@@ -18,15 +40,20 @@ function loadChart(canvas: HTMLCanvasElement): void {
     const content = getChartContent(id);
     const chartType = canvas.getAttribute(CHART_DATA_TYPE_ATTRIBUTE);
     const measuramentUnit = canvas.getAttribute(MEASURAMENT_UNIT_ATTRIBUTE) as MeasuramentUnit;
+    const multiChart = canvas.hasAttribute(MULTI_CHART_DATA_ATTRIBUTE);
 
     let options = {};
 
     switch (chartType) {
         case "pie":
-            options = getPieChartOptions(measuramentUnit);
+            options = buildChartOptions("pie", measuramentUnit, multiChart ? MULTI_CHART_INTERACTIONS : null);
             break;
         case "doughnut":
-            options = getDoughnutChartOptions(measuramentUnit);
+            options = buildChartOptions(
+                "doughnut",
+                measuramentUnit,
+                multiChart ? MULTI_CHART_INTERACTIONS : null,
+            );
             break;
     }
 
