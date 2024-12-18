@@ -30,11 +30,12 @@ export type AllocationPlan = {
 export type AllocationDTO = Omit<Allocation, "sliceSizePercentage"> & { sliceSizePercentage: string, };
 export type AllocationPlanDTO = Omit<AllocationPlan, "details"> & { details: AllocationDTO[], };
 
-export type AllocationPlanHierarchyNode = {
+export type FractalAllocation = {
     level: AllocationPlanHierarchyLevel;
-    value: string;
-    subNodes?: AllocationPlanHierarchyNode[];
+    key: string;
+    allocation: Allocation;
+    subAllocations?: FractalAllocation[];
 };
 
-export type AllocationPlanFractalHierarchy = { nodes: AllocationPlanHierarchyNode[]; };
+export type FractalAllocationHierarchy = { topAllocations: FractalAllocation[]; };
 

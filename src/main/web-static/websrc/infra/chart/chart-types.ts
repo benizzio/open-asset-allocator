@@ -18,6 +18,28 @@ export const MEASURAMENT_UNIT_ATTRIBUTE = "data-measurament";
 export const UNIDIMENSIONAL_DATASET_SUM_FIELD = "sum";
 
 export type ChartContent = {
-    chartData: ChartData,
+    chartDataSource: ChartDataSource
     chartInteractions?: Pick<CoreChartOptions<ChartType>, "onClick">
 };
+
+export interface ChartDataSource {getChartData(dataKey?: string): ChartData;}
+
+export class SingleChartDataSource implements ChartDataSource {
+
+    constructor(private readonly chartData: ChartData) {
+    }
+
+    getChartData(): ChartData {
+        return this.chartData;
+    }
+}
+
+export class MultiChartDataSource implements ChartDataSource {
+
+    constructor(private readonly chartDataMap: Map<string, ChartData>, private readonly initialDataKey: string) {
+    }
+
+    getChartData(dataKey?: string): ChartData {
+        return this.chartDataMap.get(dataKey || this.initialDataKey);
+    }
+}

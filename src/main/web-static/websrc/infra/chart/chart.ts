@@ -20,7 +20,7 @@ function loadChart(canvas: HTMLCanvasElement): void {
     const measuramentUnit = canvas.getAttribute(MEASURAMENT_UNIT_ATTRIBUTE) as MeasuramentUnit;
 
     let options = {};
-    
+
     switch (chartType) {
         case "pie":
             options = getPieChartOptions(measuramentUnit);
@@ -33,7 +33,7 @@ function loadChart(canvas: HTMLCanvasElement): void {
     if (content) {
         new Chart(canvas, {
             type: chartType as ChartType,
-            data: content.chartData,
+            data: content.chartDataSource.getChartData(),
             options: options,
         });
     }
@@ -42,8 +42,8 @@ function loadChart(canvas: HTMLCanvasElement): void {
 const chart = {
     saveChartContent,
     getChartContent,
-    loadDescendantCharts(element: HTMLElement)  {
-        element.querySelectorAll(`canvas[${CHART_DATA_TYPE_ATTRIBUTE}]`).forEach((canvas: HTMLCanvasElement) => {
+    loadDescendantCharts(element: HTMLElement) {
+        element.querySelectorAll(`canvas[${ CHART_DATA_TYPE_ATTRIBUTE }]`).forEach((canvas: HTMLCanvasElement) => {
             loadChart(canvas);
         });
     },

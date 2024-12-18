@@ -1,5 +1,5 @@
 import { PortfolioAtTime } from "../domain/portfolio";
-import { ChartContent } from "../infra/chart/chart-types";
+import { ChartContent, SingleChartDataSource } from "../infra/chart/chart-types";
 
 function getAccumulatedSlicesPerProperty(portfolioAtTime: PortfolioAtTime, dimensionProperty: string) {
     return portfolioAtTime.slices.map((slice) => {
@@ -33,7 +33,7 @@ const portfolioChart = {
             dataSet.data.push(value);
         });
 
-        return { chartData };
+        return { chartDataSource: new SingleChartDataSource(chartData) };
     },
 };
 

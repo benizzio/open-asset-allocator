@@ -2,13 +2,15 @@ import {
     Allocation,
     AllocationPlan,
     AllocationPlanDTO,
-    AllocationPlanFractalHierarchy,
     AllocationPlanHierarchyLevel,
-    AllocationPlanHierarchyNode,
+    FractalAllocation,
+    FractalAllocationHierarchy,
 } from "../domain/allocation";
 import BigNumber from "bignumber.js";
-import { ChartContent } from "../infra/chart/chart-types";
+import { ChartContent, MultiChartDataSource } from "../infra/chart/chart-types";
+import { ChartData } from "chart.js";
 
+//TODO clean code
 const allocationPlanChart = {
     toUnidimensionalChartContent(allocationPlanDTO: AllocationPlanDTO): ChartContent {
 
@@ -24,22 +26,53 @@ const allocationPlanChart = {
             details: allocations,
         };
 
-        const dataSet = { data: [], label: allocationPlan.name };
-        const chartData = { labels: [], datasets: [dataSet], test: "test" };
-
-        allocationPlan.details.filter(allocation => allocation.structuralId[0] == null).forEach((allocation) => {
-            chartData.labels.push(allocation.structuralId[1]);
-            dataSet.data.push(allocation.sliceSizePercentage.toNumber());
-        });
-
         const fractalHierarchy = extractAllocationPlanFractalHierarchy(allocationPlan);
         console.log(fractalHierarchy);
 
-        //TODO continue (click on the chart section to view next hierarchy dataset)
+        const chartDataMap = toChartDataMap(fractalHierarchy);
+        console.log(chartDataMap);
 
-        return { chartData };
+        const allocationPlanHierarchy = allocationPlan.structure.hierarchy;
+        const topLevelIndex = allocationPlanHierarchy.length - 1;
+        const topLevelKey = allocationPlanHierarchy[topLevelIndex].name;
+
+        return { chartDataSource: new MultiChartDataSource(chartDataMap, topLevelKey) };
     },
 };
+
+function mapDataSet(
+    dataSetLabel: string,
+    fractalAllocations: FractalAllocation[],
+    chartDataMap: Map<string, ChartData>,
+) {
+
+    const dataSet = { data: [], label: dataSetLabel };
+    const chartData = { labels: [], datasets: [dataSet] };
+
+    fractalAllocations.forEach((fractalAllocation) => {
+
+        dataSet.data.push(fractalAllocation.allocation.sliceSizePercentage.toNumber());
+        chartData.labels.push(fractalAllocation.key);
+
+        const subAllocations = fractalAllocation.subAllocations;
+
+        if (subAllocations && subAllocations.length > 0) {
+            mapDataSet(fractalAllocation.key, subAllocations, chartDataMap);
+        }
+    });
+    chartDataMap.set(dataSetLabel, chartData);
+}
+
+function toChartDataMap(fractalHierarchy: FractalAllocationHierarchy): Map<string, ChartData> {
+
+    const chartDataMap = new Map<string, ChartData>();
+    const fractalAllocations = fractalHierarchy.topAllocations;
+
+    const dataSetLabel = fractalAllocations[0].level.name;
+    mapDataSet(dataSetLabel, fractalAllocations, chartDataMap);
+
+    return chartDataMap;
+}
 
 function isFromLevel(allocation: Allocation, hierarchyLevelIndex: number) {
     return allocation.structuralId.every(
@@ -47,8 +80,8 @@ function isFromLevel(allocation: Allocation, hierarchyLevelIndex: number) {
     );
 }
 
-function extractAllocationPlanFractalHierarchy(allocationPlan: AllocationPlan): AllocationPlanFractalHierarchy {
-    
+function extractAllocationPlanFractalHierarchy(allocationPlan: AllocationPlan): FractalAllocationHierarchy {
+
     const allocationsPerHierarchyLevel = getAllocationsPerHierarchyLevel(allocationPlan);
 
     const rootNodes =
@@ -58,7 +91,7 @@ function extractAllocationPlanFractalHierarchy(allocationPlan: AllocationPlan): 
             allocationPlan.structure.hierarchy.length - 1,
         );
 
-    return { nodes: rootNodes };
+    return { topAllocations: rootNodes };
 }
 
 function getAllocationsPerHierarchyLevel(allocationPlan: AllocationPlan) {
@@ -78,11 +111,11 @@ function mapAllocationPlanHierarchyNodes(
     allocationsPerHierarchyLevel: Allocation[][],
     hierarchyLevelIndex: number,
     parentStructuralId?: string,
-): AllocationPlanHierarchyNode[] {
+): FractalAllocation[] {
 
     let allocationsAtHierarchyLevel = allocationsPerHierarchyLevel[hierarchyLevelIndex];
 
-    if(parentStructuralId) {
+    if (parentStructuralId) {
         allocationsAtHierarchyLevel = allocationsAtHierarchyLevel.filter(
             allocation => allocation.structuralId[hierarchyLevelIndex + 1] == parentStructuralId);
     }
@@ -101,9 +134,10 @@ function mapAllocationPlanHierarchyNodes(
 
         return {
             level: hierarchy[hierarchyLevelIndex],
-            value: allocation.structuralId[hierarchyLevelIndex],
-            subNodes,
-        } as AllocationPlanHierarchyNode;
+            key: allocation.structuralId[hierarchyLevelIndex],
+            allocation: allocation,
+            subAllocations: subNodes,
+        } as FractalAllocation;
     });
 }
 
