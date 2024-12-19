@@ -1,4 +1,4 @@
-import { ChartData, ChartType, CoreChartOptions } from "chart.js";
+import { ActiveElement, Chart, ChartData, ChartEvent, ChartType, CoreChartOptions } from "chart.js";
 
 export enum MeasuramentUnit {
     CURRENCY = "CURRENCY",
@@ -18,16 +18,13 @@ export const MULTI_CHART_DATA_ATTRIBUTE = "data-multi-chart";
 export const MEASURAMENT_UNIT_ATTRIBUTE = "data-measurament";
 export const UNIDIMENSIONAL_DATASET_SUM_FIELD = "sum";
 
-export type ChartContent = { chartDataSource: ChartDataSource };
-
 export type ChartInteractions = Partial<Pick<CoreChartOptions<ChartType>, "onClick" | "onHover">>;
+export type ChartInteraction = (event: ChartEvent, elements: ActiveElement[], chart: Chart) => void;
 
-export interface ChartDataSourceVisitor {
-
-    visitSingleChartDataSource(dataSource: SingleChartDataSource): void;
-
-    visitMultiChartDataSource(dataSource: MultiChartDataSource): void;
-}
+export type ChartContent = {
+    chartDataSource: ChartDataSource,
+    interactionObserverCallback?: ChartInteraction,
+};
 
 export interface ChartDataSource {
 
@@ -62,4 +59,11 @@ export class MultiChartDataSource implements ChartDataSource {
     accept(visitor: ChartDataSourceVisitor): void {
         visitor.visitMultiChartDataSource(this);
     }
+}
+
+export interface ChartDataSourceVisitor {
+
+    visitSingleChartDataSource(dataSource: SingleChartDataSource): void;
+
+    visitMultiChartDataSource(dataSource: MultiChartDataSource): void;
 }

@@ -13,7 +13,7 @@ const MULTI_CHART_INTERACTIONS = { onClick: multiChartDataSelectionEventHandler 
 
 const chartContentRepo = new Map<string, ChartContent>;
 
-function multiChartDataSelectionEventHandler(event: ChartEvent, elements: ActiveElement[], chart: Chart) {
+function multiChartDataSelectionEventHandler(_: ChartEvent, elements: ActiveElement[], chart: Chart) {
 
     if (!elements.length) {
         return;
@@ -38,21 +38,29 @@ function loadChart(canvas: HTMLCanvasElement): void {
 
     const id = canvas.id;
     const content = getChartContent(id);
+    const interactionObserverCallback = content.interactionObserverCallback;
     const chartType = canvas.getAttribute(CHART_DATA_TYPE_ATTRIBUTE);
     const measuramentUnit = canvas.getAttribute(MEASURAMENT_UNIT_ATTRIBUTE) as MeasuramentUnit;
     const multiChart = canvas.hasAttribute(MULTI_CHART_DATA_ATTRIBUTE);
+    const multiChartInteractions = multiChart ? MULTI_CHART_INTERACTIONS : null;
 
     let options = {};
 
     switch (chartType) {
         case "pie":
-            options = buildChartOptions("pie", measuramentUnit, multiChart ? MULTI_CHART_INTERACTIONS : null);
+            options = buildChartOptions(
+                "pie",
+                measuramentUnit,
+                multiChartInteractions,
+                interactionObserverCallback,
+            );
             break;
         case "doughnut":
             options = buildChartOptions(
                 "doughnut",
                 measuramentUnit,
-                multiChart ? MULTI_CHART_INTERACTIONS : null,
+                multiChartInteractions,
+                interactionObserverCallback,
             );
             break;
     }
@@ -77,4 +85,3 @@ const chart = {
 };
 
 export default chart;
-

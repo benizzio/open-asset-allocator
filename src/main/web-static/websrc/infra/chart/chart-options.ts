@@ -1,6 +1,6 @@
 import { ChartDataset, ChartOptions } from "chart.js";
 import format from "../format";
-import { ChartInteractions, MeasuramentUnit } from "./chart-types";
+import { ChartInteraction, ChartInteractions, MeasuramentUnit } from "./chart-types";
 import { getDatasetSum, LABEL_CALLBACKS } from "./chart-utils";
 import BigNumber from "bignumber.js";
 
@@ -50,10 +50,43 @@ export function buildChartOptions(
     chartType: string,
     dataType: MeasuramentUnit,
     chartInteractions?: ChartInteractions,
+    interactionsCallback?: ChartInteraction,
 ): ChartOptions<"pie" | "doughnut"> {
+
+    const interactions = buildChartInteractions(chartInteractions, interactionsCallback);
+
     switch (chartType) {
         case "pie":
         case "doughnut":
-            return getPieDoughnutChartOptions(dataType, chartInteractions);
+            return getPieDoughnutChartOptions(dataType, interactions);
     }
+}
+
+export function buildChartInteractions(
+    interactions?: ChartInteractions,
+    oberverCallback?: ChartInteraction,
+): ChartInteractions {
+
+    return {
+        onClick: (event, elements, chart) => {
+
+            if (interactions?.onClick) {
+                interactions.onClick(event, elements, chart);
+            }
+
+            if (oberverCallback) {
+                oberverCallback(event, elements, chart);
+            }
+        },
+        onHover: (event, elements, chart) => {
+
+            if (interactions?.onHover) {
+                interactions.onHover(event, elements, chart);
+            }
+
+            if (oberverCallback) {
+                oberverCallback(event, elements, chart);
+            }
+        },
+    };
 }
