@@ -31,10 +31,10 @@ export const LABEL_CALLBACKS = {
     },
 };
 
-export function visitMultiChartDataSource(
+export function changeChartDataSource(
+    chart: Chart,
     content: ChartContent,
     dataKey: string,
-    chart: Chart,
 ) {
     content.chartDataSource.accept({
         visitMultiChartDataSource(dataSource: MultiChartDataSource) {

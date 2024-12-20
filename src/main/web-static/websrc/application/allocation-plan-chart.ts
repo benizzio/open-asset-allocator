@@ -1,7 +1,33 @@
 import { AllocationPlanDTO, FractalAllocation, FractalAllocationHierarchy } from "../domain/allocation";
 import { ChartContent, MultiChartDataSource } from "../infra/chart/chart-types";
-import { ChartData } from "chart.js";
+import { ActiveElement, Chart, ChartData, ChartEvent } from "chart.js";
 import { allocationDomainService } from "../domain/allocation-service";
+import { changeChartDataSource } from "../infra/chart/chart-utils";
+import chartModule from "../infra/chart/chart";
+
+class FractalAllocationMultiChartDataSource extends MultiChartDataSource {
+
+    private currentFractalAllocation: FractalAllocation;
+
+    constructor(
+        chartDataMap: Map<string, ChartData>,
+        initialDataKey: string,
+        private readonly fractalHierarchy: FractalAllocationHierarchy,
+    ) {
+        super(chartDataMap, initialDataKey);
+    }
+
+    getChartData(dataKey?: string): ChartData {
+        this.currentFractalAllocation = this.fractalHierarchy.aggregatorAllocationMap.get(dataKey);
+        return super.getChartData(dataKey);
+    }
+
+    getCurrentFractalSubAllocationKeyByIndex(index: number): string {
+        return !this.currentFractalAllocation
+            ? this.fractalHierarchy.topAllocations[index].key
+            : this.currentFractalAllocation.subAllocations[index].key;
+    }
+}
 
 function mapDataSet(
     dataSetLabel: string,
@@ -45,6 +71,21 @@ function toChartDataMap(fractalHierarchy: FractalAllocationHierarchy): Map<strin
     return chartDataMap;
 }
 
+function chartDataSelectionEventHandler(_: ChartEvent, elements: ActiveElement[], chart: Chart) {
+
+    if (!elements.length) {
+        return;
+    }
+
+    const dataIndex = elements[0].index;
+    const chartId = chart.canvas.id;
+
+    const content = chartModule.getChartContent(chartId);
+    const chartDataSource = content.chartDataSource as FractalAllocationMultiChartDataSource;
+    const dataKey = chartDataSource.getCurrentFractalSubAllocationKeyByIndex(dataIndex);
+    changeChartDataSource(chart, content, dataKey);
+}
+
 const allocationPlanChart = {
 
     toUnidimensionalChartContent(allocationPlanDTO: AllocationPlanDTO): ChartContent {
@@ -55,7 +96,8 @@ const allocationPlanChart = {
         const chartDataMap = toChartDataMap(fractalHierarchy);
         const topLevelKey = allocationDomainService.getTopLevelKey(allocationPlan);
 
-        return { chartDataSource: new MultiChartDataSource(chartDataMap, topLevelKey) };
+        const dataSource = new FractalAllocationMultiChartDataSource(chartDataMap, topLevelKey, fractalHierarchy);
+        return { chartDataSource: dataSource, chartInteractions: { onClick: chartDataSelectionEventHandler } };
     },
 };
 

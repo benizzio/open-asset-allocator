@@ -23,6 +23,7 @@ export type ChartInteraction = (event: ChartEvent, elements: ActiveElement[], ch
 
 export type ChartContent = {
     chartDataSource: ChartDataSource,
+    chartInteractions?: ChartInteractions,
     interactionObserverCallback?: ChartInteraction,
 };
 

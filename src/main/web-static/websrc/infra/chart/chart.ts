@@ -1,30 +1,8 @@
-import { ActiveElement, Chart, ChartEvent, ChartType } from "chart.js";
+import { Chart, ChartType } from "chart.js";
 import { buildChartOptions } from "./chart-options";
-import {
-    CHART_DATA_TYPE_ATTRIBUTE,
-    ChartContent,
-    MEASURAMENT_UNIT_ATTRIBUTE,
-    MeasuramentUnit,
-    MULTI_CHART_DATA_ATTRIBUTE,
-} from "./chart-types";
-import { visitMultiChartDataSource } from "./chart-utils";
-
-const MULTI_CHART_INTERACTIONS = { onClick: multiChartDataSelectionEventHandler };
+import { CHART_DATA_TYPE_ATTRIBUTE, ChartContent, MEASURAMENT_UNIT_ATTRIBUTE, MeasuramentUnit } from "./chart-types";
 
 const chartContentRepo = new Map<string, ChartContent>;
-
-function multiChartDataSelectionEventHandler(_: ChartEvent, elements: ActiveElement[], chart: Chart) {
-
-    if (!elements.length) {
-        return;
-    }
-
-    const dataIndex = elements[0].index;
-    const dataKey = chart.data.labels[dataIndex] as string;
-    const chartId = chart.canvas.id;
-    const content = getChartContent(chartId);
-    visitMultiChartDataSource(content, dataKey, chart);
-}
 
 function saveChartContent(chartId: string, content: ChartContent): void {
     chartContentRepo.set(chartId, content);
@@ -41,8 +19,7 @@ function loadChart(canvas: HTMLCanvasElement): void {
     const interactionObserverCallback = content.interactionObserverCallback;
     const chartType = canvas.getAttribute(CHART_DATA_TYPE_ATTRIBUTE);
     const measuramentUnit = canvas.getAttribute(MEASURAMENT_UNIT_ATTRIBUTE) as MeasuramentUnit;
-    const multiChart = canvas.hasAttribute(MULTI_CHART_DATA_ATTRIBUTE);
-    const multiChartInteractions = multiChart ? MULTI_CHART_INTERACTIONS : null;
+    const chartInteractions = content.chartInteractions;
 
     let options = {};
 
@@ -51,7 +28,7 @@ function loadChart(canvas: HTMLCanvasElement): void {
             options = buildChartOptions(
                 "pie",
                 measuramentUnit,
-                multiChartInteractions,
+                chartInteractions,
                 interactionObserverCallback,
             );
             break;
@@ -59,7 +36,7 @@ function loadChart(canvas: HTMLCanvasElement): void {
             options = buildChartOptions(
                 "doughnut",
                 measuramentUnit,
-                multiChartInteractions,
+                chartInteractions,
                 interactionObserverCallback,
             );
             break;

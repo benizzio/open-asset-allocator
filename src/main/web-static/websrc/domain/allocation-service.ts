@@ -21,6 +21,10 @@ function getHierarchyLevel(allocation: Allocation): number {
     return 0;
 }
 
+function getStructuralIdAsString(structuralId: string[]): string {
+    return structuralId.filter(value => value != null).join("|");
+}
+
 function mapAllocationsPerHierarchyLevel(allocationPlan: AllocationPlan) {
 
     const allocationsPerHierarchyLevel: Allocation[][] = [];
@@ -49,11 +53,11 @@ function mapFractalAllocationsAtHierarchyLevel(
 
     allocationsAtCurrentLevel.forEach((allocation) => {
 
-        const fractalAllocationKey = allocation.structuralId[hierarchyLevelIndex];
+        const fractalAllocationKey = getStructuralIdAsString(allocation.structuralId);
 
         const fractalAggregationAllocation = {
-            level: hierarchyLevel,
             key: fractalAllocationKey,
+            level: hierarchyLevel,
             allocation: allocation,
         };
 
@@ -100,7 +104,9 @@ function connectAllocationsToFractalStructure(
     fractalAllocationsAtLevel.forEach((fractalAllocation) => {
 
         const allocation = fractalAllocation.allocation;
-        const parentKey = allocation.structuralId[hierarchyLevelIndex + 1];
+
+        const parentStructuralId = allocation.structuralId.slice(hierarchyLevelIndex + 1);
+        const parentKey = getStructuralIdAsString(parentStructuralId);
         const parent = aggregatorAllocationMap.get(parentKey);
 
         if (!parent) {
