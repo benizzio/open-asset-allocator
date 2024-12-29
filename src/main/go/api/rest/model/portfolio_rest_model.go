@@ -6,7 +6,13 @@ import "github.com/benizzio/open-asset-allocator/domain"
 // TYPES
 // ================================================
 
-type PortfolioSliceDTS struct {
+type PortfolioDTS struct {
+	Id                  int                    `json:"id"`
+	Name                string                 `json:"name"`
+	AllocationStructure AllocationStructureDTS `json:"allocationStructure"`
+}
+
+type PortfolioAllocationDTS struct {
 	AssetName        string `json:"assetName"`
 	AssetTicker      string `json:"assetTicker"`
 	Class            string `json:"class"`
@@ -15,35 +21,37 @@ type PortfolioSliceDTS struct {
 }
 
 type PortfolioAtTimeDTS struct {
-	TimeFrameTag     domain.TimeFrameTag `json:"timeFrameTag"`
-	Slices           []PortfolioSliceDTS `json:"slices"`
-	TotalMarketValue int                 `json:"totalMarketValue"`
+	TimeFrameTag     domain.TimeFrameTag      `json:"timeFrameTag"`
+	Allocations      []PortfolioAllocationDTS `json:"allocations"`
+	TotalMarketValue int                      `json:"totalMarketValue"`
 }
 
-type portfolioSlicesPerTimeFrameMap map[domain.TimeFrameTag][]PortfolioSliceDTS
+type portfolioAllocationsPerTimeFrameMap map[domain.TimeFrameTag][]PortfolioAllocationDTS
 
-func (aggregationMap portfolioSlicesPerTimeFrameMap) getOrBuild(timeFrameTag domain.TimeFrameTag) []PortfolioSliceDTS {
-	var sliceAggregation = aggregationMap[timeFrameTag]
-	if sliceAggregation == nil {
-		sliceAggregation = make([]PortfolioSliceDTS, 0)
+func (
+	aggregationMap portfolioAllocationsPerTimeFrameMap,
+) getOrBuild(timeFrameTag domain.TimeFrameTag) []PortfolioAllocationDTS {
+	var allocationAggregation = aggregationMap[timeFrameTag]
+	if allocationAggregation == nil {
+		allocationAggregation = make([]PortfolioAllocationDTS, 0)
 	}
-	return sliceAggregation
+	return allocationAggregation
 }
 
-func (aggregationMap portfolioSlicesPerTimeFrameMap) aggregate(
+func (aggregationMap portfolioAllocationsPerTimeFrameMap) aggregate(
 	timeFrameTag domain.TimeFrameTag,
-	sliceDTS PortfolioSliceDTS,
+	allocationDTS PortfolioAllocationDTS,
 ) {
-	var sliceAggregation = aggregationMap.getOrBuild(timeFrameTag)
-	sliceAggregation = append(sliceAggregation, sliceDTS)
-	aggregationMap[timeFrameTag] = sliceAggregation
+	var allocationAggregation = aggregationMap.getOrBuild(timeFrameTag)
+	allocationAggregation = append(allocationAggregation, allocationDTS)
+	aggregationMap[timeFrameTag] = allocationAggregation
 }
 
-func (aggregationMap portfolioSlicesPerTimeFrameMap) getAggregatedMarketValue(timeFrame domain.TimeFrameTag) int {
-	var sliceAggregation = aggregationMap[timeFrame]
+func (aggregationMap portfolioAllocationsPerTimeFrameMap) getAggregatedMarketValue(timeFrame domain.TimeFrameTag) int {
+	var allocationAggregation = aggregationMap[timeFrame]
 	var totalMarketValue = 0
-	for _, slice := range sliceAggregation {
-		totalMarketValue += slice.TotalMarketValue
+	for _, allocation := range allocationAggregation {
+		totalMarketValue += allocation.TotalMarketValue
 	}
 	return totalMarketValue
 }
@@ -52,40 +60,59 @@ func (aggregationMap portfolioSlicesPerTimeFrameMap) getAggregatedMarketValue(ti
 // MAPPING FUNCTIONS
 // ================================================
 
-func AggregateAndMapPortfolioHistory(portfolioHistory []domain.PortfolioSliceAtTime) []PortfolioAtTimeDTS {
-	portfolioSlicesPerTimeFrame := aggregateHistoryAsDTSMap(portfolioHistory)
-	aggregatedPortfoliohistory := buildHistoryDTS(portfolioSlicesPerTimeFrame)
-	return aggregatedPortfoliohistory
+func MapPortfolios(portfolios []domain.Portfolio) []PortfolioDTS {
+	var portfoliosDTS = make([]PortfolioDTS, 0)
+	for _, portfolio := range portfolios {
+		var portfolioDTS = MapPortfolio(portfolio)
+		portfoliosDTS = append(portfoliosDTS, *portfolioDTS)
+	}
+	return portfoliosDTS
 }
 
-func aggregateHistoryAsDTSMap(portfolioHistory []domain.PortfolioSliceAtTime) portfolioSlicesPerTimeFrameMap {
+func MapPortfolio(portfolio domain.Portfolio) *PortfolioDTS {
+	var structure = mapAllocationStructure(portfolio.AllocationStructure)
+	var portfolioDTS = PortfolioDTS{
+		Id:                  portfolio.Id,
+		Name:                portfolio.Name,
+		AllocationStructure: structure,
+	}
+	return &portfolioDTS
+}
 
-	var portfolioSlicesPerTimeFrame = make(portfolioSlicesPerTimeFrameMap)
-	for _, portfolioSlice := range portfolioHistory {
-		var aggregationTimeFrame = portfolioSlice.TimeFrameTag
-		var sliceJSON = sliceAtTimeToSliceDTS(portfolioSlice)
-		portfolioSlicesPerTimeFrame.aggregate(aggregationTimeFrame, sliceJSON)
+func AggregateAndMapPortfolioHistory(portfolioHistory []domain.PortfolioAllocation) []PortfolioAtTimeDTS {
+	portfolioAllocationsPerTimeFrame := aggregateHistoryAsDTSMap(portfolioHistory)
+	aggregatedPortfolioHistory := buildHistoryDTS(portfolioAllocationsPerTimeFrame)
+	return aggregatedPortfolioHistory
+}
+
+func aggregateHistoryAsDTSMap(portfolioHistory []domain.PortfolioAllocation) portfolioAllocationsPerTimeFrameMap {
+
+	var portfolioAllocationsPerTimeFrame = make(portfolioAllocationsPerTimeFrameMap)
+	for _, portfolioAllocation := range portfolioHistory {
+		var aggregationTimeFrame = portfolioAllocation.TimeFrameTag
+		var allocationJSON = portfolioAllocationToAllocationDTS(portfolioAllocation)
+		portfolioAllocationsPerTimeFrame.aggregate(aggregationTimeFrame, allocationJSON)
 	}
 
-	return portfolioSlicesPerTimeFrame
+	return portfolioAllocationsPerTimeFrame
 }
 
-func sliceAtTimeToSliceDTS(portfolioSlice domain.PortfolioSliceAtTime) PortfolioSliceDTS {
-	return PortfolioSliceDTS{
-		AssetName:        portfolioSlice.Asset.Name,
-		AssetTicker:      portfolioSlice.Asset.Ticker,
-		Class:            portfolioSlice.Class,
-		CashReserve:      portfolioSlice.CashReserve,
-		TotalMarketValue: portfolioSlice.TotalMarketValue,
+func portfolioAllocationToAllocationDTS(portfolioAllocation domain.PortfolioAllocation) PortfolioAllocationDTS {
+	return PortfolioAllocationDTS{
+		AssetName:        portfolioAllocation.Asset.Name,
+		AssetTicker:      portfolioAllocation.Asset.Ticker,
+		Class:            portfolioAllocation.Class,
+		CashReserve:      portfolioAllocation.CashReserve,
+		TotalMarketValue: portfolioAllocation.TotalMarketValue,
 	}
 }
 
-func buildHistoryDTS(portfolioSlicesPerTimeFrame portfolioSlicesPerTimeFrameMap) []PortfolioAtTimeDTS {
+func buildHistoryDTS(portfolioAllocationsPerTimeFrame portfolioAllocationsPerTimeFrameMap) []PortfolioAtTimeDTS {
 
 	var aggregatedPortfoliohistory = make([]PortfolioAtTimeDTS, 0)
-	for timeFrameTag, slices := range portfolioSlicesPerTimeFrame {
-		var totalMarketValue = portfolioSlicesPerTimeFrame.getAggregatedMarketValue(timeFrameTag)
-		portfolioSnapshot := buildSnapshotDTS(timeFrameTag, slices, totalMarketValue)
+	for timeFrameTag, allocations := range portfolioAllocationsPerTimeFrame {
+		var totalMarketValue = portfolioAllocationsPerTimeFrame.getAggregatedMarketValue(timeFrameTag)
+		portfolioSnapshot := buildSnapshotDTS(timeFrameTag, allocations, totalMarketValue)
 		aggregatedPortfoliohistory = append(aggregatedPortfoliohistory, portfolioSnapshot)
 	}
 
@@ -94,12 +121,12 @@ func buildHistoryDTS(portfolioSlicesPerTimeFrame portfolioSlicesPerTimeFrameMap)
 
 func buildSnapshotDTS(
 	timeFrameTag domain.TimeFrameTag,
-	slices []PortfolioSliceDTS,
+	allocations []PortfolioAllocationDTS,
 	totalMarketValue int,
 ) PortfolioAtTimeDTS {
 	return PortfolioAtTimeDTS{
 		TimeFrameTag:     timeFrameTag,
-		Slices:           slices,
+		Allocations:      allocations,
 		TotalMarketValue: totalMarketValue,
 	}
 }

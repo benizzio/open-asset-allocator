@@ -1,4 +1,4 @@
-import { PortfolioAtTime } from "../../domain/portfolio";
+import { PortfolioAtTime, PortfolioDTO } from "../../domain/portfolio";
 import { ChartContent } from "../../infra/chart/chart-types";
 import { ActiveElement, Chart, ChartEvent } from "chart.js";
 import chartModule from "../../infra/chart/chart";
@@ -7,7 +7,7 @@ import { allocationDomainService } from "../../domain/allocation-service";
 import { FractalPortfolioMultiChartDataSource } from "./portfolio-chart-datasource";
 import { MappedChartData } from "./portfolio-chart-model";
 import { mapChartData } from "./portfolio-chart-mapping";
-import DomUtils from "../../infra/dom-utils";
+import DomUtils from "../../infra/dom/dom-utils";
 
 function changeChartData(
     dataKey: string,
@@ -15,7 +15,7 @@ function changeChartData(
     chart: Chart,
     chartContent: ChartContent,
 ) {
-    if (dataKey && dataSource.hasChartData(dataKey)) {
+    if(dataKey && dataSource.hasChartData(dataKey)) {
         changeChartDataOnDatasource(chart, chartContent, dataKey);
     }
 }
@@ -30,7 +30,7 @@ function chartDataSelectionEventHandler(_: ChartEvent, elements: ActiveElement[]
 
     let dataKey: string;
 
-    if (dataIndex !== null) {
+    if(dataIndex !== null) {
         dataKey = dataSource.toNextLevel(currentChartData.keys[dataIndex]);
         changeChartData(dataKey, dataSource, chart, chartContent);
     }
@@ -53,7 +53,7 @@ function interactionObserverCallback(event: ChartEvent, elements: ActiveElement[
         : "";
     const levelLabel = currentHierarchyLevel.name + " " + currentAggregatorLevelValueLabel;
 
-    if (event.type === "click") {
+    if(event.type === "click") {
         const labelId = `#hierarchy-level-${ chartId }`;
         DomUtils.queryFirst(labelId).textContent = levelLabel;
     }
@@ -73,33 +73,22 @@ const portfolioChart = {
 
     toUnidimensionalChartContent(
         portfolioAtTime: PortfolioAtTime,
+        portfolioDTO: PortfolioDTO,
     ): ChartContent {
 
-        //TODO TEST CODE UNTIL BACK END IMPLEMENTATION
-        portfolioAtTime.structure = {
-            hierarchy: [
-                {
-                    name: "Assets",
-                    field: "assetTicker",
-                    index: 0,
-                },
-                {
-                    name: "Classes",
-                    field: "class",
-                    index: 1,
-                },
-            ],
-        };
+        const portfolio = allocationDomainService.mapToPortfolio(portfolioDTO);
+        const portfolioAllocationStructure = portfolio.allocationStructure;
 
-        const { topLevelIndex } = allocationDomainService.getTopHierarchyLevelInfoFromAllocationStructure(
-            portfolioAtTime.structure);
+        const { topLevelIndex } =
+            allocationDomainService.getTopHierarchyLevelInfoFromAllocationStructure(portfolioAllocationStructure);
 
-        const chartData = mapChartData(portfolioAtTime, topLevelIndex);
+        const chartData = mapChartData(portfolioAtTime, portfolio.allocationStructure, topLevelIndex);
 
         return {
             chartDataSource: new FractalPortfolioMultiChartDataSource(
                 chartData,
                 portfolioAtTime,
+                portfolioAllocationStructure,
             ),
             chartInteractions: { onClick: chartDataSelectionEventHandler },
             interactionObserverCallback,

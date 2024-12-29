@@ -1,16 +1,13 @@
 import * as handlebarsModule from "handlebars";
-import { Chart, registerables } from "chart.js";
-import ChartDataLabels from "chartjs-plugin-datalabels";
 import { registerHandlebarsChartHelper } from "./handlebars-chart";
 import { registerHandlebarsFormatHelper } from "./handlebars-format";
-import { registerHandlebarsObjectHelpers } from "./handlebars-object";
+import { registerHandlebarsLangHelpers } from "./handlebars-lang";
 
-export const handlebars ={
+export const handlebarsInfra = {
     register: () => {
-        Chart.register(...registerables, ChartDataLabels);
         registerHandlebarsChartHelper();
         registerHandlebarsFormatHelper();
-        registerHandlebarsObjectHelpers();
+        registerHandlebarsLangHelpers();
         return handlebarsModule;
     },
 };

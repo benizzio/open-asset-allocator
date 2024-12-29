@@ -30,7 +30,7 @@ func (executor *QueryExecutor) FindInto(target any) error {
 	return executor.query.All(target)
 }
 
-func (executor *QueryExecutor) FetchInto(target any) error {
+func (executor *QueryExecutor) GetInto(target any) error {
 	return executor.query.One(target)
 }
 
@@ -41,6 +41,10 @@ func (executor *QueryExecutor) GetRows() (*dbx.Rows, error) {
 // ================================================
 // QUERY BUILDER
 // ================================================
+
+const (
+	WhereClausePlaceholder = "/*WHERE+PARAMS*/"
+)
 
 type QueryBuilder struct {
 	dbx          *dbx.DB
@@ -64,7 +68,7 @@ func (builder *QueryBuilder) processSQL() string {
 	var processedSQL = builder.querySQL
 	if len(builder.whereClauses) > 0 {
 		var whereStatement = " WHERE 1=1 " + strings.Join(builder.whereClauses, " ")
-		processedSQL = strings.Replace(processedSQL, "/*WHERE+PARAMS*/", whereStatement, 1)
+		processedSQL = strings.Replace(processedSQL, WhereClausePlaceholder, whereStatement, 1)
 	}
 	return processedSQL
 }
@@ -74,10 +78,13 @@ func (builder *QueryBuilder) AddParam(name string, value any) *QueryBuilder {
 	return builder
 }
 
-func (builder *QueryBuilder) AddWhereClauseAndParam(whereClause string, name string, value any) *QueryBuilder {
+func (builder *QueryBuilder) AddWhereClause(whereClause string) *QueryBuilder {
 	builder.whereClauses = append(builder.whereClauses, whereClause)
-	builder.params[name] = value
 	return builder
+}
+
+func (builder *QueryBuilder) AddWhereClauseAndParam(whereClause string, name string, value any) *QueryBuilder {
+	return builder.AddWhereClause(whereClause).AddParam(name, value)
 }
 
 // ================================================

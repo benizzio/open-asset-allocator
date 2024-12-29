@@ -9,11 +9,11 @@ type AllocationPlanService struct {
 	allocationPlanRepository domain.AllocationPlanRepository
 }
 
-func (service *AllocationPlanService) GetAllocationPlans(planType *allocation.PlanType) (
+func (service *AllocationPlanService) GetAllocationPlans(portfolioId int, planType *allocation.PlanType) (
 	[]*domain.AllocationPlan,
 	error,
 ) {
-	return service.allocationPlanRepository.GetAllAllocationPlans(planType)
+	return service.allocationPlanRepository.GetAllAllocationPlans(portfolioId, planType)
 }
 
 func BuildAllocationPlanService(allocationPlanRepository domain.AllocationPlanRepository) *AllocationPlanService {

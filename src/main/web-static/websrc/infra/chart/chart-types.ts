@@ -6,7 +6,7 @@ export enum MeasuramentUnit {
 }
 
 export enum ChartDataType {
-    PORTFOLIO_AT_TIME_1D = "PORTFOLIO_AT_TIME_1D",
+    PORTFOLIO_HISTORY_1D = "PORTFOLIO_HISTORY_1D",
     ASSET_ALLOCATION_PLAN_1D = "ASSET_ALLOCATION_PLAN_1D",
 }
 

@@ -1,5 +1,5 @@
 import * as handlebars from "handlebars";
-import { PortfolioAtTime } from "../../domain/portfolio";
+import { PortfolioAtTime, PortfolioDTO } from "../../domain/portfolio";
 import chart from "../chart/chart";
 import portfolioChart from "../../application/portfolio-chart/portfolio-chart";
 import allocationPlanChart from "../../application/allocation-plan-chart";
@@ -13,6 +13,7 @@ import {
     MULTI_CHART_DATA_ATTRIBUTE,
 } from "../chart/chart-types";
 import { AllocationPlanDTO } from "../../domain/allocation-plan";
+import DomUtils from "../dom/dom-utils";
 
 const handlebarsChartHelper = (
     source: PortfolioAtTime | AllocationPlanDTO,
@@ -20,21 +21,31 @@ const handlebarsChartHelper = (
     options: CanvasChartOptions,
     idPrefix: string,
     idSuffix: string,
+    contextDataSelector: string,
 ) => {
 
     let chartContent: ChartContent;
     let multiChart = false;
 
-    //TODO apply visitor pattern
-    switch (chartDataType) {
+    const contextData = DomUtils.getContextDataFromRoot(contextDataSelector);
 
-        case ChartDataType.PORTFOLIO_AT_TIME_1D:
-            chartContent = portfolioChart.toUnidimensionalChartContent(source as PortfolioAtTime);
+    //TODO apply visitor pattern
+    //TODO generalize code
+    switch(chartDataType) {
+
+        case ChartDataType.PORTFOLIO_HISTORY_1D:
+            chartContent = portfolioChart.toUnidimensionalChartContent(
+                source as PortfolioAtTime,
+                contextData as PortfolioDTO,
+            );
             multiChart = true;
             break;
 
         case ChartDataType.ASSET_ALLOCATION_PLAN_1D:
-            chartContent = allocationPlanChart.toUnidimensionalChartContent(source as AllocationPlanDTO);
+            chartContent = allocationPlanChart.toUnidimensionalChartContent(
+                source as AllocationPlanDTO,
+                contextData as PortfolioDTO,
+            );
             multiChart = true;
             break;
     }

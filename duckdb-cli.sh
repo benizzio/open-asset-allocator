@@ -37,7 +37,7 @@ verify_file () {
 if [ ! -d "$input_target_dir_path" ]; then
     # if it does not, create it
     mkdir "$input_target_dir_path"
-elseif [ -f "$std_input_file_path" ]
+elif [ -f "$std_input_file_path" ]; then
     # if it exists, try to remove any previous copies of an existent input file
     rm "$std_input_file_path"
 fi
@@ -112,6 +112,23 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
 
+        # Portfolio id argument
+        --portfolio)
+            # move positional parameters inside dependencies options (--deps is $0)
+            shift
+
+            # checks if the argument is a number
+            if [[ $1 =~ ^[0-9]+$ ]]; then
+                portfolio_id="$1"
+            else
+                echo "Portfolio id must be a number"
+                exit 1
+            fi
+
+            # move to the next positional parameter
+            shift
+            ;;
+
         # default verification
         *)
             echo "Unknown option: $1"
@@ -120,8 +137,18 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+if [ -n "$pgport" ]; then
+    export PGPORT=$pgport
+fi
+
+if [ -n "$portfolio_id" ]; then
+    export PORTFOLIO_ID=$portfolio_id
+else
+    echo "Portfolio id must be informed for ingestion"
+    exit 1
+fi
+
 echo "Executing duckdb script $1"
-export PGPORT=$pgport
 docker compose -f "$project_root_abs_path"/src/main/docker/duckdb/docker-compose-duckdb.yml run --rm duckdb-cli
 
 echo "Cleaning input files"

@@ -1,11 +1,13 @@
 <div class="btn-group" role="group" aria-label="Navigation">
 
     <input type="radio" class="btn-check" name="btnradio" id="nav-radio-portfolio" autocomplete="off"
-           data-navigate-to="/portfolio" data-attribute-on-route="/portfolio:checked">
+           data-navigate-to="/portfolio/:portfolioId/history"
+           data-attribute-on-route="/portfolio/:portfolioId/history[checked]">
     <label class="btn btn-outline-primary" for="nav-radio-portfolio">Portfolio</label>
 
     <input type="radio" class="btn-check" name="btnradio" id="nav-radio-allocation-plan" autocomplete="off"
-           data-navigate-to="/allocation" data-attribute-on-route="/allocation:checked">
+           data-navigate-to="/portfolio/:portfolioId/allocation"
+           data-attribute-on-route="/portfolio/:portfolioId/allocation[checked]">
     <label class="btn btn-outline-primary" for="nav-radio-allocation-plan">Allocation Plan</label>
 
     <input type="radio" class="btn-check" name="btnradio" id="nav-radio-allocation-map"

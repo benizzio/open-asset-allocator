@@ -1,8 +1,10 @@
 import { PortfolioAtTime } from "../../domain/portfolio";
 import { AppliedAllocationHierarchyLevel, MappedChartData } from "./portfolio-chart-model";
+import { AllocationStructure } from "../../domain/allocation";
 
 export function mapChartData(
     portfolioAtTime: PortfolioAtTime,
+    portfolioStructure: AllocationStructure,
     hierarchyLevelIndex: number,
     appliedHierarchyLevels?: AppliedAllocationHierarchyLevel[],
 ): MappedChartData {
@@ -11,7 +13,12 @@ export function mapChartData(
     const chartData = { labels: [], keys: [], datasets: [dataset] };
 
     const reducedPortfolioAtTime =
-        getAccumulatedSlicesPerProperty(portfolioAtTime, hierarchyLevelIndex, appliedHierarchyLevels);
+        getAccumulatedSlicesPerProperty(
+            portfolioAtTime,
+            portfolioStructure,
+            hierarchyLevelIndex,
+            appliedHierarchyLevels,
+        );
 
     reducedPortfolioAtTime.forEach((value, key) => {
         chartData.labels.push(key);
@@ -24,13 +31,14 @@ export function mapChartData(
 
 function getAccumulatedSlicesPerProperty(
     portfolioAtTime: PortfolioAtTime,
+    portfolioStructure: AllocationStructure,
     hierarchyLevelIndex: number,
     appliedHierarchyLevels: AppliedAllocationHierarchyLevel[] = [],
 ): Map<string, number> {
 
-    const accumulationProperty = portfolioAtTime.structure.hierarchy[hierarchyLevelIndex].field;
+    const accumulationProperty = portfolioStructure.hierarchy[hierarchyLevelIndex].field;
 
-    const filteredSlices = portfolioAtTime.slices.filter((slice) => {
+    const filteredSlices = portfolioAtTime.allocations.filter((slice) => {
         return appliedHierarchyLevels.every((filter) => {
             return slice[filter.field] === filter.value;
         });

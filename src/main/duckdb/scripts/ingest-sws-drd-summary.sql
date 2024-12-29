@@ -60,35 +60,49 @@ INSERT INTO pgsql.asset (ticker)
 ;
 
 .print '=> Portfolio data to be inserted, joining data classification from asset dimension mapping classifier file'
-CREATE TEMP VIEW asset_value_fact_insertion AS
+CREATE TEMP VIEW portfolio_allocation_fact_insertion AS
     SELECT
         ass.id as asset_id,
         adm.class as class,
         adm.cash_reserve as cash_reserve,
         if(adm.asset_quantity > 0, adm.asset_quantity, swss.total_shares) as asset_quantity,
         swss.current_price as asset_market_price,
-        if(adm.asset_quantity > 0, adm.asset_quantity::DECIMAL(30,8) * swss.current_price::DECIMAL(30,8), swss.current_value) as total_market_value,
-        extract('year' FROM current_date) || lpad(extract('month' FROM current_date)::text, 2, '0') as time_frame_tag
+        if(
+            adm.asset_quantity > 0,
+            adm.asset_quantity::DECIMAL(30,8) * swss.current_price::DECIMAL(30,8),
+            swss.current_value
+        ) as total_market_value,
+        extract('year' FROM current_date) || lpad(extract('month' FROM current_date)::text, 2, '0') as time_frame_tag,
+        getenv('PORTFOLIO_ID')::INTEGER AS portfolio_id
     FROM sws_summary swss
     LEFT JOIN asset_dimension_mapping adm ON adm.ticker = swss.asset
     LEFT JOIN pgsql.asset ass ON ass.ticker = swss.asset
 ;
 
-SELECT * FROM asset_value_fact_insertion;
+SELECT * FROM portfolio_allocation_fact_insertion;
 
 .print '=> Inserting portfolio data in the asset fact table'
 -- Has to fail when the asset dimension data is missing to indicate that file is broken and needs more data
-INSERT INTO pgsql.asset_value_fact (
+INSERT INTO pgsql.portfolio_allocation_fact (
         asset_id,
         class,
         cash_reserve,
         asset_quantity,
         asset_market_price,
         total_market_value,
-        time_frame_tag
+        time_frame_tag,
+        portfolio_id
     )
-    SELECT asset_id, class, cash_reserve, asset_quantity, asset_market_price, total_market_value, time_frame_tag
-    FROM asset_value_fact_insertion
+    SELECT
+        asset_id,
+        class,
+        cash_reserve,
+        asset_quantity,
+        asset_market_price,
+        total_market_value,
+        time_frame_tag,
+        portfolio_id
+    FROM portfolio_allocation_fact_insertion
 ;
 
 COMMIT;
@@ -96,5 +110,5 @@ COMMIT;
 -- .print '===> DEBUGGING'
 -- .print 'asset table'
 -- SELECT * FROM pgsql.asset;
--- .print 'asset_value_fact table'
--- SELECT * FROM pgsql.asset_value_fact;
+-- .print 'portfolio_allocation_fact table'
+-- SELECT * FROM pgsql.portfolio_allocation_fact;

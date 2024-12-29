@@ -14,3 +14,6 @@ export type AllocationHierarchyLevel = {
 
 export type AllocationStructure = { hierarchy: AllocationHierarchyLevel[]; };
 
+export type AllocationHierarchyLevelDTO = Omit<AllocationHierarchyLevel, "index">;
+
+export type AllocationStructureDTO = { hierarchy: AllocationHierarchyLevelDTO[]; };

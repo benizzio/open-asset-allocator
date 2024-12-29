@@ -15,23 +15,26 @@ import {
     PlannedAllocation,
 } from "./allocation-plan";
 
-export function mapAllocationPlanFractalHierarchy(allocationPlan: AllocationPlan): FractalPlannedAllocationHierarchy {
+export function mapAllocationPlanFractalHierarchy(
+    allocationPlan: AllocationPlan,
+    allocationStructure: AllocationStructure,
+): FractalPlannedAllocationHierarchy {
 
     const allocationsPerHierarchyLevel = mapAllocationsPerHierarchyLevel(allocationPlan);
 
-    const topHierarchyLevelIndex = getTopLevelHierarchyIndexFromAllocationStructure(allocationPlan.structure);
+    const topHierarchyLevelIndex = getTopLevelHierarchyIndexFromAllocationStructure(allocationStructure);
     const aggregatorAllocationMap = new Map<string, FractalPlannedAllocation>();
 
     const fractalAllocationsPerHierarchyLevel = mapFractalAllocationsPerHierarchyLevel(
         allocationsPerHierarchyLevel,
-        allocationPlan,
+        allocationStructure,
         aggregatorAllocationMap,
     );
 
     connectFractalStructure(fractalAllocationsPerHierarchyLevel, aggregatorAllocationMap);
 
     return {
-        subLevel: allocationPlan.structure.hierarchy[topHierarchyLevelIndex],
+        subLevel: allocationStructure.hierarchy[topHierarchyLevelIndex],
         topAllocations: fractalAllocationsPerHierarchyLevel[topHierarchyLevelIndex],
         aggregatorAllocationMap: aggregatorAllocationMap,
     };
@@ -45,7 +48,7 @@ function mapAllocationsPerHierarchyLevel(allocationPlan: AllocationPlan) {
 
         const hierarchyLevelIndex = getHierarchyLevelIndex(allocation);
 
-        if (!allocationsPerHierarchyLevel[hierarchyLevelIndex]) {
+        if(!allocationsPerHierarchyLevel[hierarchyLevelIndex]) {
             allocationsPerHierarchyLevel[hierarchyLevelIndex] = [];
         }
         allocationsPerHierarchyLevel[hierarchyLevelIndex].push(allocation);
@@ -57,14 +60,14 @@ function mapAllocationsPerHierarchyLevel(allocationPlan: AllocationPlan) {
 
 function mapFractalAllocationsPerHierarchyLevel(
     allocationsPerHierarchyLevel: PlannedAllocation[][],
-    allocationPlan: AllocationPlan,
+    allocationStructure: AllocationStructure,
     aggregatorAllocationMap: Map<string, FractalPlannedAllocation>,
 ) {
 
     const fractalAllocationsPerHierarchyLevel: FractalPlannedAllocation[][] = [];
-    const hierachySize = getAllocationHierarchySize(allocationPlan.structure);
+    const hierachySize = getAllocationHierarchySize(allocationStructure);
 
-    for (
+    for(
         let hierarchyLevelIndex = hierachySize - 1;
         hierarchyLevelIndex >= LOWEST_AVAILABLE_HIERARCHY_LEVEL_INDEX;
         hierarchyLevelIndex--
@@ -74,7 +77,7 @@ function mapFractalAllocationsPerHierarchyLevel(
         const allocationsAtCurrentLevel = allocationsPerHierarchyLevel[hierarchyLevelIndex];
 
         mapFractalAllocationsAtHierarchyLevel(
-            allocationPlan.structure.hierarchy,
+            allocationStructure.hierarchy,
             hierarchyLevelIndex,
             allocationsAtCurrentLevel,
             fractalAllocationsPerHierarchyLevel,
@@ -109,7 +112,7 @@ function mapFractalAllocationsAtHierarchyLevel(
 
         fractalAllocationsPerHierarchyLevel[hierarchyLevelIndex].push(fractalAggregationAllocation);
 
-        if (hierarchyLevelIndex > LOWEST_AVAILABLE_HIERARCHY_LEVEL_INDEX) {
+        if(hierarchyLevelIndex > LOWEST_AVAILABLE_HIERARCHY_LEVEL_INDEX) {
             aggregatorAllocationMap.set(fractalAllocationKey, fractalAggregationAllocation);
         }
     });
@@ -122,7 +125,7 @@ function connectFractalStructure(
 
     const hierachySize = fractalAllocationsPerHierarchyLevel.length;
 
-    for (
+    for(
         let hierarchyLevelIndex = hierachySize - 2; // Top hierarchy level has no upper level
         hierarchyLevelIndex >= LOWEST_AVAILABLE_HIERARCHY_LEVEL_INDEX;
         hierarchyLevelIndex--
@@ -152,7 +155,7 @@ function connectAllocationsToFractalStructure(
         const parentKey = getPlannedAllocationStructuralIdAsString(parentStructuralId);
         const parent = aggregatorAllocationMap.get(parentKey);
 
-        if (!parent) {
+        if(!parent) {
             throw new Error(`Parent not found for allocation ${ allocation.structuralId }`);
         }
 
@@ -162,7 +165,9 @@ function connectAllocationsToFractalStructure(
     });
 }
 
-export function mapToAllocationPlan(allocationPlanDTO: AllocationPlanDTO): AllocationPlan {
+export function mapToAllocationPlan(
+    allocationPlanDTO: AllocationPlanDTO,
+): AllocationPlan {
 
     const allocations = allocationPlanDTO.details.map((allocation) => {
         return {
@@ -171,18 +176,8 @@ export function mapToAllocationPlan(allocationPlanDTO: AllocationPlanDTO): Alloc
         } as PlannedAllocation;
     });
 
-    const structure: AllocationStructure = {
-        hierarchy: allocationPlanDTO.structure.hierarchy.map((hierarchyLevel, index) => {
-            return {
-                ...hierarchyLevel,
-                index,
-            };
-        }),
-    };
-
     return {
         ...allocationPlanDTO,
         details: allocations,
-        structure,
     };
 }

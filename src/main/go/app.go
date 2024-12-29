@@ -59,9 +59,9 @@ func buildAndInjectAppComponents() (*infra.RDBMSAdapter, *infra.GinServer, []inf
 
 	var allocationPlanRepository = repository.BuildAllocationPlanRepository(databaseAdapter)
 	var allocationPlanService = application.BuildAllocationPlanService(allocationPlanRepository)
-	var allocationRESTController = rest.BuildAllocationRESTController(allocationPlanService)
+	var allocationPlanRESTController = rest.BuildAllocationPlanRESTController(allocationPlanService)
 
-	var restControllers = []infra.GinServerRESTController{portfolioRESTController, allocationRESTController}
+	var restControllers = []infra.GinServerRESTController{portfolioRESTController, allocationPlanRESTController}
 
 	return databaseAdapter, server, restControllers
 }

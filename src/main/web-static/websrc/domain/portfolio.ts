@@ -1,4 +1,10 @@
-import { AllocationStructure } from "./allocation";
+import { AllocationStructure, AllocationStructureDTO } from "./allocation";
+
+export type Portfolio = {
+    id: number;
+    name: string;
+    allocationStructure: AllocationStructure;
+};
 
 export type PortfolioAllocation = {
     assetName: string;
@@ -10,7 +16,7 @@ export type PortfolioAllocation = {
 
 export type PortfolioAtTime = {
     timeFrameTag: string;
-    //TODO change property name to allocations with back-end
-    slices: PortfolioAllocation[];
-    structure?: AllocationStructure
+    allocations: PortfolioAllocation[];
 };
+
+export type PortfolioDTO = Omit<Portfolio, "allocationStructure"> & { allocationStructure: AllocationStructureDTO; };

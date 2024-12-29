@@ -1,6 +1,10 @@
 import { MultiChartDataSource } from "../../infra/chart/chart-types";
 import { PortfolioAtTime } from "../../domain/portfolio";
-import { AllocationHierarchyLevel, LOWEST_AVAILABLE_HIERARCHY_LEVEL_INDEX } from "../../domain/allocation";
+import {
+    AllocationHierarchyLevel,
+    AllocationStructure,
+    LOWEST_AVAILABLE_HIERARCHY_LEVEL_INDEX,
+} from "../../domain/allocation";
 import { allocationDomainService } from "../../domain/allocation-service";
 import { AppliedAllocationHierarchyLevel, MappedChartData } from "./portfolio-chart-model";
 import { mapChartData } from "./portfolio-chart-mapping";
@@ -19,12 +23,13 @@ export class FractalPortfolioMultiChartDataSource extends MultiChartDataSource {
     constructor(
         initialChartData: MappedChartData,
         private readonly portfolioAtTime: PortfolioAtTime,
+        private readonly portfolioAllocationStructure: AllocationStructure,
     ) {
 
         const {
             topHierarchyLevel,
             topLevelIndex,
-        } = allocationDomainService.getTopHierarchyLevelInfoFromAllocationStructure(portfolioAtTime.structure);
+        } = allocationDomainService.getTopHierarchyLevelInfoFromAllocationStructure(portfolioAllocationStructure);
 
         const initialDataKey = generateDataKey(topHierarchyLevel.field);
         const chartDataMap = new Map([[initialDataKey, initialChartData]]);
@@ -35,7 +40,7 @@ export class FractalPortfolioMultiChartDataSource extends MultiChartDataSource {
 
     toNextLevel(filteringValue: string | number): string {
 
-        if (this.currentHierarchyLevelIndex === LOWEST_AVAILABLE_HIERARCHY_LEVEL_INDEX) {
+        if(this.currentHierarchyLevelIndex === LOWEST_AVAILABLE_HIERARCHY_LEVEL_INDEX) {
             return;
         }
 
@@ -47,7 +52,7 @@ export class FractalPortfolioMultiChartDataSource extends MultiChartDataSource {
     private movePropertiesToNextLevel(filteringValue: string | number) {
 
         const currentHierarchyLevel = allocationDomainService.getHierarchyLevelFromAllocationStructure(
-            this.portfolioAtTime.structure,
+            this.portfolioAllocationStructure,
             this.currentHierarchyLevelIndex,
         );
 
@@ -63,9 +68,10 @@ export class FractalPortfolioMultiChartDataSource extends MultiChartDataSource {
 
         const dataKey = this.generateDataKey();
 
-        if (!this.chartDataMap.has(dataKey)) {
+        if(!this.chartDataMap.has(dataKey)) {
             const chartData = mapChartData(
                 this.portfolioAtTime,
+                this.portfolioAllocationStructure,
                 this.currentHierarchyLevelIndex,
                 this.appliedHierarchyLevels,
             );
@@ -78,9 +84,9 @@ export class FractalPortfolioMultiChartDataSource extends MultiChartDataSource {
     toPreviousLevel() {
 
         const hierarchyTopLevelIndex =
-            allocationDomainService.getTopLevelHierarchyIndexFromAllocationStructure(this.portfolioAtTime.structure);
+            allocationDomainService.getTopLevelHierarchyIndexFromAllocationStructure(this.portfolioAllocationStructure);
 
-        if (this.currentHierarchyLevelIndex === hierarchyTopLevelIndex) {
+        if(this.currentHierarchyLevelIndex === hierarchyTopLevelIndex) {
             return;
         }
 
@@ -101,7 +107,7 @@ export class FractalPortfolioMultiChartDataSource extends MultiChartDataSource {
 
     public getCurrentHierarchyLevel(): AllocationHierarchyLevel {
         return allocationDomainService.getHierarchyLevelFromAllocationStructure(
-            this.portfolioAtTime.structure,
+            this.portfolioAllocationStructure,
             this.currentHierarchyLevelIndex,
         );
     }
@@ -121,7 +127,7 @@ function generateDataKey(
 
     let dataKey = "";
 
-    if (hierarchicalFilteringProperties && hierarchicalFilteringProperties.length > 0) {
+    if(hierarchicalFilteringProperties && hierarchicalFilteringProperties.length > 0) {
 
         dataKey += "F(";
 

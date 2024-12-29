@@ -3,12 +3,13 @@ import { ActiveElement, Chart, ChartData, ChartEvent } from "chart.js";
 import { allocationDomainService } from "../domain/allocation-service";
 import { changeChartDataOnDatasource } from "../infra/chart/chart-utils";
 import chartModule from "../infra/chart/chart";
-import DomUtils from "../infra/dom-utils";
+import DomUtils from "../infra/dom/dom-utils";
 import {
     AllocationPlanDTO,
     FractalPlannedAllocation,
     FractalPlannedAllocationHierarchy,
 } from "../domain/allocation-plan";
+import { PortfolioDTO } from "../domain/portfolio";
 
 class FractalPlannedAllocationMultiChartDataSource extends MultiChartDataSource {
 
@@ -48,7 +49,7 @@ function mapChildDatasets(fractalHierarchy: FractalPlannedAllocationHierarchy, c
 
         const subAllocations = fractalAllocation.subAllocations;
 
-        if (subAllocations && subAllocations.length > 0) {
+        if(subAllocations && subAllocations.length > 0) {
             mapDataset(fractalAllocation.key, subAllocations, chartDataMap);
         }
     });
@@ -92,7 +93,7 @@ function chartDataSelectionEventHandler(_: ChartEvent, elements: ActiveElement[]
     const { chartContent, chartDataSource } = getChartContent(chart);
     const dataKey = getSelectedDataKey(chartDataSource, dataIndex);
 
-    if (chartDataSource.hasChartData(dataKey)) {
+    if(chartDataSource.hasChartData(dataKey)) {
         changeChartDataOnDatasource(chart, chartContent, dataKey);
     }
 }
@@ -110,10 +111,10 @@ function getSelectedDataKey(chartDataSource: FractalPlannedAllocationMultiChartD
     let dataKey: string;
     const currentAggregator = chartDataSource.getCurrentAggregator();
 
-    if (dataIndex !== null) {
+    if(dataIndex !== null) {
         dataKey = chartDataSource.getSubAllocationKeyByIndex(dataIndex);
     }
-    else if (currentAggregator?.superAllocation) {
+    else if(currentAggregator?.superAllocation) {
         dataKey = currentAggregator.superAllocation.key;
     }
 
@@ -132,7 +133,7 @@ function interactionObserverCallback(event: ChartEvent, elements: ActiveElement[
     const currentFractalAllocationLevelValue = currentAggregator ? "for " + currentAggregator.key : "";
     const levelLabel = currentFractalAllocationLevelName + " " + currentFractalAllocationLevelValue;
 
-    if (event.type === "click") {
+    if(event.type === "click") {
         const labelId = `#hierarchy-level-${ chartId }`;
         DomUtils.queryFirst(labelId).textContent = levelLabel;
     }
@@ -140,13 +141,23 @@ function interactionObserverCallback(event: ChartEvent, elements: ActiveElement[
 
 const allocationPlanChart = {
 
-    toUnidimensionalChartContent(allocationPlanDTO: AllocationPlanDTO): ChartContent {
+    toUnidimensionalChartContent(allocationPlanDTO: AllocationPlanDTO, portfolioDTO: PortfolioDTO): ChartContent {
+
+        const portfolio = allocationDomainService.mapToPortfolio(portfolioDTO);
+        const allocationStructure = portfolio.allocationStructure;
 
         const allocationPlan = allocationDomainService.mapToAllocationPlan(allocationPlanDTO);
-        const fractalHierarchy = allocationDomainService.mapAllocationPlanFractalHierarchy(allocationPlan);
+
+        const fractalHierarchy = allocationDomainService.mapAllocationPlanFractalHierarchy(
+            allocationPlan,
+            allocationStructure,
+        );
 
         const chartDataMap = toChartDataMap(fractalHierarchy);
-        const topLevelKey = allocationDomainService.getTopLevelHierarchyKeyFromAllocationPlan(allocationPlan);
+
+        const topLevelKey = allocationDomainService.getTopLevelHierarchyKeyFromAllocationPlan(
+            allocationStructure,
+        );
 
         const dataSource = new FractalPlannedAllocationMultiChartDataSource(
             chartDataMap,

@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import { AllocationHierarchyLevel, AllocationStructure, AllocationType } from "./allocation";
+import { AllocationHierarchyLevel, AllocationType } from "./allocation";
 
 export type PlannedAllocation = {
     structuralId: string[],
@@ -11,21 +11,13 @@ export type AllocationPlan = {
     id: number;
     name: string;
     type: AllocationType;
-    structure: AllocationStructure,
     plannedExecutionDate?: Date,
     details: PlannedAllocation[],
 };
 
 export type PlannedAllocationDTO = Omit<PlannedAllocation, "sliceSizePercentage"> & { sliceSizePercentage: string, };
 
-export type AllocationPlanDTO = Omit<AllocationPlan, "details" | "structure"> & {
-    details: PlannedAllocationDTO[],
-    structure: AllocationPlanStructureDTO,
-};
-
-export type AllocationPlanHierarchyLevelDTO = Omit<AllocationHierarchyLevel, "index">;
-
-export type AllocationPlanStructureDTO = { hierarchy: AllocationPlanHierarchyLevelDTO[]; };
+export type AllocationPlanDTO = Omit<AllocationPlan, "details"> & { details: PlannedAllocationDTO[], };
 
 export type FractalPlannedAllocation = {
     key: string;
