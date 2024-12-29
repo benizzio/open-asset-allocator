@@ -9,11 +9,11 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-type AllocationPlanUnitJoinedRow struct {
+type PlannedAllocationJoinedRow struct {
 	AllocationPlanId     int
 	Name                 string
 	Type                 allocation.PlanType
-	Structure            domain.AllocationPlanStructure
+	Structure            domain.AllocationStructure
 	PlannedExecutionDate sqlext.NullTime
 	StructuralId         sqlext.NullStringSlice
 	CashReserve          bool
@@ -53,7 +53,7 @@ func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlans(planType 
 		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "Error querying allocation plans", repository)
 	}
 
-	var refs, err2 = repository.mapAllocationPlanUnitRows(result)
+	var refs, err2 = repository.mapPlannedAllocationRows(result)
 	var vals []*domain.AllocationPlan
 	for _, ref := range refs {
 		vals = append(vals, ref)
@@ -61,7 +61,7 @@ func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlans(planType 
 	return vals, err2
 }
 
-func (repository *AllocationPlanRDBMSRepository) mapAllocationPlanUnitRows(rows *dbx.Rows) (
+func (repository *AllocationPlanRDBMSRepository) mapPlannedAllocationRows(rows *dbx.Rows) (
 	[]*domain.AllocationPlan,
 	error,
 ) {
@@ -93,7 +93,7 @@ func (repository *AllocationPlanRDBMSRepository) mapRow(
 		return nil, err
 	}
 
-	allocationPlanUnit := mapUnitFromRow(row)
+	allocationPlanUnit := mapPlannedAllocationFromRow(row)
 
 	if cachedAllocationPlan, exists := allocationPlanCacheMap[row.AllocationPlanId]; exists {
 		cachedAllocationPlan.AddDetail(allocationPlanUnit)
@@ -108,9 +108,9 @@ func (repository *AllocationPlanRDBMSRepository) mapRow(
 
 func (repository *AllocationPlanRDBMSRepository) scanRow(
 	rows *dbx.Rows,
-) (*AllocationPlanUnitJoinedRow, error) {
+) (*PlannedAllocationJoinedRow, error) {
 
-	var row AllocationPlanUnitJoinedRow
+	var row PlannedAllocationJoinedRow
 	err := rows.ScanStruct(&row)
 
 	if err != nil {
@@ -124,8 +124,8 @@ func (repository *AllocationPlanRDBMSRepository) scanRow(
 }
 
 func mapPlanFromRow(
-	row *AllocationPlanUnitJoinedRow,
-	allocationPlanUnit *domain.AllocationPlanUnit,
+	row *PlannedAllocationJoinedRow,
+	plannedAllocation *domain.PlannedAllocation,
 ) domain.AllocationPlan {
 
 	var allocationPlan = domain.AllocationPlan{
@@ -135,13 +135,13 @@ func mapPlanFromRow(
 		Structure:            row.Structure,
 		PlannedExecutionDate: row.PlannedExecutionDate.ToTimeReference(),
 	}
-	allocationPlan.AddDetail(allocationPlanUnit)
+	allocationPlan.AddDetail(plannedAllocation)
 
 	return allocationPlan
 }
 
-func mapUnitFromRow(row *AllocationPlanUnitJoinedRow) *domain.AllocationPlanUnit {
-	return &domain.AllocationPlanUnit{
+func mapPlannedAllocationFromRow(row *PlannedAllocationJoinedRow) *domain.PlannedAllocation {
+	return &domain.PlannedAllocation{
 		StructuralId:        row.StructuralId.ToStringSlice(),
 		CashReserve:         row.CashReserve,
 		SliceSizePercentage: row.SliceSizePercentage,

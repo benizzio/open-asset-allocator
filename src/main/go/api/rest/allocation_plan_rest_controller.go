@@ -9,11 +9,11 @@ import (
 	"net/http"
 )
 
-type AllocationRESTController struct {
+type AllocationPlanRESTController struct {
 	allocationPlanService *application.AllocationPlanService
 }
 
-func (controller *AllocationRESTController) BuildRoutes() []infra.RESTRoute {
+func (controller *AllocationPlanRESTController) BuildRoutes() []infra.RESTRoute {
 	return []infra.RESTRoute{
 		{
 			Method:   http.MethodGet,
@@ -23,7 +23,7 @@ func (controller *AllocationRESTController) BuildRoutes() []infra.RESTRoute {
 	}
 }
 
-func (controller *AllocationRESTController) getAllocationPlans(context *gin.Context) {
+func (controller *AllocationPlanRESTController) getAllocationPlans(context *gin.Context) {
 
 	planTypeRef, success := getQueryParams(context)
 	if !success {
@@ -62,6 +62,6 @@ func getPlanTypeRef(context *gin.Context, planTypeParam string) (
 	return planTypeRef, true
 }
 
-func BuildAllocationRESTController(allocationPlanService *application.AllocationPlanService) *AllocationRESTController {
-	return &AllocationRESTController{allocationPlanService}
+func BuildAllocationPlanRESTController(allocationPlanService *application.AllocationPlanService) *AllocationPlanRESTController {
+	return &AllocationPlanRESTController{allocationPlanService}
 }
