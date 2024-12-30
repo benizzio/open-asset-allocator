@@ -27,7 +27,7 @@ type AllocationPlanRDBMSRepository struct {
 func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlans(planType *allocation.PlanType) (
 	[]*domain.AllocationPlan,
 	error,
-) {
+) { //TODO change table names according to new entity names
 	var query = `
 		SELECT 
 		    ap.id as allocation_plan_id,
