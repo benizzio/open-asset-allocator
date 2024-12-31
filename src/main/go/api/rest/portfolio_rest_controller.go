@@ -17,14 +17,15 @@ func (controller *PortfolioRESTController) BuildRoutes() []infra.RESTRoute {
 		{
 			Method:   http.MethodGet,
 			Path:     "/api/portfolio/history",
-			Handlers: gin.HandlersChain{controller.getPortfolioHistory},
+			Handlers: gin.HandlersChain{controller.getPortfolioAllocationHistory},
 		},
 	}
 }
 
-func (controller *PortfolioRESTController) getPortfolioHistory(context *gin.Context) {
+// TODO has to be selected on the context of a portfolio
+func (controller *PortfolioRESTController) getPortfolioAllocationHistory(context *gin.Context) {
 
-	portfolioHistory, err := controller.portfolioHistoryService.GetPortfolioHistory()
+	portfolioHistory, err := controller.portfolioHistoryService.GetPortfolioAllocationHistory()
 	if infra.HandleAPIError(context, "Error getting portfolio history", err) {
 		return
 	}

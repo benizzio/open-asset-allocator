@@ -2,7 +2,7 @@ package domain
 
 type TimeFrameTag string
 
-type PortfolioSliceAtTime struct {
+type PortfolioAllocation struct {
 	Asset            Asset
 	Class            string
 	CashReserve      bool
@@ -11,5 +11,5 @@ type PortfolioSliceAtTime struct {
 }
 
 type PortfolioRepository interface {
-	GetAllPortfolioSlices(limit int) ([]PortfolioSliceAtTime, error)
+	GetAllPortfolioAllocations(limit int) ([]PortfolioAllocation, error)
 }

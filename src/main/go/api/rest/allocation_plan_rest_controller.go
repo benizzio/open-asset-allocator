@@ -23,6 +23,7 @@ func (controller *AllocationPlanRESTController) BuildRoutes() []infra.RESTRoute 
 	}
 }
 
+// TODO has to be selected on the context of a portfolio
 func (controller *AllocationPlanRESTController) getAllocationPlans(context *gin.Context) {
 
 	planTypeRef, success := getQueryParams(context)

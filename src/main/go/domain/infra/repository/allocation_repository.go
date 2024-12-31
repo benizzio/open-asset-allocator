@@ -10,9 +10,10 @@ import (
 )
 
 type PlannedAllocationJoinedRow struct {
-	AllocationPlanId     int
-	Name                 string
-	Type                 allocation.PlanType
+	AllocationPlanId int
+	Name             string
+	Type             allocation.PlanType
+	//Deprecated: Must be replaced by real structure on portfolio
 	Structure            domain.AllocationStructure
 	PlannedExecutionDate sqlext.NullTime
 	StructuralId         sqlext.NullStringSlice
@@ -27,19 +28,20 @@ type AllocationPlanRDBMSRepository struct {
 func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlans(planType *allocation.PlanType) (
 	[]*domain.AllocationPlan,
 	error,
-) { //TODO change table names according to new entity names
+) {
 	var query = `
 		SELECT 
 		    ap.id as allocation_plan_id,
 		    ap.name, 
 		    ap.type, 
-		    ap.structure, 
+		    -- TODO replace by real structure on portfolio
+		    (SELECT allocation_structure FROM portfolio WHERE id = ap.portfolio_id) as structure, 
 		    ap.planned_execution_date, 
-		    apu.structural_id, 
-		    apu.cash_reserve, 
-		    apu.slice_size_percentage
-		FROM allocation_plan_unit apu 
-		JOIN allocation_plan ap ON apu.allocation_plan_id = ap.id
+		    pa.structural_id, 
+		    pa.cash_reserve, 
+		    pa.slice_size_percentage
+		FROM planned_allocation pa 
+		JOIN allocation_plan ap ON pa.allocation_plan_id = ap.id
 		/*WHERE+PARAMS*/
 	`
 

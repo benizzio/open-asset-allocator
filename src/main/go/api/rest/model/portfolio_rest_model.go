@@ -52,13 +52,13 @@ func (aggregationMap portfolioSlicesPerTimeFrameMap) getAggregatedMarketValue(ti
 // MAPPING FUNCTIONS
 // ================================================
 
-func AggregateAndMapPortfolioHistory(portfolioHistory []domain.PortfolioSliceAtTime) []PortfolioAtTimeDTS {
+func AggregateAndMapPortfolioHistory(portfolioHistory []domain.PortfolioAllocation) []PortfolioAtTimeDTS {
 	portfolioSlicesPerTimeFrame := aggregateHistoryAsDTSMap(portfolioHistory)
 	aggregatedPortfoliohistory := buildHistoryDTS(portfolioSlicesPerTimeFrame)
 	return aggregatedPortfoliohistory
 }
 
-func aggregateHistoryAsDTSMap(portfolioHistory []domain.PortfolioSliceAtTime) portfolioSlicesPerTimeFrameMap {
+func aggregateHistoryAsDTSMap(portfolioHistory []domain.PortfolioAllocation) portfolioSlicesPerTimeFrameMap {
 
 	var portfolioSlicesPerTimeFrame = make(portfolioSlicesPerTimeFrameMap)
 	for _, portfolioSlice := range portfolioHistory {
@@ -70,7 +70,7 @@ func aggregateHistoryAsDTSMap(portfolioHistory []domain.PortfolioSliceAtTime) po
 	return portfolioSlicesPerTimeFrame
 }
 
-func sliceAtTimeToSliceDTS(portfolioSlice domain.PortfolioSliceAtTime) PortfolioSliceDTS {
+func sliceAtTimeToSliceDTS(portfolioSlice domain.PortfolioAllocation) PortfolioSliceDTS {
 	return PortfolioSliceDTS{
 		AssetName:        portfolioSlice.Asset.Name,
 		AssetTicker:      portfolioSlice.Asset.Ticker,
