@@ -6,6 +6,12 @@ import "github.com/benizzio/open-asset-allocator/domain"
 // TYPES
 // ================================================
 
+type PortfolioDTS struct {
+	Id                  int                    `json:"id"`
+	Name                string                 `json:"name"`
+	AllocationStructure AllocationStructureDTS `json:"allocationStructure"`
+}
+
 type PortfolioSliceDTS struct {
 	AssetName        string `json:"assetName"`
 	AssetTicker      string `json:"assetTicker"`
@@ -51,6 +57,25 @@ func (aggregationMap portfolioSlicesPerTimeFrameMap) getAggregatedMarketValue(ti
 // ================================================
 // MAPPING FUNCTIONS
 // ================================================
+
+func MapPortfolios(portfolios []domain.Portfolio) []PortfolioDTS {
+	var portfoliosDTS = make([]PortfolioDTS, 0)
+	for _, portfolio := range portfolios {
+		var portfolioDTS = mapPortfolio(portfolio)
+		portfoliosDTS = append(portfoliosDTS, *portfolioDTS)
+	}
+	return portfoliosDTS
+}
+
+func mapPortfolio(portfolio domain.Portfolio) *PortfolioDTS {
+	var structure = mapAllocationStructure(portfolio.AllocationStructure)
+	var portfolioDTS = PortfolioDTS{
+		Id:                  portfolio.Id,
+		Name:                portfolio.Name,
+		AllocationStructure: structure,
+	}
+	return &portfolioDTS
+}
 
 func AggregateAndMapPortfolioHistory(portfolioHistory []domain.PortfolioAllocation) []PortfolioAtTimeDTS {
 	portfolioSlicesPerTimeFrame := aggregateHistoryAsDTSMap(portfolioHistory)

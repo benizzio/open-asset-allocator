@@ -16,10 +16,27 @@ func (controller *PortfolioRESTController) BuildRoutes() []infra.RESTRoute {
 	return []infra.RESTRoute{
 		{
 			Method:   http.MethodGet,
+			Path:     "/api/portfolio",
+			Handlers: gin.HandlersChain{controller.getPortfolios},
+		},
+		{
+			Method:   http.MethodGet,
 			Path:     "/api/portfolio/history",
 			Handlers: gin.HandlersChain{controller.getPortfolioAllocationHistory},
 		},
 	}
+}
+
+func (controller *PortfolioRESTController) getPortfolios(context *gin.Context) {
+
+	portfolios, err := controller.portfolioHistoryService.GetPortfolios()
+	if infra.HandleAPIError(context, "Error getting portfolios", err) {
+		return
+	}
+
+	portfolioDTSs := model.MapPortfolios(portfolios)
+
+	context.IndentedJSON(http.StatusOK, portfolioDTSs)
 }
 
 // TODO has to be selected on the context of a portfolio

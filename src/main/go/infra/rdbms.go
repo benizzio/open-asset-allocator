@@ -30,7 +30,7 @@ func (executor *QueryExecutor) FindInto(target any) error {
 	return executor.query.All(target)
 }
 
-func (executor *QueryExecutor) FetchInto(target any) error {
+func (executor *QueryExecutor) GetInto(target any) error {
 	return executor.query.One(target)
 }
 

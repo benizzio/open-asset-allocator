@@ -21,10 +21,24 @@ const (
 
 const (
 	queryAllocationsError = "Error querying portfolio allocations"
+	queryPortfoliosError  = "Error querying portfolios"
 )
 
 type PortfolioRDBMSRepository struct {
 	dbAdapter *infra.RDBMSAdapter
+}
+
+func (repository *PortfolioRDBMSRepository) GetAllPortfolios() ([]domain.Portfolio, error) {
+
+	var query = `
+		SELECT p.id, p.name, p.allocation_structure
+		FROM portfolio p
+	`
+
+	var result []domain.Portfolio
+	err := repository.dbAdapter.BuildQuery(query).Build().FindInto(&result)
+
+	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryPortfoliosError, repository)
 }
 
 func (repository *PortfolioRDBMSRepository) GetAllPortfolioAllocations(timeFrameLimit int) (

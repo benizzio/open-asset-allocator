@@ -8,6 +8,10 @@ type PortfolioHistoryService struct {
 	portfolioRepository domain.PortfolioRepository
 }
 
+func (service *PortfolioHistoryService) GetPortfolios() ([]domain.Portfolio, error) {
+	return service.portfolioRepository.GetAllPortfolios()
+}
+
 func (service *PortfolioHistoryService) GetPortfolioAllocationHistory() ([]domain.PortfolioAllocation, error) {
 	return service.portfolioRepository.GetAllPortfolioAllocations(10)
 }

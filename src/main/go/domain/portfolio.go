@@ -10,6 +10,13 @@ type PortfolioAllocation struct {
 	TotalMarketValue int
 }
 
+type Portfolio struct {
+	Id                  int
+	Name                string
+	AllocationStructure AllocationStructure
+}
+
 type PortfolioRepository interface {
+	GetAllPortfolios() ([]Portfolio, error)
 	GetAllPortfolioAllocations(limit int) ([]PortfolioAllocation, error)
 }
