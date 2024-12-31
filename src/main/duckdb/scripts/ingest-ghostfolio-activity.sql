@@ -102,28 +102,12 @@ CREATE TEMP VIEW yahoo_asset_list AS
 -- SELECT * FROM yahoo_asset_list;
 
 .print '=> Creating temporary table and view for market data from Yahoo'
--- function "yahoo_finance" does not accept dynamic values, constant for now
+SET VARIABLE yahoo_ticker_list = (SELECT LIST(yahoo_ticker) FROM yahoo_asset_list);
+
 CREATE TEMP TABLE yahoo_finance_data AS
     SELECT symbol, Date[2] as last_date, Close[2] as last_close
     FROM yahoo_finance(
-        [
-            "SOL-USD",
-            "UNI7083-USD",
-            "LINK-USD",
-            "MANA-USD",
-            "BTC-USD",
-            "ETH-USD",
-            "XRP-USD",
-            "AXS-USD",
-            "USDC-USD",
-            "LTC-USD",
-            "XTZ-USD",
-            "XLM-USD",
-            "SAND-USD",
-            "AUDIO-USD",
-            "MATIC-USD",
-            "MKR-USD"
-        ],
+        getvariable('yahoo_ticker_list'),
         (current_date() - INTERVAL 1 DAY)::DATE,
         current_date(),
         "1d"
@@ -140,7 +124,8 @@ CREATE TEMP VIEW yahoo_current_asset_price AS
 .print '=> Reading and registering (upserting) market data from Yahoo'
 INSERT INTO pgsql.asset_price_market_data (asset_data_source_id, market_date, market_close_price)
     SELECT ycap.asset_data_source_id, ycap.market_date, ycap.close_price FROM yahoo_current_asset_price ycap
-    LEFT JOIN pgsql.asset_price_market_data apmd ON apmd.asset_data_source_id = ycap.asset_data_source_id AND apmd.market_date = ycap.market_date
+    LEFT JOIN pgsql.asset_price_market_data apmd
+        ON apmd.asset_data_source_id = ycap.asset_data_source_id AND apmd.market_date = ycap.market_date
     WHERE apmd.asset_data_source_id IS NULL
 ;
 
@@ -193,11 +178,10 @@ INSERT INTO ghostf_symbol_aggegation
     |)
 ;
 
--- TODO to debug, remove?
-select * from ghostf_symbol_aggegation;
+SELECT * FROM ghostf_symbol_aggegation;
 
-.print '=> Creating temporary view for asset value fact insertion'
-CREATE TEMP VIEW asset_value_fact_insertion AS
+.print '=> Creating temporary view for portfolio allocation fact insertion'
+CREATE TEMP VIEW portfolio_allocation_fact_insertion AS
     SELECT
         aplmd.asset_id,
         gsa.class,
@@ -205,30 +189,39 @@ CREATE TEMP VIEW asset_value_fact_insertion AS
         gsa.total_quantity AS asset_quantity,
         aplmd.market_close_price AS asset_market_price,
         gsa.total_quantity::DECIMAL(30,8) * aplmd.market_close_price::DECIMAL(30,8) AS total_market_value,
-        extract('year' FROM current_date) || lpad(extract('month' FROM current_date)::text, 2, '0') as time_frame_tag
+        extract('year' FROM current_date) || lpad(extract('month' FROM current_date)::text, 2, '0') as time_frame_tag,
+        getenv('PORTFOLIO_ID')::INTEGER AS portfolio_id
     FROM ghostf_symbol_aggegation gsa
     LEFT JOIN pgsql.asset_price_last_market_data aplmd ON gsa.symbol = aplmd.ticker
     JOIN pgsql.asset ass ON aplmd.asset_id = ass.id
     WHERE aplmd.data_source = 'YAHOO'
 ;
 
--- TODO to debug, remove?
-select * from asset_value_fact_insertion;
+SELECT * FROM portfolio_allocation_fact_insertion;
 
 -- TODO insert current asset position based on last prices
 .print '=> Inserting portfolio data in the asset fact table'
 -- Has to fail when the asset dimension data is missing to indicate that file is broken and needs more data
-INSERT INTO pgsql.asset_value_fact (
+INSERT INTO pgsql.portfolio_allocation_fact (
         asset_id,
         class,
         cash_reserve,
         asset_quantity,
         asset_market_price,
         total_market_value,
-        time_frame_tag
+        time_frame_tag,
+        portfolio_id
     )
-    SELECT asset_id, class, cash_reserve, asset_quantity, asset_market_price, total_market_value, time_frame_tag
-    FROM asset_value_fact_insertion
+    SELECT
+        asset_id,
+        class,
+        cash_reserve,
+        asset_quantity,
+        asset_market_price,
+        total_market_value,
+        time_frame_tag,
+        portfolio_id
+    FROM portfolio_allocation_fact_insertion
 ;
 
 COMMIT;
@@ -236,5 +229,5 @@ COMMIT;
 -- .print '===> DEBUGGING'
 -- .print 'asset table'
 -- SELECT * FROM pgsql.asset;
--- .print 'asset_value_fact table'
--- SELECT * FROM pgsql.asset_value_fact;
+-- .print 'portfolio_allocation_fact table'
+-- SELECT * FROM pgsql.portfolio_allocation_fact;
