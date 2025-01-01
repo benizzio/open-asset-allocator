@@ -20,7 +20,8 @@ func (controller *PortfolioRESTController) BuildRoutes() []infra.RESTRoute {
 			Handlers: gin.HandlersChain{controller.getPortfolios},
 		},
 		{
-			Method:   http.MethodGet,
+			Method: http.MethodGet,
+			//TODO change to /api/portfolio/{portfolioId}/history and handle parameter
 			Path:     "/api/portfolio/history",
 			Handlers: gin.HandlersChain{controller.getPortfolioAllocationHistory},
 		},

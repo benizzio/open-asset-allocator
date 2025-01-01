@@ -3,6 +3,7 @@ import * as bootstrap from "bootstrap";
 import router from "./infra/routing/router";
 import chart from "./infra/chart/chart";
 import { handlebars } from "./infra/handlebars/handlebars";
+import { htmxInfra } from "./infra/htmx";
 
 //eslint-disable-next-line
 const browserGlobal = (window as any);
@@ -13,7 +14,9 @@ browserGlobal.chart = chart;
 
 const onPageLoad = () => {
     router.init();
+    htmxInfra.init();
 };
 document.addEventListener("DOMContentLoaded", onPageLoad);
+
 
 export default { clientSideTemplates, bootstrap };

@@ -16,7 +16,8 @@ type AllocationPlanRESTController struct {
 func (controller *AllocationPlanRESTController) BuildRoutes() []infra.RESTRoute {
 	return []infra.RESTRoute{
 		{
-			Method:   http.MethodGet,
+			Method: http.MethodGet,
+			//TODO change to /api/portfolio/{portfolioId}/allocation/plan and handle parameter
 			Path:     "/api/allocation/plan",
 			Handlers: gin.HandlersChain{controller.getAllocationPlans},
 		},

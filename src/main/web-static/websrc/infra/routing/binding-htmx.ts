@@ -1,13 +1,13 @@
+import htmx from "htmx.org";
+import DomUtils from "../dom-utils";
+import { logger, LogLevel } from "../logging";
+import { navigoRouter } from "./routing-navigo";
+
 // =============================================================================
 // HTMX EVENT ON ROUTE
 // triggers a custom HTMX event when a route is navigated to
 // attribute value format is "route:event"
 // =============================================================================
-
-import htmx from "htmx.org";
-import DomUtils from "../dom-utils";
-import { logger, LogLevel } from "../logging";
-import { navigoRouter } from "./routing-navigo";
 
 const HTMX_EVENT_ON_ROUTE_ATTRIBUTE = "data-htmx-event-on-route";
 const HTMX_EVENT_ON_ROUTE_BOUND_FLAG = "htmx-event-on-route-bound";
@@ -48,6 +48,6 @@ function bindRouteToHTMXEventOnElements(htmxRoutedElements: NodeListOf<HTMLEleme
 }
 
 export function bindHTMXEventOnRouteInDescendants(element: HTMLElement) {
-    const htmxRoutedElements = DomUtils.queryAllInDescendants(element, `[${HTMX_EVENT_ON_ROUTE_ATTRIBUTE}]`);
+    const htmxRoutedElements = DomUtils.queryAllInDescendants(element, `[${ HTMX_EVENT_ON_ROUTE_ATTRIBUTE }]`);
     bindRouteToHTMXEventOnElements(htmxRoutedElements);
 }
