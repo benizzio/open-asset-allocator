@@ -17,11 +17,16 @@ const (
 		WHERE pa.time_frame_tag IN (SELECT time_frame_tag FROM time_frame_tags)
 		ORDER BY pa.time_frame_tag DESC, pa.class ASC, pa.cash_reserve DESC, ass.ticker ASC
 	`
+	getPortfoliosSQL = `
+		SELECT p.id, p.name, p.allocation_structure
+		FROM portfolio p
+	`
 )
 
 const (
 	queryAllocationsError = "Error querying portfolio allocations"
 	queryPortfoliosError  = "Error querying portfolios"
+	queryPortfolioError   = "Error querying single portfolio"
 )
 
 type PortfolioRDBMSRepository struct {
@@ -30,15 +35,22 @@ type PortfolioRDBMSRepository struct {
 
 func (repository *PortfolioRDBMSRepository) GetAllPortfolios() ([]domain.Portfolio, error) {
 
-	var query = `
-		SELECT p.id, p.name, p.allocation_structure
-		FROM portfolio p
-	`
-
 	var result []domain.Portfolio
-	err := repository.dbAdapter.BuildQuery(query).Build().FindInto(&result)
+	err := repository.dbAdapter.BuildQuery(getPortfoliosSQL).Build().FindInto(&result)
 
 	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryPortfoliosError, repository)
+}
+
+func (repository *PortfolioRDBMSRepository) GetPortfolio(id int) (domain.Portfolio, error) {
+
+	var query = getPortfoliosSQL + `
+		WHERE p.id = {:id}
+	`
+
+	var result domain.Portfolio
+	err := repository.dbAdapter.BuildQuery(query).AddParam("id", id).Build().GetInto(&result)
+
+	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryPortfolioError, repository)
 }
 
 func (repository *PortfolioRDBMSRepository) GetAllPortfolioAllocations(timeFrameLimit int) (

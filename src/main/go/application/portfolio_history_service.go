@@ -12,6 +12,10 @@ func (service *PortfolioHistoryService) GetPortfolios() ([]domain.Portfolio, err
 	return service.portfolioRepository.GetAllPortfolios()
 }
 
+func (service *PortfolioHistoryService) GetPortfolio(id int) (domain.Portfolio, error) {
+	return service.portfolioRepository.GetPortfolio(id)
+}
+
 func (service *PortfolioHistoryService) GetPortfolioAllocationHistory() ([]domain.PortfolioAllocation, error) {
 	return service.portfolioRepository.GetAllPortfolioAllocations(10)
 }

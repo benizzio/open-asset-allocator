@@ -18,5 +18,6 @@ type Portfolio struct {
 
 type PortfolioRepository interface {
 	GetAllPortfolios() ([]Portfolio, error)
+	GetPortfolio(id int) (Portfolio, error)
 	GetAllPortfolioAllocations(limit int) ([]PortfolioAllocation, error)
 }

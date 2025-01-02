@@ -6,6 +6,7 @@ import (
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 
 type PortfolioRESTController struct {
@@ -20,8 +21,13 @@ func (controller *PortfolioRESTController) BuildRoutes() []infra.RESTRoute {
 			Handlers: gin.HandlersChain{controller.getPortfolios},
 		},
 		{
+			Method:   http.MethodGet,
+			Path:     "/api/portfolio/:portfolioId",
+			Handlers: gin.HandlersChain{controller.getPortfolio},
+		},
+		{
 			Method: http.MethodGet,
-			//TODO change to /api/portfolio/{portfolioId}/history and handle parameter
+			//TODO change to /api/portfolio/:portfolioId/history and handle parameter
 			Path:     "/api/portfolio/history",
 			Handlers: gin.HandlersChain{controller.getPortfolioAllocationHistory},
 		},
@@ -38,6 +44,24 @@ func (controller *PortfolioRESTController) getPortfolios(context *gin.Context) {
 	portfolioDTSs := model.MapPortfolios(portfolios)
 
 	context.IndentedJSON(http.StatusOK, portfolioDTSs)
+}
+
+func (controller *PortfolioRESTController) getPortfolio(context *gin.Context) {
+
+	var portfolioIdParam = context.Param("portfolioId")
+	portfolioId, err := strconv.Atoi(portfolioIdParam)
+	if infra.HandleAPIError(context, "Error getting portfolioId url parameter", err) {
+		return
+	}
+
+	portfolio, err := controller.portfolioHistoryService.GetPortfolio(portfolioId)
+	if infra.HandleAPIError(context, "Error getting portfolio", err) {
+		return
+	}
+
+	portfolioDTS := model.MapPortfolio(portfolio)
+
+	context.IndentedJSON(http.StatusOK, portfolioDTS)
 }
 
 // TODO has to be selected on the context of a portfolio
