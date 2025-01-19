@@ -6,6 +6,9 @@
   - DIVERGENCE: last portfolio history from a timeframe, select a allocation plan to analyze
     - show divergent value in currency units
     - show divergent value in percentage
+    - Endpoint
+      - `GET /api/portfolio/:portfolioId/divergence/:timeFrameTag/plan/:planId`
+        - returns full divergence analysis in fractal hierachy
   - CONVERGENCE: create from mapped DIVERGENCE?
     - line for each divergent record 
     - field for how much to value to move and to what asset
