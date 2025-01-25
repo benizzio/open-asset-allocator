@@ -15,4 +15,18 @@ export function registerHandlebarsLangHelpers() {
             <script id="${ id }" type="application/json">${ JSON.stringify(object) }</script>
         `;
     });
+
+    handlebars.registerHelper("repeater", function(text: unknown, count: number, prefix: string, suffix: string) {
+        if(count <= 0) {
+            return "";
+        }
+        let result = String(text).repeat(count);
+        result = prefix ? prefix + result : result;
+        result = suffix ? result + suffix : result;
+        return result;
+    });
+
+    handlebars.registerHelper("stringify", function(object: object) {
+        return JSON.stringify(object);
+    });
 }

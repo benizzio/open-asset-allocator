@@ -6,11 +6,7 @@ import { bindAttributeOnRouteInDescendants } from "./binding-dom-attribute-on-ro
 const router = {
     init() {
         router.bindDocumentToRouting();
-        // router.initNavigoOnBrowserRoute();
     },
-    // initNavigoOnBrowserRoute() {
-    //     navigoRouter.resolve();
-    // },
     bindDescendants(element: HTMLElement) {
         bindHTMXTriggerOnRouteInDescendants(element);
         bindNavigateToInDescendants(element);

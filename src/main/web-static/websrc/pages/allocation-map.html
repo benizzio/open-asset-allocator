@@ -1,0 +1,183 @@
+<div class="accordion"
+     id="accordion-allocation-map"
+     handlebars-template="template-allocation-map"
+     hx-get="/api/portfolio/:portfolioId/divergence/options"
+     hx-trigger="load"
+     hx-include="[name='portfolioId']"
+>
+    <div class="accordion-item placeholder-glow">
+        <h2 class="accordion-header placeholder col-12">placeholder</h2>
+    </div>
+    <div class="accordion-item placeholder-glow">
+        <h2 class="accordion-header placeholder col-12">placeholder</h2>
+    </div>
+</div>
+
+<script id="template-allocation-map" type="text/x-handlebars-template">
+
+    {{#each availableHistory}}
+        <div class="accordion-item">
+
+            <h2 class="accordion-header">
+                <button class="accordion-button"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#{{this}}-allocation-map-container"
+                        aria-expanded="true"
+                        aria-controls="{{this}}-allocation-map-container"
+                >
+                    {{this}}
+                </button>
+            </h2>
+
+            <div id="{{this}}-allocation-map-container"
+                 class="accordion-collapse collapse show"
+                 data-bs-parent="#accordion-allocation-map"
+            >
+                <div class="accordion-body row justify-content-center">
+
+                    <div class="col-12 d-flex flex-column align-items-center">
+                        <div class="d-flex flex-row ">
+                            <label class="mx-1">
+                                <select class="form-select" name="{{this}}PlanDivercence">
+                                    <option value="0" selected>Choose an allocation plan</option>
+                                    {{#each ../availablePlans}}
+                                        <option value="{{this.id}}">{{this.name}}</option>
+                                    {{/each}}
+                                </select>
+                            </label>
+                            <button type="button" class="btn btn-primary mx-1"
+                                    onclick="selectDivergenceOptions('{{this}}PlanDivercence', 'divergence-analysis-container-{{this}}')"
+                            >
+                                <span class="bi bi-bar-chart-steps"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="divergence-analysis-container-{{this}}"
+                         class="col-12 table-responsive"
+                         handlebars-template="template-divergence-analysis"
+                         hx-get="/api/portfolio/:portfolioId/divergence/{{this}}/allocation-plan/:{{this}}PlanDivercence"
+                         hx-include="[name='portfolioId'],[name='{{this}}PlanDivercence']"
+                         hx-trigger="generate-divergence-analysis"
+                    >
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    {{/each}}
+
+</script>
+
+<script id="template-divergence-analysis" type="text/x-handlebars-template">
+    <table class="table align-middle caption-top">
+        <caption>Total market value: {{formatCurrency portfolioTotalMarketValue}}</caption>
+        <thead>
+        <tr>
+            <th scope="col">Unit</th>
+            <th scope="col">Total market value</th>
+            <th scope="col">Planned market value</th>
+            <th scope="col" colspan="2">Divergence</th>
+        </tr>
+        </thead>
+        <tbody class="table-group-divider">
+        {{#each root}}
+            {{> template-divergence-analysis-table-row upperMarketValue=../portfolioTotalMarketValue}}
+        {{/each}}
+        </tbody>
+    </table>
+</script>
+
+<script id="template-divergence-analysis-table-row" type="text/x-handlebars-template">
+    <tr {{#if upperLevelKey}} class="collapse" id="{{upperLevelKey}}-internal-divergences" {{/if}}>
+        <td>
+            {{{repeater "&nbsp;&nbsp;&nbsp;&nbsp;" depth "" ""}}}
+            {{#if internalDivergences}}
+                <span class="badge text-bg-primary"
+                      data-bs-toggle="collapse"
+                      data-bs-target="#{{hierarchyLevelKey}}-internal-divergences"
+                ><span class="bi bi-arrow-90deg-down"></span>
+            </span>
+            {{else}}
+                <span class='bi bi-arrow-return-right'></span>
+            {{/if}}
+            <span>{{hierarchyLevelKey}}</span>
+        </td>
+        <td>
+            {{{repeater "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" depth "" ""}}}
+            {{divergenceVisualization upperMarketValue this "totalMarketValue"}}
+        </td>
+        <td>
+            {{{repeater "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" depth "" ""}}}
+            {{divergenceVisualization upperMarketValue this "plannedMarketValue"}}
+        </td>
+        <td>
+            {{{repeater "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" depth "" ""}}}
+            {{divergenceVisualization upperMarketValue this "divergence"}}
+        </td>
+        <td class="col-2">
+            {{{divergenceVisualization upperMarketValue this "divergenceBar"}}}
+        </td>
+    </tr>
+    {{#if internalDivergences}}
+        {{#each internalDivergences}}
+            {{> template-divergence-analysis-table-row upperMarketValue=../totalMarketValue upperLevelKey=../hierarchyLevelKey}}
+        {{/each}}
+    {{/if}}
+</script>
+
+<script type="text/javascript">
+
+    initComponent();
+
+    function initComponent() {
+        registerRecursiveRowTemplatePartial();
+    }
+
+    const allocationMapContainerElement = document.querySelector('#accordion-allocation-map');
+
+    function registerRecursiveRowTemplatePartial() {
+
+        const tableRowPartialId = 'template-divergence-analysis-table-row';
+        const divergenceAnalysisTableRowHTML = document.querySelector('#template-divergence-analysis-table-row').innerHTML;
+        Handlebars.registerPartial(tableRowPartialId, divergenceAnalysisTableRowHTML);
+
+        const allocationMapObserver = new MutationObserver((_, observer) => {
+            if (!document.body.contains(allocationMapContainerElement)) {
+                console.info(`Allocation map container removed, unregistering ${tableRowPartialId} partial and observer`);
+                observer.disconnect();
+                Handlebars.unregisterPartial(tableRowPartialId);
+            }
+        });
+        allocationMapObserver.observe(document, {childList: true, subtree: true});
+    }
+</script>
+
+<script type="text/javascript">
+
+    function selectDivergenceOptions(allocationPlanIdFieldName, divergenceAnalysisContainerId) {
+        const selectElement = document.querySelector(`select[name='${allocationPlanIdFieldName}']`);
+        const selectedPlanId = Number(selectElement.value);
+        if (selectedPlanId) {
+            setValid(selectElement);
+            triggerGenerateDivergence(selectedPlanId, `#${divergenceAnalysisContainerId}`);
+        } else {
+            setInvalid(selectElement);
+        }
+    }
+
+    function triggerGenerateDivergence(planId, analysisContainertElementId) {
+        const divergenceAnalysisElement = document.querySelector(analysisContainertElementId);
+        htmx.trigger(divergenceAnalysisElement, "generate-divergence-analysis");
+    }
+
+    function setValid(element) {
+        element.classList.remove("is-invalid");
+    }
+
+    function setInvalid(element) {
+        element.classList.add("is-invalid");
+    }
+</script>

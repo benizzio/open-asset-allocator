@@ -6,6 +6,7 @@ import (
 	"github.com/benizzio/open-asset-allocator/api/rest"
 	"github.com/benizzio/open-asset-allocator/application"
 	"github.com/benizzio/open-asset-allocator/domain/infra/repository"
+	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/golang/glog"
 	"os"
@@ -54,12 +55,25 @@ func buildAndInjectAppComponents() (*infra.RDBMSAdapter, *infra.GinServer, []inf
 	var databaseAdapter = infra.BuildDatabaseAdapter(config)
 
 	var portfolioRepository = repository.BuildPortfolioRepository(databaseAdapter)
-	var portfolioHistoryService = application.BuildPortfolioHistoryService(portfolioRepository)
-	var portfolioRESTController = rest.BuildPortfolioRESTController(portfolioHistoryService)
-
 	var allocationPlanRepository = repository.BuildAllocationPlanRepository(databaseAdapter)
-	var allocationPlanService = application.BuildAllocationPlanService(allocationPlanRepository)
-	var allocationPlanRESTController = rest.BuildAllocationPlanRESTController(allocationPlanService)
+
+	var portfolioDomService = service.BuildPortfolioDomService(portfolioRepository)
+	var allocationPlanDomService = service.BuildAllocationPlanDomService(allocationPlanRepository)
+	var portfolioDivergenceAnalysisService = application.BuildPortfolioDivergenceAnalysisAppService(
+		portfolioDomService,
+		allocationPlanDomService,
+	)
+	var portfolioAnalysisConfigurationService = application.BuildPortfolioAnalysisConfigurationAppService(
+		portfolioDomService,
+		allocationPlanDomService,
+	)
+
+	var portfolioRESTController = rest.BuildPortfolioRESTController(
+		portfolioDomService,
+		portfolioAnalysisConfigurationService,
+		portfolioDivergenceAnalysisService,
+	)
+	var allocationPlanRESTController = rest.BuildAllocationPlanRESTController(allocationPlanDomService)
 
 	var restControllers = []infra.GinServerRESTController{portfolioRESTController, allocationPlanRESTController}
 

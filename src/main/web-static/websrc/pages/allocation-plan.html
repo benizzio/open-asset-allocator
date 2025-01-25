@@ -48,15 +48,7 @@
     {{/each}}
 
     <script type="text/javascript">
-
-        const portfolioDataELement = document.querySelector("#portfolio-context #portfolio");
-        const portfolio = JSON.parse(portfolioDataELement.textContent);
-        const hierarchy = portfolio.allocationStructure.hierarchy;
-
-        const hierarchyLevelElements = document.querySelectorAll("[id^='hierarchy-level-allocation-plan-chart-']");
-        hierarchyLevelElements.forEach((element) => {
-            element.textContent = hierarchy[hierarchy.length - 1].name;
-        });
+        setTextContentWithTopHierarchyName("[id^='hierarchy-level-allocation-plan-chart-']");
     </script>
 
 </template>

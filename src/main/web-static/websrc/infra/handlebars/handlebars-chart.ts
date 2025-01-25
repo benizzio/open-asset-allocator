@@ -15,6 +15,7 @@ import {
 import { AllocationPlanDTO } from "../../domain/allocation-plan";
 import DomUtils from "../dom/dom-utils";
 
+//TODO depends on domain objects, should be moved to application layer or generalized
 const handlebarsChartHelper = (
     source: PortfolioAtTime | AllocationPlanDTO,
     chartDataType: ChartDataType,

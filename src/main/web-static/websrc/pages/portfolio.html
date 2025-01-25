@@ -23,4 +23,24 @@
          data-display-on-route="/portfolio/:portfolioId/allocation"
          hx-get="/websrc/pages/allocation-plan.html" hx-trigger="load-allocation once"
          style="display: none"></div>
+    <div class="col" data-hx-trigger-on-route="/portfolio/:portfolioId/allocation-map!load-allocation-map"
+         data-display-on-route="/portfolio/:portfolioId/allocation-map"
+         hx-get="/websrc/pages/allocation-map.html" hx-trigger="load-allocation-map once"
+         style="display: none"></div>
 </div>
+
+<script type="text/javascript">
+
+    function setTextContentWithTopHierarchyName(elementIdPrefix) {
+
+        const portfolioDataELement = document.querySelector("#portfolio-context #portfolio");
+        const portfolio = JSON.parse(portfolioDataELement.textContent);
+        const hierarchy = portfolio.allocationStructure.hierarchy;
+
+        const hierarchyLevelElements = document.querySelectorAll(elementIdPrefix);
+        hierarchyLevelElements.forEach((element) => {
+            element.textContent = hierarchy[hierarchy.length - 1].name;
+        });
+    }
+    
+</script>
