@@ -14,6 +14,7 @@ const (
 )
 
 type PortfolioRESTController struct {
+	portfolioService        *application.PortfolioService
 	portfolioHistoryService *application.PortfolioHistoryService
 }
 
@@ -39,7 +40,7 @@ func (controller *PortfolioRESTController) BuildRoutes() []infra.RESTRoute {
 
 func (controller *PortfolioRESTController) getPortfolios(context *gin.Context) {
 
-	portfolios, err := controller.portfolioHistoryService.GetPortfolios()
+	portfolios, err := controller.portfolioService.GetPortfolios()
 	if infra.HandleAPIError(context, "Error getting portfolios", err) {
 		return
 	}
@@ -57,7 +58,7 @@ func (controller *PortfolioRESTController) getPortfolio(context *gin.Context) {
 		return
 	}
 
-	portfolio, err := controller.portfolioHistoryService.GetPortfolio(portfolioId)
+	portfolio, err := controller.portfolioService.GetPortfolio(portfolioId)
 	if infra.HandleAPIError(context, "Error getting portfolio", err) {
 		return
 	}
@@ -85,6 +86,9 @@ func (controller *PortfolioRESTController) getPortfolioAllocationHistory(context
 	context.JSON(http.StatusOK, aggregatedPortfoliohistoryDTS)
 }
 
-func BuildPortfolioRESTController(portfolioHistoryService *application.PortfolioHistoryService) *PortfolioRESTController {
-	return &PortfolioRESTController{portfolioHistoryService}
+func BuildPortfolioRESTController(
+	portfolioService *application.PortfolioService,
+	portfolioHistoryService *application.PortfolioHistoryService,
+) *PortfolioRESTController {
+	return &PortfolioRESTController{portfolioService, portfolioHistoryService}
 }

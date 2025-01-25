@@ -8,10 +8,11 @@ import (
 
 const (
 	portfolioAllocationTableName  = "portfolio_allocation_fact"
+	portfolioAllocationProjection = `pa.*, ass.ticker as "asset.ticker", COALESCE(ass.name, '') as "asset.name"`
 	getAllPortfolioAllocationsSQL = `
 		WITH time_frame_tags 
 			AS (SELECT DISTINCT time_frame_tag, create_timestamp FROM [table] ORDER BY create_timestamp DESC LIMIT {:timeFrameLimit})
-		SELECT pa.*, ass.ticker as "asset.ticker", COALESCE(ass.name, '') as "asset.name" 
+		SELECT ` + portfolioAllocationProjection + `
 		FROM [table] pa
 		JOIN asset ass ON ass.id = pa.asset_id
 		` + infra.WhereClausePlaceholder + `
@@ -68,6 +69,25 @@ func (repository *PortfolioRDBMSRepository) GetAllPortfolioAllocations(id int, t
 		AddParam("timeFrameLimit", timeFrameLimit).
 		AddWhereClause("AND pa.time_frame_tag IN (SELECT time_frame_tag FROM time_frame_tags)").
 		AddWhereClauseAndParam("AND pa.portfolio_id = {:portfolioId}", "portfolioId", id).
+		Build().FindInto(&result)
+
+	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryAllocationsError, repository)
+}
+
+func (repository *PortfolioRDBMSRepository) FindPortfolioAllocations(id int, timeFrameTag domain.TimeFrameTag) (
+	[]domain.PortfolioAllocation,
+	error,
+) {
+	var query = `SELECT` + portfolioAllocationProjection + `
+			FROM ` + portfolioAllocationTableName + ` pa 
+			WHERE pa.portfolio_id = {:portfolioId} AND pa.time_frame_tag = {:timeFrameTag}
+			ORDER BY pa.time_frame_tag DESC, pa.class ASC, pa.cash_reserve DESC, ass.ticker ASC
+		`
+
+	var result []domain.PortfolioAllocation
+	err := repository.dbAdapter.BuildQuery(query).
+		AddParam("portfolioId", id).
+		AddParam("timeFrameTag", timeFrameTag).
 		Build().FindInto(&result)
 
 	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryAllocationsError, repository)

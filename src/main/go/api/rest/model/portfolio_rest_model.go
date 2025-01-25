@@ -1,6 +1,8 @@
 package model
 
-import "github.com/benizzio/open-asset-allocator/domain"
+import (
+	"github.com/benizzio/open-asset-allocator/domain"
+)
 
 // ================================================
 // TYPES

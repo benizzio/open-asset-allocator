@@ -20,4 +20,5 @@ type PortfolioRepository interface {
 	GetAllPortfolios() ([]Portfolio, error)
 	GetPortfolio(id int) (Portfolio, error)
 	GetAllPortfolioAllocations(id int, limit int) ([]PortfolioAllocation, error)
+	FindPortfolioAllocations(id int, timeFrameTag TimeFrameTag) ([]PortfolioAllocation, error)
 }
