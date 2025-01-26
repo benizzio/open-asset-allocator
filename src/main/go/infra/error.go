@@ -1,6 +1,7 @@
 package infra
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/glog"
 	"net/http"
@@ -37,6 +38,10 @@ func (appError *AppError) String() string {
 
 func BuildAppError(message string, origin any) error {
 	return newAppError(message, nil, origin)
+}
+
+func BuildAppErrorFormatted(origin any, message string, params ...any) error {
+	return newAppError(fmt.Sprintf(message, params), nil, origin)
 }
 
 func PropagateAsAppError(cause error, origin any) error {

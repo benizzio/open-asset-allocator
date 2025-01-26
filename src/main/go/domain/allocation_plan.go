@@ -26,4 +26,5 @@ func (allocationPlan *AllocationPlan) AddDetail(detail *PlannedAllocation) {
 
 type AllocationPlanRepository interface {
 	GetAllAllocationPlans(portfolioId int, planType *allocation.PlanType) ([]*AllocationPlan, error)
+	GetAllocationPlan(id int) (*AllocationPlan, error)
 }
