@@ -1,8 +1,11 @@
 package rest
 
 import (
+	"fmt"
 	"github.com/benizzio/open-asset-allocator/api/rest/model"
 	"github.com/benizzio/open-asset-allocator/application"
+	"github.com/benizzio/open-asset-allocator/domain"
+	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -10,12 +13,14 @@ import (
 )
 
 const (
-	portfolioIdParam = "portfolioId"
+	portfolioIdParam  = "portfolioId"
+	timeFrameTagParam = "timeFrameTag"
+	planIdParam       = "planId"
 )
 
 type PortfolioRESTController struct {
-	portfolioService        *application.PortfolioService
-	portfolioHistoryService *application.PortfolioHistoryService
+	portfolioDomService       *service.PortfolioDomService
+	portfiolioAnalysisService *application.PortfolioAnalysisAppService
 }
 
 func (controller *PortfolioRESTController) BuildRoutes() []infra.RESTRoute {
@@ -35,12 +40,17 @@ func (controller *PortfolioRESTController) BuildRoutes() []infra.RESTRoute {
 			Path:     "/api/portfolio/:" + portfolioIdParam + "/history",
 			Handlers: gin.HandlersChain{controller.getPortfolioAllocationHistory},
 		},
+		{
+			Method:   http.MethodGet,
+			Path:     "/api/portfolio/:" + portfolioIdParam + "/divergence/:" + timeFrameTagParam + "/allocation-plan/:" + planIdParam,
+			Handlers: gin.HandlersChain{controller.GetDivercenceAnalysis},
+		},
 	}
 }
 
 func (controller *PortfolioRESTController) getPortfolios(context *gin.Context) {
 
-	portfolios, err := controller.portfolioService.GetPortfolios()
+	portfolios, err := controller.portfolioDomService.GetPortfolios()
 	if infra.HandleAPIError(context, "Error getting portfolios", err) {
 		return
 	}
@@ -58,7 +68,7 @@ func (controller *PortfolioRESTController) getPortfolio(context *gin.Context) {
 		return
 	}
 
-	portfolio, err := controller.portfolioService.GetPortfolio(portfolioId)
+	portfolio, err := controller.portfolioDomService.GetPortfolio(portfolioId)
 	if infra.HandleAPIError(context, "Error getting portfolio", err) {
 		return
 	}
@@ -76,7 +86,7 @@ func (controller *PortfolioRESTController) getPortfolioAllocationHistory(context
 		return
 	}
 
-	portfolioHistory, err := controller.portfolioHistoryService.GetPortfolioAllocationHistory(portfolioId)
+	portfolioHistory, err := controller.portfolioDomService.GetPortfolioAllocationHistory(portfolioId)
 	if infra.HandleAPIError(context, "Error getting portfolio history", err) {
 		return
 	}
@@ -86,9 +96,39 @@ func (controller *PortfolioRESTController) getPortfolioAllocationHistory(context
 	context.JSON(http.StatusOK, aggregatedPortfoliohistoryDTS)
 }
 
+func (controller *PortfolioRESTController) GetDivercenceAnalysis(context *gin.Context) {
+
+	portfolioIdParam := context.Param(portfolioIdParam)
+	portfolioId, err := strconv.Atoi(portfolioIdParam)
+	if infra.HandleAPIError(context, "Error getting portfolioId url parameter", err) {
+		return
+	}
+
+	var timeFrameTagParam = domain.TimeFrameTag(context.Param(timeFrameTagParam))
+
+	planIdParam := context.Param(planIdParam)
+	planId, err := strconv.Atoi(planIdParam)
+	if infra.HandleAPIError(context, "Error getting planId url parameter", err) {
+		return
+	}
+
+	analysis, err := controller.portfiolioAnalysisService.GeneratePortfolioDivergenceAnalysis(
+		portfolioId,
+		timeFrameTagParam,
+		planId,
+	)
+	if infra.HandleAPIError(context, "Error generating portfolio divergence analysis", err) {
+		return
+	}
+
+	fmt.Println(analysis)
+
+	//TODO continue
+}
+
 func BuildPortfolioRESTController(
-	portfolioService *application.PortfolioService,
-	portfolioHistoryService *application.PortfolioHistoryService,
+	portfolioDomService *service.PortfolioDomService,
+	portfiolioAnalysisService *application.PortfolioAnalysisAppService,
 ) *PortfolioRESTController {
-	return &PortfolioRESTController{portfolioService, portfolioHistoryService}
+	return &PortfolioRESTController{portfolioDomService, portfiolioAnalysisService}
 }

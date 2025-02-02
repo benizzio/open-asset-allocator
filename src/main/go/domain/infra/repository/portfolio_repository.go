@@ -3,17 +3,16 @@ package repository
 import (
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra"
-	"strings"
 )
 
 const (
-	portfolioAllocationTableName  = "portfolio_allocation_fact"
-	portfolioAllocationProjection = `pa.*, ass.ticker as "asset.ticker", COALESCE(ass.name, '') as "asset.name"`
+	timeFrameTagLimitComplement = `
+		WITH time_frame_tags
+			AS (SELECT DISTINCT time_frame_tag, create_timestamp FROM portfolio_allocation_fact pa ORDER BY create_timestamp DESC LIMIT {:timeFrameLimit})
+	`
 	getAllPortfolioAllocationsSQL = `
-		WITH time_frame_tags 
-			AS (SELECT DISTINCT time_frame_tag, create_timestamp FROM [table] ORDER BY create_timestamp DESC LIMIT {:timeFrameLimit})
-		SELECT ` + portfolioAllocationProjection + `
-		FROM [table] pa
+		SELECT pa.*, ass.ticker as "asset.ticker", COALESCE(ass.name, '') as "asset.name"
+		FROM portfolio_allocation_fact pa
 		JOIN asset ass ON ass.id = pa.asset_id
 		` + infra.WhereClausePlaceholder + `
 		ORDER BY pa.time_frame_tag DESC, pa.class ASC, pa.cash_reserve DESC, ass.ticker ASC
@@ -58,11 +57,7 @@ func (repository *PortfolioRDBMSRepository) GetAllPortfolioAllocations(id int, t
 	[]domain.PortfolioAllocation,
 	error,
 ) {
-	var query = strings.ReplaceAll(
-		getAllPortfolioAllocationsSQL,
-		"[table]",
-		portfolioAllocationTableName,
-	)
+	var query = timeFrameTagLimitComplement + getAllPortfolioAllocationsSQL
 
 	var result []domain.PortfolioAllocation
 	err := repository.dbAdapter.BuildQuery(query).
@@ -78,16 +73,10 @@ func (repository *PortfolioRDBMSRepository) FindPortfolioAllocations(id int, tim
 	[]domain.PortfolioAllocation,
 	error,
 ) {
-	var query = `SELECT` + portfolioAllocationProjection + `
-			FROM ` + portfolioAllocationTableName + ` pa 
-			WHERE pa.portfolio_id = {:portfolioId} AND pa.time_frame_tag = {:timeFrameTag}
-			ORDER BY pa.time_frame_tag DESC, pa.class ASC, pa.cash_reserve DESC, ass.ticker ASC
-		`
-
 	var result []domain.PortfolioAllocation
-	err := repository.dbAdapter.BuildQuery(query).
-		AddParam("portfolioId", id).
-		AddParam("timeFrameTag", timeFrameTag).
+	err := repository.dbAdapter.BuildQuery(getAllPortfolioAllocationsSQL).
+		AddWhereClauseAndParam("AND pa.portfolio_id = {:portfolioId}", "portfolioId", id).
+		AddWhereClauseAndParam("AND pa.time_frame_tag = {:timeFrameTag}", "timeFrameTag", timeFrameTag).
 		Build().FindInto(&result)
 
 	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryAllocationsError, repository)

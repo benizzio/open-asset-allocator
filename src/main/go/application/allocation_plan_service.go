@@ -5,17 +5,18 @@ import (
 	"github.com/benizzio/open-asset-allocator/domain/allocation"
 )
 
-type AllocationPlanService struct {
+// TODO move this to a domain service
+type AllocationPlanAppService struct {
 	allocationPlanRepository domain.AllocationPlanRepository
 }
 
-func (service *AllocationPlanService) GetAllocationPlans(portfolioId int, planType *allocation.PlanType) (
+func (service *AllocationPlanAppService) GetAllocationPlans(portfolioId int, planType *allocation.PlanType) (
 	[]*domain.AllocationPlan,
 	error,
 ) {
 	return service.allocationPlanRepository.GetAllAllocationPlans(portfolioId, planType)
 }
 
-func BuildAllocationPlanService(allocationPlanRepository domain.AllocationPlanRepository) *AllocationPlanService {
-	return &AllocationPlanService{allocationPlanRepository}
+func BuildAllocationPlanAppService(allocationPlanRepository domain.AllocationPlanRepository) *AllocationPlanAppService {
+	return &AllocationPlanAppService{allocationPlanRepository}
 }

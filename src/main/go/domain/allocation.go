@@ -5,13 +5,17 @@ import (
 	"fmt"
 )
 
+const HierarchicalIdLevelSeparator = "|"
+
 type AllocationHierarchyLevel struct {
 	Name  string `json:"name,omitempty"`
 	Field string `json:"field,omitempty"`
 }
 
+type AllocationHierarchy []AllocationHierarchyLevel
+
 type AllocationStructure struct {
-	Hierarchy []AllocationHierarchyLevel `json:"hierarchy,omitempty"`
+	Hierarchy AllocationHierarchy `json:"hierarchy,omitempty"`
 }
 
 func (allocationStructure *AllocationStructure) Scan(value interface{}) error {

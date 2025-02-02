@@ -11,7 +11,7 @@ import (
 )
 
 type AllocationPlanRESTController struct {
-	allocationPlanService *application.AllocationPlanService
+	allocationPlanService *application.AllocationPlanAppService
 }
 
 func (controller *AllocationPlanRESTController) BuildRoutes() []infra.RESTRoute {
@@ -43,6 +43,6 @@ func (controller *AllocationPlanRESTController) getAllocationPlans(context *gin.
 	context.JSON(http.StatusOK, allocationPlansDTS)
 }
 
-func BuildAllocationPlanRESTController(allocationPlanService *application.AllocationPlanService) *AllocationPlanRESTController {
+func BuildAllocationPlanRESTController(allocationPlanService *application.AllocationPlanAppService) *AllocationPlanRESTController {
 	return &AllocationPlanRESTController{allocationPlanService}
 }
