@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"fmt"
 	"github.com/benizzio/open-asset-allocator/api/rest/model"
 	"github.com/benizzio/open-asset-allocator/application"
 	"github.com/benizzio/open-asset-allocator/domain"
@@ -121,9 +120,7 @@ func (controller *PortfolioRESTController) GetDivercenceAnalysis(context *gin.Co
 		return
 	}
 
-	fmt.Println(analysis)
-
-	//TODO continue
+	context.JSON(http.StatusOK, analysis)
 }
 
 func BuildPortfolioRESTController(

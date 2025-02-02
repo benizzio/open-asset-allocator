@@ -40,9 +40,13 @@ func (service *PortfolioDomService) GenerateHierarchicalId(
 
 	for i := highestHierarchyIndex; i >= hierarchyLevelIndex; i-- {
 
-		idSegment, err := service.getIdSegment(allocation, hierarchy, i)
+		idSegment, err := service.GetIdSegment(allocation, hierarchy[i])
 		if err != nil {
 			return "", err
+		}
+
+		if i <= highestHierarchyIndex-1 {
+			idSegment += domain.HierarchicalIdLevelSeparator
 		}
 
 		hierarchicalId = idSegment + hierarchicalId
@@ -51,25 +55,17 @@ func (service *PortfolioDomService) GenerateHierarchicalId(
 	return hierarchicalId, nil
 }
 
-func (service *PortfolioDomService) getIdSegment(
+func (service *PortfolioDomService) GetIdSegment(
 	allocation domain.PortfolioAllocation,
-	hierarchy domain.AllocationHierarchy,
-	hierarchyIndex int,
+	hierarchyLevel domain.AllocationHierarchyLevel,
 ) (string, error) {
 
-	var hierarchyLevel = hierarchy[hierarchyIndex]
-	var highestHierarchyIndex = len(hierarchy) - 1
-
-	var hierarchyLevelValue, err = service.getHierarchyLevelFieldValue(hierarchyLevel, allocation)
+	var hierarchyLevelKey, err = service.getHierarchyLevelFieldValue(hierarchyLevel, allocation)
 	if err != nil {
 		return "", err
 	}
 
-	if hierarchyIndex <= highestHierarchyIndex-1 {
-		hierarchyLevelValue += domain.HierarchicalIdLevelSeparator
-	}
-
-	return hierarchyLevelValue, nil
+	return hierarchyLevelKey, nil
 }
 
 func (service *PortfolioDomService) getHierarchyLevelFieldValue(

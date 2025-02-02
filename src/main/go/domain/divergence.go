@@ -2,9 +2,10 @@ package domain
 
 type PotentialDivergence struct {
 	HierarchyLevelKey          string
+	HierarchicalId             string
 	TotalMarketValue           int
 	TotalMarketValueDivergence int
-	InternalDivergences        []PotentialDivergence
+	InternalDivergences        []*PotentialDivergence
 }
 
 type DivergenceAnalysis struct {
@@ -12,5 +13,5 @@ type DivergenceAnalysis struct {
 	TimeFrameTag              TimeFrameTag
 	AllocationPlanId          int
 	PortfolioTotalMarketValue int
-	Root                      []PotentialDivergence
+	Root                      []*PotentialDivergence
 }
