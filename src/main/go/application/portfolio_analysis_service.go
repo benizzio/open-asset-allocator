@@ -3,6 +3,7 @@ package application
 import (
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/domain/service"
+	"github.com/shopspring/decimal"
 )
 
 type PortfolioAnalysisAppService struct {
@@ -27,11 +28,6 @@ func (service *PortfolioAnalysisAppService) GeneratePortfolioDivergenceAnalysis(
 		return nil, err
 	}
 
-	//allocationPlan, err := service.allocationPlanDomService.GetAllocationPlan(allocationPlanId)
-	//if err != nil {
-	//	return nil, err
-	//}
-
 	var divergenceAnalysis = buildDivergenceAnalysis(
 		portfolio,
 		timeFrameTag,
@@ -41,7 +37,6 @@ func (service *PortfolioAnalysisAppService) GeneratePortfolioDivergenceAnalysis(
 	var potentialDivergenceMap = make(map[string]*domain.PotentialDivergence)
 	var allocationHierarchy = portfolio.AllocationStructure.Hierarchy
 
-	//TODO calculate divergence according to allocation plan
 	for _, allocation := range portfolioAllocations {
 
 		var allocationHierarchySize = len(allocationHierarchy)
@@ -113,6 +108,15 @@ func (service *PortfolioAnalysisAppService) GeneratePortfolioDivergenceAnalysis(
 		divergenceAnalysis.PortfolioTotalMarketValue += allocation.TotalMarketValue
 	}
 
+	plannedAllocationMap, err := service.allocationPlanDomService.GetPlannedAllocationsPerHyerarchicalIdMap(allocationPlanId)
+	if err != nil {
+		return nil, err
+	}
+
+	setDivergenceValues(divergenceAnalysis.Root, plannedAllocationMap, divergenceAnalysis.PortfolioTotalMarketValue)
+
+	//TODO calculate planned side of symmetric difference (still in plannedAllocationMap, use it to create potential divergences)
+
 	return divergenceAnalysis, nil
 }
 
@@ -127,6 +131,35 @@ func buildDivergenceAnalysis(
 		AllocationPlanId:          allocationPlanId,
 		PortfolioTotalMarketValue: 0,
 		Root:                      make([]*domain.PotentialDivergence, 0),
+	}
+}
+
+// TODO clean code
+func setDivergenceValues(
+	potentialDivergences []*domain.PotentialDivergence,
+	plannedAllocationMap domain.PlannedAllocationsPerHierarchicalId,
+	levelTotalMarketValue int64,
+) {
+	for _, potentialDivergence := range potentialDivergences {
+
+		plannedAllocation := plannedAllocationMap.Get(potentialDivergence.HierarchicalId)
+		if plannedAllocation != nil {
+
+			var plannedAllocationValue = plannedAllocation.SliceSizePercentage.
+				Mul(decimal.NewFromInt(levelTotalMarketValue)).
+				Round(0).IntPart()
+			potentialDivergence.TotalMarketValueDivergence = potentialDivergence.TotalMarketValue - plannedAllocationValue
+
+			if potentialDivergence.InternalDivergences != nil {
+				setDivergenceValues(
+					potentialDivergence.InternalDivergences, plannedAllocationMap, potentialDivergence.TotalMarketValue,
+				)
+			}
+
+			plannedAllocationMap.Remove(potentialDivergence.HierarchicalId)
+		} else {
+			potentialDivergence.TotalMarketValueDivergence = potentialDivergence.TotalMarketValue
+		}
 	}
 }
 

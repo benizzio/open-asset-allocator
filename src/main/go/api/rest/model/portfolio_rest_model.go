@@ -19,13 +19,13 @@ type PortfolioAllocationDTS struct {
 	AssetTicker      string `json:"assetTicker"`
 	Class            string `json:"class"`
 	CashReserve      bool   `json:"cashReserve"`
-	TotalMarketValue int    `json:"totalMarketValue"`
+	TotalMarketValue int64  `json:"totalMarketValue"`
 }
 
 type PortfolioAtTimeDTS struct {
 	TimeFrameTag     domain.TimeFrameTag      `json:"timeFrameTag"`
 	Allocations      []PortfolioAllocationDTS `json:"allocations"`
-	TotalMarketValue int                      `json:"totalMarketValue"`
+	TotalMarketValue int64                    `json:"totalMarketValue"`
 }
 
 type portfolioAllocationsPerTimeFrameMap map[domain.TimeFrameTag][]PortfolioAllocationDTS
@@ -49,9 +49,9 @@ func (aggregationMap portfolioAllocationsPerTimeFrameMap) aggregate(
 	aggregationMap[timeFrameTag] = allocationAggregation
 }
 
-func (aggregationMap portfolioAllocationsPerTimeFrameMap) getAggregatedMarketValue(timeFrame domain.TimeFrameTag) int {
+func (aggregationMap portfolioAllocationsPerTimeFrameMap) getAggregatedMarketValue(timeFrame domain.TimeFrameTag) int64 {
 	var allocationAggregation = aggregationMap[timeFrame]
-	var totalMarketValue = 0
+	var totalMarketValue = int64(0)
 	for _, allocation := range allocationAggregation {
 		totalMarketValue += allocation.TotalMarketValue
 	}
@@ -124,7 +124,7 @@ func buildHistoryDTS(portfolioAllocationsPerTimeFrame portfolioAllocationsPerTim
 func buildSnapshotDTS(
 	timeFrameTag domain.TimeFrameTag,
 	allocations []PortfolioAllocationDTS,
-	totalMarketValue int,
+	totalMarketValue int64,
 ) PortfolioAtTimeDTS {
 	return PortfolioAtTimeDTS{
 		TimeFrameTag:     timeFrameTag,

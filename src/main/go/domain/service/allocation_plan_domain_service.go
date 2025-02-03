@@ -20,6 +20,25 @@ func (service *AllocationPlanDomService) GetAllocationPlan(id int) (*domain.Allo
 	return service.allocationPlanRepository.GetAllocationPlan(id)
 }
 
+func (service *AllocationPlanDomService) GetPlannedAllocationsPerHyerarchicalIdMap(allocationPlanId int) (
+	domain.PlannedAllocationsPerHierarchicalId,
+	error,
+) {
+	allocationPlan, err := service.GetAllocationPlan(allocationPlanId)
+	if err != nil {
+		return nil, err
+	}
+
+	plannedAllocationMap := make(domain.PlannedAllocationsPerHierarchicalId)
+
+	for _, plannedAllocation := range allocationPlan.Details {
+		hierarchicalId := plannedAllocation.StructuralId.String()
+		plannedAllocationMap[hierarchicalId] = plannedAllocation
+	}
+
+	return plannedAllocationMap, nil
+}
+
 func BuildAllocationPlanDomService(allocationPlanRepository domain.AllocationPlanRepository) *AllocationPlanDomService {
 	return &AllocationPlanDomService{allocationPlanRepository}
 }

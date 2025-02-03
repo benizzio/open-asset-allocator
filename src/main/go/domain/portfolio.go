@@ -7,7 +7,7 @@ type PortfolioAllocation struct {
 	Class            string
 	CashReserve      bool
 	TimeFrameTag     TimeFrameTag
-	TotalMarketValue int
+	TotalMarketValue int64
 }
 
 type Portfolio struct {

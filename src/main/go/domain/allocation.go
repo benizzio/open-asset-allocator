@@ -32,3 +32,18 @@ func (allocationStructure *AllocationStructure) Scan(value interface{}) error {
 
 	return json.Unmarshal(bytes, allocationStructure)
 }
+
+type HierarchicalId []*string
+
+func (hierarchicalId HierarchicalId) String() string {
+	var result = ""
+	for index, level := range hierarchicalId {
+		if level != nil {
+			result += *level
+			if index < len(hierarchicalId)-1 {
+				result += HierarchicalIdLevelSeparator
+			}
+		}
+	}
+	return result
+}

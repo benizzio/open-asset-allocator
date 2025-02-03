@@ -6,8 +6,18 @@ import (
 	"time"
 )
 
+type PlannedAllocationsPerHierarchicalId map[string]*PlannedAllocation
+
+func (plannedAllocationMap PlannedAllocationsPerHierarchicalId) Get(hierarchicalId string) *PlannedAllocation {
+	return plannedAllocationMap[hierarchicalId]
+}
+
+func (plannedAllocationMap PlannedAllocationsPerHierarchicalId) Remove(hierarchicalId string) {
+	delete(plannedAllocationMap, hierarchicalId)
+}
+
 type PlannedAllocation struct {
-	StructuralId        []*string
+	StructuralId        HierarchicalId //TODO rename this to HierarchicalId in all stack
 	CashReserve         bool
 	SliceSizePercentage decimal.Decimal
 }
