@@ -10,14 +10,14 @@ const (
 		WITH time_frame_tags
 			AS (SELECT DISTINCT time_frame_tag, create_timestamp FROM portfolio_allocation_fact pa ORDER BY create_timestamp DESC LIMIT {:timeFrameLimit})
 	`
-	getAllPortfolioAllocationsSQL = `
+	portfolioAllocationsSQL = `
 		SELECT pa.*, ass.ticker as "asset.ticker", COALESCE(ass.name, '') as "asset.name"
 		FROM portfolio_allocation_fact pa
 		JOIN asset ass ON ass.id = pa.asset_id
 		` + infra.WhereClausePlaceholder + `
 		ORDER BY pa.time_frame_tag DESC, pa.class ASC, pa.cash_reserve DESC, ass.ticker ASC
 	`
-	getPortfoliosSQL = `
+	portfolioSQL = `
 		SELECT p.id, p.name, p.allocation_structure
 		FROM portfolio p
 	`
@@ -36,14 +36,14 @@ type PortfolioRDBMSRepository struct {
 func (repository *PortfolioRDBMSRepository) GetAllPortfolios() ([]domain.Portfolio, error) {
 
 	var result []domain.Portfolio
-	err := repository.dbAdapter.BuildQuery(getPortfoliosSQL).Build().FindInto(&result)
+	err := repository.dbAdapter.BuildQuery(portfolioSQL).Build().FindInto(&result)
 
 	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryPortfoliosError, repository)
 }
 
 func (repository *PortfolioRDBMSRepository) GetPortfolio(id int) (domain.Portfolio, error) {
 
-	var query = getPortfoliosSQL + `
+	var query = portfolioSQL + `
 		WHERE p.id = {:id}
 	`
 
@@ -57,7 +57,7 @@ func (repository *PortfolioRDBMSRepository) GetAllPortfolioAllocations(id int, t
 	[]domain.PortfolioAllocation,
 	error,
 ) {
-	var query = timeFrameTagLimitComplement + getAllPortfolioAllocationsSQL
+	var query = timeFrameTagLimitComplement + portfolioAllocationsSQL
 
 	var result []domain.PortfolioAllocation
 	err := repository.dbAdapter.BuildQuery(query).
@@ -74,7 +74,7 @@ func (repository *PortfolioRDBMSRepository) FindPortfolioAllocations(id int, tim
 	error,
 ) {
 	var result []domain.PortfolioAllocation
-	err := repository.dbAdapter.BuildQuery(getAllPortfolioAllocationsSQL).
+	err := repository.dbAdapter.BuildQuery(portfolioAllocationsSQL).
 		AddWhereClauseAndParam("AND pa.portfolio_id = {:portfolioId}", "portfolioId", id).
 		AddWhereClauseAndParam("AND pa.time_frame_tag = {:timeFrameTag}", "timeFrameTag", timeFrameTag).
 		Build().FindInto(&result)

@@ -19,15 +19,7 @@ type PlannedAllocationJoinedRowDTS struct {
 	SliceSizePercentage  decimal.Decimal
 }
 
-type AllocationPlanRDBMSRepository struct {
-	dbAdapter *infra.RDBMSAdapter
-}
-
-func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlans(portfolioId int, planType *allocation.PlanType) (
-	[]*domain.AllocationPlan,
-	error,
-) {
-	var query = `
+const allocationPlanSQL = `
 		SELECT 
 		    ap.id as allocation_plan_id,
 		    ap.name, 
@@ -40,7 +32,16 @@ func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlans(portfolio
 		JOIN allocation_plan ap ON pa.allocation_plan_id = ap.id
 	` + infra.WhereClausePlaceholder
 
-	var queryBuilder = repository.dbAdapter.BuildQuery(query)
+type AllocationPlanRDBMSRepository struct {
+	dbAdapter *infra.RDBMSAdapter
+}
+
+func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlans(portfolioId int, planType *allocation.PlanType) (
+	[]*domain.AllocationPlan,
+	error,
+) {
+
+	var queryBuilder = repository.dbAdapter.BuildQuery(allocationPlanSQL)
 
 	queryBuilder.AddWhereClauseAndParam("AND ap.portfolio_id = {:portfolioId}", "portfolioId", portfolioId)
 
@@ -58,22 +59,8 @@ func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlans(portfolio
 
 func (repository *AllocationPlanRDBMSRepository) GetAllocationPlan(id int) (*domain.AllocationPlan, error) {
 
-	var query = `
-		SELECT
-		    ap.id as allocation_plan_id,
-		    ap.name,
-		    ap.type,
-		    ap.planned_execution_date,
-		    pa.structural_id,
-		    pa.cash_reserve,
-		    pa.slice_size_percentage
-		FROM planned_allocation pa
-		JOIN allocation_plan ap ON pa.allocation_plan_id = ap.id
-		WHERE ap.id = {:id}
-	`
-
-	var queryBuilder = repository.dbAdapter.BuildQuery(query)
-	queryBuilder.AddParam("id", id)
+	var queryBuilder = repository.dbAdapter.BuildQuery(allocationPlanSQL)
+	queryBuilder.AddWhereClauseAndParam("AND ap.id = {:id}", "id", id)
 
 	result, queryError := queryBuilder.Build().GetRows()
 	if queryError != nil {

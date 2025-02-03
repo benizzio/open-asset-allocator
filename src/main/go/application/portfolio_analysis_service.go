@@ -7,7 +7,7 @@ import (
 
 type PortfolioAnalysisAppService struct {
 	portfolioDomService      *service.PortfolioDomService
-	allocationPlanRepository domain.AllocationPlanRepository
+	allocationPlanDomService *service.AllocationPlanDomService
 }
 
 // TODO clean code
@@ -27,7 +27,7 @@ func (service *PortfolioAnalysisAppService) GeneratePortfolioDivergenceAnalysis(
 		return nil, err
 	}
 
-	//allocationPlan, err := service.allocationPlanRepository.GetAllocationPlan(allocationPlanId)
+	//allocationPlan, err := service.allocationPlanDomService.GetAllocationPlan(allocationPlanId)
 	//if err != nil {
 	//	return nil, err
 	//}
@@ -132,10 +132,10 @@ func buildDivergenceAnalysis(
 
 func BuildPortfolioAnalysisAppService(
 	portfolioDomService *service.PortfolioDomService,
-	allocationPlanRepository domain.AllocationPlanRepository,
+	allocationPlanDomService *service.AllocationPlanDomService,
 ) *PortfolioAnalysisAppService {
 	return &PortfolioAnalysisAppService{
-		allocationPlanRepository: allocationPlanRepository,
+		allocationPlanDomService: allocationPlanDomService,
 		portfolioDomService:      portfolioDomService,
 	}
 }
