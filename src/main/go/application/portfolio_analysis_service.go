@@ -6,6 +6,58 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+// TODO create utility methods to iterate on context
+type PortfolioAllocationIterationMappingContext struct {
+	allocation            *domain.PortfolioAllocation
+	currentlevelIteration *HierarchyLevelIterationMappingContext
+}
+
+type HierarchyLevelIterationMappingContext struct {
+	hierarchyLevelIndex int
+}
+
+type DivergenceAnalysisMappingContext struct {
+	potentialDivergenceMap           map[string]*domain.PotentialDivergence
+	allocationHierarchy              domain.AllocationHierarchy
+	allocationHierarchySize          int
+	topAllocationHierarchyLevelIndex int
+	currentAllocationIteration       *PortfolioAllocationIterationMappingContext
+}
+
+func (context *DivergenceAnalysisMappingContext) getCurrentAllocation() *domain.PortfolioAllocation {
+	if context.currentAllocationIteration != nil {
+		return context.currentAllocationIteration.allocation
+	}
+	return nil
+}
+
+func (context *DivergenceAnalysisMappingContext) getCurrentHirearchicalLevel() *domain.AllocationHierarchyLevel {
+	if context.currentAllocationIteration != nil && context.currentAllocationIteration.currentlevelIteration != nil {
+		return &context.allocationHierarchy[context.currentAllocationIteration.currentlevelIteration.hierarchyLevelIndex]
+	}
+	return nil
+}
+
+func (context *DivergenceAnalysisMappingContext) getCurrentHirearchicalLevelIndex() int {
+	if context.currentAllocationIteration != nil && context.currentAllocationIteration.currentlevelIteration != nil {
+		return context.currentAllocationIteration.currentlevelIteration.hierarchyLevelIndex
+	}
+	return -1
+}
+
+func buildDivergenceAnalysisMappingContext(
+	potentialDivergenceMap map[string]*domain.PotentialDivergence,
+	allocationHierarchy domain.AllocationHierarchy,
+) *DivergenceAnalysisMappingContext {
+	var allocationHierarchySize = len(allocationHierarchy)
+	return &DivergenceAnalysisMappingContext{
+		potentialDivergenceMap:           potentialDivergenceMap,
+		allocationHierarchy:              allocationHierarchy,
+		allocationHierarchySize:          allocationHierarchySize,
+		topAllocationHierarchyLevelIndex: allocationHierarchySize - 1,
+	}
+}
+
 type PortfolioAnalysisAppService struct {
 	portfolioDomService      *service.PortfolioDomService
 	allocationPlanDomService *service.AllocationPlanDomService
@@ -23,85 +75,11 @@ func (service *PortfolioAnalysisAppService) GeneratePortfolioDivergenceAnalysis(
 		return nil, err
 	}
 
-	var divergenceAnalysis = buildDivergenceAnalysis(
-		portfolio,
-		timeFrameTag,
-		allocationPlanId,
-	)
+	var divergenceAnalysis = buildDivergenceAnalysis(portfolio, timeFrameTag, allocationPlanId)
 
-	var potentialDivergenceMap = make(map[string]*domain.PotentialDivergence)
-	var allocationHierarchy = portfolio.AllocationStructure.Hierarchy
-
-	for _, allocation := range portfolioAllocations {
-
-		var allocationHierarchySize = len(allocationHierarchy)
-		var lastHierarchyLevelIndex = allocationHierarchySize - 1
-		var allocationPotentialDivergenceHierarchy = make([]*domain.PotentialDivergence, allocationHierarchySize)
-		var lowerLevelPotentialDivergenceCreated = false
-
-		for hierarchyLevelIndex, hierarchyLevel := range allocationHierarchy {
-
-			hierarchicalId, err := service.portfolioDomService.GenerateHierarchicalId(
-				allocation,
-				allocationHierarchy,
-				hierarchyLevelIndex,
-			)
-			if err != nil {
-				return nil, err
-			}
-			//hierarchicalId += "a"
-
-			hierarchyLevelKey, err := service.portfolioDomService.GetIdSegment(
-				allocation,
-				&hierarchyLevel,
-			)
-			if err != nil {
-				return nil, err
-			}
-
-			var potentialDivergence = potentialDivergenceMap[hierarchicalId]
-			var potentialDivergenceCreated = false
-			if potentialDivergence == nil {
-
-				potentialDivergence = &domain.PotentialDivergence{
-					HierarchyLevelKey:          hierarchyLevelKey,
-					HierarchicalId:             hierarchicalId,
-					TotalMarketValue:           0,
-					TotalMarketValueDivergence: 0,
-					InternalDivergences:        nil,
-				}
-
-				if hierarchyLevelIndex > 0 {
-					potentialDivergence.InternalDivergences = make([]*domain.PotentialDivergence, 0)
-				}
-
-				potentialDivergenceMap[hierarchicalId] = potentialDivergence
-				if hierarchyLevelIndex == lastHierarchyLevelIndex {
-					divergenceAnalysis.Root = append(
-						divergenceAnalysis.Root,
-						potentialDivergence,
-					)
-				}
-				potentialDivergenceCreated = true
-			}
-
-			if lowerLevelPotentialDivergenceCreated {
-				previousLevelIndex := hierarchyLevelIndex - 1
-				lowerLevelPotentialDivergence := allocationPotentialDivergenceHierarchy[previousLevelIndex]
-				potentialDivergence.InternalDivergences = append(
-					potentialDivergence.InternalDivergences,
-					lowerLevelPotentialDivergence,
-				)
-			}
-
-			allocationPotentialDivergenceHierarchy[hierarchyLevelIndex] = potentialDivergence
-
-			potentialDivergence.TotalMarketValue += allocation.TotalMarketValue
-
-			lowerLevelPotentialDivergenceCreated = potentialDivergenceCreated
-		}
-
-		divergenceAnalysis.PortfolioTotalMarketValue += allocation.TotalMarketValue
+	err = service.mapPotentialDivergencesFromPortfolioAllocations(divergenceAnalysis, portfolio, portfolioAllocations)
+	if err != nil {
+		return nil, err
 	}
 
 	plannedAllocationMap, err := service.allocationPlanDomService.GetPlannedAllocationsPerHyerarchicalIdMap(allocationPlanId)
@@ -111,9 +89,110 @@ func (service *PortfolioAnalysisAppService) GeneratePortfolioDivergenceAnalysis(
 
 	setDivergenceValues(divergenceAnalysis.Root, plannedAllocationMap, divergenceAnalysis.PortfolioTotalMarketValue)
 
-	//TODO calculate planned side of symmetric difference (still in plannedAllocationMap, use it to create potential divergences)
+	//TODO calculate planned side set difference (still in plannedAllocationMap, use it to create potential divergences)
 
 	return divergenceAnalysis, nil
+}
+
+func (service *PortfolioAnalysisAppService) mapPotentialDivergencesFromPortfolioAllocations(
+	divergenceAnalysis *domain.DivergenceAnalysis,
+	portfolio *domain.Portfolio,
+	portfolioAllocations []*domain.PortfolioAllocation,
+) error {
+
+	var mappingContext = buildDivergenceAnalysisMappingContext(
+		make(map[string]*domain.PotentialDivergence),
+		portfolio.AllocationStructure.Hierarchy,
+	)
+
+	for _, allocation := range portfolioAllocations {
+
+		mappingContext.currentAllocationIteration = &PortfolioAllocationIterationMappingContext{
+			allocation:            allocation,
+			currentlevelIteration: nil,
+		}
+
+		err := service.mapPotentialDivergenceFromPortfolioAllocation(divergenceAnalysis, mappingContext)
+		if err != nil {
+			return err
+		}
+
+		divergenceAnalysis.PortfolioTotalMarketValue += allocation.TotalMarketValue
+
+		mappingContext.currentAllocationIteration = nil
+	}
+
+	return nil
+}
+
+func (service *PortfolioAnalysisAppService) mapPotentialDivergenceFromPortfolioAllocation(
+	divergenceAnalysis *domain.DivergenceAnalysis,
+	context *DivergenceAnalysisMappingContext,
+) error {
+
+	var potentialDivergencesInAllocationHierarchy = make([]*domain.PotentialDivergence, context.allocationHierarchySize)
+	var lowerLevelPotentialDivergenceCreated = false
+
+	for hierarchyLevelIndex, _ := range context.allocationHierarchy {
+
+		context.currentAllocationIteration.currentlevelIteration = &HierarchyLevelIterationMappingContext{
+			hierarchyLevelIndex: hierarchyLevelIndex,
+		}
+
+		hierarchicalId, hierarchyLevelKey, err := service.generatePotentialDivergenceIdentifiers(context)
+		if err != nil {
+			return err
+		}
+
+		var potentialDivergence, potentialDivergenceCreated = buildPotentialDivergenceIfNotExists(
+			divergenceAnalysis,
+			hierarchicalId,
+			hierarchyLevelKey,
+			context,
+		)
+
+		if lowerLevelPotentialDivergenceCreated {
+			connectLowerLevelDivergence(
+				hierarchyLevelIndex,
+				potentialDivergencesInAllocationHierarchy,
+				potentialDivergence,
+			)
+		}
+
+		potentialDivergencesInAllocationHierarchy[hierarchyLevelIndex] = potentialDivergence
+
+		potentialDivergence.TotalMarketValue += context.getCurrentAllocation().TotalMarketValue
+
+		lowerLevelPotentialDivergenceCreated = potentialDivergenceCreated
+
+		context.currentAllocationIteration.currentlevelIteration = nil
+	}
+
+	return nil
+}
+
+func (service *PortfolioAnalysisAppService) generatePotentialDivergenceIdentifiers(
+	context *DivergenceAnalysisMappingContext,
+) (string, string, error) {
+
+	hierarchicalId, err := service.portfolioDomService.GenerateHierarchicalId(
+		context.getCurrentAllocation(),
+		context.allocationHierarchy,
+		context.getCurrentHirearchicalLevelIndex(),
+	)
+	if err != nil {
+		return "", "", err
+	}
+	//hierarchicalId += "a"
+
+	hierarchyLevelKey, err := service.portfolioDomService.GetIdSegment(
+		context.getCurrentAllocation(),
+		context.getCurrentHirearchicalLevel(),
+	)
+	if err != nil {
+		return "", "", err
+	}
+	return hierarchicalId, hierarchyLevelKey, nil
 }
 
 func buildDivergenceAnalysis(
@@ -128,6 +207,56 @@ func buildDivergenceAnalysis(
 		PortfolioTotalMarketValue: 0,
 		Root:                      make([]*domain.PotentialDivergence, 0),
 	}
+}
+
+func buildPotentialDivergenceIfNotExists(
+	divergenceAnalysis *domain.DivergenceAnalysis,
+	hierarchicalId string,
+	hierarchyLevelKey string,
+	context *DivergenceAnalysisMappingContext,
+) (*domain.PotentialDivergence, bool) {
+
+	var potentialDivergence = context.potentialDivergenceMap[hierarchicalId]
+	if potentialDivergence == nil {
+
+		potentialDivergence = &domain.PotentialDivergence{
+			HierarchyLevelKey:          hierarchyLevelKey,
+			HierarchicalId:             hierarchicalId,
+			TotalMarketValue:           0,
+			TotalMarketValueDivergence: 0,
+			InternalDivergences:        nil,
+		}
+
+		hierarchyLevelIndex := context.getCurrentHirearchicalLevelIndex()
+		if hierarchyLevelIndex > 0 {
+			potentialDivergence.InternalDivergences = make([]*domain.PotentialDivergence, 0)
+		}
+
+		if hierarchyLevelIndex == context.topAllocationHierarchyLevelIndex {
+			divergenceAnalysis.Root = append(
+				divergenceAnalysis.Root,
+				potentialDivergence,
+			)
+		}
+
+		return potentialDivergence, true
+	}
+
+	return potentialDivergence, false
+}
+
+// TODO use context instead of parameters
+func connectLowerLevelDivergence(
+	hierarchyLevelIndex int,
+	potentialDivergencesInAllocationHierarchy []*domain.PotentialDivergence,
+	potentialDivergence *domain.PotentialDivergence,
+) {
+	previousLevelIndex := hierarchyLevelIndex - 1
+	lowerLevelPotentialDivergence := potentialDivergencesInAllocationHierarchy[previousLevelIndex]
+	potentialDivergence.InternalDivergences = append(
+		potentialDivergence.InternalDivergences,
+		lowerLevelPotentialDivergence,
+	)
 }
 
 // TODO clean code
