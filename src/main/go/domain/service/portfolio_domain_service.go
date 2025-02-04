@@ -14,7 +14,7 @@ func (service *PortfolioDomService) GetPortfolios() ([]domain.Portfolio, error) 
 	return service.portfolioRepository.GetAllPortfolios()
 }
 
-func (service *PortfolioDomService) GetPortfolio(id int) (domain.Portfolio, error) {
+func (service *PortfolioDomService) GetPortfolio(id int) (*domain.Portfolio, error) {
 	return service.portfolioRepository.GetPortfolio(id)
 }
 
@@ -27,6 +27,24 @@ func (service *PortfolioDomService) FindPortfolioAllocations(
 	timeFrameTag domain.TimeFrameTag,
 ) ([]domain.PortfolioAllocation, error) {
 	return service.portfolioRepository.FindPortfolioAllocations(id, timeFrameTag)
+}
+
+func (service *PortfolioDomService) GetPortfolioSnapshot(
+	id int,
+	timeFrameTag domain.TimeFrameTag,
+) (*domain.Portfolio, []domain.PortfolioAllocation, error) {
+
+	portfolio, err := service.GetPortfolio(id)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	portfolioAllocations, err := service.FindPortfolioAllocations(id, timeFrameTag)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return portfolio, portfolioAllocations, nil
 }
 
 func (service *PortfolioDomService) GenerateHierarchicalId(

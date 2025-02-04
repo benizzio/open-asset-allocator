@@ -41,7 +41,7 @@ func (repository *PortfolioRDBMSRepository) GetAllPortfolios() ([]domain.Portfol
 	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryPortfoliosError, repository)
 }
 
-func (repository *PortfolioRDBMSRepository) GetPortfolio(id int) (domain.Portfolio, error) {
+func (repository *PortfolioRDBMSRepository) GetPortfolio(id int) (*domain.Portfolio, error) {
 
 	var query = portfolioSQL + `
 		WHERE p.id = {:id}
@@ -50,7 +50,7 @@ func (repository *PortfolioRDBMSRepository) GetPortfolio(id int) (domain.Portfol
 	var result domain.Portfolio
 	err := repository.dbAdapter.BuildQuery(query).AddParam("id", id).Build().GetInto(&result)
 
-	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryPortfolioError, repository)
+	return &result, infra.PropagateAsAppErrorWithNewMessage(err, queryPortfolioError, repository)
 }
 
 func (repository *PortfolioRDBMSRepository) GetAllPortfolioAllocations(id int, timeFrameLimit int) (

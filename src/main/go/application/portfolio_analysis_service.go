@@ -18,12 +18,7 @@ func (service *PortfolioAnalysisAppService) GeneratePortfolioDivergenceAnalysis(
 	allocationPlanId int,
 ) (*domain.DivergenceAnalysis, error) {
 
-	portfolio, err := service.portfolioDomService.GetPortfolio(id)
-	if err != nil {
-		return nil, err
-	}
-
-	portfolioAllocations, err := service.portfolioDomService.FindPortfolioAllocations(id, timeFrameTag)
+	portfolio, portfolioAllocations, err := service.portfolioDomService.GetPortfolioSnapshot(id, timeFrameTag)
 	if err != nil {
 		return nil, err
 	}
@@ -54,6 +49,7 @@ func (service *PortfolioAnalysisAppService) GeneratePortfolioDivergenceAnalysis(
 			if err != nil {
 				return nil, err
 			}
+			//hierarchicalId += "a"
 
 			hierarchyLevelKey, err := service.portfolioDomService.GetIdSegment(
 				allocation,
@@ -121,7 +117,7 @@ func (service *PortfolioAnalysisAppService) GeneratePortfolioDivergenceAnalysis(
 }
 
 func buildDivergenceAnalysis(
-	portfolio domain.Portfolio,
+	portfolio *domain.Portfolio,
 	timeFrameTag domain.TimeFrameTag,
 	allocationPlanId int,
 ) *domain.DivergenceAnalysis {

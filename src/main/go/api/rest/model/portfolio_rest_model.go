@@ -65,13 +65,13 @@ func (aggregationMap portfolioAllocationsPerTimeFrameMap) getAggregatedMarketVal
 func MapPortfolios(portfolios []domain.Portfolio) []PortfolioDTS {
 	var portfoliosDTS = make([]PortfolioDTS, 0)
 	for _, portfolio := range portfolios {
-		var portfolioDTS = MapPortfolio(portfolio)
+		var portfolioDTS = MapPortfolio(&portfolio)
 		portfoliosDTS = append(portfoliosDTS, *portfolioDTS)
 	}
 	return portfoliosDTS
 }
 
-func MapPortfolio(portfolio domain.Portfolio) *PortfolioDTS {
+func MapPortfolio(portfolio *domain.Portfolio) *PortfolioDTS {
 	var structure = mapAllocationStructure(portfolio.AllocationStructure)
 	var portfolioDTS = PortfolioDTS{
 		Id:                  portfolio.Id,
