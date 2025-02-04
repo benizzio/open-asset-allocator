@@ -10,7 +10,7 @@ type PortfolioDomService struct {
 	portfolioRepository                  domain.PortfolioRepository
 }
 
-func (service *PortfolioDomService) GetPortfolios() ([]domain.Portfolio, error) {
+func (service *PortfolioDomService) GetPortfolios() ([]*domain.Portfolio, error) {
 	return service.portfolioRepository.GetAllPortfolios()
 }
 
@@ -18,21 +18,21 @@ func (service *PortfolioDomService) GetPortfolio(id int) (*domain.Portfolio, err
 	return service.portfolioRepository.GetPortfolio(id)
 }
 
-func (service *PortfolioDomService) GetPortfolioAllocationHistory(id int) ([]domain.PortfolioAllocation, error) {
+func (service *PortfolioDomService) GetPortfolioAllocationHistory(id int) ([]*domain.PortfolioAllocation, error) {
 	return service.portfolioRepository.GetAllPortfolioAllocations(id, 10)
 }
 
 func (service *PortfolioDomService) FindPortfolioAllocations(
 	id int,
 	timeFrameTag domain.TimeFrameTag,
-) ([]domain.PortfolioAllocation, error) {
+) ([]*domain.PortfolioAllocation, error) {
 	return service.portfolioRepository.FindPortfolioAllocations(id, timeFrameTag)
 }
 
 func (service *PortfolioDomService) GetPortfolioSnapshot(
 	id int,
 	timeFrameTag domain.TimeFrameTag,
-) (*domain.Portfolio, []domain.PortfolioAllocation, error) {
+) (*domain.Portfolio, []*domain.PortfolioAllocation, error) {
 
 	portfolio, err := service.GetPortfolio(id)
 	if err != nil {
@@ -48,7 +48,7 @@ func (service *PortfolioDomService) GetPortfolioSnapshot(
 }
 
 func (service *PortfolioDomService) GenerateHierarchicalId(
-	allocation domain.PortfolioAllocation,
+	allocation *domain.PortfolioAllocation,
 	hierarchy domain.AllocationHierarchy,
 	hierarchyLevelIndex int,
 ) (string, error) {
@@ -58,7 +58,7 @@ func (service *PortfolioDomService) GenerateHierarchicalId(
 
 	for i := highestHierarchyIndex; i >= hierarchyLevelIndex; i-- {
 
-		idSegment, err := service.GetIdSegment(allocation, hierarchy[i])
+		idSegment, err := service.GetIdSegment(allocation, &hierarchy[i])
 		if err != nil {
 			return "", err
 		}
@@ -74,8 +74,8 @@ func (service *PortfolioDomService) GenerateHierarchicalId(
 }
 
 func (service *PortfolioDomService) GetIdSegment(
-	allocation domain.PortfolioAllocation,
-	hierarchyLevel domain.AllocationHierarchyLevel,
+	allocation *domain.PortfolioAllocation,
+	hierarchyLevel *domain.AllocationHierarchyLevel,
 ) (string, error) {
 
 	var hierarchyLevelKey, err = service.getHierarchyLevelFieldValue(hierarchyLevel, allocation)
@@ -87,14 +87,14 @@ func (service *PortfolioDomService) GetIdSegment(
 }
 
 func (service *PortfolioDomService) getHierarchyLevelFieldValue(
-	level domain.AllocationHierarchyLevel,
-	allocation domain.PortfolioAllocation,
+	level *domain.AllocationHierarchyLevel,
+	allocation *domain.PortfolioAllocation,
 ) (string, error) {
 	extractorFunction, ok := service.allocationHierarchyFieldExtractorMap[level.Field]
 	if !ok {
 		return "", infra.BuildAppErrorFormatted("No extractor registered for field: %s", level.Field)
 	}
-	return extractorFunction(&allocation), nil
+	return extractorFunction(allocation), nil
 }
 
 func BuildPortfolioDomService(portfolioRepository domain.PortfolioRepository) *PortfolioDomService {

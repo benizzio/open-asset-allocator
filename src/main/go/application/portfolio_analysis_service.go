@@ -53,7 +53,7 @@ func (service *PortfolioAnalysisAppService) GeneratePortfolioDivergenceAnalysis(
 
 			hierarchyLevelKey, err := service.portfolioDomService.GetIdSegment(
 				allocation,
-				hierarchyLevel,
+				&hierarchyLevel,
 			)
 			if err != nil {
 				return nil, err

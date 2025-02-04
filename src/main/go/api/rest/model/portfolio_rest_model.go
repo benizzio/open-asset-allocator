@@ -62,10 +62,10 @@ func (aggregationMap portfolioAllocationsPerTimeFrameMap) getAggregatedMarketVal
 // MAPPING FUNCTIONS
 // ================================================
 
-func MapPortfolios(portfolios []domain.Portfolio) []PortfolioDTS {
+func MapPortfolios(portfolios []*domain.Portfolio) []PortfolioDTS {
 	var portfoliosDTS = make([]PortfolioDTS, 0)
 	for _, portfolio := range portfolios {
-		var portfolioDTS = MapPortfolio(&portfolio)
+		var portfolioDTS = MapPortfolio(portfolio)
 		portfoliosDTS = append(portfoliosDTS, *portfolioDTS)
 	}
 	return portfoliosDTS
@@ -81,13 +81,13 @@ func MapPortfolio(portfolio *domain.Portfolio) *PortfolioDTS {
 	return &portfolioDTS
 }
 
-func AggregateAndMapPortfolioHistory(portfolioHistory []domain.PortfolioAllocation) []PortfolioAtTimeDTS {
+func AggregateAndMapPortfolioHistory(portfolioHistory []*domain.PortfolioAllocation) []PortfolioAtTimeDTS {
 	portfolioAllocationsPerTimeFrame := aggregateHistoryAsDTSMap(portfolioHistory)
 	aggregatedPortfolioHistory := buildHistoryDTS(portfolioAllocationsPerTimeFrame)
 	return aggregatedPortfolioHistory
 }
 
-func aggregateHistoryAsDTSMap(portfolioHistory []domain.PortfolioAllocation) portfolioAllocationsPerTimeFrameMap {
+func aggregateHistoryAsDTSMap(portfolioHistory []*domain.PortfolioAllocation) portfolioAllocationsPerTimeFrameMap {
 
 	var portfolioAllocationsPerTimeFrame = make(portfolioAllocationsPerTimeFrameMap)
 	for _, portfolioAllocation := range portfolioHistory {
@@ -99,7 +99,7 @@ func aggregateHistoryAsDTSMap(portfolioHistory []domain.PortfolioAllocation) por
 	return portfolioAllocationsPerTimeFrame
 }
 
-func portfolioAllocationToAllocationDTS(portfolioAllocation domain.PortfolioAllocation) PortfolioAllocationDTS {
+func portfolioAllocationToAllocationDTS(portfolioAllocation *domain.PortfolioAllocation) PortfolioAllocationDTS {
 	return PortfolioAllocationDTS{
 		AssetName:        portfolioAllocation.Asset.Name,
 		AssetTicker:      portfolioAllocation.Asset.Ticker,
