@@ -8,16 +8,6 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-const (
-	allocationIterationMappingContextKey   = "allocationIterationMappingContext"
-	hierarchySubIterationMappingContextKey = "hierarchySubIterationMappingContext"
-)
-
-type allocationIterationMappingContextValue struct {
-	potentialDivergenceMap       map[string]*domain.PotentialDivergence
-	portfolioAllocationsIterator *util.Iterator[*domain.PortfolioAllocation]
-}
-
 type PortfolioAnalysisAppService struct {
 	portfolioDomService      *service.PortfolioDomService
 	allocationPlanDomService *service.AllocationPlanDomService
@@ -30,14 +20,14 @@ func (service *PortfolioAnalysisAppService) GeneratePortfolioDivergenceAnalysis(
 	allocationPlanId int,
 ) (*domain.DivergenceAnalysis, error) {
 
-	var analysisContext = context.Background()
-
 	portfolio, portfolioAllocations, err := service.portfolioDomService.GetPortfolioSnapshot(id, timeFrameTag)
 	if err != nil {
 		return nil, err
 	}
 
 	var divergenceAnalysis = buildDivergenceAnalysis(portfolio, timeFrameTag, allocationPlanId)
+
+	var analysisContext = context.WithValue(context.Background(), divergenceAnalysisContextKey, divergenceAnalysis)
 
 	err = service.mapPotentialDivergencesFromPortfolioAllocations(
 		analysisContext,
@@ -75,11 +65,7 @@ func (service *PortfolioAnalysisAppService) mapPotentialDivergencesFromPortfolio
 		portfolioAllocationsIterator: util.NewIterator(portfolioAllocations),
 	}
 
-	var allocationIterationMappingContext = context.WithValue(
-		analysisContext,
-		allocationIterationMappingContextKey,
-		iterationContextValue,
-	)
+	var allocationIterationMappingContext = buildAllocationIterationContext(analysisContext, iterationContextValue)
 
 	for iterationContextValue.portfolioAllocationsIterator.HasNext() {
 
@@ -87,7 +73,6 @@ func (service *PortfolioAnalysisAppService) mapPotentialDivergencesFromPortfolio
 
 		err := service.mapPotentialDivergenceFromPortfolioAllocation(
 			allocationIterationMappingContext,
-			divergenceAnalysis,
 			allocationHierarchy,
 		)
 		if err != nil {
@@ -102,61 +87,76 @@ func (service *PortfolioAnalysisAppService) mapPotentialDivergencesFromPortfolio
 
 func (service *PortfolioAnalysisAppService) mapPotentialDivergenceFromPortfolioAllocation(
 	analysisContext context.Context,
-	divergenceAnalysis *domain.DivergenceAnalysis,
 	allocationHierarchy domain.AllocationHierarchy,
 ) error {
 
-	//TODO make a context type with methods do do this
-	var allocationIterationContextValue = analysisContext.
-		Value(allocationIterationMappingContextKey).(*allocationIterationMappingContextValue)
+	var allocationIterationContextValue = getAllocationIterationContextValue(analysisContext)
+
+	var allocationHierarchyIterator = util.NewIterator(allocationHierarchy)
+	var hierarchySubIterationMappingContext = buildHierarchySubIterationContext(
+		analysisContext,
+		allocationHierarchyIterator,
+	)
 
 	var potentialDivergencesInAllocationHierarchy = make([]*domain.PotentialDivergence, allocationHierarchy.Size())
 	var lowerLevelPotentialDivergenceCreated = false
-
-	var allocationHierarchyIterator = util.NewIterator(allocationHierarchy)
-	//TODO make a context type with methods do do this
-	var hierarchySubIterationMappingContext = context.WithValue(
-		analysisContext,
-		hierarchySubIterationMappingContextKey,
-		allocationHierarchyIterator,
-	)
 
 	for allocationHierarchyIterator.HasNext() {
 
 		var _, allocationHierarchyLevelIndex = allocationHierarchyIterator.Next()
 
-		hierarchicalId, hierarchyLevelKey, err := service.generatePotentialDivergenceIdentifiers(
+		var lowerLevelDivergence *domain.PotentialDivergence
+		if lowerLevelPotentialDivergenceCreated {
+			lowerLevelDivergence = potentialDivergencesInAllocationHierarchy[allocationHierarchyLevelIndex-1]
+		}
+
+		potentialDivergence, potentialDivergenceCreated, err := service.buildAndConnectPotentialDivergenceIfNotExists(
 			hierarchySubIterationMappingContext,
 			allocationHierarchy,
+			lowerLevelDivergence,
 		)
 		if err != nil {
 			return err
 		}
 
-		var potentialDivergence, potentialDivergenceCreated = buildPotentialDivergenceIfNotExists(
-			hierarchySubIterationMappingContext,
-			divergenceAnalysis,
-			hierarchicalId,
-			hierarchyLevelKey,
-		)
-
-		if lowerLevelPotentialDivergenceCreated {
-			connectLowerLevelDivergence(
-				potentialDivergence,
-				potentialDivergencesInAllocationHierarchy[allocationHierarchyLevelIndex-1],
-			)
+		if potentialDivergenceCreated {
+			potentialDivergencesInAllocationHierarchy[allocationHierarchyLevelIndex] = potentialDivergence
 		}
-
-		potentialDivergencesInAllocationHierarchy[allocationHierarchyLevelIndex] = potentialDivergence
 
 		var currentAllocation, _ = allocationIterationContextValue.portfolioAllocationsIterator.Current()
 		potentialDivergence.TotalMarketValue += currentAllocation.TotalMarketValue
 
 		lowerLevelPotentialDivergenceCreated = potentialDivergenceCreated
-
 	}
 
 	return nil
+}
+
+func (service *PortfolioAnalysisAppService) buildAndConnectPotentialDivergenceIfNotExists(
+	hierarchySubIterationMappingContext context.Context,
+	allocationHierarchy domain.AllocationHierarchy,
+	lowerLevelDivergence *domain.PotentialDivergence,
+) (*domain.PotentialDivergence, bool, error) {
+
+	hierarchicalId, hierarchyLevelKey, err := service.generatePotentialDivergenceIdentifiers(
+		hierarchySubIterationMappingContext,
+		allocationHierarchy,
+	)
+	if err != nil {
+		return nil, false, err
+	}
+
+	var potentialDivergence, potentialDivergenceCreated = buildAndAttachPotentialDivergenceIfNotExists(
+		hierarchySubIterationMappingContext,
+		hierarchicalId,
+		hierarchyLevelKey,
+	)
+
+	if lowerLevelDivergence != nil {
+		potentialDivergence.AddInternalDivergence(lowerLevelDivergence)
+	}
+
+	return potentialDivergence, potentialDivergenceCreated, nil
 }
 
 func (service *PortfolioAnalysisAppService) generatePotentialDivergenceIdentifiers(
@@ -164,15 +164,9 @@ func (service *PortfolioAnalysisAppService) generatePotentialDivergenceIdentifie
 	allocationHierarchy domain.AllocationHierarchy,
 ) (string, string, error) {
 
-	//TODO make a context type with methods do do this
-	var allocationIterationContextValue = analysisContext.
-		Value(allocationIterationMappingContextKey).(*allocationIterationMappingContextValue)
-
+	var allocationIterationContextValue = getAllocationIterationContextValue(analysisContext)
 	var currentAllocation, _ = allocationIterationContextValue.portfolioAllocationsIterator.Current()
-
-	//TODO make a context type with methods do do this
-	var currentHierarchyLevelIterator = analysisContext.
-		Value(hierarchySubIterationMappingContextKey).(*util.Iterator[domain.AllocationHierarchyLevel])
+	var currentHierarchyLevelIterator = getHierarchySubIterationContextValue(analysisContext)
 	var currentHierarchyLevel, currentHierarchyLevelIndex = currentHierarchyLevelIterator.CurrentPointer()
 
 	hierarchicalId, err := service.portfolioDomService.GenerateHierarchicalId(
@@ -209,45 +203,29 @@ func buildDivergenceAnalysis(
 	}
 }
 
-// TODO clean code
-func buildPotentialDivergenceIfNotExists(
+func buildAndAttachPotentialDivergenceIfNotExists(
 	analysisContext context.Context,
-	divergenceAnalysis *domain.DivergenceAnalysis,
 	hierarchicalId string,
 	hierarchyLevelKey string,
 ) (*domain.PotentialDivergence, bool) {
 
-	//TODO make a context type with methods do do this
-	var allocationIterationContextValue = analysisContext.
-		Value(allocationIterationMappingContextKey).(*allocationIterationMappingContextValue)
-
-	//TODO make a context type with methods do do this
-	var currentHierarchyLevelIterator = analysisContext.
-		Value(hierarchySubIterationMappingContextKey).(*util.Iterator[domain.AllocationHierarchyLevel])
+	var allocationIterationContextValue = getAllocationIterationContextValue(analysisContext)
+	var currentHierarchyLevelIterator = getHierarchySubIterationContextValue(analysisContext)
 	var _, currentHierarchyLevelIndex = currentHierarchyLevelIterator.Current()
 
 	var potentialDivergence = allocationIterationContextValue.potentialDivergenceMap[hierarchicalId]
 	if potentialDivergence == nil {
 
-		potentialDivergence = &domain.PotentialDivergence{
-			HierarchyLevelKey:          hierarchyLevelKey,
-			HierarchicalId:             hierarchicalId,
-			TotalMarketValue:           0,
-			TotalMarketValueDivergence: 0,
-			InternalDivergences:        nil,
-		}
+		potentialDivergence = newPotentialDivergence(hierarchyLevelKey, hierarchicalId)
 
 		if currentHierarchyLevelIndex > 0 {
 			potentialDivergence.InternalDivergences = make([]*domain.PotentialDivergence, 0)
 		}
 
-		var topAllocationHierarchyLevelIndex = currentHierarchyLevelIterator.Size() - 1
-		if currentHierarchyLevelIndex == topAllocationHierarchyLevelIndex {
-			divergenceAnalysis.Root = append(
-				divergenceAnalysis.Root,
-				potentialDivergence,
-			)
-		}
+		attachToRootIfTopLevel(
+			analysisContext,
+			potentialDivergence,
+		)
 
 		allocationIterationContextValue.potentialDivergenceMap[hierarchicalId] = potentialDivergence
 
@@ -257,15 +235,29 @@ func buildPotentialDivergenceIfNotExists(
 	return potentialDivergence, false
 }
 
-// TODO remove this for an add metod in slice
-func connectLowerLevelDivergence(
+func newPotentialDivergence(hierarchyLevelKey string, hierarchicalId string) *domain.PotentialDivergence {
+	return &domain.PotentialDivergence{
+		HierarchyLevelKey:          hierarchyLevelKey,
+		HierarchicalId:             hierarchicalId,
+		TotalMarketValue:           0,
+		TotalMarketValueDivergence: 0,
+		InternalDivergences:        nil,
+	}
+}
+
+func attachToRootIfTopLevel(
+	analysisContext context.Context,
 	potentialDivergence *domain.PotentialDivergence,
-	lowerLevelDivergence *domain.PotentialDivergence,
 ) {
-	potentialDivergence.InternalDivergences = append(
-		potentialDivergence.InternalDivergences,
-		lowerLevelDivergence,
-	)
+
+	var currentHierarchyLevelIterator = getHierarchySubIterationContextValue(analysisContext)
+	var topAllocationHierarchyLevelIndex = currentHierarchyLevelIterator.Size() - 1
+	var _, currentHierarchyLevelIndex = currentHierarchyLevelIterator.Current()
+	var divergenceAnalysis = getDivergenceAnalysisContextValue(analysisContext)
+
+	if currentHierarchyLevelIndex == topAllocationHierarchyLevelIndex {
+		divergenceAnalysis.AddRootDivergence(potentialDivergence)
+	}
 }
 
 // TODO clean code
