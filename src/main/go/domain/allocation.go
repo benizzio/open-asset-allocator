@@ -14,6 +14,11 @@ type AllocationHierarchyLevel struct {
 
 type AllocationHierarchy []AllocationHierarchyLevel
 
+// TODO add as generic slice method
+func (hierarchy AllocationHierarchy) Size() int {
+	return len(hierarchy)
+}
+
 type AllocationStructure struct {
 	Hierarchy AllocationHierarchy `json:"hierarchy,omitempty"`
 }
