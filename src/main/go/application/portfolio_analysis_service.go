@@ -33,10 +33,7 @@ func (service *PortfolioAnalysisAppService) GeneratePortfolioDivergenceAnalysis(
 
 	analysisContext = buildPotentialDivergenceMapContext(analysisContext, potentialDivergenceMap)
 
-	err = service.complementAnalysisWithAllocationPlanSetDifference(
-		analysisContext,
-		allocationPlanId,
-	)
+	err = service.complementAnalysisWithAllocationPlanSetDifference(analysisContext, allocationPlanId)
 	if err != nil {
 		return nil, err
 	}
@@ -103,9 +100,7 @@ func (service *PortfolioAnalysisAppService) mapPotentialDivergencesFromPortfolio
 
 		var allocation, _ = iterationContextValue.portfolioAllocationsIterator.Next()
 
-		err := service.mapPotentialDivergenceFromPortfolioAllocation(
-			allocationIterationMappingContext,
-		)
+		err := service.mapPotentialDivergenceFromPortfolioAllocation(allocationIterationMappingContext)
 		if err != nil {
 			return nil, err
 		}
@@ -239,10 +234,7 @@ func (service *PortfolioAnalysisAppService) generatePotentialDivergenceIdentifie
 	}
 	//hierarchicalId += "a"
 
-	hierarchyLevelKey, err := service.portfolioDomService.GetIdSegment(
-		currentAllocation,
-		currentHierarchyLevel,
-	)
+	hierarchyLevelKey, err := service.portfolioDomService.GetIdSegment(currentAllocation, currentHierarchyLevel)
 	if err != nil {
 		return "", "", err
 	}
@@ -279,10 +271,7 @@ func buildAndAttachPotentialDivergenceIfNotExists(
 		var isLowestLevel = currentHierarchyLevelIndex == 0
 		potentialDivergence = newPotentialDivergence(hierarchyLevelKey, hierarchicalId, isLowestLevel)
 
-		attachToRootIfTopLevel(
-			analysisContext,
-			potentialDivergence,
-		)
+		attachToRootIfTopLevel(analysisContext, potentialDivergence)
 
 		allocationIterationContextValue.potentialDivergenceMap[hierarchicalId] = potentialDivergence
 
@@ -342,7 +331,9 @@ func calculateCurrentDivergenceValuesFromReferencedPlan(
 
 			if potentialDivergence.InternalDivergences != nil {
 				calculateCurrentDivergenceValuesFromReferencedPlan(
-					potentialDivergence.InternalDivergences, plannedAllocationMap, potentialDivergence.TotalMarketValue,
+					potentialDivergence.InternalDivergences,
+					plannedAllocationMap,
+					potentialDivergence.TotalMarketValue,
 				)
 			}
 
