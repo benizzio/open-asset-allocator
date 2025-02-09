@@ -13,8 +13,38 @@ type PortfolioAnalysisAppService struct {
 	allocationPlanDomService *service.AllocationPlanDomService
 }
 
-// TODO clean code
 func (service *PortfolioAnalysisAppService) GeneratePortfolioDivergenceAnalysis(
+	id int,
+	timeFrameTag domain.TimeFrameTag,
+	allocationPlanId int,
+) (*domain.DivergenceAnalysis, error) {
+
+	divergenceAnalysis, err := service.generateDivergenceAnalysisFromPortfolioAllocationSet(
+		id,
+		timeFrameTag,
+		allocationPlanId,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	plannedAllocationMap, err := service.allocationPlanDomService.GetPlannedAllocationsPerHyerarchicalIdMap(allocationPlanId)
+	if err != nil {
+		return nil, err
+	}
+
+	calculateCurrentDivergenceValuesFromReferencedPlan(
+		divergenceAnalysis.Root,
+		plannedAllocationMap,
+		divergenceAnalysis.PortfolioTotalMarketValue,
+	)
+
+	//TODO calculate planned side set difference (still in plannedAllocationMap, use it to create potential divergences)
+
+	return divergenceAnalysis, nil
+}
+
+func (service *PortfolioAnalysisAppService) generateDivergenceAnalysisFromPortfolioAllocationSet(
 	id int,
 	timeFrameTag domain.TimeFrameTag,
 	allocationPlanId int,
@@ -26,8 +56,7 @@ func (service *PortfolioAnalysisAppService) GeneratePortfolioDivergenceAnalysis(
 	}
 
 	var divergenceAnalysis = buildDivergenceAnalysis(portfolio, timeFrameTag, allocationPlanId)
-
-	var analysisContext = context.WithValue(context.Background(), divergenceAnalysisContextKey, divergenceAnalysis)
+	var analysisContext = buildDivergenceAnalysisContext(context.Background(), divergenceAnalysis)
 
 	err = service.mapPotentialDivergencesFromPortfolioAllocations(
 		analysisContext,
@@ -38,15 +67,6 @@ func (service *PortfolioAnalysisAppService) GeneratePortfolioDivergenceAnalysis(
 	if err != nil {
 		return nil, err
 	}
-
-	plannedAllocationMap, err := service.allocationPlanDomService.GetPlannedAllocationsPerHyerarchicalIdMap(allocationPlanId)
-	if err != nil {
-		return nil, err
-	}
-
-	setDivergenceValues(divergenceAnalysis.Root, plannedAllocationMap, divergenceAnalysis.PortfolioTotalMarketValue)
-
-	//TODO calculate planned side set difference (still in plannedAllocationMap, use it to create potential divergences)
 
 	return divergenceAnalysis, nil
 }
@@ -260,33 +280,41 @@ func attachToRootIfTopLevel(
 	}
 }
 
-// TODO clean code
-func setDivergenceValues(
+func calculateCurrentDivergenceValuesFromReferencedPlan(
 	potentialDivergences []*domain.PotentialDivergence,
 	plannedAllocationMap domain.PlannedAllocationsPerHierarchicalId,
 	levelTotalMarketValue int64,
 ) {
 	for _, potentialDivergence := range potentialDivergences {
 
-		plannedAllocation := plannedAllocationMap.Get(potentialDivergence.HierarchicalId)
+		var plannedAllocation = plannedAllocationMap.Get(potentialDivergence.HierarchicalId)
 		if plannedAllocation != nil {
 
-			var plannedAllocationValue = plannedAllocation.SliceSizePercentage.
-				Mul(decimal.NewFromInt(levelTotalMarketValue)).
-				Round(0).IntPart()
-			potentialDivergence.TotalMarketValueDivergence = potentialDivergence.TotalMarketValue - plannedAllocationValue
+			calculateDivergenceValue(potentialDivergence, plannedAllocation, levelTotalMarketValue)
 
 			if potentialDivergence.InternalDivergences != nil {
-				setDivergenceValues(
+				calculateCurrentDivergenceValuesFromReferencedPlan(
 					potentialDivergence.InternalDivergences, plannedAllocationMap, potentialDivergence.TotalMarketValue,
 				)
 			}
 
+			//To allow for planned side set difference
 			plannedAllocationMap.Remove(potentialDivergence.HierarchicalId)
 		} else {
 			potentialDivergence.TotalMarketValueDivergence = potentialDivergence.TotalMarketValue
 		}
 	}
+}
+
+func calculateDivergenceValue(
+	potentialDivergence *domain.PotentialDivergence,
+	plannedAllocation *domain.PlannedAllocation,
+	levelTotalMarketValue int64,
+) {
+	var plannedAllocationValue = plannedAllocation.SliceSizePercentage.
+		Mul(decimal.NewFromInt(levelTotalMarketValue)).
+		Round(0).IntPart()
+	potentialDivergence.TotalMarketValueDivergence = potentialDivergence.TotalMarketValue - plannedAllocationValue
 }
 
 func BuildPortfolioAnalysisAppService(
