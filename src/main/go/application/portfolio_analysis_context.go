@@ -7,10 +7,17 @@ import (
 )
 
 const (
-	allocationIterationContextKey   = "allocationIteration"
-	hierarchySubIterationContextKey = "hierarchySubIteration"
-	divergenceAnalysisContextKey    = "divergenceAnalysis"
+	allocationIterationContextKey    = "allocationIteration"
+	hierarchySubIterationContextKey  = "hierarchySubIteration"
+	divergenceAnalysisContextKey     = "divergenceAnalysis"
+	potentialDivergenceMapContextKey = "potentialDivergenceMap"
 )
+
+type divergenceAnalysisContextValue struct {
+	portfolio            *domain.Portfolio
+	portfolioAllocations []*domain.PortfolioAllocation
+	divergenceAnalysis   *domain.DivergenceAnalysis
+}
 
 type allocationIterationMappingContextValue struct {
 	potentialDivergenceMap       potentialDivercencesPerHierarchicalId
@@ -19,13 +26,13 @@ type allocationIterationMappingContextValue struct {
 
 func buildDivergenceAnalysisContext(
 	ctx context.Context,
-	divergenceAnalysis *domain.DivergenceAnalysis,
+	divergenceAnalysis *divergenceAnalysisContextValue,
 ) context.Context {
 	return context.WithValue(ctx, divergenceAnalysisContextKey, divergenceAnalysis)
 }
 
-func getDivergenceAnalysisContextValue(ctx context.Context) *domain.DivergenceAnalysis {
-	return ctx.Value(divergenceAnalysisContextKey).(*domain.DivergenceAnalysis)
+func getDivergenceAnalysisContextValue(ctx context.Context) *divergenceAnalysisContextValue {
+	return ctx.Value(divergenceAnalysisContextKey).(*divergenceAnalysisContextValue)
 }
 
 func buildAllocationIterationContext(
@@ -48,4 +55,15 @@ func buildHierarchySubIterationContext(
 
 func getHierarchySubIterationContextValue(ctx context.Context) *util.Iterator[domain.AllocationHierarchyLevel] {
 	return ctx.Value(hierarchySubIterationContextKey).(*util.Iterator[domain.AllocationHierarchyLevel])
+}
+
+func buildPotentialDivergenceMapContext(
+	ctx context.Context,
+	value potentialDivercencesPerHierarchicalId,
+) context.Context {
+	return context.WithValue(ctx, potentialDivergenceMapContextKey, value)
+}
+
+func getPotentialDivergenceMapContextValue(ctx context.Context) potentialDivercencesPerHierarchicalId {
+	return ctx.Value(potentialDivergenceMapContextKey).(potentialDivercencesPerHierarchicalId)
 }

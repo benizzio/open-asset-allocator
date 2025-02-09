@@ -21,6 +21,36 @@ func (service *PortfolioAnalysisAppService) GeneratePortfolioDivergenceAnalysis(
 	allocationPlanId int,
 ) (*domain.DivergenceAnalysis, error) {
 
+	var analysisContext, err = service.initializeAnalysisContext(portfolioId, timeFrameTag, allocationPlanId)
+	if err != nil {
+		return nil, err
+	}
+
+	potentialDivergenceMap, err := service.generateDivergenceAnalysisFromPortfolioAllocationSet(analysisContext)
+	if err != nil {
+		return nil, err
+	}
+
+	analysisContext = buildPotentialDivergenceMapContext(analysisContext, potentialDivergenceMap)
+
+	err = service.complementAnalysisWithAllocationPlanSetDifference(
+		analysisContext,
+		allocationPlanId,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	var divergenceAnalysis = getDivergenceAnalysisContextValue(analysisContext).divergenceAnalysis
+	return divergenceAnalysis, nil
+}
+
+func (service *PortfolioAnalysisAppService) initializeAnalysisContext(
+	portfolioId int,
+	timeFrameTag domain.TimeFrameTag,
+	allocationPlanId int,
+) (context.Context, error) {
+
 	var portfolio, portfolioAllocations, err = service.portfolioDomService.GetPortfolioSnapshot(
 		portfolioId,
 		timeFrameTag,
@@ -29,69 +59,38 @@ func (service *PortfolioAnalysisAppService) GeneratePortfolioDivergenceAnalysis(
 		return nil, err
 	}
 
-	divergenceAnalysis, potentialDivergenceMap, err := service.generateDivergenceAnalysisFromPortfolioAllocationSet(
-		portfolio,
-		portfolioAllocations,
-		timeFrameTag,
-		allocationPlanId,
-	)
-	if err != nil {
-		return nil, err
+	var divergenceAnalysis = buildDivergenceAnalysis(portfolio, timeFrameTag, allocationPlanId)
+
+	var analysisContextValue = &divergenceAnalysisContextValue{
+		portfolio:            portfolio,
+		portfolioAllocations: portfolioAllocations,
+		divergenceAnalysis:   divergenceAnalysis,
 	}
 
-	plannedAllocationMap, err := service.allocationPlanDomService.GetPlannedAllocationsPerHyerarchicalIdMap(allocationPlanId)
-	if err != nil {
-		return nil, err
-	}
-
-	calculateCurrentDivergenceValuesFromReferencedPlan(
-		divergenceAnalysis.Root,
-		plannedAllocationMap,
-		divergenceAnalysis.PortfolioTotalMarketValue,
-	)
-
-	generatePotentialDivergencesFromAllocationPlanSetDifference(
-		portfolio,
-		divergenceAnalysis,
-		potentialDivergenceMap,
-		plannedAllocationMap,
-	)
-
-	return divergenceAnalysis, nil
+	var analysisContext = buildDivergenceAnalysisContext(context.Background(), analysisContextValue)
+	return analysisContext, nil
 }
 
 func (service *PortfolioAnalysisAppService) generateDivergenceAnalysisFromPortfolioAllocationSet(
-	portfolio *domain.Portfolio,
-	portfolioAllocations []*domain.PortfolioAllocation,
-	timeFrameTag domain.TimeFrameTag,
-	allocationPlanId int,
-) (*domain.DivergenceAnalysis, potentialDivercencesPerHierarchicalId, error) {
+	analysisContext context.Context,
+) (potentialDivercencesPerHierarchicalId, error) {
 
-	var divergenceAnalysis = buildDivergenceAnalysis(portfolio, timeFrameTag, allocationPlanId)
-	var analysisContext = buildDivergenceAnalysisContext(context.Background(), divergenceAnalysis)
-
-	potentialDivergenceMap, err := service.mapPotentialDivergencesFromPortfolioAllocations(
-		analysisContext,
-		divergenceAnalysis,
-		portfolio,
-		portfolioAllocations,
-	)
+	potentialDivergenceMap, err := service.mapPotentialDivergencesFromPortfolioAllocations(analysisContext)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return divergenceAnalysis, potentialDivergenceMap, nil
+	return potentialDivergenceMap, nil
 }
 
 func (service *PortfolioAnalysisAppService) mapPotentialDivergencesFromPortfolioAllocations(
 	analysisContext context.Context,
-	divergenceAnalysis *domain.DivergenceAnalysis,
-	portfolio *domain.Portfolio,
-	portfolioAllocations []*domain.PortfolioAllocation,
 ) (potentialDivercencesPerHierarchicalId, error) {
 
-	var allocationHierarchy = portfolio.AllocationStructure.Hierarchy
+	var analysisContextValue = getDivergenceAnalysisContextValue(analysisContext)
+	var divergenceAnalysis = analysisContextValue.divergenceAnalysis
 	var potentialDivergenceMap = make(potentialDivercencesPerHierarchicalId)
+	var portfolioAllocations = analysisContextValue.portfolioAllocations
 
 	var iterationContextValue = &allocationIterationMappingContextValue{
 		potentialDivergenceMap:       potentialDivergenceMap,
@@ -106,7 +105,6 @@ func (service *PortfolioAnalysisAppService) mapPotentialDivergencesFromPortfolio
 
 		err := service.mapPotentialDivergenceFromPortfolioAllocation(
 			allocationIterationMappingContext,
-			allocationHierarchy,
 		)
 		if err != nil {
 			return nil, err
@@ -118,12 +116,41 @@ func (service *PortfolioAnalysisAppService) mapPotentialDivergencesFromPortfolio
 	return potentialDivergenceMap, nil
 }
 
-func (service *PortfolioAnalysisAppService) mapPotentialDivergenceFromPortfolioAllocation(
+func (service *PortfolioAnalysisAppService) complementAnalysisWithAllocationPlanSetDifference(
 	analysisContext context.Context,
-	allocationHierarchy domain.AllocationHierarchy,
+	allocationPlanId int,
 ) error {
 
+	var analysisContextValue = getDivergenceAnalysisContextValue(analysisContext)
+	var divergenceAnalysis = analysisContextValue.divergenceAnalysis
+
+	plannedAllocationMap, err := service.allocationPlanDomService.GetPlannedAllocationsPerHyerarchicalIdMap(allocationPlanId)
+	if err != nil {
+		return err
+	}
+
+	calculateCurrentDivergenceValuesFromReferencedPlan(
+		divergenceAnalysis.Root,
+		plannedAllocationMap,
+		divergenceAnalysis.PortfolioTotalMarketValue,
+	)
+
+	generatePotentialDivergencesFromAllocationPlanSetDifference(
+		analysisContext,
+		divergenceAnalysis,
+		plannedAllocationMap,
+	)
+
+	return nil
+}
+
+func (service *PortfolioAnalysisAppService) mapPotentialDivergenceFromPortfolioAllocation(
+	analysisContext context.Context,
+) error {
+
+	var analysisContextValue = getDivergenceAnalysisContextValue(analysisContext)
 	var allocationIterationContextValue = getAllocationIterationContextValue(analysisContext)
+	var allocationHierarchy = analysisContextValue.portfolio.AllocationStructure.Hierarchy
 
 	var allocationHierarchyIterator = util.NewIterator(allocationHierarchy)
 	var hierarchySubIterationMappingContext = buildHierarchySubIterationContext(
@@ -294,10 +321,10 @@ func attachToRootIfTopLevel(
 	var currentHierarchyLevelIterator = getHierarchySubIterationContextValue(analysisContext)
 	var topAllocationHierarchyLevelIndex = currentHierarchyLevelIterator.Size() - 1
 	var _, currentHierarchyLevelIndex = currentHierarchyLevelIterator.Current()
-	var divergenceAnalysis = getDivergenceAnalysisContextValue(analysisContext)
+	var analysisContextValue = getDivergenceAnalysisContextValue(analysisContext)
 
 	if currentHierarchyLevelIndex == topAllocationHierarchyLevelIndex {
-		divergenceAnalysis.AddRootDivergence(potentialDivergence)
+		analysisContextValue.divergenceAnalysis.AddRootDivergence(potentialDivergence)
 	}
 }
 
@@ -340,13 +367,15 @@ func calculateDivergenceValue(
 
 // TODO clean code
 func generatePotentialDivergencesFromAllocationPlanSetDifference(
-	portfolio *domain.Portfolio,
+	analysisContext context.Context,
 	divergenceAnalysis *domain.DivergenceAnalysis,
-	potentialDivergenceMap potentialDivercencesPerHierarchicalId,
 	plannedAllocationMap domain.PlannedAllocationsPerHierarchicalId,
 ) {
 
-	var hierarchySize = portfolio.AllocationStructure.Hierarchy.Size()
+	var analysisContextValue = getDivergenceAnalysisContextValue(analysisContext)
+	var hierarchySize = analysisContextValue.portfolio.AllocationStructure.Hierarchy.Size()
+	var potentialDivergenceMap = getPotentialDivergenceMapContextValue(analysisContext)
+
 	var hierarchytopLevelIndex = hierarchySize - 1
 
 	for _, plannedAllocation := range plannedAllocationMap {
