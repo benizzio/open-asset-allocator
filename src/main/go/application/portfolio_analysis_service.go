@@ -19,7 +19,7 @@ func (service *PortfolioAnalysisAppService) GeneratePortfolioDivergenceAnalysis(
 	allocationPlanId int,
 ) (*domain.DivergenceAnalysis, error) {
 
-	divergenceAnalysis, err := service.generateDivergenceAnalysisFromPortfolioAllocationSet(
+	var divergenceAnalysis, err = service.generateDivergenceAnalysisFromPortfolioAllocationSet(
 		id,
 		timeFrameTag,
 		allocationPlanId,
@@ -50,7 +50,7 @@ func (service *PortfolioAnalysisAppService) generateDivergenceAnalysisFromPortfo
 	allocationPlanId int,
 ) (*domain.DivergenceAnalysis, error) {
 
-	portfolio, portfolioAllocations, err := service.portfolioDomService.GetPortfolioSnapshot(id, timeFrameTag)
+	var portfolio, portfolioAllocations, err = service.portfolioDomService.GetPortfolioSnapshot(id, timeFrameTag)
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +158,7 @@ func (service *PortfolioAnalysisAppService) buildAndConnectPotentialDivergenceIf
 	lowerLevelDivergence *domain.PotentialDivergence,
 ) (*domain.PotentialDivergence, bool, error) {
 
-	hierarchicalId, hierarchyLevelKey, err := service.generatePotentialDivergenceIdentifiers(
+	var hierarchicalId, hierarchyLevelKey, err = service.generatePotentialDivergenceIdentifiers(
 		hierarchySubIterationMappingContext,
 		allocationHierarchy,
 	)
@@ -189,7 +189,7 @@ func (service *PortfolioAnalysisAppService) generatePotentialDivergenceIdentifie
 	var currentHierarchyLevelIterator = getHierarchySubIterationContextValue(analysisContext)
 	var currentHierarchyLevel, currentHierarchyLevelIndex = currentHierarchyLevelIterator.CurrentPointer()
 
-	hierarchicalId, err := service.portfolioDomService.GenerateHierarchicalId(
+	var hierarchicalId, err = service.portfolioDomService.GenerateHierarchicalId(
 		currentAllocation,
 		allocationHierarchy,
 		currentHierarchyLevelIndex,
