@@ -13,7 +13,7 @@ const (
 )
 
 type allocationIterationMappingContextValue struct {
-	potentialDivergenceMap       map[string]*domain.PotentialDivergence
+	potentialDivergenceMap       potentialDivercencesPerHierarchicalId
 	portfolioAllocationsIterator *util.Iterator[*domain.PortfolioAllocation]
 }
 
