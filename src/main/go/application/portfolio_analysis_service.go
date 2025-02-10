@@ -132,7 +132,6 @@ func (service *PortfolioAnalysisAppService) complementAnalysisWithAllocationPlan
 
 	generatePotentialDivergencesFromAllocationPlanSetDifference(
 		analysisContext,
-		divergenceAnalysis,
 		plannedAllocationMap,
 	)
 
@@ -232,7 +231,6 @@ func (service *PortfolioAnalysisAppService) generatePotentialDivergenceIdentifie
 	if err != nil {
 		return "", "", err
 	}
-	//hierarchicalId += "a"
 
 	hierarchyLevelKey, err := service.portfolioDomService.GetIdSegment(currentAllocation, currentHierarchyLevel)
 	if err != nil {
@@ -356,16 +354,13 @@ func calculateDivergenceValue(
 	potentialDivergence.TotalMarketValueDivergence = potentialDivergence.TotalMarketValue - plannedAllocationValue
 }
 
-// TODO clean code
 func generatePotentialDivergencesFromAllocationPlanSetDifference(
 	analysisContext context.Context,
-	divergenceAnalysis *domain.DivergenceAnalysis,
 	plannedAllocationMap domain.PlannedAllocationsPerHierarchicalId,
 ) {
 
 	var analysisContextValue = getDivergenceAnalysisContextValue(analysisContext)
 	var hierarchySize = analysisContextValue.portfolio.AllocationStructure.Hierarchy.Size()
-	var potentialDivergenceMap = getPotentialDivergenceMapContextValue(analysisContext)
 
 	var hierarchytopLevelIndex = hierarchySize - 1
 
@@ -373,38 +368,81 @@ func generatePotentialDivergencesFromAllocationPlanSetDifference(
 
 		var currentPlannedStructuralId = plannedAllocation.StructuralId
 
-		for i := hierarchytopLevelIndex; i >= 0; i-- {
+		checkAndGeneratePotentialDivergencesOnHierarchy(
+			analysisContext,
+			plannedAllocation,
+			hierarchytopLevelIndex,
+			currentPlannedStructuralId,
+		)
+	}
+}
 
-			var currentLevelHierarchicalId = currentPlannedStructuralId[i:hierarchySize]
-			var currentLevelingHierarchicalIdKey = currentLevelHierarchicalId.String()
-			var _, currentLevelExists = potentialDivergenceMap[currentLevelingHierarchicalIdKey]
-			if !currentLevelExists {
+func checkAndGeneratePotentialDivergencesOnHierarchy(
+	analysisContext context.Context,
+	plannedAllocation *domain.PlannedAllocation,
+	hierarchytopLevelIndex int,
+	currentPlannedStructuralId domain.HierarchicalId,
+) {
 
-				var isLowestLevel = i == 0
-				var isTopLevel = i == hierarchytopLevelIndex
+	var analysisContextValue = getDivergenceAnalysisContextValue(analysisContext)
+	var potentialDivergenceMap = getPotentialDivergenceMapContextValue(analysisContext)
+	var hierarchySize = analysisContextValue.portfolio.AllocationStructure.Hierarchy.Size()
 
-				var potentialDivergence = newPotentialDivergence(
-					*currentPlannedStructuralId[i],
-					currentLevelingHierarchicalIdKey,
-					isLowestLevel,
-				)
+	for i := hierarchytopLevelIndex; i >= 0; i-- {
 
-				var parentTotalMarketValue int64 = 0
-				if isTopLevel {
-					divergenceAnalysis.AddRootDivergence(potentialDivergence)
-					parentTotalMarketValue = divergenceAnalysis.PortfolioTotalMarketValue
-				} else {
-					var parentLevelHierarchicalId = currentPlannedStructuralId[i+1 : hierarchySize]
-					var parentLevelHierarchicalIdKey = parentLevelHierarchicalId.String()
-					var parentPotentialDivergence = potentialDivergenceMap[parentLevelHierarchicalIdKey]
-					parentPotentialDivergence.AddInternalDivergence(potentialDivergence)
-					parentTotalMarketValue = parentPotentialDivergence.TotalMarketValue
-				}
+		var currentLevelHierarchicalId = currentPlannedStructuralId[i:hierarchySize]
+		var currentLevelHierarchicalIdString = currentLevelHierarchicalId.String()
+		var _, currentLevelExists = potentialDivergenceMap[currentLevelHierarchicalIdString]
+		if !currentLevelExists {
 
-				calculateDivergenceValue(potentialDivergence, plannedAllocation, parentTotalMarketValue)
-			}
+			var parentLevelHierarchicalId = currentPlannedStructuralId[i+1 : hierarchySize]
+			var isLowestHierarchyLevel = i == 0
+			var isTopHierarchyLevel = i == hierarchytopLevelIndex
+
+			generateAndAttachPotentialDivergenceForPlannedAllocation(
+				analysisContext,
+				plannedAllocation,
+				*currentPlannedStructuralId[i],
+				parentLevelHierarchicalId.String(),
+				currentLevelHierarchicalIdString,
+				isTopHierarchyLevel,
+				isLowestHierarchyLevel,
+			)
 		}
 	}
+}
+
+func generateAndAttachPotentialDivergenceForPlannedAllocation(
+	analysisContext context.Context,
+	plannedAllocation *domain.PlannedAllocation,
+	hierarchyLevelkey string,
+	parentLevelHierarchicalId string,
+	currentLevelHierarchicalId string,
+	isTopHierarchyLevel bool,
+	isLowestHierarchyLevel bool,
+) {
+
+	var potentialDivergenceMap = getPotentialDivergenceMapContextValue(analysisContext)
+	var analysisContextValue = getDivergenceAnalysisContextValue(analysisContext)
+	var divergenceAnalysis = analysisContextValue.divergenceAnalysis
+
+	var potentialDivergence = newPotentialDivergence(
+		hierarchyLevelkey,
+		currentLevelHierarchicalId,
+		isLowestHierarchyLevel,
+	)
+
+	var parentTotalMarketValue int64 = 0
+	if isTopHierarchyLevel {
+		divergenceAnalysis.AddRootDivergence(potentialDivergence)
+		parentTotalMarketValue = divergenceAnalysis.PortfolioTotalMarketValue
+	} else {
+		var parentPotentialDivergence = potentialDivergenceMap[parentLevelHierarchicalId]
+		parentPotentialDivergence.AddInternalDivergence(potentialDivergence)
+		parentTotalMarketValue = parentPotentialDivergence.TotalMarketValue
+	}
+
+	calculateDivergenceValue(potentialDivergence, plannedAllocation, parentTotalMarketValue)
 }
 
 func BuildPortfolioAnalysisAppService(
