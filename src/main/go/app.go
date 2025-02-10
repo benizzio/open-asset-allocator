@@ -59,14 +59,14 @@ func buildAndInjectAppComponents() (*infra.RDBMSAdapter, *infra.GinServer, []inf
 
 	var portfolioDomService = service.BuildPortfolioDomService(portfolioRepository)
 	var allocationPlanDomService = service.BuildAllocationPlanDomService(allocationPlanRepository)
-	var portfolioAnalysisService = application.BuildPortfolioAnalysisAppService(
+	var portfolioDivergenceAnalysisService = application.BuildPortfolioDivergenceAnalysisAppService(
 		portfolioDomService,
 		allocationPlanDomService,
 	)
 
 	var portfolioRESTController = rest.BuildPortfolioRESTController(
 		portfolioDomService,
-		portfolioAnalysisService,
+		portfolioDivergenceAnalysisService,
 	)
 	var allocationPlanRESTController = rest.BuildAllocationPlanRESTController(allocationPlanDomService)
 

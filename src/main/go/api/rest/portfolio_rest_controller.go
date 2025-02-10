@@ -18,8 +18,8 @@ const (
 )
 
 type PortfolioRESTController struct {
-	portfolioDomService       *service.PortfolioDomService
-	portfiolioAnalysisService *application.PortfolioAnalysisAppService
+	portfolioDomService                 *service.PortfolioDomService
+	portfiolioDivergenceAnalysisService *application.PortfolioDivergenceAnalysisAppService
 }
 
 func (controller *PortfolioRESTController) BuildRoutes() []infra.RESTRoute {
@@ -111,7 +111,7 @@ func (controller *PortfolioRESTController) GetDivercenceAnalysis(context *gin.Co
 		return
 	}
 
-	analysis, err := controller.portfiolioAnalysisService.GeneratePortfolioDivergenceAnalysis(
+	analysis, err := controller.portfiolioDivergenceAnalysisService.GeneratePortfolioDivergenceAnalysis(
 		portfolioId,
 		timeFrameTagParam,
 		planId,
@@ -127,7 +127,7 @@ func (controller *PortfolioRESTController) GetDivercenceAnalysis(context *gin.Co
 
 func BuildPortfolioRESTController(
 	portfolioDomService *service.PortfolioDomService,
-	portfiolioAnalysisService *application.PortfolioAnalysisAppService,
+	portfiolioAnalysisService *application.PortfolioDivergenceAnalysisAppService,
 ) *PortfolioRESTController {
 	return &PortfolioRESTController{portfolioDomService, portfiolioAnalysisService}
 }

@@ -8,14 +8,14 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-type PortfolioAnalysisAppService struct {
+type PortfolioDivergenceAnalysisAppService struct {
 	portfolioDomService      *service.PortfolioDomService
 	allocationPlanDomService *service.AllocationPlanDomService
 }
 
 type potentialDivercencesPerHierarchicalId map[string]*domain.PotentialDivergence
 
-func (service *PortfolioAnalysisAppService) GeneratePortfolioDivergenceAnalysis(
+func (service *PortfolioDivergenceAnalysisAppService) GeneratePortfolioDivergenceAnalysis(
 	portfolioId int,
 	timeFrameTag domain.TimeFrameTag,
 	allocationPlanId int,
@@ -42,7 +42,7 @@ func (service *PortfolioAnalysisAppService) GeneratePortfolioDivergenceAnalysis(
 	return divergenceAnalysis, nil
 }
 
-func (service *PortfolioAnalysisAppService) initializeAnalysisContext(
+func (service *PortfolioDivergenceAnalysisAppService) initializeAnalysisContext(
 	portfolioId int,
 	timeFrameTag domain.TimeFrameTag,
 	allocationPlanId int,
@@ -68,7 +68,7 @@ func (service *PortfolioAnalysisAppService) initializeAnalysisContext(
 	return analysisContext, nil
 }
 
-func (service *PortfolioAnalysisAppService) generateDivergenceAnalysisFromPortfolioAllocationSet(
+func (service *PortfolioDivergenceAnalysisAppService) generateDivergenceAnalysisFromPortfolioAllocationSet(
 	analysisContext context.Context,
 ) (potentialDivercencesPerHierarchicalId, error) {
 
@@ -80,7 +80,7 @@ func (service *PortfolioAnalysisAppService) generateDivergenceAnalysisFromPortfo
 	return potentialDivergenceMap, nil
 }
 
-func (service *PortfolioAnalysisAppService) mapPotentialDivergencesFromPortfolioAllocations(
+func (service *PortfolioDivergenceAnalysisAppService) mapPotentialDivergencesFromPortfolioAllocations(
 	analysisContext context.Context,
 ) (potentialDivercencesPerHierarchicalId, error) {
 
@@ -111,7 +111,7 @@ func (service *PortfolioAnalysisAppService) mapPotentialDivergencesFromPortfolio
 	return potentialDivergenceMap, nil
 }
 
-func (service *PortfolioAnalysisAppService) complementAnalysisWithAllocationPlanSetDifference(
+func (service *PortfolioDivergenceAnalysisAppService) complementAnalysisWithAllocationPlanSetDifference(
 	analysisContext context.Context,
 	allocationPlanId int,
 ) error {
@@ -138,7 +138,7 @@ func (service *PortfolioAnalysisAppService) complementAnalysisWithAllocationPlan
 	return nil
 }
 
-func (service *PortfolioAnalysisAppService) mapPotentialDivergenceFromPortfolioAllocation(
+func (service *PortfolioDivergenceAnalysisAppService) mapPotentialDivergenceFromPortfolioAllocation(
 	analysisContext context.Context,
 ) error {
 
@@ -186,7 +186,7 @@ func (service *PortfolioAnalysisAppService) mapPotentialDivergenceFromPortfolioA
 	return nil
 }
 
-func (service *PortfolioAnalysisAppService) buildAndConnectPotentialDivergenceIfNotExists(
+func (service *PortfolioDivergenceAnalysisAppService) buildAndConnectPotentialDivergenceIfNotExists(
 	hierarchySubIterationMappingContext context.Context,
 	allocationHierarchy domain.AllocationHierarchy,
 	lowerLevelDivergence *domain.PotentialDivergence,
@@ -213,7 +213,7 @@ func (service *PortfolioAnalysisAppService) buildAndConnectPotentialDivergenceIf
 	return potentialDivergence, potentialDivergenceCreated, nil
 }
 
-func (service *PortfolioAnalysisAppService) generatePotentialDivergenceIdentifiers(
+func (service *PortfolioDivergenceAnalysisAppService) generatePotentialDivergenceIdentifiers(
 	analysisContext context.Context,
 	allocationHierarchy domain.AllocationHierarchy,
 ) (string, string, error) {
@@ -445,11 +445,11 @@ func generateAndAttachPotentialDivergenceForPlannedAllocation(
 	calculateDivergenceValue(potentialDivergence, plannedAllocation, parentTotalMarketValue)
 }
 
-func BuildPortfolioAnalysisAppService(
+func BuildPortfolioDivergenceAnalysisAppService(
 	portfolioDomService *service.PortfolioDomService,
 	allocationPlanDomService *service.AllocationPlanDomService,
-) *PortfolioAnalysisAppService {
-	return &PortfolioAnalysisAppService{
+) *PortfolioDivergenceAnalysisAppService {
+	return &PortfolioDivergenceAnalysisAppService{
 		allocationPlanDomService: allocationPlanDomService,
 		portfolioDomService:      portfolioDomService,
 	}
