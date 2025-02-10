@@ -120,7 +120,9 @@ func (controller *PortfolioRESTController) GetDivercenceAnalysis(context *gin.Co
 		return
 	}
 
-	context.JSON(http.StatusOK, analysis)
+	var analysisDTS = model.MapDivergenceAnalysis(analysis)
+
+	context.JSON(http.StatusOK, analysisDTS)
 }
 
 func BuildPortfolioRESTController(

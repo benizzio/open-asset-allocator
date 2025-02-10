@@ -58,6 +58,22 @@ func (aggregationMap portfolioAllocationsPerTimeFrameMap) getAggregatedMarketVal
 	return totalMarketValue
 }
 
+type PotentialDivergenceDTS struct {
+	HierarchyLevelKey          string                    `json:"hierarchyLevelKey"`
+	HierarchicalId             string                    `json:"hierarchicalId"`
+	TotalMarketValue           int64                     `json:"totalMarketValue"`
+	TotalMarketValueDivergence int64                     `json:"totalMarketValueDivergence"`
+	InternalDivergences        []*PotentialDivergenceDTS `json:"internalDivergences,omitempty"`
+}
+
+type DivergenceAnalysisDTS struct {
+	PortfolioId               int                       `json:"portfolioId"`
+	TimeFrameTag              domain.TimeFrameTag       `json:"timeFrameTag"`
+	AllocationPlanId          int                       `json:"allocationPlanId"`
+	PortfolioTotalMarketValue int64                     `json:"portfolioTotalMarketValue"`
+	Root                      []*PotentialDivergenceDTS `json:"root"`
+}
+
 // ================================================
 // MAPPING FUNCTIONS
 // ================================================
@@ -131,4 +147,37 @@ func buildSnapshotDTS(
 		Allocations:      allocations,
 		TotalMarketValue: totalMarketValue,
 	}
+}
+
+func MapDivergenceAnalysis(analysis *domain.DivergenceAnalysis) *DivergenceAnalysisDTS {
+	var rootDivergences = mapPotentialDivergences(analysis.Root)
+	var analysisDTS = DivergenceAnalysisDTS{
+		PortfolioId:               analysis.PortfolioId,
+		TimeFrameTag:              analysis.TimeFrameTag,
+		AllocationPlanId:          analysis.AllocationPlanId,
+		PortfolioTotalMarketValue: analysis.PortfolioTotalMarketValue,
+		Root:                      rootDivergences,
+	}
+	return &analysisDTS
+}
+
+func mapPotentialDivergences(divergences []*domain.PotentialDivergence) []*PotentialDivergenceDTS {
+	var divergencesDTS = make([]*PotentialDivergenceDTS, 0)
+	for _, divergence := range divergences {
+		var divergenceDTS = mapPotentialDivergence(divergence)
+		divergencesDTS = append(divergencesDTS, divergenceDTS)
+	}
+	return divergencesDTS
+}
+
+func mapPotentialDivergence(divergence *domain.PotentialDivergence) *PotentialDivergenceDTS {
+	var internalDivergences = mapPotentialDivergences(divergence.InternalDivergences)
+	var divergenceDTS = PotentialDivergenceDTS{
+		HierarchyLevelKey:          divergence.HierarchyLevelKey,
+		HierarchicalId:             divergence.HierarchicalId,
+		TotalMarketValue:           divergence.TotalMarketValue,
+		TotalMarketValueDivergence: divergence.TotalMarketValueDivergence,
+		InternalDivergences:        internalDivergences,
+	}
+	return &divergenceDTS
 }
