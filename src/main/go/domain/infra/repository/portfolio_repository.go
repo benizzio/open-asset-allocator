@@ -7,7 +7,12 @@ import (
 )
 
 const (
-	timeFrameTagLimitComplement = `
+	timeFrameTagsSQL = `
+		SELECT DISTINCT time_frame_tag, create_timestamp FROM portfolio_allocation_fact pa 
+		` + infra.WhereClausePlaceholder + `
+		ORDER BY create_timestamp DESC LIMIT {:timeFrameLimit}
+	`
+	timeFrameTagsComplement = `
 		WITH time_frame_tags
 			AS (SELECT DISTINCT time_frame_tag, create_timestamp FROM portfolio_allocation_fact pa ORDER BY create_timestamp DESC LIMIT {:timeFrameLimit})
 	`
@@ -25,9 +30,14 @@ const (
 )
 
 const (
-	queryAllocationsError = "Error querying portfolio allocations"
-	queryPortfoliosError  = "Error querying portfolios"
-	queryPortfolioError   = "Error querying single portfolio"
+	portfolioIdWhereClause = "AND pa.portfolio_id = {:portfolioId}"
+)
+
+const (
+	queryAllocationsError   = "Error querying portfolio allocations"
+	queryPortfoliosError    = "Error querying portfolios"
+	queryPortfolioError     = "Error querying single portfolio"
+	queryTimeFrameTagsError = "Error querying time frame tags"
 )
 
 type PortfolioRDBMSRepository struct {
@@ -58,13 +68,13 @@ func (repository *PortfolioRDBMSRepository) GetAllPortfolioAllocations(id int, t
 	[]*domain.PortfolioAllocation,
 	error,
 ) {
-	var query = timeFrameTagLimitComplement + portfolioAllocationsSQL
+	var query = timeFrameTagsComplement + portfolioAllocationsSQL
 
 	var queryResult []domain.PortfolioAllocation
 	err := repository.dbAdapter.BuildQuery(query).
 		AddParam("timeFrameLimit", timeFrameLimit).
 		AddWhereClause("AND pa.time_frame_tag IN (SELECT time_frame_tag FROM time_frame_tags)").
-		AddWhereClauseAndParam("AND pa.portfolio_id = {:portfolioId}", "portfolioId", id).
+		AddWhereClauseAndParam(portfolioIdWhereClause, "portfolioId", id).
 		Build().FindInto(&queryResult)
 
 	var result = util.ToPointerSlice(queryResult)
@@ -78,13 +88,29 @@ func (repository *PortfolioRDBMSRepository) FindPortfolioAllocations(id int, tim
 ) {
 	var queryResult []domain.PortfolioAllocation
 	err := repository.dbAdapter.BuildQuery(portfolioAllocationsSQL).
-		AddWhereClauseAndParam("AND pa.portfolio_id = {:portfolioId}", "portfolioId", id).
+		AddWhereClauseAndParam(portfolioIdWhereClause, "portfolioId", id).
 		AddWhereClauseAndParam("AND pa.time_frame_tag = {:timeFrameTag}", "timeFrameTag", timeFrameTag).
 		Build().FindInto(&queryResult)
 
 	var result = util.ToPointerSlice(queryResult)
 
 	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryAllocationsError, repository)
+}
+
+func (repository *PortfolioRDBMSRepository) GetAllTimeFrameTags(
+	portfolioId int,
+	timeFrameLimit int,
+) ([]domain.TimeFrameTag, error) {
+
+	var query = timeFrameTagsSQL
+
+	var result []domain.TimeFrameTag
+	err := repository.dbAdapter.BuildQuery(query).
+		AddWhereClauseAndParam(portfolioIdWhereClause, "portfolioId", portfolioId).
+		AddParam("timeFrameLimit", timeFrameLimit).
+		Build().FindInto(&result)
+
+	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryTimeFrameTagsError, repository)
 }
 
 func BuildPortfolioRepository(dbAdapter *infra.RDBMSAdapter) *PortfolioRDBMSRepository {

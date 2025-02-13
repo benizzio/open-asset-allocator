@@ -22,9 +22,13 @@ type PlannedAllocation struct {
 	SliceSizePercentage decimal.Decimal
 }
 
+type AllocationPlanIdentifier struct {
+	Id   int
+	Name string
+}
+
 type AllocationPlan struct {
-	Id                   int
-	Name                 string
+	AllocationPlanIdentifier
 	PlanType             allocation.PlanType
 	PlannedExecutionDate *time.Time
 	Details              []*PlannedAllocation
@@ -37,4 +41,5 @@ func (allocationPlan *AllocationPlan) AddDetail(detail *PlannedAllocation) {
 type AllocationPlanRepository interface {
 	GetAllAllocationPlans(portfolioId int, planType *allocation.PlanType) ([]*AllocationPlan, error)
 	GetAllocationPlan(id int) (*AllocationPlan, error)
+	GetAllAllocationPlanIdentifiers(portfolioId int, planType *allocation.PlanType) ([]*AllocationPlanIdentifier, error)
 }

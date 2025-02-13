@@ -1,0 +1,42 @@
+<!-- TODO Call and map analysis options -->
+<div class="accordion" id="accordion-allocation-map" handlebars-template="template-allocation-map"
+     hx-get="/api/portfolio/:portfolioId/history" hx-trigger="load" hx-include="[name='portfolioId']">
+    <div class="accordion-item placeholder-glow">
+        <h2 class="accordion-header placeholder col-12">placeholder</h2>
+    </div>
+    <div class="accordion-item placeholder-glow">
+        <h2 class="accordion-header placeholder col-12">placeholder</h2>
+    </div>
+</div>
+
+<template id="template-allocation-map">
+
+    {{#each .}}
+    <div class="accordion-item">
+
+        <h2 class="accordion-header">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#{{timeFrameTag}}-slice" aria-expanded="true"
+                    aria-controls="{{timeFrameTag}}-slice">
+                {{timeFrameTag}}
+            </button>
+        </h2>
+
+        <div id="{{timeFrameTag}}-slice" class="accordion-collapse collapse show"
+             data-bs-parent="#accordion-allocation-map">
+            <div class="accordion-body row justify-content-center">
+
+                <div class="col-12 d-flex flex-column align-items-center">
+
+                    Allocation plan selection here
+
+                </div>
+
+
+            </div>
+        </div>
+
+    </div>
+    {{/each}}
+
+</template>

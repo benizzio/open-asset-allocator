@@ -47,6 +47,13 @@ func (service *PortfolioDomService) GetPortfolioSnapshot(
 	return portfolio, portfolioAllocations, nil
 }
 
+func (service *PortfolioDomService) GetAllTimeFrameTags(
+	portfolioId int,
+	timeFrameLimit int,
+) ([]domain.TimeFrameTag, error) {
+	return service.portfolioRepository.GetAllTimeFrameTags(portfolioId, timeFrameLimit)
+}
+
 func (service *PortfolioDomService) GenerateHierarchicalId(
 	allocation *domain.PortfolioAllocation,
 	hierarchy domain.AllocationHierarchy,

@@ -5,6 +5,7 @@ import (
 	"github.com/benizzio/open-asset-allocator/domain/allocation"
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/benizzio/open-asset-allocator/infra/sqlext"
+	"github.com/benizzio/open-asset-allocator/infra/util"
 	dbx "github.com/go-ozzo/ozzo-dbx"
 	"github.com/shopspring/decimal"
 )
@@ -19,7 +20,12 @@ type PlannedAllocationJoinedRowDTS struct {
 	SliceSizePercentage  decimal.Decimal
 }
 
-const allocationPlanSQL = `
+const (
+	allocationPlanIdentifierSQL = `
+		SELECT ap.id, ap.name
+		FROM allocation_plan ap
+	` + infra.WhereClausePlaceholder
+	allocationPlanSQL = `
 		SELECT 
 		    ap.id as allocation_plan_id,
 		    ap.name, 
@@ -31,6 +37,7 @@ const allocationPlanSQL = `
 		FROM planned_allocation pa 
 		JOIN allocation_plan ap ON pa.allocation_plan_id = ap.id
 	` + infra.WhereClausePlaceholder
+)
 
 type AllocationPlanRDBMSRepository struct {
 	dbAdapter *infra.RDBMSAdapter
@@ -49,12 +56,13 @@ func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlans(portfolio
 		queryBuilder.AddWhereClauseAndParam("AND ap.type = {:planType}", "planType", planType.String())
 	}
 
-	result, queryError := queryBuilder.Build().GetRows()
+	var queryResult []PlannedAllocationJoinedRowDTS
+	queryError := queryBuilder.Build().FindInto(&queryResult)
 	if queryError != nil {
 		return nil, infra.PropagateAsAppErrorWithNewMessage(queryError, "Error querying allocation plans", repository)
 	}
 
-	return repository.mapPlannedAllocationRows(result)
+	return repository.mapPlannedAllocationRows(queryResult)
 }
 
 func (repository *AllocationPlanRDBMSRepository) GetAllocationPlan(id int) (*domain.AllocationPlan, error) {
@@ -62,12 +70,13 @@ func (repository *AllocationPlanRDBMSRepository) GetAllocationPlan(id int) (*dom
 	var queryBuilder = repository.dbAdapter.BuildQuery(allocationPlanSQL)
 	queryBuilder.AddWhereClauseAndParam("AND ap.id = {:id}", "id", id)
 
-	result, queryError := queryBuilder.Build().GetRows()
+	var queryResult []PlannedAllocationJoinedRowDTS
+	queryError := queryBuilder.Build().FindInto(&queryResult)
 	if queryError != nil {
 		return nil, infra.PropagateAsAppErrorWithNewMessage(queryError, "Error querying allocation plan", repository)
 	}
 
-	var refs, mappingError = repository.mapPlannedAllocationRows(result)
+	var refs, mappingError = repository.mapPlannedAllocationRows(queryResult)
 	if mappingError != nil {
 		return nil, mappingError
 	}
@@ -79,7 +88,33 @@ func (repository *AllocationPlanRDBMSRepository) GetAllocationPlan(id int) (*dom
 	return refs[0], nil
 }
 
-func (repository *AllocationPlanRDBMSRepository) mapPlannedAllocationRows(rows *dbx.Rows) (
+func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlanIdentifiers(
+	portfolioId int,
+	planType *allocation.PlanType,
+) ([]*domain.AllocationPlanIdentifier, error) {
+
+	var queryBuilder = repository.dbAdapter.BuildQuery(allocationPlanIdentifierSQL)
+
+	queryBuilder.AddWhereClauseAndParam("AND ap.portfolio_id = {:portfolioId}", "portfolioId", portfolioId)
+
+	if planType != nil {
+		queryBuilder.AddWhereClauseAndParam("AND ap.type = {:planType}", "planType", planType.String())
+	}
+
+	var queryResult []domain.AllocationPlanIdentifier
+	queryError := queryBuilder.Build().FindInto(&queryResult)
+	if queryError != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(
+			queryError,
+			"Error querying allocation plan identifiers",
+			repository,
+		)
+	}
+
+	return util.ToPointerSlice(queryResult), nil
+}
+
+func (repository *AllocationPlanRDBMSRepository) mapPlannedAllocationRows(rows []PlannedAllocationJoinedRowDTS) (
 	[]*domain.AllocationPlan,
 	error,
 ) {
@@ -87,9 +122,9 @@ func (repository *AllocationPlanRDBMSRepository) mapPlannedAllocationRows(rows *
 	var allocationPlanCacheMap = make(map[int]*domain.AllocationPlan)
 	var allocationPlans = make([]*domain.AllocationPlan, 0)
 
-	for rows.Next() {
+	for _, row := range rows {
 
-		allocationPlan, err := repository.mapRow(rows, allocationPlanCacheMap)
+		allocationPlan, err := repository.mapRow(&row, allocationPlanCacheMap)
 		if err != nil {
 			return nil, err
 		}
@@ -102,23 +137,18 @@ func (repository *AllocationPlanRDBMSRepository) mapPlannedAllocationRows(rows *
 }
 
 func (repository *AllocationPlanRDBMSRepository) mapRow(
-	rows *dbx.Rows,
+	row *PlannedAllocationJoinedRowDTS,
 	allocationPlanCacheMap map[int]*domain.AllocationPlan,
 ) (*domain.AllocationPlan, error) {
 
-	rowDTS, err := repository.scanRow(rows)
-	if err != nil {
-		return nil, err
-	}
+	allocationPlanUnit := mapPlannedAllocationFromRow(row)
 
-	allocationPlanUnit := mapPlannedAllocationFromRow(rowDTS)
-
-	if cachedAllocationPlan, exists := allocationPlanCacheMap[rowDTS.AllocationPlanId]; exists {
+	if cachedAllocationPlan, exists := allocationPlanCacheMap[row.AllocationPlanId]; exists {
 		cachedAllocationPlan.AddDetail(allocationPlanUnit)
 	} else {
-		allocationPlan := mapPlanFromRow(rowDTS, allocationPlanUnit)
-		allocationPlanCacheMap[rowDTS.AllocationPlanId] = &allocationPlan
-		return &allocationPlan, nil
+		allocationPlan := mapPlanFromRow(row, allocationPlanUnit)
+		allocationPlanCacheMap[row.AllocationPlanId] = allocationPlan
+		return allocationPlan, nil
 	}
 
 	return nil, nil
@@ -144,17 +174,19 @@ func (repository *AllocationPlanRDBMSRepository) scanRow(
 func mapPlanFromRow(
 	rowDTS *PlannedAllocationJoinedRowDTS,
 	plannedAllocation *domain.PlannedAllocation,
-) domain.AllocationPlan {
+) *domain.AllocationPlan {
 
 	var allocationPlan = domain.AllocationPlan{
-		Id:                   rowDTS.AllocationPlanId,
-		Name:                 rowDTS.Name,
+		AllocationPlanIdentifier: domain.AllocationPlanIdentifier{
+			Id:   rowDTS.AllocationPlanId,
+			Name: rowDTS.Name,
+		},
 		PlanType:             rowDTS.Type,
 		PlannedExecutionDate: rowDTS.PlannedExecutionDate.ToTimeReference(),
 	}
 	allocationPlan.AddDetail(plannedAllocation)
 
-	return allocationPlan
+	return &allocationPlan
 }
 
 func mapPlannedAllocationFromRow(rowDTS *PlannedAllocationJoinedRowDTS) *domain.PlannedAllocation {

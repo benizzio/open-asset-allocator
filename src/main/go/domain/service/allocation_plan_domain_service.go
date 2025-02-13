@@ -20,6 +20,13 @@ func (service *AllocationPlanDomService) GetAllocationPlan(id int) (*domain.Allo
 	return service.allocationPlanRepository.GetAllocationPlan(id)
 }
 
+func (service *AllocationPlanDomService) GetAllAllocationPlanIdentifiers(
+	portfolioId int,
+	planType *allocation.PlanType,
+) ([]*domain.AllocationPlanIdentifier, error) {
+	return service.allocationPlanRepository.GetAllAllocationPlanIdentifiers(portfolioId, planType)
+}
+
 func (service *AllocationPlanDomService) GetPlannedAllocationsPerHyerarchicalIdMap(allocationPlanId int) (
 	domain.PlannedAllocationsPerHierarchicalId,
 	error,
