@@ -56,36 +56,36 @@
     </div>
     {{/each}}
 
-    <script type="text/javascript">
-
-        function selectDivergenceOptions(allocationPlanIdFieldName, divergenceAnalysisContainerId) {
-            const selectElement = document.querySelector(`select[name='${allocationPlanIdFieldName}']`);
-            const selectedPlanId = Number(selectElement.value);
-            if (selectedPlanId) {
-                setValid(selectElement);
-                triggerGenerateDivergence(selectedPlanId, `#${divergenceAnalysisContainerId}`);
-            } else {
-                setInvalid(selectElement);
-            }
-        }
-
-        function triggerGenerateDivergence(planId, analysisContainertElementId) {
-            const divergenceAnalysisElement = document.querySelector(analysisContainertElementId);
-            htmx.trigger(divergenceAnalysisElement, "generate-divergence-analysis");
-        }
-
-        function setValid(element) {
-            element.classList.remove("is-invalid");
-        }
-
-        function setInvalid(element) {
-            element.classList.add("is-invalid");
-        }
-
-    </script>
-
 </template>
 
 <template id="template-divergence-analysis">
     {{this}}
 </template>
+
+<script type="text/javascript">
+
+    function selectDivergenceOptions(allocationPlanIdFieldName, divergenceAnalysisContainerId) {
+        const selectElement = document.querySelector(`select[name='${allocationPlanIdFieldName}']`);
+        const selectedPlanId = Number(selectElement.value);
+        if (selectedPlanId) {
+            setValid(selectElement);
+            triggerGenerateDivergence(selectedPlanId, `#${divergenceAnalysisContainerId}`);
+        } else {
+            setInvalid(selectElement);
+        }
+    }
+
+    function triggerGenerateDivergence(planId, analysisContainertElementId) {
+        const divergenceAnalysisElement = document.querySelector(analysisContainertElementId);
+        htmx.trigger(divergenceAnalysisElement, "generate-divergence-analysis");
+    }
+
+    function setValid(element) {
+        element.classList.remove("is-invalid");
+    }
+
+    function setInvalid(element) {
+        element.classList.add("is-invalid");
+    }
+
+</script>
