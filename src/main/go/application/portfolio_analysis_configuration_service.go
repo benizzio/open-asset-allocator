@@ -35,3 +35,13 @@ func (service *PortfolioAnalysisConfigurationAppService) GetDivergenceAnalysisOp
 
 	return analysisOptions, nil
 }
+
+func BuildPortfolioAnalysisConfigurationAppService(
+	portfolioDomService *service.PortfolioDomService,
+	allocationPlanDomService *service.AllocationPlanDomService,
+) *PortfolioAnalysisConfigurationAppService {
+	return &PortfolioAnalysisConfigurationAppService{
+		portfolioDomService,
+		allocationPlanDomService,
+	}
+}

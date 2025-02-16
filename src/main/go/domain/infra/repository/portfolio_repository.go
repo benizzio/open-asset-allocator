@@ -4,17 +4,23 @@ import (
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/benizzio/open-asset-allocator/infra/util"
+	"time"
 )
+
+type portfolioTimeFrame struct {
+	TimeFrameTag    domain.TimeFrameTag
+	CreateTimestamp time.Time
+}
 
 const (
 	timeFrameTagsSQL = `
-		SELECT DISTINCT time_frame_tag, create_timestamp FROM portfolio_allocation_fact pa 
+		SELECT DISTINCT time_frame_tag, create_timestamp::date FROM portfolio_allocation_fact pa 
 		` + infra.WhereClausePlaceholder + `
 		ORDER BY create_timestamp DESC LIMIT {:timeFrameLimit}
 	`
 	timeFrameTagsComplement = `
 		WITH time_frame_tags
-			AS (SELECT DISTINCT time_frame_tag, create_timestamp FROM portfolio_allocation_fact pa ORDER BY create_timestamp DESC LIMIT {:timeFrameLimit})
+			AS (SELECT DISTINCT time_frame_tag, create_timestamp::date FROM portfolio_allocation_fact pa ORDER BY create_timestamp DESC LIMIT {:timeFrameLimit})
 	`
 	portfolioAllocationsSQL = `
 		SELECT pa.*, ass.ticker as "asset.ticker", COALESCE(ass.name, '') as "asset.name"
@@ -104,11 +110,16 @@ func (repository *PortfolioRDBMSRepository) GetAllTimeFrameTags(
 
 	var query = timeFrameTagsSQL
 
-	var result []domain.TimeFrameTag
+	var queryResult []portfolioTimeFrame
 	err := repository.dbAdapter.BuildQuery(query).
 		AddWhereClauseAndParam(portfolioIdWhereClause, "portfolioId", portfolioId).
 		AddParam("timeFrameLimit", timeFrameLimit).
-		Build().FindInto(&result)
+		Build().FindInto(&queryResult)
+
+	var result = make([]domain.TimeFrameTag, len(queryResult))
+	for i, timeFrame := range queryResult {
+		result[i] = timeFrame.TimeFrameTag
+	}
 
 	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryTimeFrameTagsError, repository)
 }

@@ -12,13 +12,17 @@ import (
 )
 
 const (
-	portfolioIdParam  = "portfolioId"
-	timeFrameTagParam = "timeFrameTag"
-	planIdParam       = "planId"
+	portfolioPath              = "/api/portfolio"
+	portfolioIdParam           = "portfolioId"
+	specificPortfolioPath      = portfolioPath + "/:" + portfolioIdParam
+	timeFrameTagParam          = "timeFrameTag"
+	planIdParam                = "planId"
+	getPortfolioIdErrorMessage = "Error getting portfolioId url parameter"
 )
 
 type PortfolioRESTController struct {
 	portfolioDomService                 *service.PortfolioDomService
+	portfiolioAnalysisConfigService     *application.PortfolioAnalysisConfigurationAppService
 	portfiolioDivergenceAnalysisService *application.PortfolioDivergenceAnalysisAppService
 }
 
@@ -26,23 +30,28 @@ func (controller *PortfolioRESTController) BuildRoutes() []infra.RESTRoute {
 	return []infra.RESTRoute{
 		{
 			Method:   http.MethodGet,
-			Path:     "/api/portfolio",
+			Path:     portfolioPath,
 			Handlers: gin.HandlersChain{controller.getPortfolios},
 		},
 		{
 			Method:   http.MethodGet,
-			Path:     "/api/portfolio/:" + portfolioIdParam,
+			Path:     specificPortfolioPath,
 			Handlers: gin.HandlersChain{controller.getPortfolio},
 		},
 		{
 			Method:   http.MethodGet,
-			Path:     "/api/portfolio/:" + portfolioIdParam + "/history",
+			Path:     specificPortfolioPath + "/history",
 			Handlers: gin.HandlersChain{controller.getPortfolioAllocationHistory},
 		},
 		{
 			Method:   http.MethodGet,
-			Path:     "/api/portfolio/:" + portfolioIdParam + "/divergence/:" + timeFrameTagParam + "/allocation-plan/:" + planIdParam,
+			Path:     specificPortfolioPath + "/divergence/:" + timeFrameTagParam + "/allocation-plan/:" + planIdParam,
 			Handlers: gin.HandlersChain{controller.GetDivercenceAnalysis},
+		},
+		{
+			Method:   http.MethodGet,
+			Path:     specificPortfolioPath + "/divergence/options",
+			Handlers: gin.HandlersChain{controller.GetDivergenceAnalysisOptions},
 		},
 	}
 }
@@ -63,7 +72,7 @@ func (controller *PortfolioRESTController) getPortfolio(context *gin.Context) {
 
 	var portfolioIdParam = context.Param(portfolioIdParam)
 	portfolioId, err := strconv.Atoi(portfolioIdParam)
-	if infra.HandleAPIError(context, "Error getting portfolioId url parameter", err) {
+	if infra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
 		return
 	}
 
@@ -81,7 +90,7 @@ func (controller *PortfolioRESTController) getPortfolioAllocationHistory(context
 
 	var portfolioIdParam = context.Param(portfolioIdParam)
 	portfolioId, err := strconv.Atoi(portfolioIdParam)
-	if infra.HandleAPIError(context, "Error getting portfolioId url parameter", err) {
+	if infra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
 		return
 	}
 
@@ -95,11 +104,29 @@ func (controller *PortfolioRESTController) getPortfolioAllocationHistory(context
 	context.JSON(http.StatusOK, aggregatedPortfoliohistoryDTS)
 }
 
+func (controller *PortfolioRESTController) GetDivergenceAnalysisOptions(context *gin.Context) {
+
+	portfolioIdParam := context.Param(portfolioIdParam)
+	portfolioId, err := strconv.Atoi(portfolioIdParam)
+	if infra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
+		return
+	}
+
+	analysisOptions, err := controller.portfiolioAnalysisConfigService.GetDivergenceAnalysisOptions(portfolioId)
+	if infra.HandleAPIError(context, "Error getting divergence analysis options", err) {
+		return
+	}
+
+	var analysisOptionsDTS = model.MapAnalysisOptions(analysisOptions)
+
+	context.JSON(http.StatusOK, analysisOptionsDTS)
+}
+
 func (controller *PortfolioRESTController) GetDivercenceAnalysis(context *gin.Context) {
 
 	portfolioIdParam := context.Param(portfolioIdParam)
 	portfolioId, err := strconv.Atoi(portfolioIdParam)
-	if infra.HandleAPIError(context, "Error getting portfolioId url parameter", err) {
+	if infra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
 		return
 	}
 
@@ -127,7 +154,12 @@ func (controller *PortfolioRESTController) GetDivercenceAnalysis(context *gin.Co
 
 func BuildPortfolioRESTController(
 	portfolioDomService *service.PortfolioDomService,
+	portfiolioAnalysisConfigService *application.PortfolioAnalysisConfigurationAppService,
 	portfiolioAnalysisService *application.PortfolioDivergenceAnalysisAppService,
 ) *PortfolioRESTController {
-	return &PortfolioRESTController{portfolioDomService, portfiolioAnalysisService}
+	return &PortfolioRESTController{
+		portfolioDomService,
+		portfiolioAnalysisConfigService,
+		portfiolioAnalysisService,
+	}
 }
