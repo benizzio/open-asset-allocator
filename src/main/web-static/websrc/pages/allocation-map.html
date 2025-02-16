@@ -1,6 +1,5 @@
-<!-- TODO Call and map analysis options -->
 <div class="accordion" id="accordion-allocation-map" handlebars-template="template-allocation-map"
-     hx-get="/api/portfolio/:portfolioId/history" hx-trigger="load" hx-include="[name='portfolioId']">
+     hx-get="/api/portfolio/:portfolioId/divergence/options" hx-trigger="load" hx-include="[name='portfolioId']">
     <div class="accordion-item placeholder-glow">
         <h2 class="accordion-header placeholder col-12">placeholder</h2>
     </div>
@@ -11,27 +10,45 @@
 
 <template id="template-allocation-map">
 
-    {{#each .}}
+    {{#each availableHistory}}
     <div class="accordion-item">
 
         <h2 class="accordion-header">
             <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#{{timeFrameTag}}-slice" aria-expanded="true"
-                    aria-controls="{{timeFrameTag}}-slice">
-                {{timeFrameTag}}
+                    data-bs-target="#{{this}}-allocation-map-container" aria-expanded="true"
+                    aria-controls="{{this}}-allocation-map-container">
+                {{this}}
             </button>
         </h2>
 
-        <div id="{{timeFrameTag}}-slice" class="accordion-collapse collapse show"
+        <div id="{{this}}-allocation-map-container" class="accordion-collapse collapse show"
              data-bs-parent="#accordion-allocation-map">
             <div class="accordion-body row justify-content-center">
 
                 <div class="col-12 d-flex flex-column align-items-center">
-
-                    Allocation plan selection here
-
+                    <div class="d-flex flex-row ">
+                        <label class="mx-1">
+                            <select class="form-select" name="{{this}}PlanDivercence">
+                                <option value="0" selected>Choose an allocation plan</option>
+                                {{#each ../availablePlans}}
+                                <option value="{{this.id}}">{{this.name}}</option>
+                                {{/each}}
+                            </select>
+                        </label>
+                        <button type="button" class="btn btn-primary mx-1"
+                                onclick="selectDivergenceOptions('{{this}}PlanDivercence', 'divergence-analysis-container-{{this}}')"
+                        >
+                            <span class="bi bi-bar-chart-steps"></span>
+                        </button>
+                    </div>
                 </div>
 
+                <div id="divergence-analysis-container-{{this}}" class="col-12"
+                     handlebars-template="template-divergence-analysis"
+                     hx-get="/api/portfolio/:portfolioId/divergence/{{this}}/allocation-plan/:{{this}}PlanDivercence"
+                     hx-include="[name='portfolioId'],[name='{{this}}PlanDivercence']"
+                     hx-trigger="generate-divergence-analysis once">
+                </div>
 
             </div>
         </div>
@@ -39,4 +56,34 @@
     </div>
     {{/each}}
 
+    <script>
+        function selectDivergenceOptions(allocationPlanIdFieldName, divergenceAnalysisContainerId) {
+            const selectElement = document.querySelector(`select[name='${allocationPlanIdFieldName}']`);
+            const selectedPlanId = Number(selectElement.value);
+            if (selectedPlanId) {
+                setValid(selectElement);
+                triggerGenerateDivergence(selectedPlanId, `#${divergenceAnalysisContainerId}`);
+            } else {
+                setInvalid(selectElement);
+            }
+        }
+
+        function triggerGenerateDivergence(planId, analysisContainertElementId) {
+            const divergenceAnalysisElement = document.querySelector(analysisContainertElementId);
+            htmx.trigger(divergenceAnalysisElement, "generate-divergence-analysis");
+        }
+
+        function setValid(element) {
+            element.classList.remove("is-invalid");
+        }
+
+        function setInvalid(element) {
+            element.classList.add("is-invalid");
+        }
+    </script>
+
+</template>
+
+<template id="template-divergence-analysis">
+    {{this}}
 </template>
