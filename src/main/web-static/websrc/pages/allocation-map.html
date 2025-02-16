@@ -56,7 +56,8 @@
     </div>
     {{/each}}
 
-    <script>
+    <script type="text/javascript">
+
         function selectDivergenceOptions(allocationPlanIdFieldName, divergenceAnalysisContainerId) {
             const selectElement = document.querySelector(`select[name='${allocationPlanIdFieldName}']`);
             const selectedPlanId = Number(selectElement.value);
@@ -80,6 +81,7 @@
         function setInvalid(element) {
             element.classList.add("is-invalid");
         }
+
     </script>
 
 </template>
