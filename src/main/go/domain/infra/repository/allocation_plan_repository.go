@@ -36,7 +36,9 @@ const (
 		    pa.slice_size_percentage
 		FROM planned_allocation pa 
 		JOIN allocation_plan ap ON pa.allocation_plan_id = ap.id
-	` + infra.WhereClausePlaceholder
+	` + infra.WhereClausePlaceholder + `
+		ORDER BY pa.cash_reserve DESC, pa.slice_size_percentage DESC
+`
 )
 
 type AllocationPlanRDBMSRepository struct {

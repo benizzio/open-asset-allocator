@@ -1,8 +1,9 @@
-import { ChartDataset, ChartOptions } from "chart.js";
+import { ChartOptions } from "chart.js";
 import format from "../format";
-import { ChartInteraction, ChartInteractions, MeasuramentUnit } from "./chart-types";
-import { getDatasetSum, LABEL_CALLBACKS } from "./chart-utils";
-import BigNumber from "bignumber.js";
+import { ChartInteraction, ChartInteractions, LocalChartOptions } from "./chart-types";
+import { LABEL_CALLBACKS, valueAsPercentageOfDataset } from "./chart-utils";
+import { BOOTSTRAP_BODY_BACKGROUND_COLOR } from "../color";
+import { Context } from "chartjs-plugin-datalabels/types/context";
 
 const PIE_DOUGHNUT_CHART_OPTIONS: ChartOptions<"pie" | "doughnut"> = {
     plugins: {
@@ -21,11 +22,16 @@ const PIE_DOUGHNUT_CHART_OPTIONS: ChartOptions<"pie" | "doughnut"> = {
                 weight: "bolder",
                 size: 17,
             },
-            formatter: (value: number, context) => {
-                const valueBigNumber = new BigNumber(value);
-                const total = getDatasetSum(context.chart.data.datasets[0] as ChartDataset<"pie" | "doughnut">);
-                const totalBigNumber = new BigNumber(total);
-                return format.calculateAndFormatPercent(valueBigNumber, totalBigNumber);
+            color: BOOTSTRAP_BODY_BACKGROUND_COLOR,
+            formatter: (value: number, context: Context) => {
+
+                const percent = valueAsPercentageOfDataset(value, context);
+
+                if(percent.isLessThan(0.03)) {
+                    return "";
+                }
+
+                return format.formatPercent(percent.toNumber());
             },
         },
     },
@@ -33,32 +39,32 @@ const PIE_DOUGHNUT_CHART_OPTIONS: ChartOptions<"pie" | "doughnut"> = {
 };
 
 function getPieDoughnutChartOptions(
-    dataType: MeasuramentUnit,
+    localChartOptions: LocalChartOptions,
     chartInteractions?: ChartInteractions,
 ): ChartOptions<"pie" | "doughnut"> {
     return {
         ...PIE_DOUGHNUT_CHART_OPTIONS,
+        ...localChartOptions,
         ...chartInteractions,
         plugins: {
             ...PIE_DOUGHNUT_CHART_OPTIONS.plugins,
-            tooltip: { callbacks: { label: LABEL_CALLBACKS[dataType] } },
+            tooltip: { callbacks: { label: LABEL_CALLBACKS[localChartOptions.measuramentUnit] } },
         },
-    };
+    } as ChartOptions<"pie" | "doughnut">;
 }
 
 export function buildChartOptions(
-    chartType: string,
-    dataType: MeasuramentUnit,
+    localChartOptions: LocalChartOptions,
     chartInteractions?: ChartInteractions,
     interactionsCallback?: ChartInteraction,
-): ChartOptions<"pie" | "doughnut"> {
+): ChartOptions {
 
     const interactions = buildChartInteractions(chartInteractions, interactionsCallback);
 
-    switch (chartType) {
+    switch(localChartOptions.type) {
         case "pie":
         case "doughnut":
-            return getPieDoughnutChartOptions(dataType, interactions);
+            return getPieDoughnutChartOptions(localChartOptions, interactions) as ChartOptions;
     }
 }
 
@@ -70,21 +76,21 @@ export function buildChartInteractions(
     return {
         onClick: (event, elements, chart) => {
 
-            if (interactions?.onClick) {
+            if(interactions?.onClick) {
                 interactions.onClick(event, elements, chart);
             }
 
-            if (oberverCallback) {
+            if(oberverCallback) {
                 oberverCallback(event, elements, chart);
             }
         },
         onHover: (event, elements, chart) => {
 
-            if (interactions?.onHover) {
+            if(interactions?.onHover) {
                 interactions.onHover(event, elements, chart);
             }
 
-            if (oberverCallback) {
+            if(oberverCallback) {
                 oberverCallback(event, elements, chart);
             }
         },

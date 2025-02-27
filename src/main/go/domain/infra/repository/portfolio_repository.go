@@ -27,7 +27,7 @@ const (
 		FROM portfolio_allocation_fact pa
 		JOIN asset ass ON ass.id = pa.asset_id
 		` + infra.WhereClausePlaceholder + `
-		ORDER BY pa.time_frame_tag DESC, pa.class ASC, pa.cash_reserve DESC, ass.ticker ASC
+		ORDER BY pa.time_frame_tag DESC, pa.class ASC, pa.cash_reserve DESC, pa.total_market_value DESC
 	`
 	portfolioSQL = `
 		SELECT p.id, p.name, p.allocation_structure

@@ -1,5 +1,6 @@
 <div class="accordion" id="accordion-allocation-plan" handlebars-template="template-allocation-plan-item"
-     hx-get="/api/portfolio/:portfolioId/allocation-plan" hx-trigger="load" hx-include="[name='portfolioId']">
+     hx-get="/api/portfolio/:portfolioId/allocation-plan" hx-trigger="load" hx-include="[name='portfolioId']"
+>
     <div class="accordion-item placeholder-glow">
         <h2 class="accordion-header placeholder col-12">placeholder</h2>
     </div>
@@ -16,7 +17,8 @@
         <h2 class="accordion-header">
             <button class="accordion-button" type="button" data-bs-toggle="collapse"
                     data-bs-target="#allocation-plan-{{id}}" aria-expanded="true"
-                    aria-controls="allocation-plan-{{id}}">
+                    aria-controls="allocation-plan-{{id}}"
+            >
                 {{name}}
             </button>
         </h2>
@@ -35,7 +37,7 @@
                     {{{ chart
                     this
                     "ASSET_ALLOCATION_PLAN_1D"
-                    (object type="doughnut" measuramentUnit="PERCENTAGE")
+                    "allocation-plan-chart-options"
                     "allocation-plan-chart"
                     id
                     "#portfolio-context #portfolio"
@@ -52,3 +54,10 @@
     </script>
 
 </template>
+
+<script id="allocation-plan-chart-options" type="application/json">
+    {
+        "type": "doughnut",
+        "measuramentUnit": "PERCENTAGE"
+    }
+</script>

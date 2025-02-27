@@ -29,4 +29,8 @@ export function registerHandlebarsLangHelpers() {
     handlebars.registerHelper("stringify", function(object: object) {
         return JSON.stringify(object);
     });
+
+    handlebars.registerHelper("concat", function(...args) {
+        return Array.from(args).slice(0, arguments.length - 1).join("");
+    });
 }

@@ -1,4 +1,4 @@
-import { ActiveElement, Chart, ChartData, ChartEvent, ChartType, CoreChartOptions } from "chart.js";
+import { ActiveElement, Chart, ChartData, ChartEvent, ChartOptions, ChartType, CoreChartOptions } from "chart.js";
 
 export enum MeasuramentUnit {
     CURRENCY = "CURRENCY",
@@ -10,11 +10,10 @@ export enum ChartDataType {
     ASSET_ALLOCATION_PLAN_1D = "ASSET_ALLOCATION_PLAN_1D",
 }
 
-export type CanvasChartOptions = { type: string, measuramentUnit?: MeasuramentUnit };
+export type LocalChartOptions = { type: string, measuramentUnit?: MeasuramentUnit } & ChartOptions;
 
-export const CHART_DATA_TYPE_ATTRIBUTE = "data-chart-type";
-export const MULTI_CHART_DATA_ATTRIBUTE = "data-multi-chart";
-export const MEASURAMENT_UNIT_ATTRIBUTE = "data-measurament";
+export const CHART_ATTRIBUTE = "data-chart";
+export const CHART_OPTIONS_JSON_ELEMENT_ID = "chart-options-element";
 export const UNIDIMENSIONAL_DATASET_SUM_FIELD = "sum";
 
 export type ChartInteractions = Partial<Pick<CoreChartOptions<ChartType>, "onClick" | "onHover">>;
@@ -24,6 +23,7 @@ export type ChartContent = {
     chartDataSource: ChartDataSource,
     chartInteractions?: ChartInteractions,
     interactionObserverCallback?: ChartInteraction,
+    multiChart?: boolean,
 };
 
 export interface ChartDataSource {

@@ -1,5 +1,5 @@
 import { ChartContent, MultiChartDataSource } from "../infra/chart/chart-types";
-import { ActiveElement, Chart, ChartData, ChartEvent } from "chart.js";
+import { ActiveElement, Chart, ChartData, ChartDataset, ChartEvent } from "chart.js";
 import { allocationDomainService } from "../domain/allocation-service";
 import { changeChartDataOnDatasource } from "../infra/chart/chart-utils";
 import chartModule from "../infra/chart/chart";
@@ -61,13 +61,21 @@ function mapDataset(
     chartDataMap: Map<string, ChartData>,
 ) {
 
-    const dataset = { data: [], label: datasetLabel };
+    const dataset: ChartDataset = { data: [], label: datasetLabel, backgroundColor: [] };
     const chartData = { labels: [], datasets: [dataset] };
+    const colorScale = chartModule.getPieDoughnutChartColorScale();
+    dataset.backgroundColor = colorScale.colors(fractalAllocations.length);
 
-    fractalAllocations.forEach((fractalAllocation) => {
+    fractalAllocations.forEach((fractalAllocation, index) => {
+
         const allocation = fractalAllocation.allocation;
+
         dataset.data.push(allocation.sliceSizePercentage.toNumber());
         chartData.labels.push(allocation.structuralId[fractalAllocation.level.index]);
+
+        if(allocation.cashReserve) {
+            chartModule.convertUnidimensionalDatasetBackgroundToPattern(dataset, index);
+        }
     });
 
     chartDataMap.set(datasetLabel, chartData);

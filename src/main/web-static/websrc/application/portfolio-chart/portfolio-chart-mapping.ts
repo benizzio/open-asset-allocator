@@ -1,6 +1,10 @@
-import { PortfolioAtTime } from "../../domain/portfolio";
+import { PortfolioAllocation, PortfolioAtTime } from "../../domain/portfolio";
 import { AppliedAllocationHierarchyLevel, MappedChartData } from "./portfolio-chart-model";
 import { AllocationStructure } from "../../domain/allocation";
+import { ChartDataset } from "chart.js";
+import chartModule from "../../infra/chart/chart";
+
+type ReducedAllocation = Pick<PortfolioAllocation, "totalMarketValue" | "cashReserve">;
 
 export function mapChartData(
     portfolioAtTime: PortfolioAtTime,
@@ -9,52 +13,73 @@ export function mapChartData(
     appliedHierarchyLevels?: AppliedAllocationHierarchyLevel[],
 ): MappedChartData {
 
-    const dataset = { data: [], label: portfolioAtTime.timeFrameTag };
-    const chartData = { labels: [], keys: [], datasets: [dataset] };
+    const dataset: ChartDataset = { data: [], label: portfolioAtTime.timeFrameTag, backgroundColor: [] };
+    const chartData: MappedChartData = { labels: [], keys: [], datasets: [dataset] };
+    const colorScale = chartModule.getPieDoughnutChartColorScale();
 
     const reducedPortfolioAtTime =
-        getAccumulatedSlicesPerProperty(
+        getAccumulatedAllocationsPerProperty(
             portfolioAtTime,
             portfolioStructure,
             hierarchyLevelIndex,
             appliedHierarchyLevels,
         );
 
+    dataset.backgroundColor = colorScale.colors(reducedPortfolioAtTime.size);
+
+    let index = 0;
+
     reducedPortfolioAtTime.forEach((value, key) => {
-        chartData.labels.push(key);
+
+        chartData.labels.push(key + (value.cashReserve ? " (cash reserve)" : ""));
         chartData.keys.push(key);
-        dataset.data.push(value);
+        dataset.data.push(value.totalMarketValue);
+
+        if(value.cashReserve) {
+            chartModule.convertUnidimensionalDatasetBackgroundToPattern(dataset, index);
+            index++;
+        }
     });
 
     return chartData;
 }
 
-function getAccumulatedSlicesPerProperty(
+function getAccumulatedAllocationsPerProperty(
     portfolioAtTime: PortfolioAtTime,
     portfolioStructure: AllocationStructure,
     hierarchyLevelIndex: number,
     appliedHierarchyLevels: AppliedAllocationHierarchyLevel[] = [],
-): Map<string, number> {
+): Map<string, ReducedAllocation> {
 
     const accumulationProperty = portfolioStructure.hierarchy[hierarchyLevelIndex].field;
 
-    const filteredSlices = portfolioAtTime.allocations.filter((slice) => {
+    const filteredAllocations = portfolioAtTime.allocations.filter((slice) => {
         return appliedHierarchyLevels.every((filter) => {
             return slice[filter.field] === filter.value;
         });
     });
 
-    const mappedSliceMarketValues = filteredSlices.map((slice) => {
+    const mappedAllocationMarketValues = filteredAllocations.map((allocation) => {
         return {
-            label: slice[accumulationProperty],
-            data: slice.totalMarketValue,
+            label: allocation[accumulationProperty],
+            data: allocation.totalMarketValue,
+            cashReserve: allocation.cashReserve,
         };
     });
 
-    return mappedSliceMarketValues.reduce((accumulator, slice) => {
-        const currentKey = slice.label;
+    return mappedAllocationMarketValues.reduce((accumulator, allocation) => {
+
+        const currentKey = allocation.label;
         const currentValue = accumulator.get(currentKey);
-        accumulator.set(currentKey, !currentValue ? slice.data : currentValue + slice.data);
+
+        const reducedAllocation = {
+            totalMarketValue: !currentValue
+                ? allocation.data
+                : currentValue.totalMarketValue + allocation.data,
+            cashReserve: allocation.cashReserve,
+        };
+        accumulator.set(currentKey, reducedAllocation);
+
         return accumulator;
-    }, new Map<string, number>());
+    }, new Map<string, ReducedAllocation>());
 }

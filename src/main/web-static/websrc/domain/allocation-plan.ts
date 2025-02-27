@@ -3,7 +3,7 @@ import { AllocationHierarchyLevel, AllocationType } from "./allocation";
 
 export type PlannedAllocation = {
     structuralId: string[],
-    chashReserve: boolean,
+    cashReserve: boolean,
     sliceSizePercentage: BigNumber,
 };
 

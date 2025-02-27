@@ -1,6 +1,8 @@
 import { Chart, ChartType } from "chart.js";
 import { buildChartOptions } from "./chart-options";
-import { CHART_DATA_TYPE_ATTRIBUTE, ChartContent, MEASURAMENT_UNIT_ATTRIBUTE, MeasuramentUnit } from "./chart-types";
+import { CHART_ATTRIBUTE, CHART_OPTIONS_JSON_ELEMENT_ID, ChartContent, LocalChartOptions } from "./chart-types";
+import DomUtils from "../dom/dom-utils";
+import { convertUnidimensionalDatasetBackgroundToPattern, getPieDoughnutChartColorScale } from "./chart-utils";
 
 const chartContentRepo = new Map<string, ChartContent>;
 
@@ -22,33 +24,22 @@ function loadChart(canvas: HTMLCanvasElement): void {
 
     const id = canvas.id;
     const content = getChartContent(id);
+
     const interactionObserverCallback = content.interactionObserverCallback;
-    const chartType = canvas.getAttribute(CHART_DATA_TYPE_ATTRIBUTE);
-    const measuramentUnit = canvas.getAttribute(MEASURAMENT_UNIT_ATTRIBUTE) as MeasuramentUnit;
     const chartInteractions = content.chartInteractions;
 
-    let options = {};
+    const localOptionsElementId = canvas.getAttribute(CHART_OPTIONS_JSON_ELEMENT_ID);
+    const localOptions = DomUtils.getContextDataFromRoot("#" + localOptionsElementId) as LocalChartOptions;
+    const chartType = localOptions.type;
 
-    switch (chartType) {
-        case "pie":
-            options = buildChartOptions(
-                "pie",
-                measuramentUnit,
-                chartInteractions,
-                interactionObserverCallback,
-            );
-            break;
-        case "doughnut":
-            options = buildChartOptions(
-                "doughnut",
-                measuramentUnit,
-                chartInteractions,
-                interactionObserverCallback,
-            );
-            break;
-    }
 
-    if (content) {
+    const options = buildChartOptions(
+        localOptions,
+        chartInteractions,
+        interactionObserverCallback,
+    );
+
+    if(content) {
         new Chart(canvas, {
             type: chartType as ChartType,
             data: content.chartDataSource.getChartData(),
@@ -62,10 +53,12 @@ const chart = {
     getChartContent,
     getChartContentFromChart,
     loadDescendantCharts(element: HTMLElement) {
-        element.querySelectorAll(`canvas[${ CHART_DATA_TYPE_ATTRIBUTE }]`).forEach((canvas: HTMLCanvasElement) => {
+        element.querySelectorAll(`canvas[${ CHART_ATTRIBUTE }]`).forEach((canvas: HTMLCanvasElement) => {
             loadChart(canvas);
         });
     },
+    getPieDoughnutChartColorScale,
+    convertUnidimensionalDatasetBackgroundToPattern,
 };
 
 export default chart;

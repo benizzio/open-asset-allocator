@@ -1,5 +1,6 @@
 <div class="accordion" id="accordion-portfolio-history" handlebars-template="template-portfolio-history"
-     hx-get="/api/portfolio/:portfolioId/history" hx-trigger="load" hx-include="[name='portfolioId']">
+     hx-get="/api/portfolio/:portfolioId/history" hx-trigger="load" hx-include="[name='portfolioId']"
+>
     <div class="accordion-item placeholder-glow">
         <h2 class="accordion-header placeholder col-12">placeholder</h2>
     </div>
@@ -15,14 +16,16 @@
 
         <h2 class="accordion-header">
             <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#{{timeFrameTag}}-slice" aria-expanded="true"
-                    aria-controls="{{timeFrameTag}}-slice">
+                    data-bs-target="#{{timeFrameTag}}-portfolio-allocation" aria-expanded="true"
+                    aria-controls="{{timeFrameTag}}-portfolio-allocation"
+            >
                 {{timeFrameTag}}
             </button>
         </h2>
 
-        <div id="{{timeFrameTag}}-slice" class="accordion-collapse collapse show"
-             data-bs-parent="#accordion-portfolio-history">
+        <div id="{{timeFrameTag}}-portfolio-allocation" class="accordion-collapse collapse show"
+             data-bs-parent="#accordion-portfolio-history"
+        >
             <div class="accordion-body row justify-content-center">
 
                 <div class="col-12 d-flex flex-column align-items-center">
@@ -40,12 +43,13 @@
                     {{{ chart
                     this
                     "PORTFOLIO_HISTORY_1D"
-                    (object type="pie" measuramentUnit="CURRENCY")
+                    "portfolio-allocation-chart-options"
                     "portfolio-chart"
                     timeFrameTag
                     "#portfolio-context #portfolio"
                     }}}
                 </div>
+
 
             </div>
         </div>
@@ -59,3 +63,10 @@
 
 </template>
 
+<script id="portfolio-allocation-chart-options" type="application/json">
+    {
+        "type": "doughnut",
+        "cutout": "35%",
+        "measuramentUnit": "CURRENCY"
+    }
+</script>

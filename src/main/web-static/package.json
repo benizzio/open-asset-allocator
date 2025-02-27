@@ -4,6 +4,7 @@
     "@parcel/transformer-raw": "^2.12.0",
     "@parcel/transformer-sass": "^2.12.0",
     "@stylistic/eslint-plugin-ts": "^2.8.0",
+    "@types/chroma-js": "^3.1.1",
     "eslint": "^9.11.1",
     "globals": "^15.9.0",
     "http-proxy-middleware": "^2.0.7",
@@ -15,12 +16,15 @@
     "bignumber.js": "^9.1.2",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
+    "bootswatch": "^5.3.3",
     "chart.js": "^4.4.4",
     "chartjs-plugin-datalabels": "^2.2.0",
+    "chroma-js": "^3.1.2",
     "handlebars": "^4.7.8",
     "htmx-ext-client-side-templates": "^2.0.0",
     "htmx.org": "^2.0.2",
-    "navigo": "^8.11.1"
+    "navigo": "^8.11.1",
+    "patternomaly": "^1.3.2"
   },
   "scripts": {
     "clean": "rimraf dist",
