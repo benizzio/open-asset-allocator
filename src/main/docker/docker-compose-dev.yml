@@ -37,4 +37,4 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ${POSTGRES_DATA_DIR}
+      device: ${POSTGRES_DEV_DATA_DIR}

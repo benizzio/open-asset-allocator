@@ -58,7 +58,9 @@ func (server *GinServer) configRootHMTLAndDependenciesRoute() {
 			file := context.Param("filepath")
 			if strings.HasSuffix(file, ".js") ||
 				strings.HasSuffix(file, ".js.map") ||
-				strings.HasSuffix(file, ".css") {
+				strings.HasSuffix(file, ".css") ||
+				strings.HasSuffix(file, ".woff") ||
+				strings.HasSuffix(file, ".woff2") {
 				context.File(filepath.Join(server.config.webStaticContentPath, file))
 			} else {
 				server.handleGetAsToRoot(context)

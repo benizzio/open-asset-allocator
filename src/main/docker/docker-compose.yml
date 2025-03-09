@@ -15,8 +15,18 @@ services:
       service: db
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   migration-engine:
     extends:
       file: docker-compose-base.yml
       service: migration-engine
+
+volumes:
+  postgres_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${POSTGRES_DATA_DIR}
