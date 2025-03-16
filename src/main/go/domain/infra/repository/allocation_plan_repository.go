@@ -24,10 +24,12 @@ const (
 	allocationPlanIdentifierSQL = `
 		SELECT ap.id, ap.name
 		FROM allocation_plan ap
-	` + infra.WhereClausePlaceholder
+	` + infra.WhereClausePlaceholder + `
+		ORDER BY ap.create_timestamp DESC
+	`
 	allocationPlanSQL = `
 		SELECT 
-		    ap.id as allocation_plan_id,
+		    ap.id AS allocation_plan_id,
 		    ap.name, 
 		    ap.type, 
 		    ap.planned_execution_date, 
@@ -37,8 +39,8 @@ const (
 		FROM planned_allocation pa 
 		JOIN allocation_plan ap ON pa.allocation_plan_id = ap.id
 	` + infra.WhereClausePlaceholder + `
-		ORDER BY pa.cash_reserve DESC, pa.slice_size_percentage DESC
-`
+		ORDER BY ap.create_timestamp DESC, pa.cash_reserve DESC, pa.slice_size_percentage DESC
+	`
 )
 
 type AllocationPlanRDBMSRepository struct {

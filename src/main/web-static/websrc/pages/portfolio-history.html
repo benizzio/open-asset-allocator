@@ -15,15 +15,18 @@
     <div class="accordion-item">
 
         <h2 class="accordion-header">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#{{timeFrameTag}}-portfolio-allocation" aria-expanded="true"
+            <button class="accordion-button {{#unless @first}}collapsed{{/unless}}"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#{{timeFrameTag}}-portfolio-allocation"
+                    aria-expanded="true"
                     aria-controls="{{timeFrameTag}}-portfolio-allocation"
             >
                 {{timeFrameTag}}
             </button>
         </h2>
 
-        <div id="{{timeFrameTag}}-portfolio-allocation" class="accordion-collapse collapse show"
+        <div id="{{timeFrameTag}}-portfolio-allocation" class="accordion-collapse collapse {{#if @first}}show{{/if}}"
              data-bs-parent="#accordion-portfolio-history"
         >
             <div class="accordion-body row justify-content-center">

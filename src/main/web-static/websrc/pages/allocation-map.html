@@ -19,7 +19,7 @@
         <div class="accordion-item">
 
             <h2 class="accordion-header">
-                <button class="accordion-button"
+                <button class="accordion-button {{#unless @first}}collapsed{{/unless}}"
                         type="button"
                         data-bs-toggle="collapse"
                         data-bs-target="#{{this}}-allocation-map-container"
@@ -31,7 +31,7 @@
             </h2>
 
             <div id="{{this}}-allocation-map-container"
-                 class="accordion-collapse collapse show"
+                 class="accordion-collapse collapse {{#if @first}}show{{/if}}"
                  data-bs-parent="#accordion-allocation-map"
             >
                 <div class="accordion-body row justify-content-center">

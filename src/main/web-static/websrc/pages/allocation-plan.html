@@ -15,15 +15,21 @@
     <div class="accordion-item">
 
         <h2 class="accordion-header">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#allocation-plan-{{id}}" aria-expanded="true"
+            <button class="accordion-button {{#unless @first}}collapsed{{/unless}}"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#allocation-plan-{{id}}"
+                    aria-expanded="true"
                     aria-controls="allocation-plan-{{id}}"
             >
                 {{name}}
             </button>
         </h2>
 
-        <div id="allocation-plan-{{id}}" class="accordion-collapse collapse show" data-bs-parent="#accordion-portfolio">
+        <div id="allocation-plan-{{id}}"
+             class="accordion-collapse collapse {{#if @first}}show{{/if}}"
+             data-bs-parent="#accordion-portfolio"
+        >
             <div class="accordion-body row justify-content-center">
 
                 <div class="col-12 d-flex flex-column align-items-center">

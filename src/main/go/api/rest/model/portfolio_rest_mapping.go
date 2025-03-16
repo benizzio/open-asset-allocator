@@ -2,6 +2,8 @@ package model
 
 import (
 	"github.com/benizzio/open-asset-allocator/domain"
+	"sort"
+	"strings"
 )
 
 // ==========================================
@@ -67,6 +69,16 @@ func buildHistoryDTS(portfolioAllocationsPerTimeFrame portfolioAllocationsPerTim
 		portfolioSnapshot := buildSnapshotDTS(timeFrameTag, allocations, totalMarketValue)
 		aggregatedPortfoliohistory = append(aggregatedPortfoliohistory, portfolioSnapshot)
 	}
+
+	// Sort the aggregated portfolio history by time frame tag, in descending order
+	sort.Slice(
+		aggregatedPortfoliohistory, func(i, j int) bool {
+			return strings.Compare(
+				string(aggregatedPortfoliohistory[i].TimeFrameTag),
+				string(aggregatedPortfoliohistory[j].TimeFrameTag),
+			) > 0
+		},
+	)
 
 	return aggregatedPortfoliohistory
 }
