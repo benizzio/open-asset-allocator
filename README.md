@@ -40,7 +40,10 @@ Some definitions I believe are a lot more useful:
 
 ## What is this tool?
 
-It is a web application that allows the continued management of the application of asset allocation strategies in a
-fractal structure.
+It is an application that allows the continued management of the application of asset allocation strategies in a
+"fractal" structure. The allocation needs to follow this top-down repeatable structure, composed of assets on the lowest
+level.
+Those assets can be grouped by any criteria defined by the implemented model, and that will form the top levels of the
+hierarchical structure. In the lowest level the assets can be also classified as cash reserves.
 
 TODO continue
