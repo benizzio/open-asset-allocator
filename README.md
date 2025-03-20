@@ -22,9 +22,11 @@ Some definitions I believe are a lot more useful:
 - A strategy to manage assets with focus in the long term, with clear fallbacks for short term volatility and
   deviations;
 - A technique to store cognitive energy in a plan that allows for intuitive, "automatic" behavior when moving assets,
-  detaching it from emotional influences and deviations;
+  helping detach it from emotional influences and deviations;
 - A way to time the markets without targets, taking advantage of its cyclic nature (where appliable), and to buy "cheap"
   and sell "expensive" without having to know about the price at the time of action;
+- A process that is used to manage large ammounts of assets, enjoying large accumulation zones and permanent time in the
+  market;
 - A method that allows for higher focus on some very important risk assessment
   and [convex payoff](https://youtu.be/ovEPIQR65hc) topics:
     - Maintaining diversification with
@@ -34,7 +36,7 @@ Some definitions I believe are a lot more useful:
       [barbell (bimodal) strategies](https://www.investopedia.com/articles/investing/013114/barbell-investment-strategy.asp);
     - Taking care of [hedging tail risks](https://youtu.be/o3Qno1rT-nw).
 
-TODO diagram of stages of the normal asset allocation strategy
+![asset allocation flow](/docs/images/asset-allocation-flow.png)
 
 ## What is this tool?
 
