@@ -161,8 +161,8 @@ INSERT INTO planned_allocation
 (allocation_plan_id, structural_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
 VALUES
     (1, '{"NasdaqGM:SHV", "STOCKS"}', 5, true, 0.5, NULL),
-    (1, '{"ARCA:EWZ", "STOCKS"}', 6, false, 0.45, NULL),
-    (1, '{"ARCA:SPY", "STOCKS"}', 7, false, 0.05, NULL)
+    (1, '{"ARCA:EWZ", "STOCKS"}', 6, false, 0.05, NULL),
+    (1, '{"ARCA:SPY", "STOCKS"}', 7, false, 0.45, NULL)
 ;
 
 SELECT setval('allocation_plan_id_seq', (SELECT max(id) FROM allocation_plan));
