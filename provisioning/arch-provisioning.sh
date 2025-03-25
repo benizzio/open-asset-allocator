@@ -28,3 +28,7 @@ sudo systemctl disable docker.service
 sudo systemctl stop docker.service
 sudo systemctl enable docker.socket
 sudo systemctl start docker.socket
+
+# install nvm and node
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh | bash
+nvm install

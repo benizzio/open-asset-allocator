@@ -17,6 +17,7 @@ rm -rf "${build_dir:?}"
 
 echo "===== Building frontend"
 cd "$web_static_dir" || exit
+npm install
 npm run build
 
 echo "===== Copying frontend resources for build"

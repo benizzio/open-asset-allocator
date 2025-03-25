@@ -58,6 +58,23 @@ available as an example dataset in the project):
 ![asset level bonds](/docs/images/example-portfolio-bonds.png)
 ![asset level stocks](/docs/images/example-portfolio-stocks.png)
 
+### Installing and running
+
+> [!IMPORTANT]
+> Pre-requisites: git, docker, docker-compose, npm (version in .nvmrc), make
+> Verify if there is a provisioning script for your OS in the `provisioning` folder. If not, I welcome PRs to add them.
+
+1. Clone the repository: `git clone https://github.com/benizzio/open-asset-allocator.git`
+2. build the application: `make`
+3. start the services: `make start`
+4. application will be available at in [localhost](http://localhost)
+
+Configuration can be done in [.env](src/main/docker/.env)
+
+> [!NOTE]
+> Current pre-alpha version requires data ingestion or manual data insertion.
+> To access the stored portfolio go to `http://localhost/portfolio/<portfolio id>`
+
 ### Features
 
 - **Manage multiple portfolios**:
