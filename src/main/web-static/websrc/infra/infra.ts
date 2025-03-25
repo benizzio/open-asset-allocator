@@ -3,7 +3,6 @@ import ChartDataLabels from "chartjs-plugin-datalabels";
 import { handlebarsInfra } from "./handlebars/handlebars";
 import { htmxInfra } from "./htmx";
 import router from "./routing/router";
-import * as clientSideTemplates from "htmx-ext-client-side-templates";
 import * as bootstrap from "bootstrap";
 
 //eslint-disable-next-line
@@ -24,6 +23,8 @@ export const infra = {
         };
         document.addEventListener("DOMContentLoaded", onPageLoad);
 
-        return { clientSideTemplates, bootstrap };
+        return {
+            bootstrap
+        };
     },
 };

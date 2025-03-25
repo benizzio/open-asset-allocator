@@ -16,17 +16,17 @@
 
 <div class="container-fluid">
 
-    <div id="portfolio-container" hx-get="/websrc/pages/portfolio.html" hx-trigger="route-reached once"
-         data-hx-trigger-on-route="/portfolio/:portfolioId/*!route-reached">
+    <div id="portfolio-container"
+         hx-get="/websrc/pages/portfolio.html"
+         hx-trigger="route-reached once"
+         data-hx-trigger-on-route="/portfolio/:portfolioId/*!route-reached"
+    >
     </div>
 
 </div>
 
-<!-- TODO: parcel processing breaks the lib, find fix -->
-<script src="https://unpkg.com/htmx.org@2.0.2"
-        integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ"
-        crossorigin="anonymous"></script>
-
+<script src="./node_modules/htmx.org/dist/htmx.js"></script>
+<script src="./node_modules/htmx-ext-client-side-templates/dist/client-side-templates.js"></script>
 <script defer src="/websrc/root.ts" type="module"></script>
 
 </body>
