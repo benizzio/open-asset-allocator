@@ -5,7 +5,7 @@
     "@parcel/transformer-sass": "^2.14.1",
     "@stylistic/eslint-plugin-ts": "^4.2.0",
     "@types/chroma-js": "^3.1.1",
-    "eslint": "^9.11.1",
+    "eslint": "^9.23.0",
     "globals": "^15.9.0",
     "http-proxy-middleware": "^2.0.7",
     "parcel": "^2.14.1",
