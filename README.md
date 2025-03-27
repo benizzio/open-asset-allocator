@@ -112,10 +112,10 @@ Configuration can be done in [.env](src/main/docker/.env)
 
 ### Roadmap(ish)
 
-- [ ] Color configuration per hierarchy level record for visual consistency
 - [x] Pie chart for portfolio history view if possible to control inner radius
 - [ ] Allocation map:
     - [x] DIVERGENCE: last portfolio history from a timeframe, select an allocation plan to analyze
+        - [ ] cash reserve marker on table (label & color)
         - [ ] persistence of generated analysis on timeframe for convenience
         - [x] show divergent value in currency units
         - [x] show divergent value in percentage
@@ -125,3 +125,6 @@ Configuration can be done in [.env](src/main/docker/.env)
         - line for each divergent record
         - field for how much to value to move and to what asset
         - show final state after convergence (chart maybe?)
+- [ ] UI improvements:
+    - [ ] Color configuration per hierarchy level record for visual consistency (apply to charts and tables)
+    - [ ] Change accordion header font to differentiate from content
