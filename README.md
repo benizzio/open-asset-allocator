@@ -112,19 +112,31 @@ Configuration can be done in [.env](src/main/docker/.env)
 
 ### Roadmap(ish)
 
-- [x] Pie chart for portfolio history view if possible to control inner radius
-- [ ] Allocation map:
-    - [x] DIVERGENCE: last portfolio history from a timeframe, select an allocation plan to analyze
+- Portfolio history
+    - [ ] allow inclusion of external cash inflow via UI
+- Allocation map:
+    - DIVERGENCE: last portfolio history from a timeframe, select an allocation plan to analyze
         - [ ] cash reserve marker on table (label & color)
         - [ ] persistence of generated analysis on timeframe for convenience
         - [x] show divergent value in currency units
         - [x] show divergent value in percentage
         - [ ] allow easy UI elements to add extenal cash inflow
-    - [ ] CONVERGENCE: create from mapped DIVERGENCE?
-        - bound to a divergence analysis and its plan
-        - line for each divergent record
-        - field for how much to value to move and to what asset
-        - show final state after convergence (chart maybe?)
+        - [ ] show divergence mode used with informative text
+        - [ ] add percentage divergence mode config ("aggresive" from level or "conservative" from asset)
+        - [ ] add divergence bar mode config (change proportion from 2:1)
+    - [ ] CONVERGENCE:
+        - [ ] create from a mapped divergence analysis (bound to a divergence analysis and its plan)
+        - [ ] fractal execution: create per level and per parent selection when below top
+        - [ ] line for each divergent record, add field for post-convergence goal (maket value) and calculate new
+          percentage
+        - [ ] allow obtaining inserted external cash inflow and using it for convergence in any asset
+            - (?) upper field inside each level of fractal structure to visualize re-balancing and availability deeper
+              within the hierachy
+        - (?) show final state after convergence (chart maybe?)
+        - [ ] allow creation of multiple steps for segmented convergence plan
+            - (?) Copy previous unexecuted plans on new divergence analysis
+        - (?) fild to inpuit curret market value at the time of convergence execution and calculate movement quantity
+          (no need to persist)
 - [ ] UI improvements:
     - [ ] Color configuration per hierarchy level record for visual consistency (apply to charts and tables)
     - [ ] Change accordion header font to differentiate from content
