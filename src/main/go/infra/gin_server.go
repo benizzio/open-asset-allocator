@@ -55,7 +55,15 @@ func (server *GinServer) configRootHMTLAndDependenciesRoute() {
 	glog.Infof("Serving .js, .js.map, .css files from root to load bundles")
 	server.router.GET(
 		"/:filepath", func(context *gin.Context) {
+
 			file := context.Param("filepath")
+
+			// Validate the file parameter to prevent path traversal
+			if strings.Contains(file, "/") || strings.Contains(file, "\\") || strings.Contains(file, "..") {
+				context.String(http.StatusBadRequest, "Invalid file name")
+				return
+			}
+
 			if strings.HasSuffix(file, ".js") ||
 				strings.HasSuffix(file, ".js.map") ||
 				strings.HasSuffix(file, ".css") ||
@@ -77,7 +85,7 @@ func (server *GinServer) configUnknownStandardRoutes() {
 			if context.Request.Method == "GET" && !server.isRequestToAPI(context) {
 				server.handleGetAsToRoot(context)
 			} else {
-				context.String(404, "Not Found")
+				context.String(http.StatusNotFound, "Not Found")
 			}
 		},
 	)
