@@ -56,6 +56,11 @@ func (server *GinServer) configRootHMTLAndDependenciesRoute() {
 	server.router.GET(
 		"/:filepath", func(context *gin.Context) {
 			file := context.Param("filepath")
+			// Validate the file parameter to prevent path traversal
+			if strings.Contains(file, "/") || strings.Contains(file, "\\") || strings.Contains(file, "..") {
+				context.String(http.StatusBadRequest, "Invalid file name")
+				return
+			}
 			if strings.HasSuffix(file, ".js") ||
 				strings.HasSuffix(file, ".js.map") ||
 				strings.HasSuffix(file, ".css") ||
