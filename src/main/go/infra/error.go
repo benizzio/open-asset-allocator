@@ -59,7 +59,7 @@ func HandleAPIError(context *gin.Context, message string, cause error) bool {
 	var handle = cause != nil
 	if handle {
 		glog.Error(message, ": ", cause)
-		context.IndentedJSON(http.StatusInternalServerError, gin.H{"error": message})
+		context.JSON(http.StatusInternalServerError, gin.H{"error": message})
 	}
 	return handle
 }
