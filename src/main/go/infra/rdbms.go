@@ -174,6 +174,6 @@ func buildPingContext() (context.Context, context.CancelFunc) {
 	return pingContext, cancel
 }
 
-func BuildDatabaseAdapter(config Configuration) *RDBMSAdapter {
+func BuildDatabaseAdapter(config *Configuration) *RDBMSAdapter {
 	return &RDBMSAdapter{config: config.rdbmsConfig}
 }

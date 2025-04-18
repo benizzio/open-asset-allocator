@@ -15,47 +15,24 @@ import (
 	"time"
 )
 
-// TODO clean
-func main() {
-
-	if infra.ConfigLogger() {
-		return
-	}
-
-	//Change this to a fluent API
-	databaseAdapter, server := initializeAppComponents(buildAndInjectAppComponents())
-
-	stopChannel := buildStopChannel()
-
-	<-stopChannel
-
-	stopContext, cancel := buildStopContext()
-	defer cancel()
-
-	closeAppComponents(stopContext, server, databaseAdapter)
-
-	glog.Info("Exiting application process")
+type App struct {
+	config          *infra.Configuration
+	databaseAdapter *infra.RDBMSAdapter
+	server          *infra.GinServer
+	restControllers []infra.GinServerRESTController
 }
 
-func buildStopContext() (context.Context, context.CancelFunc) {
-	stopContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	go func() {
-		<-stopContext.Done()
-		if errors.Is(stopContext.Err(), context.DeadlineExceeded) {
-			glog.Fatal("Error stopping application: timeout")
-		}
-	}()
-	return stopContext, cancel
-}
-
-func buildAndInjectAppComponents() (*infra.RDBMSAdapter, *infra.GinServer, []infra.GinServerRESTController) {
-
+func (app *App) buildBaseInfrastructure() {
 	var config = infra.ReadConfig()
-	var server = infra.BuildGinServer(config)
-	var databaseAdapter = infra.BuildDatabaseAdapter(config)
+	app.config = config
+	app.server = infra.BuildGinServer(config)
+	app.databaseAdapter = infra.BuildDatabaseAdapter(config)
+}
 
-	var portfolioRepository = repository.BuildPortfolioRepository(databaseAdapter)
-	var allocationPlanRepository = repository.BuildAllocationPlanRepository(databaseAdapter)
+func (app *App) buildAppComponents() {
+
+	var portfolioRepository = repository.BuildPortfolioRepository(app.databaseAdapter)
+	var allocationPlanRepository = repository.BuildAllocationPlanRepository(app.databaseAdapter)
 
 	var portfolioDomService = service.BuildPortfolioDomService(portfolioRepository)
 	var allocationPlanDomService = service.BuildAllocationPlanDomService(allocationPlanRepository)
@@ -75,26 +52,47 @@ func buildAndInjectAppComponents() (*infra.RDBMSAdapter, *infra.GinServer, []inf
 	)
 	var allocationPlanRESTController = rest.BuildAllocationPlanRESTController(allocationPlanDomService)
 
-	var restControllers = []infra.GinServerRESTController{portfolioRESTController, allocationPlanRESTController}
-
-	return databaseAdapter, server, restControllers
+	app.restControllers = []infra.GinServerRESTController{portfolioRESTController, allocationPlanRESTController}
 }
 
-func initializeAppComponents(
-	databaseAdapter *infra.RDBMSAdapter,
-	server *infra.GinServer,
-	restControllers []infra.GinServerRESTController,
-) (
-	*infra.RDBMSAdapter,
-	*infra.GinServer,
-) {
+func (app *App) initializeAppComponents() {
+	app.databaseAdapter.Init()
+	app.databaseAdapter.Ping()
+	app.server.Init(app.restControllers)
+}
 
-	databaseAdapter.Init()
-	databaseAdapter.Ping()
+func (app *App) closeAppComponents(stopContext context.Context) {
+	app.server.Stop(stopContext)
+	app.databaseAdapter.Stop()
+}
 
-	server.Init(restControllers)
+func (app *App) Start() {
 
-	return databaseAdapter, server
+	app.buildBaseInfrastructure()
+	app.buildAppComponents()
+	app.initializeAppComponents()
+
+	stopChannel := buildStopChannel()
+
+	<-stopChannel
+
+	stopContext, cancel := buildStopContext()
+	defer cancel()
+
+	app.closeAppComponents(stopContext)
+
+	glog.Info("Exiting application process")
+}
+
+func buildStopContext() (context.Context, context.CancelFunc) {
+	stopContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	go func() {
+		<-stopContext.Done()
+		if errors.Is(stopContext.Err(), context.DeadlineExceeded) {
+			glog.Fatal("Error stopping application: timeout")
+		}
+	}()
+	return stopContext, cancel
 }
 
 func buildStopChannel() chan os.Signal {
@@ -104,11 +102,12 @@ func buildStopChannel() chan os.Signal {
 	return stopChannel
 }
 
-func closeAppComponents(
-	stopContext context.Context,
-	server *infra.GinServer,
-	databaseAdapter *infra.RDBMSAdapter,
-) {
-	server.Stop(stopContext)
-	databaseAdapter.Stop()
+func main() {
+
+	if infra.ConfigLogger() {
+		return
+	}
+
+	var app = App{}
+	app.Start()
 }

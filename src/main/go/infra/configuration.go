@@ -21,12 +21,12 @@ type Configuration struct {
 	rdbmsConfig     RDBMSConfiguration
 }
 
-func ReadConfig() Configuration {
+func ReadConfig() *Configuration {
 
 	var tempWebStaticContentPath = os.Getenv("WEB_STATIC_CONTENT_PATH")
 	var tempWebStaticSourceRelPath = os.Getenv("WEB_STATIC_SOURCE_REL_PATH")
 
-	return Configuration{
+	return &Configuration{
 		ginServerConfig: GinServerConfiguration{
 			port:                   os.Getenv("PORT"),
 			webStaticContentPath:   tempWebStaticContentPath,

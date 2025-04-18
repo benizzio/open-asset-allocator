@@ -153,7 +153,7 @@ func (server *GinServer) Stop(stopContext context.Context) {
 	server.stop(stopContext)
 }
 
-func BuildGinServer(config Configuration) *GinServer {
+func BuildGinServer(config *Configuration) *GinServer {
 	return &GinServer{
 		router: gin.Default(),
 		config: config.ginServerConfig,
