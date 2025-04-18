@@ -10,7 +10,7 @@ module.exports = function (app) {
 
     // Proxy API requests to the backend
     app.use(
-        createProxyMiddleware("/api", { target: "http://localhost:8080/" }),
+        createProxyMiddleware({ pathFilter: "/api", target: "http://localhost:8080/", changeOrigin: true }),
     );
 
     // Override default Parcel behavior to serve static files from the dist folder
@@ -23,11 +23,10 @@ module.exports = function (app) {
         const filename = requestURL.split("?")[0];
         const isHTMXRequest = req.headers["hx-request"];
 
-        if(isHTMXRequest && !fs.existsSync(path.join(dir, filename))) {
+        if (isHTMXRequest && !fs.existsSync(path.join(dir, filename))) {
             res.statusCode = 404;
             next(`Resource not found: ${requestURL}`);
-        }
-        else {
+        } else {
             next();
         }
     });
