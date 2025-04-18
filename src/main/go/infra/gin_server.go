@@ -138,8 +138,10 @@ func (server *GinServer) Init(controllers []GinServerRESTController) {
 
 	glog.Infof("Configuring server before initialization")
 
-	glog.Infof("Configuring basic routes")
-	server.configBasicRoutes()
+	if !server.config.apiOnly {
+		glog.Infof("Configuring basic routes")
+		server.configBasicRoutes()
+	}
 
 	glog.Infof("Configuring controller routes")
 	server.configControllerRoutes(controllers)
@@ -156,6 +158,6 @@ func (server *GinServer) Stop(stopContext context.Context) {
 func BuildGinServer(config *Configuration) *GinServer {
 	return &GinServer{
 		router: gin.Default(),
-		config: config.ginServerConfig,
+		config: config.GinServerConfig,
 	}
 }

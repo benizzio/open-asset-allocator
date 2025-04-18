@@ -1,5 +1,7 @@
 package util
 
+import "reflect"
+
 func ToPointerSlice[S any](slice []S) []*S {
 	result := make([]*S, len(slice))
 	for index, value := range slice {
@@ -44,4 +46,44 @@ func (iterator *Iterator[T]) Size() int {
 
 func NewIterator[T any](slice []T) *Iterator[T] {
 	return &Iterator[T]{index: -1, slice: slice}
+}
+
+func DeepCompleteStruct[T interface{}](target *T, source *T) {
+
+	if target == nil || source == nil {
+		return
+	}
+
+	var structType = reflect.TypeOf(*target)
+	var targetStructValue = reflect.ValueOf(target).Elem()
+	var sourceStructValue = reflect.ValueOf(source).Elem()
+
+	if structType.Kind() == reflect.Struct {
+		deepCompleteReflective(structType, targetStructValue, sourceStructValue)
+	}
+}
+
+func deepCompleteReflective(structType reflect.Type, targetStructValue reflect.Value, sourceStructValue reflect.Value) {
+
+	if targetStructValue.IsNil() || sourceStructValue.IsNil() {
+		return
+	}
+
+	for i := 0; i < structType.NumField(); i++ {
+
+		if structType.Field(i).Type.Kind() == reflect.Struct {
+			deepCompleteReflective(
+				structType.Field(i).Type,
+				targetStructValue.Field(i).Elem(),
+				sourceStructValue.Field(i).Elem(),
+			)
+		}
+
+		var sourceStructFieldValue = sourceStructValue.Field(i)
+		var targetStructFieldValue = targetStructValue.Field(i)
+
+		if targetStructFieldValue.IsZero() && !sourceStructFieldValue.IsZero() {
+			targetStructFieldValue.Set(sourceStructFieldValue)
+		}
+	}
 }

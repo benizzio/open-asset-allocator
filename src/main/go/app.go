@@ -8,6 +8,7 @@ import (
 	"github.com/benizzio/open-asset-allocator/domain/infra/repository"
 	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/infra"
+	"github.com/benizzio/open-asset-allocator/infra/util"
 	"github.com/golang/glog"
 	"os"
 	"os/signal"
@@ -24,9 +25,19 @@ type App struct {
 
 func (app *App) buildBaseInfrastructure() {
 	var config = infra.ReadConfig()
-	app.config = config
+	app.completeConfig(config)
 	app.server = infra.BuildGinServer(config)
 	app.databaseAdapter = infra.BuildDatabaseAdapter(config)
+}
+
+func (app *App) completeConfig(config *infra.Configuration) {
+
+	if app.config == nil {
+		app.config = config
+		return
+	}
+
+	util.DeepCompleteStruct(app.config, config)
 }
 
 func (app *App) buildAppComponents() {
@@ -82,6 +93,11 @@ func (app *App) Start() {
 	app.closeAppComponents(stopContext)
 
 	glog.Info("Exiting application process")
+}
+
+func (app *App) StartOverridingConfigs(config *infra.Configuration) {
+	app.config = config
+	app.Start()
 }
 
 func buildStopContext() (context.Context, context.CancelFunc) {

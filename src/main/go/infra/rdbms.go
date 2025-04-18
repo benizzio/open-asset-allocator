@@ -175,5 +175,5 @@ func buildPingContext() (context.Context, context.CancelFunc) {
 }
 
 func BuildDatabaseAdapter(config *Configuration) *RDBMSAdapter {
-	return &RDBMSAdapter{config: config.rdbmsConfig}
+	return &RDBMSAdapter{config: config.RdbmsConfig}
 }
