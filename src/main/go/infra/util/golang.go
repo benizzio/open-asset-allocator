@@ -65,7 +65,7 @@ func DeepCompleteStruct[T interface{}](target *T, source *T) {
 
 func deepCompleteReflective(structType reflect.Type, targetStructValue reflect.Value, sourceStructValue reflect.Value) {
 
-	if targetStructValue.IsNil() || sourceStructValue.IsNil() {
+	if !targetStructValue.IsZero() {
 		return
 	}
 
@@ -82,7 +82,7 @@ func deepCompleteReflective(structType reflect.Type, targetStructValue reflect.V
 		var sourceStructFieldValue = sourceStructValue.Field(i)
 		var targetStructFieldValue = targetStructValue.Field(i)
 
-		if targetStructFieldValue.IsZero() && !sourceStructFieldValue.IsZero() {
+		if targetStructFieldValue.IsZero() {
 			targetStructFieldValue.Set(sourceStructFieldValue)
 		}
 	}

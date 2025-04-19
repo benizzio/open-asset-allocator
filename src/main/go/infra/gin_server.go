@@ -117,7 +117,7 @@ func (server *GinServer) configControllerRoutes(controllers []GinServerRESTContr
 func (server *GinServer) start() {
 
 	server.httpServer = &http.Server{
-		Addr:    fmt.Sprintf(":%s", server.config.port),
+		Addr:    fmt.Sprintf(":%s", server.config.Port),
 		Handler: server.router,
 	}
 
@@ -138,7 +138,7 @@ func (server *GinServer) Init(controllers []GinServerRESTController) {
 
 	glog.Infof("Configuring server before initialization")
 
-	if !server.config.apiOnly {
+	if !server.config.ApiOnly {
 		glog.Infof("Configuring basic routes")
 		server.configBasicRoutes()
 	}

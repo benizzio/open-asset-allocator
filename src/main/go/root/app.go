@@ -1,4 +1,4 @@
-package main
+package root
 
 import (
 	"context"
@@ -116,14 +116,4 @@ func buildStopChannel() chan os.Signal {
 	signal.Notify(stopChannel, syscall.SIGINT, syscall.SIGTERM)
 	signal.Notify(stopChannel, os.Interrupt, os.Kill)
 	return stopChannel
-}
-
-func main() {
-
-	if infra.ConfigLogger() {
-		return
-	}
-
-	var app = App{}
-	app.Start()
 }

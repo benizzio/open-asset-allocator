@@ -3,13 +3,13 @@ package infra
 import "os"
 
 type GinServerConfiguration struct {
-	port                   string
+	Port                   string
 	webStaticContentPath   string
 	webStaticSourceRelPath string
 	rootHTMLFilename       string
 	webStaticSourcePath    string
 	apiRootPath            string
-	apiOnly                bool
+	ApiOnly                bool
 }
 
 type RDBMSConfiguration struct {
@@ -29,13 +29,13 @@ func ReadConfig() *Configuration {
 
 	return &Configuration{
 		GinServerConfig: GinServerConfiguration{
-			port:                   os.Getenv("PORT"),
+			Port:                   os.Getenv("PORT"),
 			webStaticContentPath:   tempWebStaticContentPath,
 			webStaticSourceRelPath: tempWebStaticSourceRelPath,
 			rootHTMLFilename:       os.Getenv("ROOT_HTML_FILENAME"),
 			webStaticSourcePath:    tempWebStaticContentPath + tempWebStaticSourceRelPath,
 			apiRootPath:            "/api",
-			apiOnly:                false,
+			ApiOnly:                false,
 		},
 		RdbmsConfig: RDBMSConfiguration{
 			driverName: os.Getenv("RDBMS_DRIVER_NAME"),
