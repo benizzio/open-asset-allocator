@@ -24,10 +24,17 @@ type App struct {
 }
 
 func (app *App) buildBaseInfrastructure() {
+
 	var config = infra.ReadConfig()
+	// TODO only on debug mode
+	glog.Info("Applying environment configurations ", config)
+
 	app.completeConfig(config)
-	app.server = infra.BuildGinServer(config)
-	app.databaseAdapter = infra.BuildDatabaseAdapter(config)
+	// TODO only on debug mode
+	glog.Info("Final configuration definitions: ", app.config)
+
+	app.server = infra.BuildGinServer(app.config)
+	app.databaseAdapter = infra.BuildDatabaseAdapter(app.config)
 }
 
 func (app *App) completeConfig(config *infra.Configuration) {
@@ -77,27 +84,39 @@ func (app *App) closeAppComponents(stopContext context.Context) {
 	app.databaseAdapter.Stop()
 }
 
-func (app *App) Start() {
+func (app *App) Run() {
 
-	app.buildBaseInfrastructure()
-	app.buildAppComponents()
-	app.initializeAppComponents()
+	glog.Info("Starting application on run mode...")
+	app.Start()
 
 	stopChannel := buildStopChannel()
 
 	<-stopChannel
 
+	glog.Info("Received stop signal, shutting down application...")
+	app.Stop()
+}
+
+func (app *App) Start() {
+	app.buildBaseInfrastructure()
+	app.buildAppComponents()
+	app.initializeAppComponents()
+}
+
+func (app *App) StartOverridingConfigs(config *infra.Configuration) {
+	// TODO only on debug mode
+	glog.Info("Starting application with overridden configurations", config)
+	app.config = config
+	app.Start()
+}
+
+func (app *App) Stop() {
 	stopContext, cancel := buildStopContext()
 	defer cancel()
 
 	app.closeAppComponents(stopContext)
 
 	glog.Info("Exiting application process")
-}
-
-func (app *App) StartOverridingConfigs(config *infra.Configuration) {
-	app.config = config
-	app.Start()
 }
 
 func buildStopContext() (context.Context, context.CancelFunc) {

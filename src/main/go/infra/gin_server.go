@@ -122,6 +122,7 @@ func (server *GinServer) start() {
 	}
 
 	go func() {
+		glog.Infof("Starting server on %s", server.httpServer.Addr)
 		if err := server.httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			glog.Fatalf("listen: %s\n", err)
 		}

@@ -100,10 +100,10 @@ type RDBMSAdapter struct {
 func (adapter *RDBMSAdapter) openPool() {
 
 	// TODO verification for debug logging, this should be logged only in debug mode
-	glog.Infof("Opening connection to %s at %s", adapter.config.driverName, adapter.config.rdbmsURL)
+	glog.Infof("Opening connection to %s at %s", adapter.config.DriverName, adapter.config.RdbmsURL)
 
 	var connectionError error
-	adapter.connectionPool, connectionError = sql.Open(adapter.config.driverName, adapter.config.rdbmsURL)
+	adapter.connectionPool, connectionError = sql.Open(adapter.config.DriverName, adapter.config.RdbmsURL)
 	if connectionError != nil {
 		glog.Fatal("Error opening database connection: ", connectionError)
 		return
@@ -118,7 +118,7 @@ func (adapter *RDBMSAdapter) configPool() {
 }
 
 func (adapter *RDBMSAdapter) buildDBX() {
-	adapter.dbx = dbx.NewFromDB(adapter.connectionPool, adapter.config.driverName)
+	adapter.dbx = dbx.NewFromDB(adapter.connectionPool, adapter.config.DriverName)
 }
 
 func (adapter *RDBMSAdapter) Init() {

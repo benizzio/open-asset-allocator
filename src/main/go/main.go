@@ -12,5 +12,5 @@ func main() {
 	}
 
 	var app = root.App{}
-	app.Start()
+	app.Run()
 }

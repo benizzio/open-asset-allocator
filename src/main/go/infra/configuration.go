@@ -1,6 +1,9 @@
 package infra
 
-import "os"
+import (
+	"github.com/benizzio/open-asset-allocator/infra/util"
+	"os"
+)
 
 type GinServerConfiguration struct {
 	Port                   string
@@ -13,13 +16,17 @@ type GinServerConfiguration struct {
 }
 
 type RDBMSConfiguration struct {
-	driverName string
-	rdbmsURL   string
+	DriverName string
+	RdbmsURL   string
 }
 
 type Configuration struct {
 	GinServerConfig GinServerConfiguration
 	RdbmsConfig     RDBMSConfiguration
+}
+
+func (config *Configuration) String() string {
+	return util.StructString(config)
 }
 
 func ReadConfig() *Configuration {
@@ -38,8 +45,8 @@ func ReadConfig() *Configuration {
 			ApiOnly:                false,
 		},
 		RdbmsConfig: RDBMSConfiguration{
-			driverName: os.Getenv("RDBMS_DRIVER_NAME"),
-			rdbmsURL:   os.Getenv("RDBMS_URL"),
+			DriverName: os.Getenv("RDBMS_DRIVER_NAME"),
+			RdbmsURL:   os.Getenv("RDBMS_URL"),
 		},
 	}
 }
