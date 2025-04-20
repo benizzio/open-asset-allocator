@@ -1,4 +1,4 @@
-package test
+package inttest
 
 import (
 	"context"
@@ -18,12 +18,15 @@ import (
 )
 
 const (
+	dbDriverName           = "postgres"
 	postgresqlImage        = "postgres:17.4-bullseye"
 	postgresqlDatabaseName = "postgres"
 	postgresqlUsername
 	postgresqlPassword = "localadmin"
 	flywayImage        = "flyway/flyway:10"
 )
+
+var postgresqlConnectionString string
 
 func TestMain(m *testing.M) {
 
@@ -33,17 +36,31 @@ func TestMain(m *testing.M) {
 
 	ctx := context.Background()
 
-	postgresContainer, postgresqlConnectionString := buildAndRunPostgresqlTestcontainer(ctx)
-
+	var (
+		postgresContainer *postgres.PostgresContainer
+		err               error
+	)
+	postgresContainer, postgresqlConnectionString, err = buildAndRunPostgresqlTestcontainer(ctx)
 	defer func() {
 		if err := testcontainers.TerminateContainer(postgresContainer); err != nil {
 			glog.Errorf("failed to terminate container: %s", err)
 		}
 	}()
+	if err != nil {
+		os.Exit(1)
+	}
 
-	runFlywayTestcontainer(postgresqlConnectionString, ctx)
+	err = runFlywayTestcontainer(ctx)
+	if err != nil {
+		os.Exit(1)
+	}
 
-	app := buildAndStartApplication(postgresqlConnectionString)
+	err = initializeDBState()
+	if err != nil {
+		os.Exit(1)
+	}
+
+	app := buildAndStartApplication()
 	defer func() {
 		app.Stop()
 	}()
@@ -54,7 +71,7 @@ func TestMain(m *testing.M) {
 	os.Exit(exitVal)
 }
 
-func buildAndRunPostgresqlTestcontainer(ctx context.Context) (*postgres.PostgresContainer, string) {
+func buildAndRunPostgresqlTestcontainer(ctx context.Context) (*postgres.PostgresContainer, string, error) {
 
 	glog.Info("Starting PostgreSQL testcontainer...")
 	postgresContainer, err := postgres.Run(
@@ -71,13 +88,13 @@ func buildAndRunPostgresqlTestcontainer(ctx context.Context) (*postgres.Postgres
 
 	if err != nil {
 		glog.Errorf("failed to start container: %s", err)
-		os.Exit(1)
+		return nil, "", err
 	}
 
 	connectionString, err := postgresContainer.ConnectionString(ctx)
 	if err != nil {
 		glog.Errorf("failed to obtain connection string: %s", err)
-		os.Exit(1)
+		return nil, "", err
 	}
 
 	glog.Info("PostgreSQL testcontainer initialized with no errors as ", connectionString)
@@ -85,21 +102,21 @@ func buildAndRunPostgresqlTestcontainer(ctx context.Context) (*postgres.Postgres
 	state, err := postgresContainer.State(ctx)
 	if err != nil {
 		glog.Errorf("failed to get container state: %s", err)
-		os.Exit(1)
+		return nil, "", err
 	}
 	glog.Infof("PostgreSQL container state is '%s'", state.Status)
 
-	return postgresContainer, connectionString
+	return postgresContainer, connectionString, nil
 }
 
-func runFlywayTestcontainer(postgresConnectionString string, ctx context.Context) {
+func runFlywayTestcontainer(ctx context.Context) error {
 
 	// Set up migrations
 	var flywayMigrationsPath = filepath.Join("..", "..", "flyway", "sql")
 	var flywayConfigPath = filepath.Join("..", "..", "flyway", "conf")
 
 	var flywayConnectionString = strings.Replace(
-		postgresConnectionString,
+		postgresqlConnectionString,
 		postgresqlUsername+":"+postgresqlPassword+"@localhost",
 		"172.17.0.1",
 		1,
@@ -173,11 +190,13 @@ func runFlywayTestcontainer(postgresConnectionString string, ctx context.Context
 
 	if err != nil {
 		glog.Errorf("failed to start flyway container: %s", err)
-		os.Exit(1)
+		return err
 	}
+
+	return nil
 }
 
-func buildAndStartApplication(postgresqlConnectionString string) root.App {
+func buildAndStartApplication() root.App {
 
 	// set up application test server
 	var appConnectionString = postgresqlConnectionString + "sslmode=disable"
@@ -187,7 +206,7 @@ func buildAndStartApplication(postgresqlConnectionString string) root.App {
 		ApiOnly: true,
 	}
 	var dbConfig = infra.RDBMSConfiguration{
-		DriverName: "postgres",
+		DriverName: dbDriverName,
 		RdbmsURL:   appConnectionString,
 	}
 
