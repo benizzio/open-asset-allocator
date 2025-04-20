@@ -17,23 +17,51 @@ import (
 	"time"
 )
 
-func TestMain(m *testing.M) { //TODO clean code
+const (
+	postgresqlImage        = "postgres:17.4-bullseye"
+	postgresqlDatabaseName = "postgres"
+	postgresqlUsername
+	postgresqlPassword = "localadmin"
+	flywayImage        = "flyway/flyway:10"
+)
+
+func TestMain(m *testing.M) {
 
 	if infra.ConfigLogger() {
 		return
 	}
 
-	// Set up a test container for PostgreSQL
 	ctx := context.Background()
+
+	postgresContainer, postgresqlConnectionString := buildAndRunPostgresqlTestcontainer(ctx)
+
+	defer func() {
+		if err := testcontainers.TerminateContainer(postgresContainer); err != nil {
+			glog.Errorf("failed to terminate container: %s", err)
+		}
+	}()
+
+	runFlywayTestcontainer(postgresqlConnectionString, ctx)
+
+	app := buildAndStartApplication(postgresqlConnectionString)
+	defer func() {
+		app.Stop()
+	}()
+
+	// run tests
+	var exitVal = m.Run()
+
+	os.Exit(exitVal)
+}
+
+func buildAndRunPostgresqlTestcontainer(ctx context.Context) (*postgres.PostgresContainer, string) {
 
 	glog.Info("Starting PostgreSQL testcontainer...")
 	postgresContainer, err := postgres.Run(
-		ctx, "postgres:17.4-bullseye",
-		//postgres.WithInitScripts(filepath.Join("..", "..", "postgres", "init-user-db.sh")),
-		//postgres.WithConfigFile(filepath.Join("testdata", "my-postgres.conf")),
-		postgres.WithDatabase("postgres"),
-		postgres.WithUsername("postgres"),
-		postgres.WithPassword("localadmin"),
+		ctx, postgresqlImage,
+		postgres.WithDatabase(postgresqlDatabaseName),
+		postgres.WithUsername(postgresqlUsername),
+		postgres.WithPassword(postgresqlPassword),
 		testcontainers.WithWaitStrategy(
 			wait.ForLog("database system is ready to accept connections").
 				WithOccurrence(2).
@@ -46,17 +74,12 @@ func TestMain(m *testing.M) { //TODO clean code
 		os.Exit(1)
 	}
 
-	defer func() {
-		if err := testcontainers.TerminateContainer(postgresContainer); err != nil {
-			glog.Errorf("failed to terminate container: %s", err)
-		}
-	}()
-
 	connectionString, err := postgresContainer.ConnectionString(ctx)
 	if err != nil {
 		glog.Errorf("failed to obtain connection string: %s", err)
 		os.Exit(1)
 	}
+
 	glog.Info("PostgreSQL testcontainer initialized with no errors as ", connectionString)
 
 	state, err := postgresContainer.State(ctx)
@@ -64,20 +87,33 @@ func TestMain(m *testing.M) { //TODO clean code
 		glog.Errorf("failed to get container state: %s", err)
 		os.Exit(1)
 	}
-	glog.Infof("PostgreSQL container state: %s", state.Status)
+	glog.Infof("PostgreSQL container state is '%s'", state.Status)
+
+	return postgresContainer, connectionString
+}
+
+func runFlywayTestcontainer(postgresConnectionString string, ctx context.Context) {
 
 	// Set up migrations
 	var flywayMigrationsPath = filepath.Join("..", "..", "flyway", "sql")
 	var flywayConfigPath = filepath.Join("..", "..", "flyway", "conf")
-	var flywayConnectionString = strings.ReplaceAll(connectionString, "postgres:localadmin@localhost", "172.17.0.1")
-	flywayConnectionString = strings.ReplaceAll(flywayConnectionString, "postgres:", "jdbc:postgresql:")
+
+	var flywayConnectionString = strings.Replace(
+		postgresConnectionString,
+		postgresqlUsername+":"+postgresqlPassword+"@localhost",
+		"172.17.0.1",
+		1,
+	)
+	flywayConnectionString = strings.Replace(flywayConnectionString, "postgres:", "jdbc:postgresql:", 1)
+
+	glog.Info("Starting flyway testcontainer with connection ", flywayConnectionString)
 	var flywayContainerRequest = testcontainers.ContainerRequest{
-		Image: "flyway/flyway:10",
+		Image: flywayImage,
 		Cmd: []string{
 			"-url=" + flywayConnectionString,
-			"-user=postgres",
-			"-password=localadmin",
-			"-connectRetries=10",
+			"-user=" + postgresqlUsername,
+			"-password=" + postgresqlPassword,
+			"-connectRetries=5",
 			"migrate",
 		},
 		Files: []testcontainers.ContainerFile{
@@ -98,7 +134,7 @@ func TestMain(m *testing.M) { //TODO clean code
 		Env: map[string]string{
 			"FLYWAY_DEBUG": "true",
 		},
-		WaitingFor: wait.ForLog("Successfully applied").WithStartupTimeout(10 * time.Second),
+		WaitingFor: wait.ForLog("Successfully applied").WithStartupTimeout(5 * time.Second),
 	}
 
 	flywayContainer, err := testcontainers.GenericContainer(
@@ -108,16 +144,28 @@ func TestMain(m *testing.M) { //TODO clean code
 		},
 	)
 
+	defer func() {
+		if err := flywayContainer.Terminate(ctx); err != nil {
+			glog.Errorf("failed to terminate flyway container: %s", err)
+		}
+	}()
+
 	// Even if the container failed to start properly, try to get the logs
 	// The container might have started but exited quickly with an error
 	containerID := flywayContainer.GetContainerID()
 	if containerID != "" {
+
 		// Get logs even if the container exited
 		logReader, err := flywayContainer.Logs(ctx)
 		if err != nil {
 			glog.Errorf("failed to retrieve logs: %s", err)
 		} else {
-			defer logReader.Close()
+			defer func(logReader io.ReadCloser) {
+				err := logReader.Close()
+				if err != nil {
+					glog.Errorf("failed to close log reader: %s", err)
+				}
+			}(logReader)
 			logContent, _ := io.ReadAll(logReader)
 			glog.Infof("Flyway container logs:\n%s", string(logContent))
 		}
@@ -127,15 +175,12 @@ func TestMain(m *testing.M) { //TODO clean code
 		glog.Errorf("failed to start flyway container: %s", err)
 		os.Exit(1)
 	}
+}
 
-	defer func() {
-		if err := flywayContainer.Terminate(ctx); err != nil {
-			glog.Errorf("failed to terminate flyway container: %s", err)
-		}
-	}()
+func buildAndStartApplication(postgresqlConnectionString string) root.App {
 
 	// set up application test server
-	var appConnectionString = connectionString + "sslmode=disable"
+	var appConnectionString = postgresqlConnectionString + "sslmode=disable"
 
 	var ginServerConfig = infra.GinServerConfiguration{
 		Port:    "8081",
@@ -154,10 +199,5 @@ func TestMain(m *testing.M) { //TODO clean code
 	var app = root.App{}
 	app.StartOverridingConfigs(&testConfig)
 
-	var exitVal = m.Run()
-
-	// Stop and cleanup
-	app.Stop()
-
-	os.Exit(exitVal)
+	return app
 }
