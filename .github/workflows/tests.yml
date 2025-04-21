@@ -8,7 +8,6 @@ jobs:
     name: Go Tests
     runs-on: ubuntu-latest
     # Removing the container with hardcoded version
-    id: go_tests
     continue-on-error: false
     steps:
       - name: Checkout code
