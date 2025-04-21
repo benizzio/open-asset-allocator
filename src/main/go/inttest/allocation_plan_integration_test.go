@@ -9,7 +9,7 @@ import (
 
 func TestGetAllocationPlans(t *testing.T) {
 
-	response, err := http.Get("http://localhost:8081/api/portfolio/1/allocation-plan")
+	response, err := http.Get(testAPIURLprefix + "/portfolio/1/allocation-plan")
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -18,7 +18,6 @@ func TestGetAllocationPlans(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotEmpty(t, body)
 
-	// TODO continue with assertions
 	var expectedResponseJSON = `
 		[
 			{

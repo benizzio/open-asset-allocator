@@ -17,17 +17,6 @@ import (
 	"time"
 )
 
-const (
-	dbDriverName           = "postgres"
-	postgresqlImage        = "postgres:17.4-bullseye"
-	postgresqlDatabaseName = "postgres"
-	postgresqlUsername
-	postgresqlPassword = "localadmin"
-	flywayImage        = "flyway/flyway:10"
-)
-
-var postgresqlConnectionString string
-
 func TestMain(m *testing.M) {
 
 	if infra.ConfigLogger() {

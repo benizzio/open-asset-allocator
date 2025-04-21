@@ -1,10 +1,5 @@
 package inttest
 
-import (
-	dbx "github.com/go-ozzo/ozzo-dbx"
-	"github.com/golang/glog"
-)
-
 const initialStateSQL = `
 	INSERT INTO portfolio (id, "name", allocation_structure)
 	VALUES (
@@ -177,20 +172,5 @@ const initialStateSQL = `
 `
 
 func initializeDBState() error {
-
-	glog.Info("Initializing DB state")
-	db, err := dbx.Open(dbDriverName, postgresqlConnectionString+"sslmode=disable")
-	if err != nil {
-		glog.Errorf("Error openingDB connection: %s", err)
-		return err
-	}
-
-	var query = db.NewQuery(initialStateSQL)
-	_, err = query.Execute()
-	if err != nil {
-		glog.Errorf("Error initiatilizing db state: %s", err)
-		return err
-	}
-
-	return nil
+	return executeDBQuery(initialStateSQL)
 }
