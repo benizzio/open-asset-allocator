@@ -39,7 +39,7 @@ const initialStateSQL = `
 	
 	DELETE FROM portfolio_allocation_fact WHERE portfolio_id = 1;
 	
-	-- BONDS total market value = 27000
+	-- Portfolio 1 BONDS total market value = 27000
 	INSERT INTO portfolio_allocation_fact (
 		asset_id,
 		"class",
@@ -57,7 +57,7 @@ const initialStateSQL = `
 			   100,
 			   100,
 			   10000,
-			   to_char(current_date, 'YYYYMM'),
+			   '202501',
 			   1
 		   ),
 		   (
@@ -67,7 +67,7 @@ const initialStateSQL = `
 			   80,
 			   100,
 			   8000,
-			   to_char(current_date, 'YYYYMM'),
+			   '202501',
 			   1
 		   ),
 		   (
@@ -77,7 +77,7 @@ const initialStateSQL = `
 			   60,
 			   100,
 			   6000,
-			   to_char(current_date, 'YYYYMM'),
+			   '202501',
 			   1
 		   ),
 		   (
@@ -87,12 +87,12 @@ const initialStateSQL = `
 			   30,
 			   100,
 			   3000,
-			   to_char(current_date, 'YYYYMM'),
+			   '202501',
 			   1
 		   )
 	;
 	
-	-- STOCKS total market value = 18000
+	-- Portfolio 1 STOCKS total market value = 18000
 	INSERT INTO public.portfolio_allocation_fact (
 		asset_id,
 		"class",
@@ -110,7 +110,7 @@ const initialStateSQL = `
 			   80,
 			   100,
 			   9000,
-			   to_char(current_date, 'YYYYMM'),
+			   '202501',
 			   1
 		   ),
 		   (
@@ -120,7 +120,7 @@ const initialStateSQL = `
 			   10,
 			   100,
 			   1000,
-			   to_char(current_date, 'YYYYMM'),
+			   '202501',
 			   1
 		   ),
 		   (
@@ -130,11 +130,33 @@ const initialStateSQL = `
 			   90,
 			   100,
 			   8000,
-			   to_char(current_date, 'YYYYMM'),
+			   '202501',
 			   1
 		   )
 	;
 	
+	INSERT INTO portfolio_allocation_fact (
+		asset_id,
+		"class",
+		cash_reserve,
+		asset_quantity,
+		asset_market_price,
+		total_market_value,
+		time_frame_tag,
+		portfolio_id
+	)
+	VALUES (
+			   1,
+			   'BONDS',
+			   FALSE,
+			   100,
+			   100,
+			   10000,
+			   '202503',
+			   1
+		   )
+	;
+
 	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, portfolio_id)
 	VALUES (
 			   1,
