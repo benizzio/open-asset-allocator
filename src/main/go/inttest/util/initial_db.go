@@ -21,6 +21,9 @@ const initialStateSQL = `
 	
 	SELECT setval('portfolio_id_seq', (SELECT max(id) FROM portfolio));
 	
+	-- ###################################################################
+	-- ASSET TABLE
+	-- ###################################################################
 	INSERT INTO asset (id, ticker, "name") VALUES
 		(1, 'ARCA:BIL', 'SPDR Bloomberg 1-3 Month T-Bill ETF'),
 		(2, 'ARCA:STIP', 'iShares 0-5 Year TIPS Bond ETF'),
@@ -37,6 +40,9 @@ const initialStateSQL = `
 	
 	SELECT setval('asset_id_seq', (SELECT max(id) FROM asset));
 	
+	-- ###################################################################
+	-- ALLOCATION FACT TABLE
+	-- ###################################################################
 	DELETE FROM portfolio_allocation_fact WHERE portfolio_id = 1;
 	
 	-- Portfolio 1 BONDS total market value = 27000
@@ -92,7 +98,9 @@ const initialStateSQL = `
 		   )
 	;
 	
+	-- ###################################################################
 	-- Portfolio 1 STOCKS total market value = 18000
+	-- ###################################################################
 	INSERT INTO public.portfolio_allocation_fact (
 		asset_id,
 		"class",
@@ -157,6 +165,9 @@ const initialStateSQL = `
 		   )
 	;
 
+	-- ###################################################################
+	-- ALLOCATION PLAN TABLE
+	-- ###################################################################
 	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, portfolio_id)
 	VALUES (
 			   1,
@@ -173,6 +184,9 @@ const initialStateSQL = `
 		portfolio_id = EXCLUDED.portfolio_id
 	;
 	
+	-- ###################################################################
+	-- PLANNED ALLOCATION TABLE
+	-- ###################################################################
 	DELETE FROM planned_allocation WHERE allocation_plan_id = 1;
 	
 	INSERT INTO planned_allocation
