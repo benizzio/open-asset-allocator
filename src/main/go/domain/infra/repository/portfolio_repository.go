@@ -23,7 +23,7 @@ const (
 			AS (SELECT DISTINCT time_frame_tag, create_timestamp::date FROM portfolio_allocation_fact pa ORDER BY create_timestamp DESC LIMIT {:timeFrameLimit})
 	`
 	portfolioAllocationsSQL = `
-		SELECT pa.*, ass.ticker as "asset.ticker", COALESCE(ass.name, '') as "asset.name"
+		SELECT pa.*, ass.ticker AS "asset.ticker", coalesce(ass.name, '') AS "asset.name"
 		FROM portfolio_allocation_fact pa
 		JOIN asset ass ON ass.id = pa.asset_id
 		` + infra.WhereClausePlaceholder + `
@@ -52,10 +52,10 @@ type PortfolioRDBMSRepository struct {
 
 func (repository *PortfolioRDBMSRepository) GetAllPortfolios() ([]*domain.Portfolio, error) {
 
-	var result []*domain.Portfolio
+	var result []domain.Portfolio
 	err := repository.dbAdapter.BuildQuery(portfolioSQL).Build().FindInto(&result)
 
-	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryPortfoliosError, repository)
+	return util.ToPointerSlice(result), infra.PropagateAsAppErrorWithNewMessage(err, queryPortfoliosError, repository)
 }
 
 func (repository *PortfolioRDBMSRepository) GetPortfolio(id int) (*domain.Portfolio, error) {

@@ -117,11 +117,12 @@ func (server *GinServer) configControllerRoutes(controllers []GinServerRESTContr
 func (server *GinServer) start() {
 
 	server.httpServer = &http.Server{
-		Addr:    fmt.Sprintf(":%s", server.config.port),
+		Addr:    fmt.Sprintf(":%s", server.config.Port),
 		Handler: server.router,
 	}
 
 	go func() {
+		glog.Infof("Starting server on %s", server.httpServer.Addr)
 		if err := server.httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			glog.Fatalf("listen: %s\n", err)
 		}
@@ -138,8 +139,10 @@ func (server *GinServer) Init(controllers []GinServerRESTController) {
 
 	glog.Infof("Configuring server before initialization")
 
-	glog.Infof("Configuring basic routes")
-	server.configBasicRoutes()
+	if !server.config.ApiOnly {
+		glog.Infof("Configuring basic routes")
+		server.configBasicRoutes()
+	}
 
 	glog.Infof("Configuring controller routes")
 	server.configControllerRoutes(controllers)
@@ -156,6 +159,6 @@ func (server *GinServer) Stop(stopContext context.Context) {
 func BuildGinServer(config *Configuration) *GinServer {
 	return &GinServer{
 		router: gin.Default(),
-		config: config.ginServerConfig,
+		config: config.GinServerConfig,
 	}
 }

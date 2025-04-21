@@ -1,4 +1,4 @@
-package main
+package root
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"github.com/benizzio/open-asset-allocator/domain/infra/repository"
 	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/infra"
+	"github.com/benizzio/open-asset-allocator/infra/util"
 	"github.com/golang/glog"
 	"os"
 	"os/signal"
@@ -23,10 +24,27 @@ type App struct {
 }
 
 func (app *App) buildBaseInfrastructure() {
+
 	var config = infra.ReadConfig()
-	app.config = config
-	app.server = infra.BuildGinServer(config)
-	app.databaseAdapter = infra.BuildDatabaseAdapter(config)
+	// TODO only on debug mode
+	glog.Info("Applying environment configurations ", config)
+
+	app.completeConfig(config)
+	// TODO only on debug mode
+	glog.Info("Final configuration definitions: ", app.config)
+
+	app.server = infra.BuildGinServer(app.config)
+	app.databaseAdapter = infra.BuildDatabaseAdapter(app.config)
+}
+
+func (app *App) completeConfig(config *infra.Configuration) {
+
+	if app.config == nil {
+		app.config = config
+		return
+	}
+
+	util.DeepCompleteStruct(app.config, config)
 }
 
 func (app *App) buildAppComponents() {
@@ -66,16 +84,33 @@ func (app *App) closeAppComponents(stopContext context.Context) {
 	app.databaseAdapter.Stop()
 }
 
-func (app *App) Start() {
+func (app *App) Run() {
 
-	app.buildBaseInfrastructure()
-	app.buildAppComponents()
-	app.initializeAppComponents()
+	glog.Info("Starting application on run mode...")
+	app.Start()
 
 	stopChannel := buildStopChannel()
 
 	<-stopChannel
 
+	glog.Info("Received stop signal, shutting down application...")
+	app.Stop()
+}
+
+func (app *App) Start() {
+	app.buildBaseInfrastructure()
+	app.buildAppComponents()
+	app.initializeAppComponents()
+}
+
+func (app *App) StartOverridingConfigs(config *infra.Configuration) {
+	// TODO only on debug mode
+	glog.Info("Starting application with overridden configurations", config)
+	app.config = config
+	app.Start()
+}
+
+func (app *App) Stop() {
 	stopContext, cancel := buildStopContext()
 	defer cancel()
 
@@ -100,14 +135,4 @@ func buildStopChannel() chan os.Signal {
 	signal.Notify(stopChannel, syscall.SIGINT, syscall.SIGTERM)
 	signal.Notify(stopChannel, os.Interrupt, os.Kill)
 	return stopChannel
-}
-
-func main() {
-
-	if infra.ConfigLogger() {
-		return
-	}
-
-	var app = App{}
-	app.Start()
 }

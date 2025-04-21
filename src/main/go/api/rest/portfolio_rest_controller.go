@@ -45,13 +45,13 @@ func (controller *PortfolioRESTController) BuildRoutes() []infra.RESTRoute {
 		},
 		{
 			Method:   http.MethodGet,
-			Path:     specificPortfolioPath + "/divergence/:" + timeFrameTagParam + "/allocation-plan/:" + planIdParam,
-			Handlers: gin.HandlersChain{controller.GetDivercenceAnalysis},
+			Path:     specificPortfolioPath + "/divergence/options",
+			Handlers: gin.HandlersChain{controller.GetDivergenceAnalysisOptions},
 		},
 		{
 			Method:   http.MethodGet,
-			Path:     specificPortfolioPath + "/divergence/options",
-			Handlers: gin.HandlersChain{controller.GetDivergenceAnalysisOptions},
+			Path:     specificPortfolioPath + "/divergence/:" + timeFrameTagParam + "/allocation-plan/:" + planIdParam,
+			Handlers: gin.HandlersChain{controller.GetDivergenceAnalysis},
 		},
 	}
 }
@@ -122,7 +122,7 @@ func (controller *PortfolioRESTController) GetDivergenceAnalysisOptions(context 
 	context.JSON(http.StatusOK, analysisOptionsDTS)
 }
 
-func (controller *PortfolioRESTController) GetDivercenceAnalysis(context *gin.Context) {
+func (controller *PortfolioRESTController) GetDivergenceAnalysis(context *gin.Context) {
 
 	portfolioIdParam := context.Param(portfolioIdParam)
 	portfolioId, err := strconv.Atoi(portfolioIdParam)

@@ -1,0 +1,34 @@
+name: Tests
+on:
+  pull_request:
+
+jobs:
+  test:
+    name: Go Tests
+    runs-on: ubuntu-latest
+    # Removing the container with hardcoded version
+    continue-on-error: false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set Go version from go.mod
+        id: go-version
+        run: |
+          GO_VERSION=$(grep -E "^go [0-9]+\.[0-9]+" src/main/go/go.mod | awk '{print $2}')
+          echo "GO_VERSION=$GO_VERSION" >> $GITHUB_OUTPUT
+      
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ steps.go-version.outputs.GO_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          cd src/main/go
+          go mod download
+
+      - name: Run tests
+        run: |
+          cd src/main/go
+          go test ./inttest
