@@ -1,4 +1,4 @@
-package inttest
+package util
 
 const initialStateSQL = `
 	INSERT INTO portfolio (id, "name", allocation_structure)
@@ -171,6 +171,6 @@ const initialStateSQL = `
 	SELECT setval('allocation_plan_id_seq', (SELECT max(id) FROM allocation_plan));
 `
 
-func initializeDBState() error {
-	return executeDBQuery(initialStateSQL)
+func InitializeDBState() error {
+	return ExecuteDBQuery(initialStateSQL)
 }

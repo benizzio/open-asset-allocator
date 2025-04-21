@@ -1,6 +1,7 @@
 package inttest
 
 import (
+	"github.com/benizzio/open-asset-allocator/inttest/util"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
@@ -9,7 +10,7 @@ import (
 
 func TestGetAllocationPlans(t *testing.T) {
 
-	response, err := http.Get(testAPIURLprefix + "/portfolio/1/allocation-plan")
+	response, err := http.Get(util.TestAPIURLprefix + "/portfolio/1/allocation-plan")
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)

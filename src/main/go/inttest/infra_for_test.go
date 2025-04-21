@@ -3,6 +3,7 @@ package inttest
 import (
 	"context"
 	"github.com/benizzio/open-asset-allocator/infra"
+	"github.com/benizzio/open-asset-allocator/inttest/util"
 	"github.com/benizzio/open-asset-allocator/root"
 	"github.com/docker/docker/api/types/container"
 	"github.com/golang/glog"
@@ -29,7 +30,7 @@ func TestMain(m *testing.M) {
 		postgresContainer *postgres.PostgresContainer
 		err               error
 	)
-	postgresContainer, postgresqlConnectionString, err = buildAndRunPostgresqlTestcontainer(ctx)
+	postgresContainer, util.PostgresqlConnectionString, err = buildAndRunPostgresqlTestcontainer(ctx)
 	defer func() {
 		if err := testcontainers.TerminateContainer(postgresContainer); err != nil {
 			glog.Errorf("failed to terminate container: %s", err)
@@ -44,7 +45,7 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 
-	err = initializeDBState()
+	err = util.InitializeDBState()
 	if err != nil {
 		os.Exit(1)
 	}
@@ -64,10 +65,10 @@ func buildAndRunPostgresqlTestcontainer(ctx context.Context) (*postgres.Postgres
 
 	glog.Info("Starting PostgreSQL testcontainer...")
 	postgresContainer, err := postgres.Run(
-		ctx, postgresqlImage,
-		postgres.WithDatabase(postgresqlDatabaseName),
-		postgres.WithUsername(postgresqlUsername),
-		postgres.WithPassword(postgresqlPassword),
+		ctx, util.PostgresqlImage,
+		postgres.WithDatabase(util.PostgresqlDatabaseName),
+		postgres.WithUsername(util.PostgresqlUsername),
+		postgres.WithPassword(util.PostgresqlPassword),
 		testcontainers.WithWaitStrategy(
 			wait.ForLog("database system is ready to accept connections").
 				WithOccurrence(2).
@@ -105,8 +106,8 @@ func runFlywayTestcontainer(ctx context.Context) error {
 	var flywayConfigPath = filepath.Join("..", "..", "flyway", "conf")
 
 	var flywayConnectionString = strings.Replace(
-		postgresqlConnectionString,
-		postgresqlUsername+":"+postgresqlPassword+"@localhost",
+		util.PostgresqlConnectionString,
+		util.PostgresqlUsername+":"+util.PostgresqlPassword+"@localhost",
 		"172.17.0.1",
 		1,
 	)
@@ -114,11 +115,11 @@ func runFlywayTestcontainer(ctx context.Context) error {
 
 	glog.Info("Starting flyway testcontainer with connection ", flywayConnectionString)
 	var flywayContainerRequest = testcontainers.ContainerRequest{
-		Image: flywayImage,
+		Image: util.FlywayImage,
 		Cmd: []string{
 			"-url=" + flywayConnectionString,
-			"-user=" + postgresqlUsername,
-			"-password=" + postgresqlPassword,
+			"-user=" + util.PostgresqlUsername,
+			"-password=" + util.PostgresqlPassword,
 			"-connectRetries=5",
 			"migrate",
 		},
@@ -188,14 +189,14 @@ func runFlywayTestcontainer(ctx context.Context) error {
 func buildAndStartApplication() root.App {
 
 	// set up application test server
-	var appConnectionString = postgresqlConnectionString + "sslmode=disable"
+	var appConnectionString = util.PostgresqlConnectionString + util.PostgresqlConnectionStringParameters
 
 	var ginServerConfig = infra.GinServerConfiguration{
 		Port:    "8081",
 		ApiOnly: true,
 	}
 	var dbConfig = infra.RDBMSConfiguration{
-		DriverName: dbDriverName,
+		DriverName: util.DBDriverName,
 		RdbmsURL:   appConnectionString,
 	}
 
