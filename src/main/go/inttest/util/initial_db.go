@@ -9,6 +9,15 @@ const initialStateSQL = `
 		   )
 		ON CONFLICT (id) DO UPDATE set "name" = EXCLUDED."name", allocation_structure = EXCLUDED.allocation_structure
 	;
+
+	INSERT INTO portfolio (id, "name", allocation_structure)
+	VALUES (
+			   2,
+			   'Test Portfolio 2',
+			   '{"hierarchy": [{"name": "Assets", "field": "assetTicker"}]}'::jsonb
+		   )
+		ON CONFLICT (id) DO UPDATE set "name" = EXCLUDED."name", allocation_structure = EXCLUDED.allocation_structure
+	;
 	
 	SELECT setval('portfolio_id_seq', (SELECT max(id) FROM portfolio));
 	

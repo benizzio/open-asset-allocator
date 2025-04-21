@@ -45,13 +45,13 @@ func (controller *PortfolioRESTController) BuildRoutes() []infra.RESTRoute {
 		},
 		{
 			Method:   http.MethodGet,
-			Path:     specificPortfolioPath + "/divergence/:" + timeFrameTagParam + "/allocation-plan/:" + planIdParam,
-			Handlers: gin.HandlersChain{controller.GetDivercenceAnalysis},
+			Path:     specificPortfolioPath + "/divergence/options",
+			Handlers: gin.HandlersChain{controller.GetDivergenceAnalysisOptions},
 		},
 		{
 			Method:   http.MethodGet,
-			Path:     specificPortfolioPath + "/divergence/options",
-			Handlers: gin.HandlersChain{controller.GetDivergenceAnalysisOptions},
+			Path:     specificPortfolioPath + "/divergence/:" + timeFrameTagParam + "/allocation-plan/:" + planIdParam,
+			Handlers: gin.HandlersChain{controller.GetDivercenceAnalysis},
 		},
 	}
 }
