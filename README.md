@@ -112,30 +112,36 @@ Configuration can be done in [.env](src/main/docker/.env)
 
 ### Roadmap(ish)
 
+- [ ] Portfolio management:
+    - [ ] add form based data input (start with fixed base structure class->asset)
+    - [ ] add structure management (add/remove levels)
 - Portfolio history
-    - [ ] allow inclusion of external cash inflow via UI
+    - [ ] allow inclusion of external cash inflow via UI (as separate "input" class)
+    - [ ] add form based data input (beginner user friendly)
+    - [ ] ui to handle data ingestion from known sources
+- Allocation Plan
+    - [ ] add form based data input (begginer user friendly)
 - Allocation map:
     - DIVERGENCE: last portfolio history from a timeframe, select an allocation plan to analyze
         - [ ] cash reserve marker on table (label & color)
-        - [ ] persistence of generated analysis on timeframe for convenience
+        - [ ] persistence of generated analysis on timeframe for convenience `BLOCKER FOR CONVERGENCE`
         - [x] show divergent value in currency units
         - [x] show divergent value in percentage
-        - [ ] allow easy UI elements to add extenal cash inflow
         - [ ] show divergence mode used with informative text
-        - [ ] add percentage divergence mode config ("aggresive" from level or "conservative" from asset)
+        - [ ] add percentage divergence mode config ("aggressive" from level or "conservative" from asset)
         - [ ] add divergence bar mode config (change proportion from 2:1)
     - [ ] CONVERGENCE:
         - [ ] create from a mapped divergence analysis (bound to a divergence analysis and its plan)
         - [ ] fractal execution: create per level and per parent selection when below top
         - [ ] line for each divergent record, add field for post-convergence goal (maket value) and calculate new
           percentage
-        - [ ] allow obtaining inserted external cash inflow and using it for convergence in any asset
+        - [ ] allow obtaining inserted external cash inflow ("input" classs) and using it for convergence in any asset
             - (?) upper field inside each level of fractal structure to visualize re-balancing and availability deeper
               within the hierachy
         - (?) show final state after convergence (chart maybe?)
         - [ ] allow creation of multiple steps for segmented convergence plan
             - (?) Copy previous unexecuted plans on new divergence analysis
-        - (?) fild to inpuit curret market value at the time of convergence execution and calculate movement quantity
+        - (?) field to input current market value at the time of convergence execution and calculate movement quantity
           (no need to persist)
 - [ ] UI improvements:
     - [ ] Color configuration per hierarchy level record for visual consistency (apply to charts and tables)
