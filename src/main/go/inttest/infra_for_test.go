@@ -51,13 +51,11 @@ func TestMain(m *testing.M) {
 	}
 
 	app := buildAndStartApplication()
-	defer func() {
-		app.Stop()
-	}()
 
 	// run tests
 	var exitVal = m.Run()
 
+	app.Stop()
 	os.Exit(exitVal)
 }
 
