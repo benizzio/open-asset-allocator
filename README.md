@@ -114,14 +114,14 @@ Configuration can be done in [.env](src/main/docker/.env)
 ### Roadmap(ish)
 
 - [ ] Portfolio management:
-    - [ ] add form based data input (start with fixed base structure class->asset)
+    - [ ] add form based data input (beginner-user-friendly - start with fixed base structure class->asset)
     - [ ] add structure management (add/remove levels)
 - Portfolio history
     - [ ] allow inclusion of external cash inflow via UI (as separate "input" class)
-    - [ ] add form based data input (beginner user friendly)
+    - [ ] add form based data input (beginner-user-friendly)
     - [ ] ui to handle data ingestion from known sources
 - Allocation Plan
-    - [ ] add form based data input (begginer user friendly)
+    - [ ] add form based data input (beginner-user-friendly)
 - Allocation map:
     - DIVERGENCE: last portfolio history from a timeframe, select an allocation plan to analyze
         - [ ] cash reserve marker on table (label & color)
