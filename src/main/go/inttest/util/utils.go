@@ -10,6 +10,9 @@ const (
 	PostgresqlImage        = "postgres:17.4-bullseye"
 	PostgresqlDatabaseName = "postgres"
 	PostgresqlUsername
+	PostgresqlDefaultScheme              = "postgres:"
+	PostgresqlJDBCScheme                 = "jdbc:postgresql:"
+	PostgresqlGoScheme                   = "postgresql:"
 	PostgresqlPassword                   = "localadmin"
 	PostgresqlConnectionStringParameters = "sslmode=disable"
 	FlywayImage                          = "flyway/flyway:10"

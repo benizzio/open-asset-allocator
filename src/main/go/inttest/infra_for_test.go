@@ -3,7 +3,8 @@ package inttest
 import (
 	"context"
 	"github.com/benizzio/open-asset-allocator/infra"
-	"github.com/benizzio/open-asset-allocator/inttest/util"
+	"github.com/benizzio/open-asset-allocator/infra/util"
+	inttestutil "github.com/benizzio/open-asset-allocator/inttest/util"
 	"github.com/benizzio/open-asset-allocator/root"
 	"github.com/docker/docker/api/types/container"
 	"github.com/golang/glog"
@@ -18,55 +19,71 @@ import (
 	"time"
 )
 
-func TestMain(m *testing.M) {
+const deferRegistryKey = "deferRegistry"
 
-	if infra.ConfigLogger() {
-		return
-	}
+func TestMain(m *testing.M) {
 
 	ctx := context.Background()
 
-	var (
-		postgresContainer *postgres.PostgresContainer
-		err               error
-	)
-	postgresContainer, util.PostgresqlConnectionString, err = buildAndRunPostgresqlTestcontainer(ctx)
+	var deferRegistry = util.BuildDeferRegistry()
+	ctx = context.WithValue(ctx, deferRegistryKey, deferRegistry)
+
+	var exitVal = setupAndRunTests(ctx, m)
+
+	deferRegistry.Execute()
+	os.Exit(exitVal)
+}
+
+func setupAndRunTests(ctx context.Context, m *testing.M) int {
+
+	var exitVal = setupTestInfra(ctx)
+	if exitVal != 0 {
+		return exitVal
+	}
+
+	var app = buildAndStartApplication()
 	defer func() {
-		if err := testcontainers.TerminateContainer(postgresContainer); err != nil {
-			glog.Errorf("failed to terminate container: %s", err)
-		}
+		app.Stop()
 	}()
+
+	// run tests
+	return m.Run()
+}
+
+func setupTestInfra(ctx context.Context) int {
+
+	if infra.ConfigLogger() {
+		return 1
+	}
+
+	var err error
+
+	inttestutil.PostgresqlConnectionString, err = buildAndRunPostgresqlTestcontainer(ctx)
 	if err != nil {
-		os.Exit(1)
+		return 1
 	}
 
 	err = runFlywayTestcontainer(ctx)
 	if err != nil {
-		os.Exit(1)
+		return 1
 	}
 
-	err = util.InitializeDBState()
+	err = inttestutil.InitializeDBState()
 	if err != nil {
-		os.Exit(1)
+		return 1
 	}
 
-	app := buildAndStartApplication()
-
-	// run tests
-	var exitVal = m.Run()
-
-	app.Stop()
-	os.Exit(exitVal)
+	return 0
 }
 
-func buildAndRunPostgresqlTestcontainer(ctx context.Context) (*postgres.PostgresContainer, string, error) {
+func buildAndRunPostgresqlTestcontainer(ctx context.Context) (string, error) {
 
 	glog.Info("Starting PostgreSQL testcontainer...")
 	postgresContainer, err := postgres.Run(
-		ctx, util.PostgresqlImage,
-		postgres.WithDatabase(util.PostgresqlDatabaseName),
-		postgres.WithUsername(util.PostgresqlUsername),
-		postgres.WithPassword(util.PostgresqlPassword),
+		ctx, inttestutil.PostgresqlImage,
+		postgres.WithDatabase(inttestutil.PostgresqlDatabaseName),
+		postgres.WithUsername(inttestutil.PostgresqlUsername),
+		postgres.WithPassword(inttestutil.PostgresqlPassword),
 		testcontainers.WithWaitStrategy(
 			wait.ForLog("database system is ready to accept connections").
 				WithOccurrence(2).
@@ -74,15 +91,23 @@ func buildAndRunPostgresqlTestcontainer(ctx context.Context) (*postgres.Postgres
 		),
 	)
 
+	var deferRegistry = ctx.Value(deferRegistryKey).(*util.DeferRegistry)
+	var terminateContainerDefer = func() {
+		if err := testcontainers.TerminateContainer(postgresContainer); err != nil {
+			glog.Errorf("failed to terminate container: %s", err)
+		}
+	}
+	deferRegistry.RegisterDefer(terminateContainerDefer)
+
 	if err != nil {
 		glog.Errorf("failed to start container: %s", err)
-		return nil, "", err
+		return "", err
 	}
 
 	connectionString, err := postgresContainer.ConnectionString(ctx)
 	if err != nil {
 		glog.Errorf("failed to obtain connection string: %s", err)
-		return nil, "", err
+		return "", err
 	}
 
 	glog.Info("PostgreSQL testcontainer initialized with no errors as ", connectionString)
@@ -90,11 +115,11 @@ func buildAndRunPostgresqlTestcontainer(ctx context.Context) (*postgres.Postgres
 	state, err := postgresContainer.State(ctx)
 	if err != nil {
 		glog.Errorf("failed to get container state: %s", err)
-		return nil, "", err
+		return "", err
 	}
 	glog.Infof("PostgreSQL container state is '%s'", state.Status)
 
-	return postgresContainer, connectionString, nil
+	return connectionString, nil
 }
 
 func runFlywayTestcontainer(ctx context.Context) error {
@@ -104,20 +129,25 @@ func runFlywayTestcontainer(ctx context.Context) error {
 	var flywayConfigPath = filepath.Join("..", "..", "flyway", "conf")
 
 	var flywayConnectionString = strings.Replace(
-		util.PostgresqlConnectionString,
-		util.PostgresqlUsername+":"+util.PostgresqlPassword+"@localhost",
+		inttestutil.PostgresqlConnectionString,
+		inttestutil.PostgresqlUsername+":"+inttestutil.PostgresqlPassword+"@localhost",
 		"172.17.0.1",
 		1,
 	)
-	flywayConnectionString = strings.Replace(flywayConnectionString, "postgres:", "jdbc:postgresql:", 1)
+	flywayConnectionString = strings.Replace(
+		flywayConnectionString,
+		inttestutil.PostgresqlDefaultScheme,
+		inttestutil.PostgresqlJDBCScheme,
+		1,
+	)
 
 	glog.Info("Starting flyway testcontainer with connection ", flywayConnectionString)
 	var flywayContainerRequest = testcontainers.ContainerRequest{
-		Image: util.FlywayImage,
+		Image: inttestutil.FlywayImage,
 		Cmd: []string{
 			"-url=" + flywayConnectionString,
-			"-user=" + util.PostgresqlUsername,
-			"-password=" + util.PostgresqlPassword,
+			"-user=" + inttestutil.PostgresqlUsername,
+			"-password=" + inttestutil.PostgresqlPassword,
 			"-connectRetries=5",
 			"migrate",
 		},
@@ -187,14 +217,19 @@ func runFlywayTestcontainer(ctx context.Context) error {
 func buildAndStartApplication() root.App {
 
 	// set up application test server
-	var appConnectionString = util.PostgresqlConnectionString + util.PostgresqlConnectionStringParameters
+	var appConnectionString = strings.Replace(
+		inttestutil.PostgresqlConnectionString,
+		inttestutil.PostgresqlDefaultScheme,
+		inttestutil.PostgresqlGoScheme,
+		1,
+	) + inttestutil.PostgresqlConnectionStringParameters
 
 	var ginServerConfig = infra.GinServerConfiguration{
 		Port:    "8081",
 		ApiOnly: true,
 	}
 	var dbConfig = infra.RDBMSConfiguration{
-		DriverName: util.DBDriverName,
+		DriverName: inttestutil.DBDriverName,
 		RdbmsURL:   appConnectionString,
 	}
 
