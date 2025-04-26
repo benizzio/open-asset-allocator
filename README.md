@@ -58,10 +58,11 @@ available as an example dataset in the project):
 ![asset level bonds](/docs/images/example-portfolio-bonds.png)
 ![asset level stocks](/docs/images/example-portfolio-stocks.png)
 
-### Installing and running
+### Installing and running (pre-alpha)
 
 > [!IMPORTANT]
-> Pre-requisites: git, docker, docker-compose, npm (version in .nvmrc), make
+> The pre-alpha version requires higher technical knowledge about software to use.
+> Pre-requisites: `git`, `docker`, `docker-compose`, `npm (version in .nvmrc)`, `make`.
 > Verify if there is a provisioning script for your OS in the `provisioning` folder. If not, I welcome PRs to add them.
 
 1. Clone the repository: `git clone https://github.com/benizzio/open-asset-allocator.git`
@@ -72,7 +73,7 @@ available as an example dataset in the project):
 Configuration can be done in [.env](src/main/docker/.env)
 
 > [!NOTE]
-> Current pre-alpha version requires data ingestion or manual data insertion.
+> Current pre-alpha version requires data ingestion or manual data insertion on the PostgreSQL database.
 > To access the stored portfolio go to `http://localhost/portfolio/<portfolio id>`
 
 ### Features
@@ -112,30 +113,36 @@ Configuration can be done in [.env](src/main/docker/.env)
 
 ### Roadmap(ish)
 
+- [ ] Portfolio management:
+    - [ ] add form based data input (beginner-user-friendly - start with fixed base structure class->asset)
+    - [ ] add structure management (add/remove levels)
 - Portfolio history
-    - [ ] allow inclusion of external cash inflow via UI
+    - [ ] allow inclusion of external cash inflow via UI (as separate "input" class)
+    - [ ] add form based data input (beginner-user-friendly)
+    - [ ] ui to handle data ingestion from known sources
+- Allocation Plan
+    - [ ] add form based data input (beginner-user-friendly)
 - Allocation map:
     - DIVERGENCE: last portfolio history from a timeframe, select an allocation plan to analyze
         - [ ] cash reserve marker on table (label & color)
-        - [ ] persistence of generated analysis on timeframe for convenience
+        - [ ] persistence of generated analysis on timeframe for convenience `BLOCKER FOR CONVERGENCE`
         - [x] show divergent value in currency units
         - [x] show divergent value in percentage
-        - [ ] allow easy UI elements to add extenal cash inflow
         - [ ] show divergence mode used with informative text
-        - [ ] add percentage divergence mode config ("aggresive" from level or "conservative" from asset)
+        - [ ] add percentage divergence mode config ("aggressive" from level or "conservative" from asset)
         - [ ] add divergence bar mode config (change proportion from 2:1)
     - [ ] CONVERGENCE:
         - [ ] create from a mapped divergence analysis (bound to a divergence analysis and its plan)
         - [ ] fractal execution: create per level and per parent selection when below top
         - [ ] line for each divergent record, add field for post-convergence goal (maket value) and calculate new
           percentage
-        - [ ] allow obtaining inserted external cash inflow and using it for convergence in any asset
+        - [ ] allow obtaining inserted external cash inflow ("input" class) and using it for convergence in any asset
             - (?) upper field inside each level of fractal structure to visualize re-balancing and availability deeper
               within the hierachy
         - (?) show final state after convergence (chart maybe?)
         - [ ] allow creation of multiple steps for segmented convergence plan
             - (?) Copy previous unexecuted plans on new divergence analysis
-        - (?) fild to inpuit curret market value at the time of convergence execution and calculate movement quantity
+        - (?) field to input current market value at the time of convergence execution and calculate movement quantity
           (no need to persist)
 - [ ] UI improvements:
     - [ ] Color configuration per hierarchy level record for visual consistency (apply to charts and tables)
