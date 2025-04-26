@@ -136,7 +136,7 @@ Configuration can be done in [.env](src/main/docker/.env)
         - [ ] fractal execution: create per level and per parent selection when below top
         - [ ] line for each divergent record, add field for post-convergence goal (maket value) and calculate new
           percentage
-        - [ ] allow obtaining inserted external cash inflow ("input" classs) and using it for convergence in any asset
+        - [ ] allow obtaining inserted external cash inflow ("input" class) and using it for convergence in any asset
             - (?) upper field inside each level of fractal structure to visualize re-balancing and availability deeper
               within the hierachy
         - (?) show final state after convergence (chart maybe?)
