@@ -1,2 +1,12 @@
 @import "../../node_modules/bootswatch/dist/zephyr/bootstrap.css";
 @import "../../node_modules/bootstrap-icons/font/bootstrap-icons.css";
+
+.portfolio-card {
+  width: 18rem;
+  height: 100%;
+  cursor: pointer;
+}
+
+.border-dashed {
+  border-style: dashed !important;
+}

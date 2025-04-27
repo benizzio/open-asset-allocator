@@ -16,6 +16,13 @@
 
 <div class="container-fluid">
 
+    <div id="portfolios-container"
+         hx-get="/websrc/pages/portfolios.html"
+         hx-trigger="route-reached once"
+         data-hx-trigger-on-route="/portfolio!route-reached"
+    >
+    </div>
+
     <div id="portfolio-container"
          hx-get="/websrc/pages/portfolio.html"
          hx-trigger="route-reached once"
