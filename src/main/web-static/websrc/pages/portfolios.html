@@ -2,15 +2,15 @@
      hx-get="/api/portfolio"
      hx-trigger="route-reached once"
      data-hx-trigger-on-route="/*!route-reached"
-     handlebars-template="portfolio-data"
+     handlebars-template="portfolio-selection"
      class="row justify-content-center align-items-stretch row-cols-auto my-5"
 ></div>
 
-<script id="portfolio-data" type="text/x-handlebars-template">
+<script id="portfolio-selection" type="text/x-handlebars-template">
 
     {{#each this}}
         <div class="col">
-            <div class="card portfolio-card">
+            <div class="card portfolio-card" data-navigate-to="/portfolio/{{id}}">
                 <div class="card-body">
                     <h5 class="card-title">{{name}}</h5>
                     <p class="card-text"></p>
@@ -20,8 +20,10 @@
     {{/each}}
 
     <div class="col">
-        <div class="card portfolio-card border border-primary border-dashed">
-            <div class="card-body">
+        <div class="card portfolio-card border border-primary border-dashed" data-navigate-to="/test">
+            <div class=" card-body
+        "
+            >
                 <h5 class="card-title">New portfolio</h5>
                 <span class="display-4 bi bi-plus-circle-dotted"></span>
             </div>

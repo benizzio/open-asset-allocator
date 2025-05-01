@@ -23,8 +23,10 @@ export const infra = {
         };
         document.addEventListener("DOMContentLoaded", onPageLoad);
 
-        return {
-            bootstrap
-        };
+        document.body.addEventListener("htmx:afterSettle", function() {
+            router.boot();
+        });
+
+        return { bootstrap };
     },
 };

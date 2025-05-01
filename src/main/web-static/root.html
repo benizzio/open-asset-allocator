@@ -20,7 +20,9 @@
          hx-get="/websrc/pages/portfolios.html"
          hx-trigger="route-reached once"
          data-hx-trigger-on-route="/portfolio!route-reached"
+         data-hx-trigger-on-route-clean
     >
+        <!-- hx-trigger="route-reached once" TODO customize htmx with event that runs once until cleaned -->
     </div>
 
     <div id="portfolio-container"

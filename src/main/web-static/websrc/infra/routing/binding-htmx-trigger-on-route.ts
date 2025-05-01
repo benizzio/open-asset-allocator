@@ -1,7 +1,7 @@
 import htmx from "htmx.org";
 import DomUtils from "../dom/dom-utils";
 import { logger, LogLevel } from "../logging";
-import { navigoRouter } from "./routing-navigo";
+import { HookCleanupFunction, navigoRouter } from "./routing-navigo";
 import { EventDetail } from "../htmx";
 
 // =============================================================================
@@ -11,6 +11,7 @@ import { EventDetail } from "../htmx";
 // =============================================================================
 
 const HTMX_TRIGGER_ON_ROUTE_ATTRIBUTE = "data-hx-trigger-on-route";
+const HTMX_CLEAN_ON_EXIT_ROUTE_ATTRIBUTE = HTMX_TRIGGER_ON_ROUTE_ATTRIBUTE + "-clean";
 const HTMX_TRIGGER_ON_ROUTE_EVENT_SEPARATOR = "!";
 const HTMX_TRIGGER_ON_ROUTE_BOUND_FLAG = "hx-trigger-on-route-bound";
 
@@ -30,6 +31,14 @@ function bindRouteToHTMXEventOnElements(htmxRoutedElements: NodeListOf<HTMLEleme
             const { route, event } = extractBindingData(element);
 
             bindRouteToHTMXTriggerOnElement(element, route, event);
+
+            if(element.hasAttribute(HTMX_CLEAN_ON_EXIT_ROUTE_ATTRIBUTE)) {
+                navigoRouter.addLeaveHook(route, (done: HookCleanupFunction) => {
+                    element.innerHTML = "";
+                    done();
+                });
+            }
+
             addDisableRouteRemovalObserver(element, route);
 
             element.setAttribute(HTMX_TRIGGER_ON_ROUTE_BOUND_FLAG, "true");
@@ -64,6 +73,7 @@ function addDisableRouteRemovalObserver(element: HTMLElement, route: string) {
 }
 
 function executeImmediatelyIfOnRoute(route: string, element: HTMLElement, event: string) {
+
     const routerMatch = navigoRouter.matchLocation(route);
 
     if(routerMatch) {
