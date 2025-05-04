@@ -198,11 +198,8 @@ func TestPostPortfolio(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotEmpty(t, body)
 
-	//TODO change for correct assertion
-	var actualResponseJSON = string(body)
 	var expectedResponseJSON = `
 		{
-			"id":999,
 			"name":"Test Portfolio creation",
 			"allocationStructure": {
 				"hierarchy": [
@@ -218,5 +215,8 @@ func TestPostPortfolio(t *testing.T) {
 			}
 		}
 	`
-	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
+
+	util.AssertJSONEqualIgnoringFields(t, expectedResponseJSON, string(body), "id")
+
+	//TODO assert db state
 }

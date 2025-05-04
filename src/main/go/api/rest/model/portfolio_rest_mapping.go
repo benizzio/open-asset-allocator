@@ -23,7 +23,6 @@ var (
 			},
 		},
 	}
-	defaultPortfolioId = -1
 )
 
 func MapPortfolios(portfolios []*domain.Portfolio) []PortfolioDTS {
@@ -54,7 +53,7 @@ func MapPortfolioDTS(portfolioDTS *PortfolioDTS) *domain.Portfolio {
 		allocationStructure = mapAllocationStructureDTS(portfolioDTS.AllocationStructure)
 	}
 
-	var portfolioId = defaultPortfolioId
+	var portfolioId int
 	if portfolioDTS.Id != nil {
 		portfolioId = *portfolioDTS.Id
 	}

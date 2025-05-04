@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"fmt"
 	"github.com/benizzio/open-asset-allocator/api/rest/model"
 	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/infra"
@@ -95,32 +94,13 @@ func (controller *PortfolioRESTController) postPortfolio(context *gin.Context) {
 	}
 
 	var portfolio = model.MapPortfolioDTS(&portfolioDTS)
-	//TODO test code, remove
-	//print the portfolioDTS
-	fmt.Println(portfolio)
-
-	//portfolio, err := controller.portfolioDomService.CreatePortfolio(portfolioDTS)
-	//if infra.HandleAPIError(context, "Error creating portfolio", err) {
-	//	return
-	//}
-	//
-
-	//TODO test code, fix with return from persistence
-	var id = 999
-	portfolioDTS.Id = &id
-	portfolioDTS.AllocationStructure = &model.AllocationStructureDTS{
-		Hierarchy: []model.AllocationHierarchyLevelDTS{
-			{
-				Name:  "Assets",
-				Field: "assetTicker",
-			},
-			{
-				Name:  "Classes",
-				Field: "class",
-			},
-		},
+	portfolio, err := controller.portfolioDomService.PersistPortfolio(portfolio)
+	if infra.HandleAPIError(context, "Error creating portfolio", err) {
+		return
 	}
-	context.JSON(http.StatusCreated, portfolioDTS)
+
+	var responseBody = model.MapPortfolio(portfolio)
+	context.JSON(http.StatusCreated, responseBody)
 }
 
 func BuildPortfolioRESTController(portfolioDomService *service.PortfolioDomService) *PortfolioRESTController {

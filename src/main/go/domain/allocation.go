@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"database/sql/driver"
 	"encoding/json"
 	"fmt"
 )
@@ -26,7 +27,6 @@ type AllocationStructure struct {
 func (allocationStructure *AllocationStructure) Scan(value interface{}) error {
 
 	if value == nil {
-		*allocationStructure = AllocationStructure{}
 		return nil
 	}
 
@@ -36,6 +36,16 @@ func (allocationStructure *AllocationStructure) Scan(value interface{}) error {
 	}
 
 	return json.Unmarshal(bytes, allocationStructure)
+}
+
+func (allocationStructure AllocationStructure) Value() (driver.Value, error) {
+
+	bytes, err := json.Marshal(allocationStructure)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal AllocationStructure: %v", err)
+	}
+
+	return bytes, nil
 }
 
 type HierarchicalId []*string
