@@ -26,9 +26,7 @@ func mapAllocationStructure(allocationPlanStructure domain.AllocationStructure) 
 	return AllocationStructureDTS{Hierarchy: hierarchyLevels}
 }
 
-func mapHierarchyLevels(
-	levels []domain.AllocationHierarchyLevel,
-) []AllocationHierarchyLevelDTS {
+func mapHierarchyLevels(levels []domain.AllocationHierarchyLevel) []AllocationHierarchyLevelDTS {
 
 	var dtsLevels = make([]AllocationHierarchyLevelDTS, 0)
 
@@ -41,4 +39,24 @@ func mapHierarchyLevels(
 	}
 
 	return dtsLevels
+}
+
+func mapAllocationStructureDTS(allocationPlanStructureDTS *AllocationStructureDTS) domain.AllocationStructure {
+	var hierarchyLevels = mapHierarchyLevelsDTS(allocationPlanStructureDTS.Hierarchy)
+	return domain.AllocationStructure{Hierarchy: hierarchyLevels}
+}
+
+func mapHierarchyLevelsDTS(levels []AllocationHierarchyLevelDTS) []domain.AllocationHierarchyLevel {
+
+	var domainLevels = make([]domain.AllocationHierarchyLevel, 0)
+
+	for _, level := range levels {
+		var levelDomain = domain.AllocationHierarchyLevel{
+			Name:  level.Name,
+			Field: level.Field,
+		}
+		domainLevels = append(domainLevels, levelDomain)
+	}
+
+	return domainLevels
 }

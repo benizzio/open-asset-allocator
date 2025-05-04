@@ -10,6 +10,22 @@ import (
 // PORTFOLIO
 // ==========================================
 
+var (
+	defaultAllocationStructure = domain.AllocationStructure{
+		Hierarchy: []domain.AllocationHierarchyLevel{
+			{
+				Name:  "Assets",
+				Field: "assetTicker",
+			},
+			{
+				Name:  "Classes",
+				Field: "class",
+			},
+		},
+	}
+	defaultPortfolioId = -1
+)
+
 func MapPortfolios(portfolios []*domain.Portfolio) []PortfolioDTS {
 	var portfoliosDTS = make([]PortfolioDTS, 0)
 	for _, portfolio := range portfolios {
@@ -22,11 +38,32 @@ func MapPortfolios(portfolios []*domain.Portfolio) []PortfolioDTS {
 func MapPortfolio(portfolio *domain.Portfolio) *PortfolioDTS {
 	var structure = mapAllocationStructure(portfolio.AllocationStructure)
 	var portfolioDTS = PortfolioDTS{
-		Id:                  portfolio.Id,
+		Id:                  &portfolio.Id,
 		Name:                portfolio.Name,
-		AllocationStructure: structure,
+		AllocationStructure: &structure,
 	}
 	return &portfolioDTS
+}
+
+func MapPortfolioDTS(portfolioDTS *PortfolioDTS) *domain.Portfolio {
+
+	var allocationStructure domain.AllocationStructure
+	if portfolioDTS.AllocationStructure == nil {
+		allocationStructure = defaultAllocationStructure
+	} else {
+		allocationStructure = mapAllocationStructureDTS(portfolioDTS.AllocationStructure)
+	}
+
+	var portfolioId = defaultPortfolioId
+	if portfolioDTS.Id != nil {
+		portfolioId = *portfolioDTS.Id
+	}
+
+	return &domain.Portfolio{
+		Id:                  portfolioId,
+		Name:                portfolioDTS.Name,
+		AllocationStructure: allocationStructure,
+	}
 }
 
 // ==========================================

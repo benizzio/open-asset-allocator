@@ -5,6 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -173,5 +174,49 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 		]
 	`
 
+	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
+}
+
+func TestPostPortfolio(t *testing.T) {
+
+	var postPortfolioJSON = `
+		{
+			"name":"Test Portfolio creation"
+		}
+	`
+
+	response, err := http.Post(
+		util.TestAPIURLprefix+"/portfolio",
+		"application/json",
+		strings.NewReader(postPortfolioJSON),
+	)
+	assert.NoError(t, err)
+
+	assert.Equal(t, http.StatusCreated, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+
+	//TODO change for correct assertion
+	var actualResponseJSON = string(body)
+	var expectedResponseJSON = `
+		{
+			"id":999,
+			"name":"Test Portfolio creation",
+			"allocationStructure": {
+				"hierarchy": [
+					{
+						"name":"Assets",
+						"field":"assetTicker"
+					},
+					{
+						"name":"Classes",
+						"field":"class"
+					}
+				]
+			}
+		}
+	`
 	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
 }
