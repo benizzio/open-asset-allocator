@@ -104,7 +104,7 @@ function addDisableRouteRemovalObserver(element: HTMLElement, route: string) {
     const observer = new MutationObserver((_, observer) => {
         if(DomUtils.wasElementRemoved(element)) {
 
-            logger(LogLevel.INFO, "Element removed, removing related handled for route", element, route);
+            logger(LogLevel.INFO, "Element removed, removing related handler for route", element, route);
 
             observer.disconnect();
 
