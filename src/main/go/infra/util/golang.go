@@ -1,6 +1,9 @@
 package util
 
-import "sync"
+import (
+	"reflect"
+	"sync"
+)
 
 func ToPointerSlice[S any](slice []S) []*S {
 	result := make([]*S, len(slice))
@@ -34,4 +37,8 @@ func BuildDeferRegistry() *DeferRegistry {
 	return &DeferRegistry{
 		DeferFunctions: make([]func(), 0),
 	}
+}
+
+func IsZeroValue[T any](value T) bool {
+	return reflect.ValueOf(value).Equal(reflect.Zero(reflect.TypeOf(value)))
 }

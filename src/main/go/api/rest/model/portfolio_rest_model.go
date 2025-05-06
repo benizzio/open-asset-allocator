@@ -5,9 +5,9 @@ import (
 )
 
 type PortfolioDTS struct {
-	Id                  int                    `json:"id"`
-	Name                string                 `json:"name"`
-	AllocationStructure AllocationStructureDTS `json:"allocationStructure"`
+	Id                  *int                    `json:"id"`
+	Name                string                  `json:"name"`
+	AllocationStructure *AllocationStructureDTS `json:"allocationStructure"`
 }
 
 type PortfolioAllocationDTS struct {
