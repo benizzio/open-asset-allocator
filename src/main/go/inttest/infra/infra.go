@@ -32,9 +32,10 @@ const (
 	DeferRegistryKey                     = "deferRegistry"
 )
 
-var PostgresqlConnectionString string
-
-var DatabaseConnection *dbx.DB
+var (
+	PostgresqlConnectionString string
+	DatabaseConnection         *dbx.DB
+)
 
 func SetupTestInfra(ctx context.Context) int {
 

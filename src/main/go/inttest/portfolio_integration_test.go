@@ -1,11 +1,15 @@
 package inttest
 
 import (
+	"encoding/json"
+	restmodel "github.com/benizzio/open-asset-allocator/api/rest/model"
 	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
-	"github.com/benizzio/open-asset-allocator/inttest/util"
+	inttestutil "github.com/benizzio/open-asset-allocator/inttest/util"
+	dbx "github.com/go-ozzo/ozzo-dbx"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -217,7 +221,24 @@ func TestPostPortfolio(t *testing.T) {
 		}
 	`
 
-	util.AssertJSONEqualIgnoringFields(t, expectedResponseJSON, string(body), "id")
+	inttestutil.AssertJSONEqualIgnoringFields(t, expectedResponseJSON, string(body), "id")
 
-	//TODO assert db state
+	var portfolioDTS restmodel.PortfolioDTS
+	err = json.Unmarshal(body, &portfolioDTS)
+	assert.NoError(t, err)
+
+	var portfolioIdString = strconv.Itoa(*portfolioDTS.Id)
+	var portfolioNullStringMap = dbx.NullStringMap{
+		"id":                   inttestutil.ToNullString(portfolioIdString),
+		"name":                 inttestutil.ToNullString("Test Portfolio creation"),
+		"allocation_structure": inttestutil.ToNullString(`{"hierarchy": [{"name": "Assets", "field": "assetTicker"}, {"name": "Classes", "field": "class"}]}`),
+	}
+
+	inttestutil.AssertQuery(
+		t,
+		"SELECT * FROM portfolio WHERE id="+portfolioIdString,
+		portfolioNullStringMap,
+	)
+
+	// TODO create solution to clean test data
 }
