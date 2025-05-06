@@ -1,7 +1,7 @@
 package inttest
 
 import (
-	"github.com/benizzio/open-asset-allocator/inttest/util"
+	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
@@ -10,7 +10,7 @@ import (
 
 func TestGetDivergenceAnalysisOptions(t *testing.T) {
 
-	response, err := http.Get(util.TestAPIURLprefix + "/portfolio/1/divergence/options")
+	response, err := http.Get(inttestinfra.TestAPIURLprefix + "/portfolio/1/divergence/options")
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -37,7 +37,7 @@ func TestGetDivergenceAnalysisOptions(t *testing.T) {
 
 func TestGetDivergenceAnalysis(t *testing.T) {
 
-	response, err := http.Get(util.TestAPIURLprefix + "/portfolio/1/divergence/202501/allocation-plan/1")
+	response, err := http.Get(inttestinfra.TestAPIURLprefix + "/portfolio/1/divergence/202501/allocation-plan/1")
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)

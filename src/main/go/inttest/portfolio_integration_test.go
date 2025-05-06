@@ -1,6 +1,7 @@
 package inttest
 
 import (
+	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
 	"github.com/benizzio/open-asset-allocator/inttest/util"
 	"github.com/stretchr/testify/assert"
 	"io"
@@ -11,7 +12,7 @@ import (
 
 func TestGetPortfolio(t *testing.T) {
 
-	response, err := http.Get(util.TestAPIURLprefix + "/portfolio/1")
+	response, err := http.Get(inttestinfra.TestAPIURLprefix + "/portfolio/1")
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -44,7 +45,7 @@ func TestGetPortfolio(t *testing.T) {
 
 func TestGetPortfolios(t *testing.T) {
 
-	response, err := http.Get(util.TestAPIURLprefix + "/portfolio")
+	response, err := http.Get(inttestinfra.TestAPIURLprefix + "/portfolio")
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -91,7 +92,7 @@ func TestGetPortfolios(t *testing.T) {
 
 func TestGetPortfolioAllocationHistory(t *testing.T) {
 
-	response, err := http.Get(util.TestAPIURLprefix + "/portfolio/1/history")
+	response, err := http.Get(inttestinfra.TestAPIURLprefix + "/portfolio/1/history")
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -186,7 +187,7 @@ func TestPostPortfolio(t *testing.T) {
 	`
 
 	response, err := http.Post(
-		util.TestAPIURLprefix+"/portfolio",
+		inttestinfra.TestAPIURLprefix+"/portfolio",
 		"application/json",
 		strings.NewReader(postPortfolioJSON),
 	)
