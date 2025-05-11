@@ -327,11 +327,34 @@ func TestPostPortfolioWithAllocationStructure(t *testing.T) {
 
 func TestPostPortfolioFailureWithoutMandatoryFields(t *testing.T) {
 
-	var postPortfolioJSON = `
+	var postPortfolioJSONNullFields = `
 		{
 			"name": null
 		}
 	`
+
+	var postPortfolioJSONEmptyFields = `
+		{
+			"name": ""
+		}
+	`
+	actualResponseJSONNullFields := string(postForValidationFailure(t, postPortfolioJSONNullFields))
+	actualResponseJSONEmptyFields := string(postForValidationFailure(t, postPortfolioJSONEmptyFields))
+
+	var expectedResponseJSON = `
+		{
+			"errorMessage": "Validation failed",
+			"details": [
+				"Field 'name' failed validation: is required"
+			]
+		}
+	`
+	assert.JSONEq(t, expectedResponseJSON, actualResponseJSONNullFields)
+	assert.JSONEq(t, expectedResponseJSON, actualResponseJSONEmptyFields)
+}
+
+func postForValidationFailure(t *testing.T, postPortfolioJSON string) []byte {
+
 	response, err := http.Post(
 		inttestinfra.TestAPIURLprefix+"/portfolio",
 		"application/json",
@@ -343,15 +366,5 @@ func TestPostPortfolioFailureWithoutMandatoryFields(t *testing.T) {
 	body, err := io.ReadAll(response.Body)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, body)
-
-	var actualResponseJSON = string(body)
-	var expectedResponseJSON = `
-		{
-			"errorMessage": "Validation failed",
-			"details": [
-				"Field 'name' failed validation: is required"
-			]
-		}
-	`
-	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
+	return body
 }
