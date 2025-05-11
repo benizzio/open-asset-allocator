@@ -1,31 +1,63 @@
+<!-- TODO organize and clean -->
 <div id="portfolios"
      hx-get="/api/portfolio"
      hx-trigger="load once"
      handlebars-template="portfolio-selection"
-     class="row justify-content-center align-items-stretch row-cols-auto my-5"
+     data-display-on-route="/portfolios"
 ></div>
 
 <script id="portfolio-selection" type="text/x-handlebars-template">
 
-    {{#each this}}
+    <div class="row justify-content-center align-items-stretch row-cols-auto my-5">
+
+        {{#each this}}
+            <div class="col">
+                <div class="card portfolio-card" data-navigate-to="/portfolio/{{id}}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{name}}</h5>
+                        <p class="card-text"></p>
+                    </div>
+                </div>
+            </div>
+        {{/each}}
+
         <div class="col">
-            <div class="card portfolio-card" data-navigate-to="/portfolio/{{id}}">
+            <div class="card portfolio-card border border-primary border-dashed" data-navigate-to="/portfolios/new">
                 <div class="card-body">
-                    <h5 class="card-title">{{name}}</h5>
-                    <p class="card-text"></p>
+                    <h5 class="card-title">New portfolio</h5>
+                    <span class="display-4 bi bi-plus-circle-dotted"></span>
                 </div>
             </div>
         </div>
-    {{/each}}
 
-    <div class="col">
-        <div class="card portfolio-card border border-primary border-dashed" data-navigate-to="/test">
-            <div class="card-body"
-            >
-                <h5 class="card-title">New portfolio</h5>
-                <span class="display-4 bi bi-plus-circle-dotted"></span>
-            </div>
-        </div>
     </div>
 
 </script>
+
+<div class="row justify-content-center align-items-stretch row-cols-auto my-5"
+     data-display-on-route="/portfolios/new"
+     style="display: none"
+>
+    <div class="col">
+        <div class="card portfolio-card border border-primary border-dashed">
+            <form>
+                <div class="card-body">
+                    <h5 class="card-title">New portfolio</h5>
+
+                    <input type="text"
+                           class="form-control"
+                           id="exampleFormControlInput1"
+                           placeholder="Name"
+                           aria-label="Name"
+                    />
+
+
+                </div>
+                <div class="card-footer text-end">
+                    <button type="button" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

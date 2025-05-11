@@ -40,6 +40,7 @@ function bindDisplayOnRoute(element: HTMLElement) {
 
 function configDisplayOnRouteHooks(route: string, element: HTMLElement) {
 
+    //TODO if there is no hook, create one
     const afterHookCleanup = navigoRouter.addAfterHook(route, () => {
         changeElementDisplay(element, true);
     }) as () => void;
