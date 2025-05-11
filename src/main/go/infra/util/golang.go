@@ -12,8 +12,10 @@ func ToPointerSlice[S any](slice []S) []*S {
 	return result
 }
 
+// IsZeroValue checks if a value equals its zero value.
+// (this function was improved by AI)
 func IsZeroValue[T any](value T) bool {
-	return reflect.ValueOf(value).Equal(reflect.Zero(reflect.TypeOf(value)))
+	return reflect.ValueOf(value).IsZero()
 }
 
 // unwrapType removes pointer indirection if present.
