@@ -6,7 +6,7 @@ import (
 
 type PortfolioDTS struct {
 	Id                  *int                    `json:"id"`
-	Name                string                  `json:"name"`
+	Name                string                  `json:"name" binding:"required"`
 	AllocationStructure *AllocationStructureDTS `json:"allocationStructure"`
 }
 

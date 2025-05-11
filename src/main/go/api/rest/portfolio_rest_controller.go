@@ -4,6 +4,7 @@ import (
 	"github.com/benizzio/open-asset-allocator/api/rest/model"
 	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/infra"
+	"github.com/benizzio/open-asset-allocator/infra/util"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -89,7 +90,7 @@ func (controller *PortfolioRESTController) getPortfolioAllocationHistory(context
 func (controller *PortfolioRESTController) postPortfolio(context *gin.Context) {
 
 	var portfolioDTS model.PortfolioDTS
-	if err := context.ShouldBindJSON(&portfolioDTS); infra.HandleAPIError(context, "Error binding portfolio", err) {
+	if err := util.BindAndValidateJSONWithErrorResponse(context, &portfolioDTS); err != nil {
 		return
 	}
 
