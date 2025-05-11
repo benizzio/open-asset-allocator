@@ -252,3 +252,106 @@ func TestPostPortfolio(t *testing.T) {
 		portfolioNullStringMap,
 	)
 }
+
+func TestPostPortfolioWithAllocationStructure(t *testing.T) {
+
+	var testPortfolioName = "Test Portfolio creation with allocation structure"
+
+	var allocationStructureJSONFragment = `
+		"allocationStructure": {
+			"hierarchy": [
+				{
+					"name":"Classes",
+					"field":"class"
+				}
+			]
+		}
+	`
+
+	var postPortfolioJSON = `
+		{
+			"name":"` + testPortfolioName + `",
+			` + allocationStructureJSONFragment + `
+		}
+	`
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLprefix+"/portfolio",
+		"application/json",
+		strings.NewReader(postPortfolioJSON),
+	)
+
+	t.Cleanup(
+		inttestutil.CreateDBCleanupDeferable(
+			"DELETE FROM portfolio WHERE name='%s'",
+			testPortfolioName,
+		),
+	)
+
+	assert.NoError(t, err)
+
+	assert.Equal(t, http.StatusCreated, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+
+	var expectedResponseJSON = `
+		{
+			"name":"` + testPortfolioName + `",
+			` + allocationStructureJSONFragment + `
+		}
+	`
+
+	inttestutil.AssertJSONEqualIgnoringFields(t, expectedResponseJSON, string(body), "id")
+
+	var portfolioDTS restmodel.PortfolioDTS
+	err = json.Unmarshal(body, &portfolioDTS)
+	assert.NoError(t, err)
+	assert.NotNil(t, portfolioDTS.Id)
+	assert.NotZero(t, *portfolioDTS.Id)
+
+	var portfolioIdString = strconv.Itoa(*portfolioDTS.Id)
+	var portfolioNullStringMap = dbx.NullStringMap{
+		"id":                   inttestutil.ToNullString(portfolioIdString),
+		"name":                 inttestutil.ToNullString(testPortfolioName),
+		"allocation_structure": inttestutil.ToNullString(`{"hierarchy": [{"name": "Classes", "field": "class"}]}`),
+	}
+
+	inttestutil.AssertDBWithQuery(
+		t,
+		"SELECT * FROM portfolio WHERE id="+portfolioIdString,
+		portfolioNullStringMap,
+	)
+}
+
+func TestPostPortfolioFailureWithoutMandatoryFields(t *testing.T) {
+
+	var postPortfolioJSON = `
+		{
+			"name": null
+		}
+	`
+	response, err := http.Post(
+		inttestinfra.TestAPIURLprefix+"/portfolio",
+		"application/json",
+		strings.NewReader(postPortfolioJSON),
+	)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+
+	var actualResponseJSON = string(body)
+	var expectedResponseJSON = `
+		{
+			"errorMessage": "Validation failed",
+			"details": [
+				"Field 'name' failed validation: is required"
+			]
+		}
+	`
+	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
+}
