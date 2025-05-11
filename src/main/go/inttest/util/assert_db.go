@@ -8,8 +8,8 @@ import (
 	"testing"
 )
 
-// AssertQuery executes the given SQL query and compares the result with the expected value.
-func AssertQuery(t *testing.T, sql string, expected dbx.NullStringMap) {
+// AssertDBWithQuery executes the given SQL query and compares the result with the expected value.
+func AssertDBWithQuery(t *testing.T, sql string, expected dbx.NullStringMap) {
 
 	var actual = dbx.NullStringMap{}
 

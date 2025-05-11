@@ -184,9 +184,11 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 
 func TestPostPortfolio(t *testing.T) {
 
+	var testPortfolioName = "Test Portfolio creation"
+
 	var postPortfolioJSON = `
 		{
-			"name":"Test Portfolio creation"
+			"name":"` + testPortfolioName + `"
 		}
 	`
 
@@ -195,6 +197,14 @@ func TestPostPortfolio(t *testing.T) {
 		"application/json",
 		strings.NewReader(postPortfolioJSON),
 	)
+
+	t.Cleanup(
+		inttestutil.CreateDBCleanupDeferable(
+			"DELETE FROM portfolio WHERE name='%s'",
+			testPortfolioName,
+		),
+	)
+
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusCreated, response.StatusCode)
@@ -205,7 +215,7 @@ func TestPostPortfolio(t *testing.T) {
 
 	var expectedResponseJSON = `
 		{
-			"name":"Test Portfolio creation",
+			"name":"` + testPortfolioName + `",
 			"allocationStructure": {
 				"hierarchy": [
 					{
@@ -226,19 +236,19 @@ func TestPostPortfolio(t *testing.T) {
 	var portfolioDTS restmodel.PortfolioDTS
 	err = json.Unmarshal(body, &portfolioDTS)
 	assert.NoError(t, err)
+	assert.NotNil(t, portfolioDTS.Id)
+	assert.NotZero(t, *portfolioDTS.Id)
 
 	var portfolioIdString = strconv.Itoa(*portfolioDTS.Id)
 	var portfolioNullStringMap = dbx.NullStringMap{
 		"id":                   inttestutil.ToNullString(portfolioIdString),
-		"name":                 inttestutil.ToNullString("Test Portfolio creation"),
+		"name":                 inttestutil.ToNullString(testPortfolioName),
 		"allocation_structure": inttestutil.ToNullString(`{"hierarchy": [{"name": "Assets", "field": "assetTicker"}, {"name": "Classes", "field": "class"}]}`),
 	}
 
-	inttestutil.AssertQuery(
+	inttestutil.AssertDBWithQuery(
 		t,
 		"SELECT * FROM portfolio WHERE id="+portfolioIdString,
 		portfolioNullStringMap,
 	)
-
-	// TODO create solution to clean test data
 }
