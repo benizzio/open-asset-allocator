@@ -15,7 +15,7 @@ services:
 
   #TODO: create local image with init script inside for build
   db:
-    image: postgres:17.4-bullseye
+    image: postgres:17.5-bullseye
     restart: always
     env_file: .env
     shm_size: 128mb
