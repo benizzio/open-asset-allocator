@@ -29,8 +29,8 @@ function bindDisplayOnRoute(element: HTMLElement) {
 
         logger(LogLevel.INFO, "Binding display on route hooks for element", element, route);
 
-        const { afterHookCleanup } = configDisplayOnRouteHooks(route, element);
-        addDisplayOnRouteRemovalObserver(element, afterHookCleanup);
+        const cleanupCallback = configDisplayOnRouteHooks(route, element);
+        addDisplayOnRouteRemovalObserver(element, cleanupCallback);
 
         element.setAttribute(DISPLAY_ON_ROUTE_BOUND_FLAG, "true");
 
@@ -38,29 +38,43 @@ function bindDisplayOnRoute(element: HTMLElement) {
     }
 }
 
-function configDisplayOnRouteHooks(route: string, element: HTMLElement) {
+function configDisplayOnRouteHooks(route: string, element: HTMLElement): () => void {
 
-    //TODO if there is no hook, create one
-    const afterHookCleanup = navigoRouter.addAfterHook(route, () => {
+    const hasRoute = !!navigoRouter.getRoute(route);
+
+    const displayCallback = () => {
         changeElementDisplay(element, true);
-    }) as () => void;
+    };
 
-    return { afterHookCleanup };
+    let cleanupCallback: () => void;
+
+    if(hasRoute) {
+        cleanupCallback = navigoRouter.addAfterHook(route, displayCallback) as () => void;
+    }
+    else {
+        navigoRouter.on(route, displayCallback);
+
+        cleanupCallback = () => {
+            navigoRouter.off(displayCallback);
+        };
+    }
+
+    return cleanupCallback;
 }
 
 function changeElementDisplay(element: HTMLElement, display: boolean) {
-    element.style.display = display ? "inline" : "none";
+    element.style.display = display ? null : "none";
 }
 
 function addDisplayOnRouteRemovalObserver(
     element: HTMLElement,
-    afterHookCleanup: () => void,
+    cleanupCallback: () => void,
 ) {
     const observer = new MutationObserver((_, observer) => {
         if(DomUtils.wasElementRemoved(element)) {
             logger(LogLevel.INFO, "Element removed, removing display on route action", element);
             observer.disconnect();
-            afterHookCleanup();
+            cleanupCallback();
         }
     });
     observer.observe(document, { childList: true, subtree: true });
