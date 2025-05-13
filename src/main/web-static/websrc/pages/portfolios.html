@@ -41,22 +41,27 @@
     >
         <div class="col">
             <div class="card portfolio-card border border-primary border-dashed">
-                <form>
+
+                <form hx-post="/api/portfolio" hx-ext="json-enc">
                     <div class="card-body">
+
                         <h5 class="card-title">New portfolio</h5>
 
                         <input type="text"
+                               name="name"
                                class="form-control"
                                id="exampleFormControlInput1"
                                placeholder="Name"
                                aria-label="Name"
-                        />
+                        /><!-- TODO add validation -->
+
                     </div>
                     <div class="card-footer text-end">
                         <button type="button" class="btn btn-secondary" data-navigate-to="/portfolios">Cancel</button>
                         <button type="submit" class="btn btn-primary">Create</button>
                     </div>
                 </form>
+
             </div>
         </div>
     </div>
