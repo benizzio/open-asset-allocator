@@ -19,7 +19,6 @@ export function registerPortfolioAnalysisHandlebarsHelpers() {
                 }
 
                 case "plannedMarketValue": {
-
                     return getDivergenceValueLabel(plannedMarketValue, totalMarketValue);
                 }
 

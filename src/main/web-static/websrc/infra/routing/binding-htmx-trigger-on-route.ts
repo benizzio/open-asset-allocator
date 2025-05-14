@@ -50,7 +50,7 @@ function bindRouteToHTMXEventOnElements(htmxRoutedElements: NodeListOf<HTMLEleme
 
     htmxRoutedElements.forEach((element) => {
 
-        if(!element.getAttribute(HTMX_TRIGGER_ON_ROUTE_BOUND_FLAG)) {
+        if(!element.getAttribute(HTMX_TRIGGER_ON_ROUTE_BOUND_FLAG)) {//TODO replace this if for improving the element selector
 
             logger(LogLevel.INFO, "Binding HTMX event on route for element", element);
 

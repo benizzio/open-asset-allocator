@@ -1,7 +1,3 @@
-import router from "./routing/router";
-import { domInfra } from "./dom/dom";
-import chart from "./chart/chart";
-
 export type EventDetail = {
     routerPathData?: { [key: string]: unknown };
     [key: string]: unknown;
@@ -9,13 +5,6 @@ export type EventDetail = {
 
 const configRequestEventListener = (event: CustomEvent) => {
     replaceRequestPathParams(event);
-};
-
-const afterSettleEventListener = (event: CustomEvent) => {
-    const target = event.target as HTMLElement;
-    router.bindDescendants(target);
-    domInfra.bindDescendants(target);
-    chart.loadDescendantCharts(target);
 };
 
 function replaceRequestPathParams(event: CustomEvent) {
@@ -72,13 +61,13 @@ function replaceFromFormData(event: CustomEvent) {
     event.detail.path = resolvedSplittedRequestPath.join("/");
 }
 
-function addEventListeners() {
+function addEventListeners(domSettlingBehaviorEventHandler: (event: CustomEvent) => void) {
     document.addEventListener("htmx:configRequest", configRequestEventListener);
-    document.body.addEventListener("htmx:afterSettle", afterSettleEventListener);
+    document.body.addEventListener("htmx:afterSettle", domSettlingBehaviorEventHandler);
 }
 
 export const htmxInfra = {
-    init() {
-        addEventListeners();
+    init(domSettlingBehaviorEventHandler: (event: CustomEvent) => void) {
+        addEventListeners(domSettlingBehaviorEventHandler);
     },
 };

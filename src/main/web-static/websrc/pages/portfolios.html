@@ -2,14 +2,14 @@
 <div data-exclusive-display-container>
     <div id="portfolios"
          hx-get="/api/portfolio"
-         hx-trigger="load once"
+         hx-trigger="load once, reload-portfolios"
          handlebars-template="portfolio-selection"
          data-display-on-route="/portfolios"
     ></div>
 
     <script id="portfolio-selection" type="text/x-handlebars-template">
 
-        <div class="row justify-content-center align-items-stretch row-cols-auto my-5">
+        <div class="row justify-content-center align-items-stretch row-cols-auto my-5 gy-4">
 
             {{#each this}}
                 <div class="col">
@@ -42,7 +42,14 @@
         <div class="col">
             <div class="card portfolio-card border border-primary border-dashed">
 
-                <form hx-post="/api/portfolio" hx-ext="json-enc">
+                <form id="new-portfolio-form"
+                      hx-post="/api/portfolio"
+                      hx-ext="json-enc"
+                      class="needs-validation"
+                      hx-validate="true"
+                      hx-swap="none"
+                      hx-on-htmx-after-request="reloadPortfolios(this)"
+                >
                     <div class="card-body">
 
                         <h5 class="card-title">New portfolio</h5>
@@ -53,14 +60,26 @@
                                id="exampleFormControlInput1"
                                placeholder="Name"
                                aria-label="Name"
-                        /><!-- TODO add validation -->
+                               required
+                        />
 
                     </div>
                     <div class="card-footer text-end">
-                        <button type="button" class="btn btn-secondary" data-navigate-to="/portfolios">Cancel</button>
+                        <button type="reset" class="btn btn-secondary" data-navigate-to="/portfolios">Cancel</button>
                         <button type="submit" class="btn btn-primary">Create</button>
                     </div>
                 </form>
+
+                <script type="text/javascript">
+                    function reloadPortfolios(form) {
+                        if (form.checkValidity()) {
+                            form.reset();
+                            const portfoliosElement = document.querySelector("#portfolios");
+                            htmx.trigger(portfoliosElement, "reload-portfolios");
+                            navigateTo("/portfolios");
+                        }
+                    }
+                </script>
 
             </div>
         </div>

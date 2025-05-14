@@ -23,7 +23,7 @@ function bindDisplayOnRouteElements(displayOnRouteElements: NodeListOf<HTMLEleme
 
 function bindDisplayOnRoute(element: HTMLElement) {
 
-    if(!element.getAttribute(DISPLAY_ON_ROUTE_BOUND_FLAG)) {
+    if(!element.getAttribute(DISPLAY_ON_ROUTE_BOUND_FLAG)) {//TODO replace this if for improving the element selector
 
         const route = element.getAttribute(DISPLAY_ON_ROUTE_ATTRIBUTE);
 

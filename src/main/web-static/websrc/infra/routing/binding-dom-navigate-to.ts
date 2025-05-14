@@ -36,7 +36,7 @@ function buildDestinationPath(element: HTMLElement) {
 
 function bindNavigateToElements(navigationElement: NodeListOf<HTMLElement>) {
     navigationElement.forEach((element) => {
-        if(!element.getAttribute(NAVIGATE_TO_BOUND_FLAG)) {
+        if(!element.getAttribute(NAVIGATE_TO_BOUND_FLAG)) {//TODO replace this if for improving the element selector
             logger(LogLevel.INFO, "Binding navigation element", element);
             bindKeypressNavigation(element);
             bindCLickNavigation(element);

@@ -2,12 +2,16 @@ import { bindHTMXTriggerOnRouteInDescendants } from "./binding-htmx-trigger-on-r
 import { bindNavigateToInDescendants } from "./binding-dom-navigate-to";
 import { bindDisplayOnRouteInDescendants } from "./binding-dom-display-on-route";
 import { bindAttributeOnRouteInDescendants } from "./binding-dom-attribute-on-route";
-import { bootNavigoRouter } from "./routing-navigo";
-
+import { bootNavigoRouter, navigoRouter } from "./routing-navigo";
 
 const router = {
-    init() {
+    init(browserGlobal: Window) {
+
         router.bindDocumentToRouting();
+
+        browserGlobal["navigateTo"] = (destinationPath: string) => {
+            navigoRouter.navigate(destinationPath);
+        };
     },
     bindDescendants(element: HTMLElement) {
         bindHTMXTriggerOnRouteInDescendants(element);

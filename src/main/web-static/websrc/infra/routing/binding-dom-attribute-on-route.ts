@@ -28,7 +28,7 @@ function bindAttributeOnRouteElements(attributeOnRouteElements: NodeListOf<HTMLE
 
 function bindAttributeOnRoute(element: HTMLElement) {
 
-    if(!element.getAttribute(ATTRIBUTE_ON_ROUTE_BOUND_FLAG)) {
+    if(!element.getAttribute(ATTRIBUTE_ON_ROUTE_BOUND_FLAG)) {//TODO replace this if for improving the element selector
 
         const { route, attributesStrings } = extractBindingData(element);
 
