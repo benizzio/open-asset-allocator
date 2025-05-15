@@ -23,29 +23,6 @@ const DOM_SETTLING_BEHAVIOR_EVENT_HANDLER = (event: CustomEvent) => {
     router.boot();
     domInfra.bindDescendants(target);
     chart.loadDescendantCharts(target);
-
-    //TODO clean
-    const forms = document.querySelectorAll("form.needs-validation:not([novalidate])");
-
-    forms.forEach((form: HTMLFormElement) => {
-
-        form.setAttribute("novalidate", "true");
-
-        form.addEventListener("submit", event => {
-
-            if(!form.checkValidity()) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-
-            form.classList.add("was-validated");
-
-        }, false);
-
-        form.addEventListener("reset", () => {
-            form.classList.remove("was-validated");
-        }, false);
-    });
 };
 
 /**
