@@ -36,16 +36,17 @@ function buildDestinationPath(element: HTMLElement) {
 
 function bindNavigateToElements(navigationElement: NodeListOf<HTMLElement>) {
     navigationElement.forEach((element) => {
-        if(!element.getAttribute(NAVIGATE_TO_BOUND_FLAG)) {//TODO replace this if for improving the element selector
-            logger(LogLevel.INFO, "Binding navigation element", element);
-            bindKeypressNavigation(element);
-            bindCLickNavigation(element);
-            element.setAttribute(NAVIGATE_TO_BOUND_FLAG, "true");
-        }
+        logger(LogLevel.INFO, "Binding navigation element", element);
+        bindKeypressNavigation(element);
+        bindCLickNavigation(element);
+        element.setAttribute(NAVIGATE_TO_BOUND_FLAG, "true");
     });
 }
 
 export function bindNavigateToInDescendants(element: HTMLElement) {
-    const navigationElements = DomUtils.queryAllInDescendants(element, `[${ NAVIGATE_TO_ATTRIBUTE }]`);
+    const navigationElements = DomUtils.queryAllInDescendants(
+        element,
+        `[${ NAVIGATE_TO_ATTRIBUTE }]:not([${ NAVIGATE_TO_BOUND_FLAG }])`,
+    );
     bindNavigateToElements(navigationElements);
 }

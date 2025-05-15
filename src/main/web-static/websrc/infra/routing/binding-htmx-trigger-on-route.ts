@@ -42,7 +42,10 @@ const CLEAN_ON_EXIT_HTMX_EVENT_HANDLERS = {
 };
 
 export function bindHTMXTriggerOnRouteInDescendants(element: HTMLElement) {
-    const htmxRoutedElements = DomUtils.queryAllInDescendants(element, `[${ HTMX_TRIGGER_ON_ROUTE_ATTRIBUTE }]`);
+    const htmxRoutedElements = DomUtils.queryAllInDescendants(
+        element,
+        `[${ HTMX_TRIGGER_ON_ROUTE_ATTRIBUTE }]:not([${ HTMX_TRIGGER_ON_ROUTE_BOUND_FLAG }])`,
+    );
     bindRouteToHTMXEventOnElements(htmxRoutedElements);
 }
 
@@ -50,20 +53,17 @@ function bindRouteToHTMXEventOnElements(htmxRoutedElements: NodeListOf<HTMLEleme
 
     htmxRoutedElements.forEach((element) => {
 
-        if(!element.getAttribute(HTMX_TRIGGER_ON_ROUTE_BOUND_FLAG)) {//TODO replace this if for improving the element selector
+        logger(LogLevel.INFO, "Binding HTMX event on route for element", element);
 
-            logger(LogLevel.INFO, "Binding HTMX event on route for element", element);
+        const { route, event } = extractBindingData(element);
 
-            const { route, event } = extractBindingData(element);
+        bindRouteToHTMXTriggerOnElement(element, route, event);
+        bindCleanOnExitRouteBehaviourOnElement(element, route);
+        addDisableRouteRemovalObserver(element, route);
 
-            bindRouteToHTMXTriggerOnElement(element, route, event);
-            bindCleanOnExitRouteBehaviourOnElement(element, route);
-            addDisableRouteRemovalObserver(element, route);
+        element.setAttribute(HTMX_TRIGGER_ON_ROUTE_BOUND_FLAG, "true");
 
-            element.setAttribute(HTMX_TRIGGER_ON_ROUTE_BOUND_FLAG, "true");
-
-            executeImmediatelyIfOnRoute(route, element, event);
-        }
+        executeImmediatelyIfOnRoute(route, element, event);
     });
 }
 

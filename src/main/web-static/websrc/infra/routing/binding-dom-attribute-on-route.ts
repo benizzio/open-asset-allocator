@@ -16,7 +16,10 @@ const ATTRIBUTE_ON_ROUTE_ATTRIBUTE_NAME_VALUE_GROUP_PREFIX = "[";
 const ATTRIBUTE_ON_ROUTE_ATTRIBUTE_NAME_VALUE_GROUP_SUFFIX = "]";
 
 export function bindAttributeOnRouteInDescendants(element: HTMLElement) {
-    const attributeOnRouteElements = DomUtils.queryAllInDescendants(element, `[${ ATTRIBUTE_ON_ROUTE_ATTRIBUTE }]`);
+    const attributeOnRouteElements = DomUtils.queryAllInDescendants(
+        element,
+        `[${ ATTRIBUTE_ON_ROUTE_ATTRIBUTE }]:not([${ ATTRIBUTE_ON_ROUTE_BOUND_FLAG }])`,
+    );
     bindAttributeOnRouteElements(attributeOnRouteElements);
 }
 
@@ -28,22 +31,19 @@ function bindAttributeOnRouteElements(attributeOnRouteElements: NodeListOf<HTMLE
 
 function bindAttributeOnRoute(element: HTMLElement) {
 
-    if(!element.getAttribute(ATTRIBUTE_ON_ROUTE_BOUND_FLAG)) {//TODO replace this if for improving the element selector
+    const { route, attributesStrings } = extractBindingData(element);
 
-        const { route, attributesStrings } = extractBindingData(element);
+    logger(LogLevel.INFO, "Binding attributes on route for element", element, route, attributesStrings);
 
-        logger(LogLevel.INFO, "Binding attributes on route for element", element, route, attributesStrings);
-
-        if(attributesStrings.length === 0) {
-            return;
-        }
-
-        addRouterHooks(route, attributesStrings, element);
-
-        executeImmediatelyIfOnRoute(route, attributesStrings, element);
-
-        element.setAttribute(ATTRIBUTE_ON_ROUTE_BOUND_FLAG, "true");
+    if(attributesStrings.length === 0) {
+        return;
     }
+
+    addRouterHooks(route, attributesStrings, element);
+
+    executeImmediatelyIfOnRoute(route, attributesStrings, element);
+
+    element.setAttribute(ATTRIBUTE_ON_ROUTE_BOUND_FLAG, "true");
 }
 
 function extractBindingData(element: HTMLElement) {
