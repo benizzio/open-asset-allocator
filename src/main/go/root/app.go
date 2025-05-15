@@ -63,14 +63,18 @@ func (app *App) buildAppComponents() {
 		allocationPlanDomService,
 	)
 
-	var portfolioRESTController = rest.BuildPortfolioRESTController(
-		portfolioDomService,
+	var portfolioRESTController = rest.BuildPortfolioRESTController(portfolioDomService)
+	var portfolioDivergenceAnalysisRESTController = rest.BuildDivergenceAnalysisRESTController(
 		portfolioAnalysisConfigurationService,
 		portfolioDivergenceAnalysisService,
 	)
 	var allocationPlanRESTController = rest.BuildAllocationPlanRESTController(allocationPlanDomService)
 
-	app.restControllers = []infra.GinServerRESTController{portfolioRESTController, allocationPlanRESTController}
+	app.restControllers = []infra.GinServerRESTController{
+		portfolioRESTController,
+		allocationPlanRESTController,
+		portfolioDivergenceAnalysisRESTController,
+	}
 }
 
 func (app *App) initializeAppComponents() {

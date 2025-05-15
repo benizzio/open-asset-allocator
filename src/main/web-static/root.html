@@ -16,10 +16,19 @@
 
 <div class="container-fluid">
 
+    <div id="portfolios-container"
+         hx-get="/websrc/pages/portfolios.html"
+         hx-trigger="route-reached"
+         data-hx-trigger-on-route="/portfolios/*!route-reached"
+         data-hx-trigger-on-route-clean
+    >
+    </div>
+
     <div id="portfolio-container"
          hx-get="/websrc/pages/portfolio.html"
-         hx-trigger="route-reached once"
+         hx-trigger="route-reached"
          data-hx-trigger-on-route="/portfolio/:portfolioId/*!route-reached"
+         data-hx-trigger-on-route-clean
     >
     </div>
 
@@ -27,6 +36,7 @@
 
 <script src="./node_modules/htmx.org/dist/htmx.js"></script>
 <script src="./node_modules/htmx-ext-client-side-templates/dist/client-side-templates.js"></script>
+<script src="./node_modules/htmx-ext-json-enc/dist/json-enc.js"></script>
 <script defer src="/websrc/root.ts" type="module"></script>
 
 </body>

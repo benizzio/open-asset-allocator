@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra"
+	"github.com/benizzio/open-asset-allocator/infra/util"
 )
 
 type PortfolioDomService struct {
@@ -102,6 +103,23 @@ func (service *PortfolioDomService) getHierarchyLevelFieldValue(
 		return "", infra.BuildAppErrorFormatted("No extractor registered for field: %s", level.Field)
 	}
 	return extractorFunction(allocation), nil
+}
+
+func (service *PortfolioDomService) PersistPortfolio(portfolio *domain.Portfolio) (*domain.Portfolio, error) {
+
+	var persistedPortfolio *domain.Portfolio
+	var err error
+	if util.IsZeroValue(portfolio.Id) {
+		persistedPortfolio, err = service.portfolioRepository.InsertPortfolio(portfolio)
+	} else {
+		return nil, infra.BuildAppError("Unsupported operation", service)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return persistedPortfolio, nil
 }
 
 func BuildPortfolioDomService(portfolioRepository domain.PortfolioRepository) *PortfolioDomService {

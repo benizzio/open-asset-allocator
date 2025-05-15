@@ -14,8 +14,13 @@ function bindExclusiveDisplayInDescendants(exclusiveDisplayElements: NodeListOf<
     exclusiveDisplayElements.forEach((element) => {
 
         if(!element.getAttribute(EXCLUSIVE_DISPLAY_BOUND_FLAG)) {
+
             logger(LogLevel.INFO, "Binding exclusive display for element", element);
-            const exclusiveDisplayElements = DomUtils.queryAllInDescendants(element, "*");
+
+            const exclusiveDisplayElements = DomUtils.queryDirectDescendants(
+                element,
+                "*:not(script):not(style):not(link)",
+            );
             bindExclusiveDisplay(exclusiveDisplayElements);
             element.setAttribute(EXCLUSIVE_DISPLAY_BOUND_FLAG, "true");
         }

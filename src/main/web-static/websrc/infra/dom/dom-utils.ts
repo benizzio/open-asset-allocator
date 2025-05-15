@@ -33,6 +33,9 @@ const DomUtils = {
     queryAllInDescendants(element: HTMLElement, selector: string): NodeListOf<HTMLElement> {
         return element.querySelectorAll(selector);
     },
+    queryDirectDescendants(element: HTMLElement, selector: string): NodeListOf<HTMLElement> {
+        return element.querySelectorAll(`:scope > ${ selector }`);
+    },
     wasElementRemoved(element: HTMLElement) {
         return !document.body.contains(element);
     },

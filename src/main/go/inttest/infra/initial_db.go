@@ -1,4 +1,4 @@
-package util
+package infra
 
 const initialStateSQL = `
 	INSERT INTO portfolio (id, "name", allocation_structure)
