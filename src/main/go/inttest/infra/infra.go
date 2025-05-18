@@ -19,7 +19,7 @@ import (
 
 const (
 	DBDriverName           = "postgres"
-	PostgresqlImage        = "postgres:17.4-bullseye"
+	PostgresqlImage        = "postgres:17.5-bullseye"
 	PostgresqlDatabaseName = "postgres"
 	PostgresqlUsername
 	PostgresqlDefaultScheme              = "postgres:"
