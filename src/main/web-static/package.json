@@ -13,7 +13,7 @@
     "typescript-eslint": "^8.32.1"
   },
   "dependencies": {
-    "bignumber.js": "^9.1.2",
+    "bignumber.js": "^9.3.0",
     "bootstrap": "^5.3.5",
     "bootstrap-icons": "^1.11.3",
     "bootswatch": "^5.3.5",
