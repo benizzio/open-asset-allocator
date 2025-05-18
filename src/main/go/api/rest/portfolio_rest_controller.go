@@ -95,12 +95,12 @@ func (controller *PortfolioRESTController) postPortfolio(context *gin.Context) {
 	}
 
 	var portfolio = model.MapPortfolioDTS(&portfolioDTS)
-	portfolio, err := controller.portfolioDomService.PersistPortfolio(portfolio)
+	persistedPortfolio, err := controller.portfolioDomService.PersistPortfolio(portfolio)
 	if infra.HandleAPIError(context, "Error creating portfolio", err) {
 		return
 	}
 
-	var responseBody = model.MapPortfolio(portfolio)
+	var responseBody = model.MapPortfolio(persistedPortfolio)
 	context.JSON(http.StatusCreated, responseBody)
 }
 
