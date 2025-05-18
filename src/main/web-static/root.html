@@ -8,9 +8,26 @@
 </head>
 <body hx-ext="client-side-templates">
 
-<nav class="navbar bg-body-tertiary">
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">Open Asset Allocator</a>
+        <a class="navbar-brand">Open Asset Allocator</a>
+        <button class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#main-navbar-menu"
+                aria-controls="main-navbar-menu"
+                aria-expanded="false"
+                aria-label="Toggle navigation"
+        >
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="main-navbar-menu">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/portfolios">Portfolios</a>
+                </li>
+            </ul>
+        </div>
     </div>
 </nav>
 
