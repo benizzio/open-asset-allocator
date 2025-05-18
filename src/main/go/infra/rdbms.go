@@ -154,15 +154,6 @@ func (adapter *RDBMSAdapter) Ping() {
 	glog.Info("Ping successful!")
 }
 
-func (adapter *RDBMSAdapter) BuildQuery(sql string) *QueryBuilder {
-	return &QueryBuilder{
-		dbx:          adapter.dbx,
-		querySQL:     sql,
-		params:       dbx.Params{},
-		whereClauses: make([]string, 0),
-	}
-}
-
 func buildPingContext() (context.Context, context.CancelFunc) {
 	pingContext, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	go func() {
@@ -172,6 +163,19 @@ func buildPingContext() (context.Context, context.CancelFunc) {
 		}
 	}()
 	return pingContext, cancel
+}
+
+func (adapter *RDBMSAdapter) BuildQuery(sql string) *QueryBuilder {
+	return &QueryBuilder{
+		dbx:          adapter.dbx,
+		querySQL:     sql,
+		params:       dbx.Params{},
+		whereClauses: make([]string, 0),
+	}
+}
+
+func (adapter *RDBMSAdapter) Insert(model interface{}) error {
+	return adapter.dbx.Model(model).Insert()
 }
 
 func BuildDatabaseAdapter(config *Configuration) *RDBMSAdapter {

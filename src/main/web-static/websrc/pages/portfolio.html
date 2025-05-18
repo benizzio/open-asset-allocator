@@ -1,32 +1,45 @@
-<div id="portfolio-context" hx-get="/api/portfolio/:portfolioId" hx-trigger="route-reached once"
+<div id="portfolio-context"
+     hx-get="/api/portfolio/:portfolioId"
+     hx-trigger="route-reached once"
      data-hx-trigger-on-route="/portfolio/:portfolioId/*!route-reached"
-     handlebars-template="portfolio-data" class="row justify-content-center align-items-center row-cols-auto my-5"
+     handlebars-template="portfolio-data"
+     class="row justify-content-center align-items-center row-cols-auto my-5"
 ></div>
 
-<template id="portfolio-data">
+<script id="portfolio-data" type="text/x-handlebars-template">
     <span class="h2"><span class="badge text-bg-secondary">{{name}}</span> </span>
-    <input type="hidden" name="portfolioId" value="{{id}}"/>
+    <input type="hidden" name="portfolioId" value="{{id}}" />
     {{{ domJSON "portfolio" this }}}
-</template>
+</script>
 
 <div class="row justify-content-center align-items-center row-cols-auto my-5">
     <div class="col" hx-get="/websrc/components/main-navigation.html" hx-trigger="load"></div>
 </div>
 
 <div class="row justify-content-center align-items-center"
-     data-exclusive-display-container>
-    <div class="col" data-hx-trigger-on-route="/portfolio/:portfolioId/history!load-portfolio"
+     data-exclusive-display-container
+>
+    <div class="col"
+         data-hx-trigger-on-route="/portfolio/:portfolioId/history!load-portfolio"
          data-display-on-route="/portfolio/:portfolioId/history"
-         hx-get="/websrc/pages/portfolio-history.html" hx-trigger="load-portfolio once"
-         style="display: none"></div>
-    <div class="col" data-hx-trigger-on-route="/portfolio/:portfolioId/allocation!load-allocation"
+         hx-get="/websrc/pages/portfolio-history.html"
+         hx-trigger="load-portfolio once"
+         style="display: none"
+    ></div>
+    <div class="col"
+         data-hx-trigger-on-route="/portfolio/:portfolioId/allocation!load-allocation"
          data-display-on-route="/portfolio/:portfolioId/allocation"
-         hx-get="/websrc/pages/allocation-plan.html" hx-trigger="load-allocation once"
-         style="display: none"></div>
-    <div class="col" data-hx-trigger-on-route="/portfolio/:portfolioId/allocation-map!load-allocation-map"
+         hx-get="/websrc/pages/allocation-plan.html"
+         hx-trigger="load-allocation once"
+         style="display: none"
+    ></div>
+    <div class="col"
+         data-hx-trigger-on-route="/portfolio/:portfolioId/allocation-map!load-allocation-map"
          data-display-on-route="/portfolio/:portfolioId/allocation-map"
-         hx-get="/websrc/pages/allocation-map.html" hx-trigger="load-allocation-map once"
-         style="display: none"></div>
+         hx-get="/websrc/pages/allocation-map.html"
+         hx-trigger="load-allocation-map once"
+         style="display: none"
+    ></div>
 </div>
 
 <script type="text/javascript">
@@ -42,5 +55,5 @@
             element.textContent = hierarchy[hierarchy.length - 1].name;
         });
     }
-    
+
 </script>

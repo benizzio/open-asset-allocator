@@ -124,6 +124,17 @@ func (repository *PortfolioRDBMSRepository) GetAllTimeFrameTags(
 	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryTimeFrameTagsError, repository)
 }
 
+func (repository *PortfolioRDBMSRepository) InsertPortfolio(portfolio *domain.Portfolio) (*domain.Portfolio, error) {
+
+	var insertingCopyPortfolio = *portfolio
+	err := repository.dbAdapter.Insert(&insertingCopyPortfolio)
+	if err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "Error inserting portfolio", repository)
+	}
+
+	return &insertingCopyPortfolio, nil
+}
+
 func BuildPortfolioRepository(dbAdapter *infra.RDBMSAdapter) *PortfolioRDBMSRepository {
 	return &PortfolioRDBMSRepository{dbAdapter: dbAdapter}
 }

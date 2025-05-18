@@ -28,18 +28,18 @@ type AllocationPlanDTS struct {
 // MAPPING FUNCTIONS
 // ================================================
 
-func MapAllocationPlans(allocationPlans []*domain.AllocationPlan) []AllocationPlanDTS {
+func MapToAllocationPlanDTSs(allocationPlans []*domain.AllocationPlan) []AllocationPlanDTS {
 	var allocationPlansDTS = make([]AllocationPlanDTS, 0)
 	for _, allocationPlan := range allocationPlans {
-		var allocationPlanDTS = mapAllocationPlan(allocationPlan)
+		var allocationPlanDTS = mapToAllocationPlanDTS(allocationPlan)
 		allocationPlansDTS = append(allocationPlansDTS, *allocationPlanDTS)
 	}
 	return allocationPlansDTS
 }
 
-func mapAllocationPlan(allocationPlan *domain.AllocationPlan) *AllocationPlanDTS {
+func mapToAllocationPlanDTS(allocationPlan *domain.AllocationPlan) *AllocationPlanDTS {
 
-	var allocations = mapPlannedAllocations(allocationPlan)
+	var allocations = mapToPlannedAllocationDTSs(allocationPlan)
 
 	var allocationPlanDTS = AllocationPlanDTS{
 		Id:                   allocationPlan.Id,
@@ -52,16 +52,16 @@ func mapAllocationPlan(allocationPlan *domain.AllocationPlan) *AllocationPlanDTS
 	return &allocationPlanDTS
 }
 
-func mapPlannedAllocations(allocationPlan *domain.AllocationPlan) []PlannedAllocationDTS {
+func mapToPlannedAllocationDTSs(allocationPlan *domain.AllocationPlan) []PlannedAllocationDTS {
 	var allocations = make([]PlannedAllocationDTS, 0)
 	for _, detail := range allocationPlan.Details {
-		var allocation = mapPlannedAllocation(detail)
+		var allocation = mapToPlannedAllocationDTS(detail)
 		allocations = append(allocations, allocation)
 	}
 	return allocations
 }
 
-func mapPlannedAllocation(allocation *domain.PlannedAllocation) PlannedAllocationDTS {
+func mapToPlannedAllocationDTS(allocation *domain.PlannedAllocation) PlannedAllocationDTS {
 	return PlannedAllocationDTS{
 		StructuralId:        allocation.StructuralId,
 		CashReserve:         allocation.CashReserve,

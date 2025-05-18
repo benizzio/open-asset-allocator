@@ -10,30 +10,66 @@ import (
 // PORTFOLIO
 // ==========================================
 
-func MapPortfolios(portfolios []*domain.Portfolio) []PortfolioDTS {
+var (
+	defaultAllocationStructure = domain.AllocationStructure{
+		Hierarchy: []domain.AllocationHierarchyLevel{
+			{
+				Name:  "Assets",
+				Field: "assetTicker",
+			},
+			{
+				Name:  "Classes",
+				Field: "class",
+			},
+		},
+	}
+)
+
+func MapToPortfolioDTSs(portfolios []*domain.Portfolio) []PortfolioDTS {
 	var portfoliosDTS = make([]PortfolioDTS, 0)
 	for _, portfolio := range portfolios {
-		var portfolioDTS = MapPortfolio(portfolio)
+		var portfolioDTS = MapToPortfolioDTS(portfolio)
 		portfoliosDTS = append(portfoliosDTS, *portfolioDTS)
 	}
 	return portfoliosDTS
 }
 
-func MapPortfolio(portfolio *domain.Portfolio) *PortfolioDTS {
-	var structure = mapAllocationStructure(portfolio.AllocationStructure)
+func MapToPortfolioDTS(portfolio *domain.Portfolio) *PortfolioDTS {
+	var structure = mapToAllocationStructureDTS(portfolio.AllocationStructure)
 	var portfolioDTS = PortfolioDTS{
-		Id:                  portfolio.Id,
+		Id:                  &portfolio.Id,
 		Name:                portfolio.Name,
-		AllocationStructure: structure,
+		AllocationStructure: &structure,
 	}
 	return &portfolioDTS
+}
+
+func MapToPortfolio(portfolioDTS *PortfolioDTS) *domain.Portfolio {
+
+	var allocationStructure domain.AllocationStructure
+	if portfolioDTS.AllocationStructure == nil {
+		allocationStructure = defaultAllocationStructure
+	} else {
+		allocationStructure = mapToAllocationStructure(portfolioDTS.AllocationStructure)
+	}
+
+	var portfolioId int
+	if portfolioDTS.Id != nil {
+		portfolioId = *portfolioDTS.Id
+	}
+
+	return &domain.Portfolio{
+		Id:                  portfolioId,
+		Name:                portfolioDTS.Name,
+		AllocationStructure: allocationStructure,
+	}
 }
 
 // ==========================================
 // PORTFOLIO HISTORY
 // ==========================================
 
-func AggregateAndMapPortfolioHistory(portfolioHistory []*domain.PortfolioAllocation) []PortfolioAtTimeDTS {
+func AggregateAndMapToPortfolioHistoryDTSs(portfolioHistory []*domain.PortfolioAllocation) []PortfolioSnapshotDTS {
 	portfolioAllocationsPerTimeFrame := aggregateHistoryAsDTSMap(portfolioHistory)
 	aggregatedPortfolioHistory := buildHistoryDTS(portfolioAllocationsPerTimeFrame)
 	return aggregatedPortfolioHistory
@@ -61,9 +97,9 @@ func portfolioAllocationToAllocationDTS(portfolioAllocation *domain.PortfolioAll
 	}
 }
 
-func buildHistoryDTS(portfolioAllocationsPerTimeFrame portfolioAllocationsPerTimeFrameMap) []PortfolioAtTimeDTS {
+func buildHistoryDTS(portfolioAllocationsPerTimeFrame portfolioAllocationsPerTimeFrameMap) []PortfolioSnapshotDTS {
 
-	var aggregatedPortfoliohistory = make([]PortfolioAtTimeDTS, 0)
+	var aggregatedPortfoliohistory = make([]PortfolioSnapshotDTS, 0)
 	for timeFrameTag, allocations := range portfolioAllocationsPerTimeFrame {
 		var totalMarketValue = portfolioAllocationsPerTimeFrame.getAggregatedMarketValue(timeFrameTag)
 		portfolioSnapshot := buildSnapshotDTS(timeFrameTag, allocations, totalMarketValue)
@@ -87,8 +123,8 @@ func buildSnapshotDTS(
 	timeFrameTag domain.TimeFrameTag,
 	allocations []PortfolioAllocationDTS,
 	totalMarketValue int64,
-) PortfolioAtTimeDTS {
-	return PortfolioAtTimeDTS{
+) PortfolioSnapshotDTS {
+	return PortfolioSnapshotDTS{
 		TimeFrameTag:     timeFrameTag,
 		Allocations:      allocations,
 		TotalMarketValue: totalMarketValue,
@@ -99,24 +135,24 @@ func buildSnapshotDTS(
 // ANALYSIS OPTIONS
 // ==========================================
 
-func MapAnalysisOptions(analysisOptions *domain.AnalysisOptions) *AnalysisOptionsDTS {
-	var plans = mapAllocationPlanIdentifiers(analysisOptions.AvailablePlans)
+func MapToAnalysisOptionsDTS(analysisOptions *domain.AnalysisOptions) *AnalysisOptionsDTS {
+	var plans = mapToAllocationPlanIdentifierDTSs(analysisOptions.AvailablePlans)
 	return &AnalysisOptionsDTS{
 		AvailableHistory: analysisOptions.AvailableHistory,
 		AvailablePlans:   plans,
 	}
 }
 
-func mapAllocationPlanIdentifiers(plans []*domain.AllocationPlanIdentifier) []*AllocationPlanIdentifierDTS {
+func mapToAllocationPlanIdentifierDTSs(plans []*domain.AllocationPlanIdentifier) []*AllocationPlanIdentifierDTS {
 	var plansDTS = make([]*AllocationPlanIdentifierDTS, 0)
 	for _, plan := range plans {
-		var planDTS = mapAllocationPlanIdentifier(plan)
+		var planDTS = mapToAllocationPlanIdentifierDTS(plan)
 		plansDTS = append(plansDTS, planDTS)
 	}
 	return plansDTS
 }
 
-func mapAllocationPlanIdentifier(plan *domain.AllocationPlanIdentifier) *AllocationPlanIdentifierDTS {
+func mapToAllocationPlanIdentifierDTS(plan *domain.AllocationPlanIdentifier) *AllocationPlanIdentifierDTS {
 	return &AllocationPlanIdentifierDTS{
 		Id:   plan.Id,
 		Name: plan.Name,
@@ -127,8 +163,8 @@ func mapAllocationPlanIdentifier(plan *domain.AllocationPlanIdentifier) *Allocat
 // DIVERGENCE ANALYSIS
 // ==========================================
 
-func MapDivergenceAnalysis(analysis *domain.DivergenceAnalysis) *DivergenceAnalysisDTS {
-	var rootDivergences = mapPotentialDivergences(analysis.Root, 0)
+func MapToDivergenceAnalysisDTS(analysis *domain.DivergenceAnalysis) *DivergenceAnalysisDTS {
+	var rootDivergences = mapToPotentialDivergenceDTSs(analysis.Root, 0)
 	var analysisDTS = DivergenceAnalysisDTS{
 		PortfolioId:               analysis.PortfolioId,
 		TimeFrameTag:              analysis.TimeFrameTag,
@@ -139,17 +175,17 @@ func MapDivergenceAnalysis(analysis *domain.DivergenceAnalysis) *DivergenceAnaly
 	return &analysisDTS
 }
 
-func mapPotentialDivergences(divergences []*domain.PotentialDivergence, depth int) []*PotentialDivergenceDTS {
+func mapToPotentialDivergenceDTSs(divergences []*domain.PotentialDivergence, depth int) []*PotentialDivergenceDTS {
 	var divergencesDTS = make([]*PotentialDivergenceDTS, 0)
 	for _, divergence := range divergences {
-		var divergenceDTS = mapPotentialDivergence(divergence, depth)
+		var divergenceDTS = mapToPotentialDivergenceDTS(divergence, depth)
 		divergencesDTS = append(divergencesDTS, divergenceDTS)
 	}
 	return divergencesDTS
 }
 
-func mapPotentialDivergence(divergence *domain.PotentialDivergence, depth int) *PotentialDivergenceDTS {
-	var internalDivergences = mapPotentialDivergences(divergence.InternalDivergences, depth+1)
+func mapToPotentialDivergenceDTS(divergence *domain.PotentialDivergence, depth int) *PotentialDivergenceDTS {
+	var internalDivergences = mapToPotentialDivergenceDTSs(divergence.InternalDivergences, depth+1)
 	var divergenceDTS = PotentialDivergenceDTS{
 		HierarchyLevelKey:          divergence.HierarchyLevelKey,
 		HierarchicalId:             divergence.HierarchicalId,

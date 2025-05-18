@@ -5,9 +5,9 @@ import (
 )
 
 type PortfolioDTS struct {
-	Id                  int                    `json:"id"`
-	Name                string                 `json:"name"`
-	AllocationStructure AllocationStructureDTS `json:"allocationStructure"`
+	Id                  *int                    `json:"id"`
+	Name                string                  `json:"name" binding:"required"`
+	AllocationStructure *AllocationStructureDTS `json:"allocationStructure"`
 }
 
 type PortfolioAllocationDTS struct {
@@ -18,7 +18,7 @@ type PortfolioAllocationDTS struct {
 	TotalMarketValue int64  `json:"totalMarketValue"`
 }
 
-type PortfolioAtTimeDTS struct {
+type PortfolioSnapshotDTS struct {
 	TimeFrameTag     domain.TimeFrameTag      `json:"timeFrameTag"`
 	Allocations      []PortfolioAllocationDTS `json:"allocations"`
 	TotalMarketValue int64                    `json:"totalMarketValue"`

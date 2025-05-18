@@ -8,18 +8,44 @@
 </head>
 <body hx-ext="client-side-templates">
 
-<nav class="navbar bg-body-tertiary">
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">Open Asset Allocator</a>
+        <a class="navbar-brand">Open Asset Allocator</a>
+        <button class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#main-navbar-menu"
+                aria-controls="main-navbar-menu"
+                aria-expanded="false"
+                aria-label="Toggle navigation"
+        >
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="main-navbar-menu">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/portfolios">Portfolios</a>
+                </li>
+            </ul>
+        </div>
     </div>
 </nav>
 
 <div class="container-fluid">
 
+    <div id="portfolios-container"
+         hx-get="/websrc/pages/portfolios.html"
+         hx-trigger="route-reached"
+         data-hx-trigger-on-route="/portfolios/*!route-reached"
+         data-hx-trigger-on-route-clean
+    >
+    </div>
+
     <div id="portfolio-container"
          hx-get="/websrc/pages/portfolio.html"
-         hx-trigger="route-reached once"
+         hx-trigger="route-reached"
          data-hx-trigger-on-route="/portfolio/:portfolioId/*!route-reached"
+         data-hx-trigger-on-route-clean
     >
     </div>
 
@@ -27,6 +53,7 @@
 
 <script src="./node_modules/htmx.org/dist/htmx.js"></script>
 <script src="./node_modules/htmx-ext-client-side-templates/dist/client-side-templates.js"></script>
+<script src="./node_modules/htmx-ext-json-enc/dist/json-enc.js"></script>
 <script defer src="/websrc/root.ts" type="module"></script>
 
 </body>

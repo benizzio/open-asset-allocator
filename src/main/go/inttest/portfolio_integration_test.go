@@ -1,16 +1,23 @@
 package inttest
 
 import (
-	"github.com/benizzio/open-asset-allocator/inttest/util"
+	"encoding/json"
+	restmodel "github.com/benizzio/open-asset-allocator/api/rest/model"
+	"github.com/benizzio/open-asset-allocator/infra/util"
+	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
+	inttestutil "github.com/benizzio/open-asset-allocator/inttest/util"
+	dbx "github.com/go-ozzo/ozzo-dbx"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
+	"strconv"
+	"strings"
 	"testing"
 )
 
 func TestGetPortfolio(t *testing.T) {
 
-	response, err := http.Get(util.TestAPIURLprefix + "/portfolio/1")
+	response, err := http.Get(inttestinfra.TestAPIURLprefix + "/portfolio/1")
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -43,7 +50,7 @@ func TestGetPortfolio(t *testing.T) {
 
 func TestGetPortfolios(t *testing.T) {
 
-	response, err := http.Get(util.TestAPIURLprefix + "/portfolio")
+	response, err := http.Get(inttestinfra.TestAPIURLprefix + "/portfolio")
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -90,7 +97,7 @@ func TestGetPortfolios(t *testing.T) {
 
 func TestGetPortfolioAllocationHistory(t *testing.T) {
 
-	response, err := http.Get(util.TestAPIURLprefix + "/portfolio/1/history")
+	response, err := http.Get(inttestinfra.TestAPIURLprefix + "/portfolio/1/history")
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -176,122 +183,189 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
 }
 
-func TestGetDivergenceAnalysisOptions(t *testing.T) {
+func TestPostPortfolio(t *testing.T) {
 
-	response, err := http.Get(util.TestAPIURLprefix + "/portfolio/1/divergence/options")
+	var testPortfolioName = "Test Portfolio creation"
+
+	var postPortfolioJSON = `
+		{
+			"name":"` + testPortfolioName + `"
+		}
+	`
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLprefix+"/portfolio",
+		"application/json",
+		strings.NewReader(postPortfolioJSON),
+	)
+
+	t.Cleanup(
+		inttestutil.CreateDBCleanupDeferable(
+			"DELETE FROM portfolio WHERE name='%s'",
+			testPortfolioName,
+		),
+	)
+
 	assert.NoError(t, err)
 
-	assert.Equal(t, http.StatusOK, response.StatusCode)
+	assert.Equal(t, http.StatusCreated, response.StatusCode)
 
 	body, err := io.ReadAll(response.Body)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, body)
 
-	var actualResponseJSON = string(body)
 	var expectedResponseJSON = `
 		{
-			"availableHistory":["202501", "202503"],
-			"availablePlans":[
-				{
-					"id":1,
-					"name":"60/40 Portfolio Classic - Example"
-				}
-			]
+			"name":"` + testPortfolioName + `",
+			"allocationStructure": {
+				"hierarchy": [
+					{
+						"name":"Assets",
+						"field":"assetTicker"
+					},
+					{
+						"name":"Classes",
+						"field":"class"
+					}
+				]
+			}
 		}
 	`
 
-	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
+	inttestutil.AssertJSONEqualIgnoringFields(t, expectedResponseJSON, string(body), "id")
+
+	var portfolioDTS restmodel.PortfolioDTS
+	err = json.Unmarshal(body, &portfolioDTS)
+	assert.NoError(t, err)
+	assert.NotNil(t, portfolioDTS.Id)
+	assert.NotZero(t, *portfolioDTS.Id)
+
+	var portfolioIdString = strconv.Itoa(*portfolioDTS.Id)
+	var portfolioNullStringMap = dbx.NullStringMap{
+		"id":                   util.ToNullString(portfolioIdString),
+		"name":                 util.ToNullString(testPortfolioName),
+		"allocation_structure": util.ToNullString(`{"hierarchy": [{"name": "Assets", "field": "assetTicker"}, {"name": "Classes", "field": "class"}]}`),
+	}
+
+	inttestutil.AssertDBWithQuery(
+		t,
+		"SELECT * FROM portfolio WHERE id="+portfolioIdString,
+		portfolioNullStringMap,
+	)
 }
 
-func TestGetDivergenceAnalysis(t *testing.T) {
+func TestPostPortfolioWithAllocationStructure(t *testing.T) {
 
-	response, err := http.Get(util.TestAPIURLprefix + "/portfolio/1/divergence/202501/allocation-plan/1")
-	assert.NoError(t, err)
+	var testPortfolioName = "Test Portfolio creation with allocation structure"
 
-	assert.Equal(t, http.StatusOK, response.StatusCode)
-
-	body, err := io.ReadAll(response.Body)
-	assert.NoError(t, err)
-	assert.NotEmpty(t, body)
-
-	var actualResponseJSON = string(body)
-	var expectedResponseJSON = `
-		{
-			"portfolioId":1,
-			"timeFrameTag":"202501",
-			"allocationPlanId":1,
-			"portfolioTotalMarketValue":45000,
-			"root":[
+	var allocationStructureJSONFragment = `
+		"allocationStructure": {
+			"hierarchy": [
 				{
-					"hierarchyLevelKey":"BONDS",
-					"hierarchicalId":"BONDS",
-					"totalMarketValue":27000,
-					"totalMarketValueDivergence":0,
-					"depth":0,
-					"internalDivergences":[
-						{
-							"hierarchyLevelKey":"ARCA:BIL",
-							"hierarchicalId":"ARCA:BIL|BONDS",
-							"totalMarketValue":10000,
-							"totalMarketValueDivergence":-800,
-							"depth":1
-						},
-						{
-							"hierarchyLevelKey":"ARCA:STIP",
-							"hierarchicalId":"ARCA:STIP|BONDS",
-							"totalMarketValue":8000,
-							"totalMarketValueDivergence":5300,
-							"depth":1
-						},
-						{
-							"hierarchyLevelKey":"NasdaqGM:IEF",
-							"hierarchicalId":"NasdaqGM:IEF|BONDS",
-							"totalMarketValue":6000,
-							"totalMarketValueDivergence":-2100,
-							"depth":1
-						},
-						{
-							"hierarchyLevelKey":"NasdaqGM:TLT",
-							"hierarchicalId":"NasdaqGM:TLT|BONDS",
-							"totalMarketValue":3000,
-							"totalMarketValueDivergence":-2400,
-							"depth":1
-						}
-					]
-				},
-				{
-					"hierarchyLevelKey":"STOCKS",
-					"hierarchicalId":"STOCKS",
-					"totalMarketValue":18000,
-					"totalMarketValueDivergence":0,
-					"depth":0,
-					"internalDivergences":[
-						{
-							"hierarchyLevelKey":"NasdaqGM:SHV",
-							"hierarchicalId":"NasdaqGM:SHV|STOCKS",
-							"totalMarketValue":9000,
-							"totalMarketValueDivergence":0,
-							"depth":1
-						},
-						{
-							"hierarchyLevelKey":"ARCA:SPY",
-							"hierarchicalId":"ARCA:SPY|STOCKS",
-							"totalMarketValue":8000,
-							"totalMarketValueDivergence":-100,
-							"depth":1
-						},
-						{
-							"hierarchyLevelKey":"ARCA:EWZ",
-							"hierarchicalId":"ARCA:EWZ|STOCKS",
-							"totalMarketValue":1000,
-							"totalMarketValueDivergence":100,
-							"depth":1
-						}
-					]
+					"name":"Classes",
+					"field":"class"
 				}
 			]
 		}
 	`
 
-	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
+	var postPortfolioJSON = `
+		{
+			"name":"` + testPortfolioName + `",
+			` + allocationStructureJSONFragment + `
+		}
+	`
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLprefix+"/portfolio",
+		"application/json",
+		strings.NewReader(postPortfolioJSON),
+	)
+
+	t.Cleanup(
+		inttestutil.CreateDBCleanupDeferable(
+			"DELETE FROM portfolio WHERE name='%s'",
+			testPortfolioName,
+		),
+	)
+
+	assert.NoError(t, err)
+
+	assert.Equal(t, http.StatusCreated, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+
+	var expectedResponseJSON = `
+		{
+			"name":"` + testPortfolioName + `",
+			` + allocationStructureJSONFragment + `
+		}
+	`
+
+	inttestutil.AssertJSONEqualIgnoringFields(t, expectedResponseJSON, string(body), "id")
+
+	var portfolioDTS restmodel.PortfolioDTS
+	err = json.Unmarshal(body, &portfolioDTS)
+	assert.NoError(t, err)
+	assert.NotNil(t, portfolioDTS.Id)
+	assert.NotZero(t, *portfolioDTS.Id)
+
+	var portfolioIdString = strconv.Itoa(*portfolioDTS.Id)
+	var portfolioNullStringMap = dbx.NullStringMap{
+		"id":                   util.ToNullString(portfolioIdString),
+		"name":                 util.ToNullString(testPortfolioName),
+		"allocation_structure": util.ToNullString(`{"hierarchy": [{"name": "Classes", "field": "class"}]}`),
+	}
+
+	inttestutil.AssertDBWithQuery(
+		t,
+		"SELECT * FROM portfolio WHERE id="+portfolioIdString,
+		portfolioNullStringMap,
+	)
+}
+
+func TestPostPortfolioFailureWithoutMandatoryFields(t *testing.T) {
+
+	var postPortfolioJSONNullFields = `
+		{
+			"name": null
+		}
+	`
+
+	var postPortfolioJSONEmptyFields = `
+		{
+			"name": ""
+		}
+	`
+	actualResponseJSONNullFields := string(postForValidationFailure(t, postPortfolioJSONNullFields))
+	actualResponseJSONEmptyFields := string(postForValidationFailure(t, postPortfolioJSONEmptyFields))
+
+	var expectedResponseJSON = `
+		{
+			"errorMessage": "Validation failed",
+			"details": [
+				"Field 'name' failed validation: is required"
+			]
+		}
+	`
+	assert.JSONEq(t, expectedResponseJSON, actualResponseJSONNullFields)
+	assert.JSONEq(t, expectedResponseJSON, actualResponseJSONEmptyFields)
+}
+
+func postForValidationFailure(t *testing.T, postPortfolioJSON string) []byte {
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLprefix+"/portfolio",
+		"application/json",
+		strings.NewReader(postPortfolioJSON),
+	)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+	return body
 }
