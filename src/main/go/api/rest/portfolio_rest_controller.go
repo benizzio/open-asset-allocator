@@ -90,7 +90,7 @@ func (controller *PortfolioRESTController) getPortfolioAllocationHistory(context
 func (controller *PortfolioRESTController) postPortfolio(context *gin.Context) {
 
 	var portfolioDTS model.PortfolioDTS
-	if err := util.BindAndValidateJSONWithErrorResponse(context, &portfolioDTS); err != nil {
+	if err := util.BindAndValidateJSON(context, &portfolioDTS); err != nil {
 		return
 	}
 
