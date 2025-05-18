@@ -3,6 +3,7 @@ package inttest
 import (
 	"encoding/json"
 	restmodel "github.com/benizzio/open-asset-allocator/api/rest/model"
+	"github.com/benizzio/open-asset-allocator/infra/util"
 	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
 	inttestutil "github.com/benizzio/open-asset-allocator/inttest/util"
 	dbx "github.com/go-ozzo/ozzo-dbx"
@@ -241,9 +242,9 @@ func TestPostPortfolio(t *testing.T) {
 
 	var portfolioIdString = strconv.Itoa(*portfolioDTS.Id)
 	var portfolioNullStringMap = dbx.NullStringMap{
-		"id":                   inttestutil.ToNullString(portfolioIdString),
-		"name":                 inttestutil.ToNullString(testPortfolioName),
-		"allocation_structure": inttestutil.ToNullString(`{"hierarchy": [{"name": "Assets", "field": "assetTicker"}, {"name": "Classes", "field": "class"}]}`),
+		"id":                   util.ToNullString(portfolioIdString),
+		"name":                 util.ToNullString(testPortfolioName),
+		"allocation_structure": util.ToNullString(`{"hierarchy": [{"name": "Assets", "field": "assetTicker"}, {"name": "Classes", "field": "class"}]}`),
 	}
 
 	inttestutil.AssertDBWithQuery(
@@ -313,9 +314,9 @@ func TestPostPortfolioWithAllocationStructure(t *testing.T) {
 
 	var portfolioIdString = strconv.Itoa(*portfolioDTS.Id)
 	var portfolioNullStringMap = dbx.NullStringMap{
-		"id":                   inttestutil.ToNullString(portfolioIdString),
-		"name":                 inttestutil.ToNullString(testPortfolioName),
-		"allocation_structure": inttestutil.ToNullString(`{"hierarchy": [{"name": "Classes", "field": "class"}]}`),
+		"id":                   util.ToNullString(portfolioIdString),
+		"name":                 util.ToNullString(testPortfolioName),
+		"allocation_structure": util.ToNullString(`{"hierarchy": [{"name": "Classes", "field": "class"}]}`),
 	}
 
 	inttestutil.AssertDBWithQuery(
