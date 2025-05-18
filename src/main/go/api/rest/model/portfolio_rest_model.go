@@ -18,7 +18,7 @@ type PortfolioAllocationDTS struct {
 	TotalMarketValue int64  `json:"totalMarketValue"`
 }
 
-type PortfolioAtTimeDTS struct {
+type PortfolioSnapshotDTS struct {
 	TimeFrameTag     domain.TimeFrameTag      `json:"timeFrameTag"`
 	Allocations      []PortfolioAllocationDTS `json:"allocations"`
 	TotalMarketValue int64                    `json:"totalMarketValue"`

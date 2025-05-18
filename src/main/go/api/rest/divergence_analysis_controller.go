@@ -43,7 +43,7 @@ func (controller *DivergenceAnalysisRESTController) GetDivergenceAnalysisOptions
 		return
 	}
 
-	var analysisOptionsDTS = model.MapAnalysisOptions(analysisOptions)
+	var analysisOptionsDTS = model.MapToAnalysisOptionsDTS(analysisOptions)
 
 	context.JSON(http.StatusOK, analysisOptionsDTS)
 }
@@ -73,7 +73,7 @@ func (controller *DivergenceAnalysisRESTController) GetDivergenceAnalysis(contex
 		return
 	}
 
-	var analysisDTS = model.MapDivergenceAnalysis(analysis)
+	var analysisDTS = model.MapToDivergenceAnalysisDTS(analysis)
 
 	context.JSON(http.StatusOK, analysisDTS)
 }

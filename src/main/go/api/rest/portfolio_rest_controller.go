@@ -46,7 +46,7 @@ func (controller *PortfolioRESTController) getPortfolios(context *gin.Context) {
 		return
 	}
 
-	portfolioDTSs := model.MapPortfolios(portfolios)
+	portfolioDTSs := model.MapToPortfolioDTSs(portfolios)
 
 	context.JSON(http.StatusOK, portfolioDTSs)
 }
@@ -64,7 +64,7 @@ func (controller *PortfolioRESTController) getPortfolio(context *gin.Context) {
 		return
 	}
 
-	portfolioDTS := model.MapPortfolio(portfolio)
+	portfolioDTS := model.MapToPortfolioDTS(portfolio)
 
 	context.JSON(http.StatusOK, portfolioDTS)
 }
@@ -82,7 +82,7 @@ func (controller *PortfolioRESTController) getPortfolioAllocationHistory(context
 		return
 	}
 
-	var aggregatedPortfoliohistoryDTS = model.AggregateAndMapPortfolioHistory(portfolioHistory)
+	var aggregatedPortfoliohistoryDTS = model.AggregateAndMapToPortfolioHistoryDTSs(portfolioHistory)
 
 	context.JSON(http.StatusOK, aggregatedPortfoliohistoryDTS)
 }
@@ -94,13 +94,13 @@ func (controller *PortfolioRESTController) postPortfolio(context *gin.Context) {
 		return
 	}
 
-	var portfolio = model.MapPortfolioDTS(&portfolioDTS)
+	var portfolio = model.MapToPortfolio(&portfolioDTS)
 	persistedPortfolio, err := controller.portfolioDomService.PersistPortfolio(portfolio)
 	if infra.HandleAPIError(context, "Error creating portfolio", err) {
 		return
 	}
 
-	var responseBody = model.MapPortfolio(persistedPortfolio)
+	var responseBody = model.MapToPortfolioDTS(persistedPortfolio)
 	context.JSON(http.StatusCreated, responseBody)
 }
 

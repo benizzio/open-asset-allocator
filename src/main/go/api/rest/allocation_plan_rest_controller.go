@@ -38,7 +38,7 @@ func (controller *AllocationPlanRESTController) getAllocationPlans(context *gin.
 		return
 	}
 
-	var allocationPlansDTS = model.MapAllocationPlans(allocationPlans)
+	var allocationPlansDTS = model.MapToAllocationPlanDTSs(allocationPlans)
 
 	context.JSON(http.StatusOK, allocationPlansDTS)
 }
