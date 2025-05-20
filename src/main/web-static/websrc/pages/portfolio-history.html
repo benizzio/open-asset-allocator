@@ -1,5 +1,10 @@
-<div class="accordion" id="accordion-portfolio-history" handlebars-template="template-portfolio-history"
-     hx-get="/api/portfolio/:portfolioId/history" hx-trigger="load" hx-include="[name='portfolioId']"
+<div class="accordion"
+     id="accordion-portfolio-history"
+     handlebars-template="template-portfolio-history"
+     hx-get="/api/portfolio/:portfolioId/history"
+     hx-trigger="load"
+     hx-include="[name='portfolioId']"
+     hx-on-htmx-after-settle="initPortfolioHistoryHierarchyLabels()"
 >
     <div class="accordion-item placeholder-glow">
         <h2 class="accordion-header placeholder col-12">placeholder</h2>
@@ -9,62 +14,65 @@
     </div>
 </div>
 
-<template id="template-portfolio-history">
+<script id="template-portfolio-history" type="text/x-handlebars-template">
 
     {{#each .}}
-    <div class="accordion-item">
+        <div class="accordion-item">
 
-        <h2 class="accordion-header">
-            <button class="accordion-button {{#unless @first}}collapsed{{/unless}}"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#{{timeFrameTag}}-portfolio-allocation"
-                    aria-expanded="true"
-                    aria-controls="{{timeFrameTag}}-portfolio-allocation"
+            <h2 class="accordion-header">
+                <button class="accordion-button {{#unless @first}}collapsed{{/unless}}"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#{{timeFrameTag}}-portfolio-allocation"
+                        aria-expanded="true"
+                        aria-controls="{{timeFrameTag}}-portfolio-allocation"
+                >
+                    {{timeFrameTag}}
+                </button>
+            </h2>
+
+            <div id="{{timeFrameTag}}-portfolio-allocation"
+                 class="accordion-collapse collapse {{#if @first}}show{{/if}}"
+                 data-bs-parent="#accordion-portfolio-history"
             >
-                {{timeFrameTag}}
-            </button>
-        </h2>
+                <div class="accordion-body row justify-content-center">
 
-        <div id="{{timeFrameTag}}-portfolio-allocation" class="accordion-collapse collapse {{#if @first}}show{{/if}}"
-             data-bs-parent="#accordion-portfolio-history"
-        >
-            <div class="accordion-body row justify-content-center">
+                    <div class="col-12 d-flex flex-column align-items-center">
 
-                <div class="col-12 d-flex flex-column align-items-center">
+                        <div><p class="h4">Total market value: {{formatCurrency totalMarketValue}}</p></div>
 
-                    <div><p class="h4">Total market value: {{formatCurrency totalMarketValue}}</p></div>
+                        <div class="d-flex flex-row">
+                            <p class="h4">Level:&nbsp;</p>
+                            <p id="hierarchy-level-portfolio-chart-{{timeFrameTag}}" class="h4"></p>
+                        </div>
 
-                    <div class="d-flex flex-row">
-                        <p class="h4">Level:&nbsp;</p>
-                        <p id="hierarchy-level-portfolio-chart-{{timeFrameTag}}" class="h4"></p>
                     </div>
 
+                    <div class="col-xxl-6 d-flex justify-content-center" style="max-height: 750px">
+                        {{{ chart
+                                this
+                                "PORTFOLIO_HISTORY_1D"
+                                "portfolio-allocation-chart-options"
+                                "portfolio-chart"
+                                timeFrameTag
+                                "#portfolio-context #portfolio"
+                        }}}
+                    </div>
+
+
                 </div>
-
-                <div class="col-xxl-6 d-flex justify-content-center" style="max-height: 750px">
-                    {{{ chart
-                    this
-                    "PORTFOLIO_HISTORY_1D"
-                    "portfolio-allocation-chart-options"
-                    "portfolio-chart"
-                    timeFrameTag
-                    "#portfolio-context #portfolio"
-                    }}}
-                </div>
-
-
             </div>
-        </div>
 
-    </div>
+        </div>
     {{/each}}
 
-    <script type="text/javascript">
-        setTextContentWithTopHierarchyName("[id^='hierarchy-level-portfolio-chart-']");
-    </script>
+</script>
 
-</template>
+<script type="text/javascript">
+    function initPortfolioHistoryHierarchyLabels() {
+        setTextContentWithTopHierarchyName("[id^='hierarchy-level-portfolio-chart-']");
+    }
+</script>
 
 <script id="portfolio-allocation-chart-options" type="application/json">
     {
