@@ -6,7 +6,7 @@ require (
 	github.com/docker/docker v28.0.1+incompatible
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-ozzo/ozzo-dbx v1.5.0
-	github.com/go-playground/validator/v10 v10.24.0
+	github.com/go-playground/validator/v10 v10.26.0
 	github.com/golang/glog v1.2.5
 	github.com/lib/pq v1.10.9
 	github.com/shopspring/decimal v1.4.0
