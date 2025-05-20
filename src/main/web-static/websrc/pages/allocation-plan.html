@@ -1,5 +1,11 @@
-<div class="accordion" id="accordion-allocation-plan" handlebars-template="template-allocation-plan-item"
-     hx-get="/api/portfolio/:portfolioId/allocation-plan" hx-trigger="load" hx-include="[name='portfolioId']"
+<div class="accordion"
+     id="accordion-allocation-plan"
+     handlebars-template="template-allocation-plan-item"
+     hx-get="/api/portfolio/:portfolioId/allocation-plan"
+     hx-trigger="load"
+     hx-include="[name='portfolioId']"
+     xmlns="http://www.w3.org/1999/html"
+     hx-on-htmx-after-settle="initHierarchyLabel()"
 >
     <div class="accordion-item placeholder-glow">
         <h2 class="accordion-header placeholder col-12">placeholder</h2>
@@ -9,57 +15,59 @@
     </div>
 </div>
 
-<template id="template-allocation-plan-item">
+<script id="template-allocation-plan-item" type="text/x-handlebars-template">
 
     {{#each .}}
-    <div class="accordion-item">
+        <div class="accordion-item">
 
-        <h2 class="accordion-header">
-            <button class="accordion-button {{#unless @first}}collapsed{{/unless}}"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#allocation-plan-{{id}}"
-                    aria-expanded="true"
-                    aria-controls="allocation-plan-{{id}}"
+            <h2 class="accordion-header">
+                <button class="accordion-button {{#unless @first}}collapsed{{/unless}}"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#allocation-plan-{{id}}"
+                        aria-expanded="true"
+                        aria-controls="allocation-plan-{{id}}"
+                >
+                    {{name}}
+                </button>
+            </h2>
+
+            <div id="allocation-plan-{{id}}"
+                 class="accordion-collapse collapse {{#if @first}}show{{/if}}"
+                 data-bs-parent="#accordion-portfolio"
             >
-                {{name}}
-            </button>
-        </h2>
+                <div class="accordion-body row justify-content-center">
 
-        <div id="allocation-plan-{{id}}"
-             class="accordion-collapse collapse {{#if @first}}show{{/if}}"
-             data-bs-parent="#accordion-portfolio"
-        >
-            <div class="accordion-body row justify-content-center">
-
-                <div class="col-12 d-flex flex-column align-items-center">
-                    <div class="d-flex flex-row">
-                        <p class="h4">Level:&nbsp;</p>
-                        <p id="hierarchy-level-allocation-plan-chart-{{id}}" class="h4"></p>
+                    <div class="col-12 d-flex flex-column align-items-center">
+                        <div class="d-flex flex-row">
+                            <p class="h4">Level:&nbsp;</p>
+                            <p id="hierarchy-level-allocation-plan-chart-{{id}}" class="h4"></p>
+                        </div>
                     </div>
-                </div>
 
-                <div class="col-xxl-6 d-flex justify-content-center" style="max-height: 750px">
-                    {{{ chart
-                    this
-                    "ASSET_ALLOCATION_PLAN_1D"
-                    "allocation-plan-chart-options"
-                    "allocation-plan-chart"
-                    id
-                    "#portfolio-context #portfolio"
-                    }}}
-                </div>
+                    <div class="col-xxl-6 d-flex justify-content-center" style="max-height: 750px">
+                        {{{ chart
+                                this
+                                "ASSET_ALLOCATION_PLAN_1D"
+                                "allocation-plan-chart-options"
+                                "allocation-plan-chart"
+                                id
+                                "#portfolio-context #portfolio"
+                        }}}
+                    </div>
 
+                </div>
             </div>
         </div>
-    </div>
     {{/each}}
 
-    <script type="text/javascript">
-        setTextContentWithTopHierarchyName("[id^='hierarchy-level-allocation-plan-chart-']");
-    </script>
+</script>
 
-</template>
+<script type="text/javascript">
+    function initHierarchyLabel() {
+        setTextContentWithTopHierarchyName("[id^='hierarchy-level-allocation-plan-chart-']");
+    }
+</script>
 
 <script id="allocation-plan-chart-options" type="application/json">
     {
