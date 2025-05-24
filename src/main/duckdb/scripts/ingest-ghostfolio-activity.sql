@@ -87,7 +87,10 @@ INSERT INTO pgsql.asset_market_data_source (asset_id, data_source)
     SELECT asset_id, data_source FROM asset_market_data_source_insertion
     -- Inserting yahoo equivalents to fetch all data from there for now
     UNION
-    SELECT asset_id, 'YAHOO' FROM asset_market_data_source_insertion WHERE data_source != 'YAHOO'
+    SELECT amdsi.asset_id, 'YAHOO'
+    FROM asset_market_data_source_insertion amdsi
+    JOIN pgsql.asset_market_data_source amds ON amds.asset_id = amdsi.asset_id AND amds.data_source = 'YAHOO'
+    WHERE amdsi.data_source != 'YAHOO' AND amds.id IS NULL
 ;
 
 .print '=> Creating temporary view for obtaining market pice data on Yahoo'
