@@ -8,17 +8,17 @@ order by a.ticker
 ;
 
 -- example query to verify if allocation plan fractal slices are correctly proportioned
-select 'All Classes' as category, sum(apu.slice) as total_percentage
-from allocation_plan_unit apu
+select 'All Classes' as category, sum(pa.slice_size_percentage) as total_percentage
+from planned_allocation pa
 where 1=1
-    and apu.allocation_plan_id = 1
-    and apu.structural_id[1] IS NULL
-    and apu.structural_id[2] IS NOT NULL
+  and pa.allocation_plan_id = 1
+  and pa.structural_id[1] IS NULL
+  and pa.structural_id[2] IS NOT NULL
 union
-select apu.structural_id[2] as category, sum(apu.slice) as total_percentage
-from allocation_plan_unit apu
+select pa.structural_id[2] as category, sum(pa.slice_size_percentage) as total_percentage
+from planned_allocation pa
 where 1=1
-    and apu.allocation_plan_id = 1
-    and apu.structural_id[1] IS NOT NULL
-group by apu.structural_id[2]
+  and pa.allocation_plan_id = 1
+  and pa.structural_id[1] IS NOT NULL
+group by pa.structural_id[2]
 ;
