@@ -89,11 +89,14 @@ INSERT INTO pgsql.asset_market_data_source (asset_id, data_source)
     UNION
     SELECT amdsi.asset_id, 'YAHOO'
     FROM asset_market_data_source_insertion amdsi
-    JOIN pgsql.asset_market_data_source amds ON amds.asset_id = amdsi.asset_id AND amds.data_source = 'YAHOO'
+    LEFT JOIN pgsql.asset_market_data_source amds ON amds.asset_id = amdsi.asset_id AND amds.data_source = 'YAHOO'
     WHERE amdsi.data_source != 'YAHOO' AND amds.id IS NULL
 ;
 
-.print '=> Creating temporary view for obtaining market pice data on Yahoo'
+-- to debug if needed
+-- select * from pgsql.asset_market_data_source;
+
+.print '=> Creating temporary view for obtaining market price data on Yahoo'
 CREATE TEMP VIEW yahoo_asset_list AS
     SELECT ass.id AS asset_id, split_part(ass.ticker, '.', 1) AS yahoo_ticker, amds.id AS asset_data_source_id
     FROM pgsql.asset_market_data_source amds
