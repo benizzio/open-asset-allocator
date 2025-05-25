@@ -13,6 +13,12 @@ type portfolioTimeFrame struct {
 }
 
 const (
+	//timeFrameTagsSQL = `
+	//	SELECT DISTINCT ON (time_frame_tag) time_frame_tag, create_timestamp::DATE
+	//	FROM portfolio_allocation_fact pa
+	//	` + infra.WhereClausePlaceholder + `
+	//	ORDER BY time_frame_tag DESC, create_timestamp DESC LIMIT {:timeFrameLimit}
+	//`
 	timeFrameTagsSQL = `
 		SELECT DISTINCT time_frame_tag, create_timestamp::date FROM portfolio_allocation_fact pa 
 		` + infra.WhereClausePlaceholder + `

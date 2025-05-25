@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestGetDivergenceAnalysisOptions(t *testing.T) {
+func TestGetDivergenceAnalysisOptions(t *testing.T) { // TODO test this with multiple time frame tags that have different create timestamps
 
 	response, err := http.Get(inttestinfra.TestAPIURLprefix + "/portfolio/1/divergence/options")
 	assert.NoError(t, err)
