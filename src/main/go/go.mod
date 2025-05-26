@@ -4,7 +4,7 @@ go 1.23.1
 
 require (
 	github.com/docker/docker v28.1.1+incompatible
-	github.com/gin-gonic/gin v1.10.0
+	github.com/gin-gonic/gin v1.10.1
 	github.com/go-ozzo/ozzo-dbx v1.5.0
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/golang/glog v1.2.5
