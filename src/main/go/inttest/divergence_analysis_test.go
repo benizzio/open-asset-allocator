@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestGetDivergenceAnalysisOptions(t *testing.T) { // TODO test this with multiple time frame tags that have different create timestamps
+func TestGetDivergenceAnalysisOptions(t *testing.T) {
 
 	response, err := http.Get(inttestinfra.TestAPIURLprefix + "/portfolio/1/divergence/options")
 	assert.NoError(t, err)
@@ -20,9 +20,10 @@ func TestGetDivergenceAnalysisOptions(t *testing.T) { // TODO test this with mul
 	assert.NotEmpty(t, body)
 
 	var actualResponseJSON = string(body)
+	t.Log(actualResponseJSON)
 	var expectedResponseJSON = `
 		{
-			"availableHistory":["202501", "202503"],
+			"availableHistory":["202503", "202501"],
 			"availablePlans":[
 				{
 					"id":1,
