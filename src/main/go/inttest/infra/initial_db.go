@@ -109,7 +109,8 @@ const initialStateSQL = `
 		asset_market_price,
 		total_market_value,
 		time_frame_tag,
-		portfolio_id
+		portfolio_id,
+		create_timestamp
 	)
 	VALUES (
 			   5,
@@ -119,7 +120,8 @@ const initialStateSQL = `
 			   100,
 			   9000,
 			   '202501',
-			   1
+			   1,
+			    now() - INTERVAL '1 minute'
 		   ),
 		   (
 			   6,
@@ -129,7 +131,8 @@ const initialStateSQL = `
 			   100,
 			   1000,
 			   '202501',
-			   1
+			   1,
+			   now() - INTERVAL '1 minute'
 		   ),
 		   (
 			   7,
@@ -139,7 +142,8 @@ const initialStateSQL = `
 			   100,
 			   8000,
 			   '202501',
-			   1
+			   1,
+			   now() - INTERVAL '1 minute'
 		   )
 	;
 	

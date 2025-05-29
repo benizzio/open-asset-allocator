@@ -22,7 +22,7 @@ func TestGetDivergenceAnalysisOptions(t *testing.T) {
 	var actualResponseJSON = string(body)
 	var expectedResponseJSON = `
 		{
-			"availableHistory":["202501", "202503"],
+			"availableHistory":["202503", "202501"],
 			"availablePlans":[
 				{
 					"id":1,
