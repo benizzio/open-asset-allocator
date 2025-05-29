@@ -20,7 +20,6 @@ func TestGetDivergenceAnalysisOptions(t *testing.T) {
 	assert.NotEmpty(t, body)
 
 	var actualResponseJSON = string(body)
-	t.Log(actualResponseJSON)
 	var expectedResponseJSON = `
 		{
 			"availableHistory":["202503", "202501"],
