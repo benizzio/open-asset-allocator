@@ -9,8 +9,15 @@ if [[ $# -ne 1 ]]; then
   exit 1
 fi
 
-# Path to Go module directory
-GO_MODULE_DIR="src/main/go"
+# Locate Go module directory by finding go.mod
+GO_MODULE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+while [[ ! -f "${GO_MODULE_DIR}/go.mod" && "${GO_MODULE_DIR}" != "/" ]]; do
+  GO_MODULE_DIR="$(dirname "${GO_MODULE_DIR}")"
+done
+if [[ ! -f "${GO_MODULE_DIR}/go.mod" ]]; then
+  echo "Error: go.mod file not found. Ensure this script is run within a Go module."
+  exit 1
+fi
 # Path to output directory (relative to project root)
 OUTPUT_DIR="target/dependency-graph"
 
