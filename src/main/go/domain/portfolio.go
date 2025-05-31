@@ -28,4 +28,5 @@ type PortfolioRepository interface {
 	FindPortfolioAllocations(id int, timeFrameTag TimeFrameTag) ([]*PortfolioAllocation, error)
 	GetAllTimeFrameTags(portfolioId int, timeFrameLimit int) ([]TimeFrameTag, error)
 	InsertPortfolio(portfolio *Portfolio) (*Portfolio, error)
+	UpdatePortfolio(portfolio *Portfolio) (*Portfolio, error)
 }

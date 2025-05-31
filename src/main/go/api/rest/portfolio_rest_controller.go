@@ -104,6 +104,25 @@ func (controller *PortfolioRESTController) postPortfolio(context *gin.Context) {
 	context.JSON(http.StatusCreated, responseBody)
 }
 
+func (controller *PortfolioRESTController) putPortfolio(context *gin.Context) {
+
+	var portfolioDTS model.PortfolioDTS
+	if err := util.BindAndValidateJSON(context, &portfolioDTS); err != nil {
+		return
+	}
+
+	//TODO custom validation for ID
+
+	var portfolio = model.MapToPortfolio(&portfolioDTS)
+	persistedPortfolio, err := controller.portfolioDomService.PersistPortfolio(portfolio)
+	if infra.HandleAPIError(context, "Error updating portfolio", err) {
+		return
+	}
+
+	var responseBody = model.MapToPortfolioDTS(persistedPortfolio)
+	context.JSON(http.StatusOK, responseBody)
+}
+
 func BuildPortfolioRESTController(portfolioDomService *service.PortfolioDomService) *PortfolioRESTController {
 	return &PortfolioRESTController{
 		portfolioDomService,

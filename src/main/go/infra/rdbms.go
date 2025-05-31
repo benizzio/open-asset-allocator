@@ -178,6 +178,10 @@ func (adapter *RDBMSAdapter) Insert(model interface{}) error {
 	return adapter.dbx.Model(model).Insert()
 }
 
+func (adapter *RDBMSAdapter) UpdateListedFields(model interface{}, fields ...string) error {
+	return adapter.dbx.Model(model).Update(fields...)
+}
+
 func BuildDatabaseAdapter(config *Configuration) *RDBMSAdapter {
 	return &RDBMSAdapter{config: config.RdbmsConfig}
 }

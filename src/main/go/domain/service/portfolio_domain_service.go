@@ -112,7 +112,7 @@ func (service *PortfolioDomService) PersistPortfolio(portfolio *domain.Portfolio
 	if util.IsZeroValue(portfolio.Id) {
 		persistedPortfolio, err = service.portfolioRepository.InsertPortfolio(portfolio)
 	} else {
-		return nil, infra.BuildAppError("Unsupported operation", service)
+		persistedPortfolio, err = service.portfolioRepository.UpdatePortfolio(portfolio)
 	}
 
 	if err != nil {

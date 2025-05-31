@@ -136,6 +136,17 @@ func (repository *PortfolioRDBMSRepository) InsertPortfolio(portfolio *domain.Po
 	return &insertingCopyPortfolio, nil
 }
 
+func (repository *PortfolioRDBMSRepository) UpdatePortfolio(portfolio *domain.Portfolio) (*domain.Portfolio, error) {
+
+	var updatingCopyPortfolio = *portfolio
+	err := repository.dbAdapter.UpdateListedFields(portfolio, "Name")
+	if err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "Error updating portfolio", repository)
+	}
+
+	return &updatingCopyPortfolio, nil
+}
+
 func BuildPortfolioRepository(dbAdapter *infra.RDBMSAdapter) *PortfolioRDBMSRepository {
 	return &PortfolioRDBMSRepository{dbAdapter: dbAdapter}
 }
