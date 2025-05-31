@@ -9,25 +9,29 @@ if [[ $# -ne 1 ]]; then
   exit 1
 fi
 
-# Locate Go module directory by finding go.mod
-GO_MODULE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-while [[ ! -f "${GO_MODULE_DIR}/go.mod" && "${GO_MODULE_DIR}" != "/" ]]; do
-  GO_MODULE_DIR="$(dirname "${GO_MODULE_DIR}")"
-done
+# Get the root project directory (where this script is located)
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Define output directory
+OUTPUT_DIR="${PROJECT_ROOT}/target/dependency-graph"
+
+# Create output directory if it doesn't exist
+mkdir -p "${OUTPUT_DIR}"
+
+# Hardcoded Go module directory path - simpler and more predictable
+GO_MODULE_DIR="${PROJECT_ROOT}/src/main/go"
+
+# Check if go.mod exists in the expected location
 if [[ ! -f "${GO_MODULE_DIR}/go.mod" ]]; then
-  echo "Error: go.mod file not found. Ensure this script is run within a Go module."
+  echo "Error: go.mod file not found at ${GO_MODULE_DIR}"
   exit 1
 fi
-# Path to output directory (relative to project root)
-OUTPUT_DIR="target/dependency-graph"
 
-# First, ensure the output directory exists (from project root)
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-mkdir -p "${SCRIPT_DIR}/${OUTPUT_DIR}"
+echo "Using Go module at: ${GO_MODULE_DIR}"
 
 # Change to the Go module directory to run go mod commands
-cd "${SCRIPT_DIR}/${GO_MODULE_DIR}" || {
-  echo "Error: Cannot find Go module directory at ${SCRIPT_DIR}/${GO_MODULE_DIR}"
+cd "${GO_MODULE_DIR}" || {
+  echo "Error: Cannot change to Go module directory at ${GO_MODULE_DIR}"
   exit 1
 }
 
@@ -37,19 +41,19 @@ imgfile="${dep:t}.png"
 filtered_file="filtered.txt"
 
 # Generate filtered dependency lines
-go mod graph | grep -F "$dep" > "${SCRIPT_DIR}/${OUTPUT_DIR}/${filtered_file}"
+go mod graph | grep -F "$dep" > "${OUTPUT_DIR}/${filtered_file}"
 
 # Create DOT file
 {
   echo "digraph G {"
-  awk '{print "\"" $1 "\" -> \"" $2 "\""}' "${SCRIPT_DIR}/${OUTPUT_DIR}/${filtered_file}"
+  awk '{print "\"" $1 "\" -> \"" $2 "\""}' "${OUTPUT_DIR}/${filtered_file}"
   echo "}"
-} > "${SCRIPT_DIR}/${OUTPUT_DIR}/${dotfile}"
+} > "${OUTPUT_DIR}/${dotfile}"
 
 # Generate PNG image
-dot -Tpng "${SCRIPT_DIR}/${OUTPUT_DIR}/${dotfile}" -o "${SCRIPT_DIR}/${OUTPUT_DIR}/${imgfile}"
+dot -Tpng "${OUTPUT_DIR}/${dotfile}" -o "${OUTPUT_DIR}/${imgfile}"
 
-echo "Dependency graph generated in ${OUTPUT_DIR}:"
+echo "Dependency graph generated in target/dependency-graph:"
 echo "- ${dotfile}"
 echo "- ${imgfile}"
 echo "- ${filtered_file}"
