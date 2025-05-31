@@ -37,7 +37,7 @@ imgfile="${dep:t}.png"
 filtered_file="filtered.txt"
 
 # Generate filtered dependency lines
-go mod graph | grep "$dep" > "${SCRIPT_DIR}/${OUTPUT_DIR}/${filtered_file}"
+go mod graph | grep -F "$dep" > "${SCRIPT_DIR}/${OUTPUT_DIR}/${filtered_file}"
 
 # Create DOT file
 {
