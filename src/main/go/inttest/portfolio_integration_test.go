@@ -500,6 +500,73 @@ func TestPutPortfolioFailureWithoutMandatoryFields(t *testing.T) {
 	)
 }
 
+func TestPutPortfolioWithAllocationStructure(t *testing.T) {
+
+	var testPortfolioNameBefore = "This Test Portfolio will be updated"
+	var testPortfolioNameAfter = "Test Portfolio update"
+
+	testPortFolio := insertTestPortfolio(t, testPortfolioNameBefore)
+	var testPortfolioIdString = strconv.Itoa(testPortFolio.Id)
+
+	var allocationStructureJSONFragment = `
+		"allocationStructure": {
+			"hierarchy": [
+				{
+					"name":"Classes",
+					"field":"class"
+				}
+			]
+		}
+	`
+
+	var putPortfolioJSON = `
+		{
+			"id":` + testPortfolioIdString + `,
+			"name":"` + testPortfolioNameAfter + `",
+			` + allocationStructureJSONFragment + `
+		}
+	`
+
+	response := putPortfolio(t, putPortfolioJSON)
+
+	assert.Equal(t, http.StatusOK, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+
+	var expectedResponseJSON = `
+		{
+			"id":` + testPortfolioIdString + `,
+			"name":"` + testPortfolioNameAfter + `",
+			"allocationStructure": {
+				"hierarchy": [
+					{
+						"name":"Assets",
+						"field":"assetTicker"
+					},
+					{
+						"name":"Classes",
+						"field":"class"
+					}
+				]
+			}
+		}
+	`
+
+	assert.JSONEq(t, expectedResponseJSON, string(body))
+
+	var portfolioDTS restmodel.PortfolioDTS
+	err = json.Unmarshal(body, &portfolioDTS)
+	assert.NoError(t, err)
+
+	assertPersistedPortfolioFromDTS(
+		t,
+		portfolioDTS,
+		`{"hierarchy": [{"name": "Assets", "field": "assetTicker"}, {"name": "Classes", "field": "class"}]}`,
+	)
+}
+
 func putForValidationFailure(t *testing.T, putPortfolioJSON string) []byte {
 
 	response := putPortfolio(t, putPortfolioJSON)

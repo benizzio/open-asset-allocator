@@ -139,12 +139,15 @@ func (repository *PortfolioRDBMSRepository) InsertPortfolio(portfolio *domain.Po
 func (repository *PortfolioRDBMSRepository) UpdatePortfolio(portfolio *domain.Portfolio) (*domain.Portfolio, error) {
 
 	var updatingCopyPortfolio = *portfolio
-	err := repository.dbAdapter.UpdateListedFields(portfolio, "Name")
+	err := repository.dbAdapter.UpdateListedFields(&updatingCopyPortfolio, "Name")
 	if err != nil {
 		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "Error updating portfolio", repository)
 	}
 
-	return &updatingCopyPortfolio, nil
+	var updatedPortfolio domain.Portfolio
+	err = repository.dbAdapter.Read(&updatedPortfolio, portfolio.Id)
+
+	return &updatedPortfolio, nil
 }
 
 func BuildPortfolioRepository(dbAdapter *infra.RDBMSAdapter) *PortfolioRDBMSRepository {

@@ -182,6 +182,10 @@ func (adapter *RDBMSAdapter) UpdateListedFields(model interface{}, fields ...str
 	return adapter.dbx.Model(model).Update(fields...)
 }
 
+func (adapter *RDBMSAdapter) Read(model interface{}, id any) error {
+	return adapter.dbx.Select().Model(id, model)
+}
+
 func BuildDatabaseAdapter(config *Configuration) *RDBMSAdapter {
 	return &RDBMSAdapter{config: config.RdbmsConfig}
 }
