@@ -95,7 +95,12 @@ func (controller *PortfolioRESTController) getPortfolioAllocationHistory(context
 func (controller *PortfolioRESTController) postPortfolio(context *gin.Context) {
 
 	var portfolioDTS model.PortfolioDTS
-	if err := util.BindAndValidateJSON(context, &portfolioDTS); err != nil {
+	valid, err := util.BindAndValidateJSON(context, &portfolioDTS)
+	if err != nil {
+		infra.HandleAPIError(context, bindPortfolioErrorMessage, err)
+		return
+	}
+	if !valid {
 		return
 	}
 
@@ -112,7 +117,12 @@ func (controller *PortfolioRESTController) postPortfolio(context *gin.Context) {
 func (controller *PortfolioRESTController) putPortfolio(context *gin.Context) {
 
 	var portfolioDTS model.PortfolioDTS
-	if err := util.BindAndValidateJSON(context, &portfolioDTS); err != nil {
+	valid, err := util.BindAndValidateJSON(context, &portfolioDTS)
+	if err != nil {
+		infra.HandleAPIError(context, bindPortfolioErrorMessage, err)
+		return
+	}
+	if !valid {
 		return
 	}
 
@@ -128,6 +138,7 @@ func (controller *PortfolioRESTController) putPortfolio(context *gin.Context) {
 			),
 		)
 		util.RespondWithCustomValidationErrors(context, validationErrors, portfolioDTS)
+		return
 	}
 
 	var portfolio = model.MapToPortfolio(&portfolioDTS)

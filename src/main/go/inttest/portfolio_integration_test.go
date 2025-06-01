@@ -4,11 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	restmodel "github.com/benizzio/open-asset-allocator/api/rest/model"
-	"github.com/benizzio/open-asset-allocator/domain"
-	"github.com/benizzio/open-asset-allocator/infra/util"
 	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
 	inttestutil "github.com/benizzio/open-asset-allocator/inttest/util"
-	dbx "github.com/go-ozzo/ozzo-dbx"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
@@ -236,23 +233,16 @@ func TestPostPortfolio(t *testing.T) {
 
 	inttestutil.AssertJSONEqualIgnoringFields(t, expectedResponseJSON, string(body), "id")
 
-	var portfolioDTS restmodel.PortfolioDTS
-	err = json.Unmarshal(body, &portfolioDTS)
+	var actualPortfolioDTS restmodel.PortfolioDTS
+	err = json.Unmarshal(body, &actualPortfolioDTS)
 	assert.NoError(t, err)
-	assert.NotNil(t, portfolioDTS.Id)
-	assert.NotZero(t, *portfolioDTS.Id)
+	assert.NotNil(t, actualPortfolioDTS.Id)
+	assert.NotZero(t, *actualPortfolioDTS.Id)
 
-	var portfolioIdString = strconv.Itoa(*portfolioDTS.Id)
-	var portfolioNullStringMap = dbx.NullStringMap{
-		"id":                   util.ToNullString(portfolioIdString),
-		"name":                 util.ToNullString(testPortfolioName),
-		"allocation_structure": util.ToNullString(`{"hierarchy": [{"name": "Assets", "field": "assetTicker"}, {"name": "Classes", "field": "class"}]}`),
-	}
-
-	inttestutil.AssertDBWithQuery(
+	assertPersistedPortfolioFromDTS(
 		t,
-		"SELECT * FROM portfolio WHERE id="+portfolioIdString,
-		portfolioNullStringMap,
+		actualPortfolioDTS,
+		`{"hierarchy": [{"name": "Assets", "field": "assetTicker"}, {"name": "Classes", "field": "class"}]}`,
 	)
 }
 
@@ -308,23 +298,16 @@ func TestPostPortfolioWithAllocationStructure(t *testing.T) {
 
 	inttestutil.AssertJSONEqualIgnoringFields(t, expectedResponseJSON, string(body), "id")
 
-	var portfolioDTS restmodel.PortfolioDTS
-	err = json.Unmarshal(body, &portfolioDTS)
+	var actualPortfolioDTS restmodel.PortfolioDTS
+	err = json.Unmarshal(body, &actualPortfolioDTS)
 	assert.NoError(t, err)
-	assert.NotNil(t, portfolioDTS.Id)
-	assert.NotZero(t, *portfolioDTS.Id)
+	assert.NotNil(t, actualPortfolioDTS.Id)
+	assert.NotZero(t, *actualPortfolioDTS.Id)
 
-	var portfolioIdString = strconv.Itoa(*portfolioDTS.Id)
-	var portfolioNullStringMap = dbx.NullStringMap{
-		"id":                   util.ToNullString(portfolioIdString),
-		"name":                 util.ToNullString(testPortfolioName),
-		"allocation_structure": util.ToNullString(`{"hierarchy": [{"name": "Classes", "field": "class"}]}`),
-	}
-
-	inttestutil.AssertDBWithQuery(
+	assertPersistedPortfolioFromDTS(
 		t,
-		"SELECT * FROM portfolio WHERE id="+portfolioIdString,
-		portfolioNullStringMap,
+		actualPortfolioDTS,
+		`{"hierarchy": [{"name": "Classes", "field": "class"}]}`,
 	)
 }
 
@@ -377,56 +360,17 @@ func TestPutPortfolio(t *testing.T) {
 	var testPortfolioNameBefore = "This Test Portfolio will be updated"
 	var testPortfolioNameAfter = "Test Portfolio update"
 
-	var insertPortfolioSQL = `
-		INSERT INTO portfolio (name, allocation_structure)
-		VALUES (
-			'%s',
-		    '{"hierarchy": [{"name": "Assets", "field": "assetTicker"}, {"name": "Classes", "field": "class"}]}'
-		)
-	`
-	var formattedInsertPortfolioSQL = fmt.Sprintf(insertPortfolioSQL, testPortfolioNameBefore)
-
-	err := inttestinfra.ExecuteDBQuery(formattedInsertPortfolioSQL)
-	assert.NoError(t, err)
-
-	var testPortFolio domain.Portfolio
-	err = inttestinfra.FetchWithDBQuery(
-		fmt.Sprintf("SELECT * FROM portfolio WHERE name = '%s'", testPortfolioNameBefore),
-		func(rows *dbx.Rows) error {
-			return rows.ScanStruct(&testPortFolio)
-		},
-	)
-	assert.NoError(t, err)
-
-	assert.NotZero(t, testPortFolio)
-	assert.NotZero(t, testPortFolio.Id)
-
+	testPortFolio := insertTestPortfolio(t, testPortfolioNameBefore)
 	var testPortfolioIdString = strconv.Itoa(testPortFolio.Id)
-	var postPortfolioJSON = `
+
+	var putPortfolioJSON = `
 		{
 			"id":` + testPortfolioIdString + `,
 			"name":"` + testPortfolioNameAfter + `"
 		}
 	`
 
-	request, err := http.NewRequest(
-		http.MethodPut,
-		inttestinfra.TestAPIURLprefix+"/portfolio",
-		strings.NewReader(postPortfolioJSON),
-	)
-	assert.NoError(t, err)
-	request.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	response, err := client.Do(request)
-
-	t.Cleanup(
-		inttestutil.CreateDBCleanupDeferable(
-			"DELETE FROM portfolio WHERE id='%s'",
-			testPortfolioIdString,
-		),
-	)
-	assert.NoError(t, err)
+	response := putPortfolio(t, putPortfolioJSON)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 
@@ -459,16 +403,111 @@ func TestPutPortfolio(t *testing.T) {
 	err = json.Unmarshal(body, &portfolioDTS)
 	assert.NoError(t, err)
 
-	var persistedPortfolioIdString = strconv.Itoa(*portfolioDTS.Id)
-	var portfolioNullStringMap = dbx.NullStringMap{
-		"id":                   util.ToNullString(persistedPortfolioIdString),
-		"name":                 util.ToNullString(portfolioDTS.Name),
-		"allocation_structure": util.ToNullString(`{"hierarchy": [{"name": "Assets", "field": "assetTicker"}, {"name": "Classes", "field": "class"}]}`),
-	}
-
-	inttestutil.AssertDBWithQuery(
+	assertPersistedPortfolioFromDTS(
 		t,
-		"SELECT * FROM portfolio WHERE id="+persistedPortfolioIdString,
-		portfolioNullStringMap,
+		portfolioDTS,
+		`{"hierarchy": [{"name": "Assets", "field": "assetTicker"}, {"name": "Classes", "field": "class"}]}`,
 	)
+}
+
+func TestPutPortfolioFailureWithoutMandatoryFields(t *testing.T) {
+
+	var testPortfolioName = "This Test Portfolio will be updated"
+	testPortFolio := insertTestPortfolio(t, testPortfolioName)
+
+	var putPortfolioJSONNullFields = `
+		{
+			"id": %d,
+			"name": null
+		}
+	`
+
+	var putPortfolioJSONEmptyFields = `
+		{
+			"id": %d,
+			"name": ""
+		}
+	`
+
+	var putPortfolioJSONNoFields = `
+		{
+			"id": %d
+		}
+	`
+
+	var putPortfolioJSONNoId = `
+		{
+			"name": "Portfolio without ID"
+		}
+	`
+
+	var actualResponseJSONNullFields = string(
+		putForValidationFailure(
+			t,
+			fmt.Sprintf(putPortfolioJSONNullFields, testPortFolio.Id),
+		),
+	)
+
+	var actualResponseJSONEmptyFields = string(
+		putForValidationFailure(
+			t,
+			fmt.Sprintf(putPortfolioJSONEmptyFields, testPortFolio.Id),
+		),
+	)
+
+	var actualResponseJSONNoFields = string(
+		putForValidationFailure(
+			t,
+			fmt.Sprintf(putPortfolioJSONNoFields, testPortFolio.Id),
+		),
+	)
+
+	var actualResponseJSONNoId = string(
+		putForValidationFailure(
+			t,
+			putPortfolioJSONNoId,
+		),
+	)
+
+	var expectedNoNameResponseJSON = `
+		{
+			"errorMessage": "Validation failed",
+			"details": [
+				"Field 'name' failed validation: is required"
+			]
+		}
+	`
+
+	var expectedNoIdResponseJSON = `
+		{
+			"errorMessage": "Validation failed",
+			"details": [
+				"Field 'id' failed validation: is required"
+			]
+		}
+	`
+
+	assert.JSONEq(t, expectedNoNameResponseJSON, actualResponseJSONNullFields)
+	assert.JSONEq(t, expectedNoNameResponseJSON, actualResponseJSONEmptyFields)
+	assert.JSONEq(t, expectedNoNameResponseJSON, actualResponseJSONNoFields)
+	assert.JSONEq(t, expectedNoIdResponseJSON, actualResponseJSONNoId)
+
+	assertPersistedPortfolioFromAttributes(
+		t,
+		testPortFolio.Id,
+		testPortfolioName,
+		`{"hierarchy": [{"name": "Assets", "field": "assetTicker"}, {"name": "Classes", "field": "class"}]}`,
+	)
+}
+
+func putForValidationFailure(t *testing.T, putPortfolioJSON string) []byte {
+
+	response := putPortfolio(t, putPortfolioJSON)
+
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+	return body
 }
