@@ -127,7 +127,7 @@ func (controller *PortfolioRESTController) putPortfolio(context *gin.Context) {
 	}
 
 	if portfolioDTS.Id == nil || util.IsZeroValue(portfolioDTS.Id) {
-		var validationErrors = util.BuildValidationErrorsBuilder().
+		var validationErrors = util.BuildCustomValidationErrorsBuilder().
 			CustomValidationError(
 				portfolioDTS,
 				"Id",
