@@ -36,6 +36,11 @@ func (controller *PortfolioRESTController) BuildRoutes() []infra.RESTRoute {
 			Path:     portfolioPath,
 			Handlers: gin.HandlersChain{controller.postPortfolio},
 		},
+		{
+			Method:   http.MethodPut,
+			Path:     portfolioPath,
+			Handlers: gin.HandlersChain{controller.putPortfolio},
+		},
 	}
 }
 
@@ -111,7 +116,19 @@ func (controller *PortfolioRESTController) putPortfolio(context *gin.Context) {
 		return
 	}
 
-	//TODO custom validation for ID
+	//TODO improve
+	if portfolioDTS.Id == nil || util.IsZeroValue(portfolioDTS.Id) {
+		var validationErrors = util.CreateCustomValidationErrors(
+			util.CreateCustomValidationError(
+				portfolioDTS,
+				"Id",
+				"required",
+				"Portfolio ID is required for update",
+				nil,
+			),
+		)
+		util.RespondWithCustomValidationErrors(context, validationErrors, portfolioDTS)
+	}
 
 	var portfolio = model.MapToPortfolio(&portfolioDTS)
 	persistedPortfolio, err := controller.portfolioDomService.PersistPortfolio(portfolio)

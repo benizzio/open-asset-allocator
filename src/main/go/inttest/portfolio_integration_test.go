@@ -2,7 +2,9 @@ package inttest
 
 import (
 	"encoding/json"
+	"fmt"
 	restmodel "github.com/benizzio/open-asset-allocator/api/rest/model"
+	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra/util"
 	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
 	inttestutil "github.com/benizzio/open-asset-allocator/inttest/util"
@@ -368,4 +370,105 @@ func postForValidationFailure(t *testing.T, postPortfolioJSON string) []byte {
 	assert.NoError(t, err)
 	assert.NotEmpty(t, body)
 	return body
+}
+
+func TestPutPortfolio(t *testing.T) {
+
+	var testPortfolioNameBefore = "This Test Portfolio will be updated"
+	var testPortfolioNameAfter = "Test Portfolio update"
+
+	var insertPortfolioSQL = `
+		INSERT INTO portfolio (name, allocation_structure)
+		VALUES (
+			'%s',
+		    '{"hierarchy": [{"name": "Assets", "field": "assetTicker"}, {"name": "Classes", "field": "class"}]}'
+		)
+	`
+	var formattedInsertPortfolioSQL = fmt.Sprintf(insertPortfolioSQL, testPortfolioNameBefore)
+
+	err := inttestinfra.ExecuteDBQuery(formattedInsertPortfolioSQL)
+	assert.NoError(t, err)
+
+	var testPortFolio domain.Portfolio
+	err = inttestinfra.FetchWithDBQuery(
+		fmt.Sprintf("SELECT * FROM portfolio WHERE name = '%s'", testPortfolioNameBefore),
+		func(rows *dbx.Rows) error {
+			return rows.ScanStruct(&testPortFolio)
+		},
+	)
+	assert.NoError(t, err)
+
+	assert.NotZero(t, testPortFolio)
+	assert.NotZero(t, testPortFolio.Id)
+
+	var testPortfolioIdString = strconv.Itoa(testPortFolio.Id)
+	var postPortfolioJSON = `
+		{
+			"id":` + testPortfolioIdString + `,
+			"name":"` + testPortfolioNameAfter + `"
+		}
+	`
+
+	request, err := http.NewRequest(
+		http.MethodPut,
+		inttestinfra.TestAPIURLprefix+"/portfolio",
+		strings.NewReader(postPortfolioJSON),
+	)
+	assert.NoError(t, err)
+	request.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	response, err := client.Do(request)
+
+	t.Cleanup(
+		inttestutil.CreateDBCleanupDeferable(
+			"DELETE FROM portfolio WHERE id='%s'",
+			testPortfolioIdString,
+		),
+	)
+	assert.NoError(t, err)
+
+	assert.Equal(t, http.StatusOK, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+
+	var expectedResponseJSON = `
+		{
+			"id":` + testPortfolioIdString + `,
+			"name":"` + testPortfolioNameAfter + `",
+			"allocationStructure": {
+				"hierarchy": [
+					{
+						"name":"Assets",
+						"field":"assetTicker"
+					},
+					{
+						"name":"Classes",
+						"field":"class"
+					}
+				]
+			}
+		}
+	`
+
+	assert.JSONEq(t, expectedResponseJSON, string(body))
+
+	var portfolioDTS restmodel.PortfolioDTS
+	err = json.Unmarshal(body, &portfolioDTS)
+	assert.NoError(t, err)
+
+	var persistedPortfolioIdString = strconv.Itoa(*portfolioDTS.Id)
+	var portfolioNullStringMap = dbx.NullStringMap{
+		"id":                   util.ToNullString(persistedPortfolioIdString),
+		"name":                 util.ToNullString(portfolioDTS.Name),
+		"allocation_structure": util.ToNullString(`{"hierarchy": [{"name": "Assets", "field": "assetTicker"}, {"name": "Classes", "field": "class"}]}`),
+	}
+
+	inttestutil.AssertDBWithQuery(
+		t,
+		"SELECT * FROM portfolio WHERE id="+persistedPortfolioIdString,
+		portfolioNullStringMap,
+	)
 }
