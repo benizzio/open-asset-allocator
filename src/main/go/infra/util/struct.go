@@ -61,6 +61,8 @@ func StructString[T interface{}](source *T) string {
 //
 // Returns:
 //   - The name of the struct type
+//
+// Authored by: GitHub Copilot
 func GetStructName(targetStruct interface{}) string {
 	structType := reflect.TypeOf(targetStruct)
 

@@ -8,6 +8,8 @@ import (
 )
 
 // CustomFieldError implements validator.FieldError interface
+//
+// Authored by: GitHub Copilot
 type CustomFieldError struct {
 	field           string
 	structField     string
@@ -51,6 +53,8 @@ func (e CustomFieldError) Translate(_ universalTranslator.Translator) string {
 }
 
 // customValidationErrors is a custom implementation of validator.ValidationErrors
+//
+// Authored by: GitHub Copilot
 type customValidationErrors validator.ValidationErrors
 
 // Error implements the error interface

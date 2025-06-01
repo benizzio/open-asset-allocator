@@ -5,9 +5,11 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-// CustomValidationErrorsBuilder provides a fluent API for building custom validation errors.
+// CustomValidationErrorsBuilder provides a fluent API for building custom validation validationErrors.
+//
+// Authored by: GitHub Copilot
 type CustomValidationErrorsBuilder struct {
-	errors []validator.FieldError
+	validationErrors []validator.FieldError
 }
 
 // CustomValidationError adds a validation error to the builder.
@@ -24,7 +26,7 @@ type CustomValidationErrorsBuilder struct {
 // Example:
 //
 //	// Create a validation error for a missing required field
-//	errors := BuildCustomValidationErrorsBuilder().
+//	validationErrors := BuildCustomValidationErrorsBuilder().
 //	    CustomValidationError(
 //	        user,           // Target struct
 //	        "Email",        // Field namespace
@@ -34,7 +36,7 @@ type CustomValidationErrorsBuilder struct {
 //	    )
 //
 //	// Create a validation error for a minimum value constraint
-//	errors.CustomValidationError(
+//	validationErrors.CustomValidationError(
 //	    user,           // Target struct
 //	    "Age",          // Field namespace
 //	    "min",          // Validation tag
@@ -43,7 +45,7 @@ type CustomValidationErrorsBuilder struct {
 //	)
 //
 //	// Create a validation error for a nested field with max length
-//	errors.CustomValidationError(
+//	validationErrors.CustomValidationError(
 //	    user,                  // Target struct
 //	    "Address.Street",      // Field namespace (nested)
 //	    "max",                 // Validation tag
@@ -51,30 +53,34 @@ type CustomValidationErrorsBuilder struct {
 //	    "This street name is way too long...",  // Value that failed
 //	)
 //
-//	// Build and use the validation errors
-//	validationErrors := errors.Build()
+//	// Build and use the validation validationErrors
+//	validationErrors := validationErrors.Build()
 //	RespondWithCustomValidationErrors(ctx, validationErrors, user)
-func (b *CustomValidationErrorsBuilder) CustomValidationError(
+//
+// Authored by: GitHub Copilot
+func (builder *CustomValidationErrorsBuilder) CustomValidationError(
 	targetStruct interface{},
 	fieldNamespace string,
 	tag string,
 	param string,
 	value interface{},
 ) *CustomValidationErrorsBuilder {
-	error := buildCustomValidationError(targetStruct, fieldNamespace, tag, param, value)
-	b.errors = append(b.errors, error)
-	return b
+	validationError := buildCustomValidationError(targetStruct, fieldNamespace, tag, param, value)
+	builder.validationErrors = append(builder.validationErrors, validationError)
+	return builder
 }
 
 // Build creates and returns the validator.ValidationErrors collection.
 // Returns:
-//   - validator.ValidationErrors containing all the errors added to the builder
-func (b *CustomValidationErrorsBuilder) Build() validator.ValidationErrors {
-	return buildCustomValidationErrors(b.errors...)
+//   - validator.ValidationErrors containing all the validationErrors added to the builder
+//
+// Authored by: GitHub Copilot
+func (builder *CustomValidationErrorsBuilder) Build() validator.ValidationErrors {
+	return buildCustomValidationErrors(builder.validationErrors...)
 }
 
 // BuildCustomValidationErrorsBuilder creates a new instance of the builder.
-// This function creates and returns a new builder for creating custom validation errors
+// This function creates and returns a new builder for creating custom validation validationErrors
 // with a fluent interface.
 //
 // Returns:
@@ -82,7 +88,7 @@ func (b *CustomValidationErrorsBuilder) Build() validator.ValidationErrors {
 //
 // Example:
 //
-//	// Create a builder and add validation errors
+//	// Create a builder and add validation validationErrors
 //	builder := BuildCustomValidationErrorsBuilder()
 //	builder.CustomValidationError(
 //	    user,           // Target struct
@@ -92,10 +98,10 @@ func (b *CustomValidationErrorsBuilder) Build() validator.ValidationErrors {
 //	    "",             // Value that failed
 //	)
 //
-//	// Build the validation errors collection
+//	// Build the validation validationErrors collection
 //	validationErrors := builder.Build()
 //
-//	// Or create validation errors in a fluent style
+//	// Or create validation validationErrors in a fluent style
 //	validationErrors := BuildCustomValidationErrorsBuilder().
 //	    CustomValidationError(
 //	        portfolioDTS,
@@ -106,11 +112,13 @@ func (b *CustomValidationErrorsBuilder) Build() validator.ValidationErrors {
 //	    ).
 //	    Build()
 //
-//	// Send response with the validation errors
+//	// Send response with the validation validationErrors
 //	RespondWithCustomValidationErrors(context, validationErrors, portfolioDTS)
+//
+// Authored by: GitHub Copilot
 func BuildCustomValidationErrorsBuilder() *CustomValidationErrorsBuilder {
 	return &CustomValidationErrorsBuilder{
-		errors: []validator.FieldError{},
+		validationErrors: []validator.FieldError{},
 	}
 }
 
@@ -125,6 +133,8 @@ func BuildCustomValidationErrorsBuilder() *CustomValidationErrorsBuilder {
 //
 // Returns:
 //   - validator.FieldError that can be used with validation error handling functions
+//
+// Authored by: GitHub Copilot
 func buildCustomValidationError(
 	targetStruct interface{},
 	fieldNamespace,
@@ -157,6 +167,8 @@ func buildCustomValidationError(
 //
 // Returns:
 //   - validator.ValidationErrors that can be used with validation error handling functions
+//
+// Authored by: GitHub Copilot
 func buildCustomValidationErrors(errors ...validator.FieldError) validator.ValidationErrors {
 	// CustomValidationErrors satisfies the validator.ValidationErrors interface
 	return validator.ValidationErrors(customValidationErrors(errors))
@@ -181,6 +193,8 @@ func buildCustomValidationErrors(errors ...validator.FieldError) validator.Valid
 //
 //	// Send HTTP response with these errors
 //	util.RespondWithCustomValidationErrors(ctx, errors, userObject)
+//
+// Authored by: GitHub Copilot
 func RespondWithCustomValidationErrors(
 	context *gin.Context,
 	validationErrors validator.ValidationErrors,
