@@ -76,7 +76,7 @@ func (builder *CustomValidationErrorsBuilder) CustomValidationError(
 //
 // Authored by: GitHub Copilot
 func (builder *CustomValidationErrorsBuilder) Build() validator.ValidationErrors {
-	return buildCustomValidationErrors(builder.validationErrors...)
+	return builder.validationErrors
 }
 
 // BuildCustomValidationErrorsBuilder creates a new instance of the builder.
@@ -158,20 +158,6 @@ func buildCustomValidationError(
 		paramValue:      param,
 		valueValue:      value,
 	}
-}
-
-// buildCustomValidationErrors creates a collection of validation errors that implements validator.ValidationErrors.
-//
-// Parameters:
-//   - errors: A variadic list of validator.FieldError objects
-//
-// Returns:
-//   - validator.ValidationErrors that can be used with validation error handling functions
-//
-// Authored by: GitHub Copilot
-func buildCustomValidationErrors(errors ...validator.FieldError) validator.ValidationErrors {
-	// CustomValidationErrors satisfies the validator.ValidationErrors interface
-	return validator.ValidationErrors(customValidationErrors(errors))
 }
 
 // RespondWithCustomValidationErrors takes custom validation errors and sends a standardized

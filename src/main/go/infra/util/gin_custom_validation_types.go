@@ -3,7 +3,6 @@ package util
 import (
 	"fmt"
 	universalTranslator "github.com/go-playground/universal-translator"
-	"github.com/go-playground/validator/v10"
 	"reflect"
 )
 
@@ -50,17 +49,4 @@ func (e CustomFieldError) Error() string {
 }
 func (e CustomFieldError) Translate(_ universalTranslator.Translator) string {
 	return e.Error()
-}
-
-// customValidationErrors is a custom implementation of validator.ValidationErrors
-//
-// Authored by: GitHub Copilot
-type customValidationErrors validator.ValidationErrors
-
-// Error implements the error interface
-func (errors customValidationErrors) Error() string {
-	if len(errors) == 0 {
-		return ""
-	}
-	return errors[0].Error()
 }
