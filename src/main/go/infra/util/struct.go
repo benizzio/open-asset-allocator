@@ -52,3 +52,22 @@ func StructString[T interface{}](source *T) string {
 	}
 	return string(out)
 }
+
+// GetStructName extracts the struct name from a struct or pointer to struct.
+// It handles both struct values and pointers to structs.
+//
+// Parameters:
+//   - targetStruct: The struct or pointer to struct to get the name from
+//
+// Returns:
+//   - The name of the struct type
+func GetStructName(targetStruct interface{}) string {
+	structType := reflect.TypeOf(targetStruct)
+
+	// Handle pointer types
+	if structType.Kind() == reflect.Ptr {
+		structType = structType.Elem()
+	}
+
+	return structType.Name()
+}
