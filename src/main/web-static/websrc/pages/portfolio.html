@@ -92,7 +92,7 @@
                         form.reset();
                         const portfolioElement = document.querySelector("#portfolio-context");
                         htmx.trigger(portfolioElement, "reload-portfolio", {
-                            routerPathDareta: {
+                            routerPathData: {
                                 portfolioId: portfolioId
                             }
                         });
