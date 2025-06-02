@@ -58,7 +58,7 @@
                   hx-ext="json-enc"
                   hx-validate="true"
                   hx-swap="none"
-                  hx-on-htmx-after-request="reloadPortfolio(this)"
+                  hx-on-htmx-after-request="reloadPortfolio(event)"
             >
                 <div class="card-body">
 
@@ -83,11 +83,19 @@
             </form>
 
             <script type="text/javascript">
-                function reloadPortfolio(form) {
+                function reloadPortfolio(event) {
+
+                    const portfolioId = event.detail.requestConfig.parameters.get("id");
+
+                    const form = event.target;
                     if (form.checkValidity()) {
                         form.reset();
                         const portfolioElement = document.querySelector("#portfolio-context");
-                        htmx.trigger(portfolioElement, "reload-portfolio");
+                        htmx.trigger(portfolioElement, "reload-portfolio", {
+                            routerPathDareta: {
+                                portfolioId: portfolioId
+                            }
+                        });
                     }
                 }
 

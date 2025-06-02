@@ -3,10 +3,20 @@ export type EventDetail = {
     [key: string]: unknown;
 };
 
+/**
+ * Enhances the htmx request before execution
+ *
+ * @param event - The htmx event
+ */
 const configRequestEventListener = (event: CustomEvent) => {
     replaceRequestPathParams(event);
 };
 
+/**
+ * Enhances the htmx request by replacing path parameters from alternative sources.
+ *
+ * @param event - The htmx event
+ */
 function replaceRequestPathParams(event: CustomEvent) {
 
     const requestPath = event.detail.path as string;
@@ -17,6 +27,13 @@ function replaceRequestPathParams(event: CustomEvent) {
     }
 }
 
+/**
+ * Enhances the htmx request by replacing path parameters from the event chain
+ * (e.g., from the event that triggered the current one).
+ *
+ * @param event - The htmx event, where the triggering event may contain
+ * { detail: { routerPathData: { [key: string]: unknown } } }
+ */
 function replaceFromEventChain(event: CustomEvent) {
 
     const triggeringEvent = event.detail?.triggeringEvent as CustomEvent;
@@ -33,6 +50,11 @@ function replaceFromEventChain(event: CustomEvent) {
     }
 }
 
+/**
+ * Enhances the htmx request by replacing path parameters from form data values.
+ *
+ * @param event - The htmx event
+ */
 function replaceFromFormData(event: CustomEvent) {
 
     const formData = event.detail.formData as FormData;
