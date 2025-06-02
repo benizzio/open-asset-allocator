@@ -8,6 +8,7 @@ import { logger, LogLevel } from "../logging";
 // =============================================================================
 
 const DISPLAY_ON_ROUTE_ATTRIBUTE = "data-display-on-route";
+const DISPLAY_ON_ROUTE_ATTRIBUTE_REGULAR_EXPRESSION_ROUTE = "data-display-on-regexp-route";
 const DISPLAY_ON_ROUTE_BOUND_FLAG = "display-on-route-bound";
 
 export function bindDisplayOnRouteInDescendants(element: HTMLElement) {
@@ -25,8 +26,13 @@ function bindDisplayOnRouteElements(displayOnRouteElements: NodeListOf<HTMLEleme
 }
 
 function bindDisplayOnRoute(element: HTMLElement) {
-    
-    const route = element.getAttribute(DISPLAY_ON_ROUTE_ATTRIBUTE);
+
+    let route: string | RegExp = element.getAttribute(DISPLAY_ON_ROUTE_ATTRIBUTE);
+    const isRegularExpressionRoute = element.hasAttribute(DISPLAY_ON_ROUTE_ATTRIBUTE_REGULAR_EXPRESSION_ROUTE);
+
+    if(isRegularExpressionRoute) {
+        route = new RegExp(route, "g");
+    }
 
     logger(LogLevel.INFO, "Binding display on route hooks for element", element, route);
 
@@ -38,28 +44,17 @@ function bindDisplayOnRoute(element: HTMLElement) {
     executeImmediatelyIfOnRoute(route, element);
 }
 
-function configDisplayOnRouteHooks(route: string, element: HTMLElement): () => void {
-
-    const hasRoute = !!navigoRouter.getRoute(route);
+function configDisplayOnRouteHooks(route: string | RegExp, element: HTMLElement): () => void {
 
     const displayCallback = () => {
         changeElementDisplay(element, true);
     };
 
-    let cleanupCallback: () => void;
+    navigoRouter.on(route, displayCallback);
 
-    if(hasRoute) {
-        cleanupCallback = navigoRouter.addAfterHook(route, displayCallback) as () => void;
-    }
-    else {
-        navigoRouter.on(route, displayCallback);
-
-        cleanupCallback = () => {
-            navigoRouter.off(displayCallback);
-        };
-    }
-
-    return cleanupCallback;
+    return () => {
+        navigoRouter.off(displayCallback);
+    };
 }
 
 function changeElementDisplay(element: HTMLElement, display: boolean) {
@@ -81,6 +76,6 @@ function addDisplayOnRouteRemovalObserver(
 }
 
 
-function executeImmediatelyIfOnRoute(route: string, element: HTMLElement) {
+function executeImmediatelyIfOnRoute(route: string | RegExp, element: HTMLElement) {
     changeElementDisplay(element, !!navigoRouter.matchLocation(route));
 }
