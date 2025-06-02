@@ -3,7 +3,7 @@ package service
 import (
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra"
-	"github.com/benizzio/open-asset-allocator/infra/util"
+	"github.com/benizzio/open-asset-allocator/langext"
 )
 
 type PortfolioDomService struct {
@@ -109,7 +109,7 @@ func (service *PortfolioDomService) PersistPortfolio(portfolio *domain.Portfolio
 
 	var persistedPortfolio *domain.Portfolio
 	var err error
-	if util.IsZeroValue(portfolio.Id) {
+	if langext.IsZeroValue(portfolio.Id) {
 		persistedPortfolio, err = service.portfolioRepository.InsertPortfolio(portfolio)
 	} else {
 		persistedPortfolio, err = service.portfolioRepository.UpdatePortfolio(portfolio)

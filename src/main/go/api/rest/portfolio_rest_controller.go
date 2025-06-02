@@ -5,6 +5,7 @@ import (
 	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/benizzio/open-asset-allocator/infra/util"
+	"github.com/benizzio/open-asset-allocator/langext"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -126,7 +127,7 @@ func (controller *PortfolioRESTController) putPortfolio(context *gin.Context) {
 		return
 	}
 
-	if portfolioDTS.Id == nil || util.IsZeroValue(portfolioDTS.Id) {
+	if portfolioDTS.Id == nil || langext.IsZeroValue(portfolioDTS.Id) {
 		var validationErrors = util.BuildCustomValidationErrorsBuilder().
 			CustomValidationError(
 				portfolioDTS,

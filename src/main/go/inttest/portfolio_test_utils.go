@@ -58,7 +58,7 @@ func assertPersistedPortfolioFromDTS(
 ) {
 	assertPersistedPortfolioFromAttributes(
 		t,
-		*actualPortfolioDTS.Id,
+		int(*actualPortfolioDTS.Id),
 		actualPortfolioDTS.Name,
 		actualPortFolioAllocationStructure,
 	)

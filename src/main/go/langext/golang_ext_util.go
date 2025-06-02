@@ -1,4 +1,4 @@
-package util
+package langext
 
 import (
 	"reflect"
@@ -19,10 +19,10 @@ func IsZeroValue[T any](value T) bool {
 	return reflect.ValueOf(value).IsZero()
 }
 
-// unwrapType removes pointer indirection if present.
+// UnwrapType removes pointer indirection if present.
 //
 // Authored by: GitHub Copilot
-func unwrapType(fieldType reflect.Type) reflect.Type {
+func UnwrapType(fieldType reflect.Type) reflect.Type {
 	if fieldType.Kind() == reflect.Ptr {
 		return fieldType.Elem()
 	}

@@ -521,7 +521,7 @@ func TestPutPortfolioWithAllocationStructure(t *testing.T) {
 
 	var putPortfolioJSON = `
 		{
-			"id":` + testPortfolioIdString + `,
+			"id":"` + testPortfolioIdString + `",
 			"name":"` + testPortfolioNameAfter + `",
 			` + allocationStructureJSONFragment + `
 		}
@@ -553,7 +553,7 @@ func TestPutPortfolioWithAllocationStructure(t *testing.T) {
 			}
 		}
 	`
-
+	t.Log(string(body))
 	assert.JSONEq(t, expectedResponseJSON, string(body))
 
 	var portfolioDTS restmodel.PortfolioDTS

@@ -1,6 +1,7 @@
 package util
 
 import (
+	"github.com/benizzio/open-asset-allocator/langext"
 	"reflect"
 	"strings"
 )
@@ -136,7 +137,7 @@ func processRegularField(
 	}
 
 	// Otherwise, continue navigating with the field's type
-	nextType := unwrapType(structField.Type)
+	nextType := langext.UnwrapType(structField.Type)
 	return findNestedField(fieldPath, pathIndex+1, nextType)
 }
 
@@ -159,7 +160,7 @@ func handleArrayField(fieldPathComponent string, currentType reflect.Type) (*ref
 	}
 
 	// Get the element type for arrays/slices/maps
-	fieldType := unwrapType(structField.Type)
+	fieldType := langext.UnwrapType(structField.Type)
 	var elementType reflect.Type
 
 	switch fieldType.Kind() {
