@@ -1,6 +1,7 @@
 package util
 
 import (
+	"github.com/benizzio/open-asset-allocator/langext"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
@@ -143,10 +144,10 @@ func buildCustomValidationError(
 	value interface{},
 ) validator.FieldError {
 	// Get struct name using reflection
-	structName := GetStructName(targetStruct)
+	structName := langext.GetStructName(targetStruct)
 
 	// Parse the field namespace to get the full namespace and field name
-	namespace, fieldName := getNamespaceInfo(structName, fieldNamespace)
+	namespace, fieldName := langext.GetStructNamespaceDescription(structName, fieldNamespace)
 
 	// Create and return the custom validation error
 	return CustomFieldError{
@@ -166,19 +167,31 @@ func buildCustomValidationError(
 //
 // Parameters:
 //   - context: The Gin context used to send the HTTP response
-//   - validationErrors: Custom validation errors created with buildCustomValidationError
+//   - validationErrors: Validation errors created with CustomValidationErrorsBuilder
 //   - targetStruct: The struct that contains field information (used for JSON field names)
 //
 // Example:
 //
-//	// Create custom validation errors
-//	errors := []validator.FieldError{
-//	    util.buildCustomValidationError("User", "Email", "required", "", ""),
-//	    util.buildCustomValidationError("User", "Age", "min", "18", 16),
-//	}
+//	// Create validation errors using the builder pattern
+//	validationErrors := BuildCustomValidationErrorsBuilder().
+//	    CustomValidationError(
+//	        user,           // Target struct
+//	        "Email",        // Field namespace
+//	        "required",     // Validation tag
+//	        "",             // Parameter
+//	        "",             // Value that failed
+//	    ).
+//	    CustomValidationError(
+//	        user,           // Target struct
+//	        "Age",          // Field namespace
+//	        "min",          // Validation tag
+//	        "18",           // Parameter
+//	        16,             // Value that failed
+//	    ).
+//	    Build()
 //
 //	// Send HTTP response with these errors
-//	util.RespondWithCustomValidationErrors(ctx, errors, userObject)
+//	util.RespondWithCustomValidationErrors(ctx, validationErrors, user)
 //
 // Authored by: GitHub Copilot
 func RespondWithCustomValidationErrors(

@@ -1,10 +1,12 @@
-package util
+package langext
 
 import (
 	"encoding/json"
 	"reflect"
+	"strings"
 )
 
+// DeepCompleteStruct fills in zero values in the target struct with values from the source struct.
 func DeepCompleteStruct[T interface{}](target *T, source *T) {
 
 	if target == nil || source == nil {
@@ -45,6 +47,7 @@ func deepCompleteReflective(structType reflect.Type, targetStructValue reflect.V
 	}
 }
 
+// StructString converts a struct to its JSON string representation.
 func StructString[T interface{}](source *T) string {
 	out, err := json.Marshal(source)
 	if err != nil {
@@ -72,4 +75,33 @@ func GetStructName(targetStruct interface{}) string {
 	}
 
 	return structType.Name()
+}
+
+// GetStructNamespaceDescription extracts field name and builds the full namespace
+// from a struct and field namespace string.
+//
+// Parameters:
+//   - targetStruct: The struct or pointer to struct
+//   - fieldNamespace: The field namespace (can be a simple field name or a dot-separated path)
+//
+// Returns:
+//   - namespace: The full namespace including the struct name
+//   - fieldName: The simple field name (last part of the namespace)
+//
+// Authored by: GitHub Copilot
+func GetStructNamespaceDescription(targetStruct interface{}, fieldNamespace string) (namespace, fieldName string) {
+	var structName = GetStructName(targetStruct)
+	var parts = strings.Split(fieldNamespace, ".")
+
+	// The field name is always the last part of the namespace
+	fieldName = parts[len(parts)-1]
+
+	// If namespace doesn't already start with struct name, prepend it
+	if !strings.HasPrefix(fieldNamespace, structName+".") {
+		namespace = structName + "." + fieldNamespace
+	} else {
+		namespace = fieldNamespace
+	}
+
+	return namespace, fieldName
 }

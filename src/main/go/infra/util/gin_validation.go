@@ -8,7 +8,6 @@ import (
 	"github.com/go-playground/validator/v10"
 	"net/http"
 	"reflect"
-	"strings"
 )
 
 // BindAndValidateJSON binds the request body to the provided struct and validates it.
@@ -101,30 +100,4 @@ func sendValidationErrorResponse(context *gin.Context, errorMessages []string) {
 			Details:      errorMessages,
 		},
 	)
-}
-
-// getNamespaceInfo extracts field name and builds the full namespace
-//
-// Authored by: GitHub Copilot
-func getNamespaceInfo(structName, fieldNamespace string) (namespace, fieldName string) {
-	parts := strings.Split(fieldNamespace, ".")
-
-	// Handle nested fields vs simple fields
-	if len(parts) > 1 {
-		// For nested fields, take the last part as the field name
-		fieldName = parts[len(parts)-1]
-
-		// Check if namespace already starts with struct name
-		if strings.HasPrefix(fieldNamespace, structName+".") {
-			namespace = fieldNamespace
-		} else {
-			namespace = structName + "." + fieldNamespace
-		}
-	} else {
-		// Simple field (no dots)
-		fieldName = fieldNamespace
-		namespace = structName + "." + fieldNamespace
-	}
-
-	return namespace, fieldName
 }

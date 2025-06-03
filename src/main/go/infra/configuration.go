@@ -1,7 +1,7 @@
 package infra
 
 import (
-	"github.com/benizzio/open-asset-allocator/infra/util"
+	"github.com/benizzio/open-asset-allocator/langext"
 	"os"
 )
 
@@ -26,7 +26,7 @@ type Configuration struct {
 }
 
 func (config *Configuration) String() string {
-	return util.StructString(config)
+	return langext.StructString(config)
 }
 
 func ReadConfig() *Configuration {

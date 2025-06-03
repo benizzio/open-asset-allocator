@@ -8,7 +8,7 @@ import (
 	"github.com/benizzio/open-asset-allocator/domain/infra/repository"
 	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/infra"
-	"github.com/benizzio/open-asset-allocator/infra/util"
+	"github.com/benizzio/open-asset-allocator/langext"
 	"github.com/golang/glog"
 	"os"
 	"os/signal"
@@ -44,7 +44,7 @@ func (app *App) completeConfig(config *infra.Configuration) {
 		return
 	}
 
-	util.DeepCompleteStruct(app.config, config)
+	langext.DeepCompleteStruct(app.config, config)
 }
 
 func (app *App) buildAppComponents() {
