@@ -8,13 +8,14 @@ import { logger, LogLevel } from "../logging";
 // =============================================================================
 
 const DISPLAY_ON_ROUTE_ATTRIBUTE = "data-display-on-route";
-const DISPLAY_ON_ROUTE_ATTRIBUTE_REGULAR_EXPRESSION_ROUTE = "data-display-on-regexp-route";
+const DISPLAY_ON_REGULAR_EXPRESSION_ROUTE_ATTRIBUTE = "data-display-on-regexp-route";
 const DISPLAY_ON_ROUTE_BOUND_FLAG = "display-on-route-bound";
 
 export function bindDisplayOnRouteInDescendants(element: HTMLElement) {
     const displayOnRouteElements = DomUtils.queryAllInDescendants(
         element,
-        `[${ DISPLAY_ON_ROUTE_ATTRIBUTE }]:not([${ DISPLAY_ON_ROUTE_BOUND_FLAG }])`,
+        `[${ DISPLAY_ON_ROUTE_ATTRIBUTE }]:not([${ DISPLAY_ON_ROUTE_BOUND_FLAG }])`
+        + `, [${ DISPLAY_ON_REGULAR_EXPRESSION_ROUTE_ATTRIBUTE }]:not([${ DISPLAY_ON_ROUTE_BOUND_FLAG }])`,
     );
     bindDisplayOnRouteElements(displayOnRouteElements);
 }
@@ -27,12 +28,13 @@ function bindDisplayOnRouteElements(displayOnRouteElements: NodeListOf<HTMLEleme
 
 function bindDisplayOnRoute(element: HTMLElement) {
 
-    let route: string | RegExp = element.getAttribute(DISPLAY_ON_ROUTE_ATTRIBUTE);
-    const isRegularExpressionRoute = element.hasAttribute(DISPLAY_ON_ROUTE_ATTRIBUTE_REGULAR_EXPRESSION_ROUTE);
+    const isRegularExpressionRoute = element.hasAttribute(DISPLAY_ON_REGULAR_EXPRESSION_ROUTE_ATTRIBUTE);
 
-    if(isRegularExpressionRoute) {
-        route = new RegExp(route, "g");
-    }
+    let route: string | RegExp = isRegularExpressionRoute
+        ? element.getAttribute(DISPLAY_ON_REGULAR_EXPRESSION_ROUTE_ATTRIBUTE)
+        : element.getAttribute(DISPLAY_ON_ROUTE_ATTRIBUTE);
+
+    route = isRegularExpressionRoute ? new RegExp(route, "g") : route;
 
     logger(LogLevel.INFO, "Binding display on route hooks for element", element, route);
 
