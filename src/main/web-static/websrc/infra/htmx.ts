@@ -3,12 +3,7 @@ export type EventDetail = {
     [key: string]: unknown;
 };
 
-/**
- * Enhances the htmx request before execution
- *
- * @param event - The htmx event
- */
-const configRequestEventListener = (event: CustomEvent) => {
+const configEnhancedRequestEventListener = (event: CustomEvent) => {
     replaceRequestPathParams(event);
 };
 
@@ -84,7 +79,7 @@ function replaceFromFormData(event: CustomEvent) {
 }
 
 function addEventListeners(domSettlingBehaviorEventHandler: (event: CustomEvent) => void) {
-    document.addEventListener("htmx:configRequest", configRequestEventListener);
+    document.addEventListener("htmx:configRequest", configEnhancedRequestEventListener);
     document.body.addEventListener("htmx:afterSettle", domSettlingBehaviorEventHandler);
 }
 
