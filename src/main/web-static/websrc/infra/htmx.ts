@@ -89,6 +89,12 @@ function addEventListeners(domSettlingBehaviorEventHandler: (event: CustomEvent)
 }
 
 export const htmxInfra = {
+    /**
+     * Initializes the htmx infrastructure of the application.
+     *
+     * @param domSettlingBehaviorEventHandler - The handler for the default DOM settling behavior event.
+     * Will be applied to the body and be triggered in after settiling of any child element.
+     */
     init(domSettlingBehaviorEventHandler: (event: CustomEvent) => void) {
         addEventListeners(domSettlingBehaviorEventHandler);
     },
