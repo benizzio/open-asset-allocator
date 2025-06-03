@@ -74,7 +74,7 @@ func formatErrorMessage(validationError validator.FieldError, structType reflect
 	)
 }
 
-// formatValidationError formats validation validationErrors into readable messages.
+// formatValidationError formats validation error into readable messages.
 //
 // Authored by: GitHub Copilot
 func formatValidationError(fieldError validator.FieldError) string {
