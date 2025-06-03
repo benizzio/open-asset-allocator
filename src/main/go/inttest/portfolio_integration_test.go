@@ -505,8 +505,8 @@ func TestPutPortfolioWithAllocationStructure(t *testing.T) {
 	var testPortfolioNameBefore = "This Test Portfolio will be updated"
 	var testPortfolioNameAfter = "Test Portfolio update"
 
-	testPortFolio := insertTestPortfolio(t, testPortfolioNameBefore)
-	var testPortfolioIdString = strconv.Itoa(testPortFolio.Id)
+	testPortfolio := insertTestPortfolio(t, testPortfolioNameBefore)
+	var testPortfolioIdString = strconv.Itoa(testPortfolio.Id)
 
 	var allocationStructureJSONFragment = `
 		"allocationStructure": {
