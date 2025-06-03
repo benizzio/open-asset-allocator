@@ -113,10 +113,10 @@ Configuration can be done in [.env](src/main/docker/.env)
 
 ### Roadmap(ish)
 
-- [ ] Portfolio management:
+- [x] Portfolio management:
     - [x] new portfolio - add form based data input (beginner-user-friendly - start with fixed base structure class->
       asset)
-    - [ ] edit portfolio - base fields (e.g. name) only
+    - [x] edit portfolio - base fields (e.g. name) only
     - [ ] add structure management (add/remove levels)
 - Portfolio history
     - [ ] allow inclusion of external cash inflow via UI (as separate "input" class)
