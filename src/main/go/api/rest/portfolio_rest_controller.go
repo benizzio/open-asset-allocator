@@ -96,7 +96,7 @@ func (controller *PortfolioRESTController) getPortfolioAllocationHistory(context
 func (controller *PortfolioRESTController) postPortfolio(context *gin.Context) {
 
 	var portfolioDTS model.PortfolioDTS
-	valid, err := util.BindAndValidateJSON(context, &portfolioDTS)
+	valid, err := util.BindAndValidateJSONWithInvalidResponse(context, &portfolioDTS)
 	if err != nil {
 		infra.HandleAPIError(context, bindPortfolioErrorMessage, err)
 		return
@@ -118,7 +118,7 @@ func (controller *PortfolioRESTController) postPortfolio(context *gin.Context) {
 func (controller *PortfolioRESTController) putPortfolio(context *gin.Context) {
 
 	var portfolioDTS model.PortfolioDTS
-	valid, err := util.BindAndValidateJSON(context, &portfolioDTS)
+	valid, err := util.BindAndValidateJSONWithInvalidResponse(context, &portfolioDTS)
 	if err != nil {
 		infra.HandleAPIError(context, bindPortfolioErrorMessage, err)
 		return

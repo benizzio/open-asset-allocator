@@ -27,7 +27,10 @@ must always remain to solve a real problem.
 - be [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself)
     - when a block of code gets too big (not a hard rule, but around more than 3 instructions with multiple lines), the
       human eye perceives it better if it is divided into smaller contextual blocks, which facilitates understanding, so
-      use them. Examples:
+      use them
+    - when dividing a code unit into blocks, if it is a function, a blank line after the function declaration and before
+      the first instruction is preferred, as it makes it more readable
+    - Examples:
       ```go 
       
       // bad example
@@ -111,3 +114,11 @@ must always remain to solve a real problem.
         <...>
         result, err := doSomethingElse()
         ```
+- most of the project's generic, reusable code can be found in the following listed packages. New code should be, in
+  general, attentive to those packages to be DRY.
+    - [infra](src/main/go/infra): represents the DDD infrastructure layer, and includes a lot of stack and utilitary
+      code;
+    - [inttestinfra](src/main/go/inttest/infra): represents the DDD infrastructure layer specific for integration tests,
+      and includes a lot of stack and utilitary code;
+    - [langext](src/main/go/langext): includes implementations that extend the Go language and are not available in the
+      standard implementations at the time of writing.

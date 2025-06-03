@@ -56,6 +56,27 @@ func StructString[T interface{}](source *T) string {
 	return string(out)
 }
 
+// GetStructType extracts the reflect.Type from a struct or pointer to struct.
+// It handles unwrapping pointer types to get the underlying struct type.
+//
+// Parameters:
+//   - targetStruct: The struct or pointer to struct to get the type from
+//
+// Returns:
+//   - The reflect.Type of the struct
+//
+// Authored by: GitHub Copilot
+func GetStructType(targetStruct interface{}) reflect.Type {
+
+	structType := reflect.TypeOf(targetStruct)
+
+	if structType.Kind() == reflect.Ptr {
+		structType = structType.Elem()
+	}
+
+	return structType
+}
+
 // GetStructName extracts the struct name from a struct or pointer to struct.
 // It handles both struct values and pointers to structs.
 //
@@ -67,13 +88,7 @@ func StructString[T interface{}](source *T) string {
 //
 // Authored by: GitHub Copilot
 func GetStructName(targetStruct interface{}) string {
-	structType := reflect.TypeOf(targetStruct)
-
-	// Handle pointer types
-	if structType.Kind() == reflect.Ptr {
-		structType = structType.Elem()
-	}
-
+	structType := GetStructType(targetStruct)
 	return structType.Name()
 }
 

@@ -4,17 +4,18 @@ import (
 	"errors"
 	"fmt"
 	"github.com/benizzio/open-asset-allocator/api/rest/model"
+	"github.com/benizzio/open-asset-allocator/langext"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"net/http"
 	"reflect"
 )
 
-// BindAndValidateJSON binds the request body to the provided struct and validates it.
+// BindAndValidateJSONWithInvalidResponse binds the request body to the provided struct and validates it.
 // It handles validation validationErrors by returning appropriate HTTP responses.
 //
 // Authored by: GitHub Copilot
-func BindAndValidateJSON(context *gin.Context, bindingTarget interface{}) (bool, error) {
+func BindAndValidateJSONWithInvalidResponse(context *gin.Context, bindingTarget interface{}) (bool, error) {
 	if err := context.ShouldBindJSON(bindingTarget); err == nil {
 		return true, nil
 	} else if validationErrors := extractValidationErrors(err); validationErrors != nil {
@@ -40,15 +41,14 @@ func extractValidationErrors(inputError error) validator.ValidationErrors {
 	return nil
 }
 
-// formatValidationErrorMessages converts validation validationErrors into human-readable messages.
+// formatValidationErrorMessages converts validation errors into human-readable messages.
 //
 // Authored by: GitHub Copilot
 func formatValidationErrorMessages(validationErrors validator.ValidationErrors, targetStruct interface{}) []string {
+
 	errorMessages := make([]string, 0, len(validationErrors))
-	structType := reflect.TypeOf(targetStruct)
-	if structType.Kind() == reflect.Ptr {
-		structType = structType.Elem()
-	}
+
+	structType := langext.GetStructType(targetStruct)
 
 	for _, validationError := range validationErrors {
 		message := formatErrorMessage(validationError, structType)
