@@ -5,6 +5,7 @@ import (
 	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/benizzio/open-asset-allocator/infra/util"
+	"github.com/benizzio/open-asset-allocator/langext"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -35,6 +36,11 @@ func (controller *PortfolioRESTController) BuildRoutes() []infra.RESTRoute {
 			Method:   http.MethodPost,
 			Path:     portfolioPath,
 			Handlers: gin.HandlersChain{controller.postPortfolio},
+		},
+		{
+			Method:   http.MethodPut,
+			Path:     portfolioPath,
+			Handlers: gin.HandlersChain{controller.putPortfolio},
 		},
 	}
 }
@@ -90,7 +96,12 @@ func (controller *PortfolioRESTController) getPortfolioAllocationHistory(context
 func (controller *PortfolioRESTController) postPortfolio(context *gin.Context) {
 
 	var portfolioDTS model.PortfolioDTS
-	if err := util.BindAndValidateJSON(context, &portfolioDTS); err != nil {
+	valid, err := util.BindAndValidateJSONWithInvalidResponse(context, &portfolioDTS)
+	if err != nil {
+		infra.HandleAPIError(context, bindPortfolioErrorMessage, err)
+		return
+	}
+	if !valid {
 		return
 	}
 
@@ -102,6 +113,42 @@ func (controller *PortfolioRESTController) postPortfolio(context *gin.Context) {
 
 	var responseBody = model.MapToPortfolioDTS(persistedPortfolio)
 	context.JSON(http.StatusCreated, responseBody)
+}
+
+func (controller *PortfolioRESTController) putPortfolio(context *gin.Context) {
+
+	var portfolioDTS model.PortfolioDTS
+	valid, err := util.BindAndValidateJSONWithInvalidResponse(context, &portfolioDTS)
+	if err != nil {
+		infra.HandleAPIError(context, bindPortfolioErrorMessage, err)
+		return
+	}
+	if !valid {
+		return
+	}
+
+	if portfolioDTS.Id == nil || langext.IsZeroValue(portfolioDTS.Id) {
+		var validationErrors = util.BuildCustomValidationErrorsBuilder().
+			CustomValidationError(
+				portfolioDTS,
+				"Id",
+				"required",
+				"Portfolio ID is required for update",
+				nil,
+			).
+			Build()
+		util.RespondWithCustomValidationErrors(context, validationErrors, portfolioDTS)
+		return
+	}
+
+	var portfolio = model.MapToPortfolio(&portfolioDTS)
+	persistedPortfolio, err := controller.portfolioDomService.PersistPortfolio(portfolio)
+	if infra.HandleAPIError(context, "Error updating portfolio", err) {
+		return
+	}
+
+	var responseBody = model.MapToPortfolioDTS(persistedPortfolio)
+	context.JSON(http.StatusOK, responseBody)
 }
 
 func BuildPortfolioRESTController(portfolioDomService *service.PortfolioDomService) *PortfolioRESTController {

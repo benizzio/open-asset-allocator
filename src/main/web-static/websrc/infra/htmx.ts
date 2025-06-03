@@ -3,10 +3,15 @@ export type EventDetail = {
     [key: string]: unknown;
 };
 
-const configRequestEventListener = (event: CustomEvent) => {
+const configEnhancedRequestEventListener = (event: CustomEvent) => {
     replaceRequestPathParams(event);
 };
 
+/**
+ * Enhances the htmx request by replacing path parameters from alternative sources.
+ *
+ * @param event - The htmx event
+ */
 function replaceRequestPathParams(event: CustomEvent) {
 
     const requestPath = event.detail.path as string;
@@ -17,6 +22,13 @@ function replaceRequestPathParams(event: CustomEvent) {
     }
 }
 
+/**
+ * Enhances the htmx request by replacing path parameters from the event chain
+ * (e.g., from the event that triggered the current one).
+ *
+ * @param event - The htmx event, where the triggering event may contain
+ * { detail: { routerPathData: { [key: string]: unknown } } }
+ */
 function replaceFromEventChain(event: CustomEvent) {
 
     const triggeringEvent = event.detail?.triggeringEvent as CustomEvent;
@@ -33,6 +45,11 @@ function replaceFromEventChain(event: CustomEvent) {
     }
 }
 
+/**
+ * Enhances the htmx request by replacing path parameters from form data values.
+ *
+ * @param event - The htmx event
+ */
 function replaceFromFormData(event: CustomEvent) {
 
     const formData = event.detail.formData as FormData;
@@ -62,11 +79,17 @@ function replaceFromFormData(event: CustomEvent) {
 }
 
 function addEventListeners(domSettlingBehaviorEventHandler: (event: CustomEvent) => void) {
-    document.addEventListener("htmx:configRequest", configRequestEventListener);
+    document.addEventListener("htmx:configRequest", configEnhancedRequestEventListener);
     document.body.addEventListener("htmx:afterSettle", domSettlingBehaviorEventHandler);
 }
 
 export const htmxInfra = {
+    /**
+     * Initializes the htmx infrastructure of the application.
+     *
+     * @param domSettlingBehaviorEventHandler - The handler for the default DOM settling behavior event.
+     * Will be applied to the body and be triggered in after settiling of any child element.
+     */
     init(domSettlingBehaviorEventHandler: (event: CustomEvent) => void) {
         addEventListeners(domSettlingBehaviorEventHandler);
     },

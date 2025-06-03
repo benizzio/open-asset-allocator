@@ -42,9 +42,9 @@
             <div class="card portfolio-card border border-primary border-dashed">
 
                 <form id="new-portfolio-form"
+                      class="needs-validation"
                       hx-post="/api/portfolio"
                       hx-ext="json-enc"
-                      class="needs-validation"
                       hx-validate="true"
                       hx-swap="none"
                       hx-on-htmx-after-request="reloadPortfolios(this)"
@@ -56,10 +56,10 @@
                         <input type="text"
                                name="name"
                                class="form-control"
-                               id="exampleFormControlInput1"
                                placeholder="Name"
                                aria-label="Name"
                                required
+                               autocomplete="off"
                         />
 
                     </div>

@@ -12,9 +12,9 @@ import { Match } from "navigo";
 // =============================================================================
 
 const HTMX_TRIGGER_ON_ROUTE_ATTRIBUTE = "data-hx-trigger-on-route";
-const HTMX_CLEAN_ON_EXIT_ROUTE_ATTRIBUTE = HTMX_TRIGGER_ON_ROUTE_ATTRIBUTE + "-clean";
+const HTMX_CLEAN_ON_EXIT_ROUTE_ATTRIBUTE = "data-hx-trigger-on-route-clean-on-exit";
 const HTMX_TRIGGER_ON_ROUTE_EVENT_SEPARATOR = "!";
-const HTMX_TRIGGER_ON_ROUTE_BOUND_FLAG = "hx-trigger-on-route-bound";
+const HTMX_TRIGGER_ON_ROUTE_BOUND_FLAG = "data-hx-trigger-on-route-bound";
 
 const ROUTE_HANDLER_MAP = new Map<HTMLElement, (match: Match) => void>();
 

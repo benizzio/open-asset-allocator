@@ -271,3 +271,29 @@ func ExecuteDBQuery(sql string) error {
 
 	return nil
 }
+
+func FetchWithDBQuery(sql string, rowMappingFunction func(rows *dbx.Rows) error) error {
+
+	var query = DatabaseConnection.NewQuery(sql)
+	rows, err := query.Rows()
+	if err != nil {
+		glog.Errorf("Error executing query: %s", err)
+		return err
+	}
+
+	defer func(rows *dbx.Rows) {
+		err := rows.Close()
+		if err != nil {
+			glog.Errorf("Error closing rows: %s", err)
+		}
+	}(rows)
+
+	for rows.Next() {
+		if err := rowMappingFunction(rows); err != nil {
+			glog.Errorf("Error mapping row: %s", err)
+			return err
+		}
+	}
+
+	return nil
+}

@@ -1,45 +1,134 @@
 <div id="portfolio-context"
+     class="row justify-content-center align-items-center row-cols-auto my-5"
      hx-get="/api/portfolio/:portfolioId"
-     hx-trigger="route-reached once"
+     hx-trigger="route-reached once, reload-portfolio"
      data-hx-trigger-on-route="/portfolio/:portfolioId/*!route-reached"
      handlebars-template="portfolio-data"
-     class="row justify-content-center align-items-center row-cols-auto my-5"
+     hx-on-htmx-after-settle="preFillEditPortfolioForm()"
 ></div>
 
 <script id="portfolio-data" type="text/x-handlebars-template">
-    <span class="h2"><span class="badge text-bg-secondary">{{name}}</span> </span>
-    <input type="hidden" name="portfolioId" value="{{id}}" />
+    <span class="h2"><span class="badge text-bg-secondary">{{name}}</span></span>
+    <button type="button" class="btn btn-outline-primary mb-1" data-navigate-to="/portfolio/:portfolioId/edit">
+        <span class="bi bi-pen h5"></span>
+    </button>
+    <input type="hidden" name="portfolioId" value="{{id}}" autocomplete="portfolioId" />
+    <input type="hidden" name="portfolioName" value="{{name}}" autocomplete="portfolioName" />
     {{{ domJSON "portfolio" this }}}
 </script>
 
-<div class="row justify-content-center align-items-center row-cols-auto my-5">
-    <div class="col" hx-get="/websrc/components/main-navigation.html" hx-trigger="load"></div>
-</div>
+<div data-exclusive-display-container>
+    <div data-display-on-regexp-route="portfolio\/([0-9]+)\/?(history|allocation\-map|allocation|$)"
+         style="display: none"
+    >
+        <div class="row justify-content-center align-items-center row-cols-auto my-5">
+            <div class="col" hx-get="/websrc/components/main-navigation.html" hx-trigger="load"></div>
+        </div>
 
-<div class="row justify-content-center align-items-center"
-     data-exclusive-display-container
->
-    <div class="col"
-         data-hx-trigger-on-route="/portfolio/:portfolioId/history!load-portfolio"
-         data-display-on-route="/portfolio/:portfolioId/history"
-         hx-get="/websrc/pages/portfolio-history.html"
-         hx-trigger="load-portfolio once"
+        <div class="row justify-content-center align-items-center"
+             data-exclusive-display-container
+        >
+            <div class="col"
+                 data-hx-trigger-on-route="/portfolio/:portfolioId/history!load-portfolio"
+                 data-display-on-route="/portfolio/:portfolioId/history"
+                 hx-get="/websrc/pages/portfolio-history.html"
+                 hx-trigger="load-portfolio once"
+                 style="display: none"
+            ></div>
+            <div class="col"
+                 data-hx-trigger-on-route="/portfolio/:portfolioId/allocation!load-allocation"
+                 data-display-on-route="/portfolio/:portfolioId/allocation"
+                 hx-get="/websrc/pages/allocation-plan.html"
+                 hx-trigger="load-allocation once"
+                 style="display: none"
+            ></div>
+            <div class="col"
+                 data-hx-trigger-on-route="/portfolio/:portfolioId/allocation-map!load-allocation-map"
+                 data-display-on-route="/portfolio/:portfolioId/allocation-map"
+                 hx-get="/websrc/pages/allocation-map.html"
+                 hx-trigger="load-allocation-map once"
+                 style="display: none"
+            ></div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center align-items-stretch row-cols-auto my-5"
          style="display: none"
-    ></div>
-    <div class="col"
-         data-hx-trigger-on-route="/portfolio/:portfolioId/allocation!load-allocation"
-         data-display-on-route="/portfolio/:portfolioId/allocation"
-         hx-get="/websrc/pages/allocation-plan.html"
-         hx-trigger="load-allocation once"
-         style="display: none"
-    ></div>
-    <div class="col"
-         data-hx-trigger-on-route="/portfolio/:portfolioId/allocation-map!load-allocation-map"
-         data-display-on-route="/portfolio/:portfolioId/allocation-map"
-         hx-get="/websrc/pages/allocation-map.html"
-         hx-trigger="load-allocation-map once"
-         style="display: none"
-    ></div>
+         data-display-on-route="/portfolio/:portfolioId/edit"
+    >
+        <div class="col">
+            <div class="card portfolio-card border border-primary border-dashed">
+
+                <form id="edit-portfolio-form"
+                      class="needs-validation"
+                      hx-put="/api/portfolio"
+                      hx-ext="json-enc"
+                      hx-validate="true"
+                      hx-swap="none"
+                      hx-on-htmx-after-request="reloadPortfolio(event)"
+                >
+                    <div class="card-body">
+
+                        <h5 class="card-title">Edit portfolio</h5>
+
+                        <input type="hidden" name="id" />
+
+                        <input type="text"
+                               name="name"
+                               class="form-control"
+                               placeholder="Name"
+                               aria-label="Name"
+                               required
+                               autocomplete="off"
+                        />
+
+                    </div>
+                    <div class="card-footer text-end">
+                        <button type="button" class="btn btn-secondary" data-navigate-to="/portfolio/:portfolioId">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+
+                <script type="text/javascript">
+                    function reloadPortfolio(event) {
+
+                        const portfolioId = event.detail.requestConfig.parameters.get("id");
+
+                        const form = event.target;
+                        if (form.checkValidity()) {
+                            form.reset();
+                            const portfolioElement = document.querySelector("#portfolio-context");
+                            htmx.trigger(portfolioElement, "reload-portfolio", {
+                                routerPathData: {
+                                    portfolioId: portfolioId
+                                }
+                            });
+                            navigateTo(`/portfolio/${portfolioId}`);
+                        }
+                    }
+
+                    function preFillEditPortfolioForm() {
+
+                        const portfolioDataElement = document.querySelector("#portfolio-context");
+                        const portfolioIdField = portfolioDataElement.querySelector("input[name='portfolioId']");
+                        const portfolionNameField = portfolioDataElement.querySelector("input[name='portfolioName']");
+
+                        const portfolioId = portfolioIdField.value;
+                        const portfolionName = portfolionNameField.value;
+
+                        const editPortfolioForm = document.querySelector("#edit-portfolio-form");
+                        const editPortfolioIdInput = editPortfolioForm.querySelector("input[name='id']");
+                        editPortfolioIdInput.value = portfolioId;
+                        const editPortfolioNameInput = editPortfolioForm.querySelector("input[name='name']");
+                        editPortfolioNameInput.value = portfolionName;
+                    }
+                </script>
+
+            </div>
+        </div>
+    </div>
 </div>
 
 <script type="text/javascript">

@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/benizzio/open-asset-allocator/domain"
+	"github.com/benizzio/open-asset-allocator/langext"
 	"sort"
 	"strings"
 )
@@ -36,8 +37,9 @@ func MapToPortfolioDTSs(portfolios []*domain.Portfolio) []PortfolioDTS {
 
 func MapToPortfolioDTS(portfolio *domain.Portfolio) *PortfolioDTS {
 	var structure = mapToAllocationStructureDTS(portfolio.AllocationStructure)
+	var portfolioId = langext.ParseableInt(portfolio.Id)
 	var portfolioDTS = PortfolioDTS{
-		Id:                  &portfolio.Id,
+		Id:                  &portfolioId,
 		Name:                portfolio.Name,
 		AllocationStructure: &structure,
 	}
@@ -55,7 +57,7 @@ func MapToPortfolio(portfolioDTS *PortfolioDTS) *domain.Portfolio {
 
 	var portfolioId int
 	if portfolioDTS.Id != nil {
-		portfolioId = *portfolioDTS.Id
+		portfolioId = int(*portfolioDTS.Id)
 	}
 
 	return &domain.Portfolio{

@@ -5,7 +5,7 @@ import (
 	"github.com/benizzio/open-asset-allocator/domain/allocation"
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/benizzio/open-asset-allocator/infra/sqlext"
-	"github.com/benizzio/open-asset-allocator/infra/util"
+	"github.com/benizzio/open-asset-allocator/langext"
 	dbx "github.com/go-ozzo/ozzo-dbx"
 	"github.com/shopspring/decimal"
 )
@@ -115,7 +115,7 @@ func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlanIdentifiers
 		)
 	}
 
-	return util.ToPointerSlice(queryResult), nil
+	return langext.ToPointerSlice(queryResult), nil
 }
 
 func (repository *AllocationPlanRDBMSRepository) mapPlannedAllocationRows(rows []PlannedAllocationJoinedRowDTS) (

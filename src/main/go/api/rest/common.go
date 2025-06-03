@@ -7,4 +7,5 @@ const (
 	timeFrameTagParam          = "timeFrameTag"
 	planIdParam                = "planId"
 	getPortfolioIdErrorMessage = "Error getting portfolioId url parameter"
+	bindPortfolioErrorMessage  = "Error binding portfolio from request body"
 )

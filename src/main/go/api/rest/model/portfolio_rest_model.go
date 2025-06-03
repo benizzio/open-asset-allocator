@@ -2,10 +2,11 @@ package model
 
 import (
 	"github.com/benizzio/open-asset-allocator/domain"
+	"github.com/benizzio/open-asset-allocator/langext"
 )
 
 type PortfolioDTS struct {
-	Id                  *int                    `json:"id"`
+	Id                  *langext.ParseableInt   `json:"id"`
 	Name                string                  `json:"name" binding:"required"`
 	AllocationStructure *AllocationStructureDTS `json:"allocationStructure"`
 }
