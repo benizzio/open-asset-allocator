@@ -150,6 +150,9 @@ func (repository *PortfolioRDBMSRepository) UpdatePortfolio(portfolio *domain.Po
 
 	var updatedPortfolio domain.Portfolio
 	err = repository.dbAdapter.Read(&updatedPortfolio, portfolio.Id)
+	if err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "Error retrieving updated portfolio", repository)
+	}
 
 	return &updatedPortfolio, nil
 }

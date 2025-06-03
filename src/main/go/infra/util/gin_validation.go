@@ -29,7 +29,7 @@ func BindAndValidateJSONWithInvalidResponse(context *gin.Context, bindingTarget 
 	}
 }
 
-// extractValidationErrors attempts to extract validation validationErrors from the given error.
+// extractValidationErrors attempts to extract validation errors from the given error.
 // Returns nil if the error is not a validation error.
 //
 // Authored by: GitHub Copilot

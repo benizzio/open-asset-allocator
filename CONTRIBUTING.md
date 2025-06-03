@@ -1,4 +1,4 @@
-# Contibuting guidelines for colaborators (including context for LLM code assistants and agents)
+# Contributing guidelines for collaborators (including LLM code assistants and agents)
 
 ## Code of conduct (humans only)
 
