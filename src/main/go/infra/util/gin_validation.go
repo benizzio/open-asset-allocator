@@ -41,22 +41,6 @@ func extractValidationErrors(inputError error) validator.ValidationErrors {
 	return nil
 }
 
-// formatErrorMessage formats a single validation error into a human-readable message.
-//
-// Authored by: GitHub Copilot
-func formatErrorMessage(validationError validator.FieldError, structType reflect.Type) string {
-	// Extract needed information from validation error
-	namespace := validationError.Namespace()
-	fieldName := validationError.Field()
-	jsonFieldName := getJSONFieldName(namespace, fieldName, structType)
-
-	return fmt.Sprintf(
-		"Field '%s' failed validation: %s",
-		jsonFieldName,
-		formatValidationError(validationError),
-	)
-}
-
 // formatValidationErrorMessages converts validation validationErrors into human-readable messages.
 //
 // Authored by: GitHub Copilot
@@ -75,15 +59,19 @@ func formatValidationErrorMessages(validationErrors validator.ValidationErrors, 
 	return errorMessages
 }
 
-// sendValidationErrorResponse sends a standardized HTTP response for validation validationErrors.
+// formatErrorMessage formats a single validation error into a human-readable message.
 //
 // Authored by: GitHub Copilot
-func sendValidationErrorResponse(context *gin.Context, errorMessages []string) {
-	context.JSON(
-		http.StatusBadRequest, model.ErrorResponse{
-			ErrorMessage: "Validation failed",
-			Details:      errorMessages,
-		},
+func formatErrorMessage(validationError validator.FieldError, structType reflect.Type) string {
+	// Extract needed information from validation error
+	namespace := validationError.Namespace()
+	fieldName := validationError.Field()
+	jsonFieldName := getJSONFieldName(namespace, fieldName, structType)
+
+	return fmt.Sprintf(
+		"Field '%s' failed validation: %s",
+		jsonFieldName,
+		formatValidationError(validationError),
 	)
 }
 
@@ -101,6 +89,18 @@ func formatValidationError(fieldError validator.FieldError) string {
 	default:
 		return fieldError.Tag()
 	}
+}
+
+// sendValidationErrorResponse sends a standardized HTTP response for validation validationErrors.
+//
+// Authored by: GitHub Copilot
+func sendValidationErrorResponse(context *gin.Context, errorMessages []string) {
+	context.JSON(
+		http.StatusBadRequest, model.ErrorResponse{
+			ErrorMessage: "Validation failed",
+			Details:      errorMessages,
+		},
+	)
 }
 
 // getNamespaceInfo extracts field name and builds the full namespace
