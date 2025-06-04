@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/usr/bin/env zsh
 
 script_dir=$(dirname "$0")
 project_root=$(realpath "$script_dir")
