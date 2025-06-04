@@ -36,6 +36,6 @@ build:
 start:
 	@./start.sh
 
-#Stops the application in production mode
+# Stops the application in production mode
 stop:
 	@./stop.sh
