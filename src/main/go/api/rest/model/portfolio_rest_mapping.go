@@ -91,6 +91,7 @@ func aggregateHistoryAsDTSMap(portfolioHistory []*domain.PortfolioAllocation) po
 
 func portfolioAllocationToAllocationDTS(portfolioAllocation *domain.PortfolioAllocation) PortfolioAllocationDTS {
 	return PortfolioAllocationDTS{
+		AssetId:          portfolioAllocation.Asset.Id,
 		AssetName:        portfolioAllocation.Asset.Name,
 		AssetTicker:      portfolioAllocation.Asset.Ticker,
 		Class:            portfolioAllocation.Class,
