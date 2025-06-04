@@ -1,21 +1,35 @@
-<div class="accordion"
-     id="accordion-portfolio-history"
-     handlebars-template="template-portfolio-history"
-     hx-get="/api/portfolio/:portfolioId/history"
-     hx-trigger="load"
-     hx-include="[name='portfolioId']"
-     hx-on-htmx-after-settle="initPortfolioHistoryHierarchyLabels()"
->
-    <div class="accordion-item placeholder-glow">
-        <h2 class="accordion-header placeholder col-12">placeholder</h2>
+<!-- TODO move to components -->
+<div data-exclusive-display-container>
+    <div class="accordion"
+         id="accordion-portfolio-history"
+         handlebars-template="template-portfolio-history"
+         hx-get="/api/portfolio/:portfolioId/history"
+         hx-trigger="load"
+         hx-include="[name='portfolioId']"
+         hx-on-htmx-after-settle="initPortfolioHistoryHierarchyLabels()"
+         data-display-on-route="/portfolio/:portfolioId/history"
+    >
+        <div class="accordion-item placeholder-glow">
+            <h2 class="accordion-header placeholder col-12">placeholder</h2>
+        </div>
+        <div class="accordion-item placeholder-glow">
+            <h2 class="accordion-header placeholder col-12">placeholder</h2>
+        </div>
     </div>
-    <div class="accordion-item placeholder-glow">
-        <h2 class="accordion-header placeholder col-12">placeholder</h2>
+
+    <div data-display-on-route="/portfolio/:portfolioId/history/manage">
+        <div class="card border-dark mb-3">
+            <div class="card-header">Manage portfolio allocation data</div>
+            <div class="card-body">
+                
+            </div>
+        </div>
     </div>
 </div>
 
 <script id="template-portfolio-history" type="text/x-handlebars-template">
-
+    <button type="button" class="btn btn-outline-primary mb-2" onclick="navigateToManage()">
+        <span class="h2 bi bi-database-gear"></span></button>
     {{#each .}}
         <div class="accordion-item">
 
@@ -71,6 +85,11 @@
 <script type="text/javascript">
     function initPortfolioHistoryHierarchyLabels() {
         setTextContentWithTopHierarchyName("[id^='hierarchy-level-portfolio-chart-']");
+    }
+
+    function navigateToManage() {
+        const portfolioId = document.querySelector("[name='portfolioId']").value;
+        navigateTo(`/portfolio/${portfolioId}/history/manage`);
     }
 </script>
 
