@@ -21,15 +21,18 @@
         <div class="card border-dark mb-3">
             <div class="card-header">Manage portfolio allocation data</div>
             <div class="card-body">
-                
+                <!-- TODO create allocation manage functionality and form -->
             </div>
         </div>
     </div>
 </div>
 
 <script id="template-portfolio-history" type="text/x-handlebars-template">
+
     <button type="button" class="btn btn-outline-primary mb-2" onclick="navigateToManage()">
-        <span class="h2 bi bi-database-gear"></span></button>
+        <span class="h2 bi bi-database-gear"></span>
+    </button>
+
     {{#each .}}
         <div class="accordion-item">
 
@@ -83,6 +86,7 @@
 </script>
 
 <script type="text/javascript">
+
     function initPortfolioHistoryHierarchyLabels() {
         setTextContentWithTopHierarchyName("[id^='hierarchy-level-portfolio-chart-']");
     }
@@ -91,6 +95,7 @@
         const portfolioId = document.querySelector("[name='portfolioId']").value;
         navigateTo(`/portfolio/${portfolioId}/history/manage`);
     }
+    
 </script>
 
 <script id="portfolio-allocation-chart-options" type="application/json">
