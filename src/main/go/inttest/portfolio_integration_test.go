@@ -112,6 +112,7 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 				"timeFrameTag":"202503",
 				"allocations":[
 					{
+						"assetId": 1,
 						"assetName":"SPDR Bloomberg 1-3 Month T-Bill ETF",
 						"assetTicker":"ARCA:BIL",
 						"class":"BONDS",
@@ -125,6 +126,7 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 				"timeFrameTag":"202501",
 				"allocations":[
 					{
+						"assetId": 1,
 						"assetName":"SPDR Bloomberg 1-3 Month T-Bill ETF",
 						"assetTicker":"ARCA:BIL",
 						"class":"BONDS",
@@ -132,6 +134,7 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 						"totalMarketValue":10000
 					},
 					{
+						"assetId": 2,
 						"assetName":"iShares 0-5 Year TIPS Bond ETF",
 						"assetTicker":"ARCA:STIP",
 						"class":"BONDS",
@@ -139,6 +142,7 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 						"totalMarketValue":8000
 					},
 					{
+						"assetId": 3,
 						"assetName":"iShares 7-10 Year Treasury Bond ETF",
 						"assetTicker":"NasdaqGM:IEF",
 						"class":"BONDS",
@@ -146,6 +150,7 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 						"totalMarketValue":6000
 					},
 					{
+						"assetId": 4,
 						"assetName":"iShares 20+ Year Treasury Bond ETF",
 						"assetTicker":"NasdaqGM:TLT",
 						"class":"BONDS",
@@ -153,6 +158,7 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 						"totalMarketValue":3000
 					},
 					{
+						"assetId": 5,	
 						"assetName":"iShares Short Treasury Bond ETF",
 						"assetTicker":"NasdaqGM:SHV",
 						"class":"STOCKS",
@@ -160,6 +166,7 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 						"totalMarketValue":9000
 					},
 					{
+ 						"assetId": 7,
 						"assetName":"SPDR S\u0026P 500 ETF Trust",
 						"assetTicker":"ARCA:SPY",
 						"class":"STOCKS",
@@ -167,6 +174,7 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 						"totalMarketValue":8000
 					},
 					{
+						"assetId": 6,
 						"assetName":"iShares Msci Brazil ETF",
 						"assetTicker":"ARCA:EWZ",
 						"class":"STOCKS",
@@ -175,6 +183,40 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 					}
 				],
 				"totalMarketValue":45000
+			}
+		]
+	`
+
+	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
+}
+
+func TestGetPortfolioAllocationHistoryForTimeFrame(t *testing.T) {
+
+	response, err := http.Get(inttestinfra.TestAPIURLprefix + "/portfolio/1/history?timeFrameTag=202503")
+	assert.NoError(t, err)
+
+	assert.Equal(t, http.StatusOK, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+
+	var actualResponseJSON = string(body)
+	var expectedResponseJSON = `
+		[
+			{
+				"timeFrameTag":"202503",
+				"allocations":[
+					{
+						"assetId": 1,
+						"assetName":"SPDR Bloomberg 1-3 Month T-Bill ETF",
+						"assetTicker":"ARCA:BIL",
+						"class":"BONDS",
+						"cashReserve":false,
+						"totalMarketValue":10000
+					}
+				],
+				"totalMarketValue":10000
 			}
 		]
 	`

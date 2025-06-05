@@ -28,11 +28,6 @@ func (controller *PortfolioRESTController) BuildRoutes() []infra.RESTRoute {
 			Handlers: gin.HandlersChain{controller.getPortfolio},
 		},
 		{
-			Method:   http.MethodGet,
-			Path:     specificPortfolioPath + "/history",
-			Handlers: gin.HandlersChain{controller.getPortfolioAllocationHistory},
-		},
-		{
 			Method:   http.MethodPost,
 			Path:     portfolioPath,
 			Handlers: gin.HandlersChain{controller.postPortfolio},
@@ -73,24 +68,6 @@ func (controller *PortfolioRESTController) getPortfolio(context *gin.Context) {
 	portfolioDTS := model.MapToPortfolioDTS(portfolio)
 
 	context.JSON(http.StatusOK, portfolioDTS)
-}
-
-func (controller *PortfolioRESTController) getPortfolioAllocationHistory(context *gin.Context) {
-
-	var portfolioIdParam = context.Param(portfolioIdParam)
-	portfolioId, err := strconv.Atoi(portfolioIdParam)
-	if infra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
-		return
-	}
-
-	portfolioHistory, err := controller.portfolioDomService.GetPortfolioAllocationHistory(portfolioId)
-	if infra.HandleAPIError(context, "Error getting portfolio history", err) {
-		return
-	}
-
-	var aggregatedPortfoliohistoryDTS = model.AggregateAndMapToPortfolioHistoryDTSs(portfolioHistory)
-
-	context.JSON(http.StatusOK, aggregatedPortfoliohistoryDTS)
 }
 
 func (controller *PortfolioRESTController) postPortfolio(context *gin.Context) {
