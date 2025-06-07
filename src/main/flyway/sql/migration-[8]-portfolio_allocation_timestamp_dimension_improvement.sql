@@ -33,4 +33,4 @@ FROM portfolio_allocation_obs_time pot
 WHERE paf.time_frame_tag = pot.observation_time_tag
 ;
 
-ALTER TABLE portfoliio_allocation_fact ALTER COLUMN observation_time_id SET NOT NULL;
+ALTER TABLE portfolio_allocation_fact ALTER COLUMN observation_time_id SET NOT NULL;

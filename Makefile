@@ -1,5 +1,10 @@
 .DEFAULT_GOAL := build
 
+
+# Runs the tests for the application
+test:
+	./test.sh
+
 # Builds the application for development mode
 dev-build:
 	./build-dev.sh
