@@ -12,6 +12,7 @@ type PortfolioDTS struct {
 }
 
 type PortfolioAllocationDTS struct {
+	AssetId          int    `json:"assetId"`
 	AssetName        string `json:"assetName"`
 	AssetTicker      string `json:"assetTicker"`
 	Class            string `json:"class"`
