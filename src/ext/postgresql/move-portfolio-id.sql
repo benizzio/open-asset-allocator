@@ -23,3 +23,7 @@ UPDATE allocation_plan ap
 SET portfolio_id = (SELECT value::integer FROM temp_vars WHERE key = 'new_portfolio_id')
 WHERE portfolio_id = (SELECT value::integer FROM temp_vars WHERE key = 'portfolio_id')
 ;
+
+DELETE FROM portfolio
+WHERE id = (SELECT value::integer FROM temp_vars WHERE key = 'portfolio_id')
+;
