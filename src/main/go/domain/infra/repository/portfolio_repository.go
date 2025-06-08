@@ -106,25 +106,6 @@ func (repository *PortfolioRDBMSRepository) GetPortfolio(id int) (*domain.Portfo
 	return &result, infra.PropagateAsAppErrorWithNewMessage(err, queryPortfolioError, repository)
 }
 
-// Deprecated: use GetAllPortfolioAllocationsWithinObservationTimestampsLimit
-func (repository *PortfolioRDBMSRepository) GetAllPortfolioAllocations(id int, timeFrameLimit int) (
-	[]*domain.PortfolioAllocation,
-	error,
-) {
-	var query = timeFrameTagsComplement + portfolioAllocationsSQL
-
-	var queryResult []domain.PortfolioAllocation
-	err := repository.dbAdapter.BuildQuery(query).
-		AddParam("timeFrameLimit", timeFrameLimit).
-		AddWhereClause("AND pa.time_frame_tag IN (SELECT time_frame_tag FROM time_frame_tags)").
-		AddWhereClauseAndParam(portfolioIdWhereClause, "portfolioId", id).
-		Build().FindInto(&queryResult)
-
-	var result = langext.ToPointerSlice(queryResult)
-
-	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryAllocationsError, repository)
-}
-
 func (repository *PortfolioRDBMSRepository) GetAllPortfolioAllocationsWithinObservationTimestampsLimit(
 	id int,
 	observationTimestampsLimit int,

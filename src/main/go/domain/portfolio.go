@@ -37,8 +37,6 @@ type PortfolioObservationTimestamp struct {
 type PortfolioRepository interface {
 	GetAllPortfolios() ([]*Portfolio, error)
 	GetPortfolio(id int) (*Portfolio, error)
-	// Deprecated: use GetAllPortfolioAllocationsWithinObservationTimestampsLimit
-	GetAllPortfolioAllocations(id int, timeFrameLimit int) ([]*PortfolioAllocation, error)
 	GetAllPortfolioAllocationsWithinObservationTimestampsLimit(id int, observationTimestampsLimit int) (
 		[]*PortfolioAllocation,
 		error,
