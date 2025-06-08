@@ -3,6 +3,7 @@ package model
 import (
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/langext"
+	"time"
 )
 
 type PortfolioDTS struct {
@@ -21,13 +22,17 @@ type PortfolioAllocationDTS struct {
 }
 
 type PortfolioSnapshotDTS struct {
-	TimeFrameTag     domain.TimeFrameTag      `json:"timeFrameTag"`
-	Allocations      []PortfolioAllocationDTS `json:"allocations"`
-	TotalMarketValue int64                    `json:"totalMarketValue"`
+	// Deprecated: use PortfolioObservationTimestampDTS
+	TimeFrameTag         domain.TimeFrameTag               `json:"timeFrameTag"`
+	ObservationTimestamp *PortfolioObservationTimestampDTS `json:"observationTimestamp"`
+	Allocations          []*PortfolioAllocationDTS         `json:"allocations"`
+	TotalMarketValue     int64                             `json:"totalMarketValue"`
 }
 
+// Deprecated: use portfolioAllocationsPerObservationTimestamp
 type portfolioAllocationsPerTimeFrameMap map[domain.TimeFrameTag][]PortfolioAllocationDTS
 
+// Deprecated: use portfolioAllocationsPerObservationTimestamp
 func (
 	aggregationMap portfolioAllocationsPerTimeFrameMap,
 ) getOrBuild(timeFrameTag domain.TimeFrameTag) []PortfolioAllocationDTS {
@@ -38,6 +43,7 @@ func (
 	return allocationAggregation
 }
 
+// Deprecated: use portfolioAllocationsPerObservationTimestamp
 func (aggregationMap portfolioAllocationsPerTimeFrameMap) aggregate(
 	timeFrameTag domain.TimeFrameTag,
 	allocationDTS PortfolioAllocationDTS,
@@ -47,8 +53,41 @@ func (aggregationMap portfolioAllocationsPerTimeFrameMap) aggregate(
 	aggregationMap[timeFrameTag] = allocationAggregation
 }
 
+// Deprecated: use portfolioAllocationsPerObservationTimestamp
 func (aggregationMap portfolioAllocationsPerTimeFrameMap) getAggregatedMarketValue(timeFrame domain.TimeFrameTag) int64 {
 	var allocationAggregation = aggregationMap[timeFrame]
+	var totalMarketValue = int64(0)
+	for _, allocation := range allocationAggregation {
+		totalMarketValue += allocation.TotalMarketValue
+	}
+	return totalMarketValue
+}
+
+type portfolioAllocationsPerObservationTimestamp map[*PortfolioObservationTimestampDTS][]*PortfolioAllocationDTS
+
+func (aggregationMap portfolioAllocationsPerObservationTimestamp) getOrBuild(
+	observationTimestamp *PortfolioObservationTimestampDTS,
+) []*PortfolioAllocationDTS {
+	var allocationAggregation = aggregationMap[observationTimestamp]
+	if allocationAggregation == nil {
+		allocationAggregation = make([]*PortfolioAllocationDTS, 0)
+	}
+	return allocationAggregation
+}
+
+func (aggregationMap portfolioAllocationsPerObservationTimestamp) aggregate(
+	observationTimestamp *PortfolioObservationTimestampDTS,
+	allocationDTS *PortfolioAllocationDTS,
+) {
+	var allocationAggregation = aggregationMap.getOrBuild(observationTimestamp)
+	allocationAggregation = append(allocationAggregation, allocationDTS)
+	aggregationMap[observationTimestamp] = allocationAggregation
+}
+
+func (aggregationMap portfolioAllocationsPerObservationTimestamp) getAggregatedMarketValue(
+	observationTimestamp *PortfolioObservationTimestampDTS,
+) int64 {
+	var allocationAggregation = aggregationMap[observationTimestamp]
 	var totalMarketValue = int64(0)
 	for _, allocation := range allocationAggregation {
 		totalMarketValue += allocation.TotalMarketValue
@@ -61,9 +100,17 @@ type AllocationPlanIdentifierDTS struct {
 	Name string `json:"name"`
 }
 
+type PortfolioObservationTimestampDTS struct {
+	Id                   int       `json:"id"`
+	ObservationTimeTag   string    `json:"observationTimeTag"`
+	ObservationTimestamp time.Time `json:"observationTimestamp"`
+}
+
 type AnalysisOptionsDTS struct {
-	AvailableHistory []domain.TimeFrameTag          `json:"availableHistory"`
-	AvailablePlans   []*AllocationPlanIdentifierDTS `json:"availablePlans"`
+	// Deprecated: use AvailableObservedHistory
+	AvailableHistory         []domain.TimeFrameTag               `json:"availableHistory"`
+	AvailableObservedHistory []*PortfolioObservationTimestampDTS `json:"availableObservedHistory"`
+	AvailablePlans           []*AllocationPlanIdentifierDTS      `json:"availablePlans"`
 }
 
 type PotentialDivergenceDTS struct {

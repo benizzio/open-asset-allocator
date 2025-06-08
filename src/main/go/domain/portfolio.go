@@ -29,7 +29,7 @@ type AnalysisOptions struct {
 }
 
 type PortfolioObservationTimestamp struct {
-	id                   int
+	Id                   int
 	ObservationTimeTag   string
 	ObservationTimestamp time.Time
 }
