@@ -59,6 +59,15 @@ INSERT INTO pgsql.asset (ticker)
     SELECT ticker FROM asset_insertion
 ;
 
+.print '=> Creating portfolio observation time dimension record, if it does not exist'
+INSERT INTO pgsql.portfolio_allocation_obs_time (observation_time_tag, observation_timestamp)
+SELECT getenv('PORTFOLIO_ALLOCATION_OBS_TIME_TAG') AS observation_time_tag, current_timestamp AS observation_timestamp
+    WHERE NOT EXISTS (
+    SELECT 1 FROM pgsql.portfolio_allocation_obs_time
+    WHERE observation_time_tag = getenv('PORTFOLIO_ALLOCATION_OBS_TIME_TAG')
+)
+;
+
 .print '=> Portfolio data to be inserted, joining data classification from asset dimension mapping classifier file'
 CREATE TEMP VIEW portfolio_allocation_fact_insertion AS
     SELECT
@@ -72,11 +81,13 @@ CREATE TEMP VIEW portfolio_allocation_fact_insertion AS
             adm.asset_quantity::DECIMAL(30,8) * swss.current_price::DECIMAL(30,8),
             swss.current_value
         ) as total_market_value,
-        extract('year' FROM current_date) || lpad(extract('month' FROM current_date)::text, 2, '0') as time_frame_tag,
+        paot.observation_time_tag as time_frame_tag, -- DEPRECATED TODO remove on cleanup
+        paot.id AS observation_time_id,
         getenv('PORTFOLIO_ID')::INTEGER AS portfolio_id
     FROM sws_summary swss
     LEFT JOIN asset_dimension_mapping adm ON adm.ticker = swss.asset
     LEFT JOIN pgsql.asset ass ON ass.ticker = swss.asset
+    JOIN pgsql.portfolio_allocation_obs_time paot ON paot.observation_time_tag = getenv('PORTFOLIO_ALLOCATION_OBS_TIME_TAG')
 ;
 
 SELECT * FROM portfolio_allocation_fact_insertion;
@@ -91,6 +102,7 @@ INSERT INTO pgsql.portfolio_allocation_fact (
         asset_market_price,
         total_market_value,
         time_frame_tag,
+        observation_time_id,
         portfolio_id
     )
     SELECT
@@ -101,6 +113,7 @@ INSERT INTO pgsql.portfolio_allocation_fact (
         asset_market_price,
         total_market_value,
         time_frame_tag,
+        observation_time_id,
         portfolio_id
     FROM portfolio_allocation_fact_insertion
 ;
