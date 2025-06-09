@@ -28,11 +28,6 @@ const (
 		` + infra.WhereClausePlaceholder + `
 		ORDER BY paot.observation_time_tag DESC, paot.observation_timestamp DESC LIMIT {:observationTimestampLimit}
 	`
-	// Deprecated: Use availableObservationTimeComplement
-	timeFrameTagsComplement = `
-		WITH time_frame_tags
-			AS (SELECT DISTINCT time_frame_tag, create_timestamp::date FROM portfolio_allocation_fact pa ORDER BY create_timestamp DESC LIMIT {:timeFrameLimit})
-	`
 	availableObservationTimestampsComplement = `
 		WITH observation_timestamps
 			AS (
@@ -51,7 +46,7 @@ const (
 		` + infra.WhereClausePlaceholder + `
 		ORDER BY pa.time_frame_tag DESC, pa.class ASC, pa.cash_reserve DESC, pa.total_market_value DESC
 	`
-	// TODO refactor to portfolioAllocationsSQL after removal
+	// TODO refactor to portfolioAllocationsSQL after removal of deprecated version
 	portfolioAllocationsNewSQL = `
 		SELECT pa.*, ass.id AS "asset.id", ass.ticker AS "asset.ticker", coalesce(ass.name, '') AS "asset.name", paot.*
 		FROM portfolio_allocation_fact pa
