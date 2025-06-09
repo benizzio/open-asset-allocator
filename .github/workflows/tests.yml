@@ -8,8 +8,6 @@ jobs:
   test:
     name: Go Tests
     runs-on: ubuntu-latest
-    container:
-      image: golang:alpine
     continue-on-error: false
     steps:
       - name: Install ZSH and other dependencies
