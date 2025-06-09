@@ -22,7 +22,7 @@ const (
 		ORDER BY time_frame_tag DESC, create_timestamp DESC LIMIT {:timeFrameLimit}
 	`
 	availableObservationTimestampsSQL = `
-		SELECT DISTINCT ON paot.observation_time_tag, paot.observation_timestamp
+		SELECT DISTINCT paot.*
 		FROM portfolio_allocation_fact pa
 		JOIN portfolio_allocation_obs_time paot ON pa.observation_time_id = paot.id
 		` + infra.WhereClausePlaceholder + `
@@ -48,7 +48,14 @@ const (
 	`
 	// TODO refactor to portfolioAllocationsSQL after removal of deprecated version
 	portfolioAllocationsNewSQL = `
-		SELECT pa.*, ass.id AS "asset.id", ass.ticker AS "asset.ticker", coalesce(ass.name, '') AS "asset.name", paot.*
+		SELECT 
+		    pa.*, 
+		    ass.id AS "asset.id", 
+		    ass.ticker AS "asset.ticker", 
+		    coalesce(ass.name, '') AS "asset.name", 
+		    paot.id AS "observation_timestamp.id",
+		    coalesce(paot.observation_time_tag, '') AS "observation_timestamp.observation_time_tag",
+		    paot.observation_timestamp AS "observation_timestamp.observation_timestamp"
 		FROM portfolio_allocation_fact pa
 		JOIN asset ass ON ass.id = pa.asset_id
 		JOIN portfolio_allocation_obs_time paot ON pa.observation_time_id = paot.id 
@@ -117,6 +124,8 @@ func (repository *PortfolioRDBMSRepository) GetAllPortfolioAllocationsWithinObse
 		AddWhereClauseAndParam(portfolioIdWhereClause, "portfolioId", id).
 		Build().FindInto(&queryResult)
 
+	//TODO proper error handling
+	langext.UnifyStructPointers(queryResult)
 	var result = langext.ToPointerSlice(queryResult)
 
 	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryAllocationsError, repository)
@@ -133,6 +142,8 @@ func (repository *PortfolioRDBMSRepository) FindPortfolioAllocations(id int, tim
 		AddWhereClauseAndParam("AND pa.time_frame_tag = {:timeFrameTag}", "timeFrameTag", timeFrameTag).
 		Build().FindInto(&queryResult)
 
+	//TODO proper error handling
+	langext.UnifyStructPointers(queryResult)
 	var result = langext.ToPointerSlice(queryResult)
 
 	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryAllocationsError, repository)
@@ -155,6 +166,8 @@ func (repository *PortfolioRDBMSRepository) FindPortfolioAllocationsByObservatio
 		).
 		Build().FindInto(&queryResult)
 
+	//TODO proper error handling
+	langext.UnifyStructPointers(queryResult)
 	var result = langext.ToPointerSlice(queryResult)
 
 	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryAllocationsError, repository)
@@ -174,6 +187,7 @@ func (repository *PortfolioRDBMSRepository) GetAllTimeFrameTags(
 		AddParam("timeFrameLimit", timeFrameLimit).
 		Build().FindInto(&queryResult)
 
+	//TODO proper error handling
 	var result = make([]domain.TimeFrameTag, len(queryResult))
 	for i, timeFrame := range queryResult {
 		result[i] = timeFrame.TimeFrameTag
@@ -195,6 +209,7 @@ func (repository *PortfolioRDBMSRepository) GetAvailableObservationTimestamps(
 		AddParam("observationTimestampLimit", observationTimestampsLimit).
 		Build().FindInto(&queryResult)
 
+	//TODO proper error handling
 	var result = langext.ToPointerSlice(queryResult)
 
 	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryObservationTimestampsError, repository)

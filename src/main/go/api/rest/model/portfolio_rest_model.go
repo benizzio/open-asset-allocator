@@ -29,10 +29,10 @@ type PortfolioSnapshotDTS struct {
 	TotalMarketValue     int64                             `json:"totalMarketValue"`
 }
 
-type portfolioAllocationsPerObservationTimestamp map[*PortfolioObservationTimestampDTS][]*PortfolioAllocationDTS
+type portfolioAllocationsPerObservationTimestamp map[PortfolioObservationTimestampDTS][]*PortfolioAllocationDTS
 
 func (aggregationMap portfolioAllocationsPerObservationTimestamp) getOrBuild(
-	observationTimestamp *PortfolioObservationTimestampDTS,
+	observationTimestamp PortfolioObservationTimestampDTS,
 ) []*PortfolioAllocationDTS {
 	var allocationAggregation = aggregationMap[observationTimestamp]
 	if allocationAggregation == nil {
@@ -42,7 +42,7 @@ func (aggregationMap portfolioAllocationsPerObservationTimestamp) getOrBuild(
 }
 
 func (aggregationMap portfolioAllocationsPerObservationTimestamp) aggregate(
-	observationTimestamp *PortfolioObservationTimestampDTS,
+	observationTimestamp PortfolioObservationTimestampDTS,
 	allocationDTS *PortfolioAllocationDTS,
 ) {
 	var allocationAggregation = aggregationMap.getOrBuild(observationTimestamp)
@@ -51,7 +51,7 @@ func (aggregationMap portfolioAllocationsPerObservationTimestamp) aggregate(
 }
 
 func (aggregationMap portfolioAllocationsPerObservationTimestamp) getAggregatedMarketValue(
-	observationTimestamp *PortfolioObservationTimestampDTS,
+	observationTimestamp PortfolioObservationTimestampDTS,
 ) int64 {
 	var allocationAggregation = aggregationMap[observationTimestamp]
 	var totalMarketValue = int64(0)

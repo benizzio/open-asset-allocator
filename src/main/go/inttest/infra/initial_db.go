@@ -187,7 +187,7 @@ const initialStateSQL = `
 			   10000,
 			   '202503',
 			   1,
-			   1
+			   2
 		   )
 	;
 

@@ -71,8 +71,8 @@ func MapToPortfolio(portfolioDTS *PortfolioDTS) *domain.Portfolio {
 // ==========================================
 
 func AggregateAndMapToPortfolioHistoryDTSs(portfolioHistory []*domain.PortfolioAllocation) []*PortfolioSnapshotDTS {
-	portfolioAllocationsPerTimeFrame := aggregateHistoryAsDTSMap(portfolioHistory)
-	aggregatedPortfolioHistory := buildHistoryDTS(portfolioAllocationsPerTimeFrame)
+	portfolioAllocationsPerObsTimestamp := aggregateHistoryAsDTSMap(portfolioHistory)
+	aggregatedPortfolioHistory := buildHistoryDTS(portfolioAllocationsPerObsTimestamp)
 	return aggregatedPortfolioHistory
 }
 
@@ -82,7 +82,7 @@ func aggregateHistoryAsDTSMap(portfolioHistory []*domain.PortfolioAllocation) po
 	for _, portfolioAllocation := range portfolioHistory {
 		var observationTimestampDTS = mapToAvailableObservationTimestampDTS(portfolioAllocation.ObservationTimestamp)
 		var allocationDTS = portfolioAllocationToAllocationDTS(portfolioAllocation)
-		portfolioAllocationsPerTimestamp.aggregate(observationTimestampDTS, allocationDTS)
+		portfolioAllocationsPerTimestamp.aggregate(*observationTimestampDTS, allocationDTS)
 	}
 
 	return portfolioAllocationsPerTimestamp
@@ -108,7 +108,7 @@ func buildHistoryDTS(
 		var totalMarketValue = portfolioAllocationsPerObservationTimestamp.getAggregatedMarketValue(observationTimestamp)
 		//TODO remove
 		var timeFrameTag = domain.TimeFrameTag(observationTimestamp.ObservationTimeTag)
-		portfolioSnapshot := buildSnapshotDTS(timeFrameTag, observationTimestamp, allocations, totalMarketValue)
+		portfolioSnapshot := buildSnapshotDTS(timeFrameTag, &observationTimestamp, allocations, totalMarketValue)
 		aggregatedPortfoliohistory = append(aggregatedPortfoliohistory, portfolioSnapshot)
 	}
 
