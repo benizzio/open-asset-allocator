@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: false
     steps:
-      - name: Install ZSH and other dependencies
+      - name: Install ZSH
         run: |
-          apk update
-          apk add --no-cache zsh git bash coreutils make
+          sudo apt-get update
+          sudo apt-get install -y zsh
 
       - name: Checkout code
         uses: actions/checkout@v3
@@ -24,6 +24,11 @@ jobs:
           GO_VERSION=$(grep -E "^go [0-9]+\.[0-9]+" src/main/go/go.mod | awk '{print $2}')
           echo "GO_VERSION=$GO_VERSION" >> $GITHUB_OUTPUT
       
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ steps.go-version.outputs.GO_VERSION }}
+
       - name: Install dependencies
         run: |
           cd src/main/go
