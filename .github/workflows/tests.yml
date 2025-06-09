@@ -15,7 +15,7 @@ jobs:
       - name: Install ZSH and other dependencies
         run: |
           apk update
-          apk add --no-cache zsh git bash coreutils
+          apk add --no-cache zsh git bash coreutils make
 
       - name: Checkout code
         uses: actions/checkout@v3
