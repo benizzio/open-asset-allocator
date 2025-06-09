@@ -32,5 +32,4 @@ jobs:
 
       - name: Run tests
         run: |
-          cd src/main/go
-          go test ./inttest
+          make test
