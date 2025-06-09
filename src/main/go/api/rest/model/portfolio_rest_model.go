@@ -29,40 +29,6 @@ type PortfolioSnapshotDTS struct {
 	TotalMarketValue     int64                             `json:"totalMarketValue"`
 }
 
-// Deprecated: use portfolioAllocationsPerObservationTimestamp
-type portfolioAllocationsPerTimeFrameMap map[domain.TimeFrameTag][]PortfolioAllocationDTS
-
-// Deprecated: use portfolioAllocationsPerObservationTimestamp
-func (
-	aggregationMap portfolioAllocationsPerTimeFrameMap,
-) getOrBuild(timeFrameTag domain.TimeFrameTag) []PortfolioAllocationDTS {
-	var allocationAggregation = aggregationMap[timeFrameTag]
-	if allocationAggregation == nil {
-		allocationAggregation = make([]PortfolioAllocationDTS, 0)
-	}
-	return allocationAggregation
-}
-
-// Deprecated: use portfolioAllocationsPerObservationTimestamp
-func (aggregationMap portfolioAllocationsPerTimeFrameMap) aggregate(
-	timeFrameTag domain.TimeFrameTag,
-	allocationDTS PortfolioAllocationDTS,
-) {
-	var allocationAggregation = aggregationMap.getOrBuild(timeFrameTag)
-	allocationAggregation = append(allocationAggregation, allocationDTS)
-	aggregationMap[timeFrameTag] = allocationAggregation
-}
-
-// Deprecated: use portfolioAllocationsPerObservationTimestamp
-func (aggregationMap portfolioAllocationsPerTimeFrameMap) getAggregatedMarketValue(timeFrame domain.TimeFrameTag) int64 {
-	var allocationAggregation = aggregationMap[timeFrame]
-	var totalMarketValue = int64(0)
-	for _, allocation := range allocationAggregation {
-		totalMarketValue += allocation.TotalMarketValue
-	}
-	return totalMarketValue
-}
-
 type portfolioAllocationsPerObservationTimestamp map[*PortfolioObservationTimestampDTS][]*PortfolioAllocationDTS
 
 func (aggregationMap portfolioAllocationsPerObservationTimestamp) getOrBuild(

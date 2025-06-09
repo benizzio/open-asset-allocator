@@ -10,9 +10,9 @@ type PortfolioAllocation struct {
 	Class       string
 	CashReserve bool
 	// Deprecated: use PortfolioObservationTimestamp
-	TimeFrameTag            TimeFrameTag
-	ObservationTimestampTag PortfolioObservationTimestamp
-	TotalMarketValue        int64
+	TimeFrameTag         TimeFrameTag
+	ObservationTimestamp *PortfolioObservationTimestamp
+	TotalMarketValue     int64
 }
 
 type Portfolio struct {
@@ -24,7 +24,7 @@ type Portfolio struct {
 type AnalysisOptions struct {
 	// Deprecated: use AvailableObservationTimestamps
 	AvailableHistory               []TimeFrameTag
-	AvailableObservationTimestamps []PortfolioObservationTimestamp
+	AvailableObservationTimestamps []*PortfolioObservationTimestamp
 	AvailablePlans                 []*AllocationPlanIdentifier
 }
 
@@ -47,7 +47,7 @@ type PortfolioRepository interface {
 	// Deprecated: use GetAvailableObservationTimestamps
 	GetAllTimeFrameTags(portfolioId int, timeFrameLimit int) ([]TimeFrameTag, error)
 	GetAvailableObservationTimestamps(portfolioId int, observationTimestampsLimit int) (
-		[]PortfolioObservationTimestamp,
+		[]*PortfolioObservationTimestamp,
 		error,
 	)
 	InsertPortfolio(portfolio *Portfolio) (*Portfolio, error)

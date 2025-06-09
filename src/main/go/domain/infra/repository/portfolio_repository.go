@@ -190,7 +190,7 @@ func (repository *PortfolioRDBMSRepository) GetAllTimeFrameTags(
 func (repository *PortfolioRDBMSRepository) GetAvailableObservationTimestamps(
 	portfolioId int,
 	observationTimestampsLimit int,
-) ([]domain.PortfolioObservationTimestamp, error) {
+) ([]*domain.PortfolioObservationTimestamp, error) {
 
 	var query = availableObservationTimestampsSQL
 
@@ -200,7 +200,9 @@ func (repository *PortfolioRDBMSRepository) GetAvailableObservationTimestamps(
 		AddParam("observationTimestampLimit", observationTimestampsLimit).
 		Build().FindInto(&queryResult)
 
-	return queryResult, infra.PropagateAsAppErrorWithNewMessage(err, queryObservationTimestampsError, repository)
+	var result = langext.ToPointerSlice(queryResult)
+
+	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryObservationTimestampsError, repository)
 }
 
 func (repository *PortfolioRDBMSRepository) InsertPortfolio(portfolio *domain.Portfolio) (*domain.Portfolio, error) {

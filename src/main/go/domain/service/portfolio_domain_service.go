@@ -86,7 +86,7 @@ func (service *PortfolioDomService) GetAllTimeFrameTags(
 func (service *PortfolioDomService) GetAvailableObservationTimestamps(
 	portfolioId int,
 	observationTimestampsLimit int,
-) ([]domain.PortfolioObservationTimestamp, error) {
+) ([]*domain.PortfolioObservationTimestamp, error) {
 	return service.portfolioRepository.GetAvailableObservationTimestamps(portfolioId, observationTimestampsLimit)
 }
 
