@@ -122,8 +122,10 @@ Configuration can be done in [.env](src/main/docker/.env)
     - [ ] allow inclusion of external cash inflow via UI (as separate "input" class)
     - [ ] add form based data input (beginner-user-friendly)
     - [ ] ui to handle data ingestion from known sources
+    - [ ] no content message
 - Allocation Plan
     - [ ] add form based data input (beginner-user-friendly)
+    - [ ] no content message
 - Allocation map:
     - DIVERGENCE: last portfolio history from a timeframe, select an allocation plan to analyze
         - [ ] cash reserve marker on table (label & color)

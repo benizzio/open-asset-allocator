@@ -55,6 +55,7 @@ func (controller *PortfolioAllocationRESTController) getPortfolioAllocationHisto
 	context.JSON(http.StatusOK, aggregatedPortfoliohistoryDTS)
 }
 
+// TODO: refactor to use domain.PortfolioObservationTimestamp instead of TimeFrameTag
 func (controller *PortfolioAllocationRESTController) getPortfolioAllocationHistoryUpstack(
 	timeFrameTagParamValue string,
 	portfolioId int,

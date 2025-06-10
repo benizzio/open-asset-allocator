@@ -23,6 +23,10 @@ func TestGetDivergenceAnalysisOptions(t *testing.T) {
 	var expectedResponseJSON = `
 		{
 			"availableHistory":["202503", "202501"],
+			"availableObservedHistory":[
+				{ "id": 2, "observationTimeTag": "202503", "observationTimestamp": "2025-03-01T00:00:00Z" },
+				{ "id": 1, "observationTimeTag": "202501", "observationTimestamp": "2025-01-01T00:00:00Z" }
+			],	
 			"availablePlans":[
 				{
 					"id":1,
