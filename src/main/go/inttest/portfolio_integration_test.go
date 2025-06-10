@@ -216,6 +216,11 @@ func TestGetPortfolioAllocationHistoryForTimeFrame(t *testing.T) {
 		[
 			{
 				"timeFrameTag":"202503",
+				"observationTimestamp" : {
+					"id": 2,
+					"observationTimeTag": "202503",
+					"observationTimestamp": "2025-03-01T00:00:00Z"
+				},
 				"allocations":[
 					{
 						"assetId": 1,

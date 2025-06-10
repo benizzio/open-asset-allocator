@@ -38,16 +38,7 @@ const (
 				LIMIT {:observationTimestampLimit}
 			)
 	`
-	// Deprecated: Use portfolioAllocationsNewSQL
 	portfolioAllocationsSQL = `
-		SELECT pa.*, ass.id AS "asset.id", ass.ticker AS "asset.ticker", coalesce(ass.name, '') AS "asset.name"
-		FROM portfolio_allocation_fact pa
-		JOIN asset ass ON ass.id = pa.asset_id
-		` + infra.WhereClausePlaceholder + `
-		ORDER BY pa.time_frame_tag DESC, pa.class ASC, pa.cash_reserve DESC, pa.total_market_value DESC
-	`
-	// TODO refactor to portfolioAllocationsSQL after removal of deprecated version
-	portfolioAllocationsNewSQL = `
 		SELECT 
 		    pa.*, 
 		    ass.id AS "asset.id", 
@@ -115,7 +106,7 @@ func (repository *PortfolioRDBMSRepository) GetAllPortfolioAllocationsWithinObse
 	[]*domain.PortfolioAllocation,
 	error,
 ) {
-	var query = availableObservationTimestampsComplement + portfolioAllocationsNewSQL
+	var query = availableObservationTimestampsComplement + portfolioAllocationsSQL
 
 	var queryResult []domain.PortfolioAllocation
 	err := repository.dbAdapter.BuildQuery(query).
@@ -157,7 +148,7 @@ func (repository *PortfolioRDBMSRepository) FindPortfolioAllocationsByObservatio
 	error,
 ) {
 	var queryResult []domain.PortfolioAllocation
-	err := repository.dbAdapter.BuildQuery(portfolioAllocationsNewSQL).
+	err := repository.dbAdapter.BuildQuery(portfolioAllocationsSQL).
 		AddWhereClauseAndParam(portfolioIdWhereClause, "portfolioId", id).
 		AddWhereClauseAndParam(
 			"AND pa.observation_time_id = {:observationTimestampId}",
