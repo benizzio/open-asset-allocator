@@ -48,6 +48,7 @@ func (controller *DivergenceAnalysisRESTController) GetDivergenceAnalysisOptions
 	context.JSON(http.StatusOK, analysisOptionsDTS)
 }
 
+// TODO: refactor to use domain.PortfolioObservationTimestamp instead of TimeFrameTag
 func (controller *DivergenceAnalysisRESTController) GetDivergenceAnalysis(context *gin.Context) {
 
 	portfolioIdParam := context.Param(portfolioIdParam)

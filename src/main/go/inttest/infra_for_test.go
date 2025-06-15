@@ -9,7 +9,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-
+	// TODO tests are running successfully when migrations fail, FIX
 	ctx := context.Background()
 
 	var deferRegistry = util.BuildDeferRegistry()
