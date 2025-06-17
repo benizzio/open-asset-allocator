@@ -31,5 +31,4 @@ EXECUTE FUNCTION set_observation_time_tag();
 -- Update the comment for the column to reflect the changes
 -- Authored by: GitHub Copilot
 COMMENT ON COLUMN portfolio_allocation_obs_time.observation_time_tag
-    IS 'User defined tag of the time of observation (defaults to ISO 8601 format of observation_timestamp via ' ||
-        'trg_set_observation_time_tag trigger)';
+    IS 'User defined tag of the time of observation (defaults to ISO 8601 format of observation_timestamp via trg_set_observation_time_tag tigger)';
