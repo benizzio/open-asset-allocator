@@ -112,8 +112,8 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 				"timeFrameTag":"202503",
 				"observationTimestamp" : {
 					"id": 2,
-					"observationTimeTag": "202503",
-					"observationTimestamp": "2025-03-01T00:00:00Z"
+					"timeTag": "202503",
+					"timestamp": "2025-03-01T00:00:00Z"
 				},
 				"allocations":[
 					{
@@ -131,8 +131,8 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 				"timeFrameTag":"202501",
 				"observationTimestamp" : {
 					"id": 1,
-					"observationTimeTag": "202501",
-					"observationTimestamp": "2025-01-01T00:00:00Z"
+					"timeTag": "202501",
+					"timestamp": "2025-01-01T00:00:00Z"
 				},
 				"allocations":[
 					{
@@ -218,8 +218,8 @@ func TestGetPortfolioAllocationHistoryForTimeFrame(t *testing.T) {
 				"timeFrameTag":"202503",
 				"observationTimestamp" : {
 					"id": 2,
-					"observationTimeTag": "202503",
-					"observationTimestamp": "2025-03-01T00:00:00Z"
+					"timeTag": "202503",
+					"timestamp": "2025-03-01T00:00:00Z"
 				},
 				"allocations":[
 					{

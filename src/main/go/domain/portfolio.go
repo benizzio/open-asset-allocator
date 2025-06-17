@@ -29,9 +29,9 @@ type AnalysisOptions struct {
 }
 
 type PortfolioObservationTimestamp struct {
-	Id                   int
-	ObservationTimeTag   string
-	ObservationTimestamp time.Time
+	Id        int
+	TimeTag   string
+	Timestamp time.Time
 }
 
 type PortfolioRepository interface {

@@ -107,7 +107,7 @@ func buildHistoryDTS(
 	for observationTimestamp, allocations := range portfolioAllocationsPerObservationTimestamp {
 		var totalMarketValue = portfolioAllocationsPerObservationTimestamp.getAggregatedMarketValue(observationTimestamp)
 		//TODO remove
-		var timeFrameTag = domain.TimeFrameTag(observationTimestamp.ObservationTimeTag)
+		var timeFrameTag = domain.TimeFrameTag(observationTimestamp.TimeTag)
 		portfolioSnapshot := buildSnapshotDTS(timeFrameTag, &observationTimestamp, allocations, totalMarketValue)
 		aggregatedPortfoliohistory = append(aggregatedPortfoliohistory, portfolioSnapshot)
 	}
@@ -115,8 +115,8 @@ func buildHistoryDTS(
 	// Sort the aggregated portfolio history by observation timestamp, in descending order
 	sort.Slice(
 		aggregatedPortfoliohistory, func(i, j int) bool {
-			return aggregatedPortfoliohistory[i].ObservationTimestamp.ObservationTimestamp.After(
-				aggregatedPortfoliohistory[j].ObservationTimestamp.ObservationTimestamp,
+			return aggregatedPortfoliohistory[i].ObservationTimestamp.Timestamp.After(
+				aggregatedPortfoliohistory[j].ObservationTimestamp.Timestamp,
 			)
 		},
 	)
@@ -152,9 +152,9 @@ func mapToAvailableObservationTimestampsDTS(
 
 func mapToAvailableObservationTimestampDTS(observationTimestamp *domain.PortfolioObservationTimestamp) *PortfolioObservationTimestampDTS {
 	var observationTimestampDTS = &PortfolioObservationTimestampDTS{
-		Id:                   observationTimestamp.Id,
-		ObservationTimeTag:   observationTimestamp.ObservationTimeTag,
-		ObservationTimestamp: observationTimestamp.ObservationTimestamp,
+		Id:        observationTimestamp.Id,
+		TimeTag:   observationTimestamp.TimeTag,
+		Timestamp: observationTimestamp.Timestamp,
 	}
 	return observationTimestampDTS
 }

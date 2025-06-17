@@ -22,7 +22,7 @@ const (
 		ORDER BY time_frame_tag DESC, create_timestamp DESC LIMIT {:timeFrameLimit}
 	`
 	availableObservationTimestampsSQL = `
-		SELECT DISTINCT paot.*
+		SELECT DISTINCT paot.id, paot.observation_time_tag AS time_tag, paot.observation_timestamp AS "timestamp"
 		FROM portfolio_allocation_fact pa
 		JOIN portfolio_allocation_obs_time paot ON pa.observation_time_id = paot.id
 		` + infra.WhereClausePlaceholder + `
@@ -45,8 +45,8 @@ const (
 		    ass.ticker AS "asset.ticker", 
 		    coalesce(ass.name, '') AS "asset.name", 
 		    paot.id AS "observation_timestamp.id",
-		    coalesce(paot.observation_time_tag, '') AS "observation_timestamp.observation_time_tag",
-		    paot.observation_timestamp AS "observation_timestamp.observation_timestamp"
+		    coalesce(paot.observation_time_tag, '') AS "observation_timestamp.time_tag",
+		    paot.observation_timestamp AS "observation_timestamp.timestamp"
 		FROM portfolio_allocation_fact pa
 		JOIN asset ass ON ass.id = pa.asset_id
 		JOIN portfolio_allocation_obs_time paot ON pa.observation_time_id = paot.id 

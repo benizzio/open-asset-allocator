@@ -67,9 +67,9 @@ type AllocationPlanIdentifierDTS struct {
 }
 
 type PortfolioObservationTimestampDTS struct {
-	Id                   int       `json:"id"`
-	ObservationTimeTag   string    `json:"observationTimeTag"`
-	ObservationTimestamp time.Time `json:"observationTimestamp"`
+	Id        int       `json:"id"`
+	TimeTag   string    `json:"timeTag"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 type AnalysisOptionsDTS struct {
