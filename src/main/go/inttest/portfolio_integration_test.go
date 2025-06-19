@@ -239,6 +239,45 @@ func TestGetPortfolioAllocationHistoryForTimeFrame(t *testing.T) {
 	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
 }
 
+func TestGetPortfolioAllocationHistoryForObservationTimestamp(t *testing.T) {
+
+	response, err := http.Get(inttestinfra.TestAPIURLprefix + "/portfolio/1/history?observationTimestampId=2")
+	assert.NoError(t, err)
+
+	assert.Equal(t, http.StatusOK, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+
+	var actualResponseJSON = string(body)
+	var expectedResponseJSON = `
+		[
+			{
+				"timeFrameTag":"202503",
+				"observationTimestamp" : {
+					"id": 2,
+					"timeTag": "202503",
+					"timestamp": "2025-03-01T00:00:00Z"
+				},
+				"allocations":[
+					{
+						"assetId": 1,
+						"assetName":"SPDR Bloomberg 1-3 Month T-Bill ETF",
+						"assetTicker":"ARCA:BIL",
+						"class":"BONDS",
+						"cashReserve":false,
+						"totalMarketValue":10000
+					}
+				],
+				"totalMarketValue":10000
+			}
+		]
+	`
+
+	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
+}
+
 func TestPostPortfolio(t *testing.T) {
 
 	var testPortfolioName = "Test Portfolio creation"

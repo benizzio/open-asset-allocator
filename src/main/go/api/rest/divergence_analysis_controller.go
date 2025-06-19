@@ -66,7 +66,7 @@ func (controller *DivergenceAnalysisRESTController) GetDivergenceAnalysis(contex
 
 	planIdParam := context.Param(planIdParam)
 	planId, err := strconv.Atoi(planIdParam)
-	if infra.HandleAPIError(context, "Error getting planId url parameter", err) {
+	if infra.HandleAPIError(context, getPlanIdErrorMessage, err) {
 		return
 	}
 
@@ -95,13 +95,13 @@ func (controller *DivergenceAnalysisRESTController) GetDivergenceAnalysisNew(con
 
 	var observationTimestampIdParamValue = context.Param(observationTimestampIdParam)
 	observationTimestampId, err := strconv.Atoi(observationTimestampIdParamValue)
-	if infra.HandleAPIError(context, "Error getting observationTimestampId url parameter", err) {
+	if infra.HandleAPIError(context, getObservationTimestampIdErrorMessage, err) {
 		return
 	}
 
 	planIdParamValue := context.Param(planIdParam)
 	planId, err := strconv.Atoi(planIdParamValue)
-	if infra.HandleAPIError(context, "Error getting planId url parameter", err) {
+	if infra.HandleAPIError(context, getPlanIdErrorMessage, err) {
 		return
 	}
 
