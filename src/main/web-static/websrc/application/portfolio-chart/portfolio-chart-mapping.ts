@@ -1,4 +1,4 @@
-import { PortfolioAllocation, PortfolioAtTime } from "../../domain/portfolio";
+import { PortfolioAllocation, PortfolioSnapshot } from "../../domain/portfolio";
 import { AppliedAllocationHierarchyLevel, MappedChartData } from "./portfolio-chart-model";
 import { AllocationStructure } from "../../domain/allocation";
 import { ChartDataset } from "chart.js";
@@ -7,19 +7,23 @@ import chartModule from "../../infra/chart/chart";
 type ReducedAllocation = Pick<PortfolioAllocation, "totalMarketValue" | "cashReserve">;
 
 export function mapChartData(
-    portfolioAtTime: PortfolioAtTime,
+    portfolioSnapshot: PortfolioSnapshot,
     portfolioStructure: AllocationStructure,
     hierarchyLevelIndex: number,
     appliedHierarchyLevels?: AppliedAllocationHierarchyLevel[],
 ): MappedChartData {
 
-    const dataset: ChartDataset = { data: [], label: portfolioAtTime.timeFrameTag, backgroundColor: [] };
+    const dataset: ChartDataset = {
+        data: [],
+        label: portfolioSnapshot.observationTimestamp.timeTag,
+        backgroundColor: [],
+    };
     const chartData: MappedChartData = { labels: [], keys: [], datasets: [dataset] };
     const colorScale = chartModule.getPieDoughnutChartColorScale();
 
     const reducedPortfolioAtTime =
         getAccumulatedAllocationsPerProperty(
-            portfolioAtTime,
+            portfolioSnapshot,
             portfolioStructure,
             hierarchyLevelIndex,
             appliedHierarchyLevels,
@@ -45,7 +49,7 @@ export function mapChartData(
 }
 
 function getAccumulatedAllocationsPerProperty(
-    portfolioAtTime: PortfolioAtTime,
+    portfolioAtTime: PortfolioSnapshot,
     portfolioStructure: AllocationStructure,
     hierarchyLevelIndex: number,
     appliedHierarchyLevels: AppliedAllocationHierarchyLevel[] = [],
