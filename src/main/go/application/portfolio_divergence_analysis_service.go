@@ -13,7 +13,7 @@ type PortfolioDivergenceAnalysisAppService struct {
 	allocationPlanDomService *service.AllocationPlanDomService
 }
 
-type potentialDivercencesPerHierarchicalId map[string]*domain.PotentialDivergence
+type potentialDivergencesPerHierarchicalId map[string]*domain.PotentialDivergence
 
 // Deprecated: use GeneratePortfolioDivergenceAnalysisNew
 func (service *PortfolioDivergenceAnalysisAppService) GeneratePortfolioDivergenceAnalysis(
@@ -136,7 +136,7 @@ func (service *PortfolioDivergenceAnalysisAppService) initializeAnalysisContextF
 
 func (service *PortfolioDivergenceAnalysisAppService) generateDivergenceAnalysisFromPortfolioAllocationSet(
 	analysisContext context.Context,
-) (potentialDivercencesPerHierarchicalId, error) {
+) (potentialDivergencesPerHierarchicalId, error) {
 
 	potentialDivergenceMap, err := service.mapPotentialDivergencesFromPortfolioAllocations(analysisContext)
 	if err != nil {
@@ -148,11 +148,11 @@ func (service *PortfolioDivergenceAnalysisAppService) generateDivergenceAnalysis
 
 func (service *PortfolioDivergenceAnalysisAppService) mapPotentialDivergencesFromPortfolioAllocations(
 	analysisContext context.Context,
-) (potentialDivercencesPerHierarchicalId, error) {
+) (potentialDivergencesPerHierarchicalId, error) {
 
 	var analysisContextValue = getDivergenceAnalysisContextValue(analysisContext)
 	var divergenceAnalysis = analysisContextValue.divergenceAnalysis
-	var potentialDivergenceMap = make(potentialDivercencesPerHierarchicalId)
+	var potentialDivergenceMap = make(potentialDivergencesPerHierarchicalId)
 	var portfolioAllocations = analysisContextValue.portfolioAllocations
 
 	var iterationContextValue = &allocationIterationMappingContextValue{
