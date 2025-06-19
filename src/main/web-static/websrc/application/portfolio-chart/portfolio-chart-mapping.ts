@@ -15,7 +15,7 @@ export function mapChartData(
 
     const dataset: ChartDataset = {
         data: [],
-        label: portfolioSnapshot.observationTimestamp.timeTag,
+        label: portfolioSnapshot.observationTimestamp.id.toString(),
         backgroundColor: [],
     };
     const chartData: MappedChartData = { labels: [], keys: [], datasets: [dataset] };
