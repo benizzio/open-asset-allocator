@@ -90,7 +90,7 @@ func (service *PortfolioDivergenceAnalysisAppService) initializeAnalysisContext(
 		return nil, err
 	}
 
-	var divergenceAnalysis = buildDivergenceAnalysis(portfolio, timeFrameTag, allocationPlanId)
+	var divergenceAnalysis = buildDivergenceAnalysis(portfolio, timeFrameTag, nil, allocationPlanId)
 
 	var analysisContextValue = &divergenceAnalysisContextValue{
 		portfolio:            portfolio,
@@ -116,7 +116,13 @@ func (service *PortfolioDivergenceAnalysisAppService) initializeAnalysisContextF
 		return nil, err
 	}
 
-	var divergenceAnalysis = buildDivergenceAnalysis(portfolio, "", allocationPlanId)
+	// Getting a pointer of PortfolioObservationTimestamp to populate the divergence analysis
+	var observationTimestamp *domain.PortfolioObservationTimestamp
+	if len(portfolioAllocations) > 0 {
+		observationTimestamp = portfolioAllocations[0].ObservationTimestamp
+	}
+
+	var divergenceAnalysis = buildDivergenceAnalysis(portfolio, "", observationTimestamp, allocationPlanId)
 
 	var analysisContextValue = &divergenceAnalysisContextValue{
 		portfolio:            portfolio,
@@ -302,11 +308,13 @@ func (service *PortfolioDivergenceAnalysisAppService) generatePotentialDivergenc
 func buildDivergenceAnalysis(
 	portfolio *domain.Portfolio,
 	timeFrameTag domain.TimeFrameTag,
+	observationTimestamp *domain.PortfolioObservationTimestamp,
 	allocationPlanId int,
 ) *domain.DivergenceAnalysis {
 	return &domain.DivergenceAnalysis{
 		PortfolioId:               portfolio.Id,
 		TimeFrameTag:              timeFrameTag,
+		ObservationTimestamp:      observationTimestamp,
 		AllocationPlanId:          allocationPlanId,
 		PortfolioTotalMarketValue: 0,
 		Root:                      make([]*domain.PotentialDivergence, 0),

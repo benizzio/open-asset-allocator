@@ -80,7 +80,7 @@ func aggregateHistoryAsDTSMap(portfolioHistory []*domain.PortfolioAllocation) po
 
 	var portfolioAllocationsPerTimestamp = make(portfolioAllocationsPerObservationTimestamp)
 	for _, portfolioAllocation := range portfolioHistory {
-		var observationTimestampDTS = mapToAvailableObservationTimestampDTS(portfolioAllocation.ObservationTimestamp)
+		var observationTimestampDTS = mapToObservationTimestampDTS(portfolioAllocation.ObservationTimestamp)
 		var allocationDTS = portfolioAllocationToAllocationDTS(portfolioAllocation)
 		portfolioAllocationsPerTimestamp.aggregate(*observationTimestampDTS, allocationDTS)
 	}
@@ -139,18 +139,18 @@ func buildSnapshotDTS(
 	}
 }
 
-func mapToAvailableObservationTimestampsDTS(
+func mapToObservationTimestampsDTS(
 	availableObservationTimestamps []*domain.PortfolioObservationTimestamp,
 ) []*PortfolioObservationTimestampDTS {
 	var observationTimestampsDTS = make([]*PortfolioObservationTimestampDTS, 0)
 	for _, observationTimestamp := range availableObservationTimestamps {
-		observationTimestampDTS := mapToAvailableObservationTimestampDTS(observationTimestamp)
+		observationTimestampDTS := mapToObservationTimestampDTS(observationTimestamp)
 		observationTimestampsDTS = append(observationTimestampsDTS, observationTimestampDTS)
 	}
 	return observationTimestampsDTS
 }
 
-func mapToAvailableObservationTimestampDTS(observationTimestamp *domain.PortfolioObservationTimestamp) *PortfolioObservationTimestampDTS {
+func mapToObservationTimestampDTS(observationTimestamp *domain.PortfolioObservationTimestamp) *PortfolioObservationTimestampDTS {
 	var observationTimestampDTS = &PortfolioObservationTimestampDTS{
 		Id:        observationTimestamp.Id,
 		TimeTag:   observationTimestamp.TimeTag,
@@ -165,7 +165,7 @@ func mapToAvailableObservationTimestampDTS(observationTimestamp *domain.Portfoli
 
 func MapToAnalysisOptionsDTS(analysisOptions *domain.AnalysisOptions) *AnalysisOptionsDTS {
 	var plans = mapToAllocationPlanIdentifierDTSs(analysisOptions.AvailablePlans)
-	var availableHistory = mapToAvailableObservationTimestampsDTS(analysisOptions.AvailableObservationTimestamps)
+	var availableHistory = mapToObservationTimestampsDTS(analysisOptions.AvailableObservationTimestamps)
 	return &AnalysisOptionsDTS{
 		AvailableHistory:         analysisOptions.AvailableHistory,
 		AvailableObservedHistory: availableHistory,
@@ -195,9 +195,15 @@ func mapToAllocationPlanIdentifierDTS(plan *domain.AllocationPlanIdentifier) *Al
 
 func MapToDivergenceAnalysisDTS(analysis *domain.DivergenceAnalysis) *DivergenceAnalysisDTS {
 	var rootDivergences = mapToPotentialDivergenceDTSs(analysis.Root, 0)
+	// TODO clean if after removing deprecated implementations
+	var observationTimestamp *PortfolioObservationTimestampDTS
+	if analysis.ObservationTimestamp != nil {
+		observationTimestamp = mapToObservationTimestampDTS(analysis.ObservationTimestamp)
+	}
 	var analysisDTS = DivergenceAnalysisDTS{
 		PortfolioId:               analysis.PortfolioId,
 		TimeFrameTag:              analysis.TimeFrameTag,
+		ObservationTimestamp:      observationTimestamp,
 		AllocationPlanId:          analysis.AllocationPlanId,
 		PortfolioTotalMarketValue: analysis.PortfolioTotalMarketValue,
 		Root:                      rootDivergences,

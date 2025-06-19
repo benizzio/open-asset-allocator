@@ -89,9 +89,11 @@ type PotentialDivergenceDTS struct {
 }
 
 type DivergenceAnalysisDTS struct {
-	PortfolioId               int                       `json:"portfolioId"`
-	TimeFrameTag              domain.TimeFrameTag       `json:"timeFrameTag"`
-	AllocationPlanId          int                       `json:"allocationPlanId"`
-	PortfolioTotalMarketValue int64                     `json:"portfolioTotalMarketValue"`
-	Root                      []*PotentialDivergenceDTS `json:"root"`
+	PortfolioId int `json:"portfolioId"`
+	// Deprecated: use ObservationTimestamp
+	TimeFrameTag              domain.TimeFrameTag               `json:"timeFrameTag"`
+	ObservationTimestamp      *PortfolioObservationTimestampDTS `json:"observationTimestamp"`
+	AllocationPlanId          int                               `json:"allocationPlanId"`
+	PortfolioTotalMarketValue int64                             `json:"portfolioTotalMarketValue"`
+	Root                      []*PotentialDivergenceDTS         `json:"root"`
 }
