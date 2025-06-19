@@ -108,7 +108,8 @@ func buildHistoryDTS(
 		var totalMarketValue = portfolioAllocationsPerObservationTimestamp.getAggregatedMarketValue(observationTimestamp)
 		//TODO remove
 		var timeFrameTag = domain.TimeFrameTag(observationTimestamp.TimeTag)
-		portfolioSnapshot := buildSnapshotDTS(timeFrameTag, &observationTimestamp, allocations, totalMarketValue)
+		obs := observationTimestamp
+		portfolioSnapshot := buildSnapshotDTS(timeFrameTag, &obs, allocations, totalMarketValue)
 		aggregatedPortfoliohistory = append(aggregatedPortfoliohistory, portfolioSnapshot)
 	}
 
