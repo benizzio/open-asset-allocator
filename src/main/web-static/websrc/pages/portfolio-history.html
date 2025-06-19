@@ -40,15 +40,15 @@
                 <button class="accordion-button {{#unless @first}}collapsed{{/unless}}"
                         type="button"
                         data-bs-toggle="collapse"
-                        data-bs-target="#{{timeFrameTag}}-portfolio-allocation"
+                        data-bs-target="#{{observationTimestamp.timeTag}}-portfolio-allocation"
                         aria-expanded="true"
-                        aria-controls="{{timeFrameTag}}-portfolio-allocation"
+                        aria-controls="{{observationTimestamp.timeTag}}-portfolio-allocation"
                 >
-                    {{timeFrameTag}}
+                    {{observationTimestamp.timeTag}}
                 </button>
             </h2>
 
-            <div id="{{timeFrameTag}}-portfolio-allocation"
+            <div id="{{observationTimestamp.timeTag}}-portfolio-allocation"
                  class="accordion-collapse collapse {{#if @first}}show{{/if}}"
                  data-bs-parent="#accordion-portfolio-history"
             >
@@ -60,7 +60,7 @@
 
                         <div class="d-flex flex-row">
                             <p class="h4">Level:&nbsp;</p>
-                            <p id="hierarchy-level-portfolio-chart-{{timeFrameTag}}" class="h4"></p>
+                            <p id="hierarchy-level-portfolio-chart-{{observationTimestamp.timeTag}}" class="h4"></p>
                         </div>
 
                     </div>
@@ -71,7 +71,7 @@
                                 "PORTFOLIO_HISTORY_1D"
                                 "portfolio-allocation-chart-options"
                                 "portfolio-chart"
-                                timeFrameTag
+                                observationTimestamp.timeTag
                                 "#portfolio-context #portfolio"
                         }}}
                     </div>
@@ -95,7 +95,7 @@
         const portfolioId = document.querySelector("[name='portfolioId']").value;
         navigateTo(`/portfolio/${portfolioId}/history/manage`);
     }
-    
+
 </script>
 
 <script id="portfolio-allocation-chart-options" type="application/json">

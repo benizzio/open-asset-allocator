@@ -20,7 +20,7 @@ func (controller *PortfolioAllocationRESTController) BuildRoutes() []infra.RESTR
 	return []infra.RESTRoute{
 		{
 			Method:   http.MethodGet,
-			Path:     specificPortfolioPath + "/history",
+			Path:     "/api/portfolio/:" + portfolioIdParam + "/history",
 			Handlers: gin.HandlersChain{controller.getPortfolioAllocationHistory},
 		},
 	}
@@ -36,7 +36,20 @@ func (controller *PortfolioAllocationRESTController) getPortfolioAllocationHisto
 
 	var timeFrameTagParamValue = context.Query(timeFrameTagParam)
 
-	portfolioHistory, err := controller.getPortfolioAllocationHistoryUpstack(timeFrameTagParamValue, portfolioId)
+	var observationTimestampIdParamValue = context.Query(observationTimestampIdParam)
+	var observationTimestampId int
+	if !langext.IsZeroValue(observationTimestampIdParamValue) {
+		observationTimestampId, err = strconv.Atoi(observationTimestampIdParamValue)
+		if infra.HandleAPIError(context, getObservationTimestampIdErrorMessage, err) {
+			return
+		}
+	}
+
+	portfolioHistory, err := controller.getPortfolioAllocationHistoryUpstack(
+		portfolioId,
+		timeFrameTagParamValue,
+		observationTimestampId,
+	)
 	if err != nil {
 		var errorDetail string
 		if !langext.IsZeroValue(timeFrameTagParamValue) {
@@ -56,8 +69,9 @@ func (controller *PortfolioAllocationRESTController) getPortfolioAllocationHisto
 }
 
 func (controller *PortfolioAllocationRESTController) getPortfolioAllocationHistoryUpstack(
-	timeFrameTagParamValue string,
 	portfolioId int,
+	timeFrameTagParamValue string,
+	observationTimestampId int,
 ) ([]*domain.PortfolioAllocation, error) {
 
 	var portfolioHistory []*domain.PortfolioAllocation
@@ -66,6 +80,11 @@ func (controller *PortfolioAllocationRESTController) getPortfolioAllocationHisto
 	if !langext.IsZeroValue(timeFrameTagParamValue) {
 		var timeFrameTag = domain.TimeFrameTag(timeFrameTagParamValue)
 		portfolioHistory, err = controller.portfolioDomService.FindPortfolioAllocations(portfolioId, timeFrameTag)
+	} else if !langext.IsZeroValue(observationTimestampId) {
+		portfolioHistory, err = controller.portfolioDomService.FindPortfolioAllocationsByObservationTimestamp(
+			portfolioId,
+			observationTimestampId,
+		)
 	} else {
 		portfolioHistory, err = controller.portfolioDomService.GetPortfolioAllocationHistory(portfolioId)
 	}

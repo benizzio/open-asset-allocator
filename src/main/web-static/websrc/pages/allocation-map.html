@@ -16,22 +16,22 @@
 
 <script id="template-allocation-map" type="text/x-handlebars-template">
 
-    {{#each availableHistory}}
+    {{#each availableObservedHistory}}
         <div class="accordion-item">
 
             <h2 class="accordion-header">
                 <button class="accordion-button {{#unless @first}}collapsed{{/unless}}"
                         type="button"
                         data-bs-toggle="collapse"
-                        data-bs-target="#{{this}}-allocation-map-container"
+                        data-bs-target="#time-tag-{{this.id}}-allocation-map-container"
                         aria-expanded="true"
-                        aria-controls="{{this}}-allocation-map-container"
+                        aria-controls="time-tag-{{this.id}}-allocation-map-container"
                 >
-                    {{this}}
+                    {{this.timeTag}}
                 </button>
             </h2>
 
-            <div id="{{this}}-allocation-map-container"
+            <div id="time-tag-{{this.id}}-allocation-map-container"
                  class="accordion-collapse collapse {{#if @first}}show{{/if}}"
                  data-bs-parent="#accordion-allocation-map"
             >
@@ -40,7 +40,7 @@
                     <div class="col-12 d-flex flex-column align-items-center">
                         <div class="d-flex flex-row ">
                             <label class="mx-1">
-                                <select class="form-select" name="{{this}}PlanDivercence">
+                                <select class="form-select" name="{{this.id}}PlanDivergence">
                                     <option value="0" selected>Choose an allocation plan</option>
                                     {{#each ../availablePlans}}
                                         <option value="{{this.id}}">{{this.name}}</option>
@@ -48,18 +48,18 @@
                                 </select>
                             </label>
                             <button type="button" class="btn btn-primary mx-1"
-                                    onclick="selectDivergenceOptions('{{this}}PlanDivercence', 'divergence-analysis-container-{{this}}')"
+                                    onclick="selectDivergenceOptions('{{this.id}}PlanDivergence', 'divergence-analysis-container-time-tag-{{this.id}}')"
                             >
                                 <span class="bi bi-bar-chart-steps"></span>
                             </button>
                         </div>
                     </div>
 
-                    <div id="divergence-analysis-container-{{this}}"
+                    <div id="divergence-analysis-container-time-tag-{{this.id}}"
                          class="col-12 table-responsive"
                          handlebars-template="template-divergence-analysis"
-                         hx-get="/api/portfolio/:portfolioId/divergence/{{this}}/allocation-plan/:{{this}}PlanDivercence"
-                         hx-include="[name='portfolioId'],[name='{{this}}PlanDivercence']"
+                         hx-get="/api/v2/portfolio/:portfolioId/divergence/{{this.id}}/allocation-plan/:{{this.id}}PlanDivergence"
+                         hx-include="[name='portfolioId'],[name='{{this.id}}PlanDivergence']"
                          hx-trigger="generate-divergence-analysis"
                     >
                     </div>
@@ -139,10 +139,10 @@
 
     function registerRecursiveRowTemplatePartial() {
 
-        const allocationMapContainerElement = document.querySelector('#accordion-allocation-map');
+        const allocationMapContainerElement = window['accordion-allocation-map'];
 
         const tableRowPartialId = 'template-divergence-analysis-table-row';
-        const divergenceAnalysisTableRowHTML = document.querySelector('#template-divergence-analysis-table-row').innerHTML;
+        const divergenceAnalysisTableRowHTML = window['template-divergence-analysis-table-row'].innerHTML;
         Handlebars.registerPartial(tableRowPartialId, divergenceAnalysisTableRowHTML);
 
         const allocationMapObserver = new MutationObserver((_, observer) => {
@@ -163,14 +163,14 @@
         const selectedPlanId = Number(selectElement.value);
         if (selectedPlanId) {
             setValid(selectElement);
-            triggerGenerateDivergence(selectedPlanId, `#${divergenceAnalysisContainerId}`);
+            triggerGenerateDivergence(selectedPlanId, `${divergenceAnalysisContainerId}`);
         } else {
             setInvalid(selectElement);
         }
     }
 
     function triggerGenerateDivergence(planId, analysisContainertElementId) {
-        const divergenceAnalysisElement = document.querySelector(analysisContainertElementId);
+        const divergenceAnalysisElement = window[analysisContainertElementId];
         htmx.trigger(divergenceAnalysisElement, "generate-divergence-analysis");
     }
 
