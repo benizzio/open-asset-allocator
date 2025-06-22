@@ -1,8 +1,7 @@
 package langext
 
 import (
-	"encoding/json"
-	"fmt"
+	"github.com/okhomin/gohashcode"
 	"reflect"
 )
 
@@ -60,7 +59,7 @@ func unifyPointersForField[T any](items []T, itemType reflect.Type, fieldIndex i
 	}
 
 	// For each field, we'll create a map of value -> pointer
-	var valueMap = make(map[string]interface{})
+	var valueMap = make(map[uint64]interface{})
 
 	// Process all items in the slice
 	for i := range items {
@@ -77,7 +76,7 @@ func unifyPointersForField[T any](items []T, itemType reflect.Type, fieldIndex i
 //   - valueMap: The map of value keys to pointer values
 //
 // Authored by: GitHub Copilot
-func processItemField[T any](items []T, itemIndex int, fieldIndex int, valueMap map[string]interface{}) {
+func processItemField[T any](items []T, itemIndex int, fieldIndex int, valueMap map[uint64]interface{}) {
 
 	var itemValue = reflect.ValueOf(&items[itemIndex]).Elem()
 	var fieldValue = itemValue.Field(fieldIndex)
@@ -91,8 +90,10 @@ func processItemField[T any](items []T, itemIndex int, fieldIndex int, valueMap 
 	var pointedValue = fieldValue.Elem()
 
 	// Create a unique key for the value
-	var valueKey = createValueKey(pointedValue)
-	if valueKey == "" {
+	var dereferencedValue = pointedValue.Interface()
+	var valueKey = gohashcode.Hashcode(dereferencedValue)
+
+	if valueKey == 0 {
 		return // Skip if we couldn't create a key
 	}
 
@@ -104,45 +105,4 @@ func processItemField[T any](items []T, itemIndex int, fieldIndex int, valueMap 
 		// Store this pointer for future reference
 		valueMap[valueKey] = fieldValue.Interface()
 	}
-}
-
-// createValueKey generates a string key that uniquely identifies a value.
-// Returns an empty string if the type is not supported.
-//
-// Parameters:
-//   - value: The reflect.Value to create a key for
-//
-// Returns:
-//   - A string key that uniquely identifies the value, or an empty string if the type is not supported
-//
-// Authored by: GitHub Copilot
-func createValueKey(value reflect.Value) string {
-
-	var valueKey string
-
-	switch value.Kind() {
-	case reflect.String:
-		valueKey = "s:" + value.String()
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		valueKey = fmt.Sprintf("i:%d", value.Int())
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		valueKey = fmt.Sprintf("u:%d", value.Uint())
-	case reflect.Float32, reflect.Float64:
-		// Use %f for consistent representation
-		valueKey = fmt.Sprintf("f:%f", value.Float())
-	case reflect.Bool:
-		valueKey = fmt.Sprintf("b:%t", value.Bool())
-	case reflect.Struct:
-		// For structs, use JSON serialization
-		jsonBytes, err := json.Marshal(value.Interface())
-		if err != nil {
-			return "" // Skip if can't marshal
-		}
-		valueKey = "struct:" + string(jsonBytes)
-	default:
-		// Skip unsupported types
-		return ""
-	}
-
-	return valueKey
 }
