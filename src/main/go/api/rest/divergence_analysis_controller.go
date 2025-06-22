@@ -20,7 +20,7 @@ func (controller *DivergenceAnalysisRESTController) BuildRoutes() []infra.RESTRo
 		{
 			Method:   http.MethodGet,
 			Path:     "/api/portfolio/:" + portfolioIdParam + "/divergence/options",
-			Handlers: gin.HandlersChain{controller.GetDivergenceAnalysisOptions},
+			Handlers: gin.HandlersChain{controller.getDivergenceAnalysisOptions},
 		},
 		{
 			Method:   http.MethodGet,
@@ -30,12 +30,12 @@ func (controller *DivergenceAnalysisRESTController) BuildRoutes() []infra.RESTRo
 		{
 			Method:   http.MethodGet,
 			Path:     "/api/v2/portfolio/:" + portfolioIdParam + "/divergence/:" + observationTimestampIdParam + "/allocation-plan/:" + planIdParam,
-			Handlers: gin.HandlersChain{controller.GetDivergenceAnalysisNew},
+			Handlers: gin.HandlersChain{controller.getDivergenceAnalysisNew},
 		},
 	}
 }
 
-func (controller *DivergenceAnalysisRESTController) GetDivergenceAnalysisOptions(context *gin.Context) {
+func (controller *DivergenceAnalysisRESTController) getDivergenceAnalysisOptions(context *gin.Context) {
 
 	portfolioIdParam := context.Param(portfolioIdParam)
 	portfolioId, err := strconv.Atoi(portfolioIdParam)
@@ -53,7 +53,7 @@ func (controller *DivergenceAnalysisRESTController) GetDivergenceAnalysisOptions
 	context.JSON(http.StatusOK, analysisOptionsDTS)
 }
 
-// Deprecated: use GetDivergenceAnalysisNew
+// Deprecated: use getDivergenceAnalysisNew
 func (controller *DivergenceAnalysisRESTController) GetDivergenceAnalysis(context *gin.Context) {
 
 	portfolioIdParam := context.Param(portfolioIdParam)
@@ -85,7 +85,7 @@ func (controller *DivergenceAnalysisRESTController) GetDivergenceAnalysis(contex
 }
 
 // TODO: rename when GetDivergenceAnalysis is removed
-func (controller *DivergenceAnalysisRESTController) GetDivergenceAnalysisNew(context *gin.Context) {
+func (controller *DivergenceAnalysisRESTController) getDivergenceAnalysisNew(context *gin.Context) {
 
 	portfolioIdParamValue := context.Param(portfolioIdParam)
 	portfolioId, err := strconv.Atoi(portfolioIdParamValue)
