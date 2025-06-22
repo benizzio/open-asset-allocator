@@ -6,297 +6,305 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// TestUnifyStructPointers tests the UnifyStructPointers function
+// createStringPointer returns a pointer to a new string copy.
 //
 // Authored by: GitHub Copilot
-func TestUnifyStructPointers(t *testing.T) {
+func createStringPointer(s string) *string {
 
-	// Test case 1: Basic string pointers
-	t.Run(
-		"basic string pointers", func(t *testing.T) {
-			// Define a test struct
-			type Person struct {
-				Name *string
-				Age  int
-			}
+	var stringCopy = s + ""
+	return &stringCopy
+}
 
-			// Force creation of different pointer instances for the same string value
-			var createString = func(s string) *string {
-				var stringCopy = s + "" // Force a new allocation
-				return &stringCopy
-			}
+// createFloatPointer returns a pointer to a new float64 copy.
+//
+// Authored by: GitHub Copilot
+func createFloatPointer(f float64) *float64 {
 
-			// Create test data
-			var name1 = createString("John")
-			var name2 = createString("John")  // Same value as name1, but different pointer
-			var name3 = createString("Alice") // Different value
+	var floatCopy = f
+	return &floatCopy
+}
 
-			var people = []Person{
-				{Name: name1, Age: 30},
-				{Name: name2, Age: 30},
-				{Name: name3, Age: 25},
-			}
+// createBoolPointer returns a pointer to a new bool copy.
+//
+// Authored by: GitHub Copilot
+func createBoolPointer(b bool) *bool {
 
-			// Verify initial state: pointers to same value are different
-			if name1 == name2 {
-				// If compiler optimized the pointers to be the same, we can't properly test unification
-				t.Skip("Test environment doesn't allow for distinct pointers with same value")
-			}
+	var boolCopy = b
+	return &boolCopy
+}
 
-			// Run the function
-			UnifyStructPointers(people)
+// createIntPointer returns a pointer to a new int copy.
+//
+// Authored by: GitHub Copilot
+func createIntPointer(i int) *int {
 
-			// Verify that pointers to the same value have been unified
-			assert.Same(t, people[0].Name, people[1].Name, "Pointers to equal values should be unified")
+	var intCopy = i
+	return &intCopy
+}
 
-			// Verify that pointers to different values remain different
-			assert.NotSame(t, people[0].Name, people[2].Name, "Pointers to different values should remain different")
+// TestUnifyStructPointersBasicStringPointers tests the unification of pointers to string values.
+//
+// This test verifies that pointers to equal string values are unified, while pointers
+// to different string values remain distinct.
+//
+// Authored by: GitHub Copilot
+func TestUnifyStructPointersBasicStringPointers(t *testing.T) {
 
-			// Check the actual values are still correct
-			assert.Equal(t, "John", *people[0].Name)
-			assert.Equal(t, "John", *people[1].Name)
-			assert.Equal(t, "Alice", *people[2].Name)
+	// Define a test struct
+	type Person struct {
+		Name *string
+		Age  int
+	}
+
+	// Create test data with explicitly different pointers to the same value
+	var name1 = createStringPointer("John")
+	var name2 = createStringPointer("John")  // Same value as name1, but different pointer
+	var name3 = createStringPointer("Alice") // Different value
+
+	var people = []Person{
+		{Name: name1, Age: 30},
+		{Name: name2, Age: 30},
+		{Name: name3, Age: 25},
+	}
+
+	// Verify initial condition: pointers to the same value are different instances
+	assert.NotSame(t, people[0].Name, people[1].Name, "Pointers to same value should not be the same initially")
+
+	// Run the function under test
+	UnifyStructPointers(people)
+
+	// Verify that pointers to the same value have been unified
+	assert.Same(t, people[0].Name, people[1].Name, "Pointers to equal values should be unified")
+
+	// Verify that pointers to different values remain different
+	assert.NotSame(t, people[0].Name, people[2].Name, "Pointers to different values should remain different")
+
+	// Check the actual values are still correct
+	assert.Equal(t, "John", *people[0].Name)
+	assert.Equal(t, "John", *people[1].Name)
+	assert.Equal(t, "Alice", *people[2].Name)
+}
+
+// TestUnifyStructPointersMultiplePointerTypes tests unification for structs with multiple pointer field types.
+//
+// This test ensures that pointers to equal values are unified and pointers to different values
+// remain distinct across different primitive types (string, float64, bool, int).
+//
+// Authored by: GitHub Copilot
+func TestUnifyStructPointersMultiplePointerTypes(t *testing.T) {
+
+	// Product represents a product with multiple pointer fields for testing pointer unification.
+	type Product struct {
+		Name        *string
+		Price       *float64
+		IsAvailable *bool
+		Quantity    *int
+	}
+
+	// Create test data with explicitly different pointers to equal values
+	var products = []Product{
+		{
+			Name:        createStringPointer("Widget"),
+			Price:       createFloatPointer(9.99),
+			IsAvailable: createBoolPointer(true),
+			Quantity:    createIntPointer(100),
 		},
+		{
+			Name:        createStringPointer("Widget"), // Same name
+			Price:       createFloatPointer(9.99),      // Same price
+			IsAvailable: createBoolPointer(true),       // Same availability
+			Quantity:    createIntPointer(50),          // Different quantity
+		},
+		{
+			Name:        createStringPointer("Gadget"), // Different name
+			Price:       createFloatPointer(19.99),     // Different price
+			IsAvailable: createBoolPointer(true),       // Same availability
+			Quantity:    createIntPointer(30),          // Different quantity
+		},
+	}
+
+	// Verify initial conditions: pointers to equal values are different instances
+	assert.NotSame(t, products[0].Name, products[1].Name, "Pointers to equal names should be different initially")
+	assert.NotSame(t, products[0].Price, products[1].Price, "Pointers to equal prices should be different initially")
+	assert.NotSame(
+		t,
+		products[0].IsAvailable,
+		products[1].IsAvailable,
+		"Pointers to equal availability should be different initially",
+	)
+	assert.NotSame(
+		t,
+		products[0].IsAvailable,
+		products[2].IsAvailable,
+		"Pointers to equal availability should be different initially",
 	)
 
-	// Test case 2: Multiple pointer types
-	t.Run(
-		"multiple pointer types", func(t *testing.T) {
-			// Define a test struct with multiple pointer fields
-			type Product struct {
-				Name        *string
-				Price       *float64
-				IsAvailable *bool
-				Quantity    *int
-			}
+	// Run the function under test
+	UnifyStructPointers(products)
 
-			// Create helper functions to ensure distinct pointers
-			var createString = func(s string) *string {
-				var stringCopy = s + ""
-				return &stringCopy
-			}
-			var createFloat = func(f float64) *float64 {
-				var floatCopy = f
-				return &floatCopy
-			}
-			var createBool = func(b bool) *bool {
-				var boolCopy = b
-				return &boolCopy
-			}
-			var createInt = func(i int) *int {
-				var intCopy = i
-				return &intCopy
-			}
+	// Verify that pointers to equal values have been unified
+	assert.Same(t, products[0].Name, products[1].Name, "Pointers to equal names should be unified")
+	assert.Same(t, products[0].Price, products[1].Price, "Pointers to equal prices should be unified")
+	assert.Same(t, products[0].IsAvailable, products[1].IsAvailable, "Pointers to equal availability should be unified")
+	assert.Same(t, products[0].IsAvailable, products[2].IsAvailable, "Pointers to equal availability should be unified")
 
-			// Create test data
-			var products = []Product{
-				{
-					Name:        createString("Widget"),
-					Price:       createFloat(9.99),
-					IsAvailable: createBool(true),
-					Quantity:    createInt(100),
-				},
-				{
-					Name:        createString("Widget"), // Same name
-					Price:       createFloat(9.99),      // Same price
-					IsAvailable: createBool(true),       // Same availability
-					Quantity:    createInt(50),          // Different quantity
-				},
-				{
-					Name:        createString("Gadget"), // Different name
-					Price:       createFloat(19.99),     // Different price
-					IsAvailable: createBool(true),       // Same availability
-					Quantity:    createInt(30),          // Different quantity
-				},
-			}
-
-			// Run the function
-			UnifyStructPointers(products)
-
-			// Verify that pointers to the same values have been unified
-			assert.Same(t, products[0].Name, products[1].Name, "Pointers to equal names should be unified")
-			assert.Same(t, products[0].Price, products[1].Price, "Pointers to equal prices should be unified")
-			assert.Same(
-				t,
-				products[0].IsAvailable,
-				products[1].IsAvailable,
-				"Pointers to equal availability should be unified",
-			)
-			assert.Same(
-				t,
-				products[0].IsAvailable,
-				products[2].IsAvailable,
-				"Pointers to equal availability should be unified",
-			)
-
-			// Verify that pointers to different values remain different
-			assert.NotSame(
-				t,
-				products[0].Name,
-				products[2].Name,
-				"Pointers to different names should remain different",
-			)
-			assert.NotSame(
-				t,
-				products[0].Price,
-				products[2].Price,
-				"Pointers to different prices should remain different",
-			)
-			assert.NotSame(
-				t,
-				products[0].Quantity,
-				products[1].Quantity,
-				"Pointers to different quantities should remain different",
-			)
-			assert.NotSame(
-				t,
-				products[0].Quantity,
-				products[2].Quantity,
-				"Pointers to different quantities should remain different",
-			)
-
-			// Check the actual values are still correct
-			assert.Equal(t, "Widget", *products[0].Name)
-			assert.Equal(t, "Widget", *products[1].Name)
-			assert.Equal(t, "Gadget", *products[2].Name)
-			assert.Equal(t, 9.99, *products[0].Price)
-			assert.Equal(t, 9.99, *products[1].Price)
-			assert.Equal(t, 19.99, *products[2].Price)
-			assert.Equal(t, true, *products[0].IsAvailable)
-			assert.Equal(t, true, *products[1].IsAvailable)
-			assert.Equal(t, true, *products[2].IsAvailable)
-			assert.Equal(t, 100, *products[0].Quantity)
-			assert.Equal(t, 50, *products[1].Quantity)
-			assert.Equal(t, 30, *products[2].Quantity)
-		},
+	// Verify that pointers to different values remain different
+	assert.NotSame(t, products[0].Name, products[2].Name, "Pointers to different names should remain different")
+	assert.NotSame(t, products[0].Price, products[2].Price, "Pointers to different prices should remain different")
+	assert.NotSame(
+		t,
+		products[0].Quantity,
+		products[1].Quantity,
+		"Pointers to different quantities should remain different",
+	)
+	assert.NotSame(
+		t,
+		products[0].Quantity,
+		products[2].Quantity,
+		"Pointers to different quantities should remain different",
 	)
 
-	// Test case 3: Nested struct pointers
-	t.Run(
-		"nested struct pointers", func(t *testing.T) {
-			// Define nested structs
-			type Address struct {
-				Street string
-				City   string
-			}
+	// Check the actual values are still correct
+	assert.Equal(t, "Widget", *products[0].Name)
+	assert.Equal(t, "Widget", *products[1].Name)
+	assert.Equal(t, "Gadget", *products[2].Name)
+	assert.Equal(t, 9.99, *products[0].Price)
+	assert.Equal(t, 9.99, *products[1].Price)
+	assert.Equal(t, 19.99, *products[2].Price)
+	assert.Equal(t, true, *products[0].IsAvailable)
+	assert.Equal(t, true, *products[1].IsAvailable)
+	assert.Equal(t, true, *products[2].IsAvailable)
+	assert.Equal(t, 100, *products[0].Quantity)
+	assert.Equal(t, 50, *products[1].Quantity)
+	assert.Equal(t, 30, *products[2].Quantity)
+}
 
-			type Person struct {
-				Name    string
-				Address *Address
-			}
+// TestUnifyStructPointersNestedStructPointers tests unification for nested struct pointer fields.
+//
+// This test verifies that pointers to equal struct values are unified,
+// while pointers to different struct values remain distinct.
+//
+// Authored by: GitHub Copilot
+func TestUnifyStructPointersNestedStructPointers(t *testing.T) {
 
-			// Create test data with explicitly different pointers
-			var addr1 = &Address{Street: "123 Main St", City: "Anytown"}
-			// Force creation of a different pointer with the same values
-			var addr2 = new(Address)
-			addr2.Street = addr1.Street
-			addr2.City = addr1.City
+	// Define nested structs for testing
+	type Address struct {
+		Street string
+		City   string
+	}
 
-			var addr3 = &Address{Street: "456 Oak St", City: "Othertown"}
+	type Person struct {
+		Name    string
+		Address *Address
+	}
 
-			var people = []Person{
-				{Name: "Person1", Address: addr1},
-				{Name: "Person2", Address: addr2},
-				{Name: "Person3", Address: addr3},
-			}
+	// Create test data with explicitly different pointers to equal struct values
+	var addr1 = &Address{Street: "123 Main St", City: "Anytown"}
+	var addr2 = new(Address)
+	addr2.Street = addr1.Street
+	addr2.City = addr1.City
+	var addr3 = &Address{Street: "456 Oak St", City: "Othertown"}
 
-			// Verify that the pointers are initially different
-			assert.NotSame(t, addr1, addr2, "addr1 and addr2 should be different pointers")
+	var people = []Person{
+		{Name: "Person1", Address: addr1},
+		{Name: "Person2", Address: addr2},
+		{Name: "Person3", Address: addr3},
+	}
 
-			// Run the function
-			UnifyStructPointers(people)
+	// Verify initial condition: pointers to the same struct value are different instances
+	assert.NotSame(t, addr1, addr2, "addr1 and addr2 should be different pointers")
 
-			// Verify that pointers to the same address have been unified
-			assert.Same(t, people[0].Address, people[1].Address, "Pointers to equal addresses should be unified")
+	// Run the function under test
+	UnifyStructPointers(people)
 
-			// Verify that pointers to different addresses remain different
-			assert.NotSame(
-				t,
-				people[0].Address,
-				people[2].Address,
-				"Pointers to different addresses should remain different",
-			)
+	// Verify that pointers to equal struct values have been unified
+	assert.Same(t, people[0].Address, people[1].Address, "Pointers to equal addresses should be unified")
 
-			// Check the actual values are still correct
-			assert.Equal(t, "123 Main St", people[0].Address.Street)
-			assert.Equal(t, "123 Main St", people[1].Address.Street)
-			assert.Equal(t, "456 Oak St", people[2].Address.Street)
-			assert.Equal(t, "Anytown", people[0].Address.City)
-			assert.Equal(t, "Anytown", people[1].Address.City)
-			assert.Equal(t, "Othertown", people[2].Address.City)
-		},
-	)
+	// Verify that pointers to different struct values remain different
+	assert.NotSame(t, people[0].Address, people[2].Address, "Pointers to different addresses should remain different")
 
-	// Test case 4: Empty slice
-	t.Run(
-		"empty slice", func(t *testing.T) {
-			// Define a test struct
-			type TestStruct struct {
-				Name *string
-			}
+	// Check the actual values are still correct
+	assert.Equal(t, "123 Main St", people[0].Address.Street)
+	assert.Equal(t, "123 Main St", people[1].Address.Street)
+	assert.Equal(t, "456 Oak St", people[2].Address.Street)
+	assert.Equal(t, "Anytown", people[0].Address.City)
+	assert.Equal(t, "Anytown", people[1].Address.City)
+	assert.Equal(t, "Othertown", people[2].Address.City)
+}
 
-			// Create an empty slice
-			var testData []TestStruct
+// TestUnifyStructPointersEmptySlice tests that an empty slice does not cause any issues.
+//
+// This test verifies that the function handles empty slices gracefully without panicking.
+//
+// Authored by: GitHub Copilot
+func TestUnifyStructPointersEmptySlice(t *testing.T) {
 
-			// This should not panic
-			UnifyStructPointers(testData)
+	// Define a test struct
+	type TestStruct struct {
+		Name *string
+	}
 
-			// No assertion needed - we just verify it doesn't panic
-		},
-	)
+	// Create an empty slice
+	var testData []TestStruct
 
-	// Test case 5: Slice with single item
-	t.Run(
-		"single item slice", func(t *testing.T) {
-			// Define a test struct
-			type TestStruct struct {
-				Name *string
-			}
+	// Verify the function handles empty slices without panicking
+	UnifyStructPointers(testData)
+}
 
-			// Create a slice with a single item
-			var name = "test"
-			var testData = []TestStruct{{Name: &name}}
-			var originalPtr = testData[0].Name
+// TestUnifyStructPointersSingleItemSlice tests that a single-item slice is unchanged.
+//
+// This test verifies that the function does not modify pointers when there's only one item.
+//
+// Authored by: GitHub Copilot
+func TestUnifyStructPointersSingleItemSlice(t *testing.T) {
 
-			// Run the function
-			UnifyStructPointers(testData)
+	// Define a test struct
+	type TestStruct struct {
+		Name *string
+	}
 
-			// Verify the pointer is unchanged
-			assert.Same(t, originalPtr, testData[0].Name, "Pointer should remain unchanged for single item slice")
-			assert.Equal(t, "test", *testData[0].Name, "Value should remain unchanged")
-		},
-	)
+	// Create a slice with a single item
+	var name = "test"
+	var testData = []TestStruct{{Name: &name}}
+	var originalPtr = testData[0].Name
 
-	// Test case 6: Mixed nil and non-nil pointers
-	t.Run(
-		"mixed nil and non-nil pointers", func(t *testing.T) {
-			// Define a test struct
-			type TestStruct struct {
-				Name *string
-			}
+	// Run the function under test
+	UnifyStructPointers(testData)
 
-			// Create test data with some nil pointers
-			var name1 = "test"
-			var name2 = "test" + "" // Force different allocation
+	// Verify the pointer is unchanged
+	assert.Same(t, originalPtr, testData[0].Name, "Pointer should remain unchanged for single item slice")
+	assert.Equal(t, "test", *testData[0].Name, "Value should remain unchanged")
+}
 
-			var testData = []TestStruct{
-				{Name: &name1},
-				{Name: nil},
-				{Name: &name2},
-			}
+// TestUnifyStructPointersMixedNilAndNonNil tests handling of nil pointers.
+//
+// This test verifies that nil pointers remain nil and non-nil pointers to equal values are unified.
+//
+// Authored by: GitHub Copilot
+func TestUnifyStructPointersMixedNilAndNonNil(t *testing.T) {
 
-			// Run the function
-			UnifyStructPointers(testData)
+	// Define a test struct
+	type TestStruct struct {
+		Name *string
+	}
 
-			// Verify that nil pointers remain nil
-			assert.Nil(t, testData[1].Name, "Nil pointers should remain nil")
+	// Create test data with a mix of nil and non-nil pointers
+	var name1 = "test"
+	var name2 = "test" + "" // Force different allocation
+	var testData = []TestStruct{
+		{Name: &name1},
+		{Name: nil},
+		{Name: &name2},
+	}
 
-			// Verify that pointers to the same value are unified
-			assert.Same(t, testData[0].Name, testData[2].Name, "Pointers to equal values should be unified")
+	// Run the function under test
+	UnifyStructPointers(testData)
 
-			// Check the actual values are still correct
-			assert.Equal(t, "test", *testData[0].Name)
-			assert.Equal(t, "test", *testData[2].Name)
-		},
-	)
+	// Verify that nil pointers remain nil
+	assert.Nil(t, testData[1].Name, "Nil pointers should remain nil")
+
+	// Verify that non-nil pointers to equal values are unified
+	assert.Same(t, testData[0].Name, testData[2].Name, "Pointers to equal values should be unified")
+	assert.Equal(t, "test", *testData[0].Name)
+	assert.Equal(t, "test", *testData[2].Name)
 }
