@@ -41,7 +41,7 @@ func BuildAppError(message string, origin any) error {
 }
 
 func BuildAppErrorFormatted(origin any, message string, params ...any) error {
-	return newAppError(fmt.Sprintf(message, params), nil, origin)
+	return newAppError(fmt.Sprintf(message, params...), nil, origin)
 }
 
 func PropagateAsAppError(cause error, origin any) error {

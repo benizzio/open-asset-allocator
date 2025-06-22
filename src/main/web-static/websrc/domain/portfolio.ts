@@ -6,6 +6,12 @@ export type Portfolio = {
     allocationStructure: AllocationStructure;
 };
 
+export type ObservationTimestamp = {
+    id: number;
+    timeTag: string;
+    timestamp: Date;
+};
+
 export type PortfolioAllocation = {
     assetName: string;
     assetTicker: string;
@@ -14,8 +20,12 @@ export type PortfolioAllocation = {
     totalMarketValue: number;
 };
 
-export type PortfolioAtTime = {
+export type PortfolioSnapshot = {
+    /**
+     * @deprecated use `observationTimestamp` instead
+     */
     timeFrameTag: string;
+    observationTimestamp: ObservationTimestamp;
     allocations: PortfolioAllocation[];
 };
 

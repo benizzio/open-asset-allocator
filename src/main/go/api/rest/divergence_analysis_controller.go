@@ -19,13 +19,18 @@ func (controller *DivergenceAnalysisRESTController) BuildRoutes() []infra.RESTRo
 	return []infra.RESTRoute{
 		{
 			Method:   http.MethodGet,
-			Path:     specificPortfolioPath + "/divergence/options",
+			Path:     "/api/portfolio/:" + portfolioIdParam + "/divergence/options",
 			Handlers: gin.HandlersChain{controller.GetDivergenceAnalysisOptions},
 		},
 		{
 			Method:   http.MethodGet,
-			Path:     specificPortfolioPath + "/divergence/:" + timeFrameTagParam + "/allocation-plan/:" + planIdParam,
+			Path:     "/api/portfolio/:" + portfolioIdParam + "/divergence/:" + timeFrameTagParam + "/allocation-plan/:" + planIdParam,
 			Handlers: gin.HandlersChain{controller.GetDivergenceAnalysis},
+		},
+		{
+			Method:   http.MethodGet,
+			Path:     "/api/v2/portfolio/:" + portfolioIdParam + "/divergence/:" + observationTimestampIdParam + "/allocation-plan/:" + planIdParam,
+			Handlers: gin.HandlersChain{controller.GetDivergenceAnalysisNew},
 		},
 	}
 }
@@ -48,6 +53,7 @@ func (controller *DivergenceAnalysisRESTController) GetDivergenceAnalysisOptions
 	context.JSON(http.StatusOK, analysisOptionsDTS)
 }
 
+// Deprecated: use GetDivergenceAnalysisNew
 func (controller *DivergenceAnalysisRESTController) GetDivergenceAnalysis(context *gin.Context) {
 
 	portfolioIdParam := context.Param(portfolioIdParam)
@@ -60,7 +66,7 @@ func (controller *DivergenceAnalysisRESTController) GetDivergenceAnalysis(contex
 
 	planIdParam := context.Param(planIdParam)
 	planId, err := strconv.Atoi(planIdParam)
-	if infra.HandleAPIError(context, "Error getting planId url parameter", err) {
+	if infra.HandleAPIError(context, getPlanIdErrorMessage, err) {
 		return
 	}
 
@@ -78,12 +84,47 @@ func (controller *DivergenceAnalysisRESTController) GetDivergenceAnalysis(contex
 	context.JSON(http.StatusOK, analysisDTS)
 }
 
+// TODO: rename when GetDivergenceAnalysis is removed
+func (controller *DivergenceAnalysisRESTController) GetDivergenceAnalysisNew(context *gin.Context) {
+
+	portfolioIdParamValue := context.Param(portfolioIdParam)
+	portfolioId, err := strconv.Atoi(portfolioIdParamValue)
+	if infra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
+		return
+	}
+
+	var observationTimestampIdParamValue = context.Param(observationTimestampIdParam)
+	observationTimestampId, err := strconv.Atoi(observationTimestampIdParamValue)
+	if infra.HandleAPIError(context, getObservationTimestampIdErrorMessage, err) {
+		return
+	}
+
+	planIdParamValue := context.Param(planIdParam)
+	planId, err := strconv.Atoi(planIdParamValue)
+	if infra.HandleAPIError(context, getPlanIdErrorMessage, err) {
+		return
+	}
+
+	analysis, err := controller.portfolioDivergenceAnalysisService.GeneratePortfolioDivergenceAnalysisNew(
+		portfolioId,
+		observationTimestampId,
+		planId,
+	)
+	if infra.HandleAPIError(context, "Error generating portfolio divergence analysis", err) {
+		return
+	}
+
+	var analysisDTS = model.MapToDivergenceAnalysisDTS(analysis)
+
+	context.JSON(http.StatusOK, analysisDTS)
+}
+
 func BuildDivergenceAnalysisRESTController(
-	portfiolioAnalysisConfigService *application.PortfolioAnalysisConfigurationAppService,
-	portfiolioAnalysisService *application.PortfolioDivergenceAnalysisAppService,
+	portfolioAnalysisConfigService *application.PortfolioAnalysisConfigurationAppService,
+	portfolioAnalysisService *application.PortfolioDivergenceAnalysisAppService,
 ) *DivergenceAnalysisRESTController {
 	return &DivergenceAnalysisRESTController{
-		portfiolioAnalysisConfigService,
-		portfiolioAnalysisService,
+		portfolioAnalysisConfigService,
+		portfolioAnalysisService,
 	}
 }

@@ -16,8 +16,17 @@ func (service *PortfolioAnalysisConfigurationAppService) GetDivergenceAnalysisOp
 	error,
 ) {
 
-	var timeFrameLimit = 10
-	var timeFrameTags, err = service.portfolioDomService.GetAllTimeFrameTags(portfolioId, timeFrameLimit)
+	var observationTimestampsLimit = 10
+	// TODO remove
+	timeFrameTags, err := service.portfolioDomService.GetAllTimeFrameTags(portfolioId, observationTimestampsLimit)
+	if err != nil {
+		return nil, err
+	}
+
+	availableTimestamps, err := service.portfolioDomService.GetAvailableObservationTimestamps(
+		portfolioId,
+		observationTimestampsLimit,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -29,8 +38,9 @@ func (service *PortfolioAnalysisConfigurationAppService) GetDivergenceAnalysisOp
 	}
 
 	var analysisOptions = &domain.AnalysisOptions{
-		AvailableHistory: timeFrameTags,
-		AvailablePlans:   planIdentifiers,
+		AvailableHistory:               timeFrameTags,
+		AvailableObservationTimestamps: availableTimestamps,
+		AvailablePlans:                 planIdentifiers,
 	}
 
 	return analysisOptions, nil

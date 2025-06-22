@@ -1,5 +1,5 @@
 import { MultiChartDataSource } from "../../infra/chart/chart-types";
-import { PortfolioAtTime } from "../../domain/portfolio";
+import { PortfolioSnapshot } from "../../domain/portfolio";
 import {
     AllocationHierarchyLevel,
     AllocationStructure,
@@ -11,7 +11,7 @@ import { mapChartData } from "./portfolio-chart-mapping";
 
 /**
  * MultiChartDataSource that keeps track of an applied hierarchy level,
- * based on the PortfolioAtTime hierarchy structure.
+ * based on the Portfolio allocation hierarchy structure.
  * It stores the current level being used and
  * the applied hierarchy levels for filtering data for previously selected levels only.
  */
@@ -22,7 +22,7 @@ export class FractalPortfolioMultiChartDataSource extends MultiChartDataSource {
 
     constructor(
         initialChartData: MappedChartData,
-        private readonly portfolioAtTime: PortfolioAtTime,
+        private readonly portfolioAtTime: PortfolioSnapshot,
         private readonly portfolioAllocationStructure: AllocationStructure,
     ) {
 

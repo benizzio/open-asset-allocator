@@ -20,9 +20,10 @@ func (service *PortfolioDomService) GetPortfolio(id int) (*domain.Portfolio, err
 }
 
 func (service *PortfolioDomService) GetPortfolioAllocationHistory(id int) ([]*domain.PortfolioAllocation, error) {
-	return service.portfolioRepository.GetAllPortfolioAllocations(id, 10)
+	return service.portfolioRepository.GetAllPortfolioAllocationsWithinObservationTimestampsLimit(id, 10)
 }
 
+// Deprecated: use FindPortfolioAllocationsByObservationTimestamp
 func (service *PortfolioDomService) FindPortfolioAllocations(
 	id int,
 	timeFrameTag domain.TimeFrameTag,
@@ -30,6 +31,14 @@ func (service *PortfolioDomService) FindPortfolioAllocations(
 	return service.portfolioRepository.FindPortfolioAllocations(id, timeFrameTag)
 }
 
+func (service *PortfolioDomService) FindPortfolioAllocationsByObservationTimestamp(
+	id int,
+	observationTimestampId int,
+) ([]*domain.PortfolioAllocation, error) {
+	return service.portfolioRepository.FindPortfolioAllocationsByObservationTimestamp(id, observationTimestampId)
+}
+
+// Deprecated: use GetPortfolioAtObservationTimestamp
 func (service *PortfolioDomService) GetPortfolioSnapshot(
 	id int,
 	timeFrameTag domain.TimeFrameTag,
@@ -48,11 +57,37 @@ func (service *PortfolioDomService) GetPortfolioSnapshot(
 	return portfolio, portfolioAllocations, nil
 }
 
+func (service *PortfolioDomService) GetPortfolioAtObservationTimestamp(
+	id int,
+	observationTimestampId int,
+) (*domain.Portfolio, []*domain.PortfolioAllocation, error) {
+
+	portfolio, err := service.GetPortfolio(id)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	portfolioAllocations, err := service.FindPortfolioAllocationsByObservationTimestamp(id, observationTimestampId)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return portfolio, portfolioAllocations, nil
+}
+
+// Deprecated: use GetAvailableObservationTimestamps
 func (service *PortfolioDomService) GetAllTimeFrameTags(
 	portfolioId int,
 	timeFrameLimit int,
 ) ([]domain.TimeFrameTag, error) {
 	return service.portfolioRepository.GetAllTimeFrameTags(portfolioId, timeFrameLimit)
+}
+
+func (service *PortfolioDomService) GetAvailableObservationTimestamps(
+	portfolioId int,
+	observationTimestampsLimit int,
+) ([]*domain.PortfolioObservationTimestamp, error) {
+	return service.portfolioRepository.GetAvailableObservationTimestamps(portfolioId, observationTimestampsLimit)
 }
 
 func (service *PortfolioDomService) GenerateHierarchicalId(
