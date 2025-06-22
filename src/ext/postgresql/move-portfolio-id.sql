@@ -1,3 +1,5 @@
+BEGIN TRANSACTION;
+
 CREATE TEMP TABLE temp_vars (key text PRIMARY KEY, value text);
 
 INSERT INTO temp_vars (key, value) VALUES ('portfolio_id', '1');
@@ -27,3 +29,5 @@ WHERE portfolio_id = (SELECT value::integer FROM temp_vars WHERE key = 'portfoli
 DELETE FROM portfolio
 WHERE id = (SELECT value::integer FROM temp_vars WHERE key = 'portfolio_id')
 ;
+
+COMMIT;
