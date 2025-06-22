@@ -120,11 +120,11 @@ func (controller *DivergenceAnalysisRESTController) GetDivergenceAnalysisNew(con
 }
 
 func BuildDivergenceAnalysisRESTController(
-	portfiolioAnalysisConfigService *application.PortfolioAnalysisConfigurationAppService,
-	portfiolioAnalysisService *application.PortfolioDivergenceAnalysisAppService,
+	portfolioAnalysisConfigService *application.PortfolioAnalysisConfigurationAppService,
+	portfolioAnalysisService *application.PortfolioDivergenceAnalysisAppService,
 ) *DivergenceAnalysisRESTController {
 	return &DivergenceAnalysisRESTController{
-		portfiolioAnalysisConfigService,
-		portfiolioAnalysisService,
+		portfolioAnalysisConfigService,
+		portfolioAnalysisService,
 	}
 }
