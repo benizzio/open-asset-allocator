@@ -140,7 +140,7 @@ func buildSnapshotDTS(
 	}
 }
 
-func mapToObservationTimestampsDTS(
+func mapToObservationTimestampDTSs(
 	availableObservationTimestamps []*domain.PortfolioObservationTimestamp,
 ) []*PortfolioObservationTimestampDTS {
 	var observationTimestampsDTS = make([]*PortfolioObservationTimestampDTS, 0)
@@ -166,7 +166,7 @@ func mapToObservationTimestampDTS(observationTimestamp *domain.PortfolioObservat
 
 func MapToAnalysisOptionsDTS(analysisOptions *domain.AnalysisOptions) *AnalysisOptionsDTS {
 	var plans = mapToAllocationPlanIdentifierDTSs(analysisOptions.AvailablePlans)
-	var availableHistory = mapToObservationTimestampsDTS(analysisOptions.AvailableObservationTimestamps)
+	var availableHistory = mapToObservationTimestampDTSs(analysisOptions.AvailableObservationTimestamps)
 	return &AnalysisOptionsDTS{
 		AvailableHistory:         analysisOptions.AvailableHistory,
 		AvailableObservedHistory: availableHistory,
