@@ -96,6 +96,8 @@ func portfolioAllocationToAllocationDTS(portfolioAllocation *domain.PortfolioAll
 		Class:            portfolioAllocation.Class,
 		CashReserve:      portfolioAllocation.CashReserve,
 		TotalMarketValue: portfolioAllocation.TotalMarketValue,
+		AssetQuantity:    portfolioAllocation.AssetQuantity,
+		AssetMarketPrice: portfolioAllocation.AssetMarketPrice,
 	}
 }
 

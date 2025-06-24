@@ -36,6 +36,8 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 						"assetTicker":"ARCA:BIL",
 						"class":"BONDS",
 						"cashReserve":false,
+						"assetMarketPrice":"100",
+						"assetQuantity":"100",
 						"totalMarketValue":10000
 					}
 				],
@@ -55,6 +57,8 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 						"assetTicker":"ARCA:BIL",
 						"class":"BONDS",
 						"cashReserve":false,
+						"assetMarketPrice":"100",
+						"assetQuantity":"100",
 						"totalMarketValue":10000
 					},
 					{
@@ -63,6 +67,8 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 						"assetTicker":"ARCA:STIP",
 						"class":"BONDS",
 						"cashReserve":false,
+						"assetMarketPrice":"100",
+						"assetQuantity":"80",
 						"totalMarketValue":8000
 					},
 					{
@@ -71,6 +77,8 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 						"assetTicker":"NasdaqGM:IEF",
 						"class":"BONDS",
 						"cashReserve":false,
+						"assetMarketPrice":"100",
+						"assetQuantity":"60",
 						"totalMarketValue":6000
 					},
 					{
@@ -79,6 +87,8 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 						"assetTicker":"NasdaqGM:TLT",
 						"class":"BONDS",
 						"cashReserve":false,
+						"assetMarketPrice":"100",
+						"assetQuantity":"30",
 						"totalMarketValue":3000
 					},
 					{
@@ -87,6 +97,8 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 						"assetTicker":"NasdaqGM:SHV",
 						"class":"STOCKS",
 						"cashReserve":true,
+						"assetMarketPrice":"100",
+						"assetQuantity":"80",
 						"totalMarketValue":9000
 					},
 					{
@@ -95,6 +107,8 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 						"assetTicker":"ARCA:SPY",
 						"class":"STOCKS",
 						"cashReserve":false,
+						"assetMarketPrice":"100",
+						"assetQuantity":"90",
 						"totalMarketValue":8000
 					},
 					{
@@ -103,6 +117,8 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 						"assetTicker":"ARCA:EWZ",
 						"class":"STOCKS",
 						"cashReserve":false,
+						"assetMarketPrice":"100",
+						"assetQuantity":"10",
 						"totalMarketValue":1000
 					}
 				],
@@ -142,6 +158,8 @@ func TestGetPortfolioAllocationHistoryForTimeFrame(t *testing.T) {
 						"assetTicker":"ARCA:BIL",
 						"class":"BONDS",
 						"cashReserve":false,
+						"assetMarketPrice":"100",
+						"assetQuantity":"100",
 						"totalMarketValue":10000
 					}
 				],
@@ -181,6 +199,8 @@ func TestGetPortfolioAllocationHistoryForObservationTimestamp(t *testing.T) {
 						"assetTicker":"ARCA:BIL",
 						"class":"BONDS",
 						"cashReserve":false,
+						"assetMarketPrice":"100",
+						"assetQuantity":"100",
 						"totalMarketValue":10000
 					}
 				],

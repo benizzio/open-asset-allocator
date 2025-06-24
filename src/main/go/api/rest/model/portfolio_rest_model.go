@@ -3,6 +3,7 @@ package model
 import (
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/langext"
+	"github.com/shopspring/decimal"
 	"time"
 )
 
@@ -13,12 +14,14 @@ type PortfolioDTS struct {
 }
 
 type PortfolioAllocationDTS struct {
-	AssetId          int    `json:"assetId"`
-	AssetName        string `json:"assetName"`
-	AssetTicker      string `json:"assetTicker"`
-	Class            string `json:"class"`
-	CashReserve      bool   `json:"cashReserve"`
-	TotalMarketValue int64  `json:"totalMarketValue"`
+	AssetId          int             `json:"assetId"`
+	AssetName        string          `json:"assetName"`
+	AssetTicker      string          `json:"assetTicker"`
+	Class            string          `json:"class"`
+	CashReserve      bool            `json:"cashReserve"`
+	TotalMarketValue int64           `json:"totalMarketValue"`
+	AssetQuantity    decimal.Decimal `json:"assetQuantity"`
+	AssetMarketPrice decimal.Decimal `json:"assetMarketPrice"`
 }
 
 type PortfolioSnapshotDTS struct {

@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"github.com/shopspring/decimal"
+	"time"
+)
 
 // Deprecated: Use PortfolioObservationTimestamp
 type TimeFrameTag string
@@ -13,6 +16,8 @@ type PortfolioAllocation struct {
 	TimeFrameTag         TimeFrameTag
 	ObservationTimestamp *PortfolioObservationTimestamp
 	TotalMarketValue     int64
+	AssetQuantity        decimal.Decimal
+	AssetMarketPrice     decimal.Decimal
 }
 
 type Portfolio struct {
