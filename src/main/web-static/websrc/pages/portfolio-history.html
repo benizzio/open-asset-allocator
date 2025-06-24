@@ -117,20 +117,23 @@
 
             <div id="portfolio-allocation-management-{{id}}" class="accordion-collapse collapse">
                 <div class="accordion-body row justify-content-center">
-                    <table class="table">
-                        <thead>
-                        <tr>
-                            <th scope="col" colspan="2">Asset</th>
-                            <th scope="col">Class</th>
-                            <th scope="col">Cash reserve?</th>
-                            <th scope="col">Quantity</th>
-                            <th scope="col">Market price</th>
-                            <th scope="col">Total market value</th>
-                        </tr>
-                        </thead>
-                        <tbody class="table-group-divider" id="portfolio-allocation-management-records-{{id}}">
-                        </tbody>
-                    </table>
+                    <form hx-post="/api/test" hx-ext="json-enc">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th scope="col" colspan="2">Asset</th>
+                                <th scope="col">Class</th>
+                                <th scope="col">Cash reserve?</th>
+                                <th scope="col">Quantity</th>
+                                <th scope="col">Market price</th>
+                                <th scope="col">Total market value</th>
+                            </tr>
+                            </thead>
+                            <tbody class="table-group-divider" id="portfolio-allocation-management-records-{{id}}">
+                            </tbody>
+                        </table>
+                        <button type="submit">TEST!</button>
+                    </form>
                 </div>
             </div>
 
@@ -142,9 +145,18 @@
 
     <!-- TODO: proper form, with insertion -->
     {{#each @root.[0].allocations}}
+
         <tr>
             <td>
-                {{ assetTicker }}
+                <input type="text"
+                       name="allocations[{{ @index }}][assetTicker]"
+                       class="form-control"
+                       placeholder="Asset ticker"
+                       aria-label="Asset ticker"
+                       required
+                       autocomplete="off"
+                       value="{{assetTicker}}"
+                />
             </td>
             <td>
                 {{ assetName }}
@@ -156,16 +168,18 @@
                 {{ cashReserve }}
             </td>
             <td>
-                999
+                {{ assetQuantity }}
             </td>
             <td>
-                999
+                {{ assetMarketPrice }}
             </td>
             <td>
                 {{ formatCurrency totalMarketValue }}
             </td>
         </tr>
+
     {{/each}}
+
 
 </script>
 
