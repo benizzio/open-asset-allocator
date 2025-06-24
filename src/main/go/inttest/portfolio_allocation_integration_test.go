@@ -37,7 +37,7 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 						"class":"BONDS",
 						"cashReserve":false,
 						"assetMarketPrice":"100",
-						"assetQuantity":"100",
+						"assetQuantity":"100.00009",
 						"totalMarketValue":10000
 					}
 				],
@@ -159,7 +159,7 @@ func TestGetPortfolioAllocationHistoryForTimeFrame(t *testing.T) {
 						"class":"BONDS",
 						"cashReserve":false,
 						"assetMarketPrice":"100",
-						"assetQuantity":"100",
+						"assetQuantity":"100.00009",
 						"totalMarketValue":10000
 					}
 				],
@@ -200,7 +200,7 @@ func TestGetPortfolioAllocationHistoryForObservationTimestamp(t *testing.T) {
 						"class":"BONDS",
 						"cashReserve":false,
 						"assetMarketPrice":"100",
-						"assetQuantity":"100",
+						"assetQuantity":"100.00009",
 						"totalMarketValue":10000
 					}
 				],

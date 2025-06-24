@@ -182,7 +182,7 @@ const initialStateSQL = `
 			   1,
 			   'BONDS',
 			   FALSE,
-			   100,
+			   100.00009,
 			   100,
 			   10000,
 			   '202503',
