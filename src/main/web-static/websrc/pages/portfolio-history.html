@@ -102,6 +102,7 @@
                 hx-target="#portfolio-allocation-management-records-{{id}}"
                 hx-trigger="click"
                 handlebars-template="template-portfolio-history-management-records"
+                hx-on-htmx-after-settle="initTags('portfolio-allocation-management-records-{{id}}')"
                 hx-get="/api/portfolio/:portfolioId/history?observationTimestampId={{id}}"
             >
             <button class="accordion-button collapsed"
@@ -148,9 +149,9 @@
 
         <tr>
             <td>
-                <input type="hidden" name="allocations[{{ @index }}][assetId]" value="{{assetId}}" />
+                <input type="hidden" name="allocations[{{@index}}][assetId]" value="{{assetId}}" />
                 <input type="text"
-                       name="allocations[{{ @index }}][assetTicker]"
+                       name="allocations[{{@index}}][assetTicker]"
                        placeholder="Asset ticker"
                        aria-label="Asset ticker"
                        autocomplete="off"
@@ -161,7 +162,7 @@
             </td>
             <td>
                 <input type="text"
-                       name="allocations[{{ @index }}][assetName]"
+                       name="allocations[{{@index}}][assetName]"
                        placeholder="Asset name"
                        aria-label="Asset name"
                        autocomplete="off"
@@ -171,18 +172,25 @@
                 />
             </td>
             <td>
-                <!-- TODO: experiment with https://github.com/lekoala/bootstrap5-tags -->
-                {{ class }}
+                <input type="text"
+                       name="allocations[{{@index}}][class]"
+                       placeholder="Class"
+                       aria-label="Class"
+                       autocomplete="off"
+                       class="form-control"
+                       value="{{class}}"
+                       list="datalist-classes"
+                />
             </td>
             <td>
                 <input type="checkbox"
-                       name="allocations[{{ @index }}][cashReserve]"
+                       name="allocations[{{@index}}][cashReserve]"
                        {{#if cashReserve}}checked{{/if}}
                 />
             </td>
             <td>
                 <input type="number"
-                       name="allocations[{{ @index }}][assetQuantity]"
+                       name="allocations[{{@index}}][assetQuantity]"
                        placeholder="Asset quantity"
                        aria-label="Asset quantity"
                        autocomplete="off"
@@ -193,7 +201,7 @@
             </td>
             <td>
                 <input type="number"
-                       name="allocations[{{ @index }}][assetMarketPrice]"
+                       name="allocations[{{@index}}][assetMarketPrice]"
                        placeholder="Asset market price"
                        aria-label="Asset market price"
                        autocomplete="off"
@@ -204,7 +212,7 @@
             </td>
             <td>
                 <input type="number"
-                       name="allocations[{{ @index }}][totalMarketValue]"
+                       name="allocations[{{@index}}][totalMarketValue]"
                        placeholder="Total market value"
                        aria-label="Total market value"
                        autocomplete="off"
@@ -218,6 +226,13 @@
 
 
 </script>
+
+<datalist id="datalist-classes">
+    <!-- TODO fetch already used alternatives -->
+    <option value="BONDS">BONDS</option>
+    <option value="COMMODITIES">COMMODITIES</option>
+    <option value="CRYPTO">CRYPTO</option>
+</datalist>
 
 <script type="text/javascript">
 
