@@ -118,7 +118,7 @@
             <div id="portfolio-allocation-management-{{id}}" class="accordion-collapse collapse">
                 <div class="accordion-body row justify-content-center">
                     <form hx-post="/api/test" hx-ext="form-json">
-                        <table class="table">
+                        <table class="table table-striped">
                             <thead>
                             <tr>
                                 <th scope="col" colspan="2">Asset</th>
@@ -148,33 +148,69 @@
 
         <tr>
             <td>
+                <input type="hidden" name="allocations[{{ @index }}][assetId]" value="{{assetId}}" />
                 <input type="text"
                        name="allocations[{{ @index }}][assetTicker]"
-                       class="form-control"
                        placeholder="Asset ticker"
                        aria-label="Asset ticker"
-                       required
                        autocomplete="off"
+                       required
+                       class="form-control"
                        value="{{assetTicker}}"
                 />
             </td>
             <td>
-                {{ assetName }}
+                <input type="text"
+                       name="allocations[{{ @index }}][assetName]"
+                       placeholder="Asset name"
+                       aria-label="Asset name"
+                       autocomplete="off"
+                       required
+                       class="form-control"
+                       value="{{assetName}}"
+                />
             </td>
             <td>
+                <!-- TODO: experiment with https://github.com/lekoala/bootstrap5-tags -->
                 {{ class }}
             </td>
             <td>
-                {{ cashReserve }}
+                <input type="checkbox"
+                       name="allocations[{{ @index }}][cashReserve]"
+                       {{#if cashReserve}}checked{{/if}}
+                />
             </td>
             <td>
-                {{ assetQuantity }}
+                <input type="number"
+                       name="allocations[{{ @index }}][assetQuantity]"
+                       placeholder="Asset quantity"
+                       aria-label="Asset quantity"
+                       autocomplete="off"
+                       class="form-control"
+                       value="{{assetQuantity}}"
+                       step="any"
+                />
             </td>
             <td>
-                {{ assetMarketPrice }}
+                <input type="number"
+                       name="allocations[{{ @index }}][assetMarketPrice]"
+                       placeholder="Asset market price"
+                       aria-label="Asset market price"
+                       autocomplete="off"
+                       class="form-control"
+                       value="{{assetMarketPrice}}"
+                       step="any"
+                />
             </td>
             <td>
-                {{ formatCurrency totalMarketValue }}
+                <input type="number"
+                       name="allocations[{{ @index }}][totalMarketValue]"
+                       placeholder="Total market value"
+                       aria-label="Total market value"
+                       autocomplete="off"
+                       class="form-control "
+                       value="{{totalMarketValue}}"
+                />
             </td>
         </tr>
 
