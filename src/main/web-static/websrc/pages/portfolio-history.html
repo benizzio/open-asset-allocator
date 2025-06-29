@@ -119,15 +119,16 @@
             <div id="portfolio-allocation-management-{{id}}" class="accordion-collapse collapse">
                 <div class="accordion-body row justify-content-center">
                     <form hx-post="/api/test" hx-ext="form-json">
+                        <!-- TODO verify possibility of sticky header and footer -->
                         <table class="table table-striped">
                             <thead>
                             <tr>
                                 <th scope="col" colspan="2">Asset</th>
                                 <th scope="col">Class</th>
-                                <th scope="col">Cash reserve?</th>
-                                <th scope="col">Quantity</th>
-                                <th scope="col">Market price</th>
-                                <th scope="col">Total market value</th>
+                                <th scope="col" class="w-10">Cash reserve?</th>
+                                <th scope="col" class="w-15">Quantity</th>
+                                <th scope="col" class="w-15">Market price</th>
+                                <th scope="col" class="w-12">Total market value</th>
                             </tr>
                             </thead>
                             <tbody class="table-group-divider" id="portfolio-allocation-management-records-{{id}}">
@@ -180,9 +181,10 @@
                        class="form-control"
                        value="{{class}}"
                        list="datalist-classes"
+                       oninput="maskTagInput(this)"
                 />
             </td>
-            <td>
+            <td class="align-middle text-center">
                 <input type="checkbox"
                        name="allocations[{{@index}}][cashReserve]"
                        {{#if cashReserve}}checked{{/if}}
@@ -228,7 +230,7 @@
 </script>
 
 <datalist id="datalist-classes">
-    <!-- TODO fetch already used alternatives -->
+    <!-- TODO fetch already used alternatives from backend -->
     <option value="BONDS">BONDS</option>
     <option value="COMMODITIES">COMMODITIES</option>
     <option value="CRYPTO">CRYPTO</option>
@@ -245,6 +247,14 @@
         navigateTo(`/portfolio/${portfolioId}/history/manage`);
     }
 
+    function maskTagInput(inputElement) {
+        let value = inputElement.value;
+        if (value) {
+            value = value.toUpperCase();
+            value = value.replace(" ", "");
+        }
+        inputElement.value = value;
+    }
 </script>
 
 <script id="portfolio-allocation-chart-options" type="application/json">
