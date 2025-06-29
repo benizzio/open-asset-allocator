@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/usr/bin/env zsh
 
 # First argument ($1): main script to run
 # Options:
@@ -97,7 +97,7 @@ while [[ $# -gt 0 ]]; do
 
         # Postgres port argument
         --pg-port)
-            # move positional parameters inside dependencies options (--deps is $0)
+            # move positional parameters inside dependencies options
             shift
 
             # checks if the argument is a number
@@ -114,7 +114,7 @@ while [[ $# -gt 0 ]]; do
 
         # Portfolio id argument
         --portfolio)
-            # move positional parameters inside dependencies options (--deps is $0)
+            # move positional parameters inside dependencies options
             shift
 
             # checks if the argument is a number
@@ -122,6 +122,23 @@ while [[ $# -gt 0 ]]; do
                 portfolio_id="$1"
             else
                 echo "Portfolio id must be a number"
+                exit 1
+            fi
+
+            # move to the next positional parameter
+            shift
+            ;;
+
+       # Time tag argument
+        --time-tag)
+            # move positional parameters inside time-tag option
+            shift
+
+            # Store the time tag string
+            if [[ -n "$1" ]]; then
+                time_tag="$1"
+            else
+                echo "Time tag must be provided"
                 exit 1
             fi
 
@@ -141,6 +158,10 @@ if [ -n "$pgport" ]; then
     export PGPORT=$pgport
 fi
 
+if [ -n "$time_tag" ]; then
+    export PORTFOLIO_ALLOCATION_OBS_TIME_TAG=$time_tag
+fi
+
 if [ -n "$portfolio_id" ]; then
     export PORTFOLIO_ID=$portfolio_id
 else
@@ -158,3 +179,4 @@ for file_path in "${dep_file_paths[@]}"; do
 done
 
 exit 0
+

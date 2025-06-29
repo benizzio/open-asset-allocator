@@ -64,6 +64,7 @@ func (app *App) buildAppComponents() {
 	)
 
 	var portfolioRESTController = rest.BuildPortfolioRESTController(portfolioDomService)
+	var portfolioAllocationRESTController = rest.BuildPortfolioAllocationRESTController(portfolioDomService)
 	var portfolioDivergenceAnalysisRESTController = rest.BuildDivergenceAnalysisRESTController(
 		portfolioAnalysisConfigurationService,
 		portfolioDivergenceAnalysisService,
@@ -74,6 +75,7 @@ func (app *App) buildAppComponents() {
 		portfolioRESTController,
 		allocationPlanRESTController,
 		portfolioDivergenceAnalysisRESTController,
+		portfolioAllocationRESTController,
 	}
 }
 

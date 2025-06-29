@@ -8,11 +8,15 @@ jobs:
   test:
     name: Go Tests
     runs-on: ubuntu-latest
-    # Removing the container with hardcoded version
     continue-on-error: false
     steps:
+      - name: Install ZSH
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zsh
+
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set Go version from go.mod
         id: go-version
@@ -30,7 +34,9 @@ jobs:
           cd src/main/go
           go mod download
 
+      - name: Ensure test script is executable
+        run: chmod +x test.sh
+
       - name: Run tests
         run: |
-          cd src/main/go
-          go test ./inttest
+          make test
