@@ -95,7 +95,9 @@
 <script id="template-portfolio-history-management" type="text/x-handlebars-template">
 
     {{#each .}}
+
         <div class="accordion-item">
+
             <h2 class="accordion-header"
                 data-bs-parent="#accordion-portfolio-history-management"
                 hx-include="[name='portfolioId']"
@@ -118,10 +120,10 @@
 
             <div id="portfolio-allocation-management-{{id}}" class="accordion-collapse collapse">
                 <div class="accordion-body row justify-content-center">
+
                     <form hx-post="/api/test" hx-ext="form-json">
-                        <!-- TODO verify possibility of sticky header and footer -->
                         <table class="table table-striped">
-                            <thead>
+                            <thead class="sticky-header">
                             <tr>
                                 <th scope="col" colspan="2">Asset</th>
                                 <th scope="col">Class</th>
@@ -133,9 +135,17 @@
                             </thead>
                             <tbody class="table-group-divider" id="portfolio-allocation-management-records-{{id}}">
                             </tbody>
+                            <tfoot class="sticky-footer">
+                            <tr>
+                                <td colspan="7" class="text-end">
+                                    <button type="submit">TEST!</button>
+                                </td>
+                            </tr>
+                            </tfoot>
+
                         </table>
-                        <button type="submit">TEST!</button>
                     </form>
+
                 </div>
             </div>
 
@@ -145,7 +155,6 @@
 
 <script id="template-portfolio-history-management-records" type="text/x-handlebars-template">
 
-    <!-- TODO: proper form, with insertion -->
     {{#each @root.[0].allocations}}
 
         <tr>

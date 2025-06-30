@@ -22,3 +22,13 @@
 .w-15 {
   width: 15% !important;
 }
+
+.sticky-header {
+  position: sticky;
+  top: 0;
+}
+
+.sticky-footer {
+  position: sticky;
+  bottom: 0;
+}
