@@ -251,3 +251,24 @@ func TestGetAvailableHistoryObservations(t *testing.T) {
 
 	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
 }
+
+func TestGetAvailablePortfolioAllocationClasses(t *testing.T) {
+
+	response, err := http.Get(inttestinfra.TestAPIURLprefix + "/portfolio/1/allocation-classes")
+	assert.NoError(t, err)
+
+	assert.Equal(t, http.StatusOK, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+
+	var actualResponseJSON = string(body)
+	var expectedResponseJSON = `
+		["BONDS", "STOCKS"]
+	`
+
+	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
+}
+
+// TODO test for empty classes

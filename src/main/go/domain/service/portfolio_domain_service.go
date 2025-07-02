@@ -157,6 +157,10 @@ func (service *PortfolioDomService) PersistPortfolio(portfolio *domain.Portfolio
 	return persistedPortfolio, nil
 }
 
+func (service *PortfolioDomService) FindAvailablePortfolioAllocationClasses(portfolioId int) ([]string, error) {
+	return service.portfolioRepository.FindAvailablePortfolioAllocationClasses(portfolioId)
+}
+
 func BuildPortfolioDomService(portfolioRepository domain.PortfolioRepository) *PortfolioDomService {
 	return &PortfolioDomService{
 		allocationHierarchyFieldExtractorMap: map[string]func(*domain.PortfolioAllocation) string{

@@ -28,6 +28,11 @@ func (controller *PortfolioAllocationRESTController) BuildRoutes() []infra.RESTR
 			Path:     "/api/portfolio/:" + portfolioIdParam + "/history/observation",
 			Handlers: gin.HandlersChain{controller.getAvailableHistoryObservations},
 		},
+		{
+			Method:   http.MethodGet,
+			Path:     "/api/portfolio/:" + portfolioIdParam + "/allocation-classes",
+			Handlers: gin.HandlersChain{controller.getAvailablePortfolioAllocationClasses},
+		},
 	}
 }
 
@@ -113,6 +118,22 @@ func (controller *PortfolioAllocationRESTController) getAvailableHistoryObservat
 	var availableTimestampsDTS = model.MapToObservationTimestampDTSs(availableTimestamps)
 
 	context.JSON(http.StatusOK, availableTimestampsDTS)
+}
+
+func (controller *PortfolioAllocationRESTController) getAvailablePortfolioAllocationClasses(context *gin.Context) {
+
+	portfolioIdParamValue := context.Param(portfolioIdParam)
+	portfolioId, err := strconv.Atoi(portfolioIdParamValue)
+	if infra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
+		return
+	}
+
+	availableClasses, err := controller.portfolioDomService.FindAvailablePortfolioAllocationClasses(portfolioId)
+	if infra.HandleAPIError(context, "Error getting available portfolio allocation classes", err) {
+		return
+	}
+
+	context.JSON(http.StatusOK, availableClasses)
 }
 
 func BuildPortfolioAllocationRESTController(portfolioDomService *service.PortfolioDomService) *PortfolioAllocationRESTController {

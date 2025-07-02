@@ -8,6 +8,7 @@ import (
 // Deprecated: Use PortfolioObservationTimestamp
 type TimeFrameTag string
 
+// TODO separate PortfolioAllocation and related components into new files
 type PortfolioAllocation struct {
 	Asset       Asset
 	Class       string
@@ -57,4 +58,5 @@ type PortfolioRepository interface {
 	)
 	InsertPortfolio(portfolio *Portfolio) (*Portfolio, error)
 	UpdatePortfolio(portfolio *Portfolio) (*Portfolio, error)
+	FindAvailablePortfolioAllocationClasses(portfolioId int) ([]string, error)
 }

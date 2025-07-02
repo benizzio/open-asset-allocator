@@ -57,6 +57,11 @@ const (
 		SELECT p.id, p.name, p.allocation_structure
 		FROM portfolio p
 	`
+	portfolioAllocationClassesSQL = `
+		SELECT DISTINCT pa.class 
+		FROM portfolio_allocation_fact pa ` + infra.WhereClausePlaceholder + `
+		ORDER BY pa.class ASC
+	`
 )
 
 const (
@@ -232,6 +237,41 @@ func (repository *PortfolioRDBMSRepository) UpdatePortfolio(portfolio *domain.Po
 	}
 
 	return &updatedPortfolio, nil
+}
+
+func (repository *PortfolioRDBMSRepository) FindAvailablePortfolioAllocationClasses(portfolioId int) ([]string, error) {
+
+	var query = portfolioAllocationClassesSQL
+
+	var queryResult = make([]string, 0)
+	rows, err := repository.dbAdapter.BuildQuery(query).
+		AddWhereClauseAndParam(portfolioIdWhereClause, "portfolioId", portfolioId).
+		Build().GetRows()
+
+	if err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(
+			err,
+			"Error querying portfolio allocation classes",
+			repository,
+		)
+	}
+
+	for rows.Next() {
+
+		var class string
+		err = rows.Scan(&class)
+		if err != nil {
+			return nil, infra.PropagateAsAppErrorWithNewMessage(
+				err,
+				"Error scanning portfolio allocation class",
+				repository,
+			)
+		}
+
+		queryResult = append(queryResult, class)
+	}
+
+	return queryResult, nil
 }
 
 func BuildPortfolioRepository(dbAdapter *infra.RDBMSAdapter) *PortfolioRDBMSRepository {
