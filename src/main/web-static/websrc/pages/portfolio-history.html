@@ -36,7 +36,7 @@
 
 <script id="template-portfolio-history" type="text/x-handlebars-template">
 
-    <button type="button" class="btn btn-outline-primary mb-2" onclick="navigateToManage()">
+    <button type="button" class="btn btn-outline-primary mb-2" onclick="navigateToManagePortfolioAllocationData()">
         <span class="h2 bi bi-database-gear"></span>
     </button>
 
@@ -101,10 +101,10 @@
             <h2 class="accordion-header"
                 data-bs-parent="#accordion-portfolio-history-management"
                 hx-include="[name='portfolioId']"
-                hx-target="#portfolio-allocation-management-records-{{id}}"
+                hx-target="#portfolio-allocation-management-rows-{{id}}"
                 hx-trigger="click"
                 handlebars-template="template-portfolio-history-management-rows"
-                hx-on-htmx-after-settle="initTags('portfolio-allocation-management-records-{{id}}')"
+                hx-on-htmx-after-settle="initTags('portfolio-allocation-management-rows-{{id}}')"
                 hx-get="/api/portfolio/:portfolioId/history?observationTimestampId={{id}}"
             >
             <button class="accordion-button collapsed"
@@ -135,15 +135,18 @@
                             </tr>
                             </thead>
 
-                            <tbody class="table-group-divider" id="portfolio-allocation-management-records-{{id}}">
+                            <tbody class="table-group-divider" id="portfolio-allocation-management-rows-{{id}}">
                             </tbody>
 
                             <tfoot class="sticky-footer">
                             <tr>
                                 <td colspan="7">
                                     <div class="d-flex w-100">
-                                        <button class="btn btn-secondary" type="button">
-                                            <span class="bi bi-plus-circle-fill h5"></span>
+                                        <button class="btn btn-secondary"
+                                                type="button"
+                                                onclick="addPortfolioHistoryManagementRow({{id}})"
+                                        >
+                                            <span class="bi bi-plus-circle h5"></span>
                                         </button>
                                         <button class="btn btn-primary ms-auto" type="submit">
                                             <span class="bi bi-save-fill h5"></span>
@@ -220,8 +223,8 @@
         <td>
             <input type="number"
                    name="allocations[{{allocationIndex}}][assetQuantity]"
-                   placeholder="Asset quantity"
-                   aria-label="Asset quantity"
+                   placeholder="Quantity"
+                   aria-label="Quantity"
                    autocomplete="off"
                    class="form-control"
                    value="{{assetQuantity}}"
@@ -231,8 +234,8 @@
         <td>
             <input type="number"
                    name="allocations[{{allocationIndex}}][assetMarketPrice]"
-                   placeholder="Asset market price"
-                   aria-label="Asset market price"
+                   placeholder="Market price"
+                   aria-label="Market price"
                    autocomplete="off"
                    class="form-control"
                    value="{{assetMarketPrice}}"
@@ -263,9 +266,11 @@
 </datalist>
 
 <script id="template-classes-datalist" type="text/x-handlebars-template">
+
     {{#each this}}
         <option value="{{this}}">{{this}}</option>
     {{/each}}
+
 </script>
 
 <script type="text/javascript">
@@ -275,21 +280,28 @@
         "template-portfolio-history-management-row"
     );
 
+    var handlebarPortfolioHistoryManagementRowTemplate = Handlebars.compile(window["template-portfolio-history-management-row"].innerHTML);
+
 </script>
 
-<script type="text/javascript">
+<script type="module">
 
-    function initPortfolioHistoryHierarchyLabels() {
+    window.initPortfolioHistoryHierarchyLabels = () => {
         setTextContentWithTopHierarchyName("[id^='hierarchy-level-portfolio-chart-']");
     }
 
-    function navigateToManage() {
+    window.navigateToManagePortfolioAllocationData = () => {
         const portfolioId = document.querySelector("[name='portfolioId']").value;
         navigateTo(`/portfolio/${portfolioId}/history/manage`);
         loadClasses();
     }
 
-    function maskTagInput(inputElement) {
+    function loadClasses() {
+        const datalist = window["datalist-classes"];
+        htmx.trigger(datalist, "load-classes");
+    }
+
+    window.maskTagInput = (inputElement) => {
         let value = inputElement.value;
         if (value) {
             value = value.toUpperCase();
@@ -298,10 +310,34 @@
         inputElement.value = value;
     }
 
-    function loadClasses() {
-        const datalist = window["datalist-classes"];
-        htmx.trigger(datalist, "load-classes");
+    const portfolioAllocationManagementTBodyPrefix = "portfolio-allocation-management-rows-";
+    
+    // Authored by: GitHub Copilot
+    window.addPortfolioHistoryManagementRow = (observationTimestampId) => {
+
+        const tbodyId = portfolioAllocationManagementTBodyPrefix + observationTimestampId
+        const tbody = window[tbodyId];
+        const nextIndex = getNextPortfolioHistoryManagementIndex(observationTimestampId);
+        const newRowHtml = handlebarPortfolioHistoryManagementRowTemplate({allocationIndex: nextIndex});
+
+        tbody.insertAdjacentHTML("beforeend", newRowHtml);
+
+        // Find the first input field in the newly added row and focus it
+        const firstInputFieldName = `allocations[${nextIndex}][assetTicker]`;
+        const firstInputField = tbody.querySelector(`input[name="${firstInputFieldName}"]`);
+
+        if (firstInputField) {
+            firstInputField.scrollIntoView({behavior: 'smooth', block: 'center'});
+            firstInputField.focus();
+        }
     }
+
+    function getNextPortfolioHistoryManagementIndex(observationTimestampId) {
+        const tbody = window[portfolioAllocationManagementTBodyPrefix + observationTimestampId];
+        const rows = tbody.querySelectorAll("tr");
+        return rows.length;
+    }
+
 </script>
 
 <script id="portfolio-allocation-chart-options" type="application/json">

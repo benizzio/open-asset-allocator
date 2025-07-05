@@ -73,6 +73,7 @@
 </script>
 
 <script id="template-divergence-analysis" type="text/x-handlebars-template">
+
     <table class="table align-middle caption-top">
         <caption>Total market value: {{formatCurrency portfolioTotalMarketValue}}</caption>
         <thead>
@@ -89,9 +90,11 @@
         {{/each}}
         </tbody>
     </table>
+
 </script>
 
 <script id="template-divergence-analysis-table-row" type="text/x-handlebars-template">
+
     <tr {{#if upperLevelKey}} class="collapse" id="{{upperLevelKey}}-internal-divergences" {{/if}}>
         <td>
             {{{repeater "&nbsp;&nbsp;&nbsp;&nbsp;" depth "" ""}}}
@@ -122,11 +125,13 @@
             {{{divergenceVisualization upperMarketValue this "divergenceBar"}}}
         </td>
     </tr>
+    
     {{#if internalDivergences}}
         {{#each internalDivergences}}
             {{> template-divergence-analysis-table-row upperMarketValue=../totalMarketValue upperLevelKey=../hierarchyLevelKey}}
         {{/each}}
     {{/if}}
+
 </script>
 
 <script type="text/javascript">
@@ -135,12 +140,12 @@
         "accordion-allocation-map",
         "template-divergence-analysis-table-row"
     );
-    
+
 </script>
 
-<script type="text/javascript">
+<script type="module">
 
-    function selectDivergenceOptions(allocationPlanIdFieldName, divergenceAnalysisContainerId) {
+    window.selectDivergenceOptions = (allocationPlanIdFieldName, divergenceAnalysisContainerId) => {
         const selectElement = document.querySelector(`select[name='${allocationPlanIdFieldName}']`);
         const selectedPlanId = Number(selectElement.value);
         if (selectedPlanId) {
