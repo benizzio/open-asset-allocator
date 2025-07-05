@@ -1,4 +1,4 @@
-import { PortfolioAtTime, PortfolioDTO } from "../../domain/portfolio";
+import { PortfolioDTO, PortfolioSnapshot } from "../../domain/portfolio";
 import { ChartContent } from "../../infra/chart/chart-types";
 import { ActiveElement, Chart, ChartEvent } from "chart.js";
 import chartModule from "../../infra/chart/chart";
@@ -72,7 +72,7 @@ function getChartContent(chart: Chart) {
 const portfolioChart = {
 
     toUnidimensionalChartContent(
-        portfolioAtTime: PortfolioAtTime,
+        portfolioAtTime: PortfolioSnapshot,
         portfolioDTO: PortfolioDTO,
     ): ChartContent {
 

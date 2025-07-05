@@ -89,7 +89,7 @@ func putPortfolio(t *testing.T, putPortfolioJSON string) *http.Response {
 
 	request, err := http.NewRequest(
 		http.MethodPut,
-		inttestinfra.TestAPIURLprefix+"/portfolio",
+		inttestinfra.TestAPIURLPrefix+"/portfolio",
 		strings.NewReader(putPortfolioJSON),
 	)
 	assert.NoError(t, err)

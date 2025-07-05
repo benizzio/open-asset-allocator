@@ -10,7 +10,7 @@ import (
 
 func TestGetAllocationPlans(t *testing.T) {
 
-	response, err := http.Get(inttestinfra.TestAPIURLprefix + "/portfolio/1/allocation-plan")
+	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/allocation-plan")
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
