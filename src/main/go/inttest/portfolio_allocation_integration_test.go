@@ -212,6 +212,25 @@ func TestGetPortfolioAllocationHistoryForObservationTimestamp(t *testing.T) {
 	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
 }
 
+func TestGetPortfolioAllocationHistoryForObservationTimestampNoneFound(t *testing.T) {
+
+	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/2/history?observationTimestampId=2")
+	assert.NoError(t, err)
+
+	assert.Equal(t, http.StatusOK, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+
+	var actualResponseJSON = string(body)
+	var expectedResponseJSON = `
+		[]
+	`
+
+	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
+}
+
 // TestGetAvailableHistoryObservations tests the retrieval of available history observations for a portfolio.
 //
 // This test verifies that the API correctly returns the list of available observation timestamps
