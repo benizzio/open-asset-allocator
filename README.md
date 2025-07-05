@@ -113,6 +113,14 @@ Configuration can be done in [.env](src/main/docker/.env)
 
 ### Roadmap(ish)
 
+#### Pre-alpha - Phase 1
+
+**Main stack proof of concept**: Assess that the base technologies and tools selected can solve the problem
+consistently.
+
+**Asset allocation management**: Allow the registration and tracking of portfolions and allocations plans. Facilitate
+assessing portfolio vs. plan situation through time, helping re-balancing decisions through divergence analysis.
+
 - [x] Portfolio management:
     - [x] new portfolio - add form based data input (beginner-user-friendly - start with fixed base structure class->
       asset)
@@ -133,19 +141,34 @@ Configuration can be done in [.env](src/main/docker/.env)
         - [ ] show divergence mode used with informative text
         - [ ] add percentage divergence mode config ("aggressive" from level or "conservative" from asset)
         - [ ] add divergence bar mode config (change proportion from 2:1)
+- [ ] UI improvements:
+    - [ ] Color configuration per hierarchy level record for visual consistency (apply to charts and tables)
+    - [ ] Change accordion header font to differentiate from content
+
+#### Alpha - Phase 2
+
+**Portfolio management**: Enhance re-balancing assessments through convergence analysis and planning.
+
+- Allocation map:
     - [ ] CONVERGENCE:
         - [ ] create from a mapped divergence analysis (bound to a divergence analysis and its plan)
         - [ ] fractal execution: create per level and per parent selection when below top
-        - [ ] line for each divergent record, add field for post-convergence goal (maket value) and calculate new
+        - [ ] line for each divergent record, add a field for post-convergence goal (maket value) and calculate new
           percentage
-        - [ ] allow obtaining inserted external cash inflow ("input" class) and using it for convergence in any asset
+        - [ ] allow obtaining inserted external cash inflow (“input” class) and using it for convergence in any asset
             - (?) upper field inside each level of fractal structure to visualize re-balancing and availability deeper
-              within the hierachy
+              within the hierachy.
         - (?) show final state after convergence (chart maybe?)
         - [ ] allow creation of multiple steps for segmented convergence plan
             - (?) Copy previous unexecuted plans on new divergence analysis
         - (?) field to input current market value at the time of convergence execution and calculate movement quantity
           (no need to persist)
-- [ ] UI improvements:
-    - [ ] Color configuration per hierarchy level record for visual consistency (apply to charts and tables)
-    - [ ] Change accordion header font to differentiate from content
+
+#### Beta - Phase 3
+
+**Asset allocation intelligence**: Expand management capabilities allowing users to understand how an asset allocation
+strategy can be created and modified for personal needs and expectations. Integrate indicators and data sources to
+access the ciclic nature of the markets and which phases of a cycle are currently experienced.
+
+**Financial education and research**: Provide links to source material and educational content integrated to the
+features and where they are used
