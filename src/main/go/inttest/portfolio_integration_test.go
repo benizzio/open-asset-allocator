@@ -16,7 +16,7 @@ import (
 
 func TestGetPortfolio(t *testing.T) {
 
-	response, err := http.Get(inttestinfra.TestAPIURLprefix + "/portfolio/1")
+	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1")
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -49,7 +49,7 @@ func TestGetPortfolio(t *testing.T) {
 
 func TestGetPortfolios(t *testing.T) {
 
-	response, err := http.Get(inttestinfra.TestAPIURLprefix + "/portfolio")
+	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio")
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -105,7 +105,7 @@ func TestPostPortfolio(t *testing.T) {
 	`
 
 	response, err := http.Post(
-		inttestinfra.TestAPIURLprefix+"/portfolio",
+		inttestinfra.TestAPIURLPrefix+"/portfolio",
 		"application/json",
 		strings.NewReader(postPortfolioJSON),
 	)
@@ -181,7 +181,7 @@ func TestPostPortfolioWithAllocationStructure(t *testing.T) {
 	`
 
 	response, err := http.Post(
-		inttestinfra.TestAPIURLprefix+"/portfolio",
+		inttestinfra.TestAPIURLPrefix+"/portfolio",
 		"application/json",
 		strings.NewReader(postPortfolioJSON),
 	)
@@ -254,7 +254,7 @@ func TestPostPortfolioFailureWithoutMandatoryFields(t *testing.T) {
 func postForValidationFailure(t *testing.T, postPortfolioJSON string) []byte {
 
 	response, err := http.Post(
-		inttestinfra.TestAPIURLprefix+"/portfolio",
+		inttestinfra.TestAPIURLPrefix+"/portfolio",
 		"application/json",
 		strings.NewReader(postPortfolioJSON),
 	)

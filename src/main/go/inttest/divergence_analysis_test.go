@@ -10,7 +10,7 @@ import (
 
 func TestGetDivergenceAnalysisOptions(t *testing.T) {
 
-	response, err := http.Get(inttestinfra.TestAPIURLprefix + "/portfolio/1/divergence/options")
+	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/divergence/options")
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -41,7 +41,7 @@ func TestGetDivergenceAnalysisOptions(t *testing.T) {
 
 func TestGetDivergenceAnalysis(t *testing.T) {
 
-	response, err := http.Get(inttestinfra.TestAPIURLprefix + "/portfolio/1/divergence/202501/allocation-plan/1")
+	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/divergence/202501/allocation-plan/1")
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -135,7 +135,7 @@ func TestGetDivergenceAnalysis(t *testing.T) {
 
 func TestGetDivergenceAnalysisV2(t *testing.T) {
 
-	response, err := http.Get(inttestinfra.TestAPIURLprefix + "/v2/portfolio/1/divergence/1/allocation-plan/1")
+	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/v2/portfolio/1/divergence/1/allocation-plan/1")
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)

@@ -10,7 +10,7 @@ import (
 
 func TestGetPortfolioAllocationHistory(t *testing.T) {
 
-	response, err := http.Get(inttestinfra.TestAPIURLprefix + "/portfolio/1/history")
+	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/history")
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -132,7 +132,7 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 
 func TestGetPortfolioAllocationHistoryForTimeFrame(t *testing.T) {
 
-	response, err := http.Get(inttestinfra.TestAPIURLprefix + "/portfolio/1/history?timeFrameTag=202503")
+	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/history?timeFrameTag=202503")
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -173,7 +173,7 @@ func TestGetPortfolioAllocationHistoryForTimeFrame(t *testing.T) {
 
 func TestGetPortfolioAllocationHistoryForObservationTimestamp(t *testing.T) {
 
-	response, err := http.Get(inttestinfra.TestAPIURLprefix + "/portfolio/1/history?observationTimestampId=2")
+	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/history?observationTimestampId=2")
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -221,7 +221,7 @@ func TestGetPortfolioAllocationHistoryForObservationTimestamp(t *testing.T) {
 func TestGetAvailableHistoryObservations(t *testing.T) {
 
 	// Call the API endpoint to get available history observations
-	response, err := http.Get(inttestinfra.TestAPIURLprefix + "/portfolio/1/history/observation")
+	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/history/observation")
 	assert.NoError(t, err)
 
 	// Verify successful response status code
@@ -254,7 +254,7 @@ func TestGetAvailableHistoryObservations(t *testing.T) {
 
 func TestGetAvailablePortfolioAllocationClasses(t *testing.T) {
 
-	response, err := http.Get(inttestinfra.TestAPIURLprefix + "/portfolio/1/allocation-classes")
+	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/allocation-classes")
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -271,4 +271,21 @@ func TestGetAvailablePortfolioAllocationClasses(t *testing.T) {
 	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
 }
 
-// TODO test for empty classes
+func TestGetAvailablePortfolioAllocationClassesNoneFound(t *testing.T) {
+
+	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/2/allocation-classes")
+	assert.NoError(t, err)
+
+	assert.Equal(t, http.StatusOK, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+
+	var actualResponseJSON = string(body)
+	var expectedResponseJSON = `
+		[]
+	`
+
+	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
+}
