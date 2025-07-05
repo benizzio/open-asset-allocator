@@ -131,29 +131,11 @@
 
 <script type="text/javascript">
 
-    initComponent();
-
-    function initComponent() {
-        registerRecursiveRowTemplatePartial();
-    }
-
-    function registerRecursiveRowTemplatePartial() {
-
-        const allocationMapContainerElement = window['accordion-allocation-map'];
-
-        const tableRowPartialId = 'template-divergence-analysis-table-row';
-        const divergenceAnalysisTableRowHTML = window['template-divergence-analysis-table-row'].innerHTML;
-        Handlebars.registerPartial(tableRowPartialId, divergenceAnalysisTableRowHTML);
-
-        const allocationMapObserver = new MutationObserver((_, observer) => {
-            if (!document.body.contains(allocationMapContainerElement)) {
-                console.info(`Allocation map container removed, unregistering ${tableRowPartialId} partial and observer`);
-                observer.disconnect();
-                Handlebars.unregisterPartial(tableRowPartialId);
-            }
-        });
-        allocationMapObserver.observe(document, {childList: true, subtree: true});
-    }
+    HandlebarsUtils.registerPartialToContainer(
+        "accordion-allocation-map",
+        "template-divergence-analysis-table-row"
+    );
+    
 </script>
 
 <script type="text/javascript">

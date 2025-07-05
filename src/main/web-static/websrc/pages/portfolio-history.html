@@ -103,7 +103,7 @@
                 hx-include="[name='portfolioId']"
                 hx-target="#portfolio-allocation-management-records-{{id}}"
                 hx-trigger="click"
-                handlebars-template="template-portfolio-history-management-records"
+                handlebars-template="template-portfolio-history-management-rows"
                 hx-on-htmx-after-settle="initTags('portfolio-allocation-management-records-{{id}}')"
                 hx-get="/api/portfolio/:portfolioId/history?observationTimestampId={{id}}"
             >
@@ -123,6 +123,7 @@
 
                     <form hx-post="/api/test" hx-ext="form-json">
                         <table class="table table-striped">
+
                             <thead class="sticky-header">
                             <tr>
                                 <th scope="col" colspan="2">Asset</th>
@@ -133,12 +134,21 @@
                                 <th scope="col" class="w-12">Total market value</th>
                             </tr>
                             </thead>
+
                             <tbody class="table-group-divider" id="portfolio-allocation-management-records-{{id}}">
                             </tbody>
+
                             <tfoot class="sticky-footer">
                             <tr>
-                                <td colspan="7" class="text-end">
-                                    <button type="submit">TEST!</button>
+                                <td colspan="7">
+                                    <div class="d-flex w-100">
+                                        <button class="btn btn-secondary" type="button">
+                                            <span class="bi bi-plus-circle-fill h5"></span>
+                                        </button>
+                                        <button class="btn btn-primary ms-auto" type="submit">
+                                            <span class="bi bi-save-fill h5"></span>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                             </tfoot>
@@ -150,93 +160,99 @@
             </div>
 
         </div>
+
     {{/each}}
+
 </script>
 
-<script id="template-portfolio-history-management-records" type="text/x-handlebars-template">
+<script id="template-portfolio-history-management-rows" type="text/x-handlebars-template">
 
     {{#each @root.[0].allocations}}
-
-        <tr>
-            <td>
-                <input type="hidden" name="allocations[{{@index}}][assetId]" value="{{assetId}}" />
-                <input type="text"
-                       name="allocations[{{@index}}][assetTicker]"
-                       placeholder="Asset ticker"
-                       aria-label="Asset ticker"
-                       autocomplete="off"
-                       required
-                       class="form-control"
-                       value="{{assetTicker}}"
-                />
-            </td>
-            <td>
-                <input type="text"
-                       name="allocations[{{@index}}][assetName]"
-                       placeholder="Asset name"
-                       aria-label="Asset name"
-                       autocomplete="off"
-                       required
-                       class="form-control"
-                       value="{{assetName}}"
-                />
-            </td>
-            <td>
-                <input type="text"
-                       name="allocations[{{@index}}][class]"
-                       placeholder="Class"
-                       aria-label="Class"
-                       autocomplete="off"
-                       class="form-control"
-                       value="{{class}}"
-                       list="datalist-classes"
-                       oninput="maskTagInput(this)"
-                />
-            </td>
-            <td class="align-middle text-center">
-                <input type="checkbox"
-                       name="allocations[{{@index}}][cashReserve]"
-                       {{#if cashReserve}}checked{{/if}}
-                />
-            </td>
-            <td>
-                <input type="number"
-                       name="allocations[{{@index}}][assetQuantity]"
-                       placeholder="Asset quantity"
-                       aria-label="Asset quantity"
-                       autocomplete="off"
-                       class="form-control"
-                       value="{{assetQuantity}}"
-                       step="any"
-                />
-            </td>
-            <td>
-                <input type="number"
-                       name="allocations[{{@index}}][assetMarketPrice]"
-                       placeholder="Asset market price"
-                       aria-label="Asset market price"
-                       autocomplete="off"
-                       class="form-control"
-                       value="{{assetMarketPrice}}"
-                       step="any"
-                />
-            </td>
-            <td>
-                <input type="number"
-                       name="allocations[{{@index}}][totalMarketValue]"
-                       placeholder="Total market value"
-                       aria-label="Total market value"
-                       autocomplete="off"
-                       class="form-control "
-                       value="{{totalMarketValue}}"
-                />
-            </td>
-        </tr>
-
+        {{> template-portfolio-history-management-row allocationIndex=@index}}
     {{/each}}
 
+</script>
+
+<script id="template-portfolio-history-management-row" type="text/x-handlebars-template">
+
+    <tr>
+        <td>
+            <input type="hidden" name="allocations[{{allocationIndex}}][assetId]" value="{{assetId}}" />
+            <input type="text"
+                   name="allocations[{{allocationIndex}}][assetTicker]"
+                   placeholder="Asset ticker"
+                   aria-label="Asset ticker"
+                   autocomplete="off"
+                   required
+                   class="form-control"
+                   value="{{assetTicker}}"
+            />
+        </td>
+        <td>
+            <input type="text"
+                   name="allocations[{{allocationIndex}}][assetName]"
+                   placeholder="Asset name"
+                   aria-label="Asset name"
+                   autocomplete="off"
+                   required
+                   class="form-control"
+                   value="{{assetName}}"
+            />
+        </td>
+        <td>
+            <input type="text"
+                   name="allocations[{{allocationIndex}}][class]"
+                   placeholder="Class"
+                   aria-label="Class"
+                   autocomplete="off"
+                   class="form-control"
+                   value="{{class}}"
+                   list="datalist-classes"
+                   oninput="maskTagInput(this)"
+            />
+        </td>
+        <td class="align-middle text-center">
+            <input type="checkbox"
+                   name="allocations[{{allocationIndex}}][cashReserve]"
+                   {{#if cashReserve}}checked{{/if}}
+            />
+        </td>
+        <td>
+            <input type="number"
+                   name="allocations[{{allocationIndex}}][assetQuantity]"
+                   placeholder="Asset quantity"
+                   aria-label="Asset quantity"
+                   autocomplete="off"
+                   class="form-control"
+                   value="{{assetQuantity}}"
+                   step="any"
+            />
+        </td>
+        <td>
+            <input type="number"
+                   name="allocations[{{allocationIndex}}][assetMarketPrice]"
+                   placeholder="Asset market price"
+                   aria-label="Asset market price"
+                   autocomplete="off"
+                   class="form-control"
+                   value="{{assetMarketPrice}}"
+                   step="any"
+            />
+        </td>
+        <td>
+            <input type="number"
+                   name="allocations[{{allocationIndex}}][totalMarketValue]"
+                   placeholder="Total market value"
+                   aria-label="Total market value"
+                   autocomplete="off"
+                   class="form-control "
+                   value="{{totalMarketValue}}"
+            />
+        </td>
+    </tr>
 
 </script>
+
 
 <datalist id="datalist-classes"
           hx-get="/api/portfolio/:portfolioId/allocation-classes"
@@ -250,6 +266,15 @@
     {{#each this}}
         <option value="{{this}}">{{this}}</option>
     {{/each}}
+</script>
+
+<script type="text/javascript">
+
+    HandlebarsUtils.registerPartialToContainer(
+        "accordion-portfolio-history",
+        "template-portfolio-history-management-row"
+    );
+
 </script>
 
 <script type="text/javascript">
