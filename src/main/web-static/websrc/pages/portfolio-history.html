@@ -238,12 +238,19 @@
 
 </script>
 
-<datalist id="datalist-classes">
-    <!-- TODO fetch already used alternatives from backend -->
-    <option value="BONDS">BONDS</option>
-    <option value="COMMODITIES">COMMODITIES</option>
-    <option value="CRYPTO">CRYPTO</option>
+<datalist id="datalist-classes"
+          hx-get="/api/portfolio/:portfolioId/allocation-classes"
+          hx-include="[name='portfolioId']"
+          hx-trigger="load, load-classes"
+          handlebars-template="template-classes-datalist"
+>
 </datalist>
+
+<script id="template-classes-datalist" type="text/x-handlebars-template">
+    {{#each this}}
+        <option value="{{this}}">{{this}}</option>
+    {{/each}}
+</script>
 
 <script type="text/javascript">
 
@@ -254,6 +261,7 @@
     function navigateToManage() {
         const portfolioId = document.querySelector("[name='portfolioId']").value;
         navigateTo(`/portfolio/${portfolioId}/history/manage`);
+        loadClasses();
     }
 
     function maskTagInput(inputElement) {
@@ -263,6 +271,11 @@
             value = value.replace(" ", "");
         }
         inputElement.value = value;
+    }
+
+    function loadClasses() {
+        const datalist = window["datalist-classes"];
+        htmx.trigger(datalist, "load-classes");
     }
 </script>
 
