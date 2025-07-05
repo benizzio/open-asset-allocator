@@ -4,6 +4,7 @@ import (
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/benizzio/open-asset-allocator/langext"
+	dbx "github.com/go-ozzo/ozzo-dbx"
 	"time"
 )
 
@@ -243,7 +244,19 @@ func (repository *PortfolioRDBMSRepository) FindAvailablePortfolioAllocationClas
 
 	var query = portfolioAllocationClassesSQL
 
-	var queryResult = make([]string, 0)
+	rows, err := repository.findAvailablePortfolioAllocationClassesRows(portfolioId, query)
+	if err != nil {
+		return nil, err
+	}
+
+	return repository.scanAvailablePortfolioAllocationClassesRows(rows, err)
+}
+
+func (repository *PortfolioRDBMSRepository) findAvailablePortfolioAllocationClassesRows(
+	portfolioId int,
+	query string,
+) (*dbx.Rows, error) {
+
 	rows, err := repository.dbAdapter.BuildQuery(query).
 		AddWhereClauseAndParam(portfolioIdWhereClause, "portfolioId", portfolioId).
 		Build().GetRows()
@@ -255,7 +268,15 @@ func (repository *PortfolioRDBMSRepository) FindAvailablePortfolioAllocationClas
 			repository,
 		)
 	}
+	return rows, nil
+}
 
+func (repository *PortfolioRDBMSRepository) scanAvailablePortfolioAllocationClassesRows(
+	rows *dbx.Rows,
+	err error,
+) ([]string, error) {
+
+	var queryResult = make([]string, 0)
 	for rows.Next() {
 
 		var class string
@@ -270,7 +291,6 @@ func (repository *PortfolioRDBMSRepository) FindAvailablePortfolioAllocationClas
 
 		queryResult = append(queryResult, class)
 	}
-
 	return queryResult, nil
 }
 
