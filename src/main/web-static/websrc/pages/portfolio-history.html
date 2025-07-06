@@ -181,27 +181,46 @@
 
     <tr>
         <td>
+
             <input type="hidden" name="allocations[{{allocationIndex}}][assetId]" value="{{assetId}}" />
-            <input type="text"
-                   name="allocations[{{allocationIndex}}][assetTicker]"
-                   placeholder="Asset ticker"
-                   aria-label="Asset ticker"
-                   autocomplete="off"
-                   required
-                   class="form-control"
-                   value="{{assetTicker}}"
-            />
+
+            {{#if assetId}}
+                {{assetTicker}}
+            {{else}}
+
+                <div class="input-group">
+                    <!-- TODO do search and manitpulate other fields -->
+                    <!-- If found show name as label and button to remove -->
+                    <!-- If not found show visual cue of new, button to cancel and field for name -->
+                    <input type="text"
+                           name="allocations[{{allocationIndex}}][assetTicker]"
+                           placeholder="Asset ticker"
+                           aria-label="Asset ticker"
+                           autocomplete="off"
+                           required
+                           class="form-control"
+                           value="{{assetTicker}}"
+                    />
+                    <button class="btn btn-primary btn-xs" type="button"><span class="bi bi-search"></span></button>
+                </div>
+
+            {{/if}}
+
         </td>
         <td>
-            <input type="text"
-                   name="allocations[{{allocationIndex}}][assetName]"
-                   placeholder="Asset name"
-                   aria-label="Asset name"
-                   autocomplete="off"
-                   required
-                   class="form-control"
-                   value="{{assetName}}"
-            />
+            {{#if assetName}}
+                {{assetName}}
+            {{else}}
+                <input type="text"
+                       name="allocations[{{allocationIndex}}][assetName]"
+                       placeholder="Asset name"
+                       aria-label="Asset name"
+                       autocomplete="off"
+                       class="form-control"
+                       value="{{assetName}}"
+                       style="display: none"
+                />
+            {{/if}}
         </td>
         <td>
             <input type="text"
