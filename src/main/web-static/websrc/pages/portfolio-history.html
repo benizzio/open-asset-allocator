@@ -132,6 +132,7 @@
                                 <th scope="col" class="w-15">Quantity</th>
                                 <th scope="col" class="w-15">Market price</th>
                                 <th scope="col" class="w-12">Total market value</th>
+                                <th scope="col"></th>
                             </tr>
                             </thead>
 
@@ -140,7 +141,7 @@
 
                             <tfoot class="sticky-footer">
                             <tr>
-                                <td colspan="7">
+                                <td colspan="8">
                                     <div class="d-flex w-100">
                                         <button class="btn btn-secondary"
                                                 type="button"
@@ -252,6 +253,14 @@
                    value="{{totalMarketValue}}"
             />
         </td>
+        <td>
+            <button type="button"
+                    class="btn btn-danger btn-xs"
+                    onclick="this.closest('tr').remove()"
+            >
+                <span class="bi bi-dash-circle"></span>
+            </button>
+        </td>
     </tr>
 
 </script>
@@ -311,7 +320,7 @@
     }
 
     const portfolioAllocationManagementTBodyPrefix = "portfolio-allocation-management-rows-";
-    
+
     // Authored by: GitHub Copilot
     window.addPortfolioHistoryManagementRow = (observationTimestampId) => {
 
