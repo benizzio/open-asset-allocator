@@ -36,6 +36,7 @@ export const infra = {
         Chart.register(...registerables, ChartDataLabels);
 
         BROWSER_GLOBAL.Handlebars = handlebarsInfra.register();
+        BROWSER_GLOBAL["HandlebarsUtils"] = handlebarsInfra.utils;
 
         htmxInfra.init(DOM_SETTLING_BEHAVIOR_EVENT_HANDLER);
 

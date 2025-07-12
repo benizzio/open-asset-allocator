@@ -4,35 +4,64 @@ import (
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/benizzio/open-asset-allocator/langext"
+	dbx "github.com/go-ozzo/ozzo-dbx"
 	"time"
 )
 
+// Deprecated: Use domain.PortfolioObservationTimestamp
 type portfolioTimeFrame struct {
 	TimeFrameTag    domain.TimeFrameTag
 	CreateTimestamp time.Time
 }
 
 const (
+	// Deprecated: Use availableObservationTimeTagsSQL
 	timeFrameTagsSQL = `
 		SELECT DISTINCT ON (time_frame_tag) time_frame_tag, create_timestamp
 		FROM portfolio_allocation_fact pa
 		` + infra.WhereClausePlaceholder + `
 		ORDER BY time_frame_tag DESC, create_timestamp DESC LIMIT {:timeFrameLimit}
 	`
-	timeFrameTagsComplement = `
-		WITH time_frame_tags
-			AS (SELECT DISTINCT time_frame_tag, create_timestamp::date FROM portfolio_allocation_fact pa ORDER BY create_timestamp DESC LIMIT {:timeFrameLimit})
+	availableObservationTimestampsSQL = `
+		SELECT DISTINCT paot.id, paot.observation_time_tag AS time_tag, paot.observation_timestamp AS "timestamp"
+		FROM portfolio_allocation_fact pa
+		JOIN portfolio_allocation_obs_time paot ON pa.observation_time_id = paot.id
+		` + infra.WhereClausePlaceholder + `
+		ORDER BY paot.observation_time_tag DESC, paot.observation_timestamp DESC LIMIT {:observationTimestampLimit}
+	`
+	availableObservationTimestampsComplement = `
+		WITH observation_timestamps
+			AS (
+				SELECT DISTINCT paot.*
+				FROM portfolio_allocation_fact pa
+				JOIN portfolio_allocation_obs_time paot ON pa.observation_time_id = paot.id
+				ORDER BY paot.observation_timestamp DESC 
+				LIMIT {:observationTimestampLimit}
+			)
 	`
 	portfolioAllocationsSQL = `
-		SELECT pa.*, ass.ticker AS "asset.ticker", coalesce(ass.name, '') AS "asset.name"
+		SELECT 
+		    pa.*, 
+		    ass.id AS "asset.id", 
+		    ass.ticker AS "asset.ticker", 
+		    coalesce(ass.name, '') AS "asset.name", 
+		    paot.id AS "observation_timestamp.id",
+		    coalesce(paot.observation_time_tag, '') AS "observation_timestamp.time_tag",
+		    paot.observation_timestamp AS "observation_timestamp.timestamp"
 		FROM portfolio_allocation_fact pa
 		JOIN asset ass ON ass.id = pa.asset_id
+		JOIN portfolio_allocation_obs_time paot ON pa.observation_time_id = paot.id 
 		` + infra.WhereClausePlaceholder + `
-		ORDER BY pa.time_frame_tag DESC, pa.class ASC, pa.cash_reserve DESC, pa.total_market_value DESC
+		ORDER BY paot.observation_timestamp DESC, pa.class ASC, pa.cash_reserve DESC, pa.total_market_value DESC
 	`
 	portfolioSQL = `
 		SELECT p.id, p.name, p.allocation_structure
 		FROM portfolio p
+	`
+	portfolioAllocationClassesSQL = `
+		SELECT DISTINCT pa.class 
+		FROM portfolio_allocation_fact pa ` + infra.WhereClausePlaceholder + `
+		ORDER BY pa.class ASC
 	`
 )
 
@@ -41,10 +70,11 @@ const (
 )
 
 const (
-	queryAllocationsError   = "Error querying portfolio allocations"
-	queryPortfoliosError    = "Error querying portfolios"
-	queryPortfolioError     = "Error querying single portfolio"
-	queryTimeFrameTagsError = "Error querying time frame tags"
+	queryAllocationsError           = "Error querying portfolio allocations"
+	queryPortfoliosError            = "Error querying portfolios"
+	queryPortfolioError             = "Error querying single portfolio"
+	queryTimeFrameTagsError         = "Error querying time frame tags"
+	queryObservationTimestampsError = "Error querying observation timestamps"
 )
 
 type PortfolioRDBMSRepository struct {
@@ -63,6 +93,7 @@ func (repository *PortfolioRDBMSRepository) GetAllPortfolios() ([]*domain.Portfo
 	)
 }
 
+// TODO rename to FindPortfolio
 func (repository *PortfolioRDBMSRepository) GetPortfolio(id int) (*domain.Portfolio, error) {
 
 	var query = portfolioSQL + `
@@ -75,24 +106,31 @@ func (repository *PortfolioRDBMSRepository) GetPortfolio(id int) (*domain.Portfo
 	return &result, infra.PropagateAsAppErrorWithNewMessage(err, queryPortfolioError, repository)
 }
 
-func (repository *PortfolioRDBMSRepository) GetAllPortfolioAllocations(id int, timeFrameLimit int) (
+// TODO rename to FindAllPortfolioAllocationsWithinObservationTimestampsLimit
+func (repository *PortfolioRDBMSRepository) GetAllPortfolioAllocationsWithinObservationTimestampsLimit(
+	id int,
+	observationTimestampsLimit int,
+) (
 	[]*domain.PortfolioAllocation,
 	error,
 ) {
-	var query = timeFrameTagsComplement + portfolioAllocationsSQL
+	var query = availableObservationTimestampsComplement + portfolioAllocationsSQL
 
 	var queryResult []domain.PortfolioAllocation
 	err := repository.dbAdapter.BuildQuery(query).
-		AddParam("timeFrameLimit", timeFrameLimit).
-		AddWhereClause("AND pa.time_frame_tag IN (SELECT time_frame_tag FROM time_frame_tags)").
+		AddParam("observationTimestampLimit", observationTimestampsLimit).
+		AddWhereClause("AND pa.observation_time_id IN (SELECT id FROM observation_timestamps)").
 		AddWhereClauseAndParam(portfolioIdWhereClause, "portfolioId", id).
 		Build().FindInto(&queryResult)
 
+	//TODO proper error handling
+	langext.UnifyStructPointers(queryResult)
 	var result = langext.ToPointerSlice(queryResult)
 
 	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryAllocationsError, repository)
 }
 
+// Deprecated: use FindPortfolioAllocationsByObservationTimestamp
 func (repository *PortfolioRDBMSRepository) FindPortfolioAllocations(id int, timeFrameTag domain.TimeFrameTag) (
 	[]*domain.PortfolioAllocation,
 	error,
@@ -103,11 +141,40 @@ func (repository *PortfolioRDBMSRepository) FindPortfolioAllocations(id int, tim
 		AddWhereClauseAndParam("AND pa.time_frame_tag = {:timeFrameTag}", "timeFrameTag", timeFrameTag).
 		Build().FindInto(&queryResult)
 
+	langext.UnifyStructPointers(queryResult)
 	var result = langext.ToPointerSlice(queryResult)
 
 	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryAllocationsError, repository)
 }
 
+func (repository *PortfolioRDBMSRepository) FindPortfolioAllocationsByObservationTimestamp(
+	id int,
+	observationTimestampId int,
+) (
+	[]*domain.PortfolioAllocation,
+	error,
+) {
+	var queryResult []domain.PortfolioAllocation
+	err := repository.dbAdapter.BuildQuery(portfolioAllocationsSQL).
+		AddWhereClauseAndParam(portfolioIdWhereClause, "portfolioId", id).
+		AddWhereClauseAndParam(
+			"AND pa.observation_time_id = {:observationTimestampId}",
+			"observationTimestampId",
+			observationTimestampId,
+		).
+		Build().FindInto(&queryResult)
+
+	if err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(err, queryAllocationsError, repository)
+	}
+
+	langext.UnifyStructPointers(queryResult)
+	var result = langext.ToPointerSlice(queryResult)
+
+	return result, nil
+}
+
+// Deprecated: use GetAvailableObservationTimestamps
 func (repository *PortfolioRDBMSRepository) GetAllTimeFrameTags(
 	portfolioId int,
 	timeFrameLimit int,
@@ -129,10 +196,34 @@ func (repository *PortfolioRDBMSRepository) GetAllTimeFrameTags(
 	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryTimeFrameTagsError, repository)
 }
 
+// TODO rename to FindAvailableObservationTimestamps
+func (repository *PortfolioRDBMSRepository) GetAvailableObservationTimestamps(
+	portfolioId int,
+	observationTimestampsLimit int,
+) ([]*domain.PortfolioObservationTimestamp, error) {
+
+	var query = availableObservationTimestampsSQL
+
+	var queryResult []domain.PortfolioObservationTimestamp
+	err := repository.dbAdapter.BuildQuery(query).
+		AddWhereClauseAndParam(portfolioIdWhereClause, "portfolioId", portfolioId).
+		AddParam("observationTimestampLimit", observationTimestampsLimit).
+		Build().FindInto(&queryResult)
+
+	if err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(err, queryObservationTimestampsError, repository)
+	}
+
+	var result = langext.ToPointerSlice(queryResult)
+
+	return result, nil
+}
+
 func (repository *PortfolioRDBMSRepository) InsertPortfolio(portfolio *domain.Portfolio) (*domain.Portfolio, error) {
 
 	var insertingCopyPortfolio = *portfolio
 	err := repository.dbAdapter.Insert(&insertingCopyPortfolio)
+	//TODO simplify error handling
 	if err != nil {
 		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "Error inserting portfolio", repository)
 	}
@@ -150,11 +241,63 @@ func (repository *PortfolioRDBMSRepository) UpdatePortfolio(portfolio *domain.Po
 
 	var updatedPortfolio domain.Portfolio
 	err = repository.dbAdapter.Read(&updatedPortfolio, portfolio.Id)
+	//TODO simplify error handling
 	if err != nil {
 		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "Error retrieving updated portfolio", repository)
 	}
 
 	return &updatedPortfolio, nil
+}
+
+func (repository *PortfolioRDBMSRepository) FindAvailablePortfolioAllocationClasses(portfolioId int) ([]string, error) {
+
+	var query = portfolioAllocationClassesSQL
+
+	rows, err := repository.findAvailablePortfolioAllocationClassesRows(portfolioId, query)
+	if err != nil {
+		return nil, err
+	}
+
+	return repository.scanAvailablePortfolioAllocationClassesRows(rows, err)
+}
+
+func (repository *PortfolioRDBMSRepository) findAvailablePortfolioAllocationClassesRows(
+	portfolioId int,
+	query string,
+) (*dbx.Rows, error) {
+
+	rows, err := repository.dbAdapter.BuildQuery(query).
+		AddWhereClauseAndParam(portfolioIdWhereClause, "portfolioId", portfolioId).
+		Build().GetRows()
+
+	return rows, infra.PropagateAsAppErrorWithNewMessage(
+		err,
+		"Error querying portfolio allocation classes",
+		repository,
+	)
+}
+
+func (repository *PortfolioRDBMSRepository) scanAvailablePortfolioAllocationClassesRows(
+	rows *dbx.Rows,
+	err error,
+) ([]string, error) {
+
+	var queryResult = make([]string, 0)
+	for rows.Next() {
+
+		var class string
+		err = rows.Scan(&class)
+		if err != nil {
+			return nil, infra.PropagateAsAppErrorWithNewMessage(
+				err,
+				"Error scanning portfolio allocation class",
+				repository,
+			)
+		}
+
+		queryResult = append(queryResult, class)
+	}
+	return queryResult, nil
 }
 
 func BuildPortfolioRepository(dbAdapter *infra.RDBMSAdapter) *PortfolioRDBMSRepository {

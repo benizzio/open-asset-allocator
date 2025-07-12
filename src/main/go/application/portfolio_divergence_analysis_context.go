@@ -20,7 +20,7 @@ type divergenceAnalysisContextValue struct {
 }
 
 type allocationIterationMappingContextValue struct {
-	potentialDivergenceMap       potentialDivercencesPerHierarchicalId
+	potentialDivergenceMap       potentialDivergencesPerHierarchicalId
 	portfolioAllocationsIterator *util.Iterator[*domain.PortfolioAllocation]
 }
 
@@ -59,11 +59,11 @@ func getHierarchySubIterationContextValue(ctx context.Context) *util.Iterator[do
 
 func buildPotentialDivergenceMapContext(
 	ctx context.Context,
-	value potentialDivercencesPerHierarchicalId,
+	value potentialDivergencesPerHierarchicalId,
 ) context.Context {
 	return context.WithValue(ctx, potentialDivergenceMapContextKey, value)
 }
 
-func getPotentialDivergenceMapContextValue(ctx context.Context) potentialDivercencesPerHierarchicalId {
-	return ctx.Value(potentialDivergenceMapContextKey).(potentialDivercencesPerHierarchicalId)
+func getPotentialDivergenceMapContextValue(ctx context.Context) potentialDivergencesPerHierarchicalId {
+	return ctx.Value(potentialDivergenceMapContextKey).(potentialDivergencesPerHierarchicalId)
 }
