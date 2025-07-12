@@ -65,11 +65,16 @@ func (builder *QueryBuilder) Build() *QueryExecutor {
 }
 
 func (builder *QueryBuilder) processSQL() string {
+
 	var processedSQL = builder.querySQL
+
 	if len(builder.whereClauses) > 0 {
 		var whereStatement = " WHERE 1=1 " + strings.Join(builder.whereClauses, " ")
 		processedSQL = strings.Replace(processedSQL, WhereClausePlaceholder, whereStatement, 1)
+	} else {
+		processedSQL = strings.Replace(processedSQL, WhereClausePlaceholder, "", 1)
 	}
+
 	return processedSQL
 }
 

@@ -93,6 +93,7 @@ func (repository *PortfolioRDBMSRepository) GetAllPortfolios() ([]*domain.Portfo
 	)
 }
 
+// TODO rename to FindPortfolio
 func (repository *PortfolioRDBMSRepository) GetPortfolio(id int) (*domain.Portfolio, error) {
 
 	var query = portfolioSQL + `
@@ -105,6 +106,7 @@ func (repository *PortfolioRDBMSRepository) GetPortfolio(id int) (*domain.Portfo
 	return &result, infra.PropagateAsAppErrorWithNewMessage(err, queryPortfolioError, repository)
 }
 
+// TODO rename to FindAllPortfolioAllocationsWithinObservationTimestampsLimit
 func (repository *PortfolioRDBMSRepository) GetAllPortfolioAllocationsWithinObservationTimestampsLimit(
 	id int,
 	observationTimestampsLimit int,
@@ -139,7 +141,6 @@ func (repository *PortfolioRDBMSRepository) FindPortfolioAllocations(id int, tim
 		AddWhereClauseAndParam("AND pa.time_frame_tag = {:timeFrameTag}", "timeFrameTag", timeFrameTag).
 		Build().FindInto(&queryResult)
 
-	//TODO proper error handling
 	langext.UnifyStructPointers(queryResult)
 	var result = langext.ToPointerSlice(queryResult)
 
@@ -163,11 +164,14 @@ func (repository *PortfolioRDBMSRepository) FindPortfolioAllocationsByObservatio
 		).
 		Build().FindInto(&queryResult)
 
-	//TODO proper error handling
+	if err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(err, queryAllocationsError, repository)
+	}
+
 	langext.UnifyStructPointers(queryResult)
 	var result = langext.ToPointerSlice(queryResult)
 
-	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryAllocationsError, repository)
+	return result, nil
 }
 
 // Deprecated: use GetAvailableObservationTimestamps
@@ -184,7 +188,6 @@ func (repository *PortfolioRDBMSRepository) GetAllTimeFrameTags(
 		AddParam("timeFrameLimit", timeFrameLimit).
 		Build().FindInto(&queryResult)
 
-	//TODO proper error handling
 	var result = make([]domain.TimeFrameTag, len(queryResult))
 	for i, timeFrame := range queryResult {
 		result[i] = timeFrame.TimeFrameTag
@@ -193,6 +196,7 @@ func (repository *PortfolioRDBMSRepository) GetAllTimeFrameTags(
 	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryTimeFrameTagsError, repository)
 }
 
+// TODO rename to FindAvailableObservationTimestamps
 func (repository *PortfolioRDBMSRepository) GetAvailableObservationTimestamps(
 	portfolioId int,
 	observationTimestampsLimit int,
@@ -206,16 +210,20 @@ func (repository *PortfolioRDBMSRepository) GetAvailableObservationTimestamps(
 		AddParam("observationTimestampLimit", observationTimestampsLimit).
 		Build().FindInto(&queryResult)
 
-	//TODO proper error handling
+	if err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(err, queryObservationTimestampsError, repository)
+	}
+
 	var result = langext.ToPointerSlice(queryResult)
 
-	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryObservationTimestampsError, repository)
+	return result, nil
 }
 
 func (repository *PortfolioRDBMSRepository) InsertPortfolio(portfolio *domain.Portfolio) (*domain.Portfolio, error) {
 
 	var insertingCopyPortfolio = *portfolio
 	err := repository.dbAdapter.Insert(&insertingCopyPortfolio)
+	//TODO simplify error handling
 	if err != nil {
 		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "Error inserting portfolio", repository)
 	}
@@ -233,6 +241,7 @@ func (repository *PortfolioRDBMSRepository) UpdatePortfolio(portfolio *domain.Po
 
 	var updatedPortfolio domain.Portfolio
 	err = repository.dbAdapter.Read(&updatedPortfolio, portfolio.Id)
+	//TODO simplify error handling
 	if err != nil {
 		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "Error retrieving updated portfolio", repository)
 	}
@@ -261,14 +270,11 @@ func (repository *PortfolioRDBMSRepository) findAvailablePortfolioAllocationClas
 		AddWhereClauseAndParam(portfolioIdWhereClause, "portfolioId", portfolioId).
 		Build().GetRows()
 
-	if err != nil {
-		return nil, infra.PropagateAsAppErrorWithNewMessage(
-			err,
-			"Error querying portfolio allocation classes",
-			repository,
-		)
-	}
-	return rows, nil
+	return rows, infra.PropagateAsAppErrorWithNewMessage(
+		err,
+		"Error querying portfolio allocation classes",
+		repository,
+	)
 }
 
 func (repository *PortfolioRDBMSRepository) scanAvailablePortfolioAllocationClassesRows(
