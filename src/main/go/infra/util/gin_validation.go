@@ -3,11 +3,9 @@ package util
 import (
 	"errors"
 	"fmt"
-	"github.com/benizzio/open-asset-allocator/api/rest/model"
 	"github.com/benizzio/open-asset-allocator/langext"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"net/http"
 	"reflect"
 )
 
@@ -88,16 +86,4 @@ func formatValidationError(fieldError validator.FieldError) string {
 	default:
 		return fieldError.Tag()
 	}
-}
-
-// sendValidationErrorResponse sends a standardized HTTP response for validation validationErrors.
-//
-// Authored by: GitHub Copilot
-func sendValidationErrorResponse(context *gin.Context, errorMessages []string) {
-	context.JSON(
-		http.StatusBadRequest, model.ErrorResponse{
-			ErrorMessage: "Validation failed",
-			Details:      errorMessages,
-		},
-	)
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/benizzio/open-asset-allocator/api/rest/model"
 	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/infra"
+	"github.com/benizzio/open-asset-allocator/infra/util"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -19,6 +20,11 @@ func (controller *AssetRESTController) BuildRoutes() []infra.RESTRoute {
 			Method:   http.MethodGet,
 			Path:     "/api/asset",
 			Handlers: gin.HandlersChain{controller.getKnownAssets},
+		},
+		{
+			Method:   http.MethodGet,
+			Path:     "/api/asset/:" + assetIdParam,
+			Handlers: gin.HandlersChain{controller.getAssetById},
 		},
 	}
 }
@@ -45,6 +51,11 @@ func (controller *AssetRESTController) getAssetById(context *gin.Context) {
 
 	asset, err := controller.assetDomService.FindAssetById(assetId)
 	if infra.HandleAPIError(context, "Error getting asset by ID", err) {
+		return
+	}
+
+	if asset == nil {
+		util.SendDataNotFoundResponse(context, "Asset", assetIdParamValue)
 		return
 	}
 

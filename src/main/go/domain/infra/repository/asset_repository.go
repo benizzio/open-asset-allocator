@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"database/sql"
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/benizzio/open-asset-allocator/langext"
@@ -34,6 +35,10 @@ func (repository *AssetRDBMSRepository) FindAssetById(id int) (*domain.Asset, er
 
 	var result domain.Asset
 	err := queryBuilder.Build().GetInto(&result)
+
+	if err != nil && err.Error() == sql.ErrNoRows.Error() {
+		return nil, nil
+	}
 
 	return &result, infra.PropagateAsAppErrorWithNewMessage(
 		err,

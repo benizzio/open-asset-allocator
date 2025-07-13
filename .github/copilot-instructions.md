@@ -108,6 +108,7 @@
       and includes a lot of stack and utilitary code;
     - [langext](src/main/go/langext): includes implementations that extend the Go language and are not available in the
       standard implementations at the time of writing.
+- all go integration tests and related components are located in the `src/main/go/inttest` directory
 
 ## Javascript, Typescript, and HTML standards
 
