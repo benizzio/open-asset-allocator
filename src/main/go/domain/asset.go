@@ -5,3 +5,8 @@ type Asset struct {
 	Name   string
 	Ticker string
 }
+
+type AssetRepository interface {
+	GetKnownAssets() ([]*Asset, error)
+	FindAssetById(id int) (*Asset, error)
+}

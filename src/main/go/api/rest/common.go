@@ -10,6 +10,7 @@ const (
 	timeFrameTagParam                     = "timeFrameTag"
 	observationTimestampIdParam           = "observationTimestampId"
 	planIdParam                           = "planId"
+	assetIdParam                          = "assetId"
 	getPortfolioIdErrorMessage            = "Error getting portfolioId url parameter"
 	getObservationTimestampIdErrorMessage = "Error getting observationTimestampId url parameter"
 	getPlanIdErrorMessage                 = "Error getting planId url parameter"

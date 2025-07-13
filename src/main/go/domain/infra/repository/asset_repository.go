@@ -3,6 +3,7 @@ package repository
 import (
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra"
+	"github.com/benizzio/open-asset-allocator/langext"
 )
 
 const (
@@ -19,7 +20,7 @@ func (repository *AssetRDBMSRepository) GetKnownAssets() ([]*domain.Asset, error
 	var queryBuilder = repository.dbAdapter.BuildQuery(knownAssetsSQL)
 	var result []domain.Asset
 	err := queryBuilder.Build().FindInto(&result)
-	return nil, infra.PropagateAsAppErrorWithNewMessage(
+	return langext.ToPointerSlice(result), infra.PropagateAsAppErrorWithNewMessage(
 		err,
 		"Error getting known assets",
 		repository,

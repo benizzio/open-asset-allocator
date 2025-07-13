@@ -51,9 +51,11 @@ func (app *App) buildAppComponents() {
 
 	var portfolioRepository = repository.BuildPortfolioRepository(app.databaseAdapter)
 	var allocationPlanRepository = repository.BuildAllocationPlanRepository(app.databaseAdapter)
+	var assetRepository = repository.BuildAssetRDBMSRepository(app.databaseAdapter)
 
 	var portfolioDomService = service.BuildPortfolioDomService(portfolioRepository)
 	var allocationPlanDomService = service.BuildAllocationPlanDomService(allocationPlanRepository)
+	var assetDomService = service.BuildAssetDomService(assetRepository)
 	var portfolioDivergenceAnalysisService = application.BuildPortfolioDivergenceAnalysisAppService(
 		portfolioDomService,
 		allocationPlanDomService,
@@ -70,12 +72,14 @@ func (app *App) buildAppComponents() {
 		portfolioDivergenceAnalysisService,
 	)
 	var allocationPlanRESTController = rest.BuildAllocationPlanRESTController(allocationPlanDomService)
+	var assetRESTController = rest.BuildAssetRESTController(assetDomService)
 
 	app.restControllers = []infra.GinServerRESTController{
 		portfolioRESTController,
 		allocationPlanRESTController,
 		portfolioDivergenceAnalysisRESTController,
 		portfolioAllocationRESTController,
+		assetRESTController,
 	}
 }
 
