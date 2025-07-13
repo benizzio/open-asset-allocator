@@ -201,6 +201,7 @@
                            required
                            class="form-control"
                            value="{{assetTicker}}"
+                           list="datalist-assets"
                     />
                     <button class="btn btn-primary btn-xs" type="button"><span class="bi bi-search"></span></button>
                 </div>
@@ -290,15 +291,34 @@
           hx-get="/api/portfolio/:portfolioId/allocation-classes"
           hx-include="[name='portfolioId']"
           hx-trigger="load, load-classes"
-          handlebars-template="template-classes-datalist"
+          handlebars-template="template-monovalue-datalist"
 >
 </datalist>
 
-<script id="template-classes-datalist" type="text/x-handlebars-template">
+<datalist id="datalist-assets"
+          hx-get="/api/asset"
+          hx-trigger="load, load-assets"
+          handlebars-template="template-asset-datalist"
+>
+</datalist>
 
-    {{#each this}}
-        <option value="{{this}}">{{this}}</option>
+<script id="template-monovalue-datalist" type="text/x-handlebars-template">
+
+    {{#each .}}
+
+        {{#if (getProperty this ../propertyKey) }}
+            <option value="{{getProperty this ../propertyKey}}">{{getProperty this ../propertyKey}}</option>
+        {{else}}
+            <option value="{{this}}">{{this}}</option>
+        {{/if}}
+        
     {{/each}}
+
+</script>
+
+<script id="template-asset-datalist" type="text/x-handlebars-template">
+
+    {{> template-monovalue-datalist propertyKey="ticker"}}
 
 </script>
 
@@ -307,6 +327,11 @@
     HandlebarsUtils.registerPartialToContainer(
         "accordion-portfolio-history",
         "template-portfolio-history-management-row"
+    );
+
+    HandlebarsUtils.registerPartialToContainer(
+        "accordion-portfolio-history",
+        "template-monovalue-datalist"
     );
 
     var handlebarPortfolioHistoryManagementRowTemplate = Handlebars.compile(window["template-portfolio-history-management-row"].innerHTML);
