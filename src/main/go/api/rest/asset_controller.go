@@ -7,7 +7,6 @@ import (
 	"github.com/benizzio/open-asset-allocator/infra/util"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strconv"
 )
 
 type AssetRESTController struct {
@@ -23,7 +22,7 @@ func (controller *AssetRESTController) BuildRoutes() []infra.RESTRoute {
 		},
 		{
 			Method:   http.MethodGet,
-			Path:     "/api/asset/:" + assetIdParam,
+			Path:     "/api/asset/:" + assetIdOrTickerParam,
 			Handlers: gin.HandlersChain{controller.getAssetById},
 		},
 	}
@@ -43,19 +42,15 @@ func (controller *AssetRESTController) getKnownAssets(context *gin.Context) {
 
 func (controller *AssetRESTController) getAssetById(context *gin.Context) {
 
-	var assetIdParamValue = context.Param(assetIdParam)
-	assetId, err := strconv.Atoi(assetIdParamValue)
-	if infra.HandleAPIError(context, "Error parsing asset ID", err) {
-		return
-	}
+	var assetIdOrTickerParamValue = context.Param(assetIdOrTickerParam)
 
-	asset, err := controller.assetDomService.FindAssetById(assetId)
-	if infra.HandleAPIError(context, "Error getting asset by ID", err) {
+	asset, err := controller.assetDomService.FindAssetByUniqueIdentifier(assetIdOrTickerParamValue)
+	if infra.HandleAPIError(context, "Error getting asset by Id or Ticker", err) {
 		return
 	}
 
 	if asset == nil {
-		util.SendDataNotFoundResponse(context, "Asset", assetIdParamValue)
+		util.SendDataNotFoundResponse(context, "Asset", assetIdOrTickerParamValue)
 		return
 	}
 

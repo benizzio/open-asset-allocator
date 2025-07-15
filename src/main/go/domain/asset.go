@@ -8,5 +8,5 @@ type Asset struct {
 
 type AssetRepository interface {
 	GetKnownAssets() ([]*Asset, error)
-	FindAssetById(id int) (*Asset, error)
+	FindAssetByUniqueIdentifier(uniqueIdentifier string) (*Asset, error)
 }

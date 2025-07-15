@@ -12,8 +12,8 @@ func (service *AssetDomService) GetKnownAssets() ([]*domain.Asset, error) {
 	return service.assetRepository.GetKnownAssets()
 }
 
-func (service *AssetDomService) FindAssetById(id int) (*domain.Asset, error) {
-	return service.assetRepository.FindAssetById(id)
+func (service *AssetDomService) FindAssetByUniqueIdentifier(uniqueIdentifier string) (*domain.Asset, error) {
+	return service.assetRepository.FindAssetByUniqueIdentifier(uniqueIdentifier)
 }
 
 func BuildAssetDomService(assetRepository domain.AssetRepository) *AssetDomService {

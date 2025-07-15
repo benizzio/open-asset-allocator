@@ -5,6 +5,7 @@ import (
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/benizzio/open-asset-allocator/langext"
+	"strconv"
 )
 
 const (
@@ -28,10 +29,22 @@ func (repository *AssetRDBMSRepository) GetKnownAssets() ([]*domain.Asset, error
 	)
 }
 
-func (repository *AssetRDBMSRepository) FindAssetById(id int) (*domain.Asset, error) {
+func (repository *AssetRDBMSRepository) FindAssetByUniqueIdentifier(uniqueIdentifier string) (*domain.Asset, error) {
 
 	var queryBuilder = repository.dbAdapter.BuildQuery(knownAssetsSQL)
-	queryBuilder.AddWhereClauseAndParam("AND id = {:id}", "id", id)
+
+	var whereClause string
+	if _, err := strconv.Atoi(uniqueIdentifier); err == nil {
+		whereClause = "AND (id = {:uniqueIdentifier} OR ticker = {:uniqueIdentifier})"
+	} else {
+		whereClause = "AND ticker = {:uniqueIdentifier}"
+	}
+
+	queryBuilder.AddWhereClauseAndParam(
+		whereClause,
+		"uniqueIdentifier",
+		uniqueIdentifier,
+	)
 
 	var result domain.Asset
 	err := queryBuilder.Build().GetInto(&result)

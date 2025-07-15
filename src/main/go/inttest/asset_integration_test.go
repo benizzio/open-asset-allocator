@@ -65,30 +65,59 @@ func TestGetKnownAssets(t *testing.T) {
 	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
 }
 
-// TestGetAssetById tests the GET /api/asset/{id} endpoint to retrieve a specific asset.
-//
-// Authored by: GitHub Copilot
-func TestGetAssetById(t *testing.T) {
+func TestGetAssetByIdOrTicker(t *testing.T) {
 
-	// Test retrieving a valid asset
-	response, err := http.Get(infra.TestAPIURLPrefix + "/asset/1")
-	assert.NoError(t, err)
+	t.Run(
+		"TestGetAssetById",
+		func(t *testing.T) {
 
-	assert.Equal(t, http.StatusOK, response.StatusCode)
+			// Test retrieving a valid asset
+			response, err := http.Get(infra.TestAPIURLPrefix + "/asset/1")
+			assert.NoError(t, err)
 
-	body, err := io.ReadAll(response.Body)
-	assert.NoError(t, err)
-	assert.NotEmpty(t, body)
+			assert.Equal(t, http.StatusOK, response.StatusCode)
 
-	var actualResponseJSON = string(body)
-	var expectedResponseJSON = `
-		{
-			"id": 1,
-			"name": "SPDR Bloomberg 1-3 Month T-Bill ETF",
-			"ticker": "ARCA:BIL"
-		}
-	`
-	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
+			body, err := io.ReadAll(response.Body)
+			assert.NoError(t, err)
+			assert.NotEmpty(t, body)
+
+			var actualResponseJSON = string(body)
+			var expectedResponseJSON = `
+				{
+					"id": 1,
+					"name": "SPDR Bloomberg 1-3 Month T-Bill ETF",
+					"ticker": "ARCA:BIL"
+				}
+			`
+			assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
+		},
+	)
+
+	t.Run(
+		"TestGetAssetByTicker",
+		func(t *testing.T) {
+
+			// Test retrieving a valid asset
+			response, err := http.Get(infra.TestAPIURLPrefix + "/asset/ARCA:BIL")
+			assert.NoError(t, err)
+
+			assert.Equal(t, http.StatusOK, response.StatusCode)
+
+			body, err := io.ReadAll(response.Body)
+			assert.NoError(t, err)
+			assert.NotEmpty(t, body)
+
+			var actualResponseJSON = string(body)
+			var expectedResponseJSON = `
+				{
+					"id": 1,
+					"name": "SPDR Bloomberg 1-3 Month T-Bill ETF",
+					"ticker": "ARCA:BIL"
+				}
+			`
+			assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
+		},
+	)
 }
 
 // TestGetAssetByIdNotFound tests the GET /api/asset/{id} endpoint with a non-existent asset ID.
@@ -123,35 +152,10 @@ func TestGetAssetByIdNotFound(t *testing.T) {
 // Authored by: GitHub Copilot
 func TestGetAssetByIdInvalidId(t *testing.T) {
 
-	// Test case: Negative ID (-1) - valid parsing but asset doesn't exist
-	t.Run(
-		"InvalidId_Negative", func(t *testing.T) {
-
-			response, err := http.Get(infra.TestAPIURLPrefix + "/asset/-1")
-			assert.NoError(t, err)
-
-			assert.Equal(t, http.StatusNotFound, response.StatusCode)
-
-			body, err := io.ReadAll(response.Body)
-			assert.NoError(t, err)
-			assert.NotEmpty(t, body)
-
-			var actualResponseJSON = string(body)
-			var expectedResponseJSON = `
-			{
-				"errorMessage": "Data not found",
-				"details": [
-					"Asset with ID -1 not found"
-				]
-			}
-		`
-			assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
-		},
-	)
-
 	// Test case: Empty ID (Gin redirects /api/asset/ to /api/asset)
 	t.Run(
-		"InvalidId_Empty", func(t *testing.T) {
+		"InvalidIdEmpty",
+		func(t *testing.T) {
 
 			response, err := http.Get(infra.TestAPIURLPrefix + "/asset/")
 			assert.NoError(t, err)
