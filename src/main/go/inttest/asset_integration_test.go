@@ -140,7 +140,7 @@ func TestGetAssetByIdNotFound(t *testing.T) {
 		{
 			"errorMessage": "Data not found",
 			"details": [
-				"Asset with ID 999 not found"
+				"Asset with identifier 999 not found"
 			]
 		}
 	`
