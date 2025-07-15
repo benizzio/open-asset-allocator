@@ -23,7 +23,7 @@ func SendDataNotFoundResponse(context *gin.Context, dataType string, id string) 
 		http.StatusNotFound,
 		model.ErrorResponse{
 			ErrorMessage: "Data not found",
-			Details:      []string{dataType + " with ID " + id + " not found"},
+			Details:      []string{dataType + " with identifier " + id + " not found"},
 		},
 	)
 }
