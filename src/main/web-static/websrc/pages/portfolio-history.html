@@ -172,7 +172,7 @@
 <script id="template-portfolio-history-management-rows" type="text/x-handlebars-template">
 
     {{#each @root.[0].allocations}}
-        {{> template-portfolio-history-management-row allocationIndex=@index}}
+        {{> template-portfolio-history-management-row allocationIndex=@index observationTimestampId=@root.[0].observationTimestamp.id }}
     {{/each}}
 
 </script>
@@ -182,7 +182,11 @@
     <tr>
         <td>
 
-            <input type="hidden" name="allocations[{{allocationIndex}}][assetId]" value="{{assetId}}" />
+            <input id="asset-id-input-alloc-{{allocationIndex}}-obs-{{observationTimestampId}}"
+                   type="hidden"
+                   name="allocations[{{allocationIndex}}][assetId]"
+                   value="{{assetId}}"
+            />
 
             {{#if assetId}}
                 {{assetTicker}}
@@ -193,7 +197,8 @@
                     <!-- If found show name as label and button to remove -->
                     <!-- If not found show visual cue of new, button to cancel and field for name -->
                     <!-- Add ticker datalist -->
-                    <input type="text"
+                    <input id="asset-ticker-input-alloc-{{allocationIndex}}-obs-{{observationTimestampId}}"
+                           type="text"
                            name="allocations[{{allocationIndex}}][assetTicker]"
                            placeholder="Asset ticker"
                            aria-label="Asset ticker"
@@ -203,7 +208,19 @@
                            value="{{assetTicker}}"
                            list="datalist-assets"
                     />
-                    <button class="btn btn-primary btn-xs" type="button"><span class="bi bi-search"></span></button>
+                    <button id="asset-ticker-button-alloc-{{allocationIndex}}-obs-{{observationTimestampId}}"
+                            type="button"
+                            class="btn btn-primary btn-xs"
+                            onclick="assetButtonActionClickHandler({{allocationIndex}}, {{observationTimestampId}})"
+                    >
+                        <span class="bi bi-search"></span>
+                    </button>
+                </div>
+                <div class="form-text"
+                     id="asset-ticker-message-alloc-{{allocationIndex}}-obs-{{observationTimestampId}}"
+                     style="display: none"
+                >
+                    * Inserting new asset
                 </div>
 
             {{/if}}
@@ -213,7 +230,8 @@
             {{#if assetName}}
                 {{assetName}}
             {{else}}
-                <input type="text"
+                <input id="asset-name-input-alloc-{{allocationIndex}}-obs-{{observationTimestampId}}"
+                       type="text"
                        name="allocations[{{allocationIndex}}][assetName]"
                        placeholder="Asset name"
                        aria-label="Asset name"
@@ -234,6 +252,7 @@
                    value="{{class}}"
                    list="datalist-classes"
                    oninput="maskTagInput(this)"
+                   required
             />
         </td>
         <td class="align-middle text-center">
@@ -272,6 +291,7 @@
                    autocomplete="off"
                    class="form-control "
                    value="{{totalMarketValue}}"
+                   required
             />
         </td>
         <td>
@@ -311,7 +331,7 @@
         {{else}}
             <option value="{{this}}">{{this}}</option>
         {{/if}}
-        
+
     {{/each}}
 
 </script>
@@ -372,7 +392,10 @@
         const tbodyId = portfolioAllocationManagementTBodyPrefix + observationTimestampId
         const tbody = window[tbodyId];
         const nextIndex = getNextPortfolioHistoryManagementIndex(observationTimestampId);
-        const newRowHtml = handlebarPortfolioHistoryManagementRowTemplate({allocationIndex: nextIndex});
+        const newRowHtml = handlebarPortfolioHistoryManagementRowTemplate({
+            allocationIndex: nextIndex,
+            observationTimestampId: observationTimestampId
+        });
 
         tbody.insertAdjacentHTML("beforeend", newRowHtml);
 
@@ -391,6 +414,117 @@
         const rows = tbody.querySelectorAll("tr");
         return rows.length;
     }
+
+    const assetActionButtonIdentities = {
+        search: {
+            classes: "btn btn-primary btn-xs",
+            iconClasses: "bi bi-search"
+        },
+        reset: {
+            classes: "btn btn-danger btn-xs",
+            iconClasses: "bi bi-x-circle"
+        }
+    }
+
+    window.assetButtonActionClickHandler = (index, observationTimestampId) => {
+
+        const actionButton = window[`asset-ticker-button-alloc-${index}-obs-${observationTimestampId}`];
+        const rowAssetElements = {
+            actionButton,
+            assetTickerInput: window[`asset-ticker-input-alloc-${index}-obs-${observationTimestampId}`],
+            assetTickerMessage: window[`asset-ticker-message-alloc-${index}-obs-${observationTimestampId}`],
+            assetNameInput: window[`asset-name-input-alloc-${index}-obs-${observationTimestampId}`],
+            assetIdInput: window[`asset-id-input-alloc-${index}-obs-${observationTimestampId}`]
+        };
+
+        if (actionButton.className === assetActionButtonIdentities.search.classes) {
+            getAsset(index, rowAssetElements);
+        } else if (actionButton.className === assetActionButtonIdentities.reset.classes) {
+            resetAsset(rowAssetElements);
+        }
+    }
+
+    function getAsset(index, rowAssetElements) {
+
+        const {assetTickerInput, assetNameInput, assetIdInput, assetTickerMessage} = rowAssetElements;
+
+        assetTickerInput.setCustomValidity("");
+        assetTickerInput.reportValidity();
+
+        const assetTicker = assetTickerInput.value;
+        if (!assetTicker) {
+            assetTickerInput.setCustomValidity("Required for search");
+            assetTickerInput.reportValidity();
+            return;
+        }
+
+        fetch("/api/assetssss/" + assetTicker)
+            .then(response => {
+                if (!response.ok) {
+                    const error = new Error("Network response was not ok");
+                    error.response = response;
+                    throw error;
+                }
+                return response;
+            })
+            .then(response => response.json())
+            .then(jsonBody => {
+                switchAssetActionButtonIdentity(rowAssetElements, assetActionButtonIdentities.reset);
+                assetTickerInput.readOnly = true;
+                assetTickerInput.value = jsonBody.ticker;
+                assetNameInput.style.display = "";
+                assetNameInput.readOnly = true;
+                assetNameInput.value = jsonBody.name;
+                assetIdInput.value = jsonBody.id;
+                assetTickerMessage.style.display = "none";
+            })
+            .catch(error => {
+
+                const response = error.response;
+
+                const contentType = response.headers.get("content-type");
+
+                if (contentType && contentType.includes("application/json")) {
+                    response.json().then(jsonBody => {
+                        if (jsonBody.errorMessage === "Data not found") {
+                            switchAssetActionButtonIdentity(rowAssetElements, assetActionButtonIdentities.reset);
+                            assetTickerInput.readOnly = false;
+                            assetNameInput.style.display = "";
+                            assetNameInput.readOnly = false;
+                            assetTickerMessage.style.display = ""
+                        }
+                    })
+
+                } else {
+                    // TODO add toast for errors
+                    console.error("Error fetching asset:", error);
+                }
+
+
+            })
+        ;
+    }
+
+    function switchAssetActionButtonIdentity(rowAssetElements, identity) {
+        const {actionButton} = rowAssetElements;
+        actionButton.className = identity.classes;
+        actionButton.innerHTML = `<span class="${identity.iconClasses}"></span>`;
+    }
+
+    function resetAsset(rowAssetElements) {
+        const {assetTickerInput, assetNameInput, assetIdInput, assetTickerMessage} = rowAssetElements;
+        assetTickerInput.value = "";
+        assetTickerInput.focus();
+        assetTickerInput.readOnly = false;
+        assetNameInput.value = "";
+        assetNameInput.style.display = "none";
+        assetNameInput.readOnly = false;
+        assetIdInput.value = "";
+        assetTickerMessage.style.display = "none";
+        switchAssetActionButtonIdentity(rowAssetElements, assetActionButtonIdentities.search);
+    }
+
+    //TODO custom from validation
 
 </script>
 
