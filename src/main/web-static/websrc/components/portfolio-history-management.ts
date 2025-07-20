@@ -1,4 +1,5 @@
 import htmx from "htmx.org";
+import api from "../api/api";
 
 type RowAssetElements = {
     assetIdInput: HTMLInputElement,
@@ -57,51 +58,35 @@ function getAsset(rowAssetElements: RowAssetElements) {
         return;
     }
 
-    fetch("/api/asset/" + assetTicker)
-        .then(response => {
-            if(!response.ok) {
-                const error = new Error("Network response was not ok");
-                error["response"] = response;
-                throw error;
+    api.getAsset(assetTicker)
+        .then(responseBody => {
+
+            if(api.isAPIErrorResponse(responseBody)) {
+
+                if(responseBody.errorMessage === "Data not found") {
+                    switchAssetActionButtonIdentity(rowAssetElements, ASSET_ACTION_BUTTON_IDENTITIES.reset);
+                    assetTickerInput.readOnly = false;
+                    assetNameInput.style.display = "";
+                    assetNameInput.readOnly = false;
+                    assetNameInput.required = true;
+                    assetTickerMessage.style.display = "";
+                }
+
+                return;
             }
-            return response;
-        })
-        .then(response => response.json())
-        .then(jsonBody => {
+
             switchAssetActionButtonIdentity(rowAssetElements, ASSET_ACTION_BUTTON_IDENTITIES.reset);
             assetTickerInput.readOnly = true;
-            assetTickerInput.value = jsonBody.ticker;
+            assetTickerInput.value = responseBody.ticker;
             assetNameInput.style.display = "";
             assetNameInput.readOnly = true;
-            assetNameInput.value = jsonBody.name;
-            assetIdInput.value = jsonBody.id;
+            assetNameInput.value = responseBody.name;
+            assetIdInput.value = responseBody.id.toString();
             assetTickerMessage.style.display = "none";
         })
         .catch(error => {
-
-            const response = error.response;
-
-            const contentType = response.headers.get("content-type");
-
-            if(contentType && contentType.includes("application/json")) {
-                response.json().then(jsonBody => {
-                    if(jsonBody.errorMessage === "Data not found") {
-                        switchAssetActionButtonIdentity(rowAssetElements, ASSET_ACTION_BUTTON_IDENTITIES.reset);
-                        assetTickerInput.readOnly = false;
-                        assetNameInput.style.display = "";
-                        assetNameInput.readOnly = false;
-                        assetNameInput.required = true;
-                        assetTickerMessage.style.display = "";
-                    }
-                });
-
-            }
-            else {
-                // TODO add toast for errors
-                console.error("Error fetching asset:", error);
-            }
-
-
+            // TODO add toast for errors
+            console.error("Error fetching asset:", error);
         });
 }
 
