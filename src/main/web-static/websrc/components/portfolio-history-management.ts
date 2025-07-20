@@ -93,9 +93,33 @@ class RowAssetElements {
         this.newAssetTickerMessage.style.display = "none";
     }
 
+    clearSearchFieldValidation() {
+        this.assetTickerInput.setCustomValidity("");
+        this.assetTickerInput.reportValidity();
+    }
+
+    validateSearchUniqueIdentifier(): string {
+
+        const assetUniqueIdentifier = this.assetTickerInput.value.trim();
+
+        if(!assetUniqueIdentifier) {
+            this.assetTickerInput.setCustomValidity("Required for search");
+            this.assetTickerInput.reportValidity();
+        }
+
+        return assetUniqueIdentifier;
+    }
+
     handleAssetActionButtonClick() {
+
         if(this.isInSearchMode()) {
-            getAsset(this);
+
+            this.clearSearchFieldValidation();
+            const searchUniqueIdentifier = this.validateSearchUniqueIdentifier();
+
+            if(searchUniqueIdentifier) {
+                getAsset(this, searchUniqueIdentifier);
+            }
         }
         else if(this.isInResetMode()) {
             this.resetToSearchMode();
@@ -125,22 +149,9 @@ function getNextPortfolioHistoryManagementIndex(tbody: HTMLElement): number {
     return rows.length;
 }
 
-function getAsset(rowAssetElements: RowAssetElements) {
+function getAsset(rowAssetElements: RowAssetElements, searchUniqueIdentifier: string) {
 
-    const { assetTickerInput } = rowAssetElements;
-
-    assetTickerInput.setCustomValidity("");
-    assetTickerInput.reportValidity();
-
-    const assetTicker = assetTickerInput.value;
-
-    if(!assetTicker) {
-        assetTickerInput.setCustomValidity("Required for search");
-        assetTickerInput.reportValidity();
-        return;
-    }
-
-    api.getAsset(assetTicker)
+    api.getAsset(searchUniqueIdentifier)
         .then(responseBody => {
 
             if(api.isAPIErrorResponse(responseBody)) {
