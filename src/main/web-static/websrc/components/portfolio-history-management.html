@@ -16,26 +16,26 @@
             <h2 class="accordion-header"
                 data-bs-parent="#accordion-portfolio-history-management"
                 hx-include="[name='portfolioId']"
-                hx-target="#portfolio-allocation-management-rows-{{id}}"
+                hx-target="#portfolio-history-management-form-tbody-{{id}}"
                 hx-trigger="click"
-                handlebars-template="template-portfolio-history-management-rows"
+                handlebars-template="template-portfolio-history-management-form-tbody"
                 hx-get="/api/portfolio/:portfolioId/history?observationTimestampId={{id}}"
             >
             <button class="accordion-button collapsed"
                     type="button"
                     data-bs-toggle="collapse"
-                    data-bs-target="#portfolio-allocation-management-{{id}}"
+                    data-bs-target="#portfolio-history-management-{{id}}"
                     aria-expanded="true"
-                    aria-controls="portfolio-allocation-management-{{id}}"
+                    aria-controls="portfolio-history-management-{{id}}"
             >
                 {{timeTag}}
             </button>
             </h2>
 
-            <div id="portfolio-allocation-management-{{id}}" class="accordion-collapse collapse">
+            <div id="portfolio-history-management-{{id}}" class="accordion-collapse collapse">
                 <div class="accordion-body row justify-content-center">
 
-                    <form hx-post="/api/test" hx-ext="form-json">
+                    <form id="portfolio-history-management-form-{{id}}" hx-post="/api/test" hx-ext="form-json">
                         <table class="table table-striped">
 
                             <thead class="sticky-header">
@@ -50,7 +50,7 @@
                             </tr>
                             </thead>
 
-                            <tbody class="table-group-divider" id="portfolio-allocation-management-rows-{{id}}">
+                            <tbody class="table-group-divider" id="portfolio-history-management-form-tbody-{{id}}">
                             </tbody>
 
                             <tfoot class="sticky-footer">
@@ -83,21 +83,20 @@
 
 </script>
 
-<script id="template-portfolio-history-management-rows" type="text/x-handlebars-template">
+<script id="template-portfolio-history-management-form-tbody" type="text/x-handlebars-template">
 
     {{#each @root.[0].allocations}}
-        {{> template-portfolio-history-management-row allocationIndex=@index observationTimestampId=@root.[0].observationTimestamp.id }}
+        {{> template-portfolio-history-management-form-tbody-row allocationIndex=@index observationTimestampId=@root.[0].observationTimestamp.id }}
     {{/each}}
 
 </script>
 
-<script id="template-portfolio-history-management-row" type="text/x-handlebars-template">
+<script id="template-portfolio-history-management-form-tbody-row" type="text/x-handlebars-template">
 
-    <tr>
+    <tr id="portfolio-history-management-form-{{observationTimestampId}}-row-{{allocationIndex}}">
         <td>
 
-            <input id="asset-id-input-alloc-{{allocationIndex}}-obs-{{observationTimestampId}}"
-                   type="hidden"
+            <input type="hidden"
                    name="allocations[{{allocationIndex}}][assetId]"
                    value="{{assetId}}"
             />
@@ -108,8 +107,7 @@
 
                 <div class="input-group">
 
-                    <input id="asset-ticker-input-alloc-{{allocationIndex}}-obs-{{observationTimestampId}}"
-                           type="text"
+                    <input type="text"
                            name="allocations[{{allocationIndex}}][assetTicker]"
                            placeholder="Asset ticker"
                            aria-label="Asset ticker"
@@ -118,20 +116,20 @@
                            value="{{assetTicker}}"
                            list="datalist-assets"
                            hx-validate="true"
-                           hx-on::validation:validate="validateAssetTicker({{allocationIndex}}, {{observationTimestampId}})"
+                           hx-on::validation:validate="portfolioHistoryManagement.validateAssetTicker({{allocationIndex}}, {{observationTimestampId}})"
                     />
-                    <button id="asset-ticker-button-alloc-{{allocationIndex}}-obs-{{observationTimestampId}}"
+                    <button data-asset-action-button
                             type="button"
                             class="btn btn-primary btn-xs"
-                            onclick="assetButtonActionClickHandler({{allocationIndex}}, {{observationTimestampId}})"
+                            onclick="portfolioHistoryManagement.assetActionButtonClickHandler({{allocationIndex}}, {{observationTimestampId}})"
                     >
                         <span class="bi bi-search"></span>
                     </button>
 
                 </div>
 
-                <div class="form-text"
-                     id="asset-ticker-message-alloc-{{allocationIndex}}-obs-{{observationTimestampId}}"
+                <div data-asset-ticker-message
+                     class="form-text"
                      style="display: none"
                 >
                     * Inserting new asset
@@ -146,8 +144,7 @@
             {{#if assetName}}
                 {{assetName}}
             {{else}}
-                <input id="asset-name-input-alloc-{{allocationIndex}}-obs-{{observationTimestampId}}"
-                       type="text"
+                <input type="text"
                        name="allocations[{{allocationIndex}}][assetName]"
                        placeholder="Asset name"
                        aria-label="Asset name"
@@ -237,133 +234,9 @@
 
     HandlebarsUtils.registerPartialToContainer(
         "accordion-portfolio-history",
-        "template-portfolio-history-management-row"
+        "template-portfolio-history-management-form-tbody-row"
     );
 
-    portfolioHistoryManagement.handlebarPortfolioHistoryManagementRowTemplate = Handlebars.compile(window["template-portfolio-history-management-row"].innerHTML);
-
-</script>
-
-<script type="module">
-
-
-    const assetActionButtonIdentities = {
-        search: {
-            classes: "btn btn-primary btn-xs",
-            iconClasses: "bi bi-search"
-        },
-        reset: {
-            classes: "btn btn-danger btn-xs",
-            iconClasses: "bi bi-x-circle"
-        }
-    }
-
-    window.assetButtonActionClickHandler = (index, observationTimestampId) => {
-
-        const actionButton = window[`asset-ticker-button-alloc-${index}-obs-${observationTimestampId}`];
-        const rowAssetElements = {
-            actionButton,
-            assetTickerInput: window[`asset-ticker-input-alloc-${index}-obs-${observationTimestampId}`],
-            assetTickerMessage: window[`asset-ticker-message-alloc-${index}-obs-${observationTimestampId}`],
-            assetNameInput: window[`asset-name-input-alloc-${index}-obs-${observationTimestampId}`],
-            assetIdInput: window[`asset-id-input-alloc-${index}-obs-${observationTimestampId}`]
-        };
-
-        if (actionButton.className === assetActionButtonIdentities.search.classes) {
-            getAsset(index, rowAssetElements);
-        } else if (actionButton.className === assetActionButtonIdentities.reset.classes) {
-            resetAsset(rowAssetElements);
-        }
-    }
-
-    function getAsset(index, rowAssetElements) {
-
-        const {assetTickerInput, assetNameInput, assetIdInput, assetTickerMessage} = rowAssetElements;
-
-        assetTickerInput.setCustomValidity("");
-        assetTickerInput.reportValidity();
-
-        const assetTicker = assetTickerInput.value;
-        if (!assetTicker) {
-            assetTickerInput.setCustomValidity("Required for search");
-            assetTickerInput.reportValidity();
-            return;
-        }
-
-        fetch("/api/asset/" + assetTicker)
-            .then(response => {
-                if (!response.ok) {
-                    const error = new Error("Network response was not ok");
-                    error.response = response;
-                    throw error;
-                }
-                return response;
-            })
-            .then(response => response.json())
-            .then(jsonBody => {
-                switchAssetActionButtonIdentity(rowAssetElements, assetActionButtonIdentities.reset);
-                assetTickerInput.readOnly = true;
-                assetTickerInput.value = jsonBody.ticker;
-                assetNameInput.style.display = "";
-                assetNameInput.readOnly = true;
-                assetNameInput.value = jsonBody.name;
-                assetIdInput.value = jsonBody.id;
-                assetTickerMessage.style.display = "none";
-            })
-            .catch(error => {
-
-                const response = error.response;
-
-                const contentType = response.headers.get("content-type");
-
-                if (contentType && contentType.includes("application/json")) {
-                    response.json().then(jsonBody => {
-                        if (jsonBody.errorMessage === "Data not found") {
-                            switchAssetActionButtonIdentity(rowAssetElements, assetActionButtonIdentities.reset);
-                            assetTickerInput.readOnly = false;
-                            assetNameInput.style.display = "";
-                            assetNameInput.readOnly = false;
-                            assetNameInput.required = "required";
-                            assetTickerMessage.style.display = ""
-                        }
-                    })
-
-                } else {
-                    // TODO add toast for errors
-                    console.error("Error fetching asset:", error);
-                }
-
-
-            });
-    }
-
-    function switchAssetActionButtonIdentity(rowAssetElements, identity) {
-        const {actionButton} = rowAssetElements;
-        actionButton.className = identity.classes;
-        actionButton.innerHTML = `<span class="${identity.iconClasses}"></span>`;
-    }
-
-    function resetAsset(rowAssetElements) {
-        const {assetTickerInput, assetNameInput, assetIdInput, assetTickerMessage} = rowAssetElements;
-        assetTickerInput.value = "";
-        assetTickerInput.focus();
-        assetTickerInput.readOnly = false;
-        assetNameInput.value = "";
-        assetNameInput.style.display = "none";
-        assetNameInput.readOnly = false;
-        assetNameInput.required = ""
-        assetIdInput.value = "";
-        assetTickerMessage.style.display = "none";
-        switchAssetActionButtonIdentity(rowAssetElements, assetActionButtonIdentities.search);
-    }
-
-    window.validateAssetTicker = (allocationIndex, observationTimestampId) => {
-        const assetTickerButton = window[`asset-ticker-button-alloc-${allocationIndex}-obs-${observationTimestampId}`];
-        const assetTickerInput = window[`asset-ticker-input-alloc-${allocationIndex}-obs-${observationTimestampId}`];
-        if (assetTickerButton.className === assetActionButtonIdentities.search.classes) {
-            assetTickerInput.setCustomValidity("Reference an existing asset or create a new one");
-            assetTickerInput.reportValidity();
-        }
-    }
+    portfolioHistoryManagement.handlebarPortfolioHistoryManagementRowTemplate = Handlebars.compile(window["template-portfolio-history-management-form-tbody-row"].innerHTML);
 
 </script>
