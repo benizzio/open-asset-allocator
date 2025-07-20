@@ -6,7 +6,7 @@
          hx-include="[name='portfolioId']"
          hx-trigger="load"
          handlebars-template="template-portfolio-history"
-         hx-on-htmx-after-settle="initPortfolioHistoryHierarchyLabels()"
+         hx-on::after-settle="initPortfolioHistoryHierarchyLabels()"
          data-display-on-route="/portfolio/:portfolioId/history"
     >
         <div class="accordion-item placeholder-glow">
@@ -104,7 +104,6 @@
                 hx-target="#portfolio-allocation-management-rows-{{id}}"
                 hx-trigger="click"
                 handlebars-template="template-portfolio-history-management-rows"
-                hx-on-htmx-after-settle="initTags('portfolio-allocation-management-rows-{{id}}')"
                 hx-get="/api/portfolio/:portfolioId/history?observationTimestampId={{id}}"
             >
             <button class="accordion-button collapsed"
@@ -203,10 +202,11 @@
                            placeholder="Asset ticker"
                            aria-label="Asset ticker"
                            autocomplete="off"
-                           required
                            class="form-control"
                            value="{{assetTicker}}"
                            list="datalist-assets"
+                           hx-validate="true"
+                           hx-on::validation:validate="validateAssetTicker({{allocationIndex}}, {{observationTimestampId}})"
                     />
                     <button id="asset-ticker-button-alloc-{{allocationIndex}}-obs-{{observationTimestampId}}"
                             type="button"
@@ -407,6 +407,10 @@
             firstInputField.scrollIntoView({behavior: 'smooth', block: 'center'});
             firstInputField.focus();
         }
+
+        // Process the newly added row with htmx to enable validation
+        const newRow = tbody.lastElementChild;
+        htmx.process(newRow);
     }
 
     function getNextPortfolioHistoryManagementIndex(observationTimestampId) {
@@ -458,7 +462,7 @@
             return;
         }
 
-        fetch("/api/assetssss/" + assetTicker)
+        fetch("/api/asset/" + assetTicker)
             .then(response => {
                 if (!response.ok) {
                     const error = new Error("Network response was not ok");
@@ -491,6 +495,7 @@
                             assetTickerInput.readOnly = false;
                             assetNameInput.style.display = "";
                             assetNameInput.readOnly = false;
+                            assetNameInput.required = "required";
                             assetTickerMessage.style.display = ""
                         }
                     })
@@ -501,8 +506,7 @@
                 }
 
 
-            })
-        ;
+            });
     }
 
     function switchAssetActionButtonIdentity(rowAssetElements, identity) {
@@ -519,12 +523,20 @@
         assetNameInput.value = "";
         assetNameInput.style.display = "none";
         assetNameInput.readOnly = false;
+        assetNameInput.required = ""
         assetIdInput.value = "";
         assetTickerMessage.style.display = "none";
         switchAssetActionButtonIdentity(rowAssetElements, assetActionButtonIdentities.search);
     }
 
-    //TODO custom from validation
+    window.validateAssetTicker = (allocationIndex, observationTimestampId) => {
+        const assetTickerButton = window[`asset-ticker-button-alloc-${allocationIndex}-obs-${observationTimestampId}`];
+        const assetTickerInput = window[`asset-ticker-input-alloc-${allocationIndex}-obs-${observationTimestampId}`];
+        if (assetTickerButton.className === assetActionButtonIdentities.search.classes) {
+            assetTickerInput.setCustomValidity("Reference an existing asset or create a new one");
+            assetTickerInput.reportValidity();
+        }
+    }
 
 </script>
 
