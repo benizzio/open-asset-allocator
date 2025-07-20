@@ -7,9 +7,6 @@ import * as bootstrap from "bootstrap";
 import { domInfra } from "./dom/dom";
 import chart from "./chart/chart";
 
-//eslint-disable-next-line
-const BROWSER_GLOBAL = (window as any);
-
 /**
  * Ties multiple components of the application infrastructure to HTMX async DOM behaviour.
  * When the DOM "settles" after HTMX modifying it, this function controls and binds other components from different
@@ -35,13 +32,13 @@ export const infra = {
 
         Chart.register(...registerables, ChartDataLabels);
 
-        BROWSER_GLOBAL.Handlebars = handlebarsInfra.register();
-        BROWSER_GLOBAL["HandlebarsUtils"] = handlebarsInfra.utils;
+        window.Handlebars = handlebarsInfra.register();
+        window["HandlebarsUtils"] = handlebarsInfra.utils;
 
         htmxInfra.init(DOM_SETTLING_BEHAVIOR_EVENT_HANDLER);
 
         const onPageLoad = () => {
-            router.init(BROWSER_GLOBAL);
+            router.init(window);
         };
         document.addEventListener("DOMContentLoaded", onPageLoad);
 

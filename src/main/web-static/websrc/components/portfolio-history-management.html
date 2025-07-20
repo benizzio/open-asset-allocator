@@ -59,7 +59,7 @@
                                     <div class="d-flex w-100">
                                         <button class="btn btn-secondary"
                                                 type="button"
-                                                onclick="addPortfolioHistoryManagementRow({{id}})"
+                                                onclick="portfolioHistoryManagement.addPortfolioHistoryManagementRow({{id}})"
                                         >
                                             <span class="bi bi-plus-circle h5"></span>
                                         </button>
@@ -240,46 +240,12 @@
         "template-portfolio-history-management-row"
     );
 
-    var handlebarPortfolioHistoryManagementRowTemplate = Handlebars.compile(window["template-portfolio-history-management-row"].innerHTML);
+    portfolioHistoryManagement.handlebarPortfolioHistoryManagementRowTemplate = Handlebars.compile(window["template-portfolio-history-management-row"].innerHTML);
 
 </script>
 
 <script type="module">
 
-    const portfolioAllocationManagementTBodyPrefix = "portfolio-allocation-management-rows-";
-
-    // Authored by: GitHub Copilot
-    window.addPortfolioHistoryManagementRow = (observationTimestampId) => {
-
-        const tbodyId = portfolioAllocationManagementTBodyPrefix + observationTimestampId
-        const tbody = window[tbodyId];
-        const nextIndex = getNextPortfolioHistoryManagementIndex(observationTimestampId);
-        const newRowHtml = handlebarPortfolioHistoryManagementRowTemplate({
-            allocationIndex: nextIndex,
-            observationTimestampId: observationTimestampId
-        });
-
-        tbody.insertAdjacentHTML("beforeend", newRowHtml);
-
-        // Find the first input field in the newly added row and focus it
-        const firstInputFieldName = `allocations[${nextIndex}][assetTicker]`;
-        const firstInputField = tbody.querySelector(`input[name="${firstInputFieldName}"]`);
-
-        if (firstInputField) {
-            firstInputField.scrollIntoView({behavior: 'smooth', block: 'center'});
-            firstInputField.focus();
-        }
-
-        // Process the newly added row with htmx to enable validation
-        const newRow = tbody.lastElementChild;
-        htmx.process(newRow);
-    }
-
-    function getNextPortfolioHistoryManagementIndex(observationTimestampId) {
-        const tbody = window[portfolioAllocationManagementTBodyPrefix + observationTimestampId];
-        const rows = tbody.querySelectorAll("tr");
-        return rows.length;
-    }
 
     const assetActionButtonIdentities = {
         search: {

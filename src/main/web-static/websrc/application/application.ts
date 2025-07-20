@@ -1,5 +1,6 @@
 import { registerPortfolioAnalysisHandlebarsHelpers } from "./portfolio-analysis";
 import { toChartContent } from "./chart-contents";
+import portfolioHistoryManagement from "../components/portfolio-history-management";
 
 /**
  * Component that represents the central application code tied to the underlying infrastructure.
@@ -7,6 +8,7 @@ import { toChartContent } from "./chart-contents";
 const application = {
     init() {
         registerPortfolioAnalysisHandlebarsHelpers();
+        window["portfolioHistoryManagement"] = portfolioHistoryManagement;
     },
     chartContents: { toChartContent },
 };
