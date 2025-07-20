@@ -1,96 +1,11 @@
-<!-- TODO move to components -->
-<div data-exclusive-display-container>
-    <div class="accordion"
-         id="accordion-portfolio-history"
-         hx-get="/api/portfolio/:portfolioId/history"
-         hx-include="[name='portfolioId']"
-         hx-trigger="load"
-         handlebars-template="template-portfolio-history"
-         hx-on::after-settle="initPortfolioHistoryHierarchyLabels()"
-         data-display-on-route="/portfolio/:portfolioId/history"
-    >
-        <div class="accordion-item placeholder-glow">
-            <h2 class="accordion-header placeholder col-12">placeholder</h2>
-        </div>
-        <div class="accordion-item placeholder-glow">
-            <h2 class="accordion-header placeholder col-12">placeholder</h2>
-        </div>
-    </div>
-
-    <div data-display-on-route="/portfolio/:portfolioId/history/manage">
-        <div class="card border-dark mb-3">
-            <div class="card-header">Manage portfolio allocation data</div>
-            <div class="card-body">
-                <div id="accordion-portfolio-history-management"
-                     class="accordion"
-                     hx-get="/api/portfolio/:portfolioId/history/observation"
-                     hx-include="[name='portfolioId']"
-                     hx-trigger="load"
-                     handlebars-template="template-portfolio-history-management"
-                >
-                </div>
-            </div>
-        </div>
-    </div>
+<div id="accordion-portfolio-history-management"
+     class="accordion"
+     hx-get="/api/portfolio/:portfolioId/history/observation"
+     hx-include="[name='portfolioId']"
+     hx-trigger="load"
+     handlebars-template="template-portfolio-history-management"
+>
 </div>
-
-<script id="template-portfolio-history" type="text/x-handlebars-template">
-
-    <button type="button" class="btn btn-outline-primary mb-2" onclick="navigateToManagePortfolioAllocationData()">
-        <span class="h2 bi bi-database-gear"></span>
-    </button>
-
-    {{#each .}}
-        <div class="accordion-item">
-
-            <h2 class="accordion-header">
-                <button class="accordion-button {{#unless @first}}collapsed{{/unless}}"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#portfolio-allocation-{{observationTimestamp.id}}"
-                        aria-expanded="true"
-                        aria-controls="portfolio-allocation-{{observationTimestamp.id}}"
-                >
-                    {{observationTimestamp.timeTag}}
-                </button>
-            </h2>
-
-            <div id="portfolio-allocation-{{observationTimestamp.id}}"
-                 class="accordion-collapse collapse {{#if @first}}show{{/if}}"
-                 data-bs-parent="#accordion-portfolio-history"
-            >
-                <div class="accordion-body row justify-content-center">
-
-                    <div class="col-12 d-flex flex-column align-items-center">
-
-                        <div><p class="h4">Total market value: {{formatCurrency totalMarketValue}}</p></div>
-
-                        <div class="d-flex flex-row">
-                            <p class="h4">Level:&nbsp;</p>
-                            <p id="hierarchy-level-portfolio-chart-{{observationTimestamp.id}}" class="h4"></p>
-                        </div>
-
-                    </div>
-
-                    <div class="col-xxl-6 d-flex justify-content-center" style="max-height: 750px">
-                        {{{ chart
-                                this
-                                "PORTFOLIO_HISTORY_1D"
-                                "portfolio-allocation-chart-options"
-                                "portfolio-chart"
-                                observationTimestamp.id
-                                "#portfolio-context #portfolio"
-                        }}}
-                    </div>
-
-
-                </div>
-            </div>
-
-        </div>
-    {{/each}}
-
-</script>
 
 <script id="template-portfolio-history-management" type="text/x-handlebars-template">
 
@@ -192,10 +107,7 @@
             {{else}}
 
                 <div class="input-group">
-                    <!-- TODO do search and manitpulate other fields -->
-                    <!-- If found show name as label and button to remove -->
-                    <!-- If not found show visual cue of new, button to cancel and field for name -->
-                    <!-- Add ticker datalist -->
+
                     <input id="asset-ticker-input-alloc-{{allocationIndex}}-obs-{{observationTimestampId}}"
                            type="text"
                            name="allocations[{{allocationIndex}}][assetTicker]"
@@ -215,7 +127,9 @@
                     >
                         <span class="bi bi-search"></span>
                     </button>
+
                 </div>
+
                 <div class="form-text"
                      id="asset-ticker-message-alloc-{{allocationIndex}}-obs-{{observationTimestampId}}"
                      style="display: none"
@@ -226,7 +140,9 @@
             {{/if}}
 
         </td>
+
         <td>
+
             {{#if assetName}}
                 {{assetName}}
             {{else}}
@@ -241,7 +157,9 @@
                        style="display: none"
                 />
             {{/if}}
+
         </td>
+
         <td>
             <input type="text"
                    name="allocations[{{allocationIndex}}][class]"
@@ -255,12 +173,14 @@
                    required
             />
         </td>
+
         <td class="align-middle text-center">
             <input type="checkbox"
                    name="allocations[{{allocationIndex}}][cashReserve]"
                    {{#if cashReserve}}checked{{/if}}
             />
         </td>
+
         <td>
             <input type="number"
                    name="allocations[{{allocationIndex}}][assetQuantity]"
@@ -270,8 +190,10 @@
                    class="form-control"
                    value="{{assetQuantity}}"
                    step="any"
+                   min="0"
             />
         </td>
+
         <td>
             <input type="number"
                    name="allocations[{{allocationIndex}}][assetMarketPrice]"
@@ -281,8 +203,10 @@
                    class="form-control"
                    value="{{assetMarketPrice}}"
                    step="any"
+                   min="0"
             />
         </td>
+
         <td>
             <input type="number"
                    name="allocations[{{allocationIndex}}][totalMarketValue]"
@@ -291,9 +215,11 @@
                    autocomplete="off"
                    class="form-control "
                    value="{{totalMarketValue}}"
+                   min="0"
                    required
             />
         </td>
+
         <td>
             <button type="button"
                     class="btn btn-danger btn-xs"
@@ -302,43 +228,8 @@
                 <span class="bi bi-dash-circle"></span>
             </button>
         </td>
+
     </tr>
-
-</script>
-
-
-<datalist id="datalist-classes"
-          hx-get="/api/portfolio/:portfolioId/allocation-classes"
-          hx-include="[name='portfolioId']"
-          hx-trigger="load, load-classes"
-          handlebars-template="template-monovalue-datalist"
->
-</datalist>
-
-<datalist id="datalist-assets"
-          hx-get="/api/asset"
-          hx-trigger="load, load-assets"
-          handlebars-template="template-asset-datalist"
->
-</datalist>
-
-<script id="template-monovalue-datalist" type="text/x-handlebars-template">
-
-    {{#each .}}
-
-        {{#if (getProperty this ../propertyKey) }}
-            <option value="{{getProperty this ../propertyKey}}">{{getProperty this ../propertyKey}}</option>
-        {{else}}
-            <option value="{{this}}">{{this}}</option>
-        {{/if}}
-
-    {{/each}}
-
-</script>
-
-<script id="template-asset-datalist" type="text/x-handlebars-template">
-
-    {{> template-monovalue-datalist propertyKey="ticker"}}
 
 </script>
 
@@ -349,40 +240,11 @@
         "template-portfolio-history-management-row"
     );
 
-    HandlebarsUtils.registerPartialToContainer(
-        "accordion-portfolio-history",
-        "template-monovalue-datalist"
-    );
-
     var handlebarPortfolioHistoryManagementRowTemplate = Handlebars.compile(window["template-portfolio-history-management-row"].innerHTML);
 
 </script>
 
 <script type="module">
-
-    window.initPortfolioHistoryHierarchyLabels = () => {
-        setTextContentWithTopHierarchyName("[id^='hierarchy-level-portfolio-chart-']");
-    }
-
-    window.navigateToManagePortfolioAllocationData = () => {
-        const portfolioId = document.querySelector("[name='portfolioId']").value;
-        navigateTo(`/portfolio/${portfolioId}/history/manage`);
-        loadClasses();
-    }
-
-    function loadClasses() {
-        const datalist = window["datalist-classes"];
-        htmx.trigger(datalist, "load-classes");
-    }
-
-    window.maskTagInput = (inputElement) => {
-        let value = inputElement.value;
-        if (value) {
-            value = value.toUpperCase();
-            value = value.replace(" ", "");
-        }
-        inputElement.value = value;
-    }
 
     const portfolioAllocationManagementTBodyPrefix = "portfolio-allocation-management-rows-";
 
@@ -538,12 +400,4 @@
         }
     }
 
-</script>
-
-<script id="portfolio-allocation-chart-options" type="application/json">
-    {
-        "type": "doughnut",
-        "cutout": "35%",
-        "measuramentUnit": "CURRENCY"
-    }
 </script>
