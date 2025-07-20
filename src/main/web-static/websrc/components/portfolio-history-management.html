@@ -116,7 +116,7 @@
                            value="{{assetTicker}}"
                            list="datalist-assets"
                            hx-validate="true"
-                           hx-on::validation:validate="portfolioHistoryManagement.validateAssetTicker({{allocationIndex}}, {{observationTimestampId}})"
+                           hx-on::validation:validate="portfolioHistoryManagement.validateAssetElementsForPost({{allocationIndex}}, {{observationTimestampId}})"
                     />
                     <button data-asset-action-button
                             type="button"
@@ -128,7 +128,7 @@
 
                 </div>
 
-                <div data-asset-ticker-message
+                <div data-new-asset-ticker-message
                      class="form-text"
                      style="display: none"
                 >

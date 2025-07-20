@@ -1,13 +1,6 @@
 import htmx from "htmx.org";
 import api from "../api/api";
-
-type RowAssetElements = {
-    assetIdInput: HTMLInputElement,
-    assetTickerInput: HTMLInputElement,
-    assetActionButton: HTMLButtonElement,
-    assetTickerMessage: HTMLDivElement,
-    assetNameInput: HTMLInputElement,
-};
+import { Asset } from "../domain/asset";
 
 const PORTFOLIO_ALLOCATION_MANAGEMENT_TBODY_PREFIX = "portfolio-history-management-form-tbody-";
 
@@ -20,13 +13,102 @@ const ASSET_ACTION_BUTTON_IDENTITIES = {
         classes: "btn btn-danger btn-xs",
         iconClasses: "bi bi-x-circle",
     },
-    isInSearchMode(actionButton: HTMLButtonElement): boolean {
-        return actionButton.className === ASSET_ACTION_BUTTON_IDENTITIES.search.classes;
-    },
-    isInResetMode(actionButton: HTMLButtonElement): boolean {
-        return actionButton.className === ASSET_ACTION_BUTTON_IDENTITIES.reset.classes;
-    },
 };
+
+class RowAssetElements {
+
+    assetIdInput: HTMLInputElement;
+    assetTickerInput: HTMLInputElement;
+    assetActionButton: HTMLButtonElement;
+    newAssetTickerMessage: HTMLDivElement;
+    assetNameInput: HTMLInputElement;
+
+    constructor(formUniqueId: string, formRowIndex: number) {
+        const formRow =
+            window[`portfolio-history-management-form-${ formUniqueId }-row-${ formRowIndex }`] as HTMLElement;
+        this.assetIdInput = formRow.querySelector("[name$='[assetId]']");
+        this.assetTickerInput = formRow.querySelector("[name$='[assetTicker]']");
+        this.assetActionButton = formRow.querySelector("[data-asset-action-button]");
+        this.newAssetTickerMessage = formRow.querySelector("[data-new-asset-ticker-message]");
+        this.assetNameInput = formRow.querySelector("[name$='[assetName]']");
+    }
+
+    isInSearchMode(): boolean {
+        return this.assetActionButton.className === ASSET_ACTION_BUTTON_IDENTITIES.search.classes;
+    }
+
+    isInResetMode(): boolean {
+        return this.assetActionButton.className === ASSET_ACTION_BUTTON_IDENTITIES.reset.classes;
+    }
+
+    switchAssetActionButtonIdentity(identity: typeof ASSET_ACTION_BUTTON_IDENTITIES.search) {
+        this.assetActionButton.className = identity.classes;
+        this.assetActionButton.innerHTML = `<span class="${ identity.iconClasses }"></span>`;
+    }
+
+    activateExistingAssetMode(asset: Asset) {
+
+        this.switchAssetActionButtonIdentity(ASSET_ACTION_BUTTON_IDENTITIES.reset);
+
+        this.assetTickerInput.readOnly = true;
+        this.assetTickerInput.value = asset.ticker;
+
+        this.assetNameInput.style.display = "";
+        this.assetNameInput.readOnly = true;
+        this.assetNameInput.value = asset.name;
+
+        this.assetIdInput.value = asset.id.toString();
+
+        this.newAssetTickerMessage.style.display = "none";
+    }
+
+    activateNewAssetMode() {
+
+        this.switchAssetActionButtonIdentity(ASSET_ACTION_BUTTON_IDENTITIES.reset);
+
+        this.assetTickerInput.readOnly = false;
+
+        this.assetNameInput.style.display = "";
+        this.assetNameInput.readOnly = false;
+        this.assetNameInput.required = true;
+
+        this.newAssetTickerMessage.style.display = "";
+    }
+
+    resetToSearchMode() {
+
+        this.switchAssetActionButtonIdentity(ASSET_ACTION_BUTTON_IDENTITIES.search);
+
+        this.assetTickerInput.value = "";
+        this.assetTickerInput.focus();
+        this.assetTickerInput.readOnly = false;
+
+        this.assetNameInput.value = "";
+        this.assetNameInput.style.display = "none";
+        this.assetNameInput.readOnly = false;
+        this.assetNameInput.required = false;
+
+        this.assetIdInput.value = "";
+
+        this.newAssetTickerMessage.style.display = "none";
+    }
+
+    handleAssetActionButtonClick() {
+        if(this.isInSearchMode()) {
+            getAsset(this);
+        }
+        else if(this.isInResetMode()) {
+            this.resetToSearchMode();
+        }
+    }
+
+    validateForPost() {
+        if(this.isInSearchMode()) {
+            this.assetTickerInput.setCustomValidity("Reference an existing asset or create a new one");
+            this.assetTickerInput.reportValidity();
+        }
+    }
+}
 
 function focusOnNewLine(newRow: HTMLElement) {
 
@@ -45,7 +127,7 @@ function getNextPortfolioHistoryManagementIndex(tbody: HTMLElement): number {
 
 function getAsset(rowAssetElements: RowAssetElements) {
 
-    const { assetTickerInput, assetNameInput, assetIdInput, assetTickerMessage } = rowAssetElements;
+    const { assetTickerInput } = rowAssetElements;
 
     assetTickerInput.setCustomValidity("");
     assetTickerInput.reportValidity();
@@ -62,69 +144,22 @@ function getAsset(rowAssetElements: RowAssetElements) {
         .then(responseBody => {
 
             if(api.isAPIErrorResponse(responseBody)) {
-
                 if(responseBody.errorMessage === "Data not found") {
-                    switchAssetActionButtonIdentity(rowAssetElements, ASSET_ACTION_BUTTON_IDENTITIES.reset);
-                    assetTickerInput.readOnly = false;
-                    assetNameInput.style.display = "";
-                    assetNameInput.readOnly = false;
-                    assetNameInput.required = true;
-                    assetTickerMessage.style.display = "";
+                    rowAssetElements.activateNewAssetMode();
                 }
-
+                else {
+                    // TODO add toast for errors
+                    console.error("Error fetching asset:", responseBody.errorMessage);
+                }
                 return;
             }
 
-            switchAssetActionButtonIdentity(rowAssetElements, ASSET_ACTION_BUTTON_IDENTITIES.reset);
-            assetTickerInput.readOnly = true;
-            assetTickerInput.value = responseBody.ticker;
-            assetNameInput.style.display = "";
-            assetNameInput.readOnly = true;
-            assetNameInput.value = responseBody.name;
-            assetIdInput.value = responseBody.id.toString();
-            assetTickerMessage.style.display = "none";
+            rowAssetElements.activateExistingAssetMode(responseBody as Asset);
         })
         .catch(error => {
             // TODO add toast for errors
             console.error("Error fetching asset:", error);
         });
-}
-
-function switchAssetActionButtonIdentity(
-    rowAssetElements: RowAssetElements,
-    identity: typeof ASSET_ACTION_BUTTON_IDENTITIES.search,
-) {
-    const { assetActionButton } = rowAssetElements;
-    assetActionButton.className = identity.classes;
-    assetActionButton.innerHTML = `<span class="${ identity.iconClasses }"></span>`;
-}
-
-function resetAsset(rowAssetElements: RowAssetElements) {
-    const { assetTickerInput, assetNameInput, assetIdInput, assetTickerMessage } = rowAssetElements;
-    assetTickerInput.value = "";
-    assetTickerInput.focus();
-    assetTickerInput.readOnly = false;
-    assetNameInput.value = "";
-    assetNameInput.style.display = "none";
-    assetNameInput.readOnly = false;
-    assetNameInput.required = false;
-    assetIdInput.value = "";
-    assetTickerMessage.style.display = "none";
-    switchAssetActionButtonIdentity(rowAssetElements, ASSET_ACTION_BUTTON_IDENTITIES.search);
-}
-
-function getFormRowAssetElements(formUniqueId: string, formRowIndex: number): RowAssetElements {
-
-    const formRow =
-        window[`portfolio-history-management-form-${ formUniqueId }-row-${ formRowIndex }`] as HTMLElement;
-
-    return {
-        assetIdInput: formRow.querySelector("[name$='[assetId]']"),
-        assetTickerInput: formRow.querySelector("[name$='[assetTicker]']"),
-        assetActionButton: formRow.querySelector("[data-asset-action-button]"),
-        assetTickerMessage: formRow.querySelector("[data-asset-ticker-message]"),
-        assetNameInput: formRow.querySelector("[name$='[assetName]']"),
-    };
 }
 
 const portfolioHistoryManagement = {
@@ -151,24 +186,12 @@ const portfolioHistoryManagement = {
     },
 
     assetActionButtonClickHandler(formRowIndex: number, formUniqueId: string) {
-
-        const rowAssetElements = getFormRowAssetElements(formUniqueId, formRowIndex);
-
-        if(ASSET_ACTION_BUTTON_IDENTITIES.isInSearchMode(rowAssetElements.assetActionButton)) {
-            getAsset(rowAssetElements);
-        }
-        else if(ASSET_ACTION_BUTTON_IDENTITIES.isInResetMode(rowAssetElements.assetActionButton)) {
-            resetAsset(rowAssetElements);
-        }
+        const rowAssetElements = new RowAssetElements(formUniqueId, formRowIndex);
+        rowAssetElements.handleAssetActionButtonClick();
     },
-    validateAssetTicker(formRowIndex: number, formUniqueId: string) {
-
-        const rowAssetElements = getFormRowAssetElements(formUniqueId, formRowIndex);
-
-        if(ASSET_ACTION_BUTTON_IDENTITIES.isInSearchMode(rowAssetElements.assetActionButton)) {
-            rowAssetElements.assetTickerInput.setCustomValidity("Reference an existing asset or create a new one");
-            rowAssetElements.assetTickerInput.reportValidity();
-        }
+    validateAssetElementsForPost(formRowIndex: number, formUniqueId: string) {
+        const rowAssetElements = new RowAssetElements(formUniqueId, formRowIndex);
+        rowAssetElements.validateForPost();
     },
 };
 
