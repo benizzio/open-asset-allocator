@@ -1,6 +1,7 @@
 import htmx from "htmx.org";
 import api from "../api/api";
 import { Asset } from "../domain/asset";
+import BigNumber from "bignumber.js";
 
 const PORTFOLIO_ALLOCATION_MANAGEMENT_TBODY_PREFIX = "portfolio-history-management-form-tbody-";
 
@@ -15,7 +16,7 @@ const ASSET_ACTION_BUTTON_IDENTITIES = {
     },
 };
 
-class RowAssetElements {
+class FormRowAssetElements {
 
     assetIdInput: HTMLInputElement;
     assetTickerInput: HTMLInputElement;
@@ -134,6 +135,37 @@ class RowAssetElements {
     }
 }
 
+class FormRowValueElements {
+
+    quantityInput: HTMLInputElement;
+    marketPriceInput: HTMLInputElement;
+    totalMarketValueInput: HTMLInputElement;
+
+    constructor(formUniqueId: string, formRowIndex: number) {
+        const formRow =
+            window[`portfolio-history-management-form-${ formUniqueId }-row-${ formRowIndex }`] as HTMLElement;
+        this.quantityInput = formRow.querySelector("[name$='[assetQuantity]']");
+        this.marketPriceInput = formRow.querySelector("[name$='[assetMarketPrice]']");
+        this.totalMarketValueInput = formRow.querySelector("[name$='[totalMarketValue]']");
+    }
+
+    handleInputQuantityOrMarketPrice() {
+
+        const quantity = this.quantityInput.value || 0;
+        const marketPrice = this.marketPriceInput.value || 0;
+
+        if(quantity && marketPrice) {
+            const totalMarketValue = new BigNumber(quantity).times(marketPrice);
+            this.totalMarketValueInput.value = totalMarketValue.toString();
+        }
+    }
+
+    handleInputTotalMarketValue() {
+        this.quantityInput.value = "";
+        this.marketPriceInput.value = "";
+    }
+}
+
 function focusOnNewLine(newRow: HTMLElement) {
 
     const firstFieldOfNewRow: HTMLInputElement = newRow.querySelector("input[type='text']");
@@ -149,7 +181,7 @@ function getNextPortfolioHistoryManagementIndex(tbody: HTMLElement): number {
     return rows.length;
 }
 
-function getAsset(rowAssetElements: RowAssetElements, searchUniqueIdentifier: string) {
+function getAsset(rowAssetElements: FormRowAssetElements, searchUniqueIdentifier: string) {
 
     api.getAsset(searchUniqueIdentifier)
         .then(responseBody => {
@@ -197,12 +229,23 @@ const portfolioHistoryManagement = {
     },
 
     assetActionButtonClickHandler(formRowIndex: number, formUniqueId: string) {
-        const rowAssetElements = new RowAssetElements(formUniqueId, formRowIndex);
+        const rowAssetElements = new FormRowAssetElements(formUniqueId, formRowIndex);
         rowAssetElements.handleAssetActionButtonClick();
     },
+
     validateAssetElementsForPost(formRowIndex: number, formUniqueId: string) {
-        const rowAssetElements = new RowAssetElements(formUniqueId, formRowIndex);
+        const rowAssetElements = new FormRowAssetElements(formUniqueId, formRowIndex);
         rowAssetElements.validateForPost();
+    },
+
+    handleInputQuantityOrMarketPrice(formRowIndex: number, formUniqueId: string) {
+        const rowValueElements = new FormRowValueElements(formUniqueId, formRowIndex);
+        rowValueElements.handleInputQuantityOrMarketPrice();
+    },
+
+    handleInputTotalMarketValue(formRowIndex: number, formUniqueId: string) {
+        const rowValueElements = new FormRowValueElements(formUniqueId, formRowIndex);
+        rowValueElements.handleInputTotalMarketValue();
     },
 };
 

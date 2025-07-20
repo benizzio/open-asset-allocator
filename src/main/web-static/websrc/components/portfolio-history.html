@@ -1,4 +1,5 @@
 <div data-exclusive-display-container>
+
     <div class="accordion"
          id="accordion-portfolio-history"
          hx-get="/api/portfolio/:portfolioId/history"
@@ -23,6 +24,7 @@
             </div>
         </div>
     </div>
+    
 </div>
 
 <script id="template-portfolio-history" type="text/x-handlebars-template">
@@ -147,6 +149,7 @@
         htmx.trigger(datalist, "load-classes");
     }
 
+    // TODO: create mask utility component
     window.maskTagInput = (inputElement) => {
         let value = inputElement.value;
         if (value) {

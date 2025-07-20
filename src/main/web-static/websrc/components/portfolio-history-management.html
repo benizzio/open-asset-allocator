@@ -178,7 +178,9 @@
             />
         </td>
 
+
         <td>
+            <!-- TODO mask for 8 decimal places -->
             <input type="number"
                    name="allocations[{{allocationIndex}}][assetQuantity]"
                    placeholder="Quantity"
@@ -188,10 +190,12 @@
                    value="{{assetQuantity}}"
                    step="any"
                    min="0"
+                   oninput="portfolioHistoryManagement.handleInputQuantityOrMarketPrice({{allocationIndex}}, {{observationTimestampId}})"
             />
         </td>
 
         <td>
+            <!-- TODO mask for 8 decimal places -->
             <input type="number"
                    name="allocations[{{allocationIndex}}][assetMarketPrice]"
                    placeholder="Market price"
@@ -201,6 +205,7 @@
                    value="{{assetMarketPrice}}"
                    step="any"
                    min="0"
+                   oninput="portfolioHistoryManagement.handleInputQuantityOrMarketPrice({{allocationIndex}}, {{observationTimestampId}})"
             />
         </td>
 
@@ -212,8 +217,10 @@
                    autocomplete="off"
                    class="form-control "
                    value="{{totalMarketValue}}"
+                   step="0"
                    min="0"
                    required
+                   oninput="portfolioHistoryManagement.handleInputTotalMarketValue({{allocationIndex}}, {{observationTimestampId}})"
             />
         </td>
 
