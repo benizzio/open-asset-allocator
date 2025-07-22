@@ -156,7 +156,9 @@ class FormRowValueElements {
         const marketPrice = this.marketPriceInput.value || 0;
 
         if(quantity && marketPrice) {
-            const totalMarketValue = new BigNumber(quantity).times(marketPrice);
+            const totalMarketValue = new BigNumber(quantity)
+                .times(marketPrice)
+                .decimalPlaces(0, BigNumber.ROUND_HALF_UP);
             this.totalMarketValueInput.value = totalMarketValue.toString();
         }
     }

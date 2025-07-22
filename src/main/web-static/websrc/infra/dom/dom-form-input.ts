@@ -37,3 +37,23 @@ export function maskTickerInput(inputElement: HTMLInputElement): void {
 
     inputElement.value = value;
 }
+
+/**
+ * Applies a mask to number inputs to limit decimal places to a maximum of 8.
+ * Blocks typing additional decimal digits beyond the 8th decimal place.
+ *
+ * @param inputElement The HTML input element to apply the mask to
+ * @param decimalPlaces The maximum number of decimal places allowed (default is 8)
+ *
+ * Co-authored by: GitHub Copilot
+ */
+export function maskNumberDecimalPlaces(inputElement: HTMLInputElement, decimalPlaces: number = 8): void {
+
+    if(inputElement.value && inputElement.value.includes(".")) {
+        const parts = inputElement.value.split(".");
+
+        if(parts[1] && parts[1].length > decimalPlaces) {
+            inputElement.value = parts[0] + "." + parts[1].substring(0, decimalPlaces);
+        }
+    }
+}

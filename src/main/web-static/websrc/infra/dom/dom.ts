@@ -1,6 +1,6 @@
 import { bindExclusiveDisplayContainerInDescendants } from "./dom-exclusive-display";
 import { bindFormsInDescendants } from "./dom-form";
-import { maskTagInput, maskTickerInput } from "./dom-form-input";
+import { maskNumberDecimalPlaces, maskTagInput, maskTickerInput } from "./dom-form-input";
 
 export const domInfra = {
     bindDescendants: (element: HTMLElement) => {
@@ -10,5 +10,6 @@ export const domInfra = {
     bindGlobalFunctions() {
         window["maskTagInput"] = maskTagInput;
         window["maskTickerInput"] = maskTickerInput;
+        window["maskNumberDecimalPlaces"] = maskNumberDecimalPlaces;
     },
 };
