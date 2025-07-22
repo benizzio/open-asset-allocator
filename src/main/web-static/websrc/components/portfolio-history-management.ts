@@ -2,17 +2,18 @@ import htmx from "htmx.org";
 import api from "../api/api";
 import { Asset } from "../domain/asset";
 import BigNumber from "bignumber.js";
+import { BootstrapClasses, BootstrapIconClasses } from "../infra/bootstrap/constants";
 
 const PORTFOLIO_ALLOCATION_MANAGEMENT_TBODY_PREFIX = "portfolio-history-management-form-tbody-";
 
 const ASSET_ACTION_BUTTON_IDENTITIES = {
     search: {
-        classes: "btn btn-primary btn-xs",
-        iconClasses: "bi bi-search",
+        classes: `${ BootstrapClasses.BUTTON_PRIMARY } btn-xs`,
+        iconClasses: BootstrapIconClasses.SEARCH as string,
     },
     reset: {
-        classes: "btn btn-danger btn-xs",
-        iconClasses: "bi bi-x-circle",
+        classes: `${ BootstrapClasses.BUTTON_DANGER } btn-xs`,
+        iconClasses: BootstrapIconClasses.RESET as string,
     },
 };
 

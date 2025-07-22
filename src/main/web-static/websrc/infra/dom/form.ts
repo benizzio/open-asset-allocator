@@ -1,6 +1,9 @@
 import DomUtils from "./dom-utils";
+import { BootstrapClasses } from "../bootstrap/constants";
 
-function bindSubmit(form: HTMLFormElement) {
+const ATTRIBUTE_BOOTSRAP_VALIDATION_BOUND_FLAG = "data-bootstrap-validation-bound";
+
+function bindBootstrapValidationOnSubmit(form: HTMLFormElement) {
     form.addEventListener("submit", event => {
 
         if(!form.checkValidity()) {
@@ -8,24 +11,41 @@ function bindSubmit(form: HTMLFormElement) {
             event.stopPropagation();
         }
 
-        form.classList.add("was-validated");
+        form.classList.add(BootstrapClasses.WAS_VALIDATED);
 
     }, false);
 }
 
-function bindExtract(form: HTMLFormElement) {
+function bindBootstrapValidationCleaning(form: HTMLFormElement) {
     form.addEventListener("reset", () => {
-        form.classList.remove("was-validated");
+        form.classList.remove(BootstrapClasses.WAS_VALIDATED);
     }, false);
+}
+
+function bindBootstrapValidationToDefaultForm(form: HTMLFormElement) {
+    form.addEventListener("invalid", () => {
+        form.classList.add(BootstrapClasses.WAS_VALIDATED);
+    }, true);
 }
 
 export function bindFormsInDescendants(element: HTMLElement) {
 
-    const forms = DomUtils.queryAllInDescendants(element, "form.needs-validation:not([novalidate])");
+    const forms = DomUtils.queryAllInDescendants(
+        element,
+        `form.${ BootstrapClasses.NEEDS_VALIDATION }:not([${ ATTRIBUTE_BOOTSRAP_VALIDATION_BOUND_FLAG }])`,
+    );
 
     forms.forEach((form: HTMLFormElement) => {
-        bindSubmit(form);
-        bindExtract(form);
-        form.setAttribute("novalidate", "true");
+
+        if(form.noValidate) {
+            bindBootstrapValidationOnSubmit(form);
+        }
+        else {
+            bindBootstrapValidationToDefaultForm(form);
+        }
+
+        bindBootstrapValidationCleaning(form);
+
+        form.setAttribute(ATTRIBUTE_BOOTSRAP_VALIDATION_BOUND_FLAG, "true");
     });
 }

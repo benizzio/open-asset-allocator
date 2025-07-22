@@ -35,7 +35,11 @@
             <div id="portfolio-history-management-{{id}}" class="accordion-collapse collapse">
                 <div class="accordion-body row justify-content-center">
 
-                    <form id="portfolio-history-management-form-{{id}}" hx-post="/api/test" hx-ext="form-json">
+                    <form id="portfolio-history-management-form-{{id}}"
+                          class="needs-validation"
+                          hx-post="/api/test"
+                          hx-ext="form-json"
+                    >
                         <table class="table table-striped">
 
                             <thead class="sticky-header">
@@ -132,7 +136,7 @@
                      class="form-text"
                      style="display: none"
                 >
-                    * Inserting new asset
+                    * Creating new asset
                 </div>
 
             {{/if}}

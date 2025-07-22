@@ -50,7 +50,8 @@
                       hx-ext="json-enc"
                       hx-validate="true"
                       hx-swap="none"
-                      hx-on-htmx-after-request="reloadPortfolios(this)"
+                      hx-on::after-request="reloadPortfolios(this)"
+                      novalidate
                 >
                     <div class="card-body">
 
