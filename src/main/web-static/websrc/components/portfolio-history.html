@@ -149,26 +149,6 @@
         htmx.trigger(datalist, "load-classes");
     }
 
-    // TODO: create mask utility component
-    // maskTagInput applies a complete input mask that only allows uppercase alphanumeric
-    // characters and the special characters "-" and "_", removing any other character.
-    //
-    // Parameters:
-    //   - inputElement: The HTML input element to apply the mask to
-    //
-    // Authored by: GitHub Copilot
-    window.maskTagInput = (inputElement) => {
-
-        let value = inputElement.value;
-
-        if (value) {
-            // Convert to uppercase and remove any character that is not alphanumeric, "-", or "_"
-            value = value.toUpperCase().replace(/[^A-Z0-9\-_]/g, '');
-        }
-
-        inputElement.value = value;
-    }
-
 </script>
 
 <script id="portfolio-allocation-chart-options" type="application/json">

@@ -35,6 +35,8 @@ export const infra = {
         window.Handlebars = handlebarsInfra.register();
         window["HandlebarsUtils"] = handlebarsInfra.utils;
 
+        domInfra.bindGlobalFunctions();
+
         htmxInfra.init(DOM_SETTLING_BEHAVIOR_EVENT_HANDLER);
 
         const onPageLoad = () => {

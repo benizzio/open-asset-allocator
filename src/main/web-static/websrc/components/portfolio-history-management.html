@@ -121,6 +121,7 @@
                            list="datalist-assets"
                            hx-validate="true"
                            hx-on::validation:validate="portfolioHistoryManagement.validateAssetElementsForPost({{allocationIndex}}, {{observationTimestampId}})"
+                           oninput="maskTickerInput(this)"
                     />
                     <button data-asset-action-button
                             type="button"
