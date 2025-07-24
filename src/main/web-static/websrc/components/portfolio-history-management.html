@@ -14,7 +14,6 @@
         <div class="accordion-item">
 
             <h2 class="accordion-header"
-                data-bs-parent="#accordion-portfolio-history-management"
                 hx-include="[name='portfolioId']"
                 hx-target="#portfolio-history-management-form-tbody-{{id}}"
                 hx-trigger="click"
@@ -32,7 +31,10 @@
             </button>
             </h2>
 
-            <div id="portfolio-history-management-{{id}}" class="accordion-collapse collapse">
+            <div id="portfolio-history-management-{{id}}"
+                 class="accordion-collapse collapse"
+                 data-bs-parent="#accordion-portfolio-history-management"
+            >
                 <div class="accordion-body row justify-content-center">
 
                     <form id="portfolio-history-management-form-{{id}}"

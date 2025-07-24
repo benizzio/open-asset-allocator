@@ -20,7 +20,8 @@ export function maskTagInput(inputElement: HTMLInputElement): void {
 
 /**
  * Applies a complete input mask that only allows alphanumeric
- * characters (both uppercase and lowercase) and the special characters "-", "_", and ":", removing any other character.
+ * characters (both uppercase and lowercase) and the special characters "-", "_", ":", and ".",
+ * removing any other character.
  *
  * @param inputElement The HTML input element to apply the mask to
  *
@@ -31,8 +32,8 @@ export function maskTickerInput(inputElement: HTMLInputElement): void {
     let value = inputElement.value;
 
     if(value) {
-        // Remove any character that is not alphanumeric (uppercase or lowercase), "-", "_", or ":"
-        value = value.replace(/[^A-Za-z0-9\-_:]/g, "");
+        // Remove any character that is not alphanumeric (uppercase or lowercase), "-", "_", ":", or "."
+        value = value.replace(/[^A-Za-z0-9\-_:.]/g, "");
     }
 
     inputElement.value = value;
