@@ -63,6 +63,9 @@ const (
 		FROM portfolio_allocation_fact pa ` + infra.WhereClausePlaceholder + `
 		ORDER BY pa.class ASC
 	`
+	portfolioAllocationsTempTableDDLSQL = `
+		CREATE TEMPORARY TABLE portfolio_allocation_fact_merge_temp (LIKE portfolio_allocation_fact)
+	`
 )
 
 const (

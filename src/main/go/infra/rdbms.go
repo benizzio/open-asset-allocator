@@ -6,10 +6,36 @@ import (
 	"errors"
 	dbx "github.com/go-ozzo/ozzo-dbx"
 	"github.com/golang/glog"
+	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 	"strings"
 	"time"
 )
+
+// ================================================
+// TRANSACTIONAL CONTEXT
+// ================================================
+
+const sqlTransactionContextKey = "TRANSACTION"
+
+type TransactionalContext struct {
+	context.Context
+}
+
+func (transactionalContext *TransactionalContext) GetTransaction() *sql.Tx {
+	return transactionalContext.Context.Value(sqlTransactionContextKey).(*sql.Tx)
+}
+
+func WithTransaction(db *sql.DB) (*TransactionalContext, error) {
+
+	var transaction, err = db.Begin()
+	if err != nil {
+		return nil, err
+	}
+
+	var parentContext = context.WithValue(context.Background(), sqlTransactionContextKey, transaction)
+	return &TransactionalContext{parentContext}, nil
+}
 
 // ================================================
 // QUERY EXECUTOR
@@ -102,6 +128,10 @@ type RDBMSAdapter struct {
 	dbx            *dbx.DB
 }
 
+// ------------------------------------------------
+// SETUP FUNCTIONS
+// ------------------------------------------------
+
 func (adapter *RDBMSAdapter) openPool() {
 
 	// TODO verification for debug logging, this should be logged only in debug mode
@@ -170,6 +200,10 @@ func buildPingContext() (context.Context, context.CancelFunc) {
 	return pingContext, cancel
 }
 
+// ------------------------------------------------
+// SETUP FUNCTIONS
+// ------------------------------------------------
+
 func (adapter *RDBMSAdapter) BuildQuery(sql string) *QueryBuilder {
 	return &QueryBuilder{
 		dbx:          adapter.dbx,
@@ -189,6 +223,50 @@ func (adapter *RDBMSAdapter) UpdateListedFields(model interface{}, fields ...str
 
 func (adapter *RDBMSAdapter) Read(model interface{}, id any) error {
 	return adapter.dbx.Select().Model(id, model)
+}
+
+func (adapter *RDBMSAdapter) ExecuteInBaseTransaction(transContext TransactionalContext, sql string) error {
+	var transaction = transContext.GetTransaction()
+	_, err := transaction.Exec(sql)
+	return err
+}
+
+// TODO clean
+func (adapter *RDBMSAdapter) InsertBulkInTransaction(
+	transContext TransactionalContext,
+	tableName string,
+	columns []string,
+	values [][]any,
+) error {
+
+	var transaction = transContext.GetTransaction()
+
+	var copyInSQL = pq.CopyIn(tableName, columns...)
+	statement, err := transaction.Prepare(copyInSQL)
+	if err != nil {
+		return err
+	}
+
+	defer func(statement *sql.Stmt) {
+		err := statement.Close()
+		if err != nil {
+			glog.Errorf("Error closing prepared statement: %v", err)
+		}
+	}(statement)
+
+	for _, value := range values {
+		_, err = statement.Exec(value...)
+		if err != nil {
+			return err
+		}
+	}
+
+	_, err = statement.Exec()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func BuildDatabaseAdapter(config *Configuration) *RDBMSAdapter {

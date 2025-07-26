@@ -1,5 +1,9 @@
 # Code syntax preferences
 
+> [!IMPORTANT]
+> If the prompt does not mention the intent to change the code files, do not generate any changes and just print an
+> example code.
+
 ## Language agnostic standards
 
 - use [clean code principles](https://gist.github.com/wojteklu/73c6914cc446146b8b533c0988cf8d29)
