@@ -15,11 +15,11 @@ type PortfolioDTS struct {
 
 type PortfolioAllocationDTS struct {
 	AssetId          int             `json:"assetId"`
-	AssetName        string          `json:"assetName"`
-	AssetTicker      string          `json:"assetTicker"`
-	Class            string          `json:"class"`
+	AssetName        string          `json:"assetName" binding:"required"`
+	AssetTicker      string          `json:"assetTicker" binding:"required"`
+	Class            string          `json:"class" binding:"required"`
 	CashReserve      bool            `json:"cashReserve"`
-	TotalMarketValue int64           `json:"totalMarketValue"`
+	TotalMarketValue int64           `json:"totalMarketValue" binding:"required"`
 	AssetQuantity    decimal.Decimal `json:"assetQuantity"`
 	AssetMarketPrice decimal.Decimal `json:"assetMarketPrice"`
 }
@@ -27,7 +27,7 @@ type PortfolioAllocationDTS struct {
 type PortfolioSnapshotDTS struct {
 	// Deprecated: use PortfolioObservationTimestampDTS
 	TimeFrameTag         domain.TimeFrameTag               `json:"timeFrameTag"`
-	ObservationTimestamp *PortfolioObservationTimestampDTS `json:"observationTimestamp"`
+	ObservationTimestamp *PortfolioObservationTimestampDTS `json:"observationTimestamp" binding:"required"`
 	Allocations          []*PortfolioAllocationDTS         `json:"allocations"`
 	TotalMarketValue     int64                             `json:"totalMarketValue"`
 }
@@ -70,7 +70,7 @@ type AllocationPlanIdentifierDTS struct {
 }
 
 type PortfolioObservationTimestampDTS struct {
-	Id        int       `json:"id"`
+	Id        int       `json:"id" binding:"required"`
 	TimeTag   string    `json:"timeTag"`
 	Timestamp time.Time `json:"timestamp"`
 }

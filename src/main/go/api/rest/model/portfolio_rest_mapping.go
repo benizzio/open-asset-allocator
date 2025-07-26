@@ -81,14 +81,14 @@ func aggregateHistoryAsDTSMap(portfolioHistory []*domain.PortfolioAllocation) po
 	var portfolioAllocationsPerTimestamp = make(portfolioAllocationsPerObservationTimestamp)
 	for _, portfolioAllocation := range portfolioHistory {
 		var observationTimestampDTS = mapToObservationTimestampDTS(portfolioAllocation.ObservationTimestamp)
-		var allocationDTS = portfolioAllocationToAllocationDTS(portfolioAllocation)
+		var allocationDTS = mapToPortfolioAllocationDTS(portfolioAllocation)
 		portfolioAllocationsPerTimestamp.aggregate(*observationTimestampDTS, allocationDTS)
 	}
 
 	return portfolioAllocationsPerTimestamp
 }
 
-func portfolioAllocationToAllocationDTS(portfolioAllocation *domain.PortfolioAllocation) *PortfolioAllocationDTS {
+func mapToPortfolioAllocationDTS(portfolioAllocation *domain.PortfolioAllocation) *PortfolioAllocationDTS {
 	return &PortfolioAllocationDTS{
 		AssetId:          portfolioAllocation.Asset.Id,
 		AssetName:        portfolioAllocation.Asset.Name,
@@ -160,6 +160,39 @@ func mapToObservationTimestampDTS(observationTimestamp *domain.PortfolioObservat
 		Timestamp: observationTimestamp.Timestamp,
 	}
 	return observationTimestampDTS
+}
+
+func MapToPortfolioAllocations(
+	portfolioAllocationDTSs []*PortfolioAllocationDTS,
+	observationTimestampId int,
+) []*domain.PortfolioAllocation {
+	var portfolioAllocations = make([]*domain.PortfolioAllocation, 0)
+	for _, portfolioAllocationDTS := range portfolioAllocationDTSs {
+		var portfolioAllocation = MapToPortfolioAllocation(portfolioAllocationDTS, observationTimestampId)
+		portfolioAllocations = append(portfolioAllocations, portfolioAllocation)
+	}
+	return portfolioAllocations
+}
+
+func MapToPortfolioAllocation(
+	portfolioAllocationDTS *PortfolioAllocationDTS,
+	observationTimestampId int,
+) *domain.PortfolioAllocation {
+	return &domain.PortfolioAllocation{
+		Asset: domain.Asset{
+			Id:     portfolioAllocationDTS.AssetId,
+			Name:   portfolioAllocationDTS.AssetName,
+			Ticker: portfolioAllocationDTS.AssetTicker,
+		},
+		Class:            portfolioAllocationDTS.Class,
+		CashReserve:      portfolioAllocationDTS.CashReserve,
+		TotalMarketValue: portfolioAllocationDTS.TotalMarketValue,
+		AssetQuantity:    portfolioAllocationDTS.AssetQuantity,
+		AssetMarketPrice: portfolioAllocationDTS.AssetMarketPrice,
+		ObservationTimestamp: &domain.PortfolioObservationTimestamp{
+			Id: observationTimestampId,
+		},
+	}
 }
 
 // ==========================================

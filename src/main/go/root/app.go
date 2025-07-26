@@ -56,20 +56,27 @@ func (app *App) buildAppComponents() {
 	var portfolioDomService = service.BuildPortfolioDomService(portfolioRepository)
 	var allocationPlanDomService = service.BuildAllocationPlanDomService(allocationPlanRepository)
 	var assetDomService = service.BuildAssetDomService(assetRepository)
-	var portfolioDivergenceAnalysisService = application.BuildPortfolioDivergenceAnalysisAppService(
+
+	var portfolioDivergenceAnalysisAppService = application.BuildPortfolioDivergenceAnalysisAppService(
 		portfolioDomService,
 		allocationPlanDomService,
 	)
-	var portfolioAnalysisConfigurationService = application.BuildPortfolioAnalysisConfigurationAppService(
+	var portfolioAnalysisConfigurationAppService = application.BuildPortfolioAnalysisConfigurationAppService(
 		portfolioDomService,
 		allocationPlanDomService,
+	)
+	var portfolioAllocationManagementAppService = application.BuildPortfolioAllocationManagementAppService(
+		portfolioDomService,
 	)
 
 	var portfolioRESTController = rest.BuildPortfolioRESTController(portfolioDomService)
-	var portfolioAllocationRESTController = rest.BuildPortfolioAllocationRESTController(portfolioDomService)
+	var portfolioAllocationRESTController = rest.BuildPortfolioAllocationRESTController(
+		portfolioDomService,
+		portfolioAllocationManagementAppService,
+	)
 	var portfolioDivergenceAnalysisRESTController = rest.BuildDivergenceAnalysisRESTController(
-		portfolioAnalysisConfigurationService,
-		portfolioDivergenceAnalysisService,
+		portfolioAnalysisConfigurationAppService,
+		portfolioDivergenceAnalysisAppService,
 	)
 	var allocationPlanRESTController = rest.BuildAllocationPlanRESTController(allocationPlanDomService)
 	var assetRESTController = rest.BuildAssetRESTController(assetDomService)

@@ -6,12 +6,12 @@ import (
 	"github.com/benizzio/open-asset-allocator/infra"
 )
 
-type PortfolioAllocationManagementService struct {
+type PortfolioAllocationManagementAppService struct {
 	portfolioDomService *service.PortfolioDomService
 	transactionManager  infra.TransactionManager
 }
 
-func (service *PortfolioAllocationManagementService) MergePortfolioAllocations(
+func (service *PortfolioAllocationManagementAppService) MergePortfolioAllocations(
 	portfolioId int,
 	allocations []*domain.PortfolioAllocation,
 ) error {
@@ -29,10 +29,10 @@ func (service *PortfolioAllocationManagementService) MergePortfolioAllocations(
 	return infra.PropagateAsAppErrorWithNewMessage(err, "Failed to merge portfolio allocations", service)
 }
 
-func BuildPortfolioAllocationManagementService(
+func BuildPortfolioAllocationManagementAppService(
 	portfolioDomService *service.PortfolioDomService,
-) *PortfolioAllocationManagementService {
-	return &PortfolioAllocationManagementService{
+) *PortfolioAllocationManagementAppService {
+	return &PortfolioAllocationManagementAppService{
 		portfolioDomService: portfolioDomService,
 	}
 }
