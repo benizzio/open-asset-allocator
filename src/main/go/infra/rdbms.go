@@ -243,14 +243,32 @@ func (adapter *RDBMSAdapter) RunInTransaction(
 	transactionalFunction func(transContext *TransactionalContext) error,
 ) error {
 
-	transactionalContext, err := adapter.buildTransactionalContext()
+	transContext, err := adapter.buildTransactionalContext()
 	if err != nil {
 		return err
 	}
 
-	var transaction = transactionalContext.GetTransaction()
+	defer func() {
+		if r := recover(); r != nil {
+			glog.Errorf("Recovered from panic during transactional operation: %v", r)
+			var transaction = transContext.GetTransaction()
+			if rollbackErr := transaction.Rollback(); rollbackErr != nil {
+				glog.Errorf("Transaction rollback failed: %v", rollbackErr)
+			}
+		}
+	}()
 
-	err = transactionalFunction(transactionalContext)
+	return runInTransaction(transContext, transactionalFunction)
+}
+
+func runInTransaction(
+	transContext *TransactionalContext,
+	transactionalFunction func(transContext *TransactionalContext) error,
+) error {
+
+	err := transactionalFunction(transContext)
+
+	var transaction = transContext.GetTransaction()
 	if err != nil {
 		if rollbackErr := transaction.Rollback(); rollbackErr != nil {
 			return errors.New("transaction rollback failed: " + rollbackErr.Error() + "; original error: " + err.Error())
