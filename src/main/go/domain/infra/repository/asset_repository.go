@@ -15,7 +15,7 @@ const (
 )
 
 type AssetRDBMSRepository struct {
-	dbAdapter *infra.RDBMSAdapter
+	dbAdapter infra.RepositoryRDBMSAdapter
 }
 
 func (repository *AssetRDBMSRepository) GetKnownAssets() ([]*domain.Asset, error) {
@@ -60,7 +60,7 @@ func (repository *AssetRDBMSRepository) FindAssetByUniqueIdentifier(uniqueIdenti
 	)
 }
 
-func BuildAssetRDBMSRepository(dbAdapter *infra.RDBMSAdapter) *AssetRDBMSRepository {
+func BuildAssetRDBMSRepository(dbAdapter infra.RepositoryRDBMSAdapter) *AssetRDBMSRepository {
 	return &AssetRDBMSRepository{
 		dbAdapter: dbAdapter,
 	}

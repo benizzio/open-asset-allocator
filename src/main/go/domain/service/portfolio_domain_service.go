@@ -161,6 +161,17 @@ func (service *PortfolioDomService) FindAvailablePortfolioAllocationClasses(port
 	return service.portfolioRepository.FindAvailablePortfolioAllocationClasses(portfolioId)
 }
 
+func (service *PortfolioDomService) MergePortfolioAllocations(
+	transContext *infra.TransactionalContext,
+	id int,
+	allocations []*domain.PortfolioAllocation,
+) error {
+	// TODO:
+	// 1. asset insertions
+	// 2. observation timestamp insertions
+	return service.portfolioRepository.MergePortfolioAllocations(transContext, id, allocations)
+}
+
 func BuildPortfolioDomService(portfolioRepository domain.PortfolioRepository) *PortfolioDomService {
 	return &PortfolioDomService{
 		allocationHierarchyFieldExtractorMap: map[string]func(*domain.PortfolioAllocation) string{

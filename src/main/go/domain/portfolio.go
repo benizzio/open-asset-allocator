@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/shopspring/decimal"
 	"time"
 )
@@ -59,4 +60,9 @@ type PortfolioRepository interface {
 	InsertPortfolio(portfolio *Portfolio) (*Portfolio, error)
 	UpdatePortfolio(portfolio *Portfolio) (*Portfolio, error)
 	FindAvailablePortfolioAllocationClasses(portfolioId int) ([]string, error)
+	MergePortfolioAllocations(
+		transContext *infra.TransactionalContext,
+		id int,
+		allocations []*PortfolioAllocation,
+	) error
 }

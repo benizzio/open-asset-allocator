@@ -81,7 +81,7 @@ const (
 )
 
 type PortfolioRDBMSRepository struct {
-	dbAdapter *infra.RDBMSAdapter
+	dbAdapter infra.RepositoryRDBMSAdapter
 }
 
 func (repository *PortfolioRDBMSRepository) GetAllPortfolios() ([]*domain.Portfolio, error) {
@@ -303,6 +303,60 @@ func (repository *PortfolioRDBMSRepository) scanAvailablePortfolioAllocationClas
 	return queryResult, nil
 }
 
-func BuildPortfolioRepository(dbAdapter *infra.RDBMSAdapter) *PortfolioRDBMSRepository {
+// TODO modify to actual merge after simple insertion tests
+func (repository *PortfolioRDBMSRepository) MergePortfolioAllocations(
+	transContext *infra.TransactionalContext,
+	id int,
+	allocations []*domain.PortfolioAllocation,
+) error {
+
+	if len(allocations) == 0 {
+		return nil
+	}
+
+	var columns = []string{
+		"portfolio_id",
+		"asset_id",
+		"class",
+		"cash_reserve",
+		// Deprecated: remove after cleanup
+		"time_frame_tag",
+		"observation_time_id",
+		"asset_quantity",
+		"asset_market_price",
+		"total_market_value",
+	}
+
+	var insertValues = make([][]any, len(allocations))
+	for i, allocation := range allocations {
+		insertValues[i] = []any{
+			id,
+			allocation.Asset.Id,
+			allocation.Class,
+			allocation.CashReserve,
+			// Deprecated: remove after cleanup
+			allocation.ObservationTimestamp.TimeTag,
+			allocation.ObservationTimestamp.Id,
+			allocation.AssetQuantity,
+			allocation.AssetMarketPrice,
+			allocation.TotalMarketValue,
+		}
+	}
+
+	err := repository.dbAdapter.InsertBulkInTransaction(
+		transContext,
+		"portfolio_allocation_fact",
+		columns,
+		insertValues,
+	)
+
+	return infra.PropagateAsAppErrorWithNewMessage(
+		err,
+		"Error merging portfolio allocations",
+		repository,
+	)
+}
+
+func BuildPortfolioRepository(dbAdapter infra.RepositoryRDBMSAdapter) *PortfolioRDBMSRepository {
 	return &PortfolioRDBMSRepository{dbAdapter: dbAdapter}
 }

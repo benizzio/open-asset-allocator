@@ -44,7 +44,7 @@ const (
 )
 
 type AllocationPlanRDBMSRepository struct {
-	dbAdapter *infra.RDBMSAdapter
+	dbAdapter infra.RepositoryRDBMSAdapter
 }
 
 func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlans(portfolioId int, planType *allocation.PlanType) (
@@ -201,6 +201,6 @@ func mapPlannedAllocationFromRow(rowDTS *PlannedAllocationJoinedRowDTS) *domain.
 	}
 }
 
-func BuildAllocationPlanRepository(dbAdapter *infra.RDBMSAdapter) *AllocationPlanRDBMSRepository {
+func BuildAllocationPlanRepository(dbAdapter infra.RepositoryRDBMSAdapter) *AllocationPlanRDBMSRepository {
 	return &AllocationPlanRDBMSRepository{dbAdapter: dbAdapter}
 }

@@ -26,7 +26,7 @@ func (transactionalContext *TransactionalContext) GetTransaction() *sql.Tx {
 	return transactionalContext.Context.Value(sqlTransactionContextKey).(*sql.Tx)
 }
 
-func WithTransaction(db *sql.DB) (*TransactionalContext, error) {
+func withTransaction(db *sql.DB) (*TransactionalContext, error) {
 
 	var transaction, err = db.Begin()
 	if err != nil {
@@ -128,6 +128,24 @@ type RDBMSAdapter struct {
 	dbx            *dbx.DB
 }
 
+type RepositoryRDBMSAdapter interface {
+	BuildQuery(sql string) *QueryBuilder
+	Insert(model interface{}) error
+	UpdateListedFields(model interface{}, fields ...string) error
+	Read(model interface{}, id any) error
+	ExecuteInBaseTransaction(transContext *TransactionalContext, sql string) error
+	InsertBulkInTransaction(
+		transContext *TransactionalContext,
+		tableName string,
+		columns []string,
+		values [][]any,
+	) error
+}
+
+type TransactionManager interface {
+	RunInTransaction(transactionalFunction func(transContext *TransactionalContext) error) error
+}
+
 // ------------------------------------------------
 // SETUP FUNCTIONS
 // ------------------------------------------------
@@ -201,7 +219,7 @@ func buildPingContext() (context.Context, context.CancelFunc) {
 }
 
 // ------------------------------------------------
-// SETUP FUNCTIONS
+// USAGE FUNCTIONS
 // ------------------------------------------------
 
 func (adapter *RDBMSAdapter) BuildQuery(sql string) *QueryBuilder {
@@ -211,6 +229,36 @@ func (adapter *RDBMSAdapter) BuildQuery(sql string) *QueryBuilder {
 		params:       dbx.Params{},
 		whereClauses: make([]string, 0),
 	}
+}
+
+func (adapter *RDBMSAdapter) buildTransactionalContext() (*TransactionalContext, error) {
+	var transactionContext, err = withTransaction(adapter.connectionPool)
+	if err != nil {
+		return nil, err
+	}
+	return transactionContext, nil
+}
+
+func (adapter *RDBMSAdapter) RunInTransaction(
+	transactionalFunction func(transContext *TransactionalContext) error,
+) error {
+
+	transactionalContext, err := adapter.buildTransactionalContext()
+	if err != nil {
+		return err
+	}
+
+	var transaction = transactionalContext.GetTransaction()
+
+	err = transactionalFunction(transactionalContext)
+	if err != nil {
+		if rollbackErr := transaction.Rollback(); rollbackErr != nil {
+			return errors.New("transaction rollback failed: " + rollbackErr.Error() + "; original error: " + err.Error())
+		}
+		return err
+	}
+
+	return transaction.Commit()
 }
 
 func (adapter *RDBMSAdapter) Insert(model interface{}) error {
@@ -225,7 +273,7 @@ func (adapter *RDBMSAdapter) Read(model interface{}, id any) error {
 	return adapter.dbx.Select().Model(id, model)
 }
 
-func (adapter *RDBMSAdapter) ExecuteInBaseTransaction(transContext TransactionalContext, sql string) error {
+func (adapter *RDBMSAdapter) ExecuteInBaseTransaction(transContext *TransactionalContext, sql string) error {
 	var transaction = transContext.GetTransaction()
 	_, err := transaction.Exec(sql)
 	return err
@@ -233,7 +281,7 @@ func (adapter *RDBMSAdapter) ExecuteInBaseTransaction(transContext Transactional
 
 // TODO clean
 func (adapter *RDBMSAdapter) InsertBulkInTransaction(
-	transContext TransactionalContext,
+	transContext *TransactionalContext,
 	tableName string,
 	columns []string,
 	values [][]any,
