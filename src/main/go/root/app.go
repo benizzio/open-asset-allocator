@@ -67,6 +67,7 @@ func (app *App) buildAppComponents() {
 	)
 	var portfolioAllocationManagementAppService = application.BuildPortfolioAllocationManagementAppService(
 		portfolioDomService,
+		app.databaseAdapter,
 	)
 
 	var portfolioRESTController = rest.BuildPortfolioRESTController(portfolioDomService)

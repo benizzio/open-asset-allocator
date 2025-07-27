@@ -29,7 +29,7 @@ func (controller *PortfolioAllocationRESTController) BuildRoutes() []infra.RESTR
 		{
 			Method:   http.MethodPost,
 			Path:     "/api/portfolio/:" + portfolioIdParam + "/history",
-			Handlers: gin.HandlersChain{controller.postPortfolioAllocationHistrory},
+			Handlers: gin.HandlersChain{controller.postPortfolioAllocationHistory},
 		},
 		{
 			Method:   http.MethodGet,
@@ -144,8 +144,7 @@ func (controller *PortfolioAllocationRESTController) getAvailablePortfolioAlloca
 	context.JSON(http.StatusOK, availableClasses)
 }
 
-// TODO confirm json format in front end
-func (controller *PortfolioAllocationRESTController) postPortfolioAllocationHistrory(context *gin.Context) {
+func (controller *PortfolioAllocationRESTController) postPortfolioAllocationHistory(context *gin.Context) {
 
 	var portfolioIdParamValue = context.Param(portfolioIdParam)
 	portfolioId, err := strconv.Atoi(portfolioIdParamValue)

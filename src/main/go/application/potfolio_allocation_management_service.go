@@ -31,8 +31,10 @@ func (service *PortfolioAllocationManagementAppService) MergePortfolioAllocation
 
 func BuildPortfolioAllocationManagementAppService(
 	portfolioDomService *service.PortfolioDomService,
+	transactionManager infra.TransactionManager,
 ) *PortfolioAllocationManagementAppService {
 	return &PortfolioAllocationManagementAppService{
 		portfolioDomService: portfolioDomService,
+		transactionManager:  transactionManager,
 	}
 }
