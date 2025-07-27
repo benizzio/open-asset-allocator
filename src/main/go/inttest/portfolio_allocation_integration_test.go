@@ -315,15 +315,17 @@ func TestGetAvailablePortfolioAllocationClassesNoneFound(t *testing.T) {
 	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
 }
 
-// TestPostPortfolioAllocationHistorySuccess tests the successful creation of portfolio allocation history.
+// TestPostPortfolioAllocationHistoryInsertOnly tests the successful creation of portfolio allocation history,
+// only inserting records.
 //
 // This test verifies that the POST endpoint correctly accepts a portfolio snapshot
 // and returns HTTP 204 No Content as expected, without any response body.
 // It also verifies that the data is correctly persisted in the portfolio_allocation_fact table.
 //
-// Authored by: GitHub Copilot
-func TestPostPortfolioAllocationHistorySuccess(t *testing.T) {
+// Co-authored by: GitHub Copilot
+func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 
+	//TODO test insertion new timestamp and asset
 	var postPortfolioSnapshotJSON = `
 		{
 			"observationTimestamp": {
@@ -332,8 +334,8 @@ func TestPostPortfolioAllocationHistorySuccess(t *testing.T) {
 			"allocations": [
 				{
 					"assetId": 1,
-					"assetName": "SPDR Bloomberg 1-3 Month T-Bill ETF",
-					"assetTicker": "ARCA:BIL",
+					"assetName": "This name should not affect asset record",
+					"assetTicker": "TTSNAAR:TEST",
 					"class": "BONDS",
 					"cashReserve": false,
 					"assetQuantity": "150.00",
@@ -342,8 +344,8 @@ func TestPostPortfolioAllocationHistorySuccess(t *testing.T) {
 				},
 				{
 					"assetId": 2,
-					"assetName": "iShares 0-5 Year TIPS Bond ETF",
-					"assetTicker": "ARCA:STIP",
+					"assetName": "This name should not affect asset record 2",
+					"assetTicker": "TTSNAAR2:TEST",
 					"class": "BONDS",
 					"cashReserve": false,
 					"assetQuantity": "100.00",
@@ -370,49 +372,77 @@ func TestPostPortfolioAllocationHistorySuccess(t *testing.T) {
 	assert.Empty(t, body)
 
 	// Verify that the data was correctly persisted in the portfolio_allocation_fact table
-	assertPortfolioAllocationFactPersisted(t, 1, 1, "BONDS", false, "150.00000000", "100.00000000", 15000, 3)
-	assertPortfolioAllocationFactPersisted(t, 1, 2, "BONDS", false, "100.00000000", "100.00000000", 10000, 3)
-}
+	var portfolioIdString = strconv.Itoa(1)
+	var observationTimeIdString = strconv.Itoa(3)
 
-// assertPortfolioAllocationFactPersisted verifies that a portfolio allocation record
-// was correctly inserted into the portfolio_allocation_fact table with the expected values.
-//
-// Authored by: GitHub Copilot
-func assertPortfolioAllocationFactPersisted(
-	t *testing.T,
-	portfolioId int,
-	assetId int,
-	class string,
-	cashReserve bool,
-	assetQuantity string,
-	assetMarketPrice string,
-	totalMarketValue int64,
-	observationTimeId int,
-) {
-
-	var portfolioIdString = strconv.Itoa(portfolioId)
-	var assetIdString = strconv.Itoa(assetId)
-	var cashReserveString = strconv.FormatBool(cashReserve)
-	var totalMarketValueString = strconv.FormatInt(totalMarketValue, 10)
-	var observationTimeIdString = strconv.Itoa(observationTimeId)
-
-	var expectedRecord = dbx.NullStringMap{
-		"portfolio_id":        util.ToNullString(portfolioIdString),
-		"asset_id":            util.ToNullString(assetIdString),
-		"class":               util.ToNullString(class),
-		"cash_reserve":        util.ToNullString(cashReserveString),
-		"asset_quantity":      util.ToNullString(assetQuantity),
-		"asset_market_price":  util.ToNullString(assetMarketPrice),
-		"total_market_value":  util.ToNullString(totalMarketValueString),
-		"observation_time_id": util.ToNullString(observationTimeIdString),
+	// Define expected records for the test case
+	var expectedRecords = []dbx.NullStringMap{
+		{
+			"portfolio_id":        util.ToNullString(portfolioIdString),
+			"asset_id":            util.ToNullString("1"),
+			"class":               util.ToNullString("BONDS"),
+			"cash_reserve":        util.ToNullString("false"),
+			"asset_quantity":      util.ToNullString("150.00000000"),
+			"asset_market_price":  util.ToNullString("100.00000000"),
+			"total_market_value":  util.ToNullString("15000"),
+			"observation_time_id": util.ToNullString(observationTimeIdString),
+		},
+		{
+			"portfolio_id":        util.ToNullString(portfolioIdString),
+			"asset_id":            util.ToNullString("2"),
+			"class":               util.ToNullString("BONDS"),
+			"cash_reserve":        util.ToNullString("false"),
+			"asset_quantity":      util.ToNullString("100.00000000"),
+			"asset_market_price":  util.ToNullString("100.00000000"),
+			"total_market_value":  util.ToNullString("10000"),
+			"observation_time_id": util.ToNullString(observationTimeIdString),
+		},
 	}
 
-	var query = fmt.Sprintf(
-		"SELECT portfolio_id, asset_id, class, cash_reserve, asset_quantity, asset_market_price, total_market_value, observation_time_id FROM portfolio_allocation_fact WHERE portfolio_id=%s AND asset_id=%s AND observation_time_id=%s",
+	var allocationHistoryQuery = fmt.Sprintf(
+		`
+			SELECT 
+			    portfolio_id, 
+			    asset_id, 
+			    class, 
+			    cash_reserve, 
+			    asset_quantity, 
+			    asset_market_price, 
+			    total_market_value, 
+			    observation_time_id 
+			FROM portfolio_allocation_fact 
+			WHERE portfolio_id=%s AND observation_time_id=%s 
+			ORDER BY asset_id`,
 		portfolioIdString,
-		assetIdString,
 		observationTimeIdString,
 	)
 
-	inttestutil.AssertDBWithQuery(t, query, expectedRecord)
+	inttestutil.AssertDBWithQueryMultipleRows(t, allocationHistoryQuery, expectedRecords)
+
+	var assetsQuery = fmt.Sprintf(
+		`
+			SELECT
+				id,
+				name,
+				ticker
+			FROM asset
+			WHERE id IN (1, 2)
+			ORDER BY id
+		`,
+	)
+
+	expectedRecords = []dbx.NullStringMap{
+		{
+			"id":     util.ToNullString("1"),
+			"name":   util.ToNullString("SPDR Bloomberg 1-3 Month T-Bill ETF"),
+			"ticker": util.ToNullString("ARCA:BIL"),
+		},
+		{
+			"id":     util.ToNullString("2"),
+			"name":   util.ToNullString("iShares 0-5 Year TIPS Bond ETF"),
+			"ticker": util.ToNullString("ARCA:STIP"),
+		},
+	}
+
+	inttestutil.AssertDBWithQueryMultipleRows(t, assetsQuery, expectedRecords)
 }
