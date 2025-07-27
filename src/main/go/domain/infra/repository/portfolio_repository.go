@@ -348,7 +348,6 @@ func (repository *PortfolioRDBMSRepository) scanAvailablePortfolioAllocationClas
 	return queryResult, nil
 }
 
-// TODO modify to actual merge after simple insertion tests
 func (repository *PortfolioRDBMSRepository) MergePortfolioAllocations(
 	transContext *infra.TransactionalContext,
 	id int,
@@ -358,6 +357,20 @@ func (repository *PortfolioRDBMSRepository) MergePortfolioAllocations(
 	if len(allocations) == 0 {
 		return nil
 	}
+
+	err := repository.insertPortfolioAllocationsInTempTable(transContext, id, allocations)
+	if err != nil {
+		return err
+	}
+
+	return repository.mergePortfolioAllocations(transContext, err)
+}
+
+func (repository *PortfolioRDBMSRepository) insertPortfolioAllocationsInTempTable(
+	transContext *infra.TransactionalContext,
+	id int,
+	allocations []*domain.PortfolioAllocation,
+) error {
 
 	// Create temporary table for merging allocations
 	err := repository.dbAdapter.ExecuteInTransaction(transContext, portfolioAllocationsTempTableDDLSQL)
@@ -377,7 +390,6 @@ func (repository *PortfolioRDBMSRepository) MergePortfolioAllocations(
 		columns,
 		insertValues,
 	)
-
 	if err != nil {
 		return infra.PropagateAsAppErrorWithNewMessage(
 			err,
@@ -386,13 +398,7 @@ func (repository *PortfolioRDBMSRepository) MergePortfolioAllocations(
 		)
 	}
 
-	// Perform the merge operation
-	err = repository.dbAdapter.ExecuteInTransaction(transContext, portfolioAllocationsMergeSQL)
-	return infra.PropagateAsAppErrorWithNewMessage(
-		err,
-		"Error merging portfolio allocations",
-		repository,
-	)
+	return nil
 }
 
 func preparePortfolioAllocationTempInserts(
@@ -405,7 +411,7 @@ func preparePortfolioAllocationTempInserts(
 		"asset_id",
 		"class",
 		"cash_reserve",
-		// Deprecated: remove after cleanup
+		// TODO Deprecated: remove after cleanup
 		"time_frame_tag",
 		"observation_time_id",
 		"asset_quantity",
@@ -420,7 +426,7 @@ func preparePortfolioAllocationTempInserts(
 			allocation.Asset.Id,
 			allocation.Class,
 			allocation.CashReserve,
-			// Deprecated: remove after cleanup
+			// TODO Deprecated: remove after cleanup
 			allocation.ObservationTimestamp.TimeTag,
 			allocation.ObservationTimestamp.Id,
 			allocation.AssetQuantity,
@@ -430,6 +436,18 @@ func preparePortfolioAllocationTempInserts(
 	}
 
 	return columns, insertValues
+}
+
+func (repository *PortfolioRDBMSRepository) mergePortfolioAllocations(
+	transContext *infra.TransactionalContext,
+	err error,
+) error {
+	err = repository.dbAdapter.ExecuteInTransaction(transContext, portfolioAllocationsMergeSQL)
+	return infra.PropagateAsAppErrorWithNewMessage(
+		err,
+		"Error merging portfolio allocations",
+		repository,
+	)
 }
 
 func BuildPortfolioRepository(dbAdapter infra.RepositoryRDBMSAdapter) *PortfolioRDBMSRepository {
