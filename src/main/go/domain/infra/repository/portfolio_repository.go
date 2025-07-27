@@ -63,8 +63,53 @@ const (
 		FROM portfolio_allocation_fact pa ` + infra.WhereClausePlaceholder + `
 		ORDER BY pa.class ASC
 	`
+	portfolioAllocationsTempTableName   = `portfolio_allocation_fact_merge_temp`
 	portfolioAllocationsTempTableDDLSQL = `
-		CREATE TEMPORARY TABLE portfolio_allocation_fact_merge_temp (LIKE portfolio_allocation_fact)
+		CREATE TEMPORARY TABLE ` + portfolioAllocationsTempTableName + ` (LIKE portfolio_allocation_fact INCLUDING DEFAULTS)
+	`
+	portfolioAllocationsMergeSQL = `
+		MERGE INTO portfolio_allocation_fact paf
+		USING ` + portfolioAllocationsTempTableName + ` pafmt
+		ON 
+			paf.asset_id = pafmt.asset_id
+			AND paf.class = pafmt.class
+			AND paf.cash_reserve = pafmt.cash_reserve
+			AND paf.portfolio_id = pafmt.portfolio_id
+			AND paf.observation_time_id = pafmt.observation_time_id
+		WHEN NOT MATCHED BY TARGET THEN
+    		INSERT (
+				asset_id, 
+				class, 
+				cash_reserve, 
+				asset_quantity, 
+				asset_market_price, 
+				total_market_value, 
+				time_frame_tag, 
+				portfolio_id, 
+				observation_time_id
+			)
+			VALUES (
+				pafmt.asset_id, 
+				pafmt.class, 
+				pafmt.cash_reserve, 
+				pafmt.asset_quantity, 
+				pafmt.asset_market_price, 
+				pafmt.total_market_value, 
+				pafmt.time_frame_tag, 
+				pafmt.portfolio_id, 
+				pafmt.observation_time_id
+			)
+		WHEN MATCHED AND (
+				paf.asset_quantity != pafmt.asset_quantity
+				OR paf.asset_market_price != pafmt.asset_market_price
+				OR paf.total_market_value != pafmt.total_market_value
+			) THEN
+				UPDATE SET 
+					asset_quantity = pafmt.asset_quantity,
+					asset_market_price = pafmt.asset_market_price,
+					total_market_value = pafmt.total_market_value
+		WHEN NOT MATCHED BY SOURCE THEN
+    		DELETE
 	`
 )
 
@@ -314,6 +359,47 @@ func (repository *PortfolioRDBMSRepository) MergePortfolioAllocations(
 		return nil
 	}
 
+	// Create temporary table for merging allocations
+	err := repository.dbAdapter.ExecuteInTransaction(transContext, portfolioAllocationsTempTableDDLSQL)
+	if err != nil {
+		return infra.PropagateAsAppErrorWithNewMessage(
+			err,
+			"Error creating temporary table for portfolio allocation merge",
+			repository,
+		)
+	}
+
+	// Insert values in the temporary table
+	columns, insertValues := preparePortfolioAllocationTempInserts(allocations, id)
+	err = repository.dbAdapter.InsertBulkInTransaction(
+		transContext,
+		portfolioAllocationsTempTableName,
+		columns,
+		insertValues,
+	)
+
+	if err != nil {
+		return infra.PropagateAsAppErrorWithNewMessage(
+			err,
+			"Error merging portfolio allocations",
+			repository,
+		)
+	}
+
+	// Perform the merge operation
+	err = repository.dbAdapter.ExecuteInTransaction(transContext, portfolioAllocationsMergeSQL)
+	return infra.PropagateAsAppErrorWithNewMessage(
+		err,
+		"Error merging portfolio allocations",
+		repository,
+	)
+}
+
+func preparePortfolioAllocationTempInserts(
+	allocations []*domain.PortfolioAllocation,
+	id int,
+) ([]string, [][]any) {
+
 	var columns = []string{
 		"portfolio_id",
 		"asset_id",
@@ -343,18 +429,7 @@ func (repository *PortfolioRDBMSRepository) MergePortfolioAllocations(
 		}
 	}
 
-	err := repository.dbAdapter.InsertBulkInTransaction(
-		transContext,
-		"portfolio_allocation_fact",
-		columns,
-		insertValues,
-	)
-
-	return infra.PropagateAsAppErrorWithNewMessage(
-		err,
-		"Error merging portfolio allocations",
-		repository,
-	)
+	return columns, insertValues
 }
 
 func BuildPortfolioRepository(dbAdapter infra.RepositoryRDBMSAdapter) *PortfolioRDBMSRepository {

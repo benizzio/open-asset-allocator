@@ -133,7 +133,7 @@ type RepositoryRDBMSAdapter interface {
 	Insert(model interface{}) error
 	UpdateListedFields(model interface{}, fields ...string) error
 	Read(model interface{}, id any) error
-	ExecuteInBaseTransaction(transContext *TransactionalContext, sql string) error
+	ExecuteInTransaction(transContext *TransactionalContext, sql string) error
 	InsertBulkInTransaction(
 		transContext *TransactionalContext,
 		tableName string,
@@ -291,7 +291,7 @@ func (adapter *RDBMSAdapter) Read(model interface{}, id any) error {
 	return adapter.dbx.Select().Model(id, model)
 }
 
-func (adapter *RDBMSAdapter) ExecuteInBaseTransaction(transContext *TransactionalContext, sql string) error {
+func (adapter *RDBMSAdapter) ExecuteInTransaction(transContext *TransactionalContext, sql string) error {
 	var transaction = transContext.GetTransaction()
 	_, err := transaction.Exec(sql)
 	return err
