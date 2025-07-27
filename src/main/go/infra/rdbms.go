@@ -12,6 +12,8 @@ import (
 	"time"
 )
 
+// TODO split in rdbms package
+
 // ================================================
 // TRANSACTIONAL CONTEXT
 // ================================================
@@ -297,7 +299,6 @@ func (adapter *RDBMSAdapter) ExecuteInTransaction(transContext *TransactionalCon
 	return err
 }
 
-// TODO clean
 func (adapter *RDBMSAdapter) InsertBulkInTransaction(
 	transContext *TransactionalContext,
 	tableName string,
@@ -307,8 +308,7 @@ func (adapter *RDBMSAdapter) InsertBulkInTransaction(
 
 	var transaction = transContext.GetTransaction()
 
-	var copyInSQL = pq.CopyIn(tableName, columns...)
-	statement, err := transaction.Prepare(copyInSQL)
+	statement, err := createBulkInsertPreparedStatement(tableName, columns, transaction)
 	if err != nil {
 		return err
 	}
@@ -320,19 +320,26 @@ func (adapter *RDBMSAdapter) InsertBulkInTransaction(
 		}
 	}(statement)
 
+	return executeBulkInsertPreparedStatement(statement, values)
+}
+
+func createBulkInsertPreparedStatement(tableName string, columns []string, transaction *sql.Tx) (*sql.Stmt, error) {
+	var copyInSQL = pq.CopyIn(tableName, columns...)
+	return transaction.Prepare(copyInSQL)
+}
+
+func executeBulkInsertPreparedStatement(copyStatement *sql.Stmt, values [][]any) error {
+
+	var err error
 	for _, value := range values {
-		_, err = statement.Exec(value...)
+		_, err = copyStatement.Exec(value...)
 		if err != nil {
 			return err
 		}
 	}
 
-	_, err = statement.Exec()
-	if err != nil {
-		return err
-	}
-
-	return nil
+	_, err = copyStatement.Exec()
+	return err
 }
 
 func BuildDatabaseAdapter(config *Configuration) *RDBMSAdapter {
