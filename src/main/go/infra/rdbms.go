@@ -260,10 +260,10 @@ func (adapter *RDBMSAdapter) RunInTransaction(
 		}
 	}()
 
-	return runInTransaction(transContext, transactionalFunction)
+	return adapter.runInTransaction(transContext, transactionalFunction)
 }
 
-func runInTransaction(
+func (adapter *RDBMSAdapter) runInTransaction(
 	transContext *TransactionalContext,
 	transactionalFunction func(transContext *TransactionalContext) error,
 ) error {
@@ -273,7 +273,10 @@ func runInTransaction(
 	var transaction = transContext.GetTransaction()
 	if err != nil {
 		if rollbackErr := transaction.Rollback(); rollbackErr != nil {
-			return errors.New("transaction rollback failed: " + rollbackErr.Error() + "; original error: " + err.Error())
+			return BuildAppError(
+				"transaction rollback failed: "+rollbackErr.Error()+"; original error: "+err.Error(),
+				adapter,
+			)
 		}
 		return err
 	}
