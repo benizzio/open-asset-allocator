@@ -72,14 +72,14 @@ const (
 		USING ` + portfolioAllocationsTempTableName + ` pafmt
 		ON 
 			paf.asset_id = pafmt.asset_id
-			AND paf.class = pafmt.class
+			AND paf."class" = pafmt."class"
 			AND paf.cash_reserve = pafmt.cash_reserve
 			AND paf.portfolio_id = pafmt.portfolio_id
 			AND paf.observation_time_id = pafmt.observation_time_id
 		WHEN NOT MATCHED BY TARGET THEN
     		INSERT (
 				asset_id, 
-				class, 
+				"class", 
 				cash_reserve, 
 				asset_quantity, 
 				asset_market_price, 
@@ -90,7 +90,7 @@ const (
 			)
 			VALUES (
 				pafmt.asset_id, 
-				pafmt.class, 
+				pafmt."class", 
 				pafmt.cash_reserve, 
 				pafmt.asset_quantity, 
 				pafmt.asset_market_price, 
