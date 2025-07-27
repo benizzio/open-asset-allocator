@@ -47,7 +47,7 @@ const initialStateSQL = `
 	VALUES 
 	    (1, '202501', '2025-01-01 00:00:00'::TIMESTAMP),
 		(2, '202503', '2025-03-01 00:00:00'::TIMESTAMP),
-		(3, '202504', '2025-04-01 00:00:00'::TIMESTAMP)
+		(3, 'TEMP', now()) -- TODO remove after observation time dinamic insertion is implemented
 	;
 
 	SELECT setval('portfolio_allocation_obs_time_id_seq', (SELECT max(id) FROM asset));

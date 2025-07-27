@@ -5,6 +5,7 @@ import (
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/benizzio/open-asset-allocator/langext"
+	"github.com/lib/pq"
 	"strconv"
 )
 
@@ -60,7 +61,8 @@ func (repository *AssetRDBMSRepository) FindAssetByUniqueIdentifier(uniqueIdenti
 	)
 }
 
-func (repository *AssetRDBMSRepository) InsertAssets(
+// TODO clean
+func (repository *AssetRDBMSRepository) InsertAssetsWithinTransaction(
 	transContext *infra.TransactionalContext,
 	assets []*domain.Asset,
 ) ([]*domain.Asset, error) {
@@ -90,9 +92,10 @@ func (repository *AssetRDBMSRepository) InsertAssets(
 		)
 	}
 
+	//TODO decouple pq array usage with utility function
 	var queryBuilder = infra.BuildQueryWithinTransaction[domain.Asset](transContext, assetsSQL).AddWhereClauseAndParams(
-		"AND ticker IN ?",
-		tickers,
+		"AND ticker = ANY($1)",
+		pq.Array(tickers),
 	).Build()
 
 	persistedAssets, err := queryBuilder.Find(

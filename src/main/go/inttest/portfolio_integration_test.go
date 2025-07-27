@@ -111,7 +111,7 @@ func TestPostPortfolio(t *testing.T) {
 	)
 
 	t.Cleanup(
-		inttestutil.CreateDBCleanupDeferable(
+		inttestutil.CreateDBCleanupFunction(
 			"DELETE FROM portfolio WHERE name='%s'",
 			testPortfolioName,
 		),
@@ -187,7 +187,7 @@ func TestPostPortfolioWithAllocationStructure(t *testing.T) {
 	)
 
 	t.Cleanup(
-		inttestutil.CreateDBCleanupDeferable(
+		inttestutil.CreateDBCleanupFunction(
 			"DELETE FROM portfolio WHERE name='%s'",
 			testPortfolioName,
 		),

@@ -6,7 +6,7 @@ import (
 	"github.com/golang/glog"
 )
 
-func CreateDBCleanupDeferable(formattableSQL string, params ...any) func() {
+func CreateDBCleanupFunction(formattableSQL string, params ...any) func() {
 	return func() {
 		glog.Infof("Executing test cleanup query: %s", formattableSQL)
 		err := inttestinfra.ExecuteDBQuery(fmt.Sprintf(formattableSQL, params...))

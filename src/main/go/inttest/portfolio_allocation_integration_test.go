@@ -1,11 +1,10 @@
 package inttest
 
 import (
+	"database/sql"
 	"fmt"
-	"github.com/benizzio/open-asset-allocator/infra/util"
 	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
 	inttestutil "github.com/benizzio/open-asset-allocator/inttest/util"
-	dbx "github.com/go-ozzo/ozzo-dbx"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
@@ -351,9 +350,17 @@ func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 					"assetQuantity": "100.00",
 					"assetMarketPrice": "100.00",
 					"totalMarketValue": 10000
+				},
+				{
+					"assetName": "New Asset",
+					"assetTicker": "Test:NEW",
+					"class": "STOCKS",
+					"cashReserve": false,
+					"assetQuantity": "20",
+					"assetMarketPrice": "100",
+					"totalMarketValue": 2000
 				}
-			],
-			"totalMarketValue": 25000
+			]
 		}
 	`
 
@@ -361,6 +368,18 @@ func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 		inttestinfra.TestAPIURLPrefix+"/portfolio/1/history",
 		"application/json",
 		strings.NewReader(postPortfolioSnapshotJSON),
+	)
+
+	t.Cleanup(
+		// TODO modify to run multiple statements and clean the inserted assets
+		inttestutil.CreateDBCleanupFunction(
+			`
+				DELETE FROM portfolio_allocation_fact 
+				WHERE observation_time_id IN (
+					SELECT id FROM portfolio_allocation_obs_time WHERE observation_time_tag = '%s'
+				)`,
+			"TEMP",
+		),
 	)
 
 	assert.NoError(t, err)
@@ -376,26 +395,41 @@ func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 	var observationTimeIdString = strconv.Itoa(3)
 
 	// Define expected records for the test case
-	var expectedRecords = []dbx.NullStringMap{
+	var expectedRecords = []inttestutil.AssertableNullStringMap{
 		{
-			"portfolio_id":        util.ToNullString(portfolioIdString),
-			"asset_id":            util.ToNullString("1"),
-			"class":               util.ToNullString("BONDS"),
-			"cash_reserve":        util.ToNullString("false"),
-			"asset_quantity":      util.ToNullString("150.00000000"),
-			"asset_market_price":  util.ToNullString("100.00000000"),
-			"total_market_value":  util.ToNullString("15000"),
-			"observation_time_id": util.ToNullString(observationTimeIdString),
+			"portfolio_id":        inttestutil.ToAssertableNullString(portfolioIdString),
+			"asset_id":            inttestutil.ToAssertableNullString("1"),
+			"class":               inttestutil.ToAssertableNullString("BONDS"),
+			"cash_reserve":        inttestutil.ToAssertableNullString("false"),
+			"asset_quantity":      inttestutil.ToAssertableNullString("150.00000000"),
+			"asset_market_price":  inttestutil.ToAssertableNullString("100.00000000"),
+			"total_market_value":  inttestutil.ToAssertableNullString("15000"),
+			"observation_time_id": inttestutil.ToAssertableNullString(observationTimeIdString),
 		},
 		{
-			"portfolio_id":        util.ToNullString(portfolioIdString),
-			"asset_id":            util.ToNullString("2"),
-			"class":               util.ToNullString("BONDS"),
-			"cash_reserve":        util.ToNullString("false"),
-			"asset_quantity":      util.ToNullString("100.00000000"),
-			"asset_market_price":  util.ToNullString("100.00000000"),
-			"total_market_value":  util.ToNullString("10000"),
-			"observation_time_id": util.ToNullString(observationTimeIdString),
+			"portfolio_id":        inttestutil.ToAssertableNullString(portfolioIdString),
+			"asset_id":            inttestutil.ToAssertableNullString("2"),
+			"class":               inttestutil.ToAssertableNullString("BONDS"),
+			"cash_reserve":        inttestutil.ToAssertableNullString("false"),
+			"asset_quantity":      inttestutil.ToAssertableNullString("100.00000000"),
+			"asset_market_price":  inttestutil.ToAssertableNullString("100.00000000"),
+			"total_market_value":  inttestutil.ToAssertableNullString("10000"),
+			"observation_time_id": inttestutil.ToAssertableNullString(observationTimeIdString),
+		},
+		{
+			"portfolio_id": inttestutil.ToAssertableNullString(portfolioIdString),
+			"asset_id": inttestutil.ToAssertableNullStringWithAssertion(
+				func(t *testing.T, actual sql.NullString) {
+					assert.NotEmpty(t, actual.String)
+					assert.True(t, actual.Valid)
+				},
+			),
+			"class":               inttestutil.ToAssertableNullString("STOCKS"),
+			"cash_reserve":        inttestutil.ToAssertableNullString("false"),
+			"asset_quantity":      inttestutil.ToAssertableNullString("20.00000000"),
+			"asset_market_price":  inttestutil.ToAssertableNullString("100.00000000"),
+			"total_market_value":  inttestutil.ToAssertableNullString("2000"),
+			"observation_time_id": inttestutil.ToAssertableNullString(observationTimeIdString),
 		},
 	}
 
@@ -431,16 +465,16 @@ func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 		`,
 	)
 
-	expectedRecords = []dbx.NullStringMap{
+	expectedRecords = []inttestutil.AssertableNullStringMap{
 		{
-			"id":     util.ToNullString("1"),
-			"name":   util.ToNullString("SPDR Bloomberg 1-3 Month T-Bill ETF"),
-			"ticker": util.ToNullString("ARCA:BIL"),
+			"id":     inttestutil.ToAssertableNullString("1"),
+			"name":   inttestutil.ToAssertableNullString("SPDR Bloomberg 1-3 Month T-Bill ETF"),
+			"ticker": inttestutil.ToAssertableNullString("ARCA:BIL"),
 		},
 		{
-			"id":     util.ToNullString("2"),
-			"name":   util.ToNullString("iShares 0-5 Year TIPS Bond ETF"),
-			"ticker": util.ToNullString("ARCA:STIP"),
+			"id":     inttestutil.ToAssertableNullString("2"),
+			"name":   inttestutil.ToAssertableNullString("iShares 0-5 Year TIPS Bond ETF"),
+			"ticker": inttestutil.ToAssertableNullString("ARCA:STIP"),
 		},
 	}
 

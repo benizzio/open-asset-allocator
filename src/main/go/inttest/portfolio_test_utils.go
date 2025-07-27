@@ -39,7 +39,7 @@ func insertTestPortfolio(t *testing.T, testPortfolioNameBefore string) domain.Po
 	assert.NoError(t, err)
 
 	t.Cleanup(
-		inttestutil.CreateDBCleanupDeferable(
+		inttestutil.CreateDBCleanupFunction(
 			"DELETE FROM portfolio WHERE id='%d'",
 			testPortFolio.Id,
 		),
