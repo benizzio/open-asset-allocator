@@ -18,6 +18,9 @@ func (service *PortfolioAllocationManagementAppService) MergePortfolioAllocation
 
 	var err = service.transactionManager.RunInTransaction(
 		func(transContext *infra.TransactionalContext) error {
+			// TODO:
+			// 1. asset insertions
+			// 2. observation timestamp insertions
 			return service.portfolioDomService.MergePortfolioAllocations(
 				transContext,
 				portfolioId,

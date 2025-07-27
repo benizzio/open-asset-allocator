@@ -66,6 +66,48 @@ func (executor *QueryExecutor) GetRows() (*dbx.Rows, error) {
 	return executor.query.Rows()
 }
 
+type SQLTransactionalQueryExecutor[T any] struct {
+	queryBuilder *SQLTransactionalQueryBuilder[T]
+}
+
+type RowScanner[T any] func(*sql.Rows) (T, error)
+
+func (executor *SQLTransactionalQueryExecutor[T]) Find(rowScanner RowScanner[T]) ([]T, error) {
+
+	var builder = executor.queryBuilder
+
+	rows, err := builder.transaction.Query(builder.querySQL, builder.params...)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		if closeErr := rows.Close(); closeErr != nil {
+			glog.Errorf("Error closing rows: %v", closeErr)
+		}
+	}()
+
+	var result = make([]T, 0)
+	var index = 0
+	for rows.Next() {
+
+		rowValue, scanErr := rowScanner(rows)
+		if scanErr != nil {
+			glog.Errorf("Error scanning row: %v", index)
+			return nil, scanErr
+		}
+
+		result = append(result, rowValue)
+		index++
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
 // ================================================
 // QUERY BUILDER
 // ================================================
@@ -73,6 +115,20 @@ func (executor *QueryExecutor) GetRows() (*dbx.Rows, error) {
 const (
 	WhereClausePlaceholder = "/*WHERE+PARAMS*/"
 )
+
+func processSQL(querySQL string, whereClauses []string) string {
+
+	var processedSQL = querySQL
+
+	if len(whereClauses) > 0 {
+		var whereStatement = " WHERE 1=1 " + strings.Join(whereClauses, " ")
+		processedSQL = strings.Replace(processedSQL, WhereClausePlaceholder, whereStatement, 1)
+	} else {
+		processedSQL = strings.Replace(processedSQL, WhereClausePlaceholder, "", 1)
+	}
+
+	return processedSQL
+}
 
 type QueryBuilder struct {
 	dbx          *dbx.DB
@@ -83,27 +139,13 @@ type QueryBuilder struct {
 
 func (builder *QueryBuilder) Build() *QueryExecutor {
 
-	processedSQL := builder.processSQL()
+	var processedSQL = processSQL(builder.querySQL, builder.whereClauses)
 	// TODO verification for debug logging, this should be logged only in debug mode
 	glog.Infof("Building query for SQL: %s", processedSQL)
 
 	var query = builder.dbx.NewQuery(processedSQL)
 	var queryExecutor = withParams(query, builder.params)
 	return queryExecutor
-}
-
-func (builder *QueryBuilder) processSQL() string {
-
-	var processedSQL = builder.querySQL
-
-	if len(builder.whereClauses) > 0 {
-		var whereStatement = " WHERE 1=1 " + strings.Join(builder.whereClauses, " ")
-		processedSQL = strings.Replace(processedSQL, WhereClausePlaceholder, whereStatement, 1)
-	} else {
-		processedSQL = strings.Replace(processedSQL, WhereClausePlaceholder, "", 1)
-	}
-
-	return processedSQL
 }
 
 func (builder *QueryBuilder) AddParam(name string, value any) *QueryBuilder {
@@ -118,6 +160,44 @@ func (builder *QueryBuilder) AddWhereClause(whereClause string) *QueryBuilder {
 
 func (builder *QueryBuilder) AddWhereClauseAndParam(whereClause string, name string, value any) *QueryBuilder {
 	return builder.AddWhereClause(whereClause).AddParam(name, value)
+}
+
+type SQLTransactionalQueryBuilder[T any] struct {
+	transaction  *sql.Tx
+	querySQL     string
+	whereClauses []string
+	params       []any
+}
+
+func (builder *SQLTransactionalQueryBuilder[T]) AddParams(value ...any) *SQLTransactionalQueryBuilder[T] {
+	builder.params = append(builder.params, value)
+	return builder
+}
+
+func (builder *SQLTransactionalQueryBuilder[T]) AddWhereClause(whereClause string) *SQLTransactionalQueryBuilder[T] {
+	builder.whereClauses = append(builder.whereClauses, whereClause)
+	return builder
+}
+
+func (builder *SQLTransactionalQueryBuilder[T]) AddWhereClauseAndParams(
+	whereClause string,
+	params ...any,
+) *SQLTransactionalQueryBuilder[T] {
+	builder.whereClauses = append(builder.whereClauses, whereClause)
+	builder.params = append(builder.params, params...)
+	return builder
+}
+
+func (builder *SQLTransactionalQueryBuilder[T]) Build() *SQLTransactionalQueryExecutor[T] {
+
+	var processedSQL = processSQL(builder.querySQL, builder.whereClauses)
+	// TODO verification for debug logging, this should be logged only in debug mode
+	glog.Infof("Building transactional query for SQL: %s", processedSQL)
+	builder.querySQL = processedSQL
+
+	return &SQLTransactionalQueryExecutor[T]{
+		queryBuilder: builder,
+	}
 }
 
 // ================================================
@@ -229,6 +309,18 @@ func (adapter *RDBMSAdapter) BuildQuery(sql string) *QueryBuilder {
 		dbx:          adapter.dbx,
 		querySQL:     sql,
 		params:       dbx.Params{},
+		whereClauses: make([]string, 0),
+	}
+}
+
+func BuildQueryWithinTransaction[T any](
+	transContext *TransactionalContext,
+	sql string,
+) *SQLTransactionalQueryBuilder[T] {
+	return &SQLTransactionalQueryBuilder[T]{
+		transaction:  transContext.GetTransaction(),
+		querySQL:     sql,
+		params:       make([]any, 0),
 		whereClauses: make([]string, 0),
 	}
 }
