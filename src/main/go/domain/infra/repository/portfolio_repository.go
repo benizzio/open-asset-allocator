@@ -111,6 +111,10 @@ const (
 		WHEN NOT MATCHED BY SOURCE THEN
     		DELETE
 	`
+	observationTimestampInsertSQL = `
+		INSERT INTO portfolio_allocation_obs_time (observation_time_tag, observation_timestamp)
+		VALUES (?, ?)
+    `
 )
 
 const (
@@ -373,7 +377,7 @@ func (repository *PortfolioRDBMSRepository) insertPortfolioAllocationsInTempTabl
 ) error {
 
 	// Create temporary table for merging allocations
-	err := repository.dbAdapter.ExecuteInTransaction(transContext, portfolioAllocationsTempTableDDLSQL)
+	_, err := repository.dbAdapter.ExecuteInTransaction(transContext, portfolioAllocationsTempTableDDLSQL)
 	if err != nil {
 		return infra.PropagateAsAppErrorWithNewMessage(
 			err,
@@ -442,12 +446,52 @@ func (repository *PortfolioRDBMSRepository) mergePortfolioAllocations(
 	transContext *infra.TransactionalContext,
 	err error,
 ) error {
-	err = repository.dbAdapter.ExecuteInTransaction(transContext, portfolioAllocationsMergeSQL)
+	_, err = repository.dbAdapter.ExecuteInTransaction(transContext, portfolioAllocationsMergeSQL)
 	return infra.PropagateAsAppErrorWithNewMessage(
 		err,
 		"Error merging portfolio allocations",
 		repository,
 	)
+}
+
+func (repository *PortfolioRDBMSRepository) InsertObservationTimestamp(
+	transContext *infra.TransactionalContext,
+	observationTimestamp *domain.PortfolioObservationTimestamp,
+) (*domain.PortfolioObservationTimestamp, error) {
+
+	//// TODO Deprecated: remove after cleanup
+	//if langext.IsZeroValue(observationTimestamp.TimeTag) {
+	//	observationTimestamp.TimeTag = observationTimestamp.Timestamp.Format(time.RFC3339)
+	//}
+
+	result, err := repository.dbAdapter.ExecuteInTransaction(
+		transContext,
+		observationTimestampInsertSQL,
+		observationTimestamp.TimeTag,
+		observationTimestamp.Timestamp,
+	)
+	if err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(
+			err,
+			"Error inserting portfolio observation timestamp",
+			repository,
+		)
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(
+			err,
+			"Error retrieving last inserted portfolio observation timestamp ID",
+			repository,
+		)
+	}
+
+	return &domain.PortfolioObservationTimestamp{
+		Id:        int(id),
+		TimeTag:   observationTimestamp.TimeTag,
+		Timestamp: observationTimestamp.Timestamp,
+	}, nil
 }
 
 func BuildPortfolioRepository(dbAdapter infra.RepositoryRDBMSAdapter) *PortfolioRDBMSRepository {

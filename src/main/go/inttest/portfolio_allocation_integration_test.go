@@ -324,7 +324,7 @@ func TestGetAvailablePortfolioAllocationClassesNoneFound(t *testing.T) {
 // Co-authored by: GitHub Copilot
 func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 
-	//TODO test insertion new timestamp and asset
+	//TODO test insertion new timestamp
 	var postPortfolioSnapshotJSON = `
 		{
 			"observationTimestamp": {
