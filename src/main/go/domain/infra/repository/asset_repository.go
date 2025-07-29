@@ -5,7 +5,6 @@ import (
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/benizzio/open-asset-allocator/langext"
-	"github.com/lib/pq"
 	"strconv"
 )
 
@@ -14,6 +13,16 @@ const (
 		SELECT * FROM asset
 	` + infra.WhereClausePlaceholder
 )
+
+func assetRowScanner(rows *sql.Rows) (domain.Asset, error) {
+	var asset domain.Asset
+	scanErr := rows.Scan(
+		&asset.Id,
+		&asset.Ticker,
+		&asset.Name,
+	)
+	return asset, scanErr
+}
 
 type AssetRDBMSRepository struct {
 	dbAdapter infra.RepositoryRDBMSAdapter
@@ -61,7 +70,6 @@ func (repository *AssetRDBMSRepository) FindAssetByUniqueIdentifier(uniqueIdenti
 	)
 }
 
-// TODO clean
 func (repository *AssetRDBMSRepository) InsertAssetsWithinTransaction(
 	transContext *infra.TransactionalContext,
 	assets []*domain.Asset,
@@ -92,23 +100,19 @@ func (repository *AssetRDBMSRepository) InsertAssetsWithinTransaction(
 		)
 	}
 
-	//TODO decouple pq array usage with utility function
-	var queryBuilder = infra.BuildQueryWithinTransaction[domain.Asset](transContext, assetsSQL).AddWhereClauseAndParams(
-		"AND ticker = ANY($1)",
-		pq.Array(tickers),
-	).Build()
+	return repository.FindAssetsByTickers(transContext, tickers)
+}
 
-	persistedAssets, err := queryBuilder.Find(
-		func(rows *sql.Rows) (domain.Asset, error) {
-			var asset domain.Asset
-			scanErr := rows.Scan(
-				&asset.Id,
-				&asset.Ticker,
-				&asset.Name,
-			)
-			return asset, scanErr
-		},
-	)
+func (repository *AssetRDBMSRepository) FindAssetsByTickers(
+	transContext *infra.TransactionalContext,
+	tickers []string,
+) ([]*domain.Asset, error) {
+
+	var queryExecutor = infra.BuildQueryWithinTransaction[domain.Asset](transContext, assetsSQL).
+		AddWhereClauseAndParams("AND ticker = ANY($1)", tickers).
+		Build()
+
+	persistedAssets, err := queryExecutor.Find(assetRowScanner)
 	if err != nil {
 		return nil, infra.PropagateAsAppErrorWithNewMessage(
 			err,

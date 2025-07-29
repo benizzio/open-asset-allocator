@@ -28,3 +28,25 @@ func UnwrapType(fieldType reflect.Type) reflect.Type {
 	}
 	return fieldType
 }
+
+// IsSlice checks if the provided value is a slice type.
+//
+// Uses reflection to determine if the parameter is a slice, which is required
+// for automatic conversion to pq.Array for PostgreSQL compatibility.
+//
+// Parameters:
+//   - value: The value to check
+//
+// Returns:
+//   - bool: true if the value is a slice, false otherwise
+//
+// Authored by: GitHub Copilot
+func IsSlice(value any) bool {
+
+	if value == nil {
+		return false
+	}
+
+	var valueType = UnwrapType(reflect.TypeOf(value))
+	return valueType.Kind() == reflect.Slice
+}

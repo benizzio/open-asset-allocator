@@ -13,7 +13,6 @@ type PortfolioAllocationManagementAppService struct {
 	assetDomService     *service.AssetDomService
 }
 
-// TODO clean
 func (service *PortfolioAllocationManagementAppService) MergePortfolioAllocations(
 	portfolioId int,
 	allocations []*domain.PortfolioAllocation,

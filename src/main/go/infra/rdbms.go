@@ -4,10 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"github.com/benizzio/open-asset-allocator/langext"
 	dbx "github.com/go-ozzo/ozzo-dbx"
 	"github.com/golang/glog"
 	"github.com/lib/pq"
-	_ "github.com/lib/pq"
 	"strings"
 	"time"
 )
@@ -179,12 +179,53 @@ func (builder *SQLTransactionalQueryBuilder[T]) AddWhereClause(whereClause strin
 	return builder
 }
 
+// processParamsForPostgreSQL converts slice parameters to pq.Array for PostgreSQL compatibility.
+//
+// Parameters:
+//   - params: Variable number of parameters that may include slices
+//
+// Returns:
+//   - []any: Processed parameters with slices converted to pq.Array
+//
+// Authored by: GitHub Copilot
+func processParamsForPostgreSQL(params ...any) []any {
+
+	var processedParams = make([]any, len(params))
+
+	for i, param := range params {
+		if langext.IsSlice(param) {
+			processedParams[i] = pq.Array(param)
+		} else {
+			processedParams[i] = param
+		}
+	}
+
+	return processedParams
+}
+
+// AddWhereClauseAndParams adds a WHERE clause and its parameters to the query builder.
+//
+// This method automatically converts slice parameters to pq.Array for PostgreSQL
+// compatibility, allowing seamless use of slices in SQL IN clauses and array operations.
+//
+// Parameters:
+//   - whereClause: The WHERE clause SQL fragment to add
+//   - params: Variable number of parameters, with slices automatically converted to pq.Array
+//
+// Returns:
+//   - *SQLTransactionalQueryBuilder[T]: The same builder instance for method chaining
+//
+// Co-authored by: GitHub Copilot
 func (builder *SQLTransactionalQueryBuilder[T]) AddWhereClauseAndParams(
 	whereClause string,
 	params ...any,
 ) *SQLTransactionalQueryBuilder[T] {
+
 	builder.whereClauses = append(builder.whereClauses, whereClause)
-	builder.params = append(builder.params, params...)
+
+	var processedParams = processParamsForPostgreSQL(params...)
+	builder.params = append(builder.params, processedParams...)
+
 	return builder
 }
 
