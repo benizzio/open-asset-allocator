@@ -24,31 +24,9 @@ func (service *PortfolioAllocationManagementAppService) MergePortfolioAllocation
 			// TODO:
 			// 2. observation timestamp insertions
 
-			var assetsToInsertPerTicker = make(domain.AssetsPerTicker, len(allocations))
-			for _, allocation := range allocations {
-				var asset = allocation.Asset
-				if langext.IsZeroValue(asset.Id) {
-					assetsToInsertPerTicker[asset.Ticker] = &asset
-				}
-			}
-
-			if len(assetsToInsertPerTicker) > 0 {
-
-				persistedAssetsPerTicker, err := service.assetDomService.InsertMappedAssetsWithinTransaction(
-					transContext,
-					assetsToInsertPerTicker,
-				)
-
-				if err != nil {
-					return err
-				}
-
-				for _, allocation := range allocations {
-					if langext.IsZeroValue(allocation.Asset.Id) {
-						persitedAsset := persistedAssetsPerTicker[allocation.Asset.Ticker]
-						allocation.Asset = *persitedAsset
-					}
-				}
+			err := service.persistNewAssets(transContext, allocations)
+			if err != nil {
+				return err
 			}
 
 			return service.portfolioDomService.MergePortfolioAllocations(
@@ -60,6 +38,51 @@ func (service *PortfolioAllocationManagementAppService) MergePortfolioAllocation
 	)
 
 	return infra.PropagateAsAppErrorWithNewMessage(err, "Failed to merge portfolio allocations", service)
+}
+
+func (service *PortfolioAllocationManagementAppService) persistNewAssets(
+	transContext *infra.TransactionalContext,
+	allocations []*domain.PortfolioAllocation,
+) error {
+
+	assetsToInsertPerTicker := mapNewAssetsPerTicker(allocations)
+
+	if len(assetsToInsertPerTicker) > 0 {
+
+		persistedAssetsPerTicker, err := service.assetDomService.InsertMappedAssetsWithinTransaction(
+			transContext,
+			assetsToInsertPerTicker,
+		)
+		if err != nil {
+			return err
+		}
+
+		replacePersistedAssetsOnAllocations(allocations, persistedAssetsPerTicker)
+	}
+	return nil
+}
+
+func mapNewAssetsPerTicker(allocations []*domain.PortfolioAllocation) domain.AssetsPerTicker {
+	var assetsToInsertPerTicker = make(domain.AssetsPerTicker, len(allocations))
+	for _, allocation := range allocations {
+		var asset = allocation.Asset
+		if langext.IsZeroValue(asset.Id) {
+			assetsToInsertPerTicker[asset.Ticker] = &asset
+		}
+	}
+	return assetsToInsertPerTicker
+}
+
+func replacePersistedAssetsOnAllocations(
+	allocations []*domain.PortfolioAllocation,
+	persistedAssetsPerTicker domain.AssetsPerTicker,
+) {
+	for _, allocation := range allocations {
+		if langext.IsZeroValue(allocation.Asset.Id) {
+			persitedAsset := persistedAssetsPerTicker[allocation.Asset.Ticker]
+			allocation.Asset = *persitedAsset
+		}
+	}
 }
 
 func BuildPortfolioAllocationManagementAppService(
