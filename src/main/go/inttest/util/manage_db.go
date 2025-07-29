@@ -29,7 +29,7 @@ func (builder *CleanupFunctionBuilder) Build() func() {
 	return createDBCleanupFunctionMulti(builder.cleanupQueries)
 }
 
-func BuildTestCleanupSQLBuilder() *CleanupFunctionBuilder {
+func BuildCleanupFunctionBuilder() *CleanupFunctionBuilder {
 	return &CleanupFunctionBuilder{
 		cleanupQueries: make([]*testFormattableSQLPair, 0),
 	}

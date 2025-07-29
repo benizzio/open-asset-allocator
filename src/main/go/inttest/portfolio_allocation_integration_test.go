@@ -371,15 +371,16 @@ func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 	)
 
 	t.Cleanup(
-		// TODO modify to run multiple statements and clean the inserted assets
-		inttestutil.CreateDBCleanupFunction(
-			`
+		inttestutil.BuildCleanupFunctionBuilder().
+			AddCleanupQuery(
+				`
 				DELETE FROM portfolio_allocation_fact 
 				WHERE observation_time_id IN (
-					SELECT id FROM portfolio_allocation_obs_time WHERE observation_time_tag = '%s'
+					SELECT id FROM portfolio_allocation_obs_time WHERE observation_time_tag = 'TEMP'
 				)`,
-			"TEMP",
-		),
+			).
+			AddCleanupQuery("DELETE FROM asset WHERE ticker = 'Test:NEW'").
+			Build(),
 	)
 
 	assert.NoError(t, err)
