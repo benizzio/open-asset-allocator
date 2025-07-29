@@ -56,38 +56,71 @@ type AssertableNullStringMap map[string]AssertableNullString
 //   - Any row doesn't match the corresponding expected row (using custom or standard assertions)
 //
 // Authored by: GitHub Copilot
-// TODO clean
 func AssertDBWithQueryMultipleRows(t *testing.T, query string, expected []AssertableNullStringMap) {
+	actual := executeQueryForMultipleRows(t, query)
+	validateRowCount(t, expected, actual)
+	assertAllRows(t, expected, actual)
+}
 
+// executeQueryForMultipleRows executes the SQL query and returns the result rows.
+//
+// Authored by: GitHub Copilot
+func executeQueryForMultipleRows(t *testing.T, query string) []dbx.NullStringMap {
 	var actual []dbx.NullStringMap
-
 	err := inttestinfra.DatabaseConnection.NewQuery(query).All(&actual)
 	if err != nil {
 		t.Fatalf("Error executing query: %v", err)
 	}
+	return actual
+}
 
+// validateRowCount ensures the number of actual rows matches the expected count.
+//
+// Authored by: GitHub Copilot
+func validateRowCount(t *testing.T, expected []AssertableNullStringMap, actual []dbx.NullStringMap) {
 	if len(actual) != len(expected) {
 		t.Fatalf("Expected %d rows, but got %d rows", len(expected), len(actual))
 	}
+}
 
+// assertAllRows validates each row against its expected values.
+//
+// Authored by: GitHub Copilot
+func assertAllRows(t *testing.T, expected []AssertableNullStringMap, actual []dbx.NullStringMap) {
 	for i, expectedRow := range expected {
-		actualRow := actual[i]
+		assertSingleRow(t, i, expectedRow, actual[i])
+	}
+}
 
-		for key, expectedValue := range expectedRow {
-			actualValue, exists := actualRow[key]
-			if !exists {
-				t.Fatalf("Row %d: Expected key '%s' not found in actual result", i, key)
-			}
+// assertSingleRow validates a single row against its expected values.
+//
+// Authored by: GitHub Copilot
+func assertSingleRow(t *testing.T, rowIndex int, expectedRow AssertableNullStringMap, actualRow dbx.NullStringMap) {
+	for key, expectedValue := range expectedRow {
+		assertRowColumn(t, rowIndex, key, expectedValue, actualRow)
+	}
+}
 
-			// Check if the expected value has a custom assertion function
-			if expectedValue.assertFunction != nil {
-				// Use custom assertion function
-				expectedValue.assertFunction(t, actualValue)
-			} else {
-				// Use standard equality assertion
-				assert.Equal(t, expectedValue.NullString, actualValue, "Row %d, key '%s': value does not match", i, key)
-			}
-		}
+// assertRowColumn validates a single field within a row.
+//
+// Authored by: GitHub Copilot
+func assertRowColumn(
+	t *testing.T,
+	rowIndex int,
+	key string,
+	expectedValue AssertableNullString,
+	actualRow dbx.NullStringMap,
+) {
+
+	actualValue, exists := actualRow[key]
+	if !exists {
+		t.Fatalf("Row %d: Expected key '%s' not found in actual result", rowIndex, key)
+	}
+
+	if expectedValue.assertFunction != nil {
+		expectedValue.assertFunction(t, actualValue)
+	} else {
+		assert.Equal(t, expectedValue.NullString, actualValue, "Row %d, key '%s': value does not match", rowIndex, key)
 	}
 }
 
