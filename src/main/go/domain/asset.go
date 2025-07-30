@@ -13,6 +13,6 @@ type AssetsPerTicker map[string]*Asset
 type AssetRepository interface {
 	GetKnownAssets() ([]*Asset, error)
 	FindAssetByUniqueIdentifier(uniqueIdentifier string) (*Asset, error)
-	InsertAssetsWithinTransaction(transContext *infra.TransactionalContext, assets []*Asset) ([]*Asset, error)
+	InsertAssetsInTransaction(transContext *infra.TransactionalContext, assets []*Asset) ([]*Asset, error)
 	FindAssetsByTickers(transContext *infra.TransactionalContext, tickers []string) ([]*Asset, error)
 }

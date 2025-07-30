@@ -70,7 +70,7 @@ func (repository *AssetRDBMSRepository) FindAssetByUniqueIdentifier(uniqueIdenti
 	)
 }
 
-func (repository *AssetRDBMSRepository) InsertAssetsWithinTransaction(
+func (repository *AssetRDBMSRepository) InsertAssetsInTransaction(
 	transContext *infra.TransactionalContext,
 	assets []*domain.Asset,
 ) ([]*domain.Asset, error) {

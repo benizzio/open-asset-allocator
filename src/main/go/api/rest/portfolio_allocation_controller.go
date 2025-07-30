@@ -123,7 +123,7 @@ func (controller *PortfolioAllocationRESTController) getAvailableHistoryObservat
 		return
 	}
 
-	var availableTimestampsDTS = model.MapToObservationTimestampDTSs(availableTimestamps)
+	var availableTimestampsDTS = model.MapToPortfolioObservationTimestampDTSs(availableTimestamps)
 
 	context.JSON(http.StatusOK, availableTimestampsDTS)
 }
@@ -168,9 +168,12 @@ func (controller *PortfolioAllocationRESTController) postPortfolioAllocationHist
 		portfolioSnapshotDTS.ObservationTimestamp.Id,
 	)
 
+	var observationTimestamp = model.MapToPortfolioObservationTimestamp(portfolioSnapshotDTS.ObservationTimestamp)
+
 	err = controller.portfolioAllocationManagementAppService.MergePortfolioAllocations(
 		portfolioId,
 		portfolioAllocations,
+		observationTimestamp,
 	)
 
 	if infra.HandleAPIError(context, "Error merging portfolio allocations", err) {

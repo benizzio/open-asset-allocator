@@ -352,7 +352,7 @@ func (repository *PortfolioRDBMSRepository) scanAvailablePortfolioAllocationClas
 	return queryResult, nil
 }
 
-func (repository *PortfolioRDBMSRepository) MergePortfolioAllocations(
+func (repository *PortfolioRDBMSRepository) MergePortfolioAllocationsInTransaction(
 	transContext *infra.TransactionalContext,
 	id int,
 	allocations []*domain.PortfolioAllocation,
@@ -454,15 +454,10 @@ func (repository *PortfolioRDBMSRepository) mergePortfolioAllocations(
 	)
 }
 
-func (repository *PortfolioRDBMSRepository) InsertObservationTimestamp(
+func (repository *PortfolioRDBMSRepository) InsertObservationTimestampInTransaction(
 	transContext *infra.TransactionalContext,
 	observationTimestamp *domain.PortfolioObservationTimestamp,
 ) (*domain.PortfolioObservationTimestamp, error) {
-
-	//// TODO Deprecated: remove after cleanup
-	//if langext.IsZeroValue(observationTimestamp.TimeTag) {
-	//	observationTimestamp.TimeTag = observationTimestamp.Timestamp.Format(time.RFC3339)
-	//}
 
 	result, err := repository.dbAdapter.ExecuteInTransaction(
 		transContext,

@@ -4,6 +4,7 @@ import (
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/benizzio/open-asset-allocator/langext"
+	"time"
 )
 
 type PortfolioDomService struct {
@@ -161,12 +162,24 @@ func (service *PortfolioDomService) FindAvailablePortfolioAllocationClasses(port
 	return service.portfolioRepository.FindAvailablePortfolioAllocationClasses(portfolioId)
 }
 
-func (service *PortfolioDomService) MergePortfolioAllocations(
+func (service *PortfolioDomService) MergePortfolioAllocationsInTransaction(
 	transContext *infra.TransactionalContext,
 	id int,
 	allocations []*domain.PortfolioAllocation,
 ) error {
-	return service.portfolioRepository.MergePortfolioAllocations(transContext, id, allocations)
+	return service.portfolioRepository.MergePortfolioAllocationsInTransaction(transContext, id, allocations)
+}
+
+func (service *PortfolioDomService) InsertObservationTimestampInTransaction(
+	transContext *infra.TransactionalContext,
+	observationTimestamp *domain.PortfolioObservationTimestamp,
+) (*domain.PortfolioObservationTimestamp, error) {
+
+	if langext.IsZeroValue(observationTimestamp.TimeTag) {
+		observationTimestamp.TimeTag = observationTimestamp.Timestamp.Format(time.RFC3339)
+	}
+
+	return service.portfolioRepository.InsertObservationTimestampInTransaction(transContext, observationTimestamp)
 }
 
 func BuildPortfolioDomService(portfolioRepository domain.PortfolioRepository) *PortfolioDomService {

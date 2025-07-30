@@ -60,9 +60,13 @@ type PortfolioRepository interface {
 	InsertPortfolio(portfolio *Portfolio) (*Portfolio, error)
 	UpdatePortfolio(portfolio *Portfolio) (*Portfolio, error)
 	FindAvailablePortfolioAllocationClasses(portfolioId int) ([]string, error)
-	MergePortfolioAllocations(
+	MergePortfolioAllocationsInTransaction(
 		transContext *infra.TransactionalContext,
 		id int,
 		allocations []*PortfolioAllocation,
 	) error
+	InsertObservationTimestampInTransaction(
+		transContext *infra.TransactionalContext,
+		observationTimestamp *PortfolioObservationTimestamp,
+	) (*PortfolioObservationTimestamp, error)
 }

@@ -17,14 +17,14 @@ func (service *AssetDomService) FindAssetByUniqueIdentifier(uniqueIdentifier str
 	return service.assetRepository.FindAssetByUniqueIdentifier(uniqueIdentifier)
 }
 
-func (service *AssetDomService) InsertAssetsWithinTransaction(
+func (service *AssetDomService) InsertAssetsInTransaction(
 	transContext *infra.TransactionalContext,
 	assets []*domain.Asset,
 ) ([]*domain.Asset, error) {
-	return service.assetRepository.InsertAssetsWithinTransaction(transContext, assets)
+	return service.assetRepository.InsertAssetsInTransaction(transContext, assets)
 }
 
-func (service *AssetDomService) InsertMappedAssetsWithinTransaction(
+func (service *AssetDomService) InsertMappedAssetsInTransaction(
 	transContext *infra.TransactionalContext,
 	assetsPerTicker domain.AssetsPerTicker,
 ) (domain.AssetsPerTicker, error) {
@@ -34,7 +34,7 @@ func (service *AssetDomService) InsertMappedAssetsWithinTransaction(
 		assets = append(assets, asset)
 	}
 
-	persistedAssets, err := service.InsertAssetsWithinTransaction(transContext, assets)
+	persistedAssets, err := service.InsertAssetsInTransaction(transContext, assets)
 	if err != nil {
 		return nil, err
 	}

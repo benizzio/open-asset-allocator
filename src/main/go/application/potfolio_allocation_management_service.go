@@ -16,19 +16,23 @@ type PortfolioAllocationManagementAppService struct {
 func (service *PortfolioAllocationManagementAppService) MergePortfolioAllocations(
 	portfolioId int,
 	allocations []*domain.PortfolioAllocation,
+	observationTimestamp *domain.PortfolioObservationTimestamp,
 ) error {
 
 	var err = service.transactionManager.RunInTransaction(
 		func(transContext *infra.TransactionalContext) error {
-			// TODO:
-			// 2. observation timestamp insertions
 
-			err := service.persistNewAssets(transContext, allocations)
+			err := service.manageObservationTimestamp(transContext, observationTimestamp, allocations)
 			if err != nil {
 				return err
 			}
 
-			return service.portfolioDomService.MergePortfolioAllocations(
+			err = service.persistNewAssets(transContext, allocations)
+			if err != nil {
+				return err
+			}
+
+			return service.portfolioDomService.MergePortfolioAllocationsInTransaction(
 				transContext,
 				portfolioId,
 				allocations,
@@ -37,6 +41,30 @@ func (service *PortfolioAllocationManagementAppService) MergePortfolioAllocation
 	)
 
 	return infra.PropagateAsAppErrorWithNewMessage(err, "Failed to merge portfolio allocations", service)
+}
+
+func (service *PortfolioAllocationManagementAppService) manageObservationTimestamp(
+	transContext *infra.TransactionalContext,
+	observationTimestamp *domain.PortfolioObservationTimestamp,
+	allocations []*domain.PortfolioAllocation,
+) error {
+
+	if langext.IsZeroValue(observationTimestamp.Id) {
+
+		var persistedObservationTimestamp, err = service.portfolioDomService.InsertObservationTimestampInTransaction(
+			transContext,
+			observationTimestamp,
+		)
+		if err != nil {
+			return err
+		}
+
+		for _, allocation := range allocations {
+			allocation.ObservationTimestamp = persistedObservationTimestamp
+		}
+	}
+
+	return nil
 }
 
 func (service *PortfolioAllocationManagementAppService) persistNewAssets(
@@ -48,7 +76,7 @@ func (service *PortfolioAllocationManagementAppService) persistNewAssets(
 
 	if len(assetsToInsertPerTicker) > 0 {
 
-		persistedAssetsPerTicker, err := service.assetDomService.InsertMappedAssetsWithinTransaction(
+		persistedAssetsPerTicker, err := service.assetDomService.InsertMappedAssetsInTransaction(
 			transContext,
 			assetsToInsertPerTicker,
 		)
