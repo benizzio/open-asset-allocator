@@ -328,7 +328,8 @@ func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 	var postPortfolioSnapshotJSON = `
 		{
 			"observationTimestamp": {
-				"id": 3
+				"timeTag": "202505",
+				"timestamp": "2025-05-01T00:00:00Z"
 			},
 			"allocations": [
 				{
@@ -376,10 +377,11 @@ func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 				`
 				DELETE FROM portfolio_allocation_fact 
 				WHERE observation_time_id IN (
-					SELECT id FROM portfolio_allocation_obs_time WHERE observation_time_tag = 'TEMP'
+					SELECT id FROM portfolio_allocation_obs_time WHERE observation_time_tag = '202505'
 				)`,
 			).
 			AddCleanupQuery("DELETE FROM asset WHERE ticker = 'Test:NEW'").
+			AddCleanupQuery("DELETE FROM portfolio_allocation_obs_time WHERE observation_time_tag = '202505'").
 			Build(),
 	)
 
@@ -389,95 +391,88 @@ func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 	// Verify that the response body is empty as expected for 204 No Content
 	body, err := io.ReadAll(response.Body)
 	assert.NoError(t, err)
-	assert.Empty(t, body)
+	assert.Empty(t, string(body))
 
 	// Verify that the data was correctly persisted in the portfolio_allocation_fact table
 	var portfolioIdString = strconv.Itoa(1)
-	var observationTimeIdString = strconv.Itoa(3)
+
+	var notNullAssertion = inttestutil.ToAssertableNullStringWithAssertion(
+		func(t *testing.T, actual sql.NullString) {
+			assert.NotEmpty(t, actual.String)
+			assert.True(t, actual.Valid)
+		},
+	)
 
 	// Define expected records for the test case
 	var expectedRecords = []inttestutil.AssertableNullStringMap{
 		{
-			"portfolio_id":        inttestutil.ToAssertableNullString(portfolioIdString),
-			"asset_id":            inttestutil.ToAssertableNullString("1"),
-			"class":               inttestutil.ToAssertableNullString("BONDS"),
-			"cash_reserve":        inttestutil.ToAssertableNullString("false"),
-			"asset_quantity":      inttestutil.ToAssertableNullString("150.00000000"),
-			"asset_market_price":  inttestutil.ToAssertableNullString("100.00000000"),
-			"total_market_value":  inttestutil.ToAssertableNullString("15000"),
-			"observation_time_id": inttestutil.ToAssertableNullString(observationTimeIdString),
+			"portfolio_id":          inttestutil.ToAssertableNullString(portfolioIdString),
+			"asset_id":              inttestutil.ToAssertableNullString("1"),
+			"class":                 inttestutil.ToAssertableNullString("BONDS"),
+			"cash_reserve":          inttestutil.ToAssertableNullString("false"),
+			"asset_quantity":        inttestutil.ToAssertableNullString("150.00000000"),
+			"asset_market_price":    inttestutil.ToAssertableNullString("100.00000000"),
+			"total_market_value":    inttestutil.ToAssertableNullString("15000"),
+			"name":                  inttestutil.ToAssertableNullString("SPDR Bloomberg 1-3 Month T-Bill ETF"),
+			"ticker":                inttestutil.ToAssertableNullString("ARCA:BIL"),
+			"observation_time_id":   notNullAssertion,
+			"observation_time_tag":  inttestutil.ToAssertableNullString("202505"),
+			"observation_timestamp": inttestutil.ToAssertableNullString("2025-05-01T00:00:00Z"),
 		},
 		{
-			"portfolio_id":        inttestutil.ToAssertableNullString(portfolioIdString),
-			"asset_id":            inttestutil.ToAssertableNullString("2"),
-			"class":               inttestutil.ToAssertableNullString("BONDS"),
-			"cash_reserve":        inttestutil.ToAssertableNullString("false"),
-			"asset_quantity":      inttestutil.ToAssertableNullString("100.00000000"),
-			"asset_market_price":  inttestutil.ToAssertableNullString("100.00000000"),
-			"total_market_value":  inttestutil.ToAssertableNullString("10000"),
-			"observation_time_id": inttestutil.ToAssertableNullString(observationTimeIdString),
+			"portfolio_id":          inttestutil.ToAssertableNullString(portfolioIdString),
+			"asset_id":              inttestutil.ToAssertableNullString("2"),
+			"class":                 inttestutil.ToAssertableNullString("BONDS"),
+			"cash_reserve":          inttestutil.ToAssertableNullString("false"),
+			"asset_quantity":        inttestutil.ToAssertableNullString("100.00000000"),
+			"asset_market_price":    inttestutil.ToAssertableNullString("100.00000000"),
+			"name":                  inttestutil.ToAssertableNullString("iShares 0-5 Year TIPS Bond ETF"),
+			"ticker":                inttestutil.ToAssertableNullString("ARCA:STIP"),
+			"observation_time_id":   notNullAssertion,
+			"observation_time_tag":  inttestutil.ToAssertableNullString("202505"),
+			"observation_timestamp": inttestutil.ToAssertableNullString("2025-05-01T00:00:00Z"),
 		},
 		{
-			"portfolio_id": inttestutil.ToAssertableNullString(portfolioIdString),
-			"asset_id": inttestutil.ToAssertableNullStringWithAssertion(
-				func(t *testing.T, actual sql.NullString) {
-					assert.NotEmpty(t, actual.String)
-					assert.True(t, actual.Valid)
-				},
-			),
-			"class":               inttestutil.ToAssertableNullString("STOCKS"),
-			"cash_reserve":        inttestutil.ToAssertableNullString("false"),
-			"asset_quantity":      inttestutil.ToAssertableNullString("20.00000000"),
-			"asset_market_price":  inttestutil.ToAssertableNullString("100.00000000"),
-			"total_market_value":  inttestutil.ToAssertableNullString("2000"),
-			"observation_time_id": inttestutil.ToAssertableNullString(observationTimeIdString),
+			"portfolio_id":          inttestutil.ToAssertableNullString(portfolioIdString),
+			"asset_id":              notNullAssertion,
+			"class":                 inttestutil.ToAssertableNullString("STOCKS"),
+			"cash_reserve":          inttestutil.ToAssertableNullString("false"),
+			"asset_quantity":        inttestutil.ToAssertableNullString("20.00000000"),
+			"asset_market_price":    inttestutil.ToAssertableNullString("100.00000000"),
+			"total_market_value":    inttestutil.ToAssertableNullString("2000"),
+			"name":                  inttestutil.ToAssertableNullString("New Asset"),
+			"ticker":                inttestutil.ToAssertableNullString("Test:NEW"),
+			"observation_time_id":   notNullAssertion,
+			"observation_time_tag":  inttestutil.ToAssertableNullString("202505"),
+			"observation_timestamp": inttestutil.ToAssertableNullString("2025-05-01T00:00:00Z"),
 		},
 	}
 
 	var allocationHistoryQuery = fmt.Sprintf(
 		`
 			SELECT 
-			    portfolio_id, 
-			    asset_id, 
-			    class, 
-			    cash_reserve, 
-			    asset_quantity, 
-			    asset_market_price, 
-			    total_market_value, 
-			    observation_time_id 
-			FROM portfolio_allocation_fact 
-			WHERE portfolio_id=%s AND observation_time_id=%s 
-			ORDER BY asset_id`,
+			    p.portfolio_id, 
+			    p.asset_id, 
+			    p.class, 
+			    p.cash_reserve, 
+			    p.asset_quantity, 
+			    p.asset_market_price, 
+			    p.total_market_value, 
+			    a.ticker,
+			    a.name,
+			    p.observation_time_id,
+			    o.observation_time_tag,
+				o.observation_timestamp
+			FROM portfolio_allocation_fact p 
+			JOIN asset a ON p.asset_id = a.id
+			JOIN portfolio_allocation_obs_time o ON p.observation_time_id = o.id
+			WHERE p.portfolio_id=%s AND o.observation_time_tag='%s' 
+			ORDER BY p.asset_id`,
 		portfolioIdString,
-		observationTimeIdString,
+		"202505",
 	)
 
 	inttestutil.AssertDBWithQueryMultipleRows(t, allocationHistoryQuery, expectedRecords)
-
-	var assetsQuery = fmt.Sprintf(
-		`
-			SELECT
-				id,
-				name,
-				ticker
-			FROM asset
-			WHERE id IN (1, 2)
-			ORDER BY id
-		`,
-	)
-
-	expectedRecords = []inttestutil.AssertableNullStringMap{
-		{
-			"id":     inttestutil.ToAssertableNullString("1"),
-			"name":   inttestutil.ToAssertableNullString("SPDR Bloomberg 1-3 Month T-Bill ETF"),
-			"ticker": inttestutil.ToAssertableNullString("ARCA:BIL"),
-		},
-		{
-			"id":     inttestutil.ToAssertableNullString("2"),
-			"name":   inttestutil.ToAssertableNullString("iShares 0-5 Year TIPS Bond ETF"),
-			"ticker": inttestutil.ToAssertableNullString("ARCA:STIP"),
-		},
-	}
-
-	inttestutil.AssertDBWithQueryMultipleRows(t, assetsQuery, expectedRecords)
 }
+
+// TODO test with mixed merge (update and delete), reusing existing data for timestamp

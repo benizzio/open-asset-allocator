@@ -70,7 +70,7 @@ type AllocationPlanIdentifierDTS struct {
 }
 
 type PortfolioObservationTimestampDTS struct {
-	Id        int       `json:"id" binding:"required"`
+	Id        int       `json:"id"`
 	TimeTag   string    `json:"timeTag"`
 	Timestamp time.Time `json:"timestamp"`
 }

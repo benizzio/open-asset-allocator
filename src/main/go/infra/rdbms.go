@@ -55,14 +55,20 @@ func withParams(query *dbx.Query, params dbx.Params) *QueryExecutor {
 }
 
 func (executor *QueryExecutor) FindInto(target any) error {
+	// TODO verification for debug logging, this should be logged only in debug mode
+	glog.Infof("Executing query %s \n with params %s", executor.query.SQL(), executor.query.Params())
 	return executor.query.All(target)
 }
 
 func (executor *QueryExecutor) GetInto(target any) error {
+	// TODO verification for debug logging, this should be logged only in debug mode
+	glog.Infof("Executing query %s \n with params %s", executor.query.SQL(), executor.query.Params())
 	return executor.query.One(target)
 }
 
 func (executor *QueryExecutor) GetRows() (*dbx.Rows, error) {
+	// TODO verification for debug logging, this should be logged only in debug mode
+	glog.Infof("Executing query %s \n with params %s", executor.query.SQL(), executor.query.Params())
 	return executor.query.Rows()
 }
 
@@ -72,10 +78,13 @@ type SQLTransactionalQueryExecutor[T any] struct {
 
 type RowScanner[T any] func(*sql.Rows) (T, error)
 
+// TODO do a get form single row
 func (executor *SQLTransactionalQueryExecutor[T]) Find(rowScanner RowScanner[T]) ([]T, error) {
 
 	var builder = executor.queryBuilder
 
+	// TODO verification for debug logging, this should be logged only in debug mode
+	glog.Infof("Executing transactional query %s \n with params %s", builder.querySQL, builder.params)
 	rows, err := builder.transaction.Query(builder.querySQL, builder.params...)
 	if err != nil {
 		return nil, err
@@ -106,6 +115,15 @@ func (executor *SQLTransactionalQueryExecutor[T]) Find(rowScanner RowScanner[T])
 	}
 
 	return result, nil
+}
+
+func ReturningIntIdRowScanner(rows *sql.Rows) (int64, error) {
+	var id int64
+	scanErr := rows.Scan(&id)
+	if scanErr != nil {
+		return 0, scanErr
+	}
+	return id, nil
 }
 
 // ================================================
@@ -140,8 +158,6 @@ type QueryBuilder struct {
 func (builder *QueryBuilder) Build() *QueryExecutor {
 
 	var processedSQL = processSQL(builder.querySQL, builder.whereClauses)
-	// TODO verification for debug logging, this should be logged only in debug mode
-	glog.Infof("Building query for SQL: %s", processedSQL)
 
 	var query = builder.dbx.NewQuery(processedSQL)
 	var queryExecutor = withParams(query, builder.params)
@@ -169,8 +185,9 @@ type SQLTransactionalQueryBuilder[T any] struct {
 	params       []any
 }
 
-func (builder *SQLTransactionalQueryBuilder[T]) AddParams(value ...any) *SQLTransactionalQueryBuilder[T] {
-	builder.params = append(builder.params, value)
+func (builder *SQLTransactionalQueryBuilder[T]) AddParams(params ...any) *SQLTransactionalQueryBuilder[T] {
+	var processedParams = processParamsForPostgreSQL(params...)
+	builder.params = append(builder.params, processedParams...)
 	return builder
 }
 
@@ -230,12 +247,8 @@ func (builder *SQLTransactionalQueryBuilder[T]) AddWhereClauseAndParams(
 }
 
 func (builder *SQLTransactionalQueryBuilder[T]) Build() *SQLTransactionalQueryExecutor[T] {
-
 	var processedSQL = processSQL(builder.querySQL, builder.whereClauses)
-	// TODO verification for debug logging, this should be logged only in debug mode
-	glog.Infof("Building transactional query for SQL: %s", processedSQL)
 	builder.querySQL = processedSQL
-
 	return &SQLTransactionalQueryExecutor[T]{
 		queryBuilder: builder,
 	}
@@ -354,7 +367,7 @@ func (adapter *RDBMSAdapter) BuildQuery(sql string) *QueryBuilder {
 	}
 }
 
-func BuildQueryWithinTransaction[T any](
+func BuildQueryInTransaction[T any](
 	transContext *TransactionalContext,
 	sql string,
 ) *SQLTransactionalQueryBuilder[T] {
@@ -418,14 +431,20 @@ func (adapter *RDBMSAdapter) runInTransaction(
 }
 
 func (adapter *RDBMSAdapter) Insert(model interface{}) error {
+	// TODO verification for debug logging, this should be logged only in debug mode
+	glog.Infof("Inserting model %T", model)
 	return adapter.dbx.Model(model).Insert()
 }
 
 func (adapter *RDBMSAdapter) UpdateListedFields(model interface{}, fields ...string) error {
+	// TODO verification for debug logging, this should be logged only in debug mode
+	glog.Infof("Updating model %T with fields %v", model, fields)
 	return adapter.dbx.Model(model).Update(fields...)
 }
 
 func (adapter *RDBMSAdapter) Read(model interface{}, id any) error {
+	// TODO verification for debug logging, this should be logged only in debug mode
+	glog.Infof("Reading model %T with id %v", model, id)
 	return adapter.dbx.Select().Model(id, model)
 }
 
@@ -435,6 +454,8 @@ func (adapter *RDBMSAdapter) ExecuteInTransaction(
 	params ...any,
 ) (sql.Result, error) {
 	var transaction = transContext.GetTransaction()
+	// TODO verification for debug logging, this should be logged only in debug mode
+	glog.Infof("Executing statement in transaction %s \n with params %s", sql, params)
 	return transaction.Exec(sql, processParamsForPostgreSQL(params...)...)
 }
 
@@ -464,10 +485,15 @@ func (adapter *RDBMSAdapter) InsertBulkInTransaction(
 
 func createBulkInsertPreparedStatement(tableName string, columns []string, transaction *sql.Tx) (*sql.Stmt, error) {
 	var copyInSQL = pq.CopyIn(tableName, columns...)
+	// TODO verification for debug logging, this should be logged only in debug mode
+	glog.Infof("Preparing statement in transaction %s", copyInSQL)
 	return transaction.Prepare(copyInSQL)
 }
 
 func executeBulkInsertPreparedStatement(copyStatement *sql.Stmt, values [][]any) error {
+
+	// TODO verification for debug logging, this should be logged only in debug mode
+	glog.Infof("Executing statement in transaction with values %s", values)
 
 	var err error
 	for _, value := range values {

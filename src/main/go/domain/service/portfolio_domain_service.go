@@ -179,6 +179,10 @@ func (service *PortfolioDomService) InsertObservationTimestampInTransaction(
 		observationTimestamp.TimeTag = observationTimestamp.Timestamp.Format(time.RFC3339)
 	}
 
+	if langext.IsZeroValue(observationTimestamp.Timestamp) {
+		observationTimestamp.Timestamp = time.Now()
+	}
+
 	return service.portfolioRepository.InsertObservationTimestampInTransaction(transContext, observationTimestamp)
 }
 

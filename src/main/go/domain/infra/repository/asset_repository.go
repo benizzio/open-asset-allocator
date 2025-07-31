@@ -108,7 +108,7 @@ func (repository *AssetRDBMSRepository) FindAssetsByTickers(
 	tickers []string,
 ) ([]*domain.Asset, error) {
 
-	var queryExecutor = infra.BuildQueryWithinTransaction[domain.Asset](transContext, assetsSQL).
+	var queryExecutor = infra.BuildQueryInTransaction[domain.Asset](transContext, assetsSQL).
 		AddWhereClauseAndParams("AND ticker = ANY($1)", tickers).
 		Build()
 

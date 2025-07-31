@@ -113,7 +113,8 @@ const (
 	`
 	observationTimestampInsertSQL = `
 		INSERT INTO portfolio_allocation_obs_time (observation_time_tag, observation_timestamp)
-		VALUES (?, ?)
+		VALUES ($1, $2)
+		RETURNING id
     `
 )
 
@@ -459,12 +460,11 @@ func (repository *PortfolioRDBMSRepository) InsertObservationTimestampInTransact
 	observationTimestamp *domain.PortfolioObservationTimestamp,
 ) (*domain.PortfolioObservationTimestamp, error) {
 
-	result, err := repository.dbAdapter.ExecuteInTransaction(
-		transContext,
-		observationTimestampInsertSQL,
-		observationTimestamp.TimeTag,
-		observationTimestamp.Timestamp,
-	)
+	ids, err := infra.BuildQueryInTransaction[int64](transContext, observationTimestampInsertSQL).
+		AddParams(observationTimestamp.TimeTag, observationTimestamp.Timestamp).
+		Build().
+		Find(infra.ReturningIntIdRowScanner)
+
 	if err != nil {
 		return nil, infra.PropagateAsAppErrorWithNewMessage(
 			err,
@@ -473,17 +473,8 @@ func (repository *PortfolioRDBMSRepository) InsertObservationTimestampInTransact
 		)
 	}
 
-	id, err := result.LastInsertId()
-	if err != nil {
-		return nil, infra.PropagateAsAppErrorWithNewMessage(
-			err,
-			"Error retrieving last inserted portfolio observation timestamp ID",
-			repository,
-		)
-	}
-
 	return &domain.PortfolioObservationTimestamp{
-		Id:        int(id),
+		Id:        int(ids[0]),
 		TimeTag:   observationTimestamp.TimeTag,
 		Timestamp: observationTimestamp.Timestamp,
 	}, nil
