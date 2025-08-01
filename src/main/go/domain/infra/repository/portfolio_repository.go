@@ -65,7 +65,9 @@ const (
 	`
 	portfolioAllocationsTempTableName   = `portfolio_allocation_fact_merge_temp`
 	portfolioAllocationsTempTableDDLSQL = `
-		CREATE TEMPORARY TABLE ` + portfolioAllocationsTempTableName + ` (LIKE portfolio_allocation_fact INCLUDING DEFAULTS)
+		CREATE TEMPORARY TABLE ` + portfolioAllocationsTempTableName + `
+		(LIKE portfolio_allocation_fact INCLUDING DEFAULTS) 
+		ON COMMIT DROP
 	`
 	portfolioAllocationsMergeSQL = `
 		MERGE INTO portfolio_allocation_fact paf
