@@ -106,6 +106,7 @@
             <input type="hidden"
                    name="allocations[{{allocationIndex}}][assetId]"
                    value="{{assetId}}"
+                   data-null-if-empty
             />
 
             {{#if assetId}}
@@ -197,6 +198,7 @@
                    value="{{assetQuantity}}"
                    step="any"
                    min="0"
+                   data-null-if-empty
                    oninput="
                            maskNumberDecimalPlaces(this);
                            portfolioHistoryManagement.handleInputQuantityOrMarketPrice({{allocationIndex}}, {{observationTimestampId}});
@@ -214,6 +216,7 @@
                    value="{{assetMarketPrice}}"
                    step="any"
                    min="0"
+                   data-null-if-empty
                    oninput="
                            maskNumberDecimalPlaces(this);
                            portfolioHistoryManagement.handleInputQuantityOrMarketPrice({{allocationIndex}}, {{observationTimestampId}});
