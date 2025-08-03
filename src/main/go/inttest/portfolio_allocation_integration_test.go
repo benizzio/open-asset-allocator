@@ -711,32 +711,146 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 	inttestutil.AssertDBWithQueryMultipleRows(t, allocationHistoryQuery, expectedRecords)
 }
 
-func TestPostPortfolioAllocationWithoutMandatoryFields(t *testing.T) {
+func TestPostPortfolioAllocationValidations(t *testing.T) {
 
-	var postPortfolioSnapshotJSON = `
-		{
-			"allocations": [
+	t.Run(
+		"TestPostPortfolioAllocationWithoutObservationAndAllocationFields",
+		func(t *testing.T) {
+
+			var postPortfolioSnapshotJSON = `
 				{
+					"allocations": [
+						{
+						}
+					]
 				}
-			]
-		}
-	`
+			`
 
-	actualResponseJSONNullFields := string(postPortfolioAllocationForValidationFailure(t, postPortfolioSnapshotJSON))
+			actualResponseJSONNullFields := string(
+				postPortfolioAllocationForValidationFailure(
+					t,
+					postPortfolioSnapshotJSON,
+				),
+			)
 
-	var expectedResponseJSON = `
-		{
-			"errorMessage": "Validation failed",
-			"details": [
-				"Field 'observationTimestamp' failed validation: is required",
-				"Field 'allocations[0].assetName' failed validation: is required",
-				"Field 'allocations[0].assetTicker' failed validation: is required",
-				"Field 'allocations[0].class' failed validation: is required",
-				"Field 'allocations[0].totalMarketValue' failed validation: is required"
-			]
-		}
-	`
-	assert.JSONEq(t, expectedResponseJSON, actualResponseJSONNullFields)
+			var expectedResponseJSON = `
+				{
+					"errorMessage": "Validation failed",
+					"details": [
+						"Field 'observationTimestamp' failed validation: is required",
+						"Field 'allocations[0].assetName' failed validation: is required",
+						"Field 'allocations[0].assetTicker' failed validation: is required",
+						"Field 'allocations[0].class' failed validation: is required",
+						"Field 'allocations[0].totalMarketValue' failed validation: is required"
+					]
+				}
+			`
+			assert.JSONEq(t, expectedResponseJSON, actualResponseJSONNullFields)
+		},
+	)
+
+	t.Run(
+		"TestPostPortfolioAllocationWithEmptyAllocationFields",
+		func(t *testing.T) {
+
+			var postPortfolioSnapshotJSON = `
+				{
+					"allocations": [
+						{
+							"assetName": "",
+							"assetTicker": "",
+							"class": "",
+							"totalMarketValue": 0
+						}
+					]
+				}
+			`
+
+			actualResponseJSONNullFields := string(
+				postPortfolioAllocationForValidationFailure(
+					t,
+					postPortfolioSnapshotJSON,
+				),
+			)
+
+			var expectedResponseJSON = `
+				{
+					"errorMessage": "Validation failed",
+					"details": [
+						"Field 'observationTimestamp' failed validation: is required",
+						"Field 'allocations[0].assetName' failed validation: is required",
+						"Field 'allocations[0].assetTicker' failed validation: is required",
+						"Field 'allocations[0].class' failed validation: is required",
+						"Field 'allocations[0].totalMarketValue' failed validation: is required"
+					]
+				}
+			`
+			assert.JSONEq(t, expectedResponseJSON, actualResponseJSONNullFields)
+		},
+	)
+
+	t.Run(
+		"TestPostPortfolioAllocationWithoutAllocations",
+		func(t *testing.T) {
+
+			var postPortfolioSnapshotJSON = `
+				{
+					"observationTimestamp": {
+						"id": "3"
+					}
+				}
+			`
+
+			actualResponseJSONNullFields := string(
+				postPortfolioAllocationForValidationFailure(
+					t,
+					postPortfolioSnapshotJSON,
+				),
+			)
+
+			var expectedResponseJSON = `
+				{
+					"errorMessage": "Validation failed",
+					"details": [
+						"Field 'allocations' failed validation: is required"
+					]
+				}
+			`
+			assert.JSONEq(t, expectedResponseJSON, actualResponseJSONNullFields)
+		},
+	)
+
+	t.Run(
+		"TestPostPortfolioAllocationWithEmptyAllocations",
+		func(t *testing.T) {
+
+			var postPortfolioSnapshotJSON = `
+				{
+					"observationTimestamp": {
+						"id": "3"
+					},
+					"allocations": []
+				}
+			`
+
+			actualResponseJSONNullFields := string(
+				postPortfolioAllocationForValidationFailure(
+					t,
+					postPortfolioSnapshotJSON,
+				),
+			)
+
+			var expectedResponseJSON = `
+				{
+					"errorMessage": "Validation failed",
+					"details": [
+						"Field 'allocations' failed validation: must be at least 1"
+					]
+				}
+			`
+			assert.JSONEq(t, expectedResponseJSON, actualResponseJSONNullFields)
+		},
+	)
 }
 
 func postPortfolioAllocationForValidationFailure(t *testing.T, postPortfolioJSON string) []byte {

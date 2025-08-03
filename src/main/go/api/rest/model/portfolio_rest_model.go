@@ -28,7 +28,7 @@ type PortfolioSnapshotDTS struct {
 	// Deprecated: use PortfolioObservationTimestampDTS
 	TimeFrameTag         domain.TimeFrameTag               `json:"timeFrameTag"`
 	ObservationTimestamp *PortfolioObservationTimestampDTS `json:"observationTimestamp" validate:"required"`
-	Allocations          []*PortfolioAllocationDTS         `json:"allocations"`
+	Allocations          []*PortfolioAllocationDTS         `json:"allocations" validate:"required,min=1"`
 	TotalMarketValue     int64                             `json:"totalMarketValue"`
 }
 
