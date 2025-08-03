@@ -39,7 +39,7 @@
 
                     <form id="portfolio-history-management-form-{{id}}"
                           class="needs-validation"
-                          hx-post="/api/test"
+                          hx-post="/api/portfolio/:portfolioId/history"
                           hx-ext="form-json"
                     >
                         <input type="hidden" name="observationTimestamp.id" value="{{id}}" />

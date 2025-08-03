@@ -11,6 +11,7 @@ import (
 	"github.com/benizzio/open-asset-allocator/langext"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"slices"
 	"strconv"
 )
 
@@ -162,23 +163,7 @@ func (controller *PortfolioAllocationRESTController) postPortfolioAllocationHist
 		return
 	}
 
-	var validationErrorsBuilder = util.BuildCustomValidationErrorsBuilder()
-	for index, allocation := range portfolioSnapshotDTS.Allocations {
-		var isAssetIdentified = langext.IsZeroValue(allocation.AssetId) &&
-			langext.IsZeroValue(allocation.AssetTicker) && langext.IsZeroValue(allocation.AssetName)
-		if isAssetIdentified {
-			validationErrorsBuilder.CustomValidationErrorFullNamespace(
-				portfolioSnapshotDTS,
-				"allocations["+strconv.Itoa(index)+"].assetId",
-				"custom",
-				"if assetId is not provided, assetTicker or assetName must be provided",
-				nil,
-			)
-		}
-	}
-	var validationErrors = validationErrorsBuilder.Build()
-	if len(validationErrors) > 0 {
-		util.RespondWithCustomValidationErrors(context, validationErrors, portfolioSnapshotDTS)
+	if !controller.validateCleanPortfolioAllocationHistory(context, &portfolioSnapshotDTS) {
 		return
 	}
 
@@ -200,6 +185,47 @@ func (controller *PortfolioAllocationRESTController) postPortfolioAllocationHist
 	}
 
 	context.Status(http.StatusNoContent)
+}
+
+func (controller *PortfolioAllocationRESTController) validateCleanPortfolioAllocationHistory(
+	context *gin.Context,
+	portfolioSnapshotDTS *model.PortfolioSnapshotDTS,
+) bool {
+
+	var cleanAllocations = slices.DeleteFunc(
+		portfolioSnapshotDTS.Allocations,
+		func(allocation *model.PortfolioAllocationDTS) bool {
+			if allocation == nil {
+				return true
+			}
+			return false
+		},
+	)
+	portfolioSnapshotDTS.Allocations = cleanAllocations
+
+	var validationErrorsBuilder = util.BuildCustomValidationErrorsBuilder()
+	for index, allocation := range portfolioSnapshotDTS.Allocations {
+
+		var isAssetIdentified = langext.IsZeroValue(allocation.AssetId) &&
+			langext.IsZeroValue(allocation.AssetTicker) && langext.IsZeroValue(allocation.AssetName)
+		if isAssetIdentified {
+			validationErrorsBuilder.CustomValidationErrorFullNamespace(
+				portfolioSnapshotDTS,
+				"allocations["+strconv.Itoa(index)+"].assetId",
+				"custom",
+				"if assetId is not provided, assetTicker or assetName must be provided",
+				nil,
+			)
+		}
+	}
+
+	var validationErrors = validationErrorsBuilder.Build()
+	if len(validationErrors) > 0 {
+		util.RespondWithCustomValidationErrors(context, validationErrors, portfolioSnapshotDTS)
+		return false
+	}
+
+	return true
 }
 
 func BuildPortfolioAllocationRESTController(
