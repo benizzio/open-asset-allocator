@@ -592,6 +592,11 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 		"application/json",
 		strings.NewReader(postPortfolioSnapshotJSON),
 	)
+	assert.NotNil(t, response)
+
+	if response == nil {
+		return
+	}
 
 	body, err := io.ReadAll(response.Body)
 	assert.NoError(t, err)
@@ -706,4 +711,46 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 	inttestutil.AssertDBWithQueryMultipleRows(t, allocationHistoryQuery, expectedRecords)
 }
 
-// TODO test field validation errors
+func TestPostPortfolioAllocationWithoutMandatoryFields(t *testing.T) {
+
+	var postPortfolioSnapshotJSON = `
+		{
+			"allocations": [
+				{
+				}
+			]
+		}
+	`
+
+	actualResponseJSONNullFields := string(postPortfolioAllocationForValidationFailure(t, postPortfolioSnapshotJSON))
+
+	var expectedResponseJSON = `
+		{
+			"errorMessage": "Validation failed",
+			"details": [
+				"Field 'observationTimestamp' failed validation: is required",
+				"Field 'allocations[0].assetName' failed validation: is required",
+				"Field 'allocations[0].assetTicker' failed validation: is required",
+				"Field 'allocations[0].class' failed validation: is required",
+				"Field 'allocations[0].totalMarketValue' failed validation: is required"
+			]
+		}
+	`
+	assert.JSONEq(t, expectedResponseJSON, actualResponseJSONNullFields)
+}
+
+func postPortfolioAllocationForValidationFailure(t *testing.T, postPortfolioJSON string) []byte {
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLPrefix+"/portfolio/1/history",
+		"application/json",
+		strings.NewReader(postPortfolioJSON),
+	)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+	return body
+}

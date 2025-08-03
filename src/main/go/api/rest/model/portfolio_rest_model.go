@@ -9,17 +9,17 @@ import (
 
 type PortfolioDTS struct {
 	Id                  *langext.ParseableInt   `json:"id"`
-	Name                string                  `json:"name" binding:"required"`
+	Name                string                  `json:"name" validate:"required"`
 	AllocationStructure *AllocationStructureDTS `json:"allocationStructure"`
 }
 
 type PortfolioAllocationDTS struct {
 	AssetId          langext.ParseableInt `json:"assetId"`
-	AssetName        string               `json:"assetName" binding:"required"`
-	AssetTicker      string               `json:"assetTicker" binding:"required"`
-	Class            string               `json:"class" binding:"required"`
+	AssetName        string               `json:"assetName" validate:"required"`
+	AssetTicker      string               `json:"assetTicker" validate:"required"`
+	Class            string               `json:"class" validate:"required"`
 	CashReserve      bool                 `json:"cashReserve"`
-	TotalMarketValue int64                `json:"totalMarketValue" binding:"required"`
+	TotalMarketValue int64                `json:"totalMarketValue" validate:"required"`
 	AssetQuantity    decimal.Decimal      `json:"assetQuantity"`
 	AssetMarketPrice decimal.Decimal      `json:"assetMarketPrice"`
 }
@@ -27,7 +27,7 @@ type PortfolioAllocationDTS struct {
 type PortfolioSnapshotDTS struct {
 	// Deprecated: use PortfolioObservationTimestampDTS
 	TimeFrameTag         domain.TimeFrameTag               `json:"timeFrameTag"`
-	ObservationTimestamp *PortfolioObservationTimestampDTS `json:"observationTimestamp" binding:"required"`
+	ObservationTimestamp *PortfolioObservationTimestampDTS `json:"observationTimestamp" validate:"required"`
 	Allocations          []*PortfolioAllocationDTS         `json:"allocations"`
 	TotalMarketValue     int64                             `json:"totalMarketValue"`
 }

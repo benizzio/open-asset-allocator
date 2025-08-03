@@ -236,8 +236,8 @@ func TestPostPortfolioFailureWithoutMandatoryFields(t *testing.T) {
 			"name": ""
 		}
 	`
-	actualResponseJSONNullFields := string(postForValidationFailure(t, postPortfolioJSONNullFields))
-	actualResponseJSONEmptyFields := string(postForValidationFailure(t, postPortfolioJSONEmptyFields))
+	actualResponseJSONNullFields := string(postPortfolioForValidationFailure(t, postPortfolioJSONNullFields))
+	actualResponseJSONEmptyFields := string(postPortfolioForValidationFailure(t, postPortfolioJSONEmptyFields))
 
 	var expectedResponseJSON = `
 		{
@@ -251,7 +251,7 @@ func TestPostPortfolioFailureWithoutMandatoryFields(t *testing.T) {
 	assert.JSONEq(t, expectedResponseJSON, actualResponseJSONEmptyFields)
 }
 
-func postForValidationFailure(t *testing.T, postPortfolioJSON string) []byte {
+func postPortfolioForValidationFailure(t *testing.T, postPortfolioJSON string) []byte {
 
 	response, err := http.Post(
 		inttestinfra.TestAPIURLPrefix+"/portfolio",
