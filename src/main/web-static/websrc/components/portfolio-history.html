@@ -149,6 +149,16 @@
         htmx.trigger(datalist, "load-classes");
     }
 
+    function loadAssetsDatalist() {
+        const datalist = window["datalist-assets"];
+        htmx.trigger(datalist, "load-assets");
+    }
+
+    window.loadPortfolioHistortDatalists = () => {
+        loadClassesDatalist();
+        loadAssetsDatalist();
+    }
+
 </script>
 
 <script id="portfolio-allocation-chart-options" type="application/json">

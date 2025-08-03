@@ -255,10 +255,14 @@ const portfolioHistoryManagement = {
     },
 
     reloadObservationHistory(formRowIndex: number) {
+
         const triggerELement = window[`portfolio-history-management-trigger-${ formRowIndex }`] as HTMLElement;
+
         const form = window[`portfolio-history-management-form-${ formRowIndex }`] as HTMLFormElement;
         form.reset();
+
         htmx.trigger(triggerELement, "reload-history-observation");
+        window["loadPortfolioHistortDatalists"]();
     },
 };
 
