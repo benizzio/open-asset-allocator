@@ -738,10 +738,85 @@ func TestPostPortfolioAllocationValidations(t *testing.T) {
 					"errorMessage": "Validation failed",
 					"details": [
 						"Field 'observationTimestamp' failed validation: is required",
-						"Field 'allocations[0].assetName' failed validation: is required",
-						"Field 'allocations[0].assetTicker' failed validation: is required",
 						"Field 'allocations[0].class' failed validation: is required",
 						"Field 'allocations[0].totalMarketValue' failed validation: is required"
+					]
+				}
+			`
+			assert.JSONEq(t, expectedResponseJSON, actualResponseJSONNullFields)
+		},
+	)
+
+	t.Run(
+		"TestPostPortfolioAllocationWithInvalidAssetFields",
+		func(t *testing.T) {
+
+			var postPortfolioSnapshotJSON = `
+				{
+					"observationTimestamp": {
+						"id": "3"
+					},
+					"allocations": [
+						{
+							"class": "TEST",
+							"totalMarketValue": 10
+						}
+					]
+				}
+			`
+
+			actualResponseJSONNullFields := string(
+				postPortfolioAllocationForValidationFailure(
+					t,
+					postPortfolioSnapshotJSON,
+				),
+			)
+
+			var expectedResponseJSON = `
+				{
+					"errorMessage": "Validation failed",
+					"details": [
+						"Field 'allocations[0].assetId' failed validation: if assetId is not provided, assetTicker or assetName must be provided"
+					]
+				}
+			`
+			assert.JSONEq(t, expectedResponseJSON, actualResponseJSONNullFields)
+		},
+	)
+
+	t.Run(
+		"TestPostPortfolioAllocationWithInvalidEmptyAssetFields",
+		func(t *testing.T) {
+
+			var postPortfolioSnapshotJSON = `
+				{
+					"observationTimestamp": {
+						"id": "3"
+					},
+					"allocations": [
+						{
+							"assetId": "",
+							"assetName": "",
+							"assetTicker": "",
+							"class": "TEST",
+							"totalMarketValue": 10
+						}
+					]
+				}
+			`
+
+			actualResponseJSONNullFields := string(
+				postPortfolioAllocationForValidationFailure(
+					t,
+					postPortfolioSnapshotJSON,
+				),
+			)
+
+			var expectedResponseJSON = `
+				{
+					"errorMessage": "Validation failed",
+					"details": [
+						"Field 'allocations[0].assetId' failed validation: if assetId is not provided, assetTicker or assetName must be provided"
 					]
 				}
 			`
@@ -757,8 +832,6 @@ func TestPostPortfolioAllocationValidations(t *testing.T) {
 				{
 					"allocations": [
 						{
-							"assetName": "",
-							"assetTicker": "",
 							"class": "",
 							"totalMarketValue": 0
 						}
@@ -778,8 +851,6 @@ func TestPostPortfolioAllocationValidations(t *testing.T) {
 					"errorMessage": "Validation failed",
 					"details": [
 						"Field 'observationTimestamp' failed validation: is required",
-						"Field 'allocations[0].assetName' failed validation: is required",
-						"Field 'allocations[0].assetTicker' failed validation: is required",
 						"Field 'allocations[0].class' failed validation: is required",
 						"Field 'allocations[0].totalMarketValue' failed validation: is required"
 					]

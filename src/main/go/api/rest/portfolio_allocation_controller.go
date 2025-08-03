@@ -158,8 +158,27 @@ func (controller *PortfolioAllocationRESTController) postPortfolioAllocationHist
 		infra.HandleAPIError(context, bindPortfolioSnapshotErrorMessage, err)
 		return
 	}
-
 	if !valid {
+		return
+	}
+
+	var validationErrorsBuilder = util.BuildCustomValidationErrorsBuilder()
+	for index, allocation := range portfolioSnapshotDTS.Allocations {
+		var isAssetIdentified = langext.IsZeroValue(allocation.AssetId) &&
+			langext.IsZeroValue(allocation.AssetTicker) && langext.IsZeroValue(allocation.AssetName)
+		if isAssetIdentified {
+			validationErrorsBuilder.CustomValidationErrorFullNamespace(
+				portfolioSnapshotDTS,
+				"allocations["+strconv.Itoa(index)+"].assetId",
+				"custom",
+				"if assetId is not provided, assetTicker or assetName must be provided",
+				nil,
+			)
+		}
+	}
+	var validationErrors = validationErrorsBuilder.Build()
+	if len(validationErrors) > 0 {
+		util.RespondWithCustomValidationErrors(context, validationErrors, portfolioSnapshotDTS)
 		return
 	}
 

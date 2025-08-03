@@ -15,8 +15,8 @@ type PortfolioDTS struct {
 
 type PortfolioAllocationDTS struct {
 	AssetId          langext.ParseableInt `json:"assetId"`
-	AssetName        string               `json:"assetName" validate:"required"`
-	AssetTicker      string               `json:"assetTicker" validate:"required"`
+	AssetName        string               `json:"assetName"`
+	AssetTicker      string               `json:"assetTicker"`
 	Class            string               `json:"class" validate:"required"`
 	CashReserve      bool                 `json:"cashReserve"`
 	TotalMarketValue int64                `json:"totalMarketValue" validate:"required"`

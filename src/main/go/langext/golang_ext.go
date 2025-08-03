@@ -29,10 +29,17 @@ func (parseableInt *ParseableInt) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	parsedValue, err := strconv.Atoi(stringValue)
+	var parsedValue int
+	var err error
+	if IsZeroValue(stringValue) {
+		parsedValue = 0
+	} else {
+		parsedValue, err = strconv.Atoi(stringValue)
+	}
 	if err != nil {
 		return err
 	}
+
 	*parseableInt = ParseableInt(parsedValue)
 	return nil
 }

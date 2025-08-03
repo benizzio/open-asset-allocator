@@ -92,7 +92,7 @@ func formatErrorMessage(validationError validator.FieldError, structType reflect
 
 // formatValidationError formats validation error into readable messages.
 //
-// Authored by: GitHub Copilot
+// Co-authored by: GitHub Copilot
 func formatValidationError(fieldError validator.FieldError) string {
 	switch fieldError.Tag() {
 	case "required":
@@ -101,6 +101,8 @@ func formatValidationError(fieldError validator.FieldError) string {
 		return fmt.Sprintf("must be at least %s", fieldError.Param())
 	case "max":
 		return fmt.Sprintf("must not exceed %s", fieldError.Param())
+	case "custom":
+		return fieldError.Param()
 	default:
 		return fieldError.Tag()
 	}
