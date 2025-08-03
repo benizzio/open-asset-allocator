@@ -181,7 +181,10 @@ function focusOnNewLine(newRow: HTMLElement) {
 
 function getNextPortfolioHistoryManagementIndex(tbody: HTMLElement): number {
     const rows = tbody.querySelectorAll("tr");
-    return rows.length;
+    const lastRow = rows[rows.length - 1] as HTMLElement;
+    const lastRowId = lastRow?.id;
+    const lastRowIdIndex = lastRowId?.split("-").pop();
+    return lastRowIdIndex ? parseInt(lastRowIdIndex, 10) + 1 : 0;
 }
 
 function getAsset(rowAssetElements: FormRowAssetElements, searchUniqueIdentifier: string) {
@@ -252,7 +255,9 @@ const portfolioHistoryManagement = {
     },
 
     reloadObservationHistory(formRowIndex: number) {
-        const triggerELement = window[`portfolio-history-management-trigger-${ formRowIndex }`];
+        const triggerELement = window[`portfolio-history-management-trigger-${ formRowIndex }`] as HTMLElement;
+        const form = window[`portfolio-history-management-form-${ formRowIndex }`] as HTMLFormElement;
+        form.reset();
         htmx.trigger(triggerELement, "reload-history-observation");
     },
 };
