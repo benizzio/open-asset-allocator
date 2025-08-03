@@ -8,12 +8,12 @@ const PORTFOLIO_ALLOCATION_MANAGEMENT_TBODY_PREFIX = "portfolio-history-manageme
 
 const ASSET_ACTION_BUTTON_IDENTITIES = {
     search: {
-        classes: `${ BootstrapClasses.BUTTON_PRIMARY } btn-xs`,
-        iconClasses: BootstrapIconClasses.SEARCH as string,
+        classes: `${BootstrapClasses.BUTTON_PRIMARY} btn-xs`,
+        iconClasses: `${BootstrapIconClasses.SEARCH}`,
     },
     reset: {
-        classes: `${ BootstrapClasses.BUTTON_DANGER } btn-xs`,
-        iconClasses: BootstrapIconClasses.RESET as string,
+        classes: `${BootstrapClasses.BUTTON_DANGER} btn-xs`,
+        iconClasses: `${BootstrapIconClasses.RESET}`,
     },
 };
 

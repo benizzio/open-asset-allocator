@@ -1,8 +1,8 @@
 # Code syntax preferences
 
 > [!IMPORTANT]
-> If the prompt does not mention the intent to change the code files, do not generate any changes and just print an
-> example code.
+> If the prompt does not mention the intent to change the code files, do not generate any changes and just print example
+> code blocks.
 
 ## Language agnostic standards
 

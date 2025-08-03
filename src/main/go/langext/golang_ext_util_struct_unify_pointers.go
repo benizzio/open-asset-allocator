@@ -93,10 +93,6 @@ func processItemField[T any](items []T, itemIndex int, fieldIndex int, valueMap 
 	var dereferencedValue = pointedValue.Interface()
 	var valueKey = gohashcode.Hashcode(dereferencedValue)
 
-	if valueKey == 0 {
-		return // Skip if we couldn't create a key
-	}
-
 	// Check if we've seen this value before
 	if existingPtr, found := valueMap[valueKey]; found {
 		// Replace the pointer with the existing one
