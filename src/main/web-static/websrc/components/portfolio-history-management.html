@@ -13,10 +13,11 @@
 
         <div class="accordion-item">
 
-            <h2 class="accordion-header"
+            <h2 id="portfolio-history-management-trigger-{{id}}"
+                class="accordion-header"
                 hx-include="[name='portfolioId']"
                 hx-target="#portfolio-history-management-form-tbody-{{id}}"
-                hx-trigger="click"
+                hx-trigger="click, reload-history-observation"
                 handlebars-template="template-portfolio-history-management-form-tbody"
                 hx-get="/api/portfolio/:portfolioId/history?observationTimestampId={{id}}"
             >
@@ -41,6 +42,7 @@
                           class="needs-validation"
                           hx-post="/api/portfolio/:portfolioId/history"
                           hx-ext="form-json"
+                          hx-on::after-request="portfolioHistoryManagement.reloadObservationHistory({{id}})"
                     >
                         <input type="hidden" name="observationTimestamp.id" value="{{id}}" />
                         <table class="table table-striped">

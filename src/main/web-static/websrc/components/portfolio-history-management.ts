@@ -250,6 +250,11 @@ const portfolioHistoryManagement = {
         const rowValueElements = new FormRowValueElements(formUniqueId, formRowIndex);
         rowValueElements.handleInputTotalMarketValue();
     },
+
+    reloadObservationHistory(formRowIndex: number) {
+        const triggerELement = window[`portfolio-history-management-trigger-${ formRowIndex }`];
+        htmx.trigger(triggerELement, "reload-history-observation");
+    },
 };
 
 export default portfolioHistoryManagement;
