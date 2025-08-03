@@ -14,14 +14,14 @@ type PortfolioDTS struct {
 }
 
 type PortfolioAllocationDTS struct {
-	AssetId          int             `json:"assetId"`
-	AssetName        string          `json:"assetName" binding:"required"`
-	AssetTicker      string          `json:"assetTicker" binding:"required"`
-	Class            string          `json:"class" binding:"required"`
-	CashReserve      bool            `json:"cashReserve"`
-	TotalMarketValue int64           `json:"totalMarketValue" binding:"required"`
-	AssetQuantity    decimal.Decimal `json:"assetQuantity"`
-	AssetMarketPrice decimal.Decimal `json:"assetMarketPrice"`
+	AssetId          langext.ParseableInt `json:"assetId"`
+	AssetName        string               `json:"assetName" binding:"required"`
+	AssetTicker      string               `json:"assetTicker" binding:"required"`
+	Class            string               `json:"class" binding:"required"`
+	CashReserve      bool                 `json:"cashReserve"`
+	TotalMarketValue int64                `json:"totalMarketValue" binding:"required"`
+	AssetQuantity    decimal.Decimal      `json:"assetQuantity"`
+	AssetMarketPrice decimal.Decimal      `json:"assetMarketPrice"`
 }
 
 type PortfolioSnapshotDTS struct {
@@ -70,9 +70,9 @@ type AllocationPlanIdentifierDTS struct {
 }
 
 type PortfolioObservationTimestampDTS struct {
-	Id        int       `json:"id"`
-	TimeTag   string    `json:"timeTag"`
-	Timestamp time.Time `json:"timestamp"`
+	Id        langext.ParseableInt `json:"id"`
+	TimeTag   string               `json:"timeTag"`
+	Timestamp time.Time            `json:"timestamp"`
 }
 
 type AnalysisOptionsDTS struct {

@@ -165,7 +165,7 @@ func (controller *PortfolioAllocationRESTController) postPortfolioAllocationHist
 
 	var portfolioAllocations = model.MapToPortfolioAllocations(
 		portfolioSnapshotDTS.Allocations,
-		portfolioSnapshotDTS.ObservationTimestamp.Id,
+		int(portfolioSnapshotDTS.ObservationTimestamp.Id),
 	)
 
 	var observationTimestamp = model.MapToPortfolioObservationTimestamp(portfolioSnapshotDTS.ObservationTimestamp)

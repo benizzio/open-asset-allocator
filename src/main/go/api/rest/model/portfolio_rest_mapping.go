@@ -90,7 +90,7 @@ func aggregateHistoryAsDTSMap(portfolioHistory []*domain.PortfolioAllocation) po
 
 func mapToPortfolioAllocationDTS(portfolioAllocation *domain.PortfolioAllocation) *PortfolioAllocationDTS {
 	return &PortfolioAllocationDTS{
-		AssetId:          portfolioAllocation.Asset.Id,
+		AssetId:          langext.ParseableInt(portfolioAllocation.Asset.Id),
 		AssetName:        portfolioAllocation.Asset.Name,
 		AssetTicker:      portfolioAllocation.Asset.Ticker,
 		Class:            portfolioAllocation.Class,
@@ -155,7 +155,7 @@ func MapToPortfolioObservationTimestampDTSs(
 
 func mapToObservationTimestampDTS(observationTimestamp *domain.PortfolioObservationTimestamp) *PortfolioObservationTimestampDTS {
 	var observationTimestampDTS = &PortfolioObservationTimestampDTS{
-		Id:        observationTimestamp.Id,
+		Id:        langext.ParseableInt(observationTimestamp.Id),
 		TimeTag:   observationTimestamp.TimeTag,
 		Timestamp: observationTimestamp.Timestamp,
 	}
@@ -166,7 +166,7 @@ func MapToPortfolioObservationTimestamp(
 	observationTimestampDTS *PortfolioObservationTimestampDTS,
 ) *domain.PortfolioObservationTimestamp {
 	return &domain.PortfolioObservationTimestamp{
-		Id:        observationTimestampDTS.Id,
+		Id:        int(observationTimestampDTS.Id),
 		TimeTag:   observationTimestampDTS.TimeTag,
 		Timestamp: observationTimestampDTS.Timestamp,
 	}
@@ -190,7 +190,7 @@ func MapToPortfolioAllocation(
 ) *domain.PortfolioAllocation {
 	return &domain.PortfolioAllocation{
 		Asset: domain.Asset{
-			Id:     portfolioAllocationDTS.AssetId,
+			Id:     int(portfolioAllocationDTS.AssetId),
 			Name:   portfolioAllocationDTS.AssetName,
 			Ticker: portfolioAllocationDTS.AssetTicker,
 		},

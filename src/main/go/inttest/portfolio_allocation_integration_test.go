@@ -532,11 +532,11 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 	var postPortfolioSnapshotJSON = `
 		{
 			"observationTimestamp": {
-				"id": 3
+				"id": "3"
 			},
 			"allocations": [
 				{
-					"assetId": 1,
+					"assetId": "1",
 					"assetName": "This name should not affect asset record",
 					"assetTicker": "TTSNAAR:TEST",
 					"class": "BONDS",
@@ -546,7 +546,7 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 					"totalMarketValue": 1500
 				},
 				{
-					"assetId": 1,
+					"assetId": "1",
 					"assetName": "This name should not affect asset record 2",
 					"assetTicker": "TTSNAAR2:TEST",
 					"class": "STOCKS",
@@ -556,7 +556,7 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 					"totalMarketValue": 4
 				},
 				{
-					"assetId": 6,
+					"assetId": "6",
 					"assetName": "New Asset",
 					"assetTicker": "Test:NEW",
 					"class": "STOCKS",
@@ -705,3 +705,5 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 
 	inttestutil.AssertDBWithQueryMultipleRows(t, allocationHistoryQuery, expectedRecords)
 }
+
+// TODO test field validation errors
