@@ -29,6 +29,9 @@ dev-db-logs:
 logs:
 	@docker logs -f open-asset-allocator-backend-1
 
+migration-logs:
+	@docker logs open-asset-allocator-migration-engine-1
+
 # Stops and removes all docker components
 destroy:
 	@./destroy.sh
