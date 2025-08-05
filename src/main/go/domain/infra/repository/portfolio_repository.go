@@ -1,11 +1,12 @@
 package repository
 
 import (
+	"time"
+
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/benizzio/open-asset-allocator/langext"
 	dbx "github.com/go-ozzo/ozzo-dbx"
-	"time"
 )
 
 // Deprecated: Use domain.PortfolioObservationTimestamp
@@ -110,8 +111,11 @@ const (
 					asset_quantity = pafmt.asset_quantity,
 					asset_market_price = pafmt.asset_market_price,
 					total_market_value = pafmt.total_market_value
-		WHEN NOT MATCHED BY SOURCE THEN
-    		DELETE
+		WHEN NOT MATCHED BY SOURCE AND (
+				paf.portfolio_id = $1
+				AND paf.observation_time_id = $2
+			) THEN
+    			DELETE
 	`
 	observationTimestampInsertSQL = `
 		INSERT INTO portfolio_allocation_obs_time (observation_time_tag, observation_timestamp)
@@ -357,7 +361,8 @@ func (repository *PortfolioRDBMSRepository) scanAvailablePortfolioAllocationClas
 
 func (repository *PortfolioRDBMSRepository) MergePortfolioAllocationsInTransaction(
 	transContext *infra.TransactionalContext,
-	id int,
+	portfolioId int,
+	observationTimestamp *domain.PortfolioObservationTimestamp,
 	allocations []*domain.PortfolioAllocation,
 ) error {
 
@@ -365,17 +370,17 @@ func (repository *PortfolioRDBMSRepository) MergePortfolioAllocationsInTransacti
 		return nil
 	}
 
-	err := repository.insertPortfolioAllocationsInTempTable(transContext, id, allocations)
+	err := repository.insertPortfolioAllocationsInTempTable(transContext, portfolioId, allocations)
 	if err != nil {
 		return err
 	}
 
-	return repository.mergePortfolioAllocations(transContext, err)
+	return repository.mergePortfolioAllocations(transContext, portfolioId, observationTimestamp)
 }
 
 func (repository *PortfolioRDBMSRepository) insertPortfolioAllocationsInTempTable(
 	transContext *infra.TransactionalContext,
-	id int,
+	portfolioId int,
 	allocations []*domain.PortfolioAllocation,
 ) error {
 
@@ -390,7 +395,7 @@ func (repository *PortfolioRDBMSRepository) insertPortfolioAllocationsInTempTabl
 	}
 
 	// Insert values in the temporary table
-	columns, insertValues := preparePortfolioAllocationTempInserts(allocations, id)
+	columns, insertValues := preparePortfolioAllocationTempInserts(allocations, portfolioId)
 	err = repository.dbAdapter.InsertBulkInTransaction(
 		transContext,
 		portfolioAllocationsTempTableName,
@@ -447,9 +452,15 @@ func preparePortfolioAllocationTempInserts(
 
 func (repository *PortfolioRDBMSRepository) mergePortfolioAllocations(
 	transContext *infra.TransactionalContext,
-	err error,
+	portfolioId int,
+	observationTimestamp *domain.PortfolioObservationTimestamp,
 ) error {
-	_, err = repository.dbAdapter.ExecuteInTransaction(transContext, portfolioAllocationsMergeSQL)
+	_, err := repository.dbAdapter.ExecuteInTransaction(
+		transContext,
+		portfolioAllocationsMergeSQL,
+		portfolioId,
+		observationTimestamp.Id,
+	)
 	return infra.PropagateAsAppErrorWithNewMessage(
 		err,
 		"Error merging portfolio allocations",

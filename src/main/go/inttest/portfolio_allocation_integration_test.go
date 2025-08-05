@@ -3,14 +3,15 @@ package inttest
 import (
 	"database/sql"
 	"fmt"
-	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
-	inttestutil "github.com/benizzio/open-asset-allocator/inttest/util"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"strconv"
 	"strings"
 	"testing"
+
+	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
+	inttestutil "github.com/benizzio/open-asset-allocator/inttest/util"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetPortfolioAllocationHistory(t *testing.T) {
@@ -709,6 +710,117 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 	)
 
 	inttestutil.AssertDBWithQueryMultipleRows(t, allocationHistoryQuery, expectedRecords)
+
+	var allocationHistoryOtherObservationsQuery = fmt.Sprintf(
+		`
+			SELECT
+				p.portfolio_id, 
+			    p.asset_id, 
+			    p.class, 
+			    p.cash_reserve, 
+			    p.asset_quantity, 
+			    p.asset_market_price, 
+			    p.total_market_value, 
+			    p.observation_time_id
+			FROM portfolio_allocation_fact p
+			WHERE p.portfolio_id=%s AND p.observation_time_id!=%d
+			ORDER BY p.observation_time_id, p.asset_id
+		`,
+		portfolioIdString,
+		3,
+	)
+
+	var expectedAllocationsOtherObservationsResult = []inttestutil.AssertableNullStringMap{
+		// Records from observation_time_id = 1 (initial data from 202501)
+		{
+			"portfolio_id":        inttestutil.ToAssertableNullString(portfolioIdString),
+			"asset_id":            inttestutil.ToAssertableNullString("1"),
+			"class":               inttestutil.ToAssertableNullString("BONDS"),
+			"cash_reserve":        inttestutil.ToAssertableNullString("false"),
+			"asset_quantity":      inttestutil.ToAssertableNullString("100.00000000"),
+			"asset_market_price":  inttestutil.ToAssertableNullString("100.00000000"),
+			"total_market_value":  inttestutil.ToAssertableNullString("10000"),
+			"observation_time_id": inttestutil.ToAssertableNullString("1"),
+		},
+		{
+			"portfolio_id":        inttestutil.ToAssertableNullString(portfolioIdString),
+			"asset_id":            inttestutil.ToAssertableNullString("2"),
+			"class":               inttestutil.ToAssertableNullString("BONDS"),
+			"cash_reserve":        inttestutil.ToAssertableNullString("false"),
+			"asset_quantity":      inttestutil.ToAssertableNullString("80.00000000"),
+			"asset_market_price":  inttestutil.ToAssertableNullString("100.00000000"),
+			"total_market_value":  inttestutil.ToAssertableNullString("8000"),
+			"observation_time_id": inttestutil.ToAssertableNullString("1"),
+		},
+		{
+			"portfolio_id":        inttestutil.ToAssertableNullString(portfolioIdString),
+			"asset_id":            inttestutil.ToAssertableNullString("3"),
+			"class":               inttestutil.ToAssertableNullString("BONDS"),
+			"cash_reserve":        inttestutil.ToAssertableNullString("false"),
+			"asset_quantity":      inttestutil.ToAssertableNullString("60.00000000"),
+			"asset_market_price":  inttestutil.ToAssertableNullString("100.00000000"),
+			"total_market_value":  inttestutil.ToAssertableNullString("6000"),
+			"observation_time_id": inttestutil.ToAssertableNullString("1"),
+		},
+		{
+			"portfolio_id":        inttestutil.ToAssertableNullString(portfolioIdString),
+			"asset_id":            inttestutil.ToAssertableNullString("4"),
+			"class":               inttestutil.ToAssertableNullString("BONDS"),
+			"cash_reserve":        inttestutil.ToAssertableNullString("false"),
+			"asset_quantity":      inttestutil.ToAssertableNullString("30.00000000"),
+			"asset_market_price":  inttestutil.ToAssertableNullString("100.00000000"),
+			"total_market_value":  inttestutil.ToAssertableNullString("3000"),
+			"observation_time_id": inttestutil.ToAssertableNullString("1"),
+		},
+		{
+			"portfolio_id":        inttestutil.ToAssertableNullString(portfolioIdString),
+			"asset_id":            inttestutil.ToAssertableNullString("5"),
+			"class":               inttestutil.ToAssertableNullString("STOCKS"),
+			"cash_reserve":        inttestutil.ToAssertableNullString("true"),
+			"asset_quantity":      inttestutil.ToAssertableNullString("80.00000000"),
+			"asset_market_price":  inttestutil.ToAssertableNullString("100.00000000"),
+			"total_market_value":  inttestutil.ToAssertableNullString("9000"),
+			"observation_time_id": inttestutil.ToAssertableNullString("1"),
+		},
+		{
+			"portfolio_id":        inttestutil.ToAssertableNullString(portfolioIdString),
+			"asset_id":            inttestutil.ToAssertableNullString("6"),
+			"class":               inttestutil.ToAssertableNullString("STOCKS"),
+			"cash_reserve":        inttestutil.ToAssertableNullString("false"),
+			"asset_quantity":      inttestutil.ToAssertableNullString("10.00000000"),
+			"asset_market_price":  inttestutil.ToAssertableNullString("100.00000000"),
+			"total_market_value":  inttestutil.ToAssertableNullString("1000"),
+			"observation_time_id": inttestutil.ToAssertableNullString("1"),
+		},
+		{
+			"portfolio_id":        inttestutil.ToAssertableNullString(portfolioIdString),
+			"asset_id":            inttestutil.ToAssertableNullString("7"),
+			"class":               inttestutil.ToAssertableNullString("STOCKS"),
+			"cash_reserve":        inttestutil.ToAssertableNullString("false"),
+			"asset_quantity":      inttestutil.ToAssertableNullString("90.00000000"),
+			"asset_market_price":  inttestutil.ToAssertableNullString("100.00000000"),
+			"total_market_value":  inttestutil.ToAssertableNullString("8000"),
+			"observation_time_id": inttestutil.ToAssertableNullString("1"),
+		},
+		// Record from observation_time_id = 2 (initial data from 202503)
+		{
+			"portfolio_id":        inttestutil.ToAssertableNullString(portfolioIdString),
+			"asset_id":            inttestutil.ToAssertableNullString("1"),
+			"class":               inttestutil.ToAssertableNullString("BONDS"),
+			"cash_reserve":        inttestutil.ToAssertableNullString("false"),
+			"asset_quantity":      inttestutil.ToAssertableNullString("100.00009000"),
+			"asset_market_price":  inttestutil.ToAssertableNullString("100.00000000"),
+			"total_market_value":  inttestutil.ToAssertableNullString("10000"),
+			"observation_time_id": inttestutil.ToAssertableNullString("2"),
+		},
+	}
+
+	inttestutil.AssertDBWithQueryMultipleRows(
+		t,
+		allocationHistoryOtherObservationsQuery,
+		expectedAllocationsOtherObservationsResult,
+	)
+
 }
 
 func TestPostPortfolioAllocationValidations(t *testing.T) {

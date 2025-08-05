@@ -1,9 +1,10 @@
 package domain
 
 import (
+	"time"
+
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/shopspring/decimal"
-	"time"
 )
 
 // Deprecated: Use PortfolioObservationTimestamp
@@ -62,7 +63,8 @@ type PortfolioRepository interface {
 	FindAvailablePortfolioAllocationClasses(portfolioId int) ([]string, error)
 	MergePortfolioAllocationsInTransaction(
 		transContext *infra.TransactionalContext,
-		id int,
+		portfolioId int,
+		observationTimestamp *PortfolioObservationTimestamp,
 		allocations []*PortfolioAllocation,
 	) error
 	InsertObservationTimestampInTransaction(

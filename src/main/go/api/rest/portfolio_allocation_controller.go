@@ -2,6 +2,10 @@ package rest
 
 import (
 	"fmt"
+	"net/http"
+	"slices"
+	"strconv"
+
 	"github.com/benizzio/open-asset-allocator/api/rest/model"
 	"github.com/benizzio/open-asset-allocator/application"
 	"github.com/benizzio/open-asset-allocator/domain"
@@ -10,9 +14,6 @@ import (
 	"github.com/benizzio/open-asset-allocator/infra/util"
 	"github.com/benizzio/open-asset-allocator/langext"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"slices"
-	"strconv"
 )
 
 type PortfolioAllocationRESTController struct {
@@ -176,8 +177,8 @@ func (controller *PortfolioAllocationRESTController) postPortfolioAllocationHist
 
 	err = controller.portfolioAllocationManagementAppService.MergePortfolioAllocations(
 		portfolioId,
-		portfolioAllocations,
 		observationTimestamp,
+		portfolioAllocations,
 	)
 
 	if infra.HandleAPIError(context, "Error merging portfolio allocations", err) {

@@ -15,14 +15,18 @@ type PortfolioAllocationManagementAppService struct {
 
 func (service *PortfolioAllocationManagementAppService) MergePortfolioAllocations(
 	portfolioId int,
-	allocations []*domain.PortfolioAllocation,
 	observationTimestamp *domain.PortfolioObservationTimestamp,
+	allocations []*domain.PortfolioAllocation,
 ) error {
 
 	var err = service.transactionManager.RunInTransaction(
 		func(transContext *infra.TransactionalContext) error {
 
-			err := service.manageObservationTimestamp(transContext, observationTimestamp, allocations)
+			managedObservationTimestamp, err := service.manageObservationTimestamp(
+				transContext,
+				observationTimestamp,
+				allocations,
+			)
 			if err != nil {
 				return err
 			}
@@ -35,6 +39,7 @@ func (service *PortfolioAllocationManagementAppService) MergePortfolioAllocation
 			return service.portfolioDomService.MergePortfolioAllocationsInTransaction(
 				transContext,
 				portfolioId,
+				managedObservationTimestamp,
 				allocations,
 			)
 		},
@@ -47,24 +52,27 @@ func (service *PortfolioAllocationManagementAppService) manageObservationTimesta
 	transContext *infra.TransactionalContext,
 	observationTimestamp *domain.PortfolioObservationTimestamp,
 	allocations []*domain.PortfolioAllocation,
-) error {
+) (*domain.PortfolioObservationTimestamp, error) {
+
+	var managedObservationTimestamp = observationTimestamp
+	var err error
 
 	if langext.IsZeroValue(observationTimestamp.Id) {
 
-		var persistedObservationTimestamp, err = service.portfolioDomService.InsertObservationTimestampInTransaction(
+		managedObservationTimestamp, err = service.portfolioDomService.InsertObservationTimestampInTransaction(
 			transContext,
 			observationTimestamp,
 		)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		for _, allocation := range allocations {
-			allocation.ObservationTimestamp = persistedObservationTimestamp
+			allocation.ObservationTimestamp = managedObservationTimestamp
 		}
 	}
 
-	return nil
+	return managedObservationTimestamp, nil
 }
 
 func (service *PortfolioAllocationManagementAppService) persistNewAssets(

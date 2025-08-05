@@ -1,10 +1,11 @@
 package service
 
 import (
+	"time"
+
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/benizzio/open-asset-allocator/langext"
-	"time"
 )
 
 type PortfolioDomService struct {
@@ -164,10 +165,16 @@ func (service *PortfolioDomService) FindAvailablePortfolioAllocationClasses(port
 
 func (service *PortfolioDomService) MergePortfolioAllocationsInTransaction(
 	transContext *infra.TransactionalContext,
-	id int,
+	portfolioId int,
+	observationTimestamp *domain.PortfolioObservationTimestamp,
 	allocations []*domain.PortfolioAllocation,
 ) error {
-	return service.portfolioRepository.MergePortfolioAllocationsInTransaction(transContext, id, allocations)
+	return service.portfolioRepository.MergePortfolioAllocationsInTransaction(
+		transContext,
+		portfolioId,
+		observationTimestamp,
+		allocations,
+	)
 }
 
 func (service *PortfolioDomService) InsertObservationTimestampInTransaction(
