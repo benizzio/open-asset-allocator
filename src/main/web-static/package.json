@@ -10,7 +10,7 @@
     "http-proxy-middleware": "^3.0.5",
     "parcel": "^2.15.2",
     "rimraf": "^6.0.1",
-    "typescript-eslint": "^8.33.1"
+    "typescript-eslint": "^8.39.0"
   },
   "dependencies": {
     "bignumber.js": "^9.3.0",
