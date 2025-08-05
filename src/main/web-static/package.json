@@ -1,16 +1,16 @@
 {
   "devDependencies": {
-    "@eslint/js": "^9.27.0",
+    "@eslint/js": "^9.32.0",
     "@parcel/transformer-raw": "^2.15.2",
     "@parcel/transformer-sass": "^2.15.2",
-    "@stylistic/eslint-plugin-ts": "^4.4.0",
+    "@stylistic/eslint-plugin-ts": "^4.4.1",
     "@types/chroma-js": "^3.1.1",
-    "eslint": "^9.28.0",
+    "eslint": "^9.32.0",
     "globals": "^16.2.0",
     "http-proxy-middleware": "^3.0.5",
     "parcel": "^2.15.2",
     "rimraf": "^6.0.1",
-    "typescript-eslint": "^8.33.1"
+    "typescript-eslint": "^8.39.0"
   },
   "dependencies": {
     "bignumber.js": "^9.3.0",
