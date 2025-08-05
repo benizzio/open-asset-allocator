@@ -4,7 +4,6 @@ import (
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/langext"
 	"sort"
-	"strings"
 )
 
 // ==========================================
@@ -71,50 +70,57 @@ func MapToPortfolio(portfolioDTS *PortfolioDTS) *domain.Portfolio {
 // PORTFOLIO HISTORY
 // ==========================================
 
-func AggregateAndMapToPortfolioHistoryDTSs(portfolioHistory []*domain.PortfolioAllocation) []PortfolioSnapshotDTS {
-	portfolioAllocationsPerTimeFrame := aggregateHistoryAsDTSMap(portfolioHistory)
-	aggregatedPortfolioHistory := buildHistoryDTS(portfolioAllocationsPerTimeFrame)
+func AggregateAndMapToPortfolioHistoryDTSs(portfolioHistory []*domain.PortfolioAllocation) []*PortfolioSnapshotDTS {
+	portfolioAllocationsPerObsTimestamp := aggregateHistoryAsDTSMap(portfolioHistory)
+	aggregatedPortfolioHistory := buildHistoryDTS(portfolioAllocationsPerObsTimestamp)
 	return aggregatedPortfolioHistory
 }
 
-func aggregateHistoryAsDTSMap(portfolioHistory []*domain.PortfolioAllocation) portfolioAllocationsPerTimeFrameMap {
+func aggregateHistoryAsDTSMap(portfolioHistory []*domain.PortfolioAllocation) portfolioAllocationsPerObservationTimestamp {
 
-	var portfolioAllocationsPerTimeFrame = make(portfolioAllocationsPerTimeFrameMap)
+	var portfolioAllocationsPerTimestamp = make(portfolioAllocationsPerObservationTimestamp)
 	for _, portfolioAllocation := range portfolioHistory {
-		var aggregationTimeFrame = portfolioAllocation.TimeFrameTag
-		var allocationJSON = portfolioAllocationToAllocationDTS(portfolioAllocation)
-		portfolioAllocationsPerTimeFrame.aggregate(aggregationTimeFrame, allocationJSON)
+		var observationTimestampDTS = mapToObservationTimestampDTS(portfolioAllocation.ObservationTimestamp)
+		var allocationDTS = mapToPortfolioAllocationDTS(portfolioAllocation)
+		portfolioAllocationsPerTimestamp.aggregate(*observationTimestampDTS, allocationDTS)
 	}
 
-	return portfolioAllocationsPerTimeFrame
+	return portfolioAllocationsPerTimestamp
 }
 
-func portfolioAllocationToAllocationDTS(portfolioAllocation *domain.PortfolioAllocation) PortfolioAllocationDTS {
-	return PortfolioAllocationDTS{
+func mapToPortfolioAllocationDTS(portfolioAllocation *domain.PortfolioAllocation) *PortfolioAllocationDTS {
+	return &PortfolioAllocationDTS{
+		AssetId:          langext.ParseableInt(portfolioAllocation.Asset.Id),
 		AssetName:        portfolioAllocation.Asset.Name,
 		AssetTicker:      portfolioAllocation.Asset.Ticker,
 		Class:            portfolioAllocation.Class,
 		CashReserve:      portfolioAllocation.CashReserve,
 		TotalMarketValue: portfolioAllocation.TotalMarketValue,
+		AssetQuantity:    portfolioAllocation.AssetQuantity,
+		AssetMarketPrice: portfolioAllocation.AssetMarketPrice,
 	}
 }
 
-func buildHistoryDTS(portfolioAllocationsPerTimeFrame portfolioAllocationsPerTimeFrameMap) []PortfolioSnapshotDTS {
+func buildHistoryDTS(
+	portfolioAllocationsPerObservationTimestamp portfolioAllocationsPerObservationTimestamp,
+) []*PortfolioSnapshotDTS {
 
-	var aggregatedPortfoliohistory = make([]PortfolioSnapshotDTS, 0)
-	for timeFrameTag, allocations := range portfolioAllocationsPerTimeFrame {
-		var totalMarketValue = portfolioAllocationsPerTimeFrame.getAggregatedMarketValue(timeFrameTag)
-		portfolioSnapshot := buildSnapshotDTS(timeFrameTag, allocations, totalMarketValue)
+	var aggregatedPortfoliohistory = make([]*PortfolioSnapshotDTS, 0)
+	for observationTimestamp, allocations := range portfolioAllocationsPerObservationTimestamp {
+		var totalMarketValue = portfolioAllocationsPerObservationTimestamp.getAggregatedMarketValue(observationTimestamp)
+		//TODO remove
+		var timeFrameTag = domain.TimeFrameTag(observationTimestamp.TimeTag)
+		obs := observationTimestamp
+		portfolioSnapshot := buildSnapshotDTS(timeFrameTag, &obs, allocations, totalMarketValue)
 		aggregatedPortfoliohistory = append(aggregatedPortfoliohistory, portfolioSnapshot)
 	}
 
-	// Sort the aggregated portfolio history by time frame tag, in descending order
+	// Sort the aggregated portfolio history by observation timestamp, in descending order
 	sort.Slice(
 		aggregatedPortfoliohistory, func(i, j int) bool {
-			return strings.Compare(
-				string(aggregatedPortfoliohistory[i].TimeFrameTag),
-				string(aggregatedPortfoliohistory[j].TimeFrameTag),
-			) > 0
+			return aggregatedPortfoliohistory[i].ObservationTimestamp.Timestamp.After(
+				aggregatedPortfoliohistory[j].ObservationTimestamp.Timestamp,
+			)
 		},
 	)
 
@@ -122,14 +128,80 @@ func buildHistoryDTS(portfolioAllocationsPerTimeFrame portfolioAllocationsPerTim
 }
 
 func buildSnapshotDTS(
+	// Deprecated: use observationTimestamp
 	timeFrameTag domain.TimeFrameTag,
-	allocations []PortfolioAllocationDTS,
+	observationTimestamp *PortfolioObservationTimestampDTS,
+	allocations []*PortfolioAllocationDTS,
 	totalMarketValue int64,
-) PortfolioSnapshotDTS {
-	return PortfolioSnapshotDTS{
-		TimeFrameTag:     timeFrameTag,
-		Allocations:      allocations,
-		TotalMarketValue: totalMarketValue,
+) *PortfolioSnapshotDTS {
+	return &PortfolioSnapshotDTS{
+		TimeFrameTag:         timeFrameTag,
+		ObservationTimestamp: observationTimestamp,
+		Allocations:          allocations,
+		TotalMarketValue:     totalMarketValue,
+	}
+}
+
+func MapToPortfolioObservationTimestampDTSs(
+	availableObservationTimestamps []*domain.PortfolioObservationTimestamp,
+) []*PortfolioObservationTimestampDTS {
+	var observationTimestampsDTS = make([]*PortfolioObservationTimestampDTS, 0)
+	for _, observationTimestamp := range availableObservationTimestamps {
+		observationTimestampDTS := mapToObservationTimestampDTS(observationTimestamp)
+		observationTimestampsDTS = append(observationTimestampsDTS, observationTimestampDTS)
+	}
+	return observationTimestampsDTS
+}
+
+func mapToObservationTimestampDTS(observationTimestamp *domain.PortfolioObservationTimestamp) *PortfolioObservationTimestampDTS {
+	var observationTimestampDTS = &PortfolioObservationTimestampDTS{
+		Id:        langext.ParseableInt(observationTimestamp.Id),
+		TimeTag:   observationTimestamp.TimeTag,
+		Timestamp: observationTimestamp.Timestamp,
+	}
+	return observationTimestampDTS
+}
+
+func MapToPortfolioObservationTimestamp(
+	observationTimestampDTS *PortfolioObservationTimestampDTS,
+) *domain.PortfolioObservationTimestamp {
+	return &domain.PortfolioObservationTimestamp{
+		Id:        int(observationTimestampDTS.Id),
+		TimeTag:   observationTimestampDTS.TimeTag,
+		Timestamp: observationTimestampDTS.Timestamp,
+	}
+}
+
+func MapToPortfolioAllocations(
+	portfolioAllocationDTSs []*PortfolioAllocationDTS,
+	observationTimestampId int,
+) []*domain.PortfolioAllocation {
+	var portfolioAllocations = make([]*domain.PortfolioAllocation, 0)
+	for _, portfolioAllocationDTS := range portfolioAllocationDTSs {
+		var portfolioAllocation = MapToPortfolioAllocation(portfolioAllocationDTS, observationTimestampId)
+		portfolioAllocations = append(portfolioAllocations, portfolioAllocation)
+	}
+	return portfolioAllocations
+}
+
+func MapToPortfolioAllocation(
+	portfolioAllocationDTS *PortfolioAllocationDTS,
+	observationTimestampId int,
+) *domain.PortfolioAllocation {
+	return &domain.PortfolioAllocation{
+		Asset: domain.Asset{
+			Id:     int(portfolioAllocationDTS.AssetId),
+			Name:   portfolioAllocationDTS.AssetName,
+			Ticker: portfolioAllocationDTS.AssetTicker,
+		},
+		Class:            portfolioAllocationDTS.Class,
+		CashReserve:      portfolioAllocationDTS.CashReserve,
+		TotalMarketValue: portfolioAllocationDTS.TotalMarketValue,
+		AssetQuantity:    portfolioAllocationDTS.AssetQuantity,
+		AssetMarketPrice: portfolioAllocationDTS.AssetMarketPrice,
+		ObservationTimestamp: &domain.PortfolioObservationTimestamp{
+			Id: observationTimestampId,
+		},
 	}
 }
 
@@ -139,9 +211,11 @@ func buildSnapshotDTS(
 
 func MapToAnalysisOptionsDTS(analysisOptions *domain.AnalysisOptions) *AnalysisOptionsDTS {
 	var plans = mapToAllocationPlanIdentifierDTSs(analysisOptions.AvailablePlans)
+	var availableHistory = MapToPortfolioObservationTimestampDTSs(analysisOptions.AvailableObservationTimestamps)
 	return &AnalysisOptionsDTS{
-		AvailableHistory: analysisOptions.AvailableHistory,
-		AvailablePlans:   plans,
+		AvailableHistory:         analysisOptions.AvailableHistory,
+		AvailableObservedHistory: availableHistory,
+		AvailablePlans:           plans,
 	}
 }
 
@@ -167,9 +241,15 @@ func mapToAllocationPlanIdentifierDTS(plan *domain.AllocationPlanIdentifier) *Al
 
 func MapToDivergenceAnalysisDTS(analysis *domain.DivergenceAnalysis) *DivergenceAnalysisDTS {
 	var rootDivergences = mapToPotentialDivergenceDTSs(analysis.Root, 0)
+	// TODO clean if after removing deprecated implementations
+	var observationTimestamp *PortfolioObservationTimestampDTS
+	if analysis.ObservationTimestamp != nil {
+		observationTimestamp = mapToObservationTimestampDTS(analysis.ObservationTimestamp)
+	}
 	var analysisDTS = DivergenceAnalysisDTS{
 		PortfolioId:               analysis.PortfolioId,
 		TimeFrameTag:              analysis.TimeFrameTag,
+		ObservationTimestamp:      observationTimestamp,
 		AllocationPlanId:          analysis.AllocationPlanId,
 		PortfolioTotalMarketValue: analysis.PortfolioTotalMarketValue,
 		Root:                      rootDivergences,

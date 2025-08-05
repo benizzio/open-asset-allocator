@@ -22,16 +22,16 @@
          style="display: none"
     >
         <div class="row justify-content-center align-items-center row-cols-auto my-5">
-            <div class="col" hx-get="/websrc/components/main-navigation.html" hx-trigger="load"></div>
+            <div class="col" hx-get="/websrc/components/portfolio-navigation.html" hx-trigger="load"></div>
         </div>
 
         <div class="row justify-content-center align-items-center"
              data-exclusive-display-container
         >
             <div class="col"
-                 data-hx-trigger-on-route="/portfolio/:portfolioId/history!load-portfolio"
-                 data-display-on-route="/portfolio/:portfolioId/history"
-                 hx-get="/websrc/pages/portfolio-history.html"
+                 data-hx-trigger-on-route="/portfolio/:portfolioId/history/*!load-portfolio"
+                 data-display-on-route="/portfolio/:portfolioId/history/*"
+                 hx-get="/websrc/components/portfolio-history.html"
                  hx-trigger="load-portfolio once"
                  style="display: none"
             ></div>
@@ -57,7 +57,11 @@
          data-display-on-route="/portfolio/:portfolioId/edit"
     >
         <div class="col">
-            <div class="card portfolio-card border border-primary border-dashed">
+            <div class="card portfolio-card border">
+
+                <div class="card-header">
+                    <span>Edit portfolio</span>
+                </div>
 
                 <form id="edit-portfolio-form"
                       class="needs-validation"
@@ -68,8 +72,6 @@
                       hx-on-htmx-after-request="reloadPortfolio(event)"
                 >
                     <div class="card-body">
-
-                        <h5 class="card-title">Edit portfolio</h5>
 
                         <input type="hidden" name="id" />
 

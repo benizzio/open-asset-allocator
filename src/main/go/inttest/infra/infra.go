@@ -28,7 +28,7 @@ const (
 	PostgresqlPassword                   = "localadmin"
 	PostgresqlConnectionStringParameters = "sslmode=disable"
 	FlywayImage                          = "flyway/flyway:10"
-	TestAPIURLprefix                     = "http://localhost:8081/api"
+	TestAPIURLPrefix                     = "http://localhost:8081/api"
 	DeferRegistryKey                     = "deferRegistry"
 )
 

@@ -41,6 +41,18 @@ const initialStateSQL = `
 	SELECT setval('asset_id_seq', (SELECT max(id) FROM asset));
 	
 	-- ###################################################################
+	-- ALLOCATION OBSERVATION TIME TABLE
+	-- ###################################################################
+	INSERT INTO portfolio_allocation_obs_time (id, observation_time_tag, observation_timestamp)
+	VALUES 
+	    (1, '202501', '2025-01-01 00:00:00'::TIMESTAMP),
+		(2, '202503', '2025-03-01 00:00:00'::TIMESTAMP),
+		(3, '202504', '2025-04-01 00:00:00'::TIMESTAMP) 
+	;
+
+	SELECT setval('portfolio_allocation_obs_time_id_seq', (SELECT max(id) FROM asset));
+
+	-- ###################################################################
 	-- ALLOCATION FACT TABLE
 	-- ###################################################################
 	DELETE FROM portfolio_allocation_fact WHERE portfolio_id = 1;
@@ -54,7 +66,8 @@ const initialStateSQL = `
 		asset_market_price,
 		total_market_value,
 		time_frame_tag,
-		portfolio_id
+		portfolio_id,
+		observation_time_id
 	)
 	VALUES (
 			   1,
@@ -64,6 +77,7 @@ const initialStateSQL = `
 			   100,
 			   10000,
 			   '202501',
+			   1,
 			   1
 		   ),
 		   (
@@ -74,6 +88,7 @@ const initialStateSQL = `
 			   100,
 			   8000,
 			   '202501',
+			   1,
 			   1
 		   ),
 		   (
@@ -84,6 +99,7 @@ const initialStateSQL = `
 			   100,
 			   6000,
 			   '202501',
+			   1,
 			   1
 		   ),
 		   (
@@ -94,6 +110,7 @@ const initialStateSQL = `
 			   100,
 			   3000,
 			   '202501',
+			   1,
 			   1
 		   )
 	;
@@ -110,7 +127,8 @@ const initialStateSQL = `
 		total_market_value,
 		time_frame_tag,
 		portfolio_id,
-		create_timestamp
+		create_timestamp,
+		observation_time_id
 	)
 	VALUES (
 			   5,
@@ -121,7 +139,8 @@ const initialStateSQL = `
 			   9000,
 			   '202501',
 			   1,
-			    now() - INTERVAL '1 minute'
+			   now() - INTERVAL '1 minute',
+			   1
 		   ),
 		   (
 			   6,
@@ -132,7 +151,8 @@ const initialStateSQL = `
 			   1000,
 			   '202501',
 			   1,
-			   now() - INTERVAL '1 minute'
+			   now() - INTERVAL '1 minute',
+			   1
 		   ),
 		   (
 			   7,
@@ -143,7 +163,8 @@ const initialStateSQL = `
 			   8000,
 			   '202501',
 			   1,
-			   now() - INTERVAL '1 minute'
+			   now() - INTERVAL '1 minute',
+			   1
 		   )
 	;
 	
@@ -155,17 +176,19 @@ const initialStateSQL = `
 		asset_market_price,
 		total_market_value,
 		time_frame_tag,
-		portfolio_id
+		portfolio_id,
+		observation_time_id
 	)
 	VALUES (
 			   1,
 			   'BONDS',
 			   FALSE,
-			   100,
+			   100.00009,
 			   100,
 			   10000,
 			   '202503',
-			   1
+			   1,
+			   2
 		   )
 	;
 

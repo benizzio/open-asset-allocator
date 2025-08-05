@@ -28,3 +28,57 @@ func UnwrapType(fieldType reflect.Type) reflect.Type {
 	}
 	return fieldType
 }
+
+// DereferenceValue dereferences all pointer levels from a reflect.Value, returning the final
+// non-pointer value and whether any nil pointer was encountered during dereferencing.
+//
+// This function handles nested pointers of arbitrary depth (e.g., ***SomeStruct) by recursively
+// dereferencing until it reaches a non-pointer value or encounters a nil pointer.
+//
+// Parameters:
+//   - value: The reflect.Value to dereference (may be a pointer of any depth)
+//
+// Returns:
+//   - reflect.Value: The final dereferenced value (non-pointer type)
+//   - bool: true if any nil pointer was encountered during dereferencing, false otherwise
+//
+// Example:
+//
+//	var data ***MyStruct = &&&MyStruct{Name: "test"}
+//	finalValue, isNil := DereferenceValue(reflect.ValueOf(data))
+//	// finalValue will be of type MyStruct, isNil will be false
+//
+// Authored by: GitHub Copilot
+func DereferenceValue(value reflect.Value) (reflect.Value, bool) {
+
+	for value.Kind() == reflect.Ptr {
+		if value.IsNil() {
+			return value, true
+		}
+		value = value.Elem()
+	}
+
+	return value, false
+}
+
+// IsSlice checks if the provided value is a slice type.
+//
+// Uses reflection to determine if the parameter is a slice, which is required
+// for automatic conversion to pq.Array for PostgreSQL compatibility.
+//
+// Parameters:
+//   - value: The value to check
+//
+// Returns:
+//   - bool: true if the value is a slice, false otherwise
+//
+// Authored by: GitHub Copilot
+func IsSlice(value any) bool {
+
+	if value == nil {
+		return false
+	}
+
+	var valueType = UnwrapType(reflect.TypeOf(value))
+	return valueType.Kind() == reflect.Slice
+}

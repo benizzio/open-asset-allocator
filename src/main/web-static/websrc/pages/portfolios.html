@@ -40,6 +40,9 @@
     >
         <div class="col">
             <div class="card portfolio-card border border-primary border-dashed">
+                <div class="card-header">
+                    <span>New portfolio</span>
+                </div>
 
                 <form id="new-portfolio-form"
                       class="needs-validation"
@@ -47,11 +50,10 @@
                       hx-ext="json-enc"
                       hx-validate="true"
                       hx-swap="none"
-                      hx-on-htmx-after-request="reloadPortfolios(this)"
+                      hx-on::after-request="reloadPortfolios(this)"
+                      novalidate
                 >
                     <div class="card-body">
-
-                        <h5 class="card-title">New portfolio</h5>
 
                         <input type="text"
                                name="name"

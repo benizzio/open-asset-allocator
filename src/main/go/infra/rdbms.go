@@ -4,12 +4,40 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"github.com/benizzio/open-asset-allocator/langext"
 	dbx "github.com/go-ozzo/ozzo-dbx"
 	"github.com/golang/glog"
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 	"strings"
 	"time"
 )
+
+// TODO split in rdbms package
+
+// ================================================
+// TRANSACTIONAL CONTEXT
+// ================================================
+
+const sqlTransactionContextKey = "TRANSACTION"
+
+type TransactionalContext struct {
+	context.Context
+}
+
+func (transactionalContext *TransactionalContext) GetTransaction() *sql.Tx {
+	return transactionalContext.Context.Value(sqlTransactionContextKey).(*sql.Tx)
+}
+
+func withTransaction(db *sql.DB) (*TransactionalContext, error) {
+
+	var transaction, err = db.Begin()
+	if err != nil {
+		return nil, err
+	}
+
+	var parentContext = context.WithValue(context.Background(), sqlTransactionContextKey, transaction)
+	return &TransactionalContext{parentContext}, nil
+}
 
 // ================================================
 // QUERY EXECUTOR
@@ -27,15 +55,75 @@ func withParams(query *dbx.Query, params dbx.Params) *QueryExecutor {
 }
 
 func (executor *QueryExecutor) FindInto(target any) error {
+	// TODO verification for debug logging, this should be logged only in debug mode
+	glog.Infof("Executing query %s \n with params %s", executor.query.SQL(), executor.query.Params())
 	return executor.query.All(target)
 }
 
 func (executor *QueryExecutor) GetInto(target any) error {
+	// TODO verification for debug logging, this should be logged only in debug mode
+	glog.Infof("Executing query %s \n with params %s", executor.query.SQL(), executor.query.Params())
 	return executor.query.One(target)
 }
 
 func (executor *QueryExecutor) GetRows() (*dbx.Rows, error) {
+	// TODO verification for debug logging, this should be logged only in debug mode
+	glog.Infof("Executing query %s \n with params %s", executor.query.SQL(), executor.query.Params())
 	return executor.query.Rows()
+}
+
+type SQLTransactionalQueryExecutor[T any] struct {
+	queryBuilder *SQLTransactionalQueryBuilder[T]
+}
+
+type RowScanner[T any] func(*sql.Rows) (T, error)
+
+// TODO do a get form single row
+func (executor *SQLTransactionalQueryExecutor[T]) Find(rowScanner RowScanner[T]) ([]T, error) {
+
+	var builder = executor.queryBuilder
+
+	// TODO verification for debug logging, this should be logged only in debug mode
+	glog.Infof("Executing transactional query %s \n with params %s", builder.querySQL, builder.params)
+	rows, err := builder.transaction.Query(builder.querySQL, builder.params...)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		if closeErr := rows.Close(); closeErr != nil {
+			glog.Errorf("Error closing rows: %v", closeErr)
+		}
+	}()
+
+	var result = make([]T, 0)
+	var index = 0
+	for rows.Next() {
+
+		rowValue, scanErr := rowScanner(rows)
+		if scanErr != nil {
+			glog.Errorf("Error scanning row: %v", index)
+			return nil, scanErr
+		}
+
+		result = append(result, rowValue)
+		index++
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func ReturningIntIdRowScanner(rows *sql.Rows) (int64, error) {
+	var id int64
+	scanErr := rows.Scan(&id)
+	if scanErr != nil {
+		return 0, scanErr
+	}
+	return id, nil
 }
 
 // ================================================
@@ -46,6 +134,20 @@ const (
 	WhereClausePlaceholder = "/*WHERE+PARAMS*/"
 )
 
+func processSQL(querySQL string, whereClauses []string) string {
+
+	var processedSQL = querySQL
+
+	if len(whereClauses) > 0 {
+		var whereStatement = " WHERE 1=1 " + strings.Join(whereClauses, " ")
+		processedSQL = strings.Replace(processedSQL, WhereClausePlaceholder, whereStatement, 1)
+	} else {
+		processedSQL = strings.Replace(processedSQL, WhereClausePlaceholder, "", 1)
+	}
+
+	return processedSQL
+}
+
 type QueryBuilder struct {
 	dbx          *dbx.DB
 	querySQL     string
@@ -55,22 +157,11 @@ type QueryBuilder struct {
 
 func (builder *QueryBuilder) Build() *QueryExecutor {
 
-	processedSQL := builder.processSQL()
-	// TODO verification for debug logging, this should be logged only in debug mode
-	glog.Infof("Building query for SQL: %s", processedSQL)
+	var processedSQL = processSQL(builder.querySQL, builder.whereClauses)
 
 	var query = builder.dbx.NewQuery(processedSQL)
 	var queryExecutor = withParams(query, builder.params)
 	return queryExecutor
-}
-
-func (builder *QueryBuilder) processSQL() string {
-	var processedSQL = builder.querySQL
-	if len(builder.whereClauses) > 0 {
-		var whereStatement = " WHERE 1=1 " + strings.Join(builder.whereClauses, " ")
-		processedSQL = strings.Replace(processedSQL, WhereClausePlaceholder, whereStatement, 1)
-	}
-	return processedSQL
 }
 
 func (builder *QueryBuilder) AddParam(name string, value any) *QueryBuilder {
@@ -87,6 +178,82 @@ func (builder *QueryBuilder) AddWhereClauseAndParam(whereClause string, name str
 	return builder.AddWhereClause(whereClause).AddParam(name, value)
 }
 
+type SQLTransactionalQueryBuilder[T any] struct {
+	transaction  *sql.Tx
+	querySQL     string
+	whereClauses []string
+	params       []any
+}
+
+func (builder *SQLTransactionalQueryBuilder[T]) AddParams(params ...any) *SQLTransactionalQueryBuilder[T] {
+	var processedParams = processParamsForPostgreSQL(params...)
+	builder.params = append(builder.params, processedParams...)
+	return builder
+}
+
+func (builder *SQLTransactionalQueryBuilder[T]) AddWhereClause(whereClause string) *SQLTransactionalQueryBuilder[T] {
+	builder.whereClauses = append(builder.whereClauses, whereClause)
+	return builder
+}
+
+// processParamsForPostgreSQL converts slice parameters to pq.Array for PostgreSQL compatibility.
+//
+// Parameters:
+//   - params: Variable number of parameters that may include slices
+//
+// Returns:
+//   - []any: Processed parameters with slices converted to pq.Array
+//
+// Authored by: GitHub Copilot
+func processParamsForPostgreSQL(params ...any) []any {
+
+	var processedParams = make([]any, len(params))
+
+	for i, param := range params {
+		if langext.IsSlice(param) {
+			processedParams[i] = pq.Array(param)
+		} else {
+			processedParams[i] = param
+		}
+	}
+
+	return processedParams
+}
+
+// AddWhereClauseAndParams adds a WHERE clause and its parameters to the query builder.
+//
+// This method automatically converts slice parameters to pq.Array for PostgreSQL
+// compatibility, allowing seamless use of slices in SQL IN clauses and array operations.
+//
+// Parameters:
+//   - whereClause: The WHERE clause SQL fragment to add
+//   - params: Variable number of parameters, with slices automatically converted to pq.Array
+//
+// Returns:
+//   - *SQLTransactionalQueryBuilder[T]: The same builder instance for method chaining
+//
+// Co-authored by: GitHub Copilot
+func (builder *SQLTransactionalQueryBuilder[T]) AddWhereClauseAndParams(
+	whereClause string,
+	params ...any,
+) *SQLTransactionalQueryBuilder[T] {
+
+	builder.whereClauses = append(builder.whereClauses, whereClause)
+
+	var processedParams = processParamsForPostgreSQL(params...)
+	builder.params = append(builder.params, processedParams...)
+
+	return builder
+}
+
+func (builder *SQLTransactionalQueryBuilder[T]) Build() *SQLTransactionalQueryExecutor[T] {
+	var processedSQL = processSQL(builder.querySQL, builder.whereClauses)
+	builder.querySQL = processedSQL
+	return &SQLTransactionalQueryExecutor[T]{
+		queryBuilder: builder,
+	}
+}
+
 // ================================================
 // DB ADAPTER
 // ================================================
@@ -96,6 +263,28 @@ type RDBMSAdapter struct {
 	connectionPool *sql.DB
 	dbx            *dbx.DB
 }
+
+type RepositoryRDBMSAdapter interface {
+	BuildQuery(sql string) *QueryBuilder
+	Insert(model interface{}) error
+	UpdateListedFields(model interface{}, fields ...string) error
+	Read(model interface{}, id any) error
+	ExecuteInTransaction(transContext *TransactionalContext, sql string, params ...any) (sql.Result, error)
+	InsertBulkInTransaction(
+		transContext *TransactionalContext,
+		tableName string,
+		columns []string,
+		values [][]any,
+	) error
+}
+
+type TransactionManager interface {
+	RunInTransaction(transactionalFunction func(transContext *TransactionalContext) error) error
+}
+
+// ------------------------------------------------
+// SETUP FUNCTIONS
+// ------------------------------------------------
 
 func (adapter *RDBMSAdapter) openPool() {
 
@@ -165,6 +354,10 @@ func buildPingContext() (context.Context, context.CancelFunc) {
 	return pingContext, cancel
 }
 
+// ------------------------------------------------
+// USAGE FUNCTIONS
+// ------------------------------------------------
+
 func (adapter *RDBMSAdapter) BuildQuery(sql string) *QueryBuilder {
 	return &QueryBuilder{
 		dbx:          adapter.dbx,
@@ -174,16 +367,144 @@ func (adapter *RDBMSAdapter) BuildQuery(sql string) *QueryBuilder {
 	}
 }
 
+func BuildQueryInTransaction[T any](
+	transContext *TransactionalContext,
+	sql string,
+) *SQLTransactionalQueryBuilder[T] {
+	return &SQLTransactionalQueryBuilder[T]{
+		transaction:  transContext.GetTransaction(),
+		querySQL:     sql,
+		params:       make([]any, 0),
+		whereClauses: make([]string, 0),
+	}
+}
+
+func (adapter *RDBMSAdapter) buildTransactionalContext() (*TransactionalContext, error) {
+	var transactionContext, err = withTransaction(adapter.connectionPool)
+	if err != nil {
+		return nil, err
+	}
+	return transactionContext, nil
+}
+
+func (adapter *RDBMSAdapter) RunInTransaction(
+	transactionalFunction func(transContext *TransactionalContext) error,
+) error {
+
+	transContext, err := adapter.buildTransactionalContext()
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			glog.Errorf("Recovered from panic during transactional operation: %v", r)
+			var transaction = transContext.GetTransaction()
+			if rollbackErr := transaction.Rollback(); rollbackErr != nil {
+				glog.Errorf("Transaction rollback failed: %v", rollbackErr)
+			}
+		}
+	}()
+
+	return adapter.runInTransaction(transContext, transactionalFunction)
+}
+
+func (adapter *RDBMSAdapter) runInTransaction(
+	transContext *TransactionalContext,
+	transactionalFunction func(transContext *TransactionalContext) error,
+) error {
+
+	err := transactionalFunction(transContext)
+
+	var transaction = transContext.GetTransaction()
+	if err != nil {
+		if rollbackErr := transaction.Rollback(); rollbackErr != nil {
+			return BuildAppError(
+				"transaction rollback failed: "+rollbackErr.Error()+"; original error: "+err.Error(),
+				adapter,
+			)
+		}
+		return err
+	}
+
+	return transaction.Commit()
+}
+
 func (adapter *RDBMSAdapter) Insert(model interface{}) error {
+	// TODO verification for debug logging, this should be logged only in debug mode
+	glog.Infof("Inserting model %T", model)
 	return adapter.dbx.Model(model).Insert()
 }
 
 func (adapter *RDBMSAdapter) UpdateListedFields(model interface{}, fields ...string) error {
+	// TODO verification for debug logging, this should be logged only in debug mode
+	glog.Infof("Updating model %T with fields %v", model, fields)
 	return adapter.dbx.Model(model).Update(fields...)
 }
 
 func (adapter *RDBMSAdapter) Read(model interface{}, id any) error {
+	// TODO verification for debug logging, this should be logged only in debug mode
+	glog.Infof("Reading model %T with id %v", model, id)
 	return adapter.dbx.Select().Model(id, model)
+}
+
+func (adapter *RDBMSAdapter) ExecuteInTransaction(
+	transContext *TransactionalContext,
+	sql string,
+	params ...any,
+) (sql.Result, error) {
+	var transaction = transContext.GetTransaction()
+	// TODO verification for debug logging, this should be logged only in debug mode
+	glog.Infof("Executing statement in transaction %s \n with params %s", sql, params)
+	return transaction.Exec(sql, processParamsForPostgreSQL(params...)...)
+}
+
+func (adapter *RDBMSAdapter) InsertBulkInTransaction(
+	transContext *TransactionalContext,
+	tableName string,
+	columns []string,
+	values [][]any,
+) error {
+
+	var transaction = transContext.GetTransaction()
+
+	statement, err := createBulkInsertPreparedStatement(tableName, columns, transaction)
+	if err != nil {
+		return err
+	}
+
+	defer func(statement *sql.Stmt) {
+		err := statement.Close()
+		if err != nil {
+			glog.Errorf("Error closing prepared statement: %v", err)
+		}
+	}(statement)
+
+	return executeBulkInsertPreparedStatement(statement, values)
+}
+
+func createBulkInsertPreparedStatement(tableName string, columns []string, transaction *sql.Tx) (*sql.Stmt, error) {
+	var copyInSQL = pq.CopyIn(tableName, columns...)
+	// TODO verification for debug logging, this should be logged only in debug mode
+	glog.Infof("Preparing statement in transaction %s", copyInSQL)
+	return transaction.Prepare(copyInSQL)
+}
+
+func executeBulkInsertPreparedStatement(copyStatement *sql.Stmt, values [][]any) error {
+
+	// TODO verification for debug logging, this should be logged only in debug mode
+	glog.Infof("Executing statement in transaction with values %s", values)
+
+	var err error
+	for _, value := range values {
+		_, err = copyStatement.Exec(value...)
+		if err != nil {
+			return err
+		}
+	}
+
+	_, err = copyStatement.Exec()
+	return err
 }
 
 func BuildDatabaseAdapter(config *Configuration) *RDBMSAdapter {

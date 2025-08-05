@@ -1,5 +1,10 @@
 .DEFAULT_GOAL := build
 
+
+# Runs the tests for the application
+test:
+	./test.sh
+
 # Builds the application for development mode
 dev-build:
 	./build-dev.sh
@@ -23,6 +28,9 @@ dev-db-logs:
 # Tails the logs for the backend
 logs:
 	@docker logs -f open-asset-allocator-backend-1
+
+migration-logs:
+	@docker logs open-asset-allocator-migration-engine-1
 
 # Stops and removes all docker components
 destroy:

@@ -1,10 +1,15 @@
+import { HtmxRequestConfig } from "htmx.org";
+
+const NULL_IF_EMPTY_ATTRIBUTE = "data-null-if-empty";
+
 export type EventDetail = {
     routerPathData?: { [key: string]: unknown };
     [key: string]: unknown;
-};
+} & HtmxRequestConfig;
 
 const configEnhancedRequestEventListener = (event: CustomEvent) => {
     replaceRequestPathParams(event);
+    prepareFormData(event);
 };
 
 /**
@@ -76,6 +81,25 @@ function replaceFromFormData(event: CustomEvent) {
     });
 
     event.detail.path = resolvedSplittedRequestPath.join("/");
+}
+
+function prepareFormData(event: CustomEvent) {
+
+    const eventDetail = event.detail as EventDetail;
+
+    if(eventDetail.verb === "post") {
+
+        const formElement = event.target as HTMLFormElement;
+        const formData = event.detail.formData as FormData;
+
+        for(const element of Array.from(formElement.elements) as HTMLInputElement[]) {
+
+            if(element.hasAttribute(NULL_IF_EMPTY_ATTRIBUTE) && !element.value) {
+                formData.delete(element.name);
+            }
+        }
+    }
+
 }
 
 function addEventListeners(domSettlingBehaviorEventHandler: (event: CustomEvent) => void) {

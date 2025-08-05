@@ -3,51 +3,60 @@ package model
 import (
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/langext"
+	"github.com/shopspring/decimal"
+	"time"
 )
 
 type PortfolioDTS struct {
 	Id                  *langext.ParseableInt   `json:"id"`
-	Name                string                  `json:"name" binding:"required"`
+	Name                string                  `json:"name" validate:"required"`
 	AllocationStructure *AllocationStructureDTS `json:"allocationStructure"`
 }
 
 type PortfolioAllocationDTS struct {
-	AssetName        string `json:"assetName"`
-	AssetTicker      string `json:"assetTicker"`
-	Class            string `json:"class"`
-	CashReserve      bool   `json:"cashReserve"`
-	TotalMarketValue int64  `json:"totalMarketValue"`
+	AssetId          langext.ParseableInt `json:"assetId"`
+	AssetName        string               `json:"assetName"`
+	AssetTicker      string               `json:"assetTicker"`
+	Class            string               `json:"class" validate:"required"`
+	CashReserve      bool                 `json:"cashReserve"`
+	TotalMarketValue int64                `json:"totalMarketValue" validate:"required"`
+	AssetQuantity    decimal.Decimal      `json:"assetQuantity"`
+	AssetMarketPrice decimal.Decimal      `json:"assetMarketPrice"`
 }
 
 type PortfolioSnapshotDTS struct {
-	TimeFrameTag     domain.TimeFrameTag      `json:"timeFrameTag"`
-	Allocations      []PortfolioAllocationDTS `json:"allocations"`
-	TotalMarketValue int64                    `json:"totalMarketValue"`
+	// Deprecated: use PortfolioObservationTimestampDTS
+	TimeFrameTag         domain.TimeFrameTag               `json:"timeFrameTag"`
+	ObservationTimestamp *PortfolioObservationTimestampDTS `json:"observationTimestamp" validate:"required"`
+	Allocations          []*PortfolioAllocationDTS         `json:"allocations" validate:"required,min=1"`
+	TotalMarketValue     int64                             `json:"totalMarketValue"`
 }
 
-type portfolioAllocationsPerTimeFrameMap map[domain.TimeFrameTag][]PortfolioAllocationDTS
+type portfolioAllocationsPerObservationTimestamp map[PortfolioObservationTimestampDTS][]*PortfolioAllocationDTS
 
-func (
-	aggregationMap portfolioAllocationsPerTimeFrameMap,
-) getOrBuild(timeFrameTag domain.TimeFrameTag) []PortfolioAllocationDTS {
-	var allocationAggregation = aggregationMap[timeFrameTag]
+func (aggregationMap portfolioAllocationsPerObservationTimestamp) getOrBuild(
+	observationTimestamp PortfolioObservationTimestampDTS,
+) []*PortfolioAllocationDTS {
+	var allocationAggregation = aggregationMap[observationTimestamp]
 	if allocationAggregation == nil {
-		allocationAggregation = make([]PortfolioAllocationDTS, 0)
+		allocationAggregation = make([]*PortfolioAllocationDTS, 0)
 	}
 	return allocationAggregation
 }
 
-func (aggregationMap portfolioAllocationsPerTimeFrameMap) aggregate(
-	timeFrameTag domain.TimeFrameTag,
-	allocationDTS PortfolioAllocationDTS,
+func (aggregationMap portfolioAllocationsPerObservationTimestamp) aggregate(
+	observationTimestamp PortfolioObservationTimestampDTS,
+	allocationDTS *PortfolioAllocationDTS,
 ) {
-	var allocationAggregation = aggregationMap.getOrBuild(timeFrameTag)
+	var allocationAggregation = aggregationMap.getOrBuild(observationTimestamp)
 	allocationAggregation = append(allocationAggregation, allocationDTS)
-	aggregationMap[timeFrameTag] = allocationAggregation
+	aggregationMap[observationTimestamp] = allocationAggregation
 }
 
-func (aggregationMap portfolioAllocationsPerTimeFrameMap) getAggregatedMarketValue(timeFrame domain.TimeFrameTag) int64 {
-	var allocationAggregation = aggregationMap[timeFrame]
+func (aggregationMap portfolioAllocationsPerObservationTimestamp) getAggregatedMarketValue(
+	observationTimestamp PortfolioObservationTimestampDTS,
+) int64 {
+	var allocationAggregation = aggregationMap[observationTimestamp]
 	var totalMarketValue = int64(0)
 	for _, allocation := range allocationAggregation {
 		totalMarketValue += allocation.TotalMarketValue
@@ -60,9 +69,17 @@ type AllocationPlanIdentifierDTS struct {
 	Name string `json:"name"`
 }
 
+type PortfolioObservationTimestampDTS struct {
+	Id        langext.ParseableInt `json:"id"`
+	TimeTag   string               `json:"timeTag"`
+	Timestamp time.Time            `json:"timestamp"`
+}
+
 type AnalysisOptionsDTS struct {
-	AvailableHistory []domain.TimeFrameTag          `json:"availableHistory"`
-	AvailablePlans   []*AllocationPlanIdentifierDTS `json:"availablePlans"`
+	// Deprecated: use AvailableObservedHistory
+	AvailableHistory         []domain.TimeFrameTag               `json:"availableHistory"`
+	AvailableObservedHistory []*PortfolioObservationTimestampDTS `json:"availableObservedHistory"`
+	AvailablePlans           []*AllocationPlanIdentifierDTS      `json:"availablePlans"`
 }
 
 type PotentialDivergenceDTS struct {
@@ -75,9 +92,11 @@ type PotentialDivergenceDTS struct {
 }
 
 type DivergenceAnalysisDTS struct {
-	PortfolioId               int                       `json:"portfolioId"`
-	TimeFrameTag              domain.TimeFrameTag       `json:"timeFrameTag"`
-	AllocationPlanId          int                       `json:"allocationPlanId"`
-	PortfolioTotalMarketValue int64                     `json:"portfolioTotalMarketValue"`
-	Root                      []*PotentialDivergenceDTS `json:"root"`
+	PortfolioId int `json:"portfolioId"`
+	// Deprecated: use ObservationTimestamp
+	TimeFrameTag              domain.TimeFrameTag               `json:"timeFrameTag"`
+	ObservationTimestamp      *PortfolioObservationTimestampDTS `json:"observationTimestamp"`
+	AllocationPlanId          int                               `json:"allocationPlanId"`
+	PortfolioTotalMarketValue int64                             `json:"portfolioTotalMarketValue"`
+	Root                      []*PotentialDivergenceDTS         `json:"root"`
 }

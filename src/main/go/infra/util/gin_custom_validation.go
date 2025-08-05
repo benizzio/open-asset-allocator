@@ -66,7 +66,19 @@ func (builder *CustomValidationErrorsBuilder) CustomValidationError(
 	param string,
 	value interface{},
 ) *CustomValidationErrorsBuilder {
-	validationError := buildCustomValidationError(targetStruct, fieldNamespace, tag, param, value)
+	validationError := buildCustomValidationError(targetStruct, fieldNamespace, tag, param, value, false)
+	builder.validationErrors = append(builder.validationErrors, validationError)
+	return builder
+}
+
+func (builder *CustomValidationErrorsBuilder) CustomValidationErrorFullNamespace(
+	targetStruct interface{},
+	fieldNamespace string,
+	tag string,
+	param string,
+	value interface{},
+) *CustomValidationErrorsBuilder {
+	validationError := buildCustomValidationError(targetStruct, fieldNamespace, tag, param, value, true)
 	builder.validationErrors = append(builder.validationErrors, validationError)
 	return builder
 }
@@ -131,23 +143,34 @@ func BuildCustomValidationErrorsBuilder() *CustomValidationErrorsBuilder {
 //   - tag: The validation tag that failed
 //   - param: Additional parameter for the validation tag
 //   - value: The actual value that failed validation
+//   - fullNamespace: If true, uses the full namespace for the field, otherwise uses just the field name
 //
 // Returns:
 //   - validator.FieldError that can be used with validation error handling functions
 //
-// Authored by: GitHub Copilot
+// Co-authored by: GitHub Copilot
 func buildCustomValidationError(
 	targetStruct interface{},
 	fieldNamespace,
 	tag,
 	param string,
 	value interface{},
+	fullNamespace bool,
 ) validator.FieldError {
-	// Get struct name using reflection
-	structName := langext.GetStructName(targetStruct)
 
-	// Parse the field namespace to get the full namespace and field name
-	namespace, fieldName := langext.GetStructNamespaceDescription(structName, fieldNamespace)
+	var namespace string
+	var fieldName string
+
+	if fullNamespace {
+		namespace = fieldNamespace
+		fieldName = fieldNamespace
+	} else {
+		// Get struct name using reflection
+		structName := langext.GetStructName(targetStruct)
+
+		// Parse the field namespace to get the full namespace and field name
+		namespace, fieldName = langext.GetStructNamespaceDescription(structName, fieldNamespace)
+	}
 
 	// Create and return the custom validation error
 	return CustomFieldError{

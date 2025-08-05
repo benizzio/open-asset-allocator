@@ -120,3 +120,35 @@ func GetStructNamespaceDescription(targetStruct interface{}, fieldNamespace stri
 
 	return namespace, fieldName
 }
+
+// ExtractJSONFieldName extracts the JSON field name from a struct field's json tag.
+// It handles JSON tag parsing including options like ",omitempty" and returns the
+// actual field name that should be used in JSON serialization.
+//
+// Parameters:
+//   - field: The reflect.StructField to extract the JSON field name from
+//
+// Returns:
+//   - string: The JSON field name, or the original Go field name if no json tag exists
+//
+// Example:
+//
+//	field := reflect.StructField{Name: "UserName", Tag: `json:"user_name,omitempty"`}
+//	jsonName := ExtractJSONFieldName(field)  // returns "user_name"
+//
+// Authored by: GitHub Copilot
+func ExtractJSONFieldName(field reflect.StructField) string {
+
+	jsonTag := field.Tag.Get("json")
+	if jsonTag == "" || jsonTag == "-" {
+		return field.Name
+	}
+
+	// The json tag might have options like ",omitempty", so we need to split it
+	parts := strings.Split(jsonTag, ",")
+	if parts[0] != "" {
+		return parts[0]
+	}
+
+	return field.Name
+}

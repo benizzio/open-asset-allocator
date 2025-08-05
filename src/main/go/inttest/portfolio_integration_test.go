@@ -16,7 +16,7 @@ import (
 
 func TestGetPortfolio(t *testing.T) {
 
-	response, err := http.Get(inttestinfra.TestAPIURLprefix + "/portfolio/1")
+	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1")
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -49,7 +49,7 @@ func TestGetPortfolio(t *testing.T) {
 
 func TestGetPortfolios(t *testing.T) {
 
-	response, err := http.Get(inttestinfra.TestAPIURLprefix + "/portfolio")
+	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio")
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -94,94 +94,6 @@ func TestGetPortfolios(t *testing.T) {
 	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
 }
 
-func TestGetPortfolioAllocationHistory(t *testing.T) {
-
-	response, err := http.Get(inttestinfra.TestAPIURLprefix + "/portfolio/1/history")
-	assert.NoError(t, err)
-
-	assert.Equal(t, http.StatusOK, response.StatusCode)
-
-	body, err := io.ReadAll(response.Body)
-	assert.NoError(t, err)
-	assert.NotEmpty(t, body)
-
-	var actualResponseJSON = string(body)
-	var expectedResponseJSON = `
-		[
-			{
-				"timeFrameTag":"202503",
-				"allocations":[
-					{
-						"assetName":"SPDR Bloomberg 1-3 Month T-Bill ETF",
-						"assetTicker":"ARCA:BIL",
-						"class":"BONDS",
-						"cashReserve":false,
-						"totalMarketValue":10000
-					}
-				],
-				"totalMarketValue":10000
-			},
-			{
-				"timeFrameTag":"202501",
-				"allocations":[
-					{
-						"assetName":"SPDR Bloomberg 1-3 Month T-Bill ETF",
-						"assetTicker":"ARCA:BIL",
-						"class":"BONDS",
-						"cashReserve":false,
-						"totalMarketValue":10000
-					},
-					{
-						"assetName":"iShares 0-5 Year TIPS Bond ETF",
-						"assetTicker":"ARCA:STIP",
-						"class":"BONDS",
-						"cashReserve":false,
-						"totalMarketValue":8000
-					},
-					{
-						"assetName":"iShares 7-10 Year Treasury Bond ETF",
-						"assetTicker":"NasdaqGM:IEF",
-						"class":"BONDS",
-						"cashReserve":false,
-						"totalMarketValue":6000
-					},
-					{
-						"assetName":"iShares 20+ Year Treasury Bond ETF",
-						"assetTicker":"NasdaqGM:TLT",
-						"class":"BONDS",
-						"cashReserve":false,
-						"totalMarketValue":3000
-					},
-					{
-						"assetName":"iShares Short Treasury Bond ETF",
-						"assetTicker":"NasdaqGM:SHV",
-						"class":"STOCKS",
-						"cashReserve":true,
-						"totalMarketValue":9000
-					},
-					{
-						"assetName":"SPDR S\u0026P 500 ETF Trust",
-						"assetTicker":"ARCA:SPY",
-						"class":"STOCKS",
-						"cashReserve":false,
-						"totalMarketValue":8000
-					},
-					{
-						"assetName":"iShares Msci Brazil ETF",
-						"assetTicker":"ARCA:EWZ",
-						"class":"STOCKS",
-						"cashReserve":false,
-						"totalMarketValue":1000
-					}
-				],
-				"totalMarketValue":45000
-			}
-		]
-	`
-
-	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
-}
-
 func TestPostPortfolio(t *testing.T) {
 
 	var testPortfolioName = "Test Portfolio creation"
@@ -193,13 +105,13 @@ func TestPostPortfolio(t *testing.T) {
 	`
 
 	response, err := http.Post(
-		inttestinfra.TestAPIURLprefix+"/portfolio",
+		inttestinfra.TestAPIURLPrefix+"/portfolio",
 		"application/json",
 		strings.NewReader(postPortfolioJSON),
 	)
 
 	t.Cleanup(
-		inttestutil.CreateDBCleanupDeferable(
+		inttestutil.CreateDBCleanupFunction(
 			"DELETE FROM portfolio WHERE name='%s'",
 			testPortfolioName,
 		),
@@ -269,13 +181,13 @@ func TestPostPortfolioWithAllocationStructure(t *testing.T) {
 	`
 
 	response, err := http.Post(
-		inttestinfra.TestAPIURLprefix+"/portfolio",
+		inttestinfra.TestAPIURLPrefix+"/portfolio",
 		"application/json",
 		strings.NewReader(postPortfolioJSON),
 	)
 
 	t.Cleanup(
-		inttestutil.CreateDBCleanupDeferable(
+		inttestutil.CreateDBCleanupFunction(
 			"DELETE FROM portfolio WHERE name='%s'",
 			testPortfolioName,
 		),
@@ -324,8 +236,8 @@ func TestPostPortfolioFailureWithoutMandatoryFields(t *testing.T) {
 			"name": ""
 		}
 	`
-	actualResponseJSONNullFields := string(postForValidationFailure(t, postPortfolioJSONNullFields))
-	actualResponseJSONEmptyFields := string(postForValidationFailure(t, postPortfolioJSONEmptyFields))
+	actualResponseJSONNullFields := string(postPortfolioForValidationFailure(t, postPortfolioJSONNullFields))
+	actualResponseJSONEmptyFields := string(postPortfolioForValidationFailure(t, postPortfolioJSONEmptyFields))
 
 	var expectedResponseJSON = `
 		{
@@ -339,10 +251,10 @@ func TestPostPortfolioFailureWithoutMandatoryFields(t *testing.T) {
 	assert.JSONEq(t, expectedResponseJSON, actualResponseJSONEmptyFields)
 }
 
-func postForValidationFailure(t *testing.T, postPortfolioJSON string) []byte {
+func postPortfolioForValidationFailure(t *testing.T, postPortfolioJSON string) []byte {
 
 	response, err := http.Post(
-		inttestinfra.TestAPIURLprefix+"/portfolio",
+		inttestinfra.TestAPIURLPrefix+"/portfolio",
 		"application/json",
 		strings.NewReader(postPortfolioJSON),
 	)

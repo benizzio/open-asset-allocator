@@ -51,29 +51,44 @@ func (app *App) buildAppComponents() {
 
 	var portfolioRepository = repository.BuildPortfolioRepository(app.databaseAdapter)
 	var allocationPlanRepository = repository.BuildAllocationPlanRepository(app.databaseAdapter)
+	var assetRepository = repository.BuildAssetRDBMSRepository(app.databaseAdapter)
 
 	var portfolioDomService = service.BuildPortfolioDomService(portfolioRepository)
 	var allocationPlanDomService = service.BuildAllocationPlanDomService(allocationPlanRepository)
-	var portfolioDivergenceAnalysisService = application.BuildPortfolioDivergenceAnalysisAppService(
+	var assetDomService = service.BuildAssetDomService(assetRepository)
+
+	var portfolioDivergenceAnalysisAppService = application.BuildPortfolioDivergenceAnalysisAppService(
 		portfolioDomService,
 		allocationPlanDomService,
 	)
-	var portfolioAnalysisConfigurationService = application.BuildPortfolioAnalysisConfigurationAppService(
+	var portfolioAnalysisConfigurationAppService = application.BuildPortfolioAnalysisConfigurationAppService(
 		portfolioDomService,
 		allocationPlanDomService,
+	)
+	var portfolioAllocationManagementAppService = application.BuildPortfolioAllocationManagementAppService(
+		app.databaseAdapter,
+		portfolioDomService,
+		assetDomService,
 	)
 
 	var portfolioRESTController = rest.BuildPortfolioRESTController(portfolioDomService)
+	var portfolioAllocationRESTController = rest.BuildPortfolioAllocationRESTController(
+		portfolioDomService,
+		portfolioAllocationManagementAppService,
+	)
 	var portfolioDivergenceAnalysisRESTController = rest.BuildDivergenceAnalysisRESTController(
-		portfolioAnalysisConfigurationService,
-		portfolioDivergenceAnalysisService,
+		portfolioAnalysisConfigurationAppService,
+		portfolioDivergenceAnalysisAppService,
 	)
 	var allocationPlanRESTController = rest.BuildAllocationPlanRESTController(allocationPlanDomService)
+	var assetRESTController = rest.BuildAssetRESTController(assetDomService)
 
 	app.restControllers = []infra.GinServerRESTController{
 		portfolioRESTController,
 		allocationPlanRESTController,
 		portfolioDivergenceAnalysisRESTController,
+		portfolioAllocationRESTController,
+		assetRESTController,
 	}
 }
 

@@ -34,6 +34,7 @@ INSERT INTO ghostf_activity
         SELECT unnest(activities) AS activity_struct
         FROM read_json(format('{}/ghostfolio-export-*.json', getenv('INTERNAL_DUCKDB_INPUT_PATH')))
     )
+    WHERE activity_struct.symbol != 'MATIC-USD.CC' -- TODO contingency from broken yahoo symbol - remove after asset migration
 ;
 
 .print '=> Reading the asset dimension mapping classifier file'
@@ -108,7 +109,12 @@ CREATE TEMP VIEW yahoo_asset_list AS
 -- SELECT * FROM yahoo_asset_list;
 
 .print '=> Creating temporary table and view for market data from Yahoo'
-SET VARIABLE yahoo_ticker_list = (SELECT LIST(yahoo_ticker) FROM yahoo_asset_list);
+SET VARIABLE yahoo_ticker_list = (
+    SELECT LIST(yahoo_ticker)
+    FROM yahoo_asset_list
+    WHERE yahoo_ticker != 'MATIC-USD' -- TODO contingency from broken yahoo symbol - remove after asset migration
+)
+;
 
 CREATE TEMP TABLE yahoo_finance_data AS
     SELECT symbol, Date[2] as last_date, Close[2] as last_close
@@ -186,6 +192,15 @@ INSERT INTO ghostf_symbol_aggegation
 
 SELECT * FROM ghostf_symbol_aggegation;
 
+.print '=> Creating portfolio observation time dimension record, if it does not exist'
+INSERT INTO pgsql.portfolio_allocation_obs_time (observation_time_tag, observation_timestamp)
+SELECT getenv('PORTFOLIO_ALLOCATION_OBS_TIME_TAG')::TEXT AS observation_time_tag, current_timestamp AS observation_timestamp
+WHERE NOT EXISTS (
+    SELECT 1 FROM pgsql.portfolio_allocation_obs_time
+    WHERE observation_time_tag = getenv('PORTFOLIO_ALLOCATION_OBS_TIME_TAG')::TEXT
+)
+;
+
 .print '=> Creating temporary view for portfolio allocation fact insertion'
 CREATE TEMP VIEW portfolio_allocation_fact_insertion AS
     SELECT
@@ -195,11 +210,13 @@ CREATE TEMP VIEW portfolio_allocation_fact_insertion AS
         gsa.total_quantity AS asset_quantity,
         aplmd.market_close_price AS asset_market_price,
         gsa.total_quantity::DECIMAL(30,8) * aplmd.market_close_price::DECIMAL(30,8) AS total_market_value,
-        extract('year' FROM current_date) || lpad(extract('month' FROM current_date)::text, 2, '0') as time_frame_tag,
+        paot.observation_time_tag as time_frame_tag, -- DEPRECATED TODO remove on cleanup
+        paot.id AS observation_time_id,
         getenv('PORTFOLIO_ID')::INTEGER AS portfolio_id
     FROM ghostf_symbol_aggegation gsa
     LEFT JOIN pgsql.asset_price_last_market_data aplmd ON gsa.symbol = aplmd.ticker
     JOIN pgsql.asset ass ON aplmd.asset_id = ass.id
+    JOIN pgsql.portfolio_allocation_obs_time paot ON paot.observation_time_tag = getenv('PORTFOLIO_ALLOCATION_OBS_TIME_TAG')::TEXT
     WHERE aplmd.data_source = 'YAHOO'
 ;
 
@@ -216,7 +233,8 @@ INSERT INTO pgsql.portfolio_allocation_fact (
         asset_market_price,
         total_market_value,
         time_frame_tag,
-        portfolio_id
+        portfolio_id,
+        observation_time_id
     )
     SELECT
         asset_id,
@@ -226,7 +244,8 @@ INSERT INTO pgsql.portfolio_allocation_fact (
         asset_market_price,
         total_market_value,
         time_frame_tag,
-        portfolio_id
+        portfolio_id,
+        observation_time_id
     FROM portfolio_allocation_fact_insertion
 ;
 

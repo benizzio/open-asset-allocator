@@ -1,0 +1,269 @@
+<div id="accordion-portfolio-history-management"
+     class="accordion"
+     hx-get="/api/portfolio/:portfolioId/history/observation"
+     hx-include="[name='portfolioId']"
+     hx-trigger="load"
+     handlebars-template="template-portfolio-history-management"
+>
+</div>
+
+<script id="template-portfolio-history-management" type="text/x-handlebars-template">
+
+    {{#each .}}
+
+        <div class="accordion-item">
+
+            <h2 id="portfolio-history-management-trigger-{{id}}"
+                class="accordion-header"
+                hx-include="[name='portfolioId']"
+                hx-target="#portfolio-history-management-form-tbody-{{id}}"
+                hx-trigger="click, reload-history-observation"
+                handlebars-template="template-portfolio-history-management-form-tbody"
+                hx-get="/api/portfolio/:portfolioId/history?observationTimestampId={{id}}"
+            >
+            <button class="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#portfolio-history-management-{{id}}"
+                    aria-expanded="true"
+                    aria-controls="portfolio-history-management-{{id}}"
+            >
+                {{timeTag}}
+            </button>
+            </h2>
+
+            <div id="portfolio-history-management-{{id}}"
+                 class="accordion-collapse collapse"
+                 data-bs-parent="#accordion-portfolio-history-management"
+            >
+                <div class="accordion-body row justify-content-center">
+
+                    <form id="portfolio-history-management-form-{{id}}"
+                          class="needs-validation"
+                          hx-post="/api/portfolio/:portfolioId/history"
+                          hx-ext="form-json"
+                          hx-on::after-request="portfolioHistoryManagement.reloadObservationHistory({{id}})"
+                    >
+                        <input type="hidden" name="observationTimestamp.id" value="{{id}}" />
+                        <table class="table table-striped">
+
+                            <thead class="sticky-header">
+                            <tr>
+                                <th scope="col" colspan="2">Asset</th>
+                                <th scope="col">Class</th>
+                                <th scope="col" class="w-10">Cash reserve?</th>
+                                <th scope="col" class="w-15">Quantity</th>
+                                <th scope="col" class="w-15">Market price</th>
+                                <th scope="col" class="w-12">Total market value</th>
+                                <th scope="col"></th>
+                            </tr>
+                            </thead>
+
+                            <tbody class="table-group-divider" id="portfolio-history-management-form-tbody-{{id}}">
+                            </tbody>
+
+                            <tfoot class="sticky-footer">
+                            <tr>
+                                <td colspan="8">
+                                    <div class="d-flex w-100">
+                                        <button class="btn btn-secondary"
+                                                type="button"
+                                                onclick="portfolioHistoryManagement.addPortfolioHistoryManagementRow({{id}})"
+                                        >
+                                            <span class="bi bi-plus-circle h5"></span>
+                                        </button>
+                                        <button class="btn btn-primary ms-auto" type="submit">
+                                            <span class="bi bi-save-fill h5"></span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tfoot>
+
+                        </table>
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+
+    {{/each}}
+
+</script>
+
+<script id="template-portfolio-history-management-form-tbody" type="text/x-handlebars-template">
+
+    {{#each @root.[0].allocations}}
+        {{> template-portfolio-history-management-form-tbody-row allocationIndex=@index observationTimestampId=@root.[0].observationTimestamp.id }}
+    {{/each}}
+
+</script>
+
+<script id="template-portfolio-history-management-form-tbody-row" type="text/x-handlebars-template">
+
+    <tr id="portfolio-history-management-form-{{observationTimestampId}}-row-{{allocationIndex}}">
+        <td>
+
+            <input type="hidden"
+                   name="allocations[{{allocationIndex}}][assetId]"
+                   value="{{assetId}}"
+                   data-null-if-empty
+            />
+
+            {{#if assetId}}
+                {{assetTicker}}
+            {{else}}
+
+                <div class="input-group">
+
+                    <input type="text"
+                           name="allocations[{{allocationIndex}}][assetTicker]"
+                           placeholder="Asset ticker"
+                           aria-label="Asset ticker"
+                           autocomplete="off"
+                           class="form-control"
+                           value="{{assetTicker}}"
+                           list="datalist-assets"
+                           hx-validate="true"
+                           hx-on::validation:validate="portfolioHistoryManagement.validateAssetElementsForPost({{allocationIndex}}, {{observationTimestampId}})"
+                           oninput="maskTickerInput(this)"
+                    />
+                    <button data-asset-action-button
+                            type="button"
+                            class="btn btn-primary btn-xs"
+                            onclick="portfolioHistoryManagement.assetActionButtonClickHandler({{allocationIndex}}, {{observationTimestampId}})"
+                    >
+                        <span class="bi bi-search"></span>
+                    </button>
+
+                </div>
+
+                <div data-new-asset-ticker-message
+                     class="form-text"
+                     style="display: none"
+                >
+                    * Creating new asset
+                </div>
+
+            {{/if}}
+
+        </td>
+
+        <td>
+
+            {{#if assetName}}
+                {{assetName}}
+            {{else}}
+                <input type="text"
+                       name="allocations[{{allocationIndex}}][assetName]"
+                       placeholder="Asset name"
+                       aria-label="Asset name"
+                       autocomplete="off"
+                       class="form-control"
+                       value="{{assetName}}"
+                       style="display: none"
+                />
+            {{/if}}
+
+        </td>
+
+        <td>
+            <input type="text"
+                   name="allocations[{{allocationIndex}}][class]"
+                   placeholder="Class"
+                   aria-label="Class"
+                   autocomplete="off"
+                   class="form-control"
+                   value="{{class}}"
+                   list="datalist-classes"
+                   oninput="maskTagInput(this)"
+                   required
+            />
+        </td>
+
+        <td class="align-middle text-center">
+            <input type="checkbox"
+                   name="allocations[{{allocationIndex}}][cashReserve]"
+                   {{#if cashReserve}}checked{{/if}}
+            />
+        </td>
+
+
+        <td>
+            <input type="number"
+                   name="allocations[{{allocationIndex}}][assetQuantity]"
+                   placeholder="Quantity"
+                   aria-label="Quantity"
+                   autocomplete="off"
+                   class="form-control"
+                   value="{{assetQuantity}}"
+                   step="any"
+                   min="0"
+                   data-null-if-empty
+                   oninput="
+                           maskNumberDecimalPlaces(this);
+                           portfolioHistoryManagement.handleInputQuantityOrMarketPrice({{allocationIndex}}, {{observationTimestampId}});
+                           "
+            />
+        </td>
+
+        <td>
+            <input type="number"
+                   name="allocations[{{allocationIndex}}][assetMarketPrice]"
+                   placeholder="Market price"
+                   aria-label="Market price"
+                   autocomplete="off"
+                   class="form-control"
+                   value="{{assetMarketPrice}}"
+                   step="any"
+                   min="0"
+                   data-null-if-empty
+                   oninput="
+                           maskNumberDecimalPlaces(this);
+                           portfolioHistoryManagement.handleInputQuantityOrMarketPrice({{allocationIndex}}, {{observationTimestampId}});
+                           "
+            />
+        </td>
+
+        <td>
+            <input type="number"
+                   name="allocations[{{allocationIndex}}][totalMarketValue]"
+                   placeholder="Total market value"
+                   aria-label="Total market value"
+                   autocomplete="off"
+                   class="form-control "
+                   value="{{totalMarketValue}}"
+                   step="any"
+                   min="0"
+                   required
+                   oninput="
+                           maskNumberDecimalPlaces(this);
+                           portfolioHistoryManagement.handleInputTotalMarketValue({{allocationIndex}}, {{observationTimestampId}});
+                           "
+            />
+        </td>
+
+        <td>
+            <button type="button"
+                    class="btn btn-danger btn-xs"
+                    onclick="this.closest('tr').remove()"
+            >
+                <span class="bi bi-dash-circle"></span>
+            </button>
+        </td>
+
+    </tr>
+
+</script>
+
+<script type="text/javascript">
+
+    HandlebarsUtils.registerPartialToContainer(
+        "accordion-portfolio-history",
+        "template-portfolio-history-management-form-tbody-row"
+    );
+
+    portfolioHistoryManagement.handlebarPortfolioHistoryManagementRowTemplate = Handlebars.compile(window["template-portfolio-history-management-form-tbody-row"].innerHTML);
+
+</script>

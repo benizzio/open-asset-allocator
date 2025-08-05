@@ -39,7 +39,7 @@ func insertTestPortfolio(t *testing.T, testPortfolioNameBefore string) domain.Po
 	assert.NoError(t, err)
 
 	t.Cleanup(
-		inttestutil.CreateDBCleanupDeferable(
+		inttestutil.CreateDBCleanupFunction(
 			"DELETE FROM portfolio WHERE id='%d'",
 			testPortFolio.Id,
 		),
@@ -89,7 +89,7 @@ func putPortfolio(t *testing.T, putPortfolioJSON string) *http.Response {
 
 	request, err := http.NewRequest(
 		http.MethodPut,
-		inttestinfra.TestAPIURLprefix+"/portfolio",
+		inttestinfra.TestAPIURLPrefix+"/portfolio",
 		strings.NewReader(putPortfolioJSON),
 	)
 	assert.NoError(t, err)

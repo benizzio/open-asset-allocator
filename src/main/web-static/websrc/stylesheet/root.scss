@@ -10,3 +10,32 @@
 .border-dashed {
   border-style: dashed !important;
 }
+
+.w-10 {
+  width: 10% !important;
+}
+
+.w-12 {
+  width: 12% !important;
+}
+
+.w-15 {
+  width: 15% !important;
+}
+
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.sticky-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+}
+
+.btn-xs {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+}
