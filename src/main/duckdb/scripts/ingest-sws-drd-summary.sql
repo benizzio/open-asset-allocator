@@ -81,7 +81,6 @@ CREATE TEMP VIEW portfolio_allocation_fact_insertion AS
             adm.asset_quantity::DECIMAL(30,8) * swss.current_price::DECIMAL(30,8),
             swss.current_value
         ) as total_market_value,
-        paot.observation_time_tag as time_frame_tag, -- DEPRECATED TODO remove on cleanup
         paot.id AS observation_time_id,
         getenv('PORTFOLIO_ID')::INTEGER AS portfolio_id
     FROM sws_summary swss
@@ -101,7 +100,6 @@ INSERT INTO pgsql.portfolio_allocation_fact (
         asset_quantity,
         asset_market_price,
         total_market_value,
-        time_frame_tag,
         observation_time_id,
         portfolio_id
     )
@@ -112,7 +110,6 @@ INSERT INTO pgsql.portfolio_allocation_fact (
         asset_quantity,
         asset_market_price,
         total_market_value,
-        time_frame_tag,
         observation_time_id,
         portfolio_id
     FROM portfolio_allocation_fact_insertion

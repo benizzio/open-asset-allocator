@@ -116,7 +116,7 @@ Configuration can be done in [.env](src/main/docker/.env)
 #### Backlog - Not planned yet
 
 - Portfolio history
-    - [ ] Linet chart with portfolio total market value over time
+    - [ ] Line chart with portfolio total market value over time
 
 #### Pre-alpha - Phase 1
 
