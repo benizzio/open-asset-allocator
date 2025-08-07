@@ -126,6 +126,8 @@ CREATE TEMP TABLE yahoo_finance_data AS
     )
 ;
 
+SELECT * FROM yahoo_finance_data;
+
 CREATE TEMP VIEW yahoo_current_asset_price AS
     SELECT yal.asset_data_source_id, yf.last_date AS market_date, yf.last_close AS close_price
     FROM yahoo_asset_list yal
@@ -210,7 +212,6 @@ CREATE TEMP VIEW portfolio_allocation_fact_insertion AS
         gsa.total_quantity AS asset_quantity,
         aplmd.market_close_price AS asset_market_price,
         gsa.total_quantity::DECIMAL(30,8) * aplmd.market_close_price::DECIMAL(30,8) AS total_market_value,
-        paot.observation_time_tag as time_frame_tag, -- DEPRECATED TODO remove on cleanup
         paot.id AS observation_time_id,
         getenv('PORTFOLIO_ID')::INTEGER AS portfolio_id
     FROM ghostf_symbol_aggegation gsa
@@ -232,7 +233,6 @@ INSERT INTO pgsql.portfolio_allocation_fact (
         asset_quantity,
         asset_market_price,
         total_market_value,
-        time_frame_tag,
         portfolio_id,
         observation_time_id
     )
@@ -243,7 +243,6 @@ INSERT INTO pgsql.portfolio_allocation_fact (
         asset_quantity,
         asset_market_price,
         total_market_value,
-        time_frame_tag,
         portfolio_id,
         observation_time_id
     FROM portfolio_allocation_fact_insertion
