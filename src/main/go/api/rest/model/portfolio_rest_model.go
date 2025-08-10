@@ -1,10 +1,10 @@
 package model
 
 import (
-	"github.com/benizzio/open-asset-allocator/domain"
+	"time"
+
 	"github.com/benizzio/open-asset-allocator/langext"
 	"github.com/shopspring/decimal"
-	"time"
 )
 
 type PortfolioDTS struct {
@@ -25,8 +25,6 @@ type PortfolioAllocationDTS struct {
 }
 
 type PortfolioSnapshotDTS struct {
-	// Deprecated: use PortfolioObservationTimestampDTS
-	TimeFrameTag         domain.TimeFrameTag               `json:"timeFrameTag"`
 	ObservationTimestamp *PortfolioObservationTimestampDTS `json:"observationTimestamp" validate:"required"`
 	Allocations          []*PortfolioAllocationDTS         `json:"allocations" validate:"required,min=1"`
 	TotalMarketValue     int64                             `json:"totalMarketValue"`
@@ -76,8 +74,6 @@ type PortfolioObservationTimestampDTS struct {
 }
 
 type AnalysisOptionsDTS struct {
-	// Deprecated: use AvailableObservedHistory
-	AvailableHistory         []domain.TimeFrameTag               `json:"availableHistory"`
 	AvailableObservedHistory []*PortfolioObservationTimestampDTS `json:"availableObservedHistory"`
 	AvailablePlans           []*AllocationPlanIdentifierDTS      `json:"availablePlans"`
 }
@@ -92,9 +88,7 @@ type PotentialDivergenceDTS struct {
 }
 
 type DivergenceAnalysisDTS struct {
-	PortfolioId int `json:"portfolioId"`
-	// Deprecated: use ObservationTimestamp
-	TimeFrameTag              domain.TimeFrameTag               `json:"timeFrameTag"`
+	PortfolioId               int                               `json:"portfolioId"`
 	ObservationTimestamp      *PortfolioObservationTimestampDTS `json:"observationTimestamp"`
 	AllocationPlanId          int                               `json:"allocationPlanId"`
 	PortfolioTotalMarketValue int64                             `json:"portfolioTotalMarketValue"`

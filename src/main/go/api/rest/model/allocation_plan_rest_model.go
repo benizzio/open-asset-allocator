@@ -1,9 +1,10 @@
 package model
 
 import (
+	"time"
+
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/shopspring/decimal"
-	"time"
 )
 
 // ================================================

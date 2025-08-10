@@ -1,13 +1,7 @@
 package rest
 
 const (
-	// Deprecated: use static strings for paths and parameters
-	portfolioPath    = "/api/portfolio"
-	portfolioIdParam = "portfolioId"
-	// Deprecated: use static strings for paths and parameters
-	specificPortfolioPath = portfolioPath + "/:" + portfolioIdParam
-	// Deprecated: use observationTimestampIdParam
-	timeFrameTagParam                     = "timeFrameTag"
+	portfolioIdParam                      = "portfolioId"
 	observationTimestampIdParam           = "observationTimestampId"
 	planIdParam                           = "planId"
 	assetIdOrTickerParam                  = "assetIdOrTicker"

@@ -13,9 +13,7 @@ func (divergence *PotentialDivergence) AddInternalDivergence(internalDivergence 
 }
 
 type DivergenceAnalysis struct {
-	PortfolioId int
-	// Deprecated: use ObservationTimestamp
-	TimeFrameTag              TimeFrameTag
+	PortfolioId               int
 	ObservationTimestamp      *PortfolioObservationTimestamp
 	AllocationPlanId          int
 	PortfolioTotalMarketValue int64

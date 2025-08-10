@@ -25,38 +25,11 @@ func (service *PortfolioDomService) GetPortfolioAllocationHistory(id int) ([]*do
 	return service.portfolioRepository.GetAllPortfolioAllocationsWithinObservationTimestampsLimit(id, 10)
 }
 
-// Deprecated: use FindPortfolioAllocationsByObservationTimestamp
-func (service *PortfolioDomService) FindPortfolioAllocations(
-	id int,
-	timeFrameTag domain.TimeFrameTag,
-) ([]*domain.PortfolioAllocation, error) {
-	return service.portfolioRepository.FindPortfolioAllocations(id, timeFrameTag)
-}
-
 func (service *PortfolioDomService) FindPortfolioAllocationsByObservationTimestamp(
 	id int,
 	observationTimestampId int,
 ) ([]*domain.PortfolioAllocation, error) {
 	return service.portfolioRepository.FindPortfolioAllocationsByObservationTimestamp(id, observationTimestampId)
-}
-
-// Deprecated: use GetPortfolioAtObservationTimestamp
-func (service *PortfolioDomService) GetPortfolioSnapshot(
-	id int,
-	timeFrameTag domain.TimeFrameTag,
-) (*domain.Portfolio, []*domain.PortfolioAllocation, error) {
-
-	portfolio, err := service.GetPortfolio(id)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	portfolioAllocations, err := service.FindPortfolioAllocations(id, timeFrameTag)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return portfolio, portfolioAllocations, nil
 }
 
 func (service *PortfolioDomService) GetPortfolioAtObservationTimestamp(
@@ -75,14 +48,6 @@ func (service *PortfolioDomService) GetPortfolioAtObservationTimestamp(
 	}
 
 	return portfolio, portfolioAllocations, nil
-}
-
-// Deprecated: use GetAvailableObservationTimestamps
-func (service *PortfolioDomService) GetAllTimeFrameTags(
-	portfolioId int,
-	timeFrameLimit int,
-) ([]domain.TimeFrameTag, error) {
-	return service.portfolioRepository.GetAllTimeFrameTags(portfolioId, timeFrameLimit)
 }
 
 func (service *PortfolioDomService) GetAvailableObservationTimestamps(

@@ -1,14 +1,15 @@
 package rest
 
 import (
+	"net/http"
+	"strconv"
+
 	"github.com/benizzio/open-asset-allocator/api/rest/model"
 	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/benizzio/open-asset-allocator/infra/util"
 	"github.com/benizzio/open-asset-allocator/langext"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"strconv"
 )
 
 type PortfolioRESTController struct {
@@ -19,22 +20,22 @@ func (controller *PortfolioRESTController) BuildRoutes() []infra.RESTRoute {
 	return []infra.RESTRoute{
 		{
 			Method:   http.MethodGet,
-			Path:     portfolioPath,
+			Path:     "/api/portfolio",
 			Handlers: gin.HandlersChain{controller.getPortfolios},
 		},
 		{
 			Method:   http.MethodGet,
-			Path:     specificPortfolioPath,
+			Path:     "/api/portfolio/:" + portfolioIdParam,
 			Handlers: gin.HandlersChain{controller.getPortfolio},
 		},
 		{
 			Method:   http.MethodPost,
-			Path:     portfolioPath,
+			Path:     "/api/portfolio",
 			Handlers: gin.HandlersChain{controller.postPortfolio},
 		},
 		{
 			Method:   http.MethodPut,
-			Path:     portfolioPath,
+			Path:     "/api/portfolio",
 			Handlers: gin.HandlersChain{controller.putPortfolio},
 		},
 	}

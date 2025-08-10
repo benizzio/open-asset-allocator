@@ -1,11 +1,12 @@
 package inttest
 
 import (
-	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"testing"
+
+	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetAllocationPlans(t *testing.T) {

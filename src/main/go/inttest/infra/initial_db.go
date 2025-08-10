@@ -65,7 +65,6 @@ const initialStateSQL = `
 		asset_quantity,
 		asset_market_price,
 		total_market_value,
-		time_frame_tag,
 		portfolio_id,
 		observation_time_id
 	)
@@ -76,7 +75,6 @@ const initialStateSQL = `
 			   100,
 			   100,
 			   10000,
-			   '202501',
 			   1,
 			   1
 		   ),
@@ -87,7 +85,6 @@ const initialStateSQL = `
 			   80,
 			   100,
 			   8000,
-			   '202501',
 			   1,
 			   1
 		   ),
@@ -98,7 +95,6 @@ const initialStateSQL = `
 			   60,
 			   100,
 			   6000,
-			   '202501',
 			   1,
 			   1
 		   ),
@@ -109,7 +105,6 @@ const initialStateSQL = `
 			   30,
 			   100,
 			   3000,
-			   '202501',
 			   1,
 			   1
 		   )
@@ -125,7 +120,6 @@ const initialStateSQL = `
 		asset_quantity,
 		asset_market_price,
 		total_market_value,
-		time_frame_tag,
 		portfolio_id,
 		create_timestamp,
 		observation_time_id
@@ -137,7 +131,6 @@ const initialStateSQL = `
 			   80,
 			   100,
 			   9000,
-			   '202501',
 			   1,
 			   now() - INTERVAL '1 minute',
 			   1
@@ -149,7 +142,6 @@ const initialStateSQL = `
 			   10,
 			   100,
 			   1000,
-			   '202501',
 			   1,
 			   now() - INTERVAL '1 minute',
 			   1
@@ -161,7 +153,6 @@ const initialStateSQL = `
 			   90,
 			   100,
 			   8000,
-			   '202501',
 			   1,
 			   now() - INTERVAL '1 minute',
 			   1
@@ -175,7 +166,6 @@ const initialStateSQL = `
 		asset_quantity,
 		asset_market_price,
 		total_market_value,
-		time_frame_tag,
 		portfolio_id,
 		observation_time_id
 	)
@@ -186,7 +176,6 @@ const initialStateSQL = `
 			   100.00009,
 			   100,
 			   10000,
-			   '202503',
 			   1,
 			   2
 		   )

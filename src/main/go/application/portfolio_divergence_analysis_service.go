@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/infra/util"
@@ -15,36 +16,7 @@ type PortfolioDivergenceAnalysisAppService struct {
 
 type potentialDivergencesPerHierarchicalId map[string]*domain.PotentialDivergence
 
-// Deprecated: use GeneratePortfolioDivergenceAnalysisNew
 func (service *PortfolioDivergenceAnalysisAppService) GeneratePortfolioDivergenceAnalysis(
-	portfolioId int,
-	timeFrameTag domain.TimeFrameTag,
-	allocationPlanId int,
-) (*domain.DivergenceAnalysis, error) {
-
-	var analysisContext, err = service.initializeAnalysisContext(portfolioId, timeFrameTag, allocationPlanId)
-	if err != nil {
-		return nil, err
-	}
-
-	potentialDivergenceMap, err := service.generateDivergenceAnalysisFromPortfolioAllocationSet(analysisContext)
-	if err != nil {
-		return nil, err
-	}
-
-	analysisContext = buildPotentialDivergenceMapContext(analysisContext, potentialDivergenceMap)
-
-	err = service.complementAnalysisWithAllocationPlanSetDifference(analysisContext, allocationPlanId)
-	if err != nil {
-		return nil, err
-	}
-
-	var divergenceAnalysis = getDivergenceAnalysisContextValue(analysisContext).divergenceAnalysis
-	return divergenceAnalysis, nil
-}
-
-// TODO rename to GeneratePortfolioDivergenceAnalysis after removal of old method
-func (service *PortfolioDivergenceAnalysisAppService) GeneratePortfolioDivergenceAnalysisNew(
 	portfolioId int,
 	observationTimestampId int,
 	allocationPlanId int,
@@ -75,33 +47,6 @@ func (service *PortfolioDivergenceAnalysisAppService) GeneratePortfolioDivergenc
 	return divergenceAnalysis, nil
 }
 
-// Deprecated: use initializeAnalysisContextForObservationTimestamp
-func (service *PortfolioDivergenceAnalysisAppService) initializeAnalysisContext(
-	portfolioId int,
-	timeFrameTag domain.TimeFrameTag,
-	allocationPlanId int,
-) (context.Context, error) {
-
-	var portfolio, portfolioAllocations, err = service.portfolioDomService.GetPortfolioSnapshot(
-		portfolioId,
-		timeFrameTag,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	var divergenceAnalysis = buildDivergenceAnalysis(portfolio, timeFrameTag, nil, allocationPlanId)
-
-	var analysisContextValue = &divergenceAnalysisContextValue{
-		portfolio:            portfolio,
-		portfolioAllocations: portfolioAllocations,
-		divergenceAnalysis:   divergenceAnalysis,
-	}
-
-	var analysisContext = buildDivergenceAnalysisContext(context.Background(), analysisContextValue)
-	return analysisContext, nil
-}
-
 func (service *PortfolioDivergenceAnalysisAppService) initializeAnalysisContextForObservationTimestamp(
 	portfolioId int,
 	observationTimestampId int,
@@ -122,7 +67,7 @@ func (service *PortfolioDivergenceAnalysisAppService) initializeAnalysisContextF
 		observationTimestamp = portfolioAllocations[0].ObservationTimestamp
 	}
 
-	var divergenceAnalysis = buildDivergenceAnalysis(portfolio, "", observationTimestamp, allocationPlanId)
+	var divergenceAnalysis = buildDivergenceAnalysis(portfolio, observationTimestamp, allocationPlanId)
 
 	var analysisContextValue = &divergenceAnalysisContextValue{
 		portfolio:            portfolio,
@@ -307,13 +252,11 @@ func (service *PortfolioDivergenceAnalysisAppService) generatePotentialDivergenc
 
 func buildDivergenceAnalysis(
 	portfolio *domain.Portfolio,
-	timeFrameTag domain.TimeFrameTag,
 	observationTimestamp *domain.PortfolioObservationTimestamp,
 	allocationPlanId int,
 ) *domain.DivergenceAnalysis {
 	return &domain.DivergenceAnalysis{
 		PortfolioId:               portfolio.Id,
-		TimeFrameTag:              timeFrameTag,
 		ObservationTimestamp:      observationTimestamp,
 		AllocationPlanId:          allocationPlanId,
 		PortfolioTotalMarketValue: 0,
