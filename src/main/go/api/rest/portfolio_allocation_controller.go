@@ -54,8 +54,6 @@ func (controller *PortfolioAllocationRESTController) getPortfolioAllocationHisto
 		return
 	}
 
-	var timeFrameTagParamValue = context.Query(timeFrameTagParam)
-
 	var observationTimestampIdParamValue = context.Query(observationTimestampIdParam)
 	var observationTimestampId int
 	if !langext.IsZeroValue(observationTimestampIdParamValue) {
@@ -67,13 +65,12 @@ func (controller *PortfolioAllocationRESTController) getPortfolioAllocationHisto
 
 	portfolioHistory, err := controller.getPortfolioAllocationHistoryUpstack(
 		portfolioId,
-		timeFrameTagParamValue,
 		observationTimestampId,
 	)
 	if err != nil {
 		var errorDetail string
-		if !langext.IsZeroValue(timeFrameTagParamValue) {
-			errorDetail = fmt.Sprintf(" for time frame tag %s", timeFrameTagParamValue)
+		if !langext.IsZeroValue(observationTimestampId) {
+			errorDetail = fmt.Sprintf(" for observation id %d", observationTimestampId)
 		}
 		infra.HandleAPIError(
 			context,
@@ -90,17 +87,13 @@ func (controller *PortfolioAllocationRESTController) getPortfolioAllocationHisto
 
 func (controller *PortfolioAllocationRESTController) getPortfolioAllocationHistoryUpstack(
 	portfolioId int,
-	timeFrameTagParamValue string,
 	observationTimestampId int,
 ) ([]*domain.PortfolioAllocation, error) {
 
 	var portfolioHistory []*domain.PortfolioAllocation
 	var err error
 
-	if !langext.IsZeroValue(timeFrameTagParamValue) {
-		var timeFrameTag = domain.TimeFrameTag(timeFrameTagParamValue)
-		portfolioHistory, err = controller.portfolioDomService.FindPortfolioAllocations(portfolioId, timeFrameTag)
-	} else if !langext.IsZeroValue(observationTimestampId) {
+	if !langext.IsZeroValue(observationTimestampId) {
 		portfolioHistory, err = controller.portfolioDomService.FindPortfolioAllocationsByObservationTimestamp(
 			portfolioId,
 			observationTimestampId,

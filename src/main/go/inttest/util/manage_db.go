@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+
 	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
 	"github.com/golang/glog"
 )

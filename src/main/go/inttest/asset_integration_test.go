@@ -1,11 +1,12 @@
 package inttest
 
 import (
-	"github.com/benizzio/open-asset-allocator/inttest/infra"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"testing"
+
+	"github.com/benizzio/open-asset-allocator/inttest/infra"
+	"github.com/stretchr/testify/assert"
 )
 
 // TestGetKnownAssets tests the GET /api/asset endpoint to retrieve all known assets.

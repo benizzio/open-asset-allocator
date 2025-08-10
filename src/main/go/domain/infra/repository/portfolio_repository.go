@@ -1,28 +1,13 @@
 package repository
 
 import (
-	"time"
-
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/benizzio/open-asset-allocator/langext"
 	dbx "github.com/go-ozzo/ozzo-dbx"
 )
 
-// Deprecated: Use domain.PortfolioObservationTimestamp
-type portfolioTimeFrame struct {
-	TimeFrameTag    domain.TimeFrameTag
-	CreateTimestamp time.Time
-}
-
 const (
-	// Deprecated: Use availableObservationTimeTagsSQL
-	timeFrameTagsSQL = `
-		SELECT DISTINCT ON (time_frame_tag) time_frame_tag, create_timestamp
-		FROM portfolio_allocation_fact pa
-		` + infra.WhereClausePlaceholder + `
-		ORDER BY time_frame_tag DESC, create_timestamp DESC LIMIT {:timeFrameLimit}
-	`
 	availableObservationTimestampsSQL = `
 		SELECT DISTINCT paot.id, paot.observation_time_tag AS time_tag, paot.observation_timestamp AS "timestamp"
 		FROM portfolio_allocation_fact pa
@@ -87,7 +72,6 @@ const (
 				asset_quantity, 
 				asset_market_price, 
 				total_market_value, 
-				time_frame_tag, 
 				portfolio_id, 
 				observation_time_id
 			)
@@ -98,7 +82,6 @@ const (
 				pafmt.asset_quantity, 
 				pafmt.asset_market_price, 
 				pafmt.total_market_value, 
-				pafmt.time_frame_tag, 
 				pafmt.portfolio_id, 
 				pafmt.observation_time_id
 			)
@@ -132,7 +115,6 @@ const (
 	queryAllocationsError           = "Error querying portfolio allocations"
 	queryPortfoliosError            = "Error querying portfolios"
 	queryPortfolioError             = "Error querying single portfolio"
-	queryTimeFrameTagsError         = "Error querying time frame tags"
 	queryObservationTimestampsError = "Error querying observation timestamps"
 )
 
@@ -189,23 +171,6 @@ func (repository *PortfolioRDBMSRepository) GetAllPortfolioAllocationsWithinObse
 	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryAllocationsError, repository)
 }
 
-// Deprecated: use FindPortfolioAllocationsByObservationTimestamp
-func (repository *PortfolioRDBMSRepository) FindPortfolioAllocations(id int, timeFrameTag domain.TimeFrameTag) (
-	[]*domain.PortfolioAllocation,
-	error,
-) {
-	var queryResult []domain.PortfolioAllocation
-	err := repository.dbAdapter.BuildQuery(portfolioAllocationsSQL).
-		AddWhereClauseAndParam(portfolioIdWhereClause, "portfolioId", id).
-		AddWhereClauseAndParam("AND pa.time_frame_tag = {:timeFrameTag}", "timeFrameTag", timeFrameTag).
-		Build().FindInto(&queryResult)
-
-	langext.UnifyStructPointers(queryResult)
-	var result = langext.ToPointerSlice(queryResult)
-
-	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryAllocationsError, repository)
-}
-
 func (repository *PortfolioRDBMSRepository) FindPortfolioAllocationsByObservationTimestamp(
 	id int,
 	observationTimestampId int,
@@ -231,28 +196,6 @@ func (repository *PortfolioRDBMSRepository) FindPortfolioAllocationsByObservatio
 	var result = langext.ToPointerSlice(queryResult)
 
 	return result, nil
-}
-
-// Deprecated: use GetAvailableObservationTimestamps
-func (repository *PortfolioRDBMSRepository) GetAllTimeFrameTags(
-	portfolioId int,
-	timeFrameLimit int,
-) ([]domain.TimeFrameTag, error) {
-
-	var query = timeFrameTagsSQL
-
-	var queryResult []portfolioTimeFrame
-	err := repository.dbAdapter.BuildQuery(query).
-		AddWhereClauseAndParam(portfolioIdWhereClause, "portfolioId", portfolioId).
-		AddParam("timeFrameLimit", timeFrameLimit).
-		Build().FindInto(&queryResult)
-
-	var result = make([]domain.TimeFrameTag, len(queryResult))
-	for i, timeFrame := range queryResult {
-		result[i] = timeFrame.TimeFrameTag
-	}
-
-	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryTimeFrameTagsError, repository)
 }
 
 // TODO rename to FindAvailableObservationTimestamps
@@ -423,8 +366,6 @@ func preparePortfolioAllocationTempInserts(
 		"asset_id",
 		"class",
 		"cash_reserve",
-		// TODO Deprecated: remove after cleanup
-		"time_frame_tag",
 		"observation_time_id",
 		"asset_quantity",
 		"asset_market_price",
@@ -438,8 +379,6 @@ func preparePortfolioAllocationTempInserts(
 			allocation.Asset.Id,
 			allocation.Class,
 			allocation.CashReserve,
-			// TODO Deprecated: remove after cleanup
-			allocation.ObservationTimestamp.TimeTag,
 			allocation.ObservationTimestamp.Id,
 			allocation.AssetQuantity,
 			allocation.AssetMarketPrice,

@@ -2,6 +2,11 @@ package infra
 
 import (
 	"context"
+	"io"
+	"path/filepath"
+	"strings"
+	"time"
+
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/benizzio/open-asset-allocator/infra/util"
 	"github.com/benizzio/open-asset-allocator/root"
@@ -11,10 +16,6 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
-	"io"
-	"path/filepath"
-	"strings"
-	"time"
 )
 
 const (

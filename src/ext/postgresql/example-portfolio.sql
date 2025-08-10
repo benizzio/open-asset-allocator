@@ -25,6 +25,12 @@ ON CONFLICT (id) DO
 
 SELECT setval('asset_id_seq', (SELECT max(id) FROM asset));
 
+INSERT INTO public.portfolio_allocation_obs_time (id, observation_timestamp, observation_time_tag)
+VALUES(1, CURRENT_DATE, to_char(CURRENT_DATE, 'YYYYMM'))
+;
+
+SELECT setval('portfolio_allocation_obs_time_id_seq', (SELECT max(id) FROM portfolio_allocation_obs_time));
+
 DELETE FROM portfolio_allocation_fact WHERE portfolio_id = 1;
 
 -- BONDS total market value = 27000
@@ -35,8 +41,8 @@ INSERT INTO portfolio_allocation_fact (
     asset_quantity,
     asset_market_price,
     total_market_value,
-    time_frame_tag,
-    portfolio_id
+    portfolio_id,
+    observation_time_id
 )
 VALUES (
            1,
@@ -45,7 +51,7 @@ VALUES (
            100,
            100,
            10000,
-           to_char(CURRENT_DATE, 'YYYYMM'),
+           1,
            1
        ),
        (
@@ -55,7 +61,7 @@ VALUES (
            80,
            100,
            8000,
-           to_char(CURRENT_DATE, 'YYYYMM'),
+           1,
            1
        ),
        (
@@ -65,7 +71,7 @@ VALUES (
            60,
            100,
            6000,
-           to_char(CURRENT_DATE, 'YYYYMM'),
+           1,
            1
        ),
        (
@@ -75,7 +81,7 @@ VALUES (
            30,
            100,
            3000,
-           to_char(CURRENT_DATE, 'YYYYMM'),
+           1,
            1
        )
 ;
@@ -88,8 +94,8 @@ INSERT INTO public.portfolio_allocation_fact (
     asset_quantity,
     asset_market_price,
     total_market_value,
-    time_frame_tag,
-    portfolio_id
+    portfolio_id,
+    observation_time_id
 )
 VALUES (
            5,
@@ -98,7 +104,7 @@ VALUES (
            80,
            100,
            9000,
-           to_char(CURRENT_DATE, 'YYYYMM'),
+           1,
            1
        ),
        (
@@ -108,7 +114,7 @@ VALUES (
            10,
            100,
            1000,
-           to_char(CURRENT_DATE, 'YYYYMM'),
+           1,
            1
        ),
        (
@@ -118,7 +124,7 @@ VALUES (
            90,
            100,
            8000,
-           to_char(CURRENT_DATE, 'YYYYMM'),
+           1,
            1
        )
 ;

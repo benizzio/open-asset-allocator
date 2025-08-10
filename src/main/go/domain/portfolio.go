@@ -7,16 +7,11 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-// Deprecated: Use PortfolioObservationTimestamp
-type TimeFrameTag string
-
 // TODO separate PortfolioAllocation and related components into new files
 type PortfolioAllocation struct {
-	Asset       Asset
-	Class       string
-	CashReserve bool
-	// Deprecated: use PortfolioObservationTimestamp
-	TimeFrameTag         TimeFrameTag
+	Asset                Asset
+	Class                string
+	CashReserve          bool
 	ObservationTimestamp *PortfolioObservationTimestamp
 	TotalMarketValue     int64
 	AssetQuantity        decimal.Decimal
@@ -30,8 +25,6 @@ type Portfolio struct {
 }
 
 type AnalysisOptions struct {
-	// Deprecated: use AvailableObservationTimestamps
-	AvailableHistory               []TimeFrameTag
 	AvailableObservationTimestamps []*PortfolioObservationTimestamp
 	AvailablePlans                 []*AllocationPlanIdentifier
 }
@@ -49,11 +42,7 @@ type PortfolioRepository interface {
 		[]*PortfolioAllocation,
 		error,
 	)
-	// Deprecated: use FindPortfolioAllocationsByObservationTimestamp
-	FindPortfolioAllocations(id int, timeFrameTag TimeFrameTag) ([]*PortfolioAllocation, error)
 	FindPortfolioAllocationsByObservationTimestamp(id int, observationTimestampId int) ([]*PortfolioAllocation, error)
-	// Deprecated: use GetAvailableObservationTimestamps
-	GetAllTimeFrameTags(portfolioId int, timeFrameLimit int) ([]TimeFrameTag, error)
 	GetAvailableObservationTimestamps(portfolioId int, observationTimestampsLimit int) (
 		[]*PortfolioObservationTimestamp,
 		error,

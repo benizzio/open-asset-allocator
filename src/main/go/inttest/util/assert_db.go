@@ -2,11 +2,12 @@ package util
 
 import (
 	"database/sql"
+	"testing"
+
 	infrautil "github.com/benizzio/open-asset-allocator/infra/util"
 	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
 	dbx "github.com/go-ozzo/ozzo-dbx"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 // AssertDBWithQuery executes the given SQL query and compares the result with the expected value.

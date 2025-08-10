@@ -1,13 +1,14 @@
 package rest
 
 import (
+	"net/http"
+	"strconv"
+
 	"github.com/benizzio/open-asset-allocator/api/rest/model"
 	"github.com/benizzio/open-asset-allocator/domain/allocation"
 	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"strconv"
 )
 
 type AllocationPlanRESTController struct {
@@ -18,7 +19,7 @@ func (controller *AllocationPlanRESTController) BuildRoutes() []infra.RESTRoute 
 	return []infra.RESTRoute{
 		{
 			Method:   http.MethodGet,
-			Path:     "/api/portfolio/:portfolioId/allocation-plan",
+			Path:     "/api/portfolio/:" + portfolioIdParam + "/allocation-plan",
 			Handlers: gin.HandlersChain{controller.getAllocationPlans},
 		},
 	}

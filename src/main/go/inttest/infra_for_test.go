@@ -2,10 +2,11 @@ package inttest
 
 import (
 	"context"
-	"github.com/benizzio/open-asset-allocator/infra/util"
-	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
 	"os"
 	"testing"
+
+	"github.com/benizzio/open-asset-allocator/infra/util"
+	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
 )
 
 func TestMain(m *testing.M) {

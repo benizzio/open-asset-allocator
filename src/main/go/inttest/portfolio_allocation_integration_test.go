@@ -29,7 +29,6 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 	var expectedResponseJSON = `
 		[
 			{
-				"timeFrameTag":"202503",
 				"observationTimestamp" : {
 					"id": 2,
 					"timeTag": "202503",
@@ -50,7 +49,6 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 				"totalMarketValue":10000
 			},
 			{
-				"timeFrameTag":"202501",
 				"observationTimestamp" : {
 					"id": 1,
 					"timeTag": "202501",
@@ -136,47 +134,6 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
 }
 
-func TestGetPortfolioAllocationHistoryForTimeFrame(t *testing.T) {
-
-	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/history?timeFrameTag=202503")
-	assert.NoError(t, err)
-
-	assert.Equal(t, http.StatusOK, response.StatusCode)
-
-	body, err := io.ReadAll(response.Body)
-	assert.NoError(t, err)
-	assert.NotEmpty(t, body)
-
-	var actualResponseJSON = string(body)
-	var expectedResponseJSON = `
-		[
-			{
-				"timeFrameTag":"202503",
-				"observationTimestamp" : {
-					"id": 2,
-					"timeTag": "202503",
-					"timestamp": "2025-03-01T00:00:00Z"
-				},
-				"allocations":[
-					{
-						"assetId": 1,
-						"assetName":"SPDR Bloomberg 1-3 Month T-Bill ETF",
-						"assetTicker":"ARCA:BIL",
-						"class":"BONDS",
-						"cashReserve":false,
-						"assetMarketPrice":"100",
-						"assetQuantity":"100.00009",
-						"totalMarketValue":10000
-					}
-				],
-				"totalMarketValue":10000
-			}
-		]
-	`
-
-	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
-}
-
 func TestGetPortfolioAllocationHistoryForObservationTimestamp(t *testing.T) {
 
 	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/history?observationTimestampId=2")
@@ -192,7 +149,6 @@ func TestGetPortfolioAllocationHistoryForObservationTimestamp(t *testing.T) {
 	var expectedResponseJSON = `
 		[
 			{
-				"timeFrameTag":"202503",
 				"observationTimestamp" : {
 					"id": 2,
 					"timeTag": "202503",
@@ -485,7 +441,6 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 			asset_quantity,
 			asset_market_price,
 			total_market_value,
-			time_frame_tag,
 			portfolio_id,
 			observation_time_id
 		)
@@ -496,7 +451,6 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 			   1,
 			   100,
 			   100,
-			   '202504',
 			   1,
 			   3
 			),
@@ -507,7 +461,6 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 			   10,
 			   9,
 			   90,
-			   '202504',
 			   1,
 			   3
 			)

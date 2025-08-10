@@ -21,10 +21,6 @@ export type PortfolioAllocation = {
 };
 
 export type PortfolioSnapshot = {
-    /**
-     * @deprecated use `observationTimestamp` instead
-     */
-    timeFrameTag: string;
     observationTimestamp: ObservationTimestamp;
     allocations: PortfolioAllocation[];
 };

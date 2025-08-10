@@ -1,9 +1,10 @@
 package model
 
 import (
+	"sort"
+
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/langext"
-	"sort"
 )
 
 // ==========================================
@@ -108,10 +109,8 @@ func buildHistoryDTS(
 	var aggregatedPortfoliohistory = make([]*PortfolioSnapshotDTS, 0)
 	for observationTimestamp, allocations := range portfolioAllocationsPerObservationTimestamp {
 		var totalMarketValue = portfolioAllocationsPerObservationTimestamp.getAggregatedMarketValue(observationTimestamp)
-		//TODO remove
-		var timeFrameTag = domain.TimeFrameTag(observationTimestamp.TimeTag)
 		obs := observationTimestamp
-		portfolioSnapshot := buildSnapshotDTS(timeFrameTag, &obs, allocations, totalMarketValue)
+		portfolioSnapshot := buildSnapshotDTS(&obs, allocations, totalMarketValue)
 		aggregatedPortfoliohistory = append(aggregatedPortfoliohistory, portfolioSnapshot)
 	}
 
@@ -128,14 +127,11 @@ func buildHistoryDTS(
 }
 
 func buildSnapshotDTS(
-	// Deprecated: use observationTimestamp
-	timeFrameTag domain.TimeFrameTag,
 	observationTimestamp *PortfolioObservationTimestampDTS,
 	allocations []*PortfolioAllocationDTS,
 	totalMarketValue int64,
 ) *PortfolioSnapshotDTS {
 	return &PortfolioSnapshotDTS{
-		TimeFrameTag:         timeFrameTag,
 		ObservationTimestamp: observationTimestamp,
 		Allocations:          allocations,
 		TotalMarketValue:     totalMarketValue,
@@ -213,7 +209,6 @@ func MapToAnalysisOptionsDTS(analysisOptions *domain.AnalysisOptions) *AnalysisO
 	var plans = mapToAllocationPlanIdentifierDTSs(analysisOptions.AvailablePlans)
 	var availableHistory = MapToPortfolioObservationTimestampDTSs(analysisOptions.AvailableObservationTimestamps)
 	return &AnalysisOptionsDTS{
-		AvailableHistory:         analysisOptions.AvailableHistory,
 		AvailableObservedHistory: availableHistory,
 		AvailablePlans:           plans,
 	}
@@ -241,14 +236,9 @@ func mapToAllocationPlanIdentifierDTS(plan *domain.AllocationPlanIdentifier) *Al
 
 func MapToDivergenceAnalysisDTS(analysis *domain.DivergenceAnalysis) *DivergenceAnalysisDTS {
 	var rootDivergences = mapToPotentialDivergenceDTSs(analysis.Root, 0)
-	// TODO clean if after removing deprecated implementations
-	var observationTimestamp *PortfolioObservationTimestampDTS
-	if analysis.ObservationTimestamp != nil {
-		observationTimestamp = mapToObservationTimestampDTS(analysis.ObservationTimestamp)
-	}
+	var observationTimestamp = mapToObservationTimestampDTS(analysis.ObservationTimestamp)
 	var analysisDTS = DivergenceAnalysisDTS{
 		PortfolioId:               analysis.PortfolioId,
-		TimeFrameTag:              analysis.TimeFrameTag,
 		ObservationTimestamp:      observationTimestamp,
 		AllocationPlanId:          analysis.AllocationPlanId,
 		PortfolioTotalMarketValue: analysis.PortfolioTotalMarketValue,

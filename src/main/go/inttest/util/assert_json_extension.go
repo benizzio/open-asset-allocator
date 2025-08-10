@@ -2,11 +2,12 @@ package util
 
 import (
 	"encoding/json"
-	"github.com/stretchr/testify/assert"
 	"regexp"
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // arrayIndexPattern is the regex pattern used to identify array index notation
