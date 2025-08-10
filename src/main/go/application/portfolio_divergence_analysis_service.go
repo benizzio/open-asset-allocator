@@ -10,8 +10,9 @@ import (
 )
 
 type PortfolioDivergenceAnalysisAppService struct {
-	portfolioDomService      *service.PortfolioDomService
-	allocationPlanDomService *service.AllocationPlanDomService
+	portfolioDomService           *service.PortfolioDomService
+	portfolioAllocationDomService *service.PortfolioAllocationDomService
+	allocationPlanDomService      *service.AllocationPlanDomService
 }
 
 type potentialDivergencesPerHierarchicalId map[string]*domain.PotentialDivergence
@@ -53,7 +54,12 @@ func (service *PortfolioDivergenceAnalysisAppService) initializeAnalysisContextF
 	allocationPlanId int,
 ) (context.Context, error) {
 
-	var portfolio, portfolioAllocations, err = service.portfolioDomService.GetPortfolioAtObservationTimestamp(
+	portfolio, err := service.portfolioDomService.GetPortfolio(portfolioId)
+	if err != nil {
+		return nil, err
+	}
+
+	portfolioAllocations, err := service.portfolioAllocationDomService.FindPortfolioAllocationsByObservationTimestamp(
 		portfolioId,
 		observationTimestampId,
 	)
@@ -234,7 +240,7 @@ func (service *PortfolioDivergenceAnalysisAppService) generatePotentialDivergenc
 	var currentHierarchyLevelIterator = getHierarchySubIterationContextValue(analysisContext)
 	var currentHierarchyLevel, currentHierarchyLevelIndex = currentHierarchyLevelIterator.CurrentPointer()
 
-	var hierarchicalId, err = service.portfolioDomService.GenerateHierarchicalId(
+	var hierarchicalId, err = service.portfolioAllocationDomService.GenerateHierarchicalId(
 		currentAllocation,
 		allocationHierarchy,
 		currentHierarchyLevelIndex,
@@ -243,7 +249,10 @@ func (service *PortfolioDivergenceAnalysisAppService) generatePotentialDivergenc
 		return "", "", err
 	}
 
-	hierarchyLevelKey, err := service.portfolioDomService.GetIdSegment(currentAllocation, currentHierarchyLevel)
+	hierarchyLevelKey, err := service.portfolioAllocationDomService.GetIdSegment(
+		currentAllocation,
+		currentHierarchyLevel,
+	)
 	if err != nil {
 		return "", "", err
 	}
@@ -458,10 +467,12 @@ func generateAndAttachPotentialDivergenceForPlannedAllocation(
 
 func BuildPortfolioDivergenceAnalysisAppService(
 	portfolioDomService *service.PortfolioDomService,
+	portfolioAllocationDomService *service.PortfolioAllocationDomService,
 	allocationPlanDomService *service.AllocationPlanDomService,
 ) *PortfolioDivergenceAnalysisAppService {
 	return &PortfolioDivergenceAnalysisAppService{
-		allocationPlanDomService: allocationPlanDomService,
-		portfolioDomService:      portfolioDomService,
+		portfolioDomService,
+		portfolioAllocationDomService,
+		allocationPlanDomService,
 	}
 }

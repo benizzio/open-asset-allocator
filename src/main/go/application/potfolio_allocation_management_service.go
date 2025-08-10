@@ -8,9 +8,9 @@ import (
 )
 
 type PortfolioAllocationManagementAppService struct {
-	transactionManager  infra.TransactionManager
-	portfolioDomService *service.PortfolioDomService
-	assetDomService     *service.AssetDomService
+	transactionManager            infra.TransactionManager
+	portfolioAllocationDomService *service.PortfolioAllocationDomService
+	assetDomService               *service.AssetDomService
 }
 
 func (service *PortfolioAllocationManagementAppService) MergePortfolioAllocations(
@@ -36,7 +36,7 @@ func (service *PortfolioAllocationManagementAppService) MergePortfolioAllocation
 				return err
 			}
 
-			return service.portfolioDomService.MergePortfolioAllocationsInTransaction(
+			return service.portfolioAllocationDomService.MergePortfolioAllocationsInTransaction(
 				transContext,
 				portfolioId,
 				managedObservationTimestamp,
@@ -59,7 +59,7 @@ func (service *PortfolioAllocationManagementAppService) manageObservationTimesta
 
 	if langext.IsZeroValue(observationTimestamp.Id) {
 
-		managedObservationTimestamp, err = service.portfolioDomService.InsertObservationTimestampInTransaction(
+		managedObservationTimestamp, err = service.portfolioAllocationDomService.InsertObservationTimestampInTransaction(
 			transContext,
 			observationTimestamp,
 		)
@@ -122,12 +122,12 @@ func replacePersistedAssetsOnAllocations(
 
 func BuildPortfolioAllocationManagementAppService(
 	transactionManager infra.TransactionManager,
-	portfolioDomService *service.PortfolioDomService,
+	portfolioAllocationDomService *service.PortfolioAllocationDomService,
 	assetDomService *service.AssetDomService,
 ) *PortfolioAllocationManagementAppService {
 	return &PortfolioAllocationManagementAppService{
 		transactionManager,
-		portfolioDomService,
+		portfolioAllocationDomService,
 		assetDomService,
 	}
 }

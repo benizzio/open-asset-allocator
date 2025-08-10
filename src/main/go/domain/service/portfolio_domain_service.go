@@ -1,16 +1,12 @@
 package service
 
 import (
-	"time"
-
 	"github.com/benizzio/open-asset-allocator/domain"
-	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/benizzio/open-asset-allocator/langext"
 )
 
 type PortfolioDomService struct {
-	allocationHierarchyFieldExtractorMap map[string]func(*domain.PortfolioAllocation) string
-	portfolioRepository                  domain.PortfolioRepository
+	portfolioRepository domain.PortfolioRepository
 }
 
 func (service *PortfolioDomService) GetPortfolios() ([]*domain.Portfolio, error) {
@@ -18,93 +14,7 @@ func (service *PortfolioDomService) GetPortfolios() ([]*domain.Portfolio, error)
 }
 
 func (service *PortfolioDomService) GetPortfolio(id int) (*domain.Portfolio, error) {
-	return service.portfolioRepository.GetPortfolio(id)
-}
-
-func (service *PortfolioDomService) GetPortfolioAllocationHistory(id int) ([]*domain.PortfolioAllocation, error) {
-	return service.portfolioRepository.GetAllPortfolioAllocationsWithinObservationTimestampsLimit(id, 10)
-}
-
-func (service *PortfolioDomService) FindPortfolioAllocationsByObservationTimestamp(
-	id int,
-	observationTimestampId int,
-) ([]*domain.PortfolioAllocation, error) {
-	return service.portfolioRepository.FindPortfolioAllocationsByObservationTimestamp(id, observationTimestampId)
-}
-
-func (service *PortfolioDomService) GetPortfolioAtObservationTimestamp(
-	id int,
-	observationTimestampId int,
-) (*domain.Portfolio, []*domain.PortfolioAllocation, error) {
-
-	portfolio, err := service.GetPortfolio(id)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	portfolioAllocations, err := service.FindPortfolioAllocationsByObservationTimestamp(id, observationTimestampId)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return portfolio, portfolioAllocations, nil
-}
-
-func (service *PortfolioDomService) GetAvailableObservationTimestamps(
-	portfolioId int,
-	observationTimestampsLimit int,
-) ([]*domain.PortfolioObservationTimestamp, error) {
-	return service.portfolioRepository.GetAvailableObservationTimestamps(portfolioId, observationTimestampsLimit)
-}
-
-func (service *PortfolioDomService) GenerateHierarchicalId(
-	allocation *domain.PortfolioAllocation,
-	hierarchy domain.AllocationHierarchy,
-	hierarchyLevelIndex int,
-) (string, error) {
-
-	var hierarchicalId string
-	var highestHierarchyIndex = len(hierarchy) - 1
-
-	for i := highestHierarchyIndex; i >= hierarchyLevelIndex; i-- {
-
-		idSegment, err := service.GetIdSegment(allocation, &hierarchy[i])
-		if err != nil {
-			return "", err
-		}
-
-		if i <= highestHierarchyIndex-1 {
-			idSegment += domain.HierarchicalIdLevelSeparator
-		}
-
-		hierarchicalId = idSegment + hierarchicalId
-	}
-
-	return hierarchicalId, nil
-}
-
-func (service *PortfolioDomService) GetIdSegment(
-	allocation *domain.PortfolioAllocation,
-	hierarchyLevel *domain.AllocationHierarchyLevel,
-) (string, error) {
-
-	var hierarchyLevelKey, err = service.getHierarchyLevelFieldValue(hierarchyLevel, allocation)
-	if err != nil {
-		return "", err
-	}
-
-	return hierarchyLevelKey, nil
-}
-
-func (service *PortfolioDomService) getHierarchyLevelFieldValue(
-	level *domain.AllocationHierarchyLevel,
-	allocation *domain.PortfolioAllocation,
-) (string, error) {
-	extractorFunction, ok := service.allocationHierarchyFieldExtractorMap[level.Field]
-	if !ok {
-		return "", infra.BuildAppErrorFormatted("No extractor registered for field: %s", level.Field)
-	}
-	return extractorFunction(allocation), nil
+	return service.portfolioRepository.FindPortfolio(id)
 }
 
 func (service *PortfolioDomService) PersistPortfolio(portfolio *domain.Portfolio) (*domain.Portfolio, error) {
@@ -124,50 +34,8 @@ func (service *PortfolioDomService) PersistPortfolio(portfolio *domain.Portfolio
 	return persistedPortfolio, nil
 }
 
-func (service *PortfolioDomService) FindAvailablePortfolioAllocationClasses(portfolioId int) ([]string, error) {
-	return service.portfolioRepository.FindAvailablePortfolioAllocationClasses(portfolioId)
-}
-
-func (service *PortfolioDomService) MergePortfolioAllocationsInTransaction(
-	transContext *infra.TransactionalContext,
-	portfolioId int,
-	observationTimestamp *domain.PortfolioObservationTimestamp,
-	allocations []*domain.PortfolioAllocation,
-) error {
-	return service.portfolioRepository.MergePortfolioAllocationsInTransaction(
-		transContext,
-		portfolioId,
-		observationTimestamp,
-		allocations,
-	)
-}
-
-func (service *PortfolioDomService) InsertObservationTimestampInTransaction(
-	transContext *infra.TransactionalContext,
-	observationTimestamp *domain.PortfolioObservationTimestamp,
-) (*domain.PortfolioObservationTimestamp, error) {
-
-	if langext.IsZeroValue(observationTimestamp.TimeTag) {
-		observationTimestamp.TimeTag = observationTimestamp.Timestamp.Format(time.RFC3339)
-	}
-
-	if langext.IsZeroValue(observationTimestamp.Timestamp) {
-		observationTimestamp.Timestamp = time.Now()
-	}
-
-	return service.portfolioRepository.InsertObservationTimestampInTransaction(transContext, observationTimestamp)
-}
-
 func BuildPortfolioDomService(portfolioRepository domain.PortfolioRepository) *PortfolioDomService {
 	return &PortfolioDomService{
-		allocationHierarchyFieldExtractorMap: map[string]func(*domain.PortfolioAllocation) string{
-			"assetTicker": func(allocation *domain.PortfolioAllocation) string {
-				return allocation.Asset.Ticker
-			},
-			"class": func(allocation *domain.PortfolioAllocation) string {
-				return allocation.Class
-			},
-		},
-		portfolioRepository: portfolioRepository,
+		portfolioRepository,
 	}
 }

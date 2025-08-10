@@ -7,8 +7,8 @@ import (
 )
 
 type PortfolioAnalysisConfigurationAppService struct {
-	portfolioDomService      *service.PortfolioDomService
-	allocationPlanDomService *service.AllocationPlanDomService
+	portfolioAllocationDomService *service.PortfolioAllocationDomService
+	allocationPlanDomService      *service.AllocationPlanDomService
 }
 
 func (service *PortfolioAnalysisConfigurationAppService) GetDivergenceAnalysisOptions(portfolioId int) (
@@ -18,7 +18,7 @@ func (service *PortfolioAnalysisConfigurationAppService) GetDivergenceAnalysisOp
 
 	var observationTimestampsLimit = 10
 
-	availableTimestamps, err := service.portfolioDomService.GetAvailableObservationTimestamps(
+	availableTimestamps, err := service.portfolioAllocationDomService.GetAvailableObservationTimestamps(
 		portfolioId,
 		observationTimestampsLimit,
 	)
@@ -41,11 +41,11 @@ func (service *PortfolioAnalysisConfigurationAppService) GetDivergenceAnalysisOp
 }
 
 func BuildPortfolioAnalysisConfigurationAppService(
-	portfolioDomService *service.PortfolioDomService,
+	portfolioAllocationDomService *service.PortfolioAllocationDomService,
 	allocationPlanDomService *service.AllocationPlanDomService,
 ) *PortfolioAnalysisConfigurationAppService {
 	return &PortfolioAnalysisConfigurationAppService{
-		portfolioDomService,
+		portfolioAllocationDomService,
 		allocationPlanDomService,
 	}
 }
