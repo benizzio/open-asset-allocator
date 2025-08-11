@@ -130,11 +130,14 @@ func (repository *PortfolioAllocationRDBMSRepository) FindAllPortfolioAllocation
 		AddWhereClauseAndParam(portfolioIdWhereClause, "portfolioId", id).
 		Build().FindInto(&queryResult)
 
-	//TODO proper error handling
+	if err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(err, queryAllocationsError, repository)
+	}
+
 	langext.UnifyStructPointers(queryResult)
 	var result = langext.ToPointerSlice(queryResult)
 
-	return result, infra.PropagateAsAppErrorWithNewMessage(err, queryAllocationsError, repository)
+	return result, nil
 }
 
 func (repository *PortfolioAllocationRDBMSRepository) FindPortfolioAllocationsByObservationTimestamp(

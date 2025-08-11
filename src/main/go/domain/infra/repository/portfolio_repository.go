@@ -47,15 +47,13 @@ func (repository *PortfolioRDBMSRepository) FindPortfolio(id int) (*domain.Portf
 }
 
 func (repository *PortfolioRDBMSRepository) InsertPortfolio(portfolio *domain.Portfolio) (*domain.Portfolio, error) {
-
 	var insertingCopyPortfolio = *portfolio
 	err := repository.dbAdapter.Insert(&insertingCopyPortfolio)
-	//TODO simplify error handling
-	if err != nil {
-		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "Error inserting portfolio", repository)
-	}
-
-	return &insertingCopyPortfolio, nil
+	return &insertingCopyPortfolio, infra.PropagateAsAppErrorWithNewMessage(
+		err,
+		"Error inserting portfolio",
+		repository,
+	)
 }
 
 func (repository *PortfolioRDBMSRepository) UpdatePortfolio(portfolio *domain.Portfolio) (*domain.Portfolio, error) {
@@ -68,12 +66,11 @@ func (repository *PortfolioRDBMSRepository) UpdatePortfolio(portfolio *domain.Po
 
 	var updatedPortfolio domain.Portfolio
 	err = repository.dbAdapter.Read(&updatedPortfolio, portfolio.Id)
-	//TODO simplify error handling
-	if err != nil {
-		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "Error retrieving updated portfolio", repository)
-	}
-
-	return &updatedPortfolio, nil
+	return &updatedPortfolio, infra.PropagateAsAppErrorWithNewMessage(
+		err,
+		"Error retrieving updated portfolio",
+		repository,
+	)
 }
 
 func BuildPortfolioRepository(dbAdapter infra.RepositoryRDBMSAdapter) *PortfolioRDBMSRepository {
