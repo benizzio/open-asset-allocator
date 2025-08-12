@@ -151,7 +151,7 @@ type QueryExecutor struct {
 }
 
 func withParams(query *dbx.Query, params dbx.Params) *QueryExecutor {
-	if len(params) >= 0 {
+	if len(params) > 0 {
 		query.Bind(params)
 	}
 	return &QueryExecutor{query: query}
