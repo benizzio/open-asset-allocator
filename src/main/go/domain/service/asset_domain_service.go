@@ -1,8 +1,9 @@
 package service
 
 import (
+	"context"
+
 	"github.com/benizzio/open-asset-allocator/domain"
-	"github.com/benizzio/open-asset-allocator/infra"
 )
 
 type AssetDomService struct {
@@ -18,14 +19,14 @@ func (service *AssetDomService) FindAssetByUniqueIdentifier(uniqueIdentifier str
 }
 
 func (service *AssetDomService) InsertAssetsInTransaction(
-	transContext *infra.TransactionalContext,
+	transContext context.Context,
 	assets []*domain.Asset,
 ) ([]*domain.Asset, error) {
 	return service.assetRepository.InsertAssetsInTransaction(transContext, assets)
 }
 
 func (service *AssetDomService) InsertMappedAssetsInTransaction(
-	transContext *infra.TransactionalContext,
+	transContext context.Context,
 	assetsPerTicker domain.AssetsPerTicker,
 ) (domain.AssetsPerTicker, error) {
 

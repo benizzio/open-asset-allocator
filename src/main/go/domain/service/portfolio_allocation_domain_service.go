@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"time"
 
 	"github.com/benizzio/open-asset-allocator/domain"
@@ -97,7 +98,7 @@ func (service *PortfolioAllocationDomService) FindAvailablePortfolioAllocationCl
 }
 
 func (service *PortfolioAllocationDomService) MergePortfolioAllocationsInTransaction(
-	transContext *infra.TransactionalContext,
+	transContext context.Context,
 	portfolioId int,
 	observationTimestamp *domain.PortfolioObservationTimestamp,
 	allocations []*domain.PortfolioAllocation,
@@ -111,7 +112,7 @@ func (service *PortfolioAllocationDomService) MergePortfolioAllocationsInTransac
 }
 
 func (service *PortfolioAllocationDomService) InsertObservationTimestampInTransaction(
-	transContext *infra.TransactionalContext,
+	transContext context.Context,
 	observationTimestamp *domain.PortfolioObservationTimestamp,
 ) (*domain.PortfolioObservationTimestamp, error) {
 

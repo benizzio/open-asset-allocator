@@ -1,8 +1,11 @@
 package repository
 
 import (
+	"context"
+
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra"
+	"github.com/benizzio/open-asset-allocator/infra/rdbms"
 	"github.com/benizzio/open-asset-allocator/langext"
 	dbx "github.com/go-ozzo/ozzo-dbx"
 )
@@ -12,7 +15,7 @@ const (
 		SELECT DISTINCT paot.id, paot.observation_time_tag AS time_tag, paot.observation_timestamp AS "timestamp"
 		FROM portfolio_allocation_fact pa
 		JOIN portfolio_allocation_obs_time paot ON pa.observation_time_id = paot.id
-		` + infra.WhereClausePlaceholder + `
+		` + rdbms.WhereClausePlaceholder + `
 		ORDER BY paot.observation_time_tag DESC, paot.observation_timestamp DESC LIMIT {:observationTimestampLimit}
 	`
 	availableObservationTimestampsComplement = `
@@ -37,12 +40,12 @@ const (
 		FROM portfolio_allocation_fact pa
 		JOIN asset ass ON ass.id = pa.asset_id
 		JOIN portfolio_allocation_obs_time paot ON pa.observation_time_id = paot.id 
-		` + infra.WhereClausePlaceholder + `
+		` + rdbms.WhereClausePlaceholder + `
 		ORDER BY paot.observation_timestamp DESC, pa.class ASC, pa.cash_reserve DESC, pa.total_market_value DESC
 	`
 	portfolioAllocationClassesSQL = `
 		SELECT DISTINCT pa.class 
-		FROM portfolio_allocation_fact pa ` + infra.WhereClausePlaceholder + `
+		FROM portfolio_allocation_fact pa ` + rdbms.WhereClausePlaceholder + `
 		ORDER BY pa.class ASC
 	`
 	portfolioAllocationsTempTableName   = `portfolio_allocation_fact_merge_temp`
@@ -113,7 +116,7 @@ const (
 )
 
 type PortfolioAllocationRDBMSRepository struct {
-	dbAdapter infra.RepositoryRDBMSAdapter
+	dbAdapter rdbms.RepositoryRDBMSAdapter
 }
 
 func (repository *PortfolioAllocationRDBMSRepository) FindAllPortfolioAllocationsWithinObservationTimestampsLimit(
@@ -242,26 +245,34 @@ func (repository *PortfolioAllocationRDBMSRepository) scanAvailablePortfolioAllo
 }
 
 func (repository *PortfolioAllocationRDBMSRepository) MergePortfolioAllocationsInTransaction(
-	transContext *infra.TransactionalContext,
+	transContext context.Context,
 	portfolioId int,
 	observationTimestamp *domain.PortfolioObservationTimestamp,
 	allocations []*domain.PortfolioAllocation,
 ) error {
 
+	var transactionalContext, ok = rdbms.ToSQLTransactionalContext(transContext)
+	if !ok {
+		return infra.BuildAppError(
+			"Context is not a SQL transactional context",
+			repository,
+		)
+	}
+
 	if len(allocations) == 0 {
 		return nil
 	}
 
-	err := repository.insertPortfolioAllocationsInTempTable(transContext, portfolioId, allocations)
+	err := repository.insertPortfolioAllocationsInTempTable(transactionalContext, portfolioId, allocations)
 	if err != nil {
 		return err
 	}
 
-	return repository.mergePortfolioAllocations(transContext, portfolioId, observationTimestamp)
+	return repository.mergePortfolioAllocations(transactionalContext, portfolioId, observationTimestamp)
 }
 
 func (repository *PortfolioAllocationRDBMSRepository) insertPortfolioAllocationsInTempTable(
-	transContext *infra.TransactionalContext,
+	transContext *rdbms.SQLTransactionalContext,
 	portfolioId int,
 	allocations []*domain.PortfolioAllocation,
 ) error {
@@ -329,7 +340,7 @@ func preparePortfolioAllocationTempInserts(
 }
 
 func (repository *PortfolioAllocationRDBMSRepository) mergePortfolioAllocations(
-	transContext *infra.TransactionalContext,
+	transContext *rdbms.SQLTransactionalContext,
 	portfolioId int,
 	observationTimestamp *domain.PortfolioObservationTimestamp,
 ) error {
@@ -347,14 +358,22 @@ func (repository *PortfolioAllocationRDBMSRepository) mergePortfolioAllocations(
 }
 
 func (repository *PortfolioAllocationRDBMSRepository) InsertObservationTimestampInTransaction(
-	transContext *infra.TransactionalContext,
+	transContext context.Context,
 	observationTimestamp *domain.PortfolioObservationTimestamp,
 ) (*domain.PortfolioObservationTimestamp, error) {
 
-	ids, err := infra.BuildQueryInTransaction[int64](transContext, observationTimestampInsertSQL).
+	var transactionalContext, ok = rdbms.ToSQLTransactionalContext(transContext)
+	if !ok {
+		return nil, infra.BuildAppError(
+			"Context is not a SQL transactional context",
+			repository,
+		)
+	}
+
+	ids, err := rdbms.BuildQueryInTransaction[int64](transactionalContext, observationTimestampInsertSQL).
 		AddParams(observationTimestamp.TimeTag, observationTimestamp.Timestamp).
 		Build().
-		Find(infra.ReturningIntIdRowScanner)
+		Find(rdbms.ReturningIntIdRowScanner)
 
 	if err != nil {
 		return nil, infra.PropagateAsAppErrorWithNewMessage(
@@ -371,6 +390,6 @@ func (repository *PortfolioAllocationRDBMSRepository) InsertObservationTimestamp
 	}, nil
 }
 
-func BuildPortfolioAllocationRepository(dbAdapter infra.RepositoryRDBMSAdapter) *PortfolioAllocationRDBMSRepository {
+func BuildPortfolioAllocationRepository(dbAdapter rdbms.RepositoryRDBMSAdapter) *PortfolioAllocationRDBMSRepository {
 	return &PortfolioAllocationRDBMSRepository{dbAdapter: dbAdapter}
 }

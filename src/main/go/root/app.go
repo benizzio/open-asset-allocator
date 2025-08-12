@@ -13,13 +13,14 @@ import (
 	"github.com/benizzio/open-asset-allocator/domain/infra/repository"
 	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/infra"
+	"github.com/benizzio/open-asset-allocator/infra/rdbms"
 	"github.com/benizzio/open-asset-allocator/langext"
 	"github.com/golang/glog"
 )
 
 type App struct {
 	config          *infra.Configuration
-	databaseAdapter *infra.RDBMSAdapter
+	databaseAdapter *rdbms.Adapter
 	server          *infra.GinServer
 	restControllers []infra.GinServerRESTController
 }
@@ -35,7 +36,7 @@ func (app *App) buildBaseInfrastructure() {
 	glog.Info("Final configuration definitions: ", app.config)
 
 	app.server = infra.BuildGinServer(app.config)
-	app.databaseAdapter = infra.BuildDatabaseAdapter(app.config)
+	app.databaseAdapter = rdbms.BuildDatabaseAdapter(app.config)
 }
 
 func (app *App) completeConfig(config *infra.Configuration) {

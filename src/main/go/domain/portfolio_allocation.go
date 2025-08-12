@@ -1,9 +1,9 @@
 package domain
 
 import (
+	"context"
 	"time"
 
-	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/shopspring/decimal"
 )
 
@@ -24,24 +24,24 @@ type PortfolioObservationTimestamp struct {
 }
 
 type PortfolioAllocationRepository interface {
-	FindAllPortfolioAllocationsWithinObservationTimestampsLimit(id int, observationTimestampsLimit int) (
-		[]*PortfolioAllocation,
-		error,
-	)
+	FindAllPortfolioAllocationsWithinObservationTimestampsLimit(
+		id int,
+		observationTimestampsLimit int,
+	) ([]*PortfolioAllocation, error)
 	FindPortfolioAllocationsByObservationTimestamp(id int, observationTimestampId int) ([]*PortfolioAllocation, error)
-	FindAvailableObservationTimestamps(portfolioId int, observationTimestampsLimit int) (
-		[]*PortfolioObservationTimestamp,
-		error,
-	)
+	FindAvailableObservationTimestamps(
+		portfolioId int,
+		observationTimestampsLimit int,
+	) ([]*PortfolioObservationTimestamp, error)
 	FindAvailablePortfolioAllocationClasses(portfolioId int) ([]string, error)
 	MergePortfolioAllocationsInTransaction(
-		transContext *infra.TransactionalContext,
+		transContext context.Context,
 		portfolioId int,
 		observationTimestamp *PortfolioObservationTimestamp,
 		allocations []*PortfolioAllocation,
 	) error
 	InsertObservationTimestampInTransaction(
-		transContext *infra.TransactionalContext,
+		transContext context.Context,
 		observationTimestamp *PortfolioObservationTimestamp,
 	) (*PortfolioObservationTimestamp, error)
 }

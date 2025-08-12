@@ -1,14 +1,17 @@
 package application
 
 import (
+	"context"
+
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/infra"
+	"github.com/benizzio/open-asset-allocator/infra/rdbms"
 	"github.com/benizzio/open-asset-allocator/langext"
 )
 
 type PortfolioAllocationManagementAppService struct {
-	transactionManager            infra.TransactionManager
+	transactionManager            rdbms.TransactionManager
 	portfolioAllocationDomService *service.PortfolioAllocationDomService
 	assetDomService               *service.AssetDomService
 }
@@ -20,7 +23,7 @@ func (service *PortfolioAllocationManagementAppService) MergePortfolioAllocation
 ) error {
 
 	var err = service.transactionManager.RunInTransaction(
-		func(transContext *infra.TransactionalContext) error {
+		func(transContext *rdbms.SQLTransactionalContext) error {
 
 			managedObservationTimestamp, err := service.manageObservationTimestamp(
 				transContext,
@@ -49,7 +52,7 @@ func (service *PortfolioAllocationManagementAppService) MergePortfolioAllocation
 }
 
 func (service *PortfolioAllocationManagementAppService) manageObservationTimestamp(
-	transContext *infra.TransactionalContext,
+	transContext context.Context,
 	observationTimestamp *domain.PortfolioObservationTimestamp,
 	allocations []*domain.PortfolioAllocation,
 ) (*domain.PortfolioObservationTimestamp, error) {
@@ -76,7 +79,7 @@ func (service *PortfolioAllocationManagementAppService) manageObservationTimesta
 }
 
 func (service *PortfolioAllocationManagementAppService) persistNewAssets(
-	transContext *infra.TransactionalContext,
+	transContext context.Context,
 	allocations []*domain.PortfolioAllocation,
 ) error {
 
@@ -121,7 +124,7 @@ func replacePersistedAssetsOnAllocations(
 }
 
 func BuildPortfolioAllocationManagementAppService(
-	transactionManager infra.TransactionManager,
+	transactionManager rdbms.TransactionManager,
 	portfolioAllocationDomService *service.PortfolioAllocationDomService,
 	assetDomService *service.AssetDomService,
 ) *PortfolioAllocationManagementAppService {

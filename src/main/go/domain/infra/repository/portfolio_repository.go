@@ -3,6 +3,7 @@ package repository
 import (
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra"
+	"github.com/benizzio/open-asset-allocator/infra/rdbms"
 	"github.com/benizzio/open-asset-allocator/langext"
 )
 
@@ -19,7 +20,7 @@ const (
 )
 
 type PortfolioRDBMSRepository struct {
-	dbAdapter infra.RepositoryRDBMSAdapter
+	dbAdapter rdbms.RepositoryRDBMSAdapter
 }
 
 func (repository *PortfolioRDBMSRepository) GetAllPortfolios() ([]*domain.Portfolio, error) {
@@ -73,6 +74,6 @@ func (repository *PortfolioRDBMSRepository) UpdatePortfolio(portfolio *domain.Po
 	)
 }
 
-func BuildPortfolioRepository(dbAdapter infra.RepositoryRDBMSAdapter) *PortfolioRDBMSRepository {
+func BuildPortfolioRepository(dbAdapter rdbms.RepositoryRDBMSAdapter) *PortfolioRDBMSRepository {
 	return &PortfolioRDBMSRepository{dbAdapter: dbAdapter}
 }
