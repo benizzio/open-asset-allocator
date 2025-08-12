@@ -4,6 +4,7 @@ import (
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/domain/allocation"
 	"github.com/benizzio/open-asset-allocator/infra"
+	"github.com/benizzio/open-asset-allocator/infra/rdbms"
 	"github.com/benizzio/open-asset-allocator/infra/sqlext"
 	"github.com/benizzio/open-asset-allocator/langext"
 	dbx "github.com/go-ozzo/ozzo-dbx"
@@ -24,7 +25,7 @@ const (
 	allocationPlanIdentifierSQL = `
 		SELECT ap.id, ap.name
 		FROM allocation_plan ap
-	` + infra.WhereClausePlaceholder + `
+	` + rdbms.WhereClausePlaceholder + `
 		ORDER BY ap.create_timestamp DESC
 	`
 	allocationPlanSQL = `
@@ -38,13 +39,13 @@ const (
 		    pa.slice_size_percentage
 		FROM planned_allocation pa 
 		JOIN allocation_plan ap ON pa.allocation_plan_id = ap.id
-	` + infra.WhereClausePlaceholder + `
+	` + rdbms.WhereClausePlaceholder + `
 		ORDER BY ap.create_timestamp DESC, pa.cash_reserve DESC, pa.slice_size_percentage DESC
 	`
 )
 
 type AllocationPlanRDBMSRepository struct {
-	dbAdapter infra.RepositoryRDBMSAdapter
+	dbAdapter rdbms.RepositoryRDBMSAdapter
 }
 
 func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlans(portfolioId int, planType *allocation.PlanType) (
@@ -201,6 +202,6 @@ func mapPlannedAllocationFromRow(rowDTS *PlannedAllocationJoinedRowDTS) *domain.
 	}
 }
 
-func BuildAllocationPlanRepository(dbAdapter infra.RepositoryRDBMSAdapter) *AllocationPlanRDBMSRepository {
+func BuildAllocationPlanRepository(dbAdapter rdbms.RepositoryRDBMSAdapter) *AllocationPlanRDBMSRepository {
 	return &AllocationPlanRDBMSRepository{dbAdapter: dbAdapter}
 }

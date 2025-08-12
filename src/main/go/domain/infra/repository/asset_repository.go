@@ -1,17 +1,20 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
+	"strconv"
+
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra"
+	"github.com/benizzio/open-asset-allocator/infra/rdbms"
 	"github.com/benizzio/open-asset-allocator/langext"
-	"strconv"
 )
 
 const (
 	assetsSQL = `
 		SELECT * FROM asset
-	` + infra.WhereClausePlaceholder
+	` + rdbms.WhereClausePlaceholder
 )
 
 func assetRowScanner(rows *sql.Rows) (domain.Asset, error) {
@@ -25,7 +28,7 @@ func assetRowScanner(rows *sql.Rows) (domain.Asset, error) {
 }
 
 type AssetRDBMSRepository struct {
-	dbAdapter infra.RepositoryRDBMSAdapter
+	dbAdapter rdbms.RepositoryRDBMSAdapter
 }
 
 func (repository *AssetRDBMSRepository) GetKnownAssets() ([]*domain.Asset, error) {
@@ -71,9 +74,17 @@ func (repository *AssetRDBMSRepository) FindAssetByUniqueIdentifier(uniqueIdenti
 }
 
 func (repository *AssetRDBMSRepository) InsertAssetsInTransaction(
-	transContext *infra.TransactionalContext,
+	transContext context.Context,
 	assets []*domain.Asset,
 ) ([]*domain.Asset, error) {
+
+	var transactionalContext, ok = rdbms.ToSQLTransactionalContext(transContext)
+	if !ok {
+		return nil, infra.BuildAppError(
+			"Context is not a SQL transactional context",
+			repository,
+		)
+	}
 
 	if len(assets) == 0 {
 		return assets, nil
@@ -91,7 +102,7 @@ func (repository *AssetRDBMSRepository) InsertAssetsInTransaction(
 		tickers[i] = asset.Ticker
 	}
 
-	err := repository.dbAdapter.InsertBulkInTransaction(transContext, "asset", columns, values)
+	err := repository.dbAdapter.InsertBulkInTransaction(transactionalContext, "asset", columns, values)
 	if err != nil {
 		return nil, infra.PropagateAsAppErrorWithNewMessage(
 			err,
@@ -100,15 +111,23 @@ func (repository *AssetRDBMSRepository) InsertAssetsInTransaction(
 		)
 	}
 
-	return repository.FindAssetsByTickers(transContext, tickers)
+	return repository.FindAssetsByTickersInTransaction(transactionalContext, tickers)
 }
 
-func (repository *AssetRDBMSRepository) FindAssetsByTickers(
-	transContext *infra.TransactionalContext,
+func (repository *AssetRDBMSRepository) FindAssetsByTickersInTransaction(
+	transContext context.Context,
 	tickers []string,
 ) ([]*domain.Asset, error) {
 
-	var queryExecutor = infra.BuildQueryInTransaction[domain.Asset](transContext, assetsSQL).
+	var transactionalContext, ok = rdbms.ToSQLTransactionalContext(transContext)
+	if !ok {
+		return nil, infra.BuildAppError(
+			"Context is not a SQL transactional context",
+			repository,
+		)
+	}
+
+	var queryExecutor = rdbms.BuildQueryInTransaction[domain.Asset](transactionalContext, assetsSQL).
 		AddWhereClauseAndParams("AND ticker = ANY($1)", tickers).
 		Build()
 
@@ -124,7 +143,7 @@ func (repository *AssetRDBMSRepository) FindAssetsByTickers(
 	return langext.ToPointerSlice(persistedAssets), nil
 }
 
-func BuildAssetRDBMSRepository(dbAdapter infra.RepositoryRDBMSAdapter) *AssetRDBMSRepository {
+func BuildAssetRDBMSRepository(dbAdapter rdbms.RepositoryRDBMSAdapter) *AssetRDBMSRepository {
 	return &AssetRDBMSRepository{
 		dbAdapter: dbAdapter,
 	}

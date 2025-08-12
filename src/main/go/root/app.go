@@ -3,22 +3,24 @@ package root
 import (
 	"context"
 	"errors"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
 	"github.com/benizzio/open-asset-allocator/api/rest"
 	"github.com/benizzio/open-asset-allocator/application"
 	"github.com/benizzio/open-asset-allocator/domain/infra/repository"
 	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/infra"
+	"github.com/benizzio/open-asset-allocator/infra/rdbms"
 	"github.com/benizzio/open-asset-allocator/langext"
 	"github.com/golang/glog"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
 )
 
 type App struct {
 	config          *infra.Configuration
-	databaseAdapter *infra.RDBMSAdapter
+	databaseAdapter *rdbms.Adapter
 	server          *infra.GinServer
 	restControllers []infra.GinServerRESTController
 }
@@ -34,7 +36,7 @@ func (app *App) buildBaseInfrastructure() {
 	glog.Info("Final configuration definitions: ", app.config)
 
 	app.server = infra.BuildGinServer(app.config)
-	app.databaseAdapter = infra.BuildDatabaseAdapter(app.config)
+	app.databaseAdapter = rdbms.BuildDatabaseAdapter(app.config)
 }
 
 func (app *App) completeConfig(config *infra.Configuration) {
@@ -50,30 +52,33 @@ func (app *App) completeConfig(config *infra.Configuration) {
 func (app *App) buildAppComponents() {
 
 	var portfolioRepository = repository.BuildPortfolioRepository(app.databaseAdapter)
+	var portfolioAllocationRepository = repository.BuildPortfolioAllocationRepository(app.databaseAdapter)
 	var allocationPlanRepository = repository.BuildAllocationPlanRepository(app.databaseAdapter)
 	var assetRepository = repository.BuildAssetRDBMSRepository(app.databaseAdapter)
 
 	var portfolioDomService = service.BuildPortfolioDomService(portfolioRepository)
+	var portfolioAllocationDomService = service.BuildPortfolioAllocationDomService(portfolioAllocationRepository)
 	var allocationPlanDomService = service.BuildAllocationPlanDomService(allocationPlanRepository)
 	var assetDomService = service.BuildAssetDomService(assetRepository)
 
 	var portfolioDivergenceAnalysisAppService = application.BuildPortfolioDivergenceAnalysisAppService(
 		portfolioDomService,
+		portfolioAllocationDomService,
 		allocationPlanDomService,
 	)
 	var portfolioAnalysisConfigurationAppService = application.BuildPortfolioAnalysisConfigurationAppService(
-		portfolioDomService,
+		portfolioAllocationDomService,
 		allocationPlanDomService,
 	)
 	var portfolioAllocationManagementAppService = application.BuildPortfolioAllocationManagementAppService(
 		app.databaseAdapter,
-		portfolioDomService,
+		portfolioAllocationDomService,
 		assetDomService,
 	)
 
 	var portfolioRESTController = rest.BuildPortfolioRESTController(portfolioDomService)
 	var portfolioAllocationRESTController = rest.BuildPortfolioAllocationRESTController(
-		portfolioDomService,
+		portfolioAllocationDomService,
 		portfolioAllocationManagementAppService,
 	)
 	var portfolioDivergenceAnalysisRESTController = rest.BuildDivergenceAnalysisRESTController(

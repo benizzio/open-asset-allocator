@@ -17,7 +17,7 @@ import (
 )
 
 type PortfolioAllocationRESTController struct {
-	portfolioDomService                     *service.PortfolioDomService
+	portfolioAllocationDomService           *service.PortfolioAllocationDomService
 	portfolioAllocationManagementAppService *application.PortfolioAllocationManagementAppService
 }
 
@@ -94,12 +94,12 @@ func (controller *PortfolioAllocationRESTController) getPortfolioAllocationHisto
 	var err error
 
 	if !langext.IsZeroValue(observationTimestampId) {
-		portfolioHistory, err = controller.portfolioDomService.FindPortfolioAllocationsByObservationTimestamp(
+		portfolioHistory, err = controller.portfolioAllocationDomService.FindPortfolioAllocationsByObservationTimestamp(
 			portfolioId,
 			observationTimestampId,
 		)
 	} else {
-		portfolioHistory, err = controller.portfolioDomService.GetPortfolioAllocationHistory(portfolioId)
+		portfolioHistory, err = controller.portfolioAllocationDomService.GetPortfolioAllocationHistory(portfolioId)
 	}
 
 	return portfolioHistory, err
@@ -113,7 +113,10 @@ func (controller *PortfolioAllocationRESTController) getAvailableHistoryObservat
 		return
 	}
 
-	availableTimestamps, err := controller.portfolioDomService.GetAvailableObservationTimestamps(portfolioId, 10)
+	availableTimestamps, err := controller.portfolioAllocationDomService.GetAvailableObservationTimestamps(
+		portfolioId,
+		10,
+	)
 	if infra.HandleAPIError(context, "Error getting available observation timestamps", err) {
 		return
 	}
@@ -131,7 +134,7 @@ func (controller *PortfolioAllocationRESTController) getAvailablePortfolioAlloca
 		return
 	}
 
-	availableClasses, err := controller.portfolioDomService.FindAvailablePortfolioAllocationClasses(portfolioId)
+	availableClasses, err := controller.portfolioAllocationDomService.FindAvailablePortfolioAllocationClasses(portfolioId)
 	if infra.HandleAPIError(context, "Error getting available portfolio allocation classes", err) {
 		return
 	}
@@ -223,11 +226,11 @@ func (controller *PortfolioAllocationRESTController) validateCleanPortfolioAlloc
 }
 
 func BuildPortfolioAllocationRESTController(
-	portfolioDomService *service.PortfolioDomService,
+	portfolioAllocationDomService *service.PortfolioAllocationDomService,
 	portfolioAllocationManagementAppService *application.PortfolioAllocationManagementAppService,
 ) *PortfolioAllocationRESTController {
 	return &PortfolioAllocationRESTController{
-		portfolioDomService,
+		portfolioAllocationDomService,
 		portfolioAllocationManagementAppService,
 	}
 }
