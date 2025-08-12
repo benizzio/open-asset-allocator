@@ -370,10 +370,10 @@ func (repository *PortfolioAllocationRDBMSRepository) InsertObservationTimestamp
 		)
 	}
 
-	ids, err := rdbms.BuildQueryInTransaction[int64](transactionalContext, observationTimestampInsertSQL).
+	id, err := rdbms.BuildQueryInTransaction[int64](transactionalContext, observationTimestampInsertSQL).
 		AddParams(observationTimestamp.TimeTag, observationTimestamp.Timestamp).
 		Build().
-		Find(rdbms.ReturningIntIdRowScanner)
+		Get(rdbms.ReturningIntIdSingleRowScanner)
 
 	if err != nil {
 		return nil, infra.PropagateAsAppErrorWithNewMessage(
@@ -384,7 +384,7 @@ func (repository *PortfolioAllocationRDBMSRepository) InsertObservationTimestamp
 	}
 
 	return &domain.PortfolioObservationTimestamp{
-		Id:        int(ids[0]),
+		Id:        int(id),
 		TimeTag:   observationTimestamp.TimeTag,
 		Timestamp: observationTimestamp.Timestamp,
 	}, nil

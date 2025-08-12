@@ -181,9 +181,20 @@ func (executor *QueryExecutor) GetRows() (*dbx.Rows, error) {
 
 type RowScanner[T any] func(*sql.Rows) (T, error)
 
+type SingleRowScanner[T any] func(*sql.Row) (T, error)
+
 func ReturningIntIdRowScanner(rows *sql.Rows) (int64, error) {
 	var id int64
 	scanErr := rows.Scan(&id)
+	if scanErr != nil {
+		return 0, scanErr
+	}
+	return id, nil
+}
+
+func ReturningIntIdSingleRowScanner(row *sql.Row) (int64, error) {
+	var id int64
+	scanErr := row.Scan(&id)
 	if scanErr != nil {
 		return 0, scanErr
 	}
@@ -198,7 +209,6 @@ type SQLTransactionalQueryExecutor[T any] struct {
 	queryBuilder *SQLTransactionalQueryBuilder[T]
 }
 
-// TODO do a get form single row
 func (executor *SQLTransactionalQueryExecutor[T]) Find(rowScanner RowScanner[T]) ([]T, error) {
 
 	var builder = executor.queryBuilder
@@ -235,4 +245,14 @@ func (executor *SQLTransactionalQueryExecutor[T]) Find(rowScanner RowScanner[T])
 	}
 
 	return result, nil
+}
+
+func (executor *SQLTransactionalQueryExecutor[T]) Get(rowScanner SingleRowScanner[T]) (T, error) {
+
+	var builder = executor.queryBuilder
+
+	// TODO verification for debug logging, this should be logged only in debug mode
+	glog.Infof("Executing transactional query %s \n with params %s", builder.querySQL, builder.params)
+	var row = builder.transaction.QueryRow(builder.querySQL, builder.params...)
+	return rowScanner(row)
 }
