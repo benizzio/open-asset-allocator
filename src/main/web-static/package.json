@@ -1,7 +1,7 @@
 {
   "devDependencies": {
     "@eslint/js": "^9.32.0",
-    "@parcel/transformer-raw": "^2.15.2",
+    "@parcel/transformer-raw": "^2.15.4",
     "@parcel/transformer-sass": "^2.15.2",
     "@stylistic/eslint-plugin-ts": "^4.4.1",
     "@types/chroma-js": "^3.1.1",
