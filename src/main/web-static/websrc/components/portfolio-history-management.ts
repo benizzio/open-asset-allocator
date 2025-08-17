@@ -241,7 +241,7 @@ const portfolioHistoryManagement = {
         );
     },
 
-    addPortfolioHistoryManagementRow(observationTimestampId: string) {
+    addPortfolioHistoryManagementRow(observationTimestampId: number) {
 
         const tbodyId = PORTFOLIO_ALLOCATION_MANAGEMENT_TBODY_PREFIX + observationTimestampId;
         const tbody: HTMLElement = window[tbodyId];
@@ -280,8 +280,17 @@ const portfolioHistoryManagement = {
         rowValueElements.handleInputTotalMarketValue();
     },
 
+    handleInputObservationTimeTag(
+        newTimeTagInput: HTMLInputElement,
+        observationTimestampId: number,
+    ) {
+        const form = window[`portfolio-history-management-form-${ observationTimestampId }`] as HTMLFormElement;
+        const observationTimeTagInput = form.elements.namedItem("observationTimestamp.timeTag") as HTMLInputElement;
+        observationTimeTagInput.value = newTimeTagInput.value;
+    },
+
     //TODO clean
-    reloadObservationHistory(event: CustomEvent, formRowIndex: number) {
+    reloadObservationHistory(event: CustomEvent, observationTimestampId: number) {
 
         const eventDetail = event.detail as AfterRequestEventDetail;
 
@@ -289,13 +298,14 @@ const portfolioHistoryManagement = {
             return;
         }
 
-        const form = window[`portfolio-history-management-form-${ formRowIndex }`] as HTMLFormElement;
-        const observationTimestampIdInput = form.elements.namedItem("observationTimestamp.id") as HTMLInputElement;
-        const observationTimestampId = observationTimestampIdInput.value;
+        const form = window[`portfolio-history-management-form-${ observationTimestampId }`] as HTMLFormElement;
 
-        if(observationTimestampId !== "0") {
+        if(observationTimestampId !== 0) {
+
             form.reset();
-            const triggerELement = window[`portfolio-history-management-trigger-${ formRowIndex }`] as HTMLElement;
+
+            const triggerELement =
+                window[`portfolio-history-management-trigger-${ observationTimestampId }`] as HTMLElement;
             htmx.trigger(triggerELement, "reload-history-observation");
         }
         else {

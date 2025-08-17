@@ -30,7 +30,18 @@
                     aria-expanded="true"
                     aria-controls="portfolio-history-management-{{id}}"
             >
-                {{timeTag}}
+                {{#if id}}
+                    {{timeTag}}
+                {{else}}
+                    <input type="text"
+                           placeholder="New observation *"
+                           aria-label="Time tag"
+                           autocomplete="off"
+                           class="form-control me-3"
+                           oninput="maskTagInput(this); portfolioHistoryManagement.handleInputObservationTimeTag(this, {{id}})"
+                           onkeyup="event.preventDefault()"
+                    />
+                {{/if}}
             </button>
             </h2>
 
@@ -46,7 +57,10 @@
                           hx-ext="form-json"
                           hx-on::after-request="portfolioHistoryManagement.reloadObservationHistory(event, {{id}})"
                     >
+
                         <input type="hidden" name="observationTimestamp.id" value="{{id}}" />
+                        {{#unless id}}<input type="hidden" name="observationTimestamp.timeTag" /> {{/unless}}
+
                         <table class="table table-striped">
 
                             <thead class="sticky-header">
