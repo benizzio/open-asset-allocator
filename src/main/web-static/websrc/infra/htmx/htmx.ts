@@ -1,4 +1,4 @@
-import { HtmxBeforeSwapDetails, HtmxRequestConfig } from "htmx.org";
+import { HtmxBeforeSwapDetails, HtmxRequestConfig, HtmxResponseInfo } from "htmx.org";
 import { bindHTMXTransformResponse, htmxTransformResponse } from "./binding-htmx-transform-response";
 import { CustomEventHandler } from "../infra-types";
 
@@ -10,6 +10,8 @@ export type RequestConfigEventDetail =
     { routerPathData?: { [key: string]: unknown }; }
     & EventDetail
     & HtmxRequestConfig;
+
+export type AfterRequestEventDetail = EventDetail & RequestConfigEventDetail & HtmxResponseInfo;
 
 export type BeforeSwapEventDetail = EventDetail & HtmxBeforeSwapDetails;
 

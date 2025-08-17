@@ -3,7 +3,7 @@ import api from "../api/api";
 import { Asset } from "../domain/asset";
 import BigNumber from "bignumber.js";
 import { BootstrapClasses, BootstrapIconClasses } from "../infra/bootstrap/constants";
-import { htmxInfra } from "../infra/htmx/htmx";
+import { AfterRequestEventDetail, htmxInfra } from "../infra/htmx/htmx";
 import { ObservationTimestamp } from "../domain/portfolio-allocation";
 
 const PORTFOLIO_ALLOCATION_MANAGEMENT_TBODY_PREFIX = "portfolio-history-management-form-tbody-";
@@ -240,7 +240,7 @@ const portfolioHistoryManagement = {
             modifyObservationsResponse,
         );
     },
-    
+
     addPortfolioHistoryManagementRow(observationTimestampId: string) {
 
         const tbodyId = PORTFOLIO_ALLOCATION_MANAGEMENT_TBODY_PREFIX + observationTimestampId;
@@ -280,14 +280,29 @@ const portfolioHistoryManagement = {
         rowValueElements.handleInputTotalMarketValue();
     },
 
-    reloadObservationHistory(formRowIndex: number) {
+    //TODO clean
+    reloadObservationHistory(event: CustomEvent, formRowIndex: number) {
 
-        const triggerELement = window[`portfolio-history-management-trigger-${ formRowIndex }`] as HTMLElement;
+        const eventDetail = event.detail as AfterRequestEventDetail;
+
+        if(!eventDetail.successful) {
+            return;
+        }
 
         const form = window[`portfolio-history-management-form-${ formRowIndex }`] as HTMLFormElement;
-        form.reset();
+        const observationTimestampIdInput = form.elements.namedItem("observationTimestamp.id") as HTMLInputElement;
+        const observationTimestampId = observationTimestampIdInput.value;
 
-        htmx.trigger(triggerELement, "reload-history-observation");
+        if(observationTimestampId !== "0") {
+            form.reset();
+            const triggerELement = window[`portfolio-history-management-trigger-${ formRowIndex }`] as HTMLElement;
+            htmx.trigger(triggerELement, "reload-history-observation");
+        }
+        else {
+            const triggerELement = window["accordion-portfolio-history-management"] as HTMLElement;
+            htmx.trigger(triggerELement, "reload-portfolio-history");
+        }
+
         window["loadPortfolioHistortDatalists"]();
     },
 };

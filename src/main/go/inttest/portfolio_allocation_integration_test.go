@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
 	inttestutil "github.com/benizzio/open-asset-allocator/inttest/util"
@@ -426,6 +427,123 @@ func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 			ORDER BY p.asset_id`,
 		portfolioIdString,
 		"202505",
+	)
+
+	inttestutil.AssertDBWithQueryMultipleRows(t, allocationHistoryQuery, expectedRecords)
+}
+
+func TestPostPortfolioAllocationHistoryInsertEmptyZeroTimestamp(t *testing.T) {
+
+	var postPortfolioSnapshotJSON = `
+		{
+			"observationTimestamp": {
+				"id": 0
+			},
+			"allocations": [
+				{
+					"assetName": "New Asset",
+					"assetTicker": "Test:NEW",
+					"class": "STOCKS",
+					"cashReserve": false,
+					"assetQuantity": "20",
+					"assetMarketPrice": "100",
+					"totalMarketValue": 2000
+				}
+			]
+		}
+	`
+
+	var testTime = time.Now()
+	response, err := http.Post(
+		inttestinfra.TestAPIURLPrefix+"/portfolio/1/history",
+		"application/json",
+		strings.NewReader(postPortfolioSnapshotJSON),
+	)
+
+	t.Cleanup(
+		inttestutil.BuildCleanupFunctionBuilder().
+			AddCleanupQuery(
+				`
+				DELETE FROM portfolio_allocation_fact 
+				WHERE observation_time_id IN (
+					SELECT id FROM portfolio_allocation_obs_time WHERE observation_time_tag LIKE '%%T%%'
+				)`,
+			).
+			AddCleanupQuery("DELETE FROM asset WHERE ticker = 'Test:NEW'").
+			AddCleanupQuery("DELETE FROM portfolio_allocation_obs_time WHERE observation_time_tag LIKE '%%T%%'").
+			Build(),
+	)
+
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusNoContent, response.StatusCode)
+
+	// Verify that the response body is empty as expected for 204 No Content
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.Empty(t, string(body))
+
+	// Verify that the data was correctly persisted in the portfolio_allocation_fact table
+	var portfolioIdString = strconv.Itoa(1)
+
+	var notNullAssertion = inttestutil.ToAssertableNullStringWithAssertion(
+		func(t *testing.T, actual sql.NullString) {
+			assert.NotEmpty(t, actual.String)
+			assert.True(t, actual.Valid)
+		},
+	)
+
+	// Define expected records for the test case
+	var expectedRecords = []inttestutil.AssertableNullStringMap{
+		{
+			"portfolio_id":        inttestutil.ToAssertableNullString(portfolioIdString),
+			"asset_id":            notNullAssertion,
+			"class":               inttestutil.ToAssertableNullString("STOCKS"),
+			"cash_reserve":        inttestutil.ToAssertableNullString("false"),
+			"asset_quantity":      inttestutil.ToAssertableNullString("20.00000000"),
+			"asset_market_price":  inttestutil.ToAssertableNullString("100.00000000"),
+			"total_market_value":  inttestutil.ToAssertableNullString("2000"),
+			"name":                inttestutil.ToAssertableNullString("New Asset"),
+			"ticker":              inttestutil.ToAssertableNullString("Test:NEW"),
+			"observation_time_id": notNullAssertion,
+			"observation_time_tag": inttestutil.ToAssertableNullStringWithAssertion(
+				func(t *testing.T, actual sql.NullString) {
+					dateTime, dateErr := time.Parse(time.RFC3339, actual.String)
+					assert.NoError(t, dateErr)
+					assert.WithinDuration(t, testTime, dateTime, time.Second)
+				},
+			),
+			"observation_timestamp": inttestutil.ToAssertableNullStringWithAssertion(
+				func(t *testing.T, actual sql.NullString) {
+					dateTime, dateErr := time.Parse(time.RFC3339Nano, actual.String)
+					assert.NoError(t, dateErr)
+					assert.WithinDuration(t, testTime, dateTime, time.Second)
+				},
+			),
+		},
+	}
+
+	var allocationHistoryQuery = fmt.Sprintf(
+		`
+			SELECT 
+			    p.portfolio_id, 
+			    p.asset_id, 
+			    p.class, 
+			    p.cash_reserve, 
+			    p.asset_quantity, 
+			    p.asset_market_price, 
+			    p.total_market_value, 
+			    a.ticker,
+			    a.name,
+			    p.observation_time_id,
+			    o.observation_time_tag,
+				o.observation_timestamp
+			FROM portfolio_allocation_fact p 
+			JOIN asset a ON p.asset_id = a.id
+			JOIN portfolio_allocation_obs_time o ON p.observation_time_id = o.id
+			WHERE p.portfolio_id=%s AND o.observation_time_tag LIKE '%s' 
+			ORDER BY p.asset_id`,
+		portfolioIdString,
+		"%T%",
 	)
 
 	inttestutil.AssertDBWithQueryMultipleRows(t, allocationHistoryQuery, expectedRecords)

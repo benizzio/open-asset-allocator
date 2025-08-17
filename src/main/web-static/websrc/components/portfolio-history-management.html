@@ -2,25 +2,11 @@
      class="accordion container-fluid"
      hx-get="/api/portfolio/:portfolioId/history/observation"
      hx-include="[name='portfolioId']"
-     hx-trigger="load"
+     hx-trigger="load, reload-portfolio-history"
      handlebars-template="template-portfolio-history-management"
-     hx-target="#accordion-portfolio-history-management-items"
      data-hx-transform-response="addObservationZero"
      data-hx-transform-response-on-route-matching="^\/api\/portfolio\/.+\/history\/observation$"
 >
-    <div class="row mb-3">
-        <div class="col">
-            <!-- TODO make it render observation zero -->
-            <button class="btn btn-primary" type="button">
-                <span class="bi bi-calendar-plus h4"></span>
-            </button>
-        </div>
-    </div>
-
-    <div class="row">
-        <div id="accordion-portfolio-history-management-items" class="col">
-        </div>
-    </div>
 </div>
 
 <script id="template-portfolio-history-management" type="text/x-handlebars-template">
@@ -37,9 +23,9 @@
                 handlebars-template="template-portfolio-history-management-form-tbody"
                 hx-get="/api/portfolio/:portfolioId/history?observationTimestampId={{id}}"
             >
-            <button class="accordion-button {{#if id}}collapsed{{/if}}"
+            <button class="accordion-button collapsed"
                     type="button"
-                    {{#if id}}data-bs-toggle="collapse"{{/if}}
+                    data-bs-toggle="collapse"
                     data-bs-target="#portfolio-history-management-{{id}}"
                     aria-expanded="true"
                     aria-controls="portfolio-history-management-{{id}}"
@@ -49,7 +35,7 @@
             </h2>
 
             <div id="portfolio-history-management-{{id}}"
-                 class="accordion-collapse {{#if id}}collapse{{/if}}"
+                 class="accordion-collapse collapse"
                  data-bs-parent="#accordion-portfolio-history-management"
             >
                 <div class="accordion-body row justify-content-center">
@@ -58,7 +44,7 @@
                           class="needs-validation"
                           hx-post="/api/portfolio/:portfolioId/history"
                           hx-ext="form-json"
-                          hx-on::after-request="portfolioHistoryManagement.reloadObservationHistory({{id}})"
+                          hx-on::after-request="portfolioHistoryManagement.reloadObservationHistory(event, {{id}})"
                     >
                         <input type="hidden" name="observationTimestamp.id" value="{{id}}" />
                         <table class="table table-striped">
