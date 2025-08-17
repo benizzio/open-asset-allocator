@@ -1,12 +1,12 @@
-import { AllocationStructure } from "./allocation";
-import { PlannedAllocation } from "./allocation-plan";
+import { AllocationStructure } from "../allocation";
+import { PlannedAllocation } from "../allocation-plan";
 
 export function getHierarchyLevelIndex(allocation: PlannedAllocation): number {
 
     const hierarchyTopLevelIndex = getTopLevelHierarchyIndexFromPlannedAllocation(allocation);
 
-    for (let i = hierarchyTopLevelIndex - 1; i >= 0; i--) {
-        if (!allocation.structuralId[i]) {
+    for(let i = hierarchyTopLevelIndex - 1; i >= 0; i--) {
+        if(!allocation.structuralId[i]) {
             return i + 1;
         }
     }

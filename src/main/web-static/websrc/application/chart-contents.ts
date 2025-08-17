@@ -1,8 +1,9 @@
 import { ChartContent, ChartDataType } from "../infra/chart/chart-types";
 import portfolioChart from "./portfolio-chart/portfolio-chart";
-import { PortfolioDTO, PortfolioSnapshot } from "../domain/portfolio";
+import { PortfolioDTO } from "../domain/portfolio";
 import allocationPlanChart from "./allocation-plan-chart";
 import { AllocationPlanDTO } from "../domain/allocation-plan";
+import { PortfolioSnapshot } from "../domain/portfolio-allocation";
 
 function toUnidimensionalMultiChartContent(
     chartDataType: string,

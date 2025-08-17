@@ -3,17 +3,22 @@ import api from "../api/api";
 import { Asset } from "../domain/asset";
 import BigNumber from "bignumber.js";
 import { BootstrapClasses, BootstrapIconClasses } from "../infra/bootstrap/constants";
+import { BeforeSwapEventDetail } from "../infra/htmx";
+import { ObservationTimestamp } from "../domain/portfolio-allocation";
 
 const PORTFOLIO_ALLOCATION_MANAGEMENT_TBODY_PREFIX = "portfolio-history-management-form-tbody-";
+const PORTFOLIO_ALLOCATION_MANAGEMENT_HISTORY_CONTAINER = "accordion-portfolio-history-management";
+// const PORTFOLIO_ALLOCATION_MANAGEMENT_HISTORY_CONTAINER = "accordion-portfolio-history-management-items";
+// const PORTFOLIO_ALLOCATION_MANAGEMENT_HISTORY_OBS_CONTAINER_PREFIX = "portfolio-history-management-container-";
 
 const ASSET_ACTION_BUTTON_IDENTITIES = {
     search: {
-        classes: `${BootstrapClasses.BUTTON_PRIMARY} btn-xs`,
-        iconClasses: `${BootstrapIconClasses.SEARCH}`,
+        classes: `${ BootstrapClasses.BUTTON_PRIMARY } btn-xs`,
+        iconClasses: `${ BootstrapIconClasses.SEARCH }`,
     },
     reset: {
-        classes: `${BootstrapClasses.BUTTON_DANGER} btn-xs`,
-        iconClasses: `${BootstrapIconClasses.RESET}`,
+        classes: `${ BootstrapClasses.BUTTON_DANGER } btn-xs`,
+        iconClasses: `${ BootstrapIconClasses.RESET }`,
     },
 };
 
@@ -214,6 +219,43 @@ function getAsset(rowAssetElements: FormRowAssetElements, searchUniqueIdentifier
 const portfolioHistoryManagement = {
 
     handlebarPortfolioHistoryManagementRowTemplate: null,
+    handlebarPortfolioHistoryManagementContainerTemplate: null,
+
+    modifyObservationsResponse(
+        originalServerResponseJSON: string,
+        eventDetail: BeforeSwapEventDetail,
+    ) {
+        const originalServerResponse = JSON.parse(originalServerResponseJSON) as ObservationTimestamp[];
+
+        const modifiedServerResponse: ObservationTimestamp[] = [
+            {
+                id: 0,
+                timeTag: "New Observation *",
+            },
+            ...originalServerResponse,
+        ];
+        eventDetail.serverResponse = JSON.stringify(modifiedServerResponse);
+    },
+
+    configEventsAfterSettling() {
+
+        const historyManagementContainer = window[PORTFOLIO_ALLOCATION_MANAGEMENT_HISTORY_CONTAINER] as HTMLElement;
+
+        //TODO generalize this code as "data-modify-response" referring to a function
+        historyManagementContainer.addEventListener("htmx:beforeSwap", (event: CustomEvent) => {
+            console.log("========>", event);
+
+            const eventDetail = event.detail as BeforeSwapEventDetail;
+            const eventRequestPath = eventDetail.pathInfo.finalRequestPath;
+
+            // only if request was to /api/portfolio/:portfolioId/history/observation
+            if(!eventDetail.isError && eventRequestPath.match(
+                RegExp("^\\/api\\/portfolio\\/.+\\/history\\/observation$"))) {
+                const originalServerResponseJSON = eventDetail.serverResponse;
+                this.modifyObservationsResponse(originalServerResponseJSON, eventDetail);
+            }
+        });
+    },
 
     addPortfolioHistoryManagementRow(observationTimestampId: string) {
 
@@ -264,6 +306,32 @@ const portfolioHistoryManagement = {
         htmx.trigger(triggerELement, "reload-history-observation");
         window["loadPortfolioHistortDatalists"]();
     },
+
+    //NOT WORKING! JSON FORM PLUGIN DOES NOT ACTIVATE
+    // addHistoryObservation() {
+    //
+    //     const historyContainer = window[PORTFOLIO_ALLOCATION_MANAGEMENT_HISTORY_CONTAINER] as HTMLElement;
+    //
+    //     const newObservationContainer =
+    //         window[PORTFOLIO_ALLOCATION_MANAGEMENT_HISTORY_OBS_CONTAINER_PREFIX + "0"] as HTMLElement;
+    //
+    //     if(newObservationContainer) {
+    //         return;
+    //     }
+    //
+    //     const newObservationHtml = this.handlebarPortfolioHistoryManagementContainerTemplate([
+    //         {
+    //             id: 0,
+    //             timeTag: "New Observation *",
+    //         },
+    //     ]);
+    //     historyContainer.insertAdjacentHTML("afterbegin", newObservationHtml);
+    //
+    //     const newObservation = historyContainer.firstElementChild as HTMLElement;
+    //
+    //     // Process the entire new observation element first
+    //     htmx.process(newObservation);
+    // },
 };
 
 export default portfolioHistoryManagement;

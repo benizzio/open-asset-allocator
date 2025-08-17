@@ -1,4 +1,4 @@
-import { ObservationTimestamp } from "./portfolio";
+import { ObservationTimestamp } from "./portfolio-allocation";
 
 export type PotentialDivergence = {
     hierarchyLevelKey: string,

@@ -1,29 +1,42 @@
 <div id="accordion-portfolio-history-management"
-     class="accordion"
+     class="accordion container-fluid"
      hx-get="/api/portfolio/:portfolioId/history/observation"
      hx-include="[name='portfolioId']"
      hx-trigger="load"
      handlebars-template="template-portfolio-history-management"
+     hx-target="#accordion-portfolio-history-management-items"
 >
+    <div class="row mb-3">
+        <div class="col">
+            <button class="btn btn-primary" type="button" onclick="portfolioHistoryManagement.addHistoryObservation()">
+                <span class="bi bi-calendar-plus h4"></span>
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div id="accordion-portfolio-history-management-items" class="col">
+        </div>
+    </div>
 </div>
 
 <script id="template-portfolio-history-management" type="text/x-handlebars-template">
 
     {{#each .}}
 
-        <div class="accordion-item">
+        <div id="portfolio-history-management-container-{{id}}" class="accordion-item">
 
             <h2 id="portfolio-history-management-trigger-{{id}}"
                 class="accordion-header"
                 hx-include="[name='portfolioId']"
                 hx-target="#portfolio-history-management-form-tbody-{{id}}"
-                hx-trigger="click, reload-history-observation"
+                hx-trigger="{{#if id}}click,{{/if}} reload-history-observation"
                 handlebars-template="template-portfolio-history-management-form-tbody"
                 hx-get="/api/portfolio/:portfolioId/history?observationTimestampId={{id}}"
             >
-            <button class="accordion-button collapsed"
+            <button class="accordion-button {{#if id}}collapsed{{/if}}"
                     type="button"
-                    data-bs-toggle="collapse"
+                    {{#if id}}data-bs-toggle="collapse"{{/if}}
                     data-bs-target="#portfolio-history-management-{{id}}"
                     aria-expanded="true"
                     aria-controls="portfolio-history-management-{{id}}"
@@ -33,7 +46,7 @@
             </h2>
 
             <div id="portfolio-history-management-{{id}}"
-                 class="accordion-collapse collapse"
+                 class="accordion-collapse {{#if id}}collapse{{/if}}"
                  data-bs-parent="#accordion-portfolio-history-management"
             >
                 <div class="accordion-body row justify-content-center">
@@ -59,7 +72,9 @@
                             </tr>
                             </thead>
 
-                            <tbody class="table-group-divider" id="portfolio-history-management-form-tbody-{{id}}">
+                            <tbody class="table-group-divider"
+                                   id="portfolio-history-management-form-tbody-{{id}}"
+                            >
                             </tbody>
 
                             <tfoot class="sticky-footer">
@@ -265,5 +280,6 @@
     );
 
     portfolioHistoryManagement.handlebarPortfolioHistoryManagementRowTemplate = Handlebars.compile(window["template-portfolio-history-management-form-tbody-row"].innerHTML);
+    portfolioHistoryManagement.handlebarPortfolioHistoryManagementContainerTemplate = Handlebars.compile(window["template-portfolio-history-management"].innerHTML);
 
 </script>

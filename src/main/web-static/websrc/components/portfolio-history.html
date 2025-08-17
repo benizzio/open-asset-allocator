@@ -20,7 +20,12 @@
     <div data-display-on-route="/portfolio/:portfolioId/history/manage">
         <div class="card border-dark mb-3">
             <div class="card-header">Manage portfolio allocation data</div>
-            <div class="card-body" hx-get="/websrc/components/portfolio-history-management.html" hx-trigger="load">
+            <div class="card-body"
+                 hx-get="/websrc/components/portfolio-history-management.html"
+                 hx-trigger="load"
+                 hx-on::after-settle="portfolioHistoryManagement.configEventsAfterSettling()"
+            >
+                <!-- TODO remove  hx-on after generalizing -->
             </div>
         </div>
     </div>

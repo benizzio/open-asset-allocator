@@ -2,7 +2,7 @@ import htmx from "htmx.org";
 import DomUtils from "../dom/dom-utils";
 import { logger, LogLevel } from "../logging";
 import { HookCleanupFunction, navigoRouter } from "./routing-navigo";
-import { EventDetail } from "../htmx";
+import { RequestConfigEventDetail } from "../htmx";
 import { Match } from "navigo";
 
 // =============================================================================
@@ -76,7 +76,7 @@ function extractBindingData(element: HTMLElement) {
 function bindRouteToHTMXTriggerOnElement(element: HTMLElement, route: string, event: string) {
 
     const handler = ({ data }: Match) => {
-        htmx.trigger(element, event, { routerPathData: data } as EventDetail);
+        htmx.trigger(element, event, { routerPathData: data } as RequestConfigEventDetail);
     };
 
     navigoRouter.on(route, handler);
@@ -125,6 +125,6 @@ function executeImmediatelyIfOnRoute(route: string, element: HTMLElement, event:
     const routerMatch = navigoRouter.matchLocation(route);
 
     if(routerMatch) {
-        htmx.trigger(element, event, { routerPathData: routerMatch.data } as EventDetail);
+        htmx.trigger(element, event, { routerPathData: routerMatch.data } as RequestConfigEventDetail);
     }
 }

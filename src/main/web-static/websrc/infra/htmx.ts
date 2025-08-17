@@ -1,11 +1,15 @@
-import { HtmxRequestConfig } from "htmx.org";
+import { HtmxBeforeSwapDetails, HtmxRequestConfig } from "htmx.org";
 
 const NULL_IF_EMPTY_ATTRIBUTE = "data-null-if-empty";
 
-export type EventDetail = {
-    routerPathData?: { [key: string]: unknown };
-    [key: string]: unknown;
-} & HtmxRequestConfig;
+type EventDetail = { [key: string]: unknown; };
+
+export type RequestConfigEventDetail =
+    { routerPathData?: { [key: string]: unknown }; }
+    & EventDetail
+    & HtmxRequestConfig;
+
+export type BeforeSwapEventDetail = EventDetail & HtmxBeforeSwapDetails;
 
 const configEnhancedRequestEventListener = (event: CustomEvent) => {
     replaceRequestPathParams(event);
@@ -37,7 +41,7 @@ function replaceRequestPathParams(event: CustomEvent) {
 function replaceFromEventChain(event: CustomEvent) {
 
     const triggeringEvent = event.detail?.triggeringEvent as CustomEvent;
-    const detail = triggeringEvent?.detail as EventDetail;
+    const detail = triggeringEvent?.detail as RequestConfigEventDetail;
 
     if(detail?.routerPathData) {
 

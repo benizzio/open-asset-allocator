@@ -1,6 +1,6 @@
 import { ChartContent, MultiChartDataSource } from "../infra/chart/chart-types";
 import { ActiveElement, Chart, ChartData, ChartDataset, ChartEvent } from "chart.js";
-import { allocationDomainService } from "../domain/allocation-service";
+import { allocationDomainService } from "../domain/service/allocation-service";
 import { changeChartDataOnDatasource } from "../infra/chart/chart-utils";
 import chartModule from "../infra/chart/chart";
 import DomUtils from "../infra/dom/dom-utils";
