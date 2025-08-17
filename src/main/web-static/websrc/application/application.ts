@@ -8,6 +8,7 @@ import portfolioHistoryManagement from "../components/portfolio-history-manageme
 const application = {
     init() {
         registerPortfolioAnalysisHandlebarsHelpers();
+        portfolioHistoryManagement.init();
         window["portfolioHistoryManagement"] = portfolioHistoryManagement;
     },
     chartContents: { toChartContent },

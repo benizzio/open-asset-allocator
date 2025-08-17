@@ -1,0 +1,1 @@
+export type CustomEventHandler = (event: CustomEvent) => void;

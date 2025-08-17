@@ -1,4 +1,6 @@
 import { HtmxBeforeSwapDetails, HtmxRequestConfig } from "htmx.org";
+import { bindHTMXTransformResponse, htmxTransformResponse } from "./binding-htmx-transform-response";
+import { CustomEventHandler } from "../infra-types";
 
 const NULL_IF_EMPTY_ATTRIBUTE = "data-null-if-empty";
 
@@ -106,9 +108,16 @@ function prepareFormData(event: CustomEvent) {
 
 }
 
-function addEventListeners(domSettlingBehaviorEventHandler: (event: CustomEvent) => void) {
+function addEventListeners(domSettlingBehaviorEventHandler: CustomEventHandler) {
+
     document.addEventListener("htmx:configRequest", configEnhancedRequestEventListener);
-    document.body.addEventListener("htmx:afterSettle", domSettlingBehaviorEventHandler);
+
+    const afterSettleCustomEventHandler = (event: CustomEvent) => {
+        domSettlingBehaviorEventHandler(event);
+        const eventTarget = event.target as HTMLElement;
+        bindHTMXTransformResponse(eventTarget);
+    };
+    document.body.addEventListener("htmx:afterSettle", afterSettleCustomEventHandler);
 }
 
 export const htmxInfra = {
@@ -116,9 +125,10 @@ export const htmxInfra = {
      * Initializes the htmx infrastructure of the application.
      *
      * @param domSettlingBehaviorEventHandler - The handler for the default DOM settling behavior event.
-     * Will be applied to the body and be triggered in after settiling of any child element.
+     * Will be applied to the body and be triggered in after settling of any child element.
      */
-    init(domSettlingBehaviorEventHandler: (event: CustomEvent) => void) {
+    init(domSettlingBehaviorEventHandler: CustomEventHandler) {
         addEventListeners(domSettlingBehaviorEventHandler);
     },
+    htmxTransformResponse,
 };

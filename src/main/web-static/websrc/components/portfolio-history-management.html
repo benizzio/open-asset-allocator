@@ -5,10 +5,13 @@
      hx-trigger="load"
      handlebars-template="template-portfolio-history-management"
      hx-target="#accordion-portfolio-history-management-items"
+     data-hx-transform-response="addObservationZero"
+     data-hx-transform-response-on-route-matching="^\/api\/portfolio\/.+\/history\/observation$"
 >
     <div class="row mb-3">
         <div class="col">
-            <button class="btn btn-primary" type="button" onclick="portfolioHistoryManagement.addHistoryObservation()">
+            <!-- TODO make it render observation zero -->
+            <button class="btn btn-primary" type="button">
                 <span class="bi bi-calendar-plus h4"></span>
             </button>
         </div>
