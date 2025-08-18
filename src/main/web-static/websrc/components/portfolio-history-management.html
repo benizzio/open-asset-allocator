@@ -55,7 +55,7 @@
                           class="needs-validation"
                           hx-post="/api/portfolio/:portfolioId/history"
                           hx-ext="form-json"
-                          hx-on::after-request="portfolioHistoryManagement.reloadObservationHistory(event, {{id}})"
+                          hx-on::after-request="portfolioHistoryManagement.handleAfterPostObservationHistory(event, {{id}})"
                     >
 
                         <input type="hidden" name="observationTimestamp.id" value="{{id}}" />

@@ -6,6 +6,8 @@ import { BootstrapClasses, BootstrapIconClasses } from "../infra/bootstrap/const
 import { AfterRequestEventDetail, htmxInfra } from "../infra/htmx/htmx";
 import { ObservationTimestamp } from "../domain/portfolio-allocation";
 
+const PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER = "accordion-portfolio-history-management";
+const PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX = "portfolio-history-management-form-";
 const PORTFOLIO_ALLOCATION_MANAGEMENT_TBODY_PREFIX = "portfolio-history-management-form-tbody-";
 
 const ASSET_ACTION_BUTTON_IDENTITIES = {
@@ -28,8 +30,10 @@ class FormRowAssetElements {
     assetNameInput: HTMLInputElement;
 
     constructor(formUniqueId: string, formRowIndex: number) {
-        const formRow =
-            window[`portfolio-history-management-form-${ formUniqueId }-row-${ formRowIndex }`] as HTMLElement;
+
+        const formRowId = `${ PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX }${ formUniqueId }-row-${ formRowIndex }`;
+        const formRow = window[formRowId] as HTMLElement;
+
         this.assetIdInput = formRow.querySelector("[name$='[assetId]']");
         this.assetTickerInput = formRow.querySelector("[name$='[assetTicker]']");
         this.assetActionButton = formRow.querySelector("[data-asset-action-button]");
@@ -145,8 +149,10 @@ class FormRowValueElements {
     totalMarketValueInput: HTMLInputElement;
 
     constructor(formUniqueId: string, formRowIndex: number) {
-        const formRow =
-            window[`portfolio-history-management-form-${ formUniqueId }-row-${ formRowIndex }`] as HTMLElement;
+
+        const formRowId = `${ PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX }${ formUniqueId }-row-${ formRowIndex }`;
+        const formRow = window[formRowId] as HTMLElement;
+
         this.quantityInput = formRow.querySelector("[name$='[assetQuantity]']");
         this.marketPriceInput = formRow.querySelector("[name$='[assetMarketPrice]']");
         this.totalMarketValueInput = formRow.querySelector("[name$='[totalMarketValue]']");
@@ -228,6 +234,28 @@ function modifyObservationsResponse(originalServerResponseJSON: string): string 
     return JSON.stringify(modifiedServerResponse);
 }
 
+function propagateRefreshDataAfterPost(observationTimestampId: number) {
+
+    if(observationTimestampId !== 0) {
+
+        const formId = `${ PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX }${ observationTimestampId }`;
+        const form = window[formId] as HTMLFormElement;
+        form.reset();
+
+        const triggerELement =
+            window[`portfolio-history-management-trigger-${ observationTimestampId }`] as HTMLElement;
+        htmx.trigger(triggerELement, "reload-history-observation");
+        // TODO reload history
+    }
+    else {
+        const triggerELement = window[PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER] as HTMLElement;
+        htmx.trigger(triggerELement, "reload-portfolio-history");
+        // TODO reload history observation
+    }
+
+    window["loadPortfolioHistortDatalists"]();
+}
+
 const portfolioHistoryManagement = {
 
     handlebarPortfolioHistoryManagementRowTemplate: null,
@@ -279,17 +307,14 @@ const portfolioHistoryManagement = {
         rowValueElements.handleInputTotalMarketValue();
     },
 
-    handleInputObservationTimeTag(
-        newTimeTagInput: HTMLInputElement,
-        observationTimestampId: number,
-    ) {
-        const form = window[`portfolio-history-management-form-${ observationTimestampId }`] as HTMLFormElement;
+    handleInputObservationTimeTag(newTimeTagInput: HTMLInputElement, observationTimestampId: number) {
+        const formId = `${ PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX }${ observationTimestampId }`;
+        const form = window[formId] as HTMLFormElement;
         const observationTimeTagInput = form.elements.namedItem("observationTimestamp.timeTag") as HTMLInputElement;
         observationTimeTagInput.value = newTimeTagInput.value;
     },
 
-    //TODO clean
-    reloadObservationHistory(event: CustomEvent, observationTimestampId: number) {
+    handleAfterPostObservationHistory(event: CustomEvent, observationTimestampId: number) {
 
         const eventDetail = event.detail as AfterRequestEventDetail;
 
@@ -297,22 +322,7 @@ const portfolioHistoryManagement = {
             return;
         }
 
-        const form = window[`portfolio-history-management-form-${ observationTimestampId }`] as HTMLFormElement;
-
-        if(observationTimestampId !== 0) {
-
-            form.reset();
-
-            const triggerELement =
-                window[`portfolio-history-management-trigger-${ observationTimestampId }`] as HTMLElement;
-            htmx.trigger(triggerELement, "reload-history-observation");
-        }
-        else {
-            const triggerELement = window["accordion-portfolio-history-management"] as HTMLElement;
-            htmx.trigger(triggerELement, "reload-portfolio-history");
-        }
-
-        window["loadPortfolioHistortDatalists"]();
+        propagateRefreshDataAfterPost(observationTimestampId);
     },
 };
 
