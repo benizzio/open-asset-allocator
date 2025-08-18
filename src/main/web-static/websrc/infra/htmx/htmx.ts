@@ -1,5 +1,5 @@
 import { HtmxBeforeSwapDetails, HtmxRequestConfig, HtmxResponseInfo } from "htmx.org";
-import { bindHTMXTransformResponse, htmxTransformResponse } from "./binding-htmx-transform-response";
+import { bindHTMXTransformResponseInDescendants, htmxTransformResponse } from "./binding-htmx-transform-response";
 import { CustomEventHandler } from "../infra-types";
 
 const NULL_IF_EMPTY_ATTRIBUTE = "data-null-if-empty";
@@ -114,10 +114,11 @@ function addEventListeners(domSettlingBehaviorEventHandler: CustomEventHandler) 
 
     document.addEventListener("htmx:configRequest", configEnhancedRequestEventListener);
 
+    // Add settling behaviour needed for HTMX own bindings
     const afterSettleCustomEventHandler = (event: CustomEvent) => {
         domSettlingBehaviorEventHandler(event);
         const eventTarget = event.target as HTMLElement;
-        bindHTMXTransformResponse(eventTarget);
+        bindHTMXTransformResponseInDescendants(eventTarget);
     };
     document.body.addEventListener("htmx:afterSettle", afterSettleCustomEventHandler);
 }

@@ -15,49 +15,64 @@ const HTMX_TRANSFORM_RESPONSE_BOUND_FLAG = "data-hx-trigger-on-route-bound";
 
 const TRANSFORM_RESPONSE_FUNCTION_MAP = new Map<string, (responseBody: string) => string>();
 
-//TODO clean
-export function bindHTMXTransformResponse(element: HTMLElement) {
+function extractRouteRegExpForTransform(element: HTMLElement) {
+    const transformResponseRouteAttribute =
+        element.getAttribute(HTMX_TRANSFORM_RESPONSE_ON_ROUTE_MATCHING_ATTRIBUTE);
+    return transformResponseRouteAttribute
+        ? new RegExp(transformResponseRouteAttribute)
+        : null;
+}
 
+function transformResponse(eventDetail: BeforeSwapEventDetail, transformFunctionKey: string) {
+
+    const originalServerResponseJSON = eventDetail.serverResponse;
+    const transformFunction = TRANSFORM_RESPONSE_FUNCTION_MAP.get(transformFunctionKey);
+
+    if(!transformFunction) {
+        throw new Error(`No transform function found for key "${ transformFunctionKey }".`);
+    }
+
+    eventDetail.serverResponse = transformFunction(originalServerResponseJSON);
+}
+
+function bindHTMXTransformResponseElement(element: HTMLElement) {
+
+    const transformResponseRegExp = extractRouteRegExpForTransform(element);
+
+    element.addEventListener("htmx:beforeSwap", (event: CustomEvent) => {
+
+        const eventDetail = event.detail as BeforeSwapEventDetail;
+        const eventRequestPath = eventDetail.pathInfo.finalRequestPath;
+
+        if(eventDetail.isError || (!transformResponseRegExp || !eventRequestPath.match(transformResponseRegExp))) {
+            return;
+        }
+
+        const transformFunctionKey = element.getAttribute(HTMX_TRANSFORM_RESPONSE_ATTRIBUTE);
+
+        try {
+            transformResponse(eventDetail, transformFunctionKey);
+        } catch(error) {
+            logger(LogLevel.ERROR, "Error transforming response for element", element, error);
+            return;
+        }
+    });
+}
+
+function bindHTMXTransformResponseElements(elemementsToBind: NodeListOf<HTMLElement>) {
+    elemementsToBind.forEach((element) => {
+        logger(LogLevel.INFO, "Binding HTMX transform response for element", element);
+        bindHTMXTransformResponseElement(element);
+        element.setAttribute(HTMX_TRANSFORM_RESPONSE_BOUND_FLAG, "true");
+    });
+}
+
+export function bindHTMXTransformResponseInDescendants(element: HTMLElement) {
     const elemementsToBind = DomUtils.queryAllInDescendants(
         element,
         `[${ HTMX_TRANSFORM_RESPONSE_ATTRIBUTE }]:not([${ HTMX_TRANSFORM_RESPONSE_BOUND_FLAG }])`,
     );
-
-    elemementsToBind.forEach((element) => {
-
-        logger(LogLevel.INFO, "Binding HTMX transform response for element", element);
-
-        const transformResponseRouteAttribute =
-            element.getAttribute(HTMX_TRANSFORM_RESPONSE_ON_ROUTE_MATCHING_ATTRIBUTE);
-
-        const transformResponseRegExp = transformResponseRouteAttribute
-            ? new RegExp(transformResponseRouteAttribute)
-            : null;
-
-        element.addEventListener("htmx:beforeSwap", (event: CustomEvent) => {
-
-            const eventDetail = event.detail as BeforeSwapEventDetail;
-            const eventRequestPath = eventDetail.pathInfo.finalRequestPath;
-
-            if(eventDetail.isError || (!transformResponseRegExp || !eventRequestPath.match(transformResponseRegExp))) {
-                return;
-            }
-
-
-            const originalServerResponseJSON = eventDetail.serverResponse;
-            const transformFunctionKey = element.getAttribute(HTMX_TRANSFORM_RESPONSE_ATTRIBUTE);
-            const transformFunction = TRANSFORM_RESPONSE_FUNCTION_MAP.get(transformFunctionKey);
-
-            if(!transformFunction) {
-                logger(LogLevel.WARN, "No transform function found for element", element);
-                return;
-            }
-
-            eventDetail.serverResponse = transformFunction(originalServerResponseJSON);
-        });
-
-        element.setAttribute(HTMX_TRANSFORM_RESPONSE_BOUND_FLAG, "true");
-    });
+    bindHTMXTransformResponseElements(elemementsToBind);
 }
 
 function registerTransformResponseFunction(

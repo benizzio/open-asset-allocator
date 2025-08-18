@@ -213,9 +213,8 @@ function getAsset(rowAssetElements: FormRowAssetElements, searchUniqueIdentifier
         });
 }
 
-function modifyObservationsResponse(
-    originalServerResponseJSON: string,
-): string {
+function modifyObservationsResponse(originalServerResponseJSON: string): string {
+
     const originalServerResponse = JSON.parse(originalServerResponseJSON) as ObservationTimestamp[];
 
     const modifiedServerResponse: ObservationTimestamp[] = [
