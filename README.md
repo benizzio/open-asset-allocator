@@ -133,7 +133,7 @@ assessing portfolio vs. plan situation through time, helping re-balancing decisi
     - [ ] add structure management (add/remove levels)
 - Portfolio history
     - [ ] allow inclusion of external cash inflow via UI (as separate "input" class)
-    - [ ] add form based data input (beginner-user-friendly)
+    - [x] add form based data input (beginner-user-friendly)
     - [ ] copy data from different obsevation timestamps
     - [ ] template data from plan
     - [ ] ui to handle data ingestion from known sources
