@@ -1,4 +1,5 @@
 import * as handlebars from "handlebars";
+import { HelperOptions } from "handlebars";
 
 /**
  * Registers custom Handlebars helpers that extend language functionality for template rendering.
@@ -178,5 +179,9 @@ export function registerHandlebarsLangHelpers() {
      */
     handlebars.registerHelper("getProperty", (obj: object, propertyKey: string): unknown => {
         return obj && obj[propertyKey];
+    });
+
+    handlebars.registerHelper("ifEquals", (arg1: unknown, arg2: unknown, options: HelperOptions) => {
+        return arg1 === arg2 ? options.fn(this) : options.inverse(this);
     });
 }

@@ -1,11 +1,19 @@
-import { HtmxRequestConfig } from "htmx.org";
+import { HtmxBeforeSwapDetails, HtmxRequestConfig, HtmxResponseInfo } from "htmx.org";
+import { bindHTMXTransformResponseInDescendants, htmxTransformResponse } from "./binding-htmx-transform-response";
+import { CustomEventHandler } from "../infra-types";
 
 const NULL_IF_EMPTY_ATTRIBUTE = "data-null-if-empty";
 
-export type EventDetail = {
-    routerPathData?: { [key: string]: unknown };
-    [key: string]: unknown;
-} & HtmxRequestConfig;
+type EventDetail = { [key: string]: unknown; };
+
+export type RequestConfigEventDetail =
+    { routerPathData?: { [key: string]: unknown }; }
+    & EventDetail
+    & HtmxRequestConfig;
+
+export type AfterRequestEventDetail = EventDetail & RequestConfigEventDetail & HtmxResponseInfo;
+
+export type BeforeSwapEventDetail = EventDetail & HtmxBeforeSwapDetails;
 
 const configEnhancedRequestEventListener = (event: CustomEvent) => {
     replaceRequestPathParams(event);
@@ -37,7 +45,7 @@ function replaceRequestPathParams(event: CustomEvent) {
 function replaceFromEventChain(event: CustomEvent) {
 
     const triggeringEvent = event.detail?.triggeringEvent as CustomEvent;
-    const detail = triggeringEvent?.detail as EventDetail;
+    const detail = triggeringEvent?.detail as RequestConfigEventDetail;
 
     if(detail?.routerPathData) {
 
@@ -102,9 +110,17 @@ function prepareFormData(event: CustomEvent) {
 
 }
 
-function addEventListeners(domSettlingBehaviorEventHandler: (event: CustomEvent) => void) {
+function addEventListeners(domSettlingBehaviorEventHandler: CustomEventHandler) {
+
     document.addEventListener("htmx:configRequest", configEnhancedRequestEventListener);
-    document.body.addEventListener("htmx:afterSettle", domSettlingBehaviorEventHandler);
+
+    // Add settling behaviour needed for HTMX own bindings
+    const afterSettleCustomEventHandler = (event: CustomEvent) => {
+        domSettlingBehaviorEventHandler(event);
+        const eventTarget = event.target as HTMLElement;
+        bindHTMXTransformResponseInDescendants(eventTarget);
+    };
+    document.body.addEventListener("htmx:afterSettle", afterSettleCustomEventHandler);
 }
 
 export const htmxInfra = {
@@ -112,9 +128,10 @@ export const htmxInfra = {
      * Initializes the htmx infrastructure of the application.
      *
      * @param domSettlingBehaviorEventHandler - The handler for the default DOM settling behavior event.
-     * Will be applied to the body and be triggered in after settiling of any child element.
+     * Will be applied to the body and be triggered in after settling of any child element.
      */
-    init(domSettlingBehaviorEventHandler: (event: CustomEvent) => void) {
+    init(domSettlingBehaviorEventHandler: CustomEventHandler) {
         addEventListeners(domSettlingBehaviorEventHandler);
     },
+    htmxTransformResponse,
 };

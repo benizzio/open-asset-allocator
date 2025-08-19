@@ -1,11 +1,11 @@
-import { AllocationHierarchyLevel, AllocationStructure, LOWEST_AVAILABLE_HIERARCHY_LEVEL_INDEX } from "./allocation";
+import { AllocationHierarchyLevel, AllocationStructure, LOWEST_AVAILABLE_HIERARCHY_LEVEL_INDEX } from "../allocation";
 import {
     getAllocationHierarchySize,
     getHierarchyLevelIndex,
     getPlannedAllocationStructuralIdAsString,
     getStructuralIdAsString,
     getTopLevelHierarchyIndexFromAllocationStructure,
-} from "./allocation-utils";
+} from "../utils/allocation-utils";
 import BigNumber from "bignumber.js";
 import {
     AllocationPlan,
@@ -13,7 +13,7 @@ import {
     FractalPlannedAllocation,
     FractalPlannedAllocationHierarchy,
     PlannedAllocation,
-} from "./allocation-plan";
+} from "../allocation-plan";
 
 export function mapAllocationPlanFractalHierarchy(
     allocationPlan: AllocationPlan,

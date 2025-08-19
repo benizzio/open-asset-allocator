@@ -1,8 +1,8 @@
-import { PortfolioAllocation, PortfolioSnapshot } from "../../domain/portfolio";
 import { AppliedAllocationHierarchyLevel, MappedChartData } from "./portfolio-chart-model";
 import { AllocationStructure } from "../../domain/allocation";
 import { ChartDataset } from "chart.js";
 import chartModule from "../../infra/chart/chart";
+import { PortfolioAllocation, PortfolioSnapshot } from "../../domain/portfolio-allocation";
 
 type ReducedAllocation = Pick<PortfolioAllocation, "totalMarketValue" | "cashReserve">;
 

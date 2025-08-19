@@ -1,11 +1,12 @@
 import { Chart, registerables } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import { handlebarsInfra } from "./handlebars/handlebars";
-import { htmxInfra } from "./htmx";
+import { htmxInfra } from "./htmx/htmx";
 import router from "./routing/router";
 import * as bootstrap from "bootstrap";
 import { domInfra } from "./dom/dom";
 import chart from "./chart/chart";
+import { CustomEventHandler } from "./infra-types";
 
 /**
  * Ties multiple components of the application infrastructure to HTMX async DOM behaviour.
@@ -14,7 +15,7 @@ import chart from "./chart/chart";
  *
  * @param event - The event that is triggered when the DOM settles.
  */
-const DOM_SETTLING_BEHAVIOR_EVENT_HANDLER = (event: CustomEvent) => {
+const DOM_SETTLING_BEHAVIOR_EVENT_HANDLER: CustomEventHandler = (event: CustomEvent) => {
     const target = event.target as HTMLElement;
     router.bindDescendants(target);
     router.boot();

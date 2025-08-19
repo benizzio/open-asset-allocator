@@ -1,4 +1,4 @@
-import { Portfolio, PortfolioDTO } from "./portfolio";
+import { Portfolio, PortfolioDTO } from "../portfolio";
 import { mapAllocationStructure } from "./allocation-mapping";
 
 export function mapToPortfolio(portfolioDTO: PortfolioDTO): Portfolio {

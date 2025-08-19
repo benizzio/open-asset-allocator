@@ -16,7 +16,7 @@ const (
 		FROM portfolio_allocation_fact pa
 		JOIN portfolio_allocation_obs_time paot ON pa.observation_time_id = paot.id
 		` + rdbms.WhereClausePlaceholder + `
-		ORDER BY paot.observation_time_tag DESC, paot.observation_timestamp DESC LIMIT {:observationTimestampLimit}
+		ORDER BY paot.observation_timestamp DESC LIMIT {:observationTimestampLimit}
 	`
 	availableObservationTimestampsComplement = `
 		WITH observation_timestamps

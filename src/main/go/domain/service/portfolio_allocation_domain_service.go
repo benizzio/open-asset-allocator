@@ -116,12 +116,12 @@ func (service *PortfolioAllocationDomService) InsertObservationTimestampInTransa
 	observationTimestamp *domain.PortfolioObservationTimestamp,
 ) (*domain.PortfolioObservationTimestamp, error) {
 
-	if langext.IsZeroValue(observationTimestamp.TimeTag) {
-		observationTimestamp.TimeTag = observationTimestamp.Timestamp.Format(time.RFC3339)
-	}
-
 	if langext.IsZeroValue(observationTimestamp.Timestamp) {
 		observationTimestamp.Timestamp = time.Now()
+	}
+
+	if langext.IsZeroValue(observationTimestamp.TimeTag) {
+		observationTimestamp.TimeTag = observationTimestamp.Timestamp.Format(time.RFC3339)
 	}
 
 	return service.portfolioAllocationRepository.InsertObservationTimestampInTransaction(

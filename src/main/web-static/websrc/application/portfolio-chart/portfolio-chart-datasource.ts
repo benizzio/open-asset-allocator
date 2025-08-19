@@ -1,13 +1,13 @@
 import { MultiChartDataSource } from "../../infra/chart/chart-types";
-import { PortfolioSnapshot } from "../../domain/portfolio";
 import {
     AllocationHierarchyLevel,
     AllocationStructure,
     LOWEST_AVAILABLE_HIERARCHY_LEVEL_INDEX,
 } from "../../domain/allocation";
-import { allocationDomainService } from "../../domain/allocation-service";
+import { allocationDomainService } from "../../domain/service/allocation-service";
 import { AppliedAllocationHierarchyLevel, MappedChartData } from "./portfolio-chart-model";
 import { mapChartData } from "./portfolio-chart-mapping";
+import { PortfolioSnapshot } from "../../domain/portfolio-allocation";
 
 /**
  * MultiChartDataSource that keeps track of an applied hierarchy level,

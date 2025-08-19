@@ -6,12 +6,8 @@ import { bootNavigoRouter, navigoRouter } from "./routing-navigo";
 
 const router = {
     init(browserGlobal: Window) {
-
         router.bindDocumentToRouting();
-
-        browserGlobal["navigateTo"] = (destinationPath: string) => {
-            navigoRouter.navigate(destinationPath);
-        };
+        browserGlobal["navigateTo"] = this.navigateTo;
     },
     bindDescendants(element: HTMLElement) {
         bindHTMXTriggerOnRouteInDescendants(element);
@@ -24,6 +20,9 @@ const router = {
     },
     boot() {
         bootNavigoRouter();
+    },
+    navigateTo(destinationPath: string) {
+        navigoRouter.navigate(destinationPath);
     },
 };
 

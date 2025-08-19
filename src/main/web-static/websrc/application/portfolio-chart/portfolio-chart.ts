@@ -1,13 +1,14 @@
-import { PortfolioDTO, PortfolioSnapshot } from "../../domain/portfolio";
+import { PortfolioDTO } from "../../domain/portfolio";
 import { ChartContent } from "../../infra/chart/chart-types";
 import { ActiveElement, Chart, ChartEvent } from "chart.js";
 import chartModule from "../../infra/chart/chart";
 import { changeChartDataOnDatasource } from "../../infra/chart/chart-utils";
-import { allocationDomainService } from "../../domain/allocation-service";
+import { allocationDomainService } from "../../domain/service/allocation-service";
 import { FractalPortfolioMultiChartDataSource } from "./portfolio-chart-datasource";
 import { MappedChartData } from "./portfolio-chart-model";
 import { mapChartData } from "./portfolio-chart-mapping";
 import DomUtils from "../../infra/dom/dom-utils";
+import { PortfolioSnapshot } from "../../domain/portfolio-allocation";
 
 function changeChartData(
     dataKey: string,

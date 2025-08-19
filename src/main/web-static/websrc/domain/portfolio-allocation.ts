@@ -1,0 +1,18 @@
+export type ObservationTimestamp = {
+    id: number;
+    timeTag: string;
+    timestamp?: Date;
+};
+
+export type PortfolioAllocation = {
+    assetName: string;
+    assetTicker: string;
+    class: string;
+    cashReserve: boolean;
+    totalMarketValue: number;
+};
+
+export type PortfolioSnapshot = {
+    observationTimestamp: ObservationTimestamp;
+    allocations: PortfolioAllocation[];
+};
