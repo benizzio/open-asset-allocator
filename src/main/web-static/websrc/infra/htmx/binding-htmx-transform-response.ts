@@ -4,7 +4,7 @@ import { logger, LogLevel } from "../logging";
 
 // =============================================================================
 // HTMX response transform binding
-// modifyies the response body of HTMX requests
+// modifies the response body of HTMX requests
 // using a specified function on the beforeSwap event
 // allows configuration of a validating RegExp to call function only when needed
 // =============================================================================
@@ -59,8 +59,8 @@ function bindHTMXTransformResponseElement(element: HTMLElement) {
     });
 }
 
-function bindHTMXTransformResponseElements(elemementsToBind: NodeListOf<HTMLElement>) {
-    elemementsToBind.forEach((element) => {
+function bindHTMXTransformResponseElements(elementsToBind: NodeListOf<HTMLElement>) {
+    elementsToBind.forEach((element) => {
         logger(LogLevel.INFO, "Binding HTMX transform response for element", element);
         bindHTMXTransformResponseElement(element);
         element.setAttribute(HTMX_TRANSFORM_RESPONSE_BOUND_FLAG, "true");
@@ -68,11 +68,11 @@ function bindHTMXTransformResponseElements(elemementsToBind: NodeListOf<HTMLElem
 }
 
 export function bindHTMXTransformResponseInDescendants(element: HTMLElement) {
-    const elemementsToBind = DomUtils.queryAllInDescendants(
+    const elementsToBind = DomUtils.queryAllInDescendants(
         element,
         `[${ HTMX_TRANSFORM_RESPONSE_ATTRIBUTE }]:not([${ HTMX_TRANSFORM_RESPONSE_BOUND_FLAG }])`,
     );
-    bindHTMXTransformResponseElements(elemementsToBind);
+    bindHTMXTransformResponseElements(elementsToBind);
 }
 
 function registerTransformResponseFunction(

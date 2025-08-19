@@ -256,7 +256,7 @@ function propagateRefreshDataAfterPost(observationTimestampId: number) {
     const portfolioHistoryViewContainerElement = window["accordion-portfolio-history"];
     htmx.trigger(portfolioHistoryViewContainerElement, "reload-portfolio-history");
 
-    loadPortfolioHistortDatalists();
+    loadPortfolioHistoryDatalists();
 }
 
 function loadClassesDatalist() {
@@ -269,7 +269,7 @@ function loadAssetsDatalist() {
     htmx.trigger(datalist, "load-assets");
 }
 
-function loadPortfolioHistortDatalists() {
+function loadPortfolioHistoryDatalists() {
     loadClassesDatalist();
     loadAssetsDatalist();
 }
