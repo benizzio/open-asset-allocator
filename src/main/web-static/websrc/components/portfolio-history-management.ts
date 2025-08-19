@@ -242,16 +242,18 @@ function propagateRefreshDataAfterPost(observationTimestampId: number) {
         const form = window[formId] as HTMLFormElement;
         form.reset();
 
-        const triggerELement =
+        const observationManagementTriggerElement =
             window[`portfolio-history-management-trigger-${ observationTimestampId }`] as HTMLElement;
-        htmx.trigger(triggerELement, "reload-history-observation");
-        // TODO reload history
+        htmx.trigger(observationManagementTriggerElement, "reload-portfolio-history-management-observation");
     }
     else {
-        const triggerELement = window[PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER] as HTMLElement;
-        htmx.trigger(triggerELement, "reload-portfolio-history");
-        // TODO reload history observation
+        const portfolioHistoryManagementContainerElement =
+            window[PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER] as HTMLElement;
+        htmx.trigger(portfolioHistoryManagementContainerElement, "reload-portfolio-history-management");
     }
+
+    const portfolioHistoryViewContainerElement = window["accordion-portfolio-history"];
+    htmx.trigger(portfolioHistoryViewContainerElement, "reload-portfolio-history");
 
     window["loadPortfolioHistortDatalists"]();
 }

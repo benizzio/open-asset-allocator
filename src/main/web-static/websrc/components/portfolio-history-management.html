@@ -2,7 +2,7 @@
      class="accordion container-fluid"
      hx-get="/api/portfolio/:portfolioId/history/observation"
      hx-include="[name='portfolioId']"
-     hx-trigger="load, reload-portfolio-history"
+     hx-trigger="load, reload-portfolio-history-management"
      handlebars-template="template-portfolio-history-management"
      data-hx-transform-response="addObservationZero"
      data-hx-transform-response-on-route-matching="^\/api\/portfolio\/.+\/history\/observation$"
@@ -19,7 +19,7 @@
                 class="accordion-header"
                 hx-include="[name='portfolioId']"
                 hx-target="#portfolio-history-management-form-tbody-{{id}}"
-                hx-trigger="{{#if id}}click,{{/if}} reload-history-observation"
+                hx-trigger="{{#if id}}click,{{/if}} reload-portfolio-history-management-observation"
                 handlebars-template="template-portfolio-history-management-form-tbody"
                 hx-get="/api/portfolio/:portfolioId/history?observationTimestampId={{id}}"
             >
