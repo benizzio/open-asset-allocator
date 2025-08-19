@@ -5,6 +5,7 @@ import BigNumber from "bignumber.js";
 import { BootstrapClasses, BootstrapIconClasses } from "../infra/bootstrap/constants";
 import { AfterRequestEventDetail, htmxInfra } from "../infra/htmx/htmx";
 import { ObservationTimestamp } from "../domain/portfolio-allocation";
+import router from "../infra/routing/router";
 
 const PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER = "accordion-portfolio-history-management";
 const PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX = "portfolio-history-management-form-";
@@ -255,7 +256,22 @@ function propagateRefreshDataAfterPost(observationTimestampId: number) {
     const portfolioHistoryViewContainerElement = window["accordion-portfolio-history"];
     htmx.trigger(portfolioHistoryViewContainerElement, "reload-portfolio-history");
 
-    window["loadPortfolioHistortDatalists"]();
+    loadPortfolioHistortDatalists();
+}
+
+function loadClassesDatalist() {
+    const datalist = window["datalist-classes"];
+    htmx.trigger(datalist, "load-classes");
+}
+
+function loadAssetsDatalist() {
+    const datalist = window["datalist-assets"];
+    htmx.trigger(datalist, "load-assets");
+}
+
+function loadPortfolioHistortDatalists() {
+    loadClassesDatalist();
+    loadAssetsDatalist();
 }
 
 const portfolioHistoryManagement = {
@@ -325,6 +341,12 @@ const portfolioHistoryManagement = {
         }
 
         propagateRefreshDataAfterPost(observationTimestampId);
+    },
+
+    navigateToPortfolioAllocationViewing() {
+        const globalPortfolioIdField = document.querySelector("[name='portfolioId']") as HTMLInputElement;
+        const portfolioId = globalPortfolioIdField.value;
+        router.navigateTo(`/portfolio/${ portfolioId }/history`);
     },
 };
 

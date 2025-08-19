@@ -17,15 +17,10 @@
         </div>
     </div>
 
-    <div data-display-on-route="/portfolio/:portfolioId/history/manage">
-        <div class="card border-dark mb-3">
-            <div class="card-header">Manage portfolio allocation data</div>
-            <div class="card-body"
-                 hx-get="/websrc/components/portfolio-history-management.html"
-                 hx-trigger="load"
-            >
-            </div>
-        </div>
+    <div data-display-on-route="/portfolio/:portfolioId/history/manage"
+         hx-get="/websrc/components/portfolio-history-management.html"
+         hx-trigger="load"
+    >
     </div>
 
 </div>
@@ -34,12 +29,13 @@
 
     <button type="button"
             class="btn btn-outline-primary mb-2"
-            onclick="navigateToManagePortfolioAllocationManagement()"
+            onclick="navigateToPortfolioAllocationManagement()"
     >
         <span class="h2 bi bi-database-gear"></span>
     </button>
 
     {{#each .}}
+
         <div class="accordion-item">
 
             <h2 class="accordion-header">
@@ -87,51 +83,8 @@
             </div>
 
         </div>
-    {{/each}}
-
-</script>
-
-<datalist id="datalist-classes"
-          hx-get="/api/portfolio/:portfolioId/allocation-classes"
-          hx-include="[name='portfolioId']"
-          hx-trigger="load, load-classes"
-          handlebars-template="template-monovalue-datalist"
->
-</datalist>
-
-<datalist id="datalist-assets"
-          hx-get="/api/asset"
-          hx-trigger="load, load-assets"
-          handlebars-template="template-asset-datalist"
->
-</datalist>
-
-<script id="template-monovalue-datalist" type="text/x-handlebars-template">
-
-    {{#each .}}
-
-        {{#if (getProperty this ../propertyKey) }}
-            <option value="{{getProperty this ../propertyKey}}">{{getProperty this ../propertyKey}}</option>
-        {{else}}
-            <option value="{{this}}">{{this}}</option>
-        {{/if}}
 
     {{/each}}
-
-</script>
-
-<script id="template-asset-datalist" type="text/x-handlebars-template">
-
-    {{> template-monovalue-datalist propertyKey="ticker"}}
-
-</script>
-
-<script type="text/javascript">
-
-    HandlebarsUtils.registerPartialToContainer(
-        "accordion-portfolio-history",
-        "template-monovalue-datalist"
-    );
 
 </script>
 
@@ -141,25 +94,9 @@
         setTextContentWithTopHierarchyName("[id^='hierarchy-level-portfolio-chart-']");
     }
 
-    window.navigateToManagePortfolioAllocationManagement = () => {
+    window.navigateToPortfolioAllocationManagement = () => {
         const portfolioId = document.querySelector("[name='portfolioId']").value;
         navigateTo(`/portfolio/${portfolioId}/history/manage`);
-        loadClassesDatalist();
-    }
-
-    function loadClassesDatalist() {
-        const datalist = window["datalist-classes"];
-        htmx.trigger(datalist, "load-classes");
-    }
-
-    function loadAssetsDatalist() {
-        const datalist = window["datalist-assets"];
-        htmx.trigger(datalist, "load-assets");
-    }
-
-    window.loadPortfolioHistortDatalists = () => {
-        loadClassesDatalist();
-        loadAssetsDatalist();
     }
 
 </script>
