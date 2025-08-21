@@ -1,4 +1,4 @@
-package util
+package langext
 
 type Iterator[T any] struct {
 	index int

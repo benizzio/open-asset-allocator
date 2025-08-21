@@ -5,7 +5,7 @@ import (
 
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/domain/service"
-	"github.com/benizzio/open-asset-allocator/infra/util"
+	"github.com/benizzio/open-asset-allocator/langext"
 	"github.com/golang/glog"
 	"github.com/shopspring/decimal"
 )
@@ -120,7 +120,7 @@ func (service *PortfolioDivergenceAnalysisAppService) generateDivergenceAnalysis
 
 	var iterationContextValue = &allocationIterationMappingContextValue{
 		potentialDivergenceMap:       potentialDivergenceMap,
-		portfolioAllocationsIterator: util.NewIterator(portfolioAllocations),
+		portfolioAllocationsIterator: langext.NewIterator(portfolioAllocations),
 	}
 
 	var allocationIterationMappingContext = buildAllocationIterationContext(analysisContext, iterationContextValue)
@@ -179,7 +179,7 @@ func (service *PortfolioDivergenceAnalysisAppService) mapPotentialDivergenceFrom
 	var allocationIterationContextValue = getAllocationIterationContextValue(analysisContext)
 	var allocationHierarchy = analysisContextValue.portfolio.AllocationStructure.Hierarchy
 
-	var allocationHierarchyIterator = util.NewIterator(allocationHierarchy)
+	var allocationHierarchyIterator = langext.NewIterator(allocationHierarchy)
 	var hierarchySubIterationMappingContext = buildHierarchySubIterationContext(
 		analysisContext,
 		allocationHierarchyIterator,
@@ -415,8 +415,10 @@ func generatePotentialDivergencesFromAllocationPlanSetDifference(
 
 	var hierarchytopLevelIndex = hierarchySize - 1
 
-	for _, plannedAllocation := range plannedAllocationMap {
+	var plannedAllocationIterator = langext.NewOrderedMapIterator(plannedAllocationMap)
+	for plannedAllocationIterator.HasNext() {
 
+		var plannedAllocation, _ = plannedAllocationIterator.NextValue()
 		var currentPlannedStructuralId = plannedAllocation.StructuralId
 
 		checkAndGeneratePotentialDivergencesOnHierarchy(
@@ -496,8 +498,7 @@ func generateAndAttachPotentialDivergenceForPlannedAllocation(
 		levelIdentifier,
 	)
 
-	// TODO create test that covers this
-	//potentialDivergenceMap[currentLevelHierarchicalId] = potentialDivergence
+	potentialDivergenceMap[currentLevelHierarchicalId] = potentialDivergence
 
 	var parentTotalMarketValue int64 = 0
 	if isTopHierarchyLevel {
