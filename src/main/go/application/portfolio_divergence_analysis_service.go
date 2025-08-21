@@ -48,6 +48,8 @@ func (service *PortfolioDivergenceAnalysisAppService) GeneratePortfolioDivergenc
 	return divergenceAnalysis, nil
 }
 
+// initializeAnalysisContextForObservationTimestamp initializes the all the basic structures needed to create a divergence analysis
+// and add them to a context.Context.
 func (service *PortfolioDivergenceAnalysisAppService) initializeAnalysisContextForObservationTimestamp(
 	portfolioId int,
 	observationTimestampId int,
@@ -85,19 +87,11 @@ func (service *PortfolioDivergenceAnalysisAppService) initializeAnalysisContextF
 	return analysisContext, nil
 }
 
+// generateDivergenceAnalysisFromPortfolioAllocationSet generates the initial Divergence Analysis tree structure
+// from the portfolio allocations dataset.
+//
+// Returns a map of all PotentialDivergences per HierarchicalId to facilitate finding specific nodes in the tree.
 func (service *PortfolioDivergenceAnalysisAppService) generateDivergenceAnalysisFromPortfolioAllocationSet(
-	analysisContext context.Context,
-) (potentialDivergencesPerHierarchicalId, error) {
-
-	potentialDivergenceMap, err := service.mapPotentialDivergencesFromPortfolioAllocations(analysisContext)
-	if err != nil {
-		return nil, err
-	}
-
-	return potentialDivergenceMap, nil
-}
-
-func (service *PortfolioDivergenceAnalysisAppService) mapPotentialDivergencesFromPortfolioAllocations(
 	analysisContext context.Context,
 ) (potentialDivergencesPerHierarchicalId, error) {
 
@@ -128,6 +122,10 @@ func (service *PortfolioDivergenceAnalysisAppService) mapPotentialDivergencesFro
 	return potentialDivergenceMap, nil
 }
 
+// complementAnalysisWithAllocationPlanSetDifference finalizes the divergence analysis by calculating the divergence values
+// compared to the planned values of each PotentialDivergence node, while also generating PotentialDivergences for the difference
+// between portfolio allocations and planned allocations datasets, adding PotentialDivergences
+// for the planned allocations that are not allocated in the portfolio.
 func (service *PortfolioDivergenceAnalysisAppService) complementAnalysisWithAllocationPlanSetDifference(
 	analysisContext context.Context,
 	allocationPlanId int,
