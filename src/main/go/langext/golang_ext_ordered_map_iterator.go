@@ -14,6 +14,7 @@ import (
 //   - V: The value type
 //
 // Authored by: GitHub Copilot
+// TODO add an interface to this
 type OrderedMapIterator[K comparable, V any] struct {
 	index       int
 	orderedKeys []K
