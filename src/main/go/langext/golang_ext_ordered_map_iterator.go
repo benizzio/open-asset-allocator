@@ -1,21 +1,22 @@
 package langext
 
 import (
+	"cmp"
 	"sort"
 )
 
 // OrderedMapIterator provides ordered iteration over map entries using a sorted slice of keys.
 //
 // The iterator maintains the original map and a sorted slice of keys to ensure consistent
-// iteration order. Keys are sorted using Go's default comparison for the key type.
+// iteration order. Keys are sorted using Go's built-in cmp.Compare function.
 //
 // Type parameters:
-//   - K: The key type (must be comparable and sortable)
+//   - K: The key type (must be ordered - supports <, <=, >=, > operators)
 //   - V: The value type
 //
 // Authored by: GitHub Copilot
 // TODO add an interface to this
-type OrderedMapIterator[K comparable, V any] struct {
+type OrderedMapIterator[K cmp.Ordered, V any] struct {
 	index       int
 	orderedKeys []K
 	sourceMap   map[K]V
@@ -24,7 +25,7 @@ type OrderedMapIterator[K comparable, V any] struct {
 // KeyValue represents a key-value pair from the map.
 //
 // Authored by: GitHub Copilot
-type KeyValue[K comparable, V any] struct {
+type KeyValue[K cmp.Ordered, V any] struct {
 	Key   K
 	Value V
 }
@@ -171,7 +172,7 @@ func (iterator *OrderedMapIterator[K, V]) Size() int {
 //	}
 //
 // Authored by: GitHub Copilot
-func NewOrderedMapIterator[K comparable, V any](sourceMap map[K]V) *OrderedMapIterator[K, V] {
+func NewOrderedMapIterator[K cmp.Ordered, V any](sourceMap map[K]V) *OrderedMapIterator[K, V] {
 
 	var orderedKeys = make([]K, 0, len(sourceMap))
 	for key := range sourceMap {
@@ -180,7 +181,7 @@ func NewOrderedMapIterator[K comparable, V any](sourceMap map[K]V) *OrderedMapIt
 
 	sort.Slice(
 		orderedKeys, func(i, j int) bool {
-			return compareKeys(orderedKeys[i], orderedKeys[j])
+			return cmp.Compare(orderedKeys[i], orderedKeys[j]) < 0
 		},
 	)
 
@@ -188,52 +189,5 @@ func NewOrderedMapIterator[K comparable, V any](sourceMap map[K]V) *OrderedMapIt
 		index:       -1,
 		orderedKeys: orderedKeys,
 		sourceMap:   sourceMap,
-	}
-}
-
-// compareKeys provides generic comparison for different key types.
-//
-// This function handles the most common comparable types used as map keys.
-// For custom types, you may need to create a specialized constructor.
-//
-// Parameters:
-//   - a, b: keys to compare
-//
-// Returns:
-//   - bool: true if a < b
-//
-// Authored by: GitHub Copilot
-func compareKeys[K comparable](a, b K) bool {
-	switch any(a).(type) {
-	case string:
-		return any(a).(string) < any(b).(string)
-	case int:
-		return any(a).(int) < any(b).(int)
-	case int8:
-		return any(a).(int8) < any(b).(int8)
-	case int16:
-		return any(a).(int16) < any(b).(int16)
-	case int32:
-		return any(a).(int32) < any(b).(int32)
-	case int64:
-		return any(a).(int64) < any(b).(int64)
-	case uint:
-		return any(a).(uint) < any(b).(uint)
-	case uint8:
-		return any(a).(uint8) < any(b).(uint8)
-	case uint16:
-		return any(a).(uint16) < any(b).(uint16)
-	case uint32:
-		return any(a).(uint32) < any(b).(uint32)
-	case uint64:
-		return any(a).(uint64) < any(b).(uint64)
-	case float32:
-		return any(a).(float32) < any(b).(float32)
-	case float64:
-		return any(a).(float64) < any(b).(float64)
-	default:
-		// For other comparable types, we'll need to convert to string for comparison
-		// This is a fallback and may not provide meaningful ordering for all types
-		return false
 	}
 }
