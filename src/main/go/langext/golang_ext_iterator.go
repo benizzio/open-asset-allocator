@@ -1,5 +1,6 @@
-package util
+package langext
 
+// TODO add an interface to this
 type Iterator[T any] struct {
 	index int
 	slice []T

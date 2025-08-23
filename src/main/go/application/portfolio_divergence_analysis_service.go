@@ -5,7 +5,8 @@ import (
 
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/domain/service"
-	"github.com/benizzio/open-asset-allocator/infra/util"
+	"github.com/benizzio/open-asset-allocator/langext"
+	"github.com/golang/glog"
 	"github.com/shopspring/decimal"
 )
 
@@ -23,6 +24,14 @@ func (service *PortfolioDivergenceAnalysisAppService) GeneratePortfolioDivergenc
 	allocationPlanId int,
 ) (*domain.DivergenceAnalysis, error) {
 
+	// TODO verification for debug logging, this should be logged only in debug mode
+	glog.Infof(
+		"Generating divergence analysis for portfolio %d at observation %d from allocation plan %d",
+		portfolioId,
+		observationTimestampId,
+		allocationPlanId,
+	)
+
 	var analysisContext, err = service.initializeAnalysisContextForObservationTimestamp(
 		portfolioId,
 		observationTimestampId,
@@ -31,6 +40,15 @@ func (service *PortfolioDivergenceAnalysisAppService) GeneratePortfolioDivergenc
 	if err != nil {
 		return nil, err
 	}
+
+	var analysisContextValue = getDivergenceAnalysisContextValue(analysisContext)
+	// TODO verification for debug logging, this should be logged only in debug mode
+	glog.Infof(
+		"Contextual data for divergence analysis obtained: portfolio \"%s\" at observation \"%s\" will be compared to allocation plan %d",
+		analysisContextValue.portfolio.Name,
+		analysisContextValue.divergenceAnalysis.ObservationTimestamp.TimeTag,
+		allocationPlanId,
+	)
 
 	potentialDivergenceMap, err := service.generateDivergenceAnalysisFromPortfolioAllocationSet(analysisContext)
 	if err != nil {
@@ -48,6 +66,8 @@ func (service *PortfolioDivergenceAnalysisAppService) GeneratePortfolioDivergenc
 	return divergenceAnalysis, nil
 }
 
+// initializeAnalysisContextForObservationTimestamp initializes the all the basic structures needed to create a divergence analysis
+// and add them to a context.Context.
 func (service *PortfolioDivergenceAnalysisAppService) initializeAnalysisContextForObservationTimestamp(
 	portfolioId int,
 	observationTimestampId int,
@@ -85,19 +105,11 @@ func (service *PortfolioDivergenceAnalysisAppService) initializeAnalysisContextF
 	return analysisContext, nil
 }
 
+// generateDivergenceAnalysisFromPortfolioAllocationSet generates the initial Divergence Analysis tree structure
+// from the portfolio allocations dataset.
+//
+// Returns a map of all PotentialDivergences per HierarchicalId to facilitate finding specific nodes in the tree.
 func (service *PortfolioDivergenceAnalysisAppService) generateDivergenceAnalysisFromPortfolioAllocationSet(
-	analysisContext context.Context,
-) (potentialDivergencesPerHierarchicalId, error) {
-
-	potentialDivergenceMap, err := service.mapPotentialDivergencesFromPortfolioAllocations(analysisContext)
-	if err != nil {
-		return nil, err
-	}
-
-	return potentialDivergenceMap, nil
-}
-
-func (service *PortfolioDivergenceAnalysisAppService) mapPotentialDivergencesFromPortfolioAllocations(
 	analysisContext context.Context,
 ) (potentialDivergencesPerHierarchicalId, error) {
 
@@ -108,7 +120,7 @@ func (service *PortfolioDivergenceAnalysisAppService) mapPotentialDivergencesFro
 
 	var iterationContextValue = &allocationIterationMappingContextValue{
 		potentialDivergenceMap:       potentialDivergenceMap,
-		portfolioAllocationsIterator: util.NewIterator(portfolioAllocations),
+		portfolioAllocationsIterator: langext.NewIterator(portfolioAllocations),
 	}
 
 	var allocationIterationMappingContext = buildAllocationIterationContext(analysisContext, iterationContextValue)
@@ -128,6 +140,10 @@ func (service *PortfolioDivergenceAnalysisAppService) mapPotentialDivergencesFro
 	return potentialDivergenceMap, nil
 }
 
+// complementAnalysisWithAllocationPlanSetDifference finalizes the divergence analysis by calculating the divergence values
+// compared to the planned values of each PotentialDivergence node, while also generating PotentialDivergences for the difference
+// between portfolio allocations and planned allocations datasets, adding PotentialDivergences
+// for the planned allocations that are not allocated in the portfolio.
 func (service *PortfolioDivergenceAnalysisAppService) complementAnalysisWithAllocationPlanSetDifference(
 	analysisContext context.Context,
 	allocationPlanId int,
@@ -163,7 +179,7 @@ func (service *PortfolioDivergenceAnalysisAppService) mapPotentialDivergenceFrom
 	var allocationIterationContextValue = getAllocationIterationContextValue(analysisContext)
 	var allocationHierarchy = analysisContextValue.portfolio.AllocationStructure.Hierarchy
 
-	var allocationHierarchyIterator = util.NewIterator(allocationHierarchy)
+	var allocationHierarchyIterator = langext.NewIterator(allocationHierarchy)
 	var hierarchySubIterationMappingContext = buildHierarchySubIterationContext(
 		analysisContext,
 		allocationHierarchyIterator,
@@ -225,6 +241,12 @@ func (service *PortfolioDivergenceAnalysisAppService) buildAndConnectPotentialDi
 
 	if lowerLevelDivergence != nil {
 		potentialDivergence.AddInternalDivergence(lowerLevelDivergence)
+		// TODO verification for debug logging, this should be logged only in debug mode
+		glog.Infof(
+			"Potential divergence %s linked to parent level divergence %s",
+			lowerLevelDivergence.HierarchicalId,
+			potentialDivergence.HierarchicalId,
+		)
 	}
 
 	return potentialDivergence, potentialDivergenceCreated, nil
@@ -287,7 +309,14 @@ func buildAndAttachPotentialDivergenceIfNotExists(
 	if potentialDivergence == nil {
 
 		var isLowestLevel = currentHierarchyLevelIndex == 0
-		potentialDivergence = newPotentialDivergence(hierarchyLevelKey, hierarchicalId, isLowestLevel)
+		potentialDivergence = buildPotentialDivergence(hierarchyLevelKey, hierarchicalId, isLowestLevel)
+
+		// TODO verification for debug logging, this should be logged only in debug mode
+		glog.Infof(
+			"Potential divergence node created: %s at level %d",
+			hierarchicalId,
+			currentHierarchyLevelIndex,
+		)
 
 		attachToRootIfTopLevel(analysisContext, potentialDivergence)
 
@@ -299,7 +328,7 @@ func buildAndAttachPotentialDivergenceIfNotExists(
 	return potentialDivergence, false
 }
 
-func newPotentialDivergence(
+func buildPotentialDivergence(
 	hierarchyLevelKey string,
 	hierarchicalId string,
 	isLowestLevel bool,
@@ -332,6 +361,8 @@ func attachToRootIfTopLevel(
 
 	if currentHierarchyLevelIndex == topAllocationHierarchyLevelIndex {
 		analysisContextValue.divergenceAnalysis.AddRootDivergence(potentialDivergence)
+		// TODO verification for debug logging, this should be logged only in debug mode
+		glog.Infof("Potential divergence %s linked to parent root", potentialDivergence.HierarchicalId)
 	}
 }
 
@@ -384,8 +415,10 @@ func generatePotentialDivergencesFromAllocationPlanSetDifference(
 
 	var hierarchytopLevelIndex = hierarchySize - 1
 
-	for _, plannedAllocation := range plannedAllocationMap {
+	var plannedAllocationIterator = langext.NewOrderedMapIterator(plannedAllocationMap)
+	for plannedAllocationIterator.HasNext() {
 
+		var plannedAllocation, _ = plannedAllocationIterator.NextValue()
 		var currentPlannedStructuralId = plannedAllocation.StructuralId
 
 		checkAndGeneratePotentialDivergencesOnHierarchy(
@@ -446,20 +479,43 @@ func generateAndAttachPotentialDivergenceForPlannedAllocation(
 	var analysisContextValue = getDivergenceAnalysisContextValue(analysisContext)
 	var divergenceAnalysis = analysisContextValue.divergenceAnalysis
 
-	var potentialDivergence = newPotentialDivergence(
+	var potentialDivergence = buildPotentialDivergence(
 		hierarchyLevelkey,
 		currentLevelHierarchicalId,
 		isLowestHierarchyLevel,
 	)
 
+	var levelIdentifier string
+	if isLowestHierarchyLevel {
+		levelIdentifier = "at bottom"
+	} else if isTopHierarchyLevel {
+		levelIdentifier = "at top"
+	}
+	// TODO verification for debug logging, this should be logged only in debug mode\
+	glog.Infof(
+		"Potential divergence node created: %s %s",
+		currentLevelHierarchicalId,
+		levelIdentifier,
+	)
+
+	potentialDivergenceMap[currentLevelHierarchicalId] = potentialDivergence
+
 	var parentTotalMarketValue int64 = 0
 	if isTopHierarchyLevel {
 		divergenceAnalysis.AddRootDivergence(potentialDivergence)
 		parentTotalMarketValue = divergenceAnalysis.PortfolioTotalMarketValue
+		// TODO verification for debug logging, this should be logged only in debug mode\
+		glog.Infof("Potential divergence %s linked to parent root", currentLevelHierarchicalId)
 	} else {
 		var parentPotentialDivergence = potentialDivergenceMap[parentLevelHierarchicalId]
 		parentPotentialDivergence.AddInternalDivergence(potentialDivergence)
 		parentTotalMarketValue = parentPotentialDivergence.TotalMarketValue
+		// TODO verification for debug logging, this should be logged only in debug mode\
+		glog.Infof(
+			"Potential divergence %s linked to parent %s",
+			currentLevelHierarchicalId,
+			parentLevelHierarchicalId,
+		)
 	}
 
 	calculateDivergenceValue(potentialDivergence, plannedAllocation, parentTotalMarketValue)
