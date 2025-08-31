@@ -1,6 +1,7 @@
 target
 .idea/
 src/main/go/tmp/
+src/main/go/vendor/
 
 **/node_modules/
 **/.parcel-cache/
