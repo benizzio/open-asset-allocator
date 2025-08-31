@@ -86,7 +86,7 @@ func (service *PortfolioAllocationDomService) getHierarchyLevelFieldValue(
 ) (string, error) {
 	extractorFunction, ok := service.allocationHierarchyFieldExtractorMap[level.Field]
 	if !ok {
-		return "", infra.BuildAppErrorFormatted("No extractor registered for field: %s", level.Field)
+		return "", infra.BuildAppErrorFormatted(service, "No extractor registered for field: %s", level.Field)
 	}
 	return extractorFunction(allocation), nil
 }

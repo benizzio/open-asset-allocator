@@ -1,6 +1,6 @@
 module github.com/benizzio/open-asset-allocator
 
-go 1.23.1
+go 1.24.3
 
 require (
 	github.com/docker/docker v28.3.3+incompatible
