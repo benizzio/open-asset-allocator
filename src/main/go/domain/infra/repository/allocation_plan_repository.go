@@ -129,10 +129,7 @@ func (repository *AllocationPlanRDBMSRepository) mapPlannedAllocationRows(rows [
 
 	for _, row := range rows {
 
-		allocationPlan, err := repository.mapRow(&row, allocationPlanCacheMap)
-		if err != nil {
-			return nil, err
-		}
+		allocationPlan := repository.mapRow(&row, allocationPlanCacheMap)
 		if allocationPlan != nil {
 			allocationPlans = append(allocationPlans, allocationPlan)
 		}
@@ -144,7 +141,7 @@ func (repository *AllocationPlanRDBMSRepository) mapPlannedAllocationRows(rows [
 func (repository *AllocationPlanRDBMSRepository) mapRow(
 	row *PlannedAllocationJoinedRowDTS,
 	allocationPlanCacheMap map[int]*domain.AllocationPlan,
-) (*domain.AllocationPlan, error) {
+) *domain.AllocationPlan {
 
 	allocationPlanUnit := mapPlannedAllocationFromRow(row)
 
@@ -153,10 +150,10 @@ func (repository *AllocationPlanRDBMSRepository) mapRow(
 	} else {
 		allocationPlan := mapPlanFromRow(row, allocationPlanUnit)
 		allocationPlanCacheMap[row.AllocationPlanId] = allocationPlan
-		return allocationPlan, nil
+		return allocationPlan
 	}
 
-	return nil, nil
+	return nil
 }
 
 func (repository *AllocationPlanRDBMSRepository) scanRow(
