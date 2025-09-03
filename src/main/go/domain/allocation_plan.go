@@ -1,9 +1,10 @@
 package domain
 
 import (
+	"time"
+
 	"github.com/benizzio/open-asset-allocator/domain/allocation"
 	"github.com/shopspring/decimal"
-	"time"
 )
 
 type PlannedAllocationsPerHierarchicalId map[string]*PlannedAllocation
@@ -17,6 +18,7 @@ func (plannedAllocationMap PlannedAllocationsPerHierarchicalId) Remove(hierarchi
 }
 
 type PlannedAllocation struct {
+	Id                  int
 	StructuralId        HierarchicalId //TODO rename this to HierarchicalId in all stack
 	CashReserve         bool
 	SliceSizePercentage decimal.Decimal

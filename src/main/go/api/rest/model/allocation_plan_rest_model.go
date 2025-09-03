@@ -12,6 +12,7 @@ import (
 // ================================================
 
 type PlannedAllocationDTS struct {
+	Id                  int             `json:"id,omitempty"`
 	StructuralId        []*string       `json:"structuralId,omitempty"`
 	CashReserve         bool            `json:"cashReserve"`
 	SliceSizePercentage decimal.Decimal `json:"sliceSizePercentage,omitempty"`
@@ -64,6 +65,7 @@ func mapToPlannedAllocationDTSs(allocationPlan *domain.AllocationPlan) []Planned
 
 func mapToPlannedAllocationDTS(allocation *domain.PlannedAllocation) PlannedAllocationDTS {
 	return PlannedAllocationDTS{
+		Id:                  allocation.Id,
 		StructuralId:        allocation.StructuralId,
 		CashReserve:         allocation.CashReserve,
 		SliceSizePercentage: allocation.SliceSizePercentage,

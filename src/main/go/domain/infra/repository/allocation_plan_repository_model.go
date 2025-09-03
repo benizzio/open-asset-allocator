@@ -12,6 +12,7 @@ type plannedAllocationJoinedRowDTS struct {
 	Name                 string
 	Type                 allocation.PlanType
 	PlannedExecutionDate sqlext.NullTime
+	PlannedAllocationId  int
 	StructuralId         sqlext.NullStringSlice
 	CashReserve          bool
 	SliceSizePercentage  decimal.Decimal
@@ -53,6 +54,7 @@ func mapPlannedAllocationRow(
 
 func buildPlannedAllocationFromRow(rowDTS *plannedAllocationJoinedRowDTS) *domain.PlannedAllocation {
 	return &domain.PlannedAllocation{
+		Id:                  rowDTS.PlannedAllocationId,
 		StructuralId:        rowDTS.StructuralId.ToStringSlice(),
 		CashReserve:         rowDTS.CashReserve,
 		SliceSizePercentage: rowDTS.SliceSizePercentage,

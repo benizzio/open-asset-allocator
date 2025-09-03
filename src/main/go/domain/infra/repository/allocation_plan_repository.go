@@ -20,7 +20,8 @@ const (
 		    ap.id AS allocation_plan_id,
 		    ap.name, 
 		    ap.type, 
-		    ap.planned_execution_date, 
+		    ap.planned_execution_date,
+		    pa.id AS planned_allocation_id,
 		    pa.structural_id, 
 		    pa.cash_reserve, 
 		    pa.slice_size_percentage

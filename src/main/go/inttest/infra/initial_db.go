@@ -206,30 +206,31 @@ const initialStateSQL = `
 	DELETE FROM planned_allocation WHERE allocation_plan_id = 1;
 	
 	INSERT INTO planned_allocation
-	(allocation_plan_id, structural_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
+	(id, allocation_plan_id, structural_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
 	VALUES
-		(1, '{NULL, "STOCKS"}', NULL, FALSE, 0.4, NULL),
-		(1, '{NULL, "BONDS"}', NULL, FALSE, 0.6, NULL)
+		(1, 1, '{NULL, "STOCKS"}', NULL, FALSE, 0.4, NULL),
+		(2, 1, '{NULL, "BONDS"}', NULL, FALSE, 0.6, NULL)
 	;
 	
 	INSERT INTO planned_allocation
-	(allocation_plan_id, structural_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
+	(id, allocation_plan_id, structural_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
 	VALUES
-		(1, '{"ARCA:BIL", "BONDS"}', 1, FALSE, 0.4, NULL),
-		(1, '{"NasdaqGM:IEF", "BONDS"}', 3, FALSE, 0.3, NULL),
-		(1, '{"NasdaqGM:TLT", "BONDS"}', 4, FALSE, 0.2, NULL),
-		(1, '{"ARCA:STIP", "BONDS"}', 2, FALSE, 0.1, NULL)
+		(3, 1, '{"ARCA:BIL", "BONDS"}', 1, FALSE, 0.4, NULL),
+		(4, 1, '{"NasdaqGM:IEF", "BONDS"}', 3, FALSE, 0.3, NULL),
+		(5, 1, '{"NasdaqGM:TLT", "BONDS"}', 4, FALSE, 0.2, NULL),
+		(6, 1, '{"ARCA:STIP", "BONDS"}', 2, FALSE, 0.1, NULL)
 	;
 	
 	INSERT INTO planned_allocation
-	(allocation_plan_id, structural_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
+	(id, allocation_plan_id, structural_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
 	VALUES
-		(1, '{"NasdaqGM:SHV", "STOCKS"}', 5, TRUE, 0.5, NULL),
-		(1, '{"ARCA:EWZ", "STOCKS"}', 6, FALSE, 0.05, NULL),
-		(1, '{"ARCA:SPY", "STOCKS"}', 7, FALSE, 0.45, NULL)
+		(7, 1, '{"NasdaqGM:SHV", "STOCKS"}', 5, TRUE, 0.5, NULL),
+		(8 ,1, '{"ARCA:EWZ", "STOCKS"}', 6, FALSE, 0.05, NULL),
+		(9, 1, '{"ARCA:SPY", "STOCKS"}', 7, FALSE, 0.45, NULL)
 	;
 	
 	SELECT setval('allocation_plan_id_seq', (SELECT max(id) FROM allocation_plan));
+	SELECT setval('allocation_plan_unit_id_seq', (SELECT max(id) FROM planned_allocation));
 `
 
 func InitializeDBState() error {
