@@ -1,0 +1,1 @@
+ALTER TABLE planned_allocation RENAME COLUMN structural_id TO hierarchical_id;

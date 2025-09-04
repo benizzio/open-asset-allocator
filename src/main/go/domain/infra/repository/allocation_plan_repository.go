@@ -22,7 +22,7 @@ const (
 		    ap.type, 
 		    ap.planned_execution_date,
 		    pa.id AS planned_allocation_id,
-		    pa.structural_id, 
+		    pa.hierarchical_id, 
 		    pa.cash_reserve, 
 		    pa.slice_size_percentage
 		FROM planned_allocation pa 
