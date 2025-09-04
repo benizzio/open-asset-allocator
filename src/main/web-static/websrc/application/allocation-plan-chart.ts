@@ -71,7 +71,7 @@ function mapDataset(
         const allocation = fractalAllocation.allocation;
 
         dataset.data.push(allocation.sliceSizePercentage.toNumber());
-        chartData.labels.push(allocation.structuralId[fractalAllocation.level.index]);
+        chartData.labels.push(allocation.hierarchicalId[fractalAllocation.level.index]);
 
         if(allocation.cashReserve) {
             chartModule.convertUnidimensionalDatasetBackgroundToPattern(dataset, index);
@@ -182,4 +182,3 @@ const allocationPlanChart = {
 };
 
 export default allocationPlanChart;
-

@@ -6,7 +6,7 @@ export function getHierarchyLevelIndex(allocation: PlannedAllocation): number {
     const hierarchyTopLevelIndex = getTopLevelHierarchyIndexFromPlannedAllocation(allocation);
 
     for(let i = hierarchyTopLevelIndex - 1; i >= 0; i--) {
-        if(!allocation.structuralId[i]) {
+        if(!allocation.hierarchicalId[i]) {
             return i + 1;
         }
     }
@@ -14,12 +14,12 @@ export function getHierarchyLevelIndex(allocation: PlannedAllocation): number {
     return 0;
 }
 
-export function getStructuralIdAsString(plannedAllocation: PlannedAllocation): string {
-    return getPlannedAllocationStructuralIdAsString(plannedAllocation.structuralId);
+export function getHierarchicalIdAsString(plannedAllocation: PlannedAllocation): string {
+    return getPlannedAllocationHierarchicalIdAsString(plannedAllocation.hierarchicalId);
 }
 
-export function getPlannedAllocationStructuralIdAsString(structuralId: string[]): string {
-    return structuralId.filter(value => value != null).join("|");
+export function getPlannedAllocationHierarchicalIdAsString(hierarchicalId: string[]): string {
+    return hierarchicalId.filter(value => value != null).join("|");
 }
 
 export function getAllocationHierarchySize(allocationStructure: AllocationStructure): number {
@@ -31,5 +31,5 @@ export function getTopLevelHierarchyIndexFromAllocationStructure(allocationStruc
 }
 
 export function getTopLevelHierarchyIndexFromPlannedAllocation(plannedAllocation: PlannedAllocation) {
-    return plannedAllocation.structuralId.length - 1;
+    return plannedAllocation.hierarchicalId.length - 1;
 }
