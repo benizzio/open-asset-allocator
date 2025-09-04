@@ -13,7 +13,7 @@ import (
 
 type PlannedAllocationDTS struct {
 	Id                  int             `json:"id,omitempty"`
-	HierarchicalId      []*string       `json:"structuralId,omitempty"` //TODO rename this from structuralId to hierarchicalId in front-end
+	HierarchicalId      []*string       `json:"hierarchicalId,omitempty"`
 	CashReserve         bool            `json:"cashReserve"`
 	SliceSizePercentage decimal.Decimal `json:"sliceSizePercentage,omitempty"`
 }

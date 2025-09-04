@@ -2,9 +2,9 @@ import BigNumber from "bignumber.js";
 import { AllocationHierarchyLevel, AllocationType } from "./allocation";
 
 export type PlannedAllocation = {
-    structuralId: string[],
-    cashReserve: boolean,
-    sliceSizePercentage: BigNumber,
+    hierarchicalId: string[];
+    cashReserve: boolean;
+    sliceSizePercentage: BigNumber;
 };
 
 export type AllocationPlan = {

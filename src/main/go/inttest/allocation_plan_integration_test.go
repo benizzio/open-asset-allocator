@@ -29,55 +29,55 @@ func TestGetAllocationPlans(t *testing.T) {
 				"details":[
 					{
 						"id":7,
-						"structuralId":["NasdaqGM:SHV","STOCKS"],
+						"hierarchicalId":["NasdaqGM:SHV","STOCKS"],
 						"cashReserve":true,
 						"sliceSizePercentage":"0.5"
 					},
 					{
 						"id":2,
-						"structuralId":[null,"BONDS"],
+						"hierarchicalId":[null,"BONDS"],
 						"cashReserve":false,
 						"sliceSizePercentage":"0.6"
 					},
 					{
 						"id":9,
-						"structuralId":["ARCA:SPY","STOCKS"],
+						"hierarchicalId":["ARCA:SPY","STOCKS"],
 						"cashReserve":false,
 						"sliceSizePercentage":"0.45"
 					},
 					{
 						"id":1,
-						"structuralId":[null,"STOCKS"],
+						"hierarchicalId":[null,"STOCKS"],
 						"cashReserve":false,
 						"sliceSizePercentage":"0.4"
 					},
 					{
 						"id":3,
-						"structuralId":["ARCA:BIL","BONDS"],
+						"hierarchicalId":["ARCA:BIL","BONDS"],
 						"cashReserve":false,
 						"sliceSizePercentage":"0.4"
 					},
 					{
 						"id":4,
-						"structuralId":["NasdaqGM:IEF","BONDS"],
+						"hierarchicalId":["NasdaqGM:IEF","BONDS"],
 						"cashReserve":false,
 						"sliceSizePercentage":"0.3"
 					},
 					{
 						"id":5,
-						"structuralId":["NasdaqGM:TLT","BONDS"],
+						"hierarchicalId":["NasdaqGM:TLT","BONDS"],
 						"cashReserve":false,
 						"sliceSizePercentage":"0.2"
 					},
 					{
 						"id":6,
-						"structuralId":["ARCA:STIP","BONDS"],
+						"hierarchicalId":["ARCA:STIP","BONDS"],
 						"cashReserve":false,
 						"sliceSizePercentage":"0.1"
 					},
 					{
 						"id":8,
-						"structuralId":["ARCA:EWZ","STOCKS"],
+						"hierarchicalId":["ARCA:EWZ","STOCKS"],
 						"cashReserve":false,
 						"sliceSizePercentage":"0.05"
 					}
