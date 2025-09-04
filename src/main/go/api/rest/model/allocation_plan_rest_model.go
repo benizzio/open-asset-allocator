@@ -13,7 +13,7 @@ import (
 
 type PlannedAllocationDTS struct {
 	Id                  int             `json:"id,omitempty"`
-	StructuralId        []*string       `json:"structuralId,omitempty"`
+	HierarchicalId      []*string       `json:"structuralId,omitempty"` //TODO rename this from structuralId to hierarchicalId in front-end
 	CashReserve         bool            `json:"cashReserve"`
 	SliceSizePercentage decimal.Decimal `json:"sliceSizePercentage,omitempty"`
 }
@@ -66,7 +66,7 @@ func mapToPlannedAllocationDTSs(allocationPlan *domain.AllocationPlan) []Planned
 func mapToPlannedAllocationDTS(allocation *domain.PlannedAllocation) PlannedAllocationDTS {
 	return PlannedAllocationDTS{
 		Id:                  allocation.Id,
-		StructuralId:        allocation.StructuralId,
+		HierarchicalId:      allocation.HierarchicalId,
 		CashReserve:         allocation.CashReserve,
 		SliceSizePercentage: allocation.SliceSizePercentage,
 	}

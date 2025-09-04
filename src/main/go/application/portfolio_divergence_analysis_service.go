@@ -419,13 +419,13 @@ func generatePotentialDivergencesFromAllocationPlanSetDifference(
 	for plannedAllocationIterator.HasNext() {
 
 		var plannedAllocation, _ = plannedAllocationIterator.NextValue()
-		var currentPlannedStructuralId = plannedAllocation.StructuralId
+		var currentPlannedHierarchicalId = plannedAllocation.HierarchicalId
 
 		checkAndGeneratePotentialDivergencesOnHierarchy(
 			analysisContext,
 			plannedAllocation,
 			hierarchytopLevelIndex,
-			currentPlannedStructuralId,
+			currentPlannedHierarchicalId,
 		)
 	}
 }
@@ -434,7 +434,7 @@ func checkAndGeneratePotentialDivergencesOnHierarchy(
 	analysisContext context.Context,
 	plannedAllocation *domain.PlannedAllocation,
 	hierarchytopLevelIndex int,
-	currentPlannedStructuralId domain.HierarchicalId,
+	currentPlannedHierarchicalId domain.HierarchicalId,
 ) {
 
 	var analysisContextValue = getDivergenceAnalysisContextValue(analysisContext)
@@ -443,19 +443,19 @@ func checkAndGeneratePotentialDivergencesOnHierarchy(
 
 	for i := hierarchytopLevelIndex; i >= 0; i-- {
 
-		var currentLevelHierarchicalId = currentPlannedStructuralId[i:hierarchySize]
+		var currentLevelHierarchicalId = currentPlannedHierarchicalId[i:hierarchySize]
 		var currentLevelHierarchicalIdString = currentLevelHierarchicalId.String()
 		var _, currentLevelExists = potentialDivergenceMap[currentLevelHierarchicalIdString]
 		if !currentLevelExists {
 
-			var parentLevelHierarchicalId = currentPlannedStructuralId[i+1 : hierarchySize]
+			var parentLevelHierarchicalId = currentPlannedHierarchicalId[i+1 : hierarchySize]
 			var isLowestHierarchyLevel = i == 0
 			var isTopHierarchyLevel = i == hierarchytopLevelIndex
 
 			generateAndAttachPotentialDivergenceForPlannedAllocation(
 				analysisContext,
 				plannedAllocation,
-				*currentPlannedStructuralId[i],
+				*currentPlannedHierarchicalId[i],
 				parentLevelHierarchicalId.String(),
 				currentLevelHierarchicalIdString,
 				isTopHierarchyLevel,

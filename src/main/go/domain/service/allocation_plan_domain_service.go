@@ -39,7 +39,7 @@ func (service *AllocationPlanDomService) GetPlannedAllocationsPerHyerarchicalIdM
 	plannedAllocationMap := make(domain.PlannedAllocationsPerHierarchicalId)
 
 	for _, plannedAllocation := range allocationPlan.Details {
-		hierarchicalId := plannedAllocation.StructuralId.String()
+		hierarchicalId := plannedAllocation.HierarchicalId.String()
 		plannedAllocationMap[hierarchicalId] = plannedAllocation
 	}
 
