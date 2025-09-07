@@ -1,9 +1,9 @@
 import { AllocationHierarchyLevel, AllocationStructure, LOWEST_AVAILABLE_HIERARCHY_LEVEL_INDEX } from "../allocation";
 import {
     getAllocationHierarchySize,
+    getHierarchicalIdAsString,
     getHierarchyLevelIndex,
-    getPlannedAllocationStructuralIdAsString,
-    getStructuralIdAsString,
+    getPlannedAllocationHierarchicalIdAsString,
     getTopLevelHierarchyIndexFromAllocationStructure,
 } from "../utils/allocation-utils";
 import BigNumber from "bignumber.js";
@@ -97,7 +97,7 @@ function mapFractalAllocationsAtHierarchyLevel(
 
     allocationsAtCurrentLevel.forEach((allocation) => {
 
-        const fractalAllocationKey = getStructuralIdAsString(allocation);
+        const fractalAllocationKey = getHierarchicalIdAsString(allocation);
 
         const hierarchySublevel = hierarchyLevelIndex - 1 >= LOWEST_AVAILABLE_HIERARCHY_LEVEL_INDEX
             ? hierarchy[hierarchyLevelIndex - 1]
@@ -151,12 +151,12 @@ function connectAllocationsToFractalStructure(
 
         const allocation = fractalAllocation.allocation;
 
-        const parentStructuralId = allocation.structuralId.slice(hierarchyLevelIndex + 1);
-        const parentKey = getPlannedAllocationStructuralIdAsString(parentStructuralId);
+        const parentHierarchicalId = allocation.hierarchicalId.slice(hierarchyLevelIndex + 1);
+        const parentKey = getPlannedAllocationHierarchicalIdAsString(parentHierarchicalId);
         const parent = aggregatorAllocationMap.get(parentKey);
 
         if(!parent) {
-            throw new Error(`Parent not found for allocation ${ allocation.structuralId }`);
+            throw new Error(`Parent not found for allocation ${ allocation.hierarchicalId }`);
         }
 
         parent.subAllocations = parent.subAllocations || [];

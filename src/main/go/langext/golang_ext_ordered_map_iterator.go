@@ -5,6 +5,14 @@ import (
 	"sort"
 )
 
+type MapIterator[K cmp.Ordered, V any] interface {
+	HasNext() bool
+	NextKey() (K, int)
+	NextValue() (V, int)
+	Current() (KeyValue[K, V], int)
+	Size() int
+}
+
 // OrderedMapIterator provides ordered iteration over map entries using a sorted slice of keys.
 //
 // The iterator maintains the original map and a sorted slice of keys to ensure consistent
@@ -15,7 +23,6 @@ import (
 //   - V: The value type
 //
 // Authored by: GitHub Copilot
-// TODO add an interface to this
 type OrderedMapIterator[K cmp.Ordered, V any] struct {
 	index       int
 	orderedKeys []K
@@ -40,39 +47,6 @@ func (iterator *OrderedMapIterator[K, V]) HasNext() bool {
 	return iterator.index < len(iterator.orderedKeys)-1
 }
 
-// NextKeyPointer advances the iterator and returns a pointer to the current key and its index.
-//
-// Returns:
-//   - *K: pointer to the current key
-//   - int: the current index in the ordered iteration
-//
-// Authored by: GitHub Copilot
-func (iterator *OrderedMapIterator[K, V]) NextKeyPointer() (*K, int) {
-
-	iterator.index++
-	var key = &iterator.orderedKeys[iterator.index]
-	var resultIndex = iterator.index
-
-	return key, resultIndex
-}
-
-// NextValuePointer advances the iterator and returns a pointer to the current value and its index.
-//
-// Returns:
-//   - *V: pointer to the current value
-//   - int: the current index in the ordered iteration
-//
-// Authored by: GitHub Copilot
-func (iterator *OrderedMapIterator[K, V]) NextValuePointer() (*V, int) {
-
-	iterator.index++
-	var key = iterator.orderedKeys[iterator.index]
-	var value = iterator.sourceMap[key]
-	var resultIndex = iterator.index
-
-	return &value, resultIndex
-}
-
 // NextKey advances the iterator and returns the current key and its index.
 //
 // Returns:
@@ -82,8 +56,11 @@ func (iterator *OrderedMapIterator[K, V]) NextValuePointer() (*V, int) {
 // Authored by: GitHub Copilot
 func (iterator *OrderedMapIterator[K, V]) NextKey() (K, int) {
 
-	var keyPointer, index = iterator.NextKeyPointer()
-	return *keyPointer, index
+	iterator.index++
+	var key = iterator.orderedKeys[iterator.index]
+	var resultIndex = iterator.index
+
+	return key, resultIndex
 }
 
 // NextValue advances the iterator and returns the current value and its index.
@@ -95,35 +72,27 @@ func (iterator *OrderedMapIterator[K, V]) NextKey() (K, int) {
 // Authored by: GitHub Copilot
 func (iterator *OrderedMapIterator[K, V]) NextValue() (V, int) {
 
-	var valuePointer, index = iterator.NextValuePointer()
-	return *valuePointer, index
+	iterator.index++
+	var key = iterator.orderedKeys[iterator.index]
+	var value = iterator.sourceMap[key]
+	var resultIndex = iterator.index
+
+	return value, resultIndex
 }
 
-// CurrentPointer returns a pointer to the current KeyValue pair and its index without advancing.
+// Current returns a pointer to the current KeyValue pair and its index without advancing.
 //
 // Returns:
 //   - *KeyValue[K, V]: pointer to the current key-value pair
 //   - int: the current index in the ordered iteration
 //
 // Authored by: GitHub Copilot
-func (iterator *OrderedMapIterator[K, V]) CurrentPointer() (*KeyValue[K, V], int) {
+func (iterator *OrderedMapIterator[K, V]) Current() (*KeyValue[K, V], int) {
 	var key = iterator.orderedKeys[iterator.index]
 	var value = iterator.sourceMap[key]
 	var result = &KeyValue[K, V]{Key: key, Value: value}
 
 	return result, iterator.index
-}
-
-// Current returns the current KeyValue pair and its index without advancing.
-//
-// Returns:
-//   - KeyValue[K, V]: the current key-value pair
-//   - int: the current index in the ordered iteration
-//
-// Authored by: GitHub Copilot
-func (iterator *OrderedMapIterator[K, V]) Current() (KeyValue[K, V], int) {
-	var pointer, index = iterator.CurrentPointer()
-	return *pointer, index
 }
 
 // Size returns the total number of elements in the map.

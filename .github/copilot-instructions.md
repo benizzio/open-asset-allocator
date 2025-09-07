@@ -8,12 +8,12 @@
 
 - use [clean code principles](https://gist.github.com/wojteklu/73c6914cc446146b8b533c0988cf8d29)
     - give special attention to decomposing code into smaller functions
-- follow [SOLID principles](https://en.wikipedia.org/wiki/SOLID)
+- be [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself)
     - before generation a function, look for existing functions that can be reused (more references in below language
       sections)
-- be [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself)
-    - when a block of code gets too big (not a hard rule, but around more than 3 instructions with multiple lines), the
-      human eye perceives it better if it is divided into smaller contextual blocks separated by blank lines
+- follow [SOLID principles](https://en.wikipedia.org/wiki/SOLID)
+- when a block of code gets too big (not a hard rule, but around more than 3 instructions with multiple lines), the
+  human eye perceives it better if it is divided into smaller contextual blocks separated by blank lines
     - when dividing a code unit into blocks, if it is a function, a blank line after the function declaration and before
       the first instruction is preferred, as it makes it more readable
     - Examples:
