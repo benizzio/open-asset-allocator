@@ -229,7 +229,7 @@ const initialStateSQL = `
 -- 		(2, '202503', '2025-03-01 00:00:00'::TIMESTAMP)
 -- 	;
 	
-	-- Single bond portfolio allocation
+	-- Single bond and sigle stock portfolio allocation
 	INSERT INTO portfolio_allocation_fact (
 		asset_id,
 		"class",
@@ -241,15 +241,35 @@ const initialStateSQL = `
 		observation_time_id
 	)
 	VALUES (
-			   1, --'ARCA:BIL'
-			   'BONDS',
-			   FALSE,
-			   100.00009,
-			   100,
-			   10000,
-			   3,
-			   2
-		   )
+			1, --'ARCA:BIL'
+			'BONDS',
+			 FALSE,
+			 50.00009,
+			 100,
+			 5000,
+			 3,
+			 2
+		),
+		(
+			6, --'ARCA:EWZ'
+			'STOCKS',
+			 FALSE,
+			 25.00009,
+			 100,
+			 2500,
+			 3,
+			 2
+		),
+		(
+			7, --'ARCA:SPY'
+			'STOCKS',
+			 FALSE,
+			 24.00001,
+			 100,
+			 2500,
+			 3,
+			 2
+		)
 	;
 
 	-- Dual bond portfolio allocation plan
@@ -260,23 +280,22 @@ const initialStateSQL = `
 	INSERT INTO planned_allocation
 	(id, allocation_plan_id, hierarchical_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
 	VALUES
-		(10, 2, '{NULL, "BONDS"}', NULL, FALSE, 1, NULL)
+		(10, 2, '{NULL, "BONDS"}', NULL, FALSE, 0.5, NULL),
+		(11, 2, '{NULL, "STOCKS"}', NULL, FALSE, 0.5, NULL)
 	;
 	
 	INSERT INTO planned_allocation
 	(id, allocation_plan_id, hierarchical_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
 	VALUES
-		(11, 2, '{"ARCA:BIL", "BONDS"}', 1, FALSE, 0.4, NULL),
-		(12, 2, '{"ARCA:STIP", "BONDS"}', 2, FALSE, 0.6, NULL)
+		(12, 2, '{"ARCA:BIL", "BONDS"}', 1, FALSE, 0.4, NULL),
+		(13, 2, '{"ARCA:STIP", "BONDS"}', 2, FALSE, 0.6, NULL)
 	;
 	
--- 	INSERT INTO planned_allocation
--- 	(id, allocation_plan_id, hierarchical_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
--- 	VALUES
--- 		(7, 1, '{"NasdaqGM:SHV", "STOCKS"}', 5, TRUE, 0.5, NULL),
--- 		(8, 1, '{"ARCA:EWZ", "STOCKS"}', 6, FALSE, 0.05, NULL),
--- 		(9, 1, '{"ARCA:SPY", "STOCKS"}', 7, FALSE, 0.45, NULL)
--- 	;
+	INSERT INTO planned_allocation
+	(id, allocation_plan_id, hierarchical_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
+	VALUES
+		(14, 2, '{"ARCA:EWZ", "STOCKS"}', 6, FALSE, 1, NULL)
+	;
 
 	
 	-- ###################################################################

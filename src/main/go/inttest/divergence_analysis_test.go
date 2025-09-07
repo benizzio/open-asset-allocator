@@ -136,11 +136,7 @@ func TestGetDivergenceAnalysisV2(t *testing.T) {
 	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
 }
 
-// TestGetDivergenceAnalysisV2WhenPlanHasBiggerRange tests divergence analysis when the allocation plan
-// has a bigger range of assets than what's observed in the current portfolio state.
-//
-// Authored by: GitHub Copilot
-func TestGetDivergenceAnalysisV2WhenPlanHasBiggerRange(t *testing.T) {
+func TestGetDivergenceAnalysisV2WhenPlanLowestLevelHasDifferentRanges(t *testing.T) {
 
 	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/v2/portfolio/3/divergence/2/allocation-plan/2")
 	assert.NoError(t, err)
@@ -166,22 +162,45 @@ func TestGetDivergenceAnalysisV2WhenPlanHasBiggerRange(t *testing.T) {
 				{
 					"hierarchyLevelKey":"BONDS",
 					"hierarchicalId":"BONDS",
-					"totalMarketValue":10000,
+					"totalMarketValue":5000,
 					"totalMarketValueDivergence":0,
 					"depth":0,
 					"internalDivergences":[
 						{
 							"hierarchyLevelKey":"ARCA:BIL",
 							"hierarchicalId":"ARCA:BIL|BONDS",
-							"totalMarketValue":10000,
-							"totalMarketValueDivergence":6000,
+							"totalMarketValue":5000,
+							"totalMarketValueDivergence":3000,
 							"depth":1
 						},
 						{
 							"hierarchyLevelKey":"ARCA:STIP",
 							"hierarchicalId":"ARCA:STIP|BONDS",
 							"totalMarketValue":0,
-							"totalMarketValueDivergence":-6000,
+							"totalMarketValueDivergence":-3000,
+							"depth":1
+						}
+					]
+				},
+				{
+					"hierarchyLevelKey":"STOCKS",
+					"hierarchicalId":"STOCKS",
+					"totalMarketValue":5000,
+					"totalMarketValueDivergence":0,
+					"depth":0,
+					"internalDivergences":[
+						{
+							"hierarchyLevelKey":"ARCA:EWZ",
+							"hierarchicalId":"ARCA:EWZ|STOCKS",
+							"totalMarketValue":2500,
+							"totalMarketValueDivergence":-2500,
+							"depth":1
+						},
+						{
+							"hierarchyLevelKey":"ARCA:SPY",
+							"hierarchicalId":"ARCA:SPY|STOCKS",
+							"totalMarketValue":2500,
+							"totalMarketValueDivergence":2500,
 							"depth":1
 						}
 					]
