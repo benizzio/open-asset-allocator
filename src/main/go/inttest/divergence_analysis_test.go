@@ -140,10 +140,9 @@ func TestGetDivergenceAnalysisV2(t *testing.T) {
 // has a bigger range of assets than what's observed in the current portfolio state.
 //
 // Authored by: GitHub Copilot
-// TODO test expectations are wrong, fix
 func TestGetDivergenceAnalysisV2WhenPlanHasBiggerRange(t *testing.T) {
 
-	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/v2/portfolio/1/divergence/2/allocation-plan/1")
+	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/v2/portfolio/3/divergence/2/allocation-plan/2")
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -155,20 +154,20 @@ func TestGetDivergenceAnalysisV2WhenPlanHasBiggerRange(t *testing.T) {
 	var actualResponseJSON = string(body)
 	var expectedResponseJSON = `
 		{
-			"portfolioId":1,
+			"portfolioId":3,
 			"observationTimestamp":  {
 				"id": 2,
 				"timeTag": "202503",
 				"timestamp": "2025-03-01T00:00:00Z"
 			},
-			"allocationPlanId":1,
+			"allocationPlanId":2,
 			"portfolioTotalMarketValue":10000,
 			"root":[
 				{
 					"hierarchyLevelKey":"BONDS",
 					"hierarchicalId":"BONDS",
 					"totalMarketValue":10000,
-					"totalMarketValueDivergence":4000,
+					"totalMarketValueDivergence":0,
 					"depth":0,
 					"internalDivergences":[
 						{
@@ -182,51 +181,7 @@ func TestGetDivergenceAnalysisV2WhenPlanHasBiggerRange(t *testing.T) {
 							"hierarchyLevelKey":"ARCA:STIP",
 							"hierarchicalId":"ARCA:STIP|BONDS",
 							"totalMarketValue":0,
-							"totalMarketValueDivergence":-1000,
-							"depth":1
-						},
-						{
-							"hierarchyLevelKey":"NasdaqGM:IEF",
-							"hierarchicalId":"NasdaqGM:IEF|BONDS",
-							"totalMarketValue":0,
-							"totalMarketValueDivergence":-3000,
-							"depth":1
-						},
-						{
-							"hierarchyLevelKey":"NasdaqGM:TLT",
-							"hierarchicalId":"NasdaqGM:TLT|BONDS",
-							"totalMarketValue":0,
-							"totalMarketValueDivergence":-2000,
-							"depth":1
-						}
-					]
-				},
-				{
-					"hierarchyLevelKey":"STOCKS",
-					"hierarchicalId":"STOCKS",
-					"totalMarketValue":0,
-					"totalMarketValueDivergence":-500,
-					"depth":0,
-					"internalDivergences":[
-						{
-							"hierarchyLevelKey":"ARCA:EWZ",
-							"hierarchicalId":"ARCA:EWZ|STOCKS",
-							"totalMarketValue":0,
-							"totalMarketValueDivergence":0,
-							"depth":1
-						},
-						{
-							"hierarchyLevelKey":"ARCA:SPY",
-							"hierarchicalId":"ARCA:SPY|STOCKS",
-							"totalMarketValue":0,
-							"totalMarketValueDivergence":0,
-							"depth":1
-						},
-						{
-							"hierarchyLevelKey":"NasdaqGM:SHV",
-							"hierarchicalId":"NasdaqGM:SHV|STOCKS",
-							"totalMarketValue":0,
-							"totalMarketValueDivergence":0,
+							"totalMarketValueDivergence":-6000,
 							"depth":1
 						}
 					]

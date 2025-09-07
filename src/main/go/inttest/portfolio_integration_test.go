@@ -3,15 +3,16 @@ package inttest
 import (
 	"encoding/json"
 	"fmt"
-	restmodel "github.com/benizzio/open-asset-allocator/api/rest/model"
-	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
-	inttestutil "github.com/benizzio/open-asset-allocator/inttest/util"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"strconv"
 	"strings"
 	"testing"
+
+	restmodel "github.com/benizzio/open-asset-allocator/api/rest/model"
+	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
+	inttestutil "github.com/benizzio/open-asset-allocator/inttest/util"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetPortfolio(t *testing.T) {
@@ -85,6 +86,22 @@ func TestGetPortfolios(t *testing.T) {
 						{
 							"name":"Assets",
 							"field":"assetTicker"
+						}
+					]
+				}
+			},
+			{
+				"id":3,
+				"name":"Set difference test portfolio",
+				"allocationStructure": {
+					"hierarchy": [
+						{
+							"name":"Assets",
+							"field":"assetTicker"
+						},
+						{
+							"name":"Classes",
+							"field":"class"
 						}
 					]
 				}
