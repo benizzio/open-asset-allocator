@@ -225,7 +225,7 @@ const initialStateSQL = `
 	(id, allocation_plan_id, hierarchical_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
 	VALUES
 		(7, 1, '{"NasdaqGM:SHV", "STOCKS"}', 5, TRUE, 0.5, NULL),
-		(8 ,1, '{"ARCA:EWZ", "STOCKS"}', 6, FALSE, 0.05, NULL),
+		(8, 1, '{"ARCA:EWZ", "STOCKS"}', 6, FALSE, 0.05, NULL),
 		(9, 1, '{"ARCA:SPY", "STOCKS"}', 7, FALSE, 0.45, NULL)
 	;
 	

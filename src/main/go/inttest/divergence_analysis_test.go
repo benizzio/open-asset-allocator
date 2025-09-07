@@ -140,6 +140,7 @@ func TestGetDivergenceAnalysisV2(t *testing.T) {
 // has a bigger range of assets than what's observed in the current portfolio state.
 //
 // Authored by: GitHub Copilot
+// TODO test expectations are wrong, fix
 func TestGetDivergenceAnalysisV2WhenPlanHasBiggerRange(t *testing.T) {
 
 	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/v2/portfolio/1/divergence/2/allocation-plan/1")

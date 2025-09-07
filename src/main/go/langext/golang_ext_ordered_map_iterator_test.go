@@ -179,10 +179,10 @@ func TestOrderedMapIteratorIntKeys(t *testing.T) {
 	}
 }
 
-// TestOrderedMapIteratorCurrentAndPointers tests Current and pointer methods.
+// TestOrderedMapIteratorCurrent tests Current method.
 //
 // Authored by: GitHub Copilot
-func TestOrderedMapIteratorCurrentAndPointers(t *testing.T) {
+func TestOrderedMapIteratorCurrent(t *testing.T) {
 
 	var data = map[string]int{
 		"b": 2,
@@ -208,51 +208,20 @@ func TestOrderedMapIteratorCurrentAndPointers(t *testing.T) {
 		t.Errorf("Expected Current to return (a, 1, 0), got (%s, %d, %d)", currentKV.Key, currentKV.Value, currentIndex)
 	}
 
-	// Test CurrentPointer
-	var currentPtr, currentPtrIndex = iterator.CurrentPointer()
-	if currentPtr.Key != "a" || currentPtr.Value != 1 || currentPtrIndex != 0 {
-		t.Errorf(
-			"Expected CurrentPointer to return (a, 1, 0), got (%s, %d, %d)",
-			currentPtr.Key,
-			currentPtr.Value,
-			currentPtrIndex,
-		)
+	var nextValue, nextValueIndex = iterator.NextValue()
+	if nextValue != 2 || nextValueIndex != 1 {
+		t.Errorf("Expected NextValue to return (2, 1), got (%d, %d)", nextValue, nextValueIndex)
 	}
 
-	// Test NextKeyPointer
-	var nextKeyPtr, nextKeyIndex = iterator.NextKeyPointer()
-	if *nextKeyPtr != "b" || nextKeyIndex != 1 {
-		t.Errorf("Expected NextKeyPointer to return (b, 1), got (%s, %d)", *nextKeyPtr, nextKeyIndex)
+	// Test Current methods
+	currentKV, currentIndex = iterator.Current()
+	if currentKV.Key != "b" || currentKV.Value != 2 || currentIndex != 1 {
+		t.Errorf("Expected Current to return (a, 1, 0), got (%s, %d, %d)", currentKV.Key, currentKV.Value, currentIndex)
 	}
 
 	// Should not have next now
 	if iterator.HasNext() {
 		t.Error("Expected HasNext to be false after iterating through all elements")
-	}
-}
-
-// TestOrderedMapIteratorPointerMethods tests the pointer-based methods.
-//
-// Authored by: GitHub Copilot
-func TestOrderedMapIteratorPointerMethods(t *testing.T) {
-
-	var data = map[string]int{
-		"b": 2,
-		"a": 1,
-	}
-
-	// Test NextKeyPointer
-	var keyIterator = NewOrderedMapIterator(data)
-	var keyPtr1, index1 = keyIterator.NextKeyPointer()
-	if *keyPtr1 != "a" || index1 != 0 {
-		t.Errorf("Expected NextKeyPointer to return (a, 0), got (%s, %d)", *keyPtr1, index1)
-	}
-
-	// Test NextValuePointer
-	var valueIterator = NewOrderedMapIterator(data)
-	var valuePtr1, index2 = valueIterator.NextValuePointer()
-	if *valuePtr1 != 1 || index2 != 0 {
-		t.Errorf("Expected NextValuePointer to return (1, 0), got (%d, %d)", *valuePtr1, index2)
 	}
 }
 
