@@ -22,7 +22,7 @@ type divergenceAnalysisContextValue struct {
 
 type allocationIterationMappingContextValue struct {
 	potentialDivergenceMap       potentialDivergencesPerHierarchicalId
-	portfolioAllocationsIterator *langext.Iterator[*domain.PortfolioAllocation]
+	portfolioAllocationsIterator langext.Iterator[*domain.PortfolioAllocation]
 }
 
 func buildDivergenceAnalysisContext(
@@ -49,13 +49,13 @@ func getAllocationIterationContextValue(ctx context.Context) *allocationIteratio
 
 func buildHierarchySubIterationContext(
 	ctx context.Context,
-	value *langext.Iterator[domain.AllocationHierarchyLevel],
+	value langext.Iterator[domain.AllocationHierarchyLevel],
 ) context.Context {
 	return context.WithValue(ctx, hierarchySubIterationContextKey, value)
 }
 
-func getHierarchySubIterationContextValue(ctx context.Context) *langext.Iterator[domain.AllocationHierarchyLevel] {
-	return ctx.Value(hierarchySubIterationContextKey).(*langext.Iterator[domain.AllocationHierarchyLevel])
+func getHierarchySubIterationContextValue(ctx context.Context) langext.Iterator[domain.AllocationHierarchyLevel] {
+	return ctx.Value(hierarchySubIterationContextKey).(langext.Iterator[domain.AllocationHierarchyLevel])
 }
 
 func buildPotentialDivergenceMapContext(

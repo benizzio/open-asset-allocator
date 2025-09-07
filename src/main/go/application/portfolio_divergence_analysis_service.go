@@ -120,7 +120,7 @@ func (service *PortfolioDivergenceAnalysisAppService) generateDivergenceAnalysis
 
 	var iterationContextValue = &allocationIterationMappingContextValue{
 		potentialDivergenceMap:       potentialDivergenceMap,
-		portfolioAllocationsIterator: langext.NewIterator(portfolioAllocations),
+		portfolioAllocationsIterator: langext.NewSliceIterator(portfolioAllocations),
 	}
 
 	var allocationIterationMappingContext = buildAllocationIterationContext(analysisContext, iterationContextValue)
@@ -179,7 +179,7 @@ func (service *PortfolioDivergenceAnalysisAppService) mapPotentialDivergenceFrom
 	var allocationIterationContextValue = getAllocationIterationContextValue(analysisContext)
 	var allocationHierarchy = analysisContextValue.portfolio.AllocationStructure.Hierarchy
 
-	var allocationHierarchyIterator = langext.NewIterator(allocationHierarchy)
+	var allocationHierarchyIterator = langext.NewSliceIterator(allocationHierarchy)
 	var hierarchySubIterationMappingContext = buildHierarchySubIterationContext(
 		analysisContext,
 		allocationHierarchyIterator,

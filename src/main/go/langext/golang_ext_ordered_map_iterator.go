@@ -5,6 +5,17 @@ import (
 	"sort"
 )
 
+type MapIterator[K cmp.Ordered, V any] interface {
+	HasNext() bool
+	NextKeyPointer() (*K, int)
+	NextValuePointer() (*V, int)
+	NextKey() (K, int)
+	NextValue() (V, int)
+	CurrentPointer() (*KeyValue[K, V], int)
+	Current() (KeyValue[K, V], int)
+	Size() int
+}
+
 // OrderedMapIterator provides ordered iteration over map entries using a sorted slice of keys.
 //
 // The iterator maintains the original map and a sorted slice of keys to ensure consistent
@@ -15,7 +26,6 @@ import (
 //   - V: The value type
 //
 // Authored by: GitHub Copilot
-// TODO add an interface to this
 type OrderedMapIterator[K cmp.Ordered, V any] struct {
 	index       int
 	orderedKeys []K
