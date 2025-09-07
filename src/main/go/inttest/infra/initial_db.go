@@ -229,7 +229,11 @@ const initialStateSQL = `
 -- 		(2, '202503', '2025-03-01 00:00:00'::TIMESTAMP)
 -- 	;
 	
-	-- Single bond and sigle stock portfolio allocation
+	-- ==================================================================
+	-- Lower level set difference tests
+	-- ==================================================================
+	
+	-- Single bond and dual stock portfolio allocation
 	INSERT INTO portfolio_allocation_fact (
 		asset_id,
 		"class",
@@ -272,9 +276,9 @@ const initialStateSQL = `
 		)
 	;
 
-	-- Dual bond portfolio allocation plan
+	-- Dual bond and single stock portfolio allocation plan
 	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, portfolio_id)
-	VALUES (2, 'Dual bond plan', 'ALLOCATION_PLAN', NULL, 3)
+	VALUES (2, 'Dual bond single stock plan', 'ALLOCATION_PLAN', NULL, 3)
 	;
 
 	INSERT INTO planned_allocation
@@ -297,6 +301,56 @@ const initialStateSQL = `
 		(14, 2, '{"ARCA:EWZ", "STOCKS"}', 6, FALSE, 1, NULL)
 	;
 
+	-- ==================================================================
+	-- Higher level set difference tests
+	-- ==================================================================
+	
+	-- Single bond and no stock portfolio allocation
+	INSERT INTO portfolio_allocation_fact (
+		asset_id,
+		"class",
+		cash_reserve,
+		asset_quantity,
+		asset_market_price,
+		total_market_value,
+		portfolio_id,
+		observation_time_id
+	)
+	VALUES (
+			1, --'ARCA:BIL'
+			'BONDS',
+			 FALSE,
+			 10.00009,
+			 100,
+			 10000,
+			 3,
+			 3
+		)
+	;
+
+	-- Single bond and single stock portfolio allocation plan
+	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, portfolio_id)
+	VALUES (3, 'Dual bond single stock plan', 'ALLOCATION_PLAN', NULL, 3)
+	;
+
+	INSERT INTO planned_allocation
+	(id, allocation_plan_id, hierarchical_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
+	VALUES
+		(15, 3, '{NULL, "BONDS"}', NULL, FALSE, 0.4, NULL),
+		(16, 3, '{NULL, "STOCKS"}', NULL, FALSE, 0.6, NULL)
+	;
+	
+	INSERT INTO planned_allocation
+	(id, allocation_plan_id, hierarchical_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
+	VALUES
+		(17, 3, '{"ARCA:BIL", "BONDS"}', 1, FALSE, 1, NULL)
+	;
+	
+	INSERT INTO planned_allocation
+	(id, allocation_plan_id, hierarchical_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
+	VALUES
+		(18, 3, '{"ARCA:EWZ", "STOCKS"}', 6, FALSE, 1, NULL)
+	;
 	
 	-- ###################################################################
 	-- *******************************************************************
