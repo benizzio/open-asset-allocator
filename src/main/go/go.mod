@@ -3,7 +3,7 @@ module github.com/benizzio/open-asset-allocator
 go 1.25.1
 
 require (
-	github.com/docker/docker v28.3.3+incompatible
+	github.com/docker/docker v28.4.0+incompatible
 	github.com/gin-gonic/gin v1.10.1
 	github.com/go-ozzo/ozzo-dbx v1.5.0
 	github.com/go-playground/universal-translator v0.18.1
@@ -43,7 +43,6 @@ require (
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/goccy/go-json v0.10.5 // indirect
-	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.3 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
