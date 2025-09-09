@@ -43,7 +43,8 @@ const initialStateSQL = `
 	VALUES 
 	    (1, '202501', '2025-01-01 00:00:00'::TIMESTAMP),
 		(2, '202503', '2025-03-01 00:00:00'::TIMESTAMP),
-		(3, '202504', '2025-04-01 00:00:00'::TIMESTAMP) 
+		(3, '202504', '2025-04-01 00:00:00'::TIMESTAMP),
+		(4, '202506', '2025-06-01 00:00:00'::TIMESTAMP) 
 	;
 
 	-- ###################################################################
@@ -319,18 +320,51 @@ const initialStateSQL = `
 	VALUES (
 			1, --'ARCA:BIL'
 			'BONDS',
-			 FALSE,
-			 10.00009,
-			 100,
-			 10000,
-			 3,
-			 3
+			FALSE,
+			10.00009,
+			100,
+			10000,
+			3,
+			3
+		)
+	;
+
+	-- Single bond and single stock portfolio allocation
+	INSERT INTO portfolio_allocation_fact (
+		asset_id,
+		"class",
+		cash_reserve,
+		asset_quantity,
+		asset_market_price,
+		total_market_value,
+		portfolio_id,
+		observation_time_id
+	)
+	VALUES (
+			1, --'ARCA:BIL'
+			'BONDS',
+			FALSE,
+			40.00009,
+			100,
+			4000,
+			3,
+			4
+		),
+	    (
+			6, --'ARCA:EWZ'
+			'STOCKS',
+			FALSE,
+			40.00009,
+			100,
+			4000,
+			3,
+			4
 		)
 	;
 
 	-- Single bond and single stock portfolio allocation plan
 	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, portfolio_id)
-	VALUES (3, 'Dual bond single stock plan', 'ALLOCATION_PLAN', NULL, 3)
+	VALUES (3, 'Single bond single stock plan', 'ALLOCATION_PLAN', NULL, 3)
 	;
 
 	INSERT INTO planned_allocation
@@ -351,7 +385,25 @@ const initialStateSQL = `
 	VALUES
 		(18, 3, '{"ARCA:EWZ", "STOCKS"}', 6, FALSE, 1, NULL)
 	;
+
+	-- Single bond and no stock portfolio allocation plan
+	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, portfolio_id)
+	VALUES (4, 'Single bond no stock plan', 'ALLOCATION_PLAN', NULL, 3)
+	;
+
+	INSERT INTO planned_allocation
+	(id, allocation_plan_id, hierarchical_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
+	VALUES
+		(19, 4, '{NULL, "BONDS"}', NULL, FALSE, 1, NULL)
+	;
 	
+	INSERT INTO planned_allocation
+	(id, allocation_plan_id, hierarchical_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
+	VALUES
+		(20, 4, '{"ARCA:BIL", "BONDS"}', 1, FALSE, 1, NULL)
+	;
+
+
 	-- ###################################################################
 	-- *******************************************************************
 	-- SEQUENCE RESETS AFTER MANUAL ID INSERTIONS
