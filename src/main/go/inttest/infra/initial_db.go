@@ -354,9 +354,9 @@ const initialStateSQL = `
 			6, --'ARCA:EWZ'
 			'STOCKS',
 			FALSE,
-			40.00009,
+			59.00001,
 			100,
-			4000,
+			6000,
 			3,
 			4
 		)

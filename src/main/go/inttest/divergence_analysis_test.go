@@ -274,4 +274,64 @@ func TestGetDivergenceAnalysisV2WhenPlanHighestLevelHasExtraAllocation(t *testin
 	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
 }
 
-// TODO add test for no plan but allocation exists
+func TestGetDivergenceAnalysisV2WhenHistoryHighestLevelHasExtraAllocation(t *testing.T) {
+
+	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/v2/portfolio/3/divergence/4/allocation-plan/4")
+	assert.NoError(t, err)
+
+	assert.Equal(t, http.StatusOK, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+
+	var actualResponseJSON = string(body)
+	var expectedResponseJSON = `
+		{
+			"portfolioId":3,
+			"observationTimestamp":  {
+				"id": 4,
+				"timeTag": "202506",
+				"timestamp": "2025-06-01T00:00:00Z"
+			},
+			"allocationPlanId":4,
+			"portfolioTotalMarketValue":10000,
+			"root":[
+				{
+					"hierarchyLevelKey":"BONDS",
+					"hierarchicalId":"BONDS",
+					"totalMarketValue":4000,
+					"totalMarketValueDivergence":-6000,
+					"depth":0,
+					"internalDivergences":[
+						{
+							"hierarchyLevelKey":"ARCA:BIL",
+							"hierarchicalId":"ARCA:BIL|BONDS",
+							"totalMarketValue":4000,
+							"totalMarketValueDivergence":0,
+							"depth":1
+						}
+					]
+				},
+				{
+					"hierarchyLevelKey":"STOCKS",
+					"hierarchicalId":"STOCKS",
+					"totalMarketValue":6000,
+					"totalMarketValueDivergence":6000,
+					"depth":0,
+					"internalDivergences":[
+						{
+							"hierarchyLevelKey":"ARCA:EWZ",
+							"hierarchicalId":"ARCA:EWZ|STOCKS",
+							"totalMarketValue":6000,
+							"totalMarketValueDivergence":0,
+							"depth":1
+						}
+					]
+				}
+			]
+		}
+	`
+
+	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
+}
