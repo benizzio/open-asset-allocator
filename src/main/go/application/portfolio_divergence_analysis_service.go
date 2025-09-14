@@ -374,14 +374,11 @@ func calculateCurrentDivergenceValuesFromReferencedPlan(
 	for _, potentialDivergence := range potentialDivergences {
 
 		var plannedAllocation = plannedAllocationMap.Get(potentialDivergence.HierarchicalId)
+		calculateDivergenceValue(potentialDivergence, plannedAllocation, levelTotalMarketValue)
+
 		if plannedAllocation != nil {
-
-			calculateDivergenceValue(potentialDivergence, plannedAllocation, levelTotalMarketValue)
-
 			//To allow for planned side set difference
 			plannedAllocationMap.Remove(potentialDivergence.HierarchicalId)
-		} else {
-			potentialDivergence.TotalMarketValueDivergence = potentialDivergence.TotalMarketValue
 		}
 
 		if potentialDivergence.InternalDivergences != nil {
@@ -400,16 +397,26 @@ func calculateDivergenceValue(
 	levelTotalMarketValue int64,
 ) {
 
-	var plannedAllocationValue = plannedAllocation.SliceSizePercentage.
-		Mul(decimal.NewFromInt(levelTotalMarketValue)).
-		Round(0).IntPart()
+	var plannedAllocationValue int64
+	var plannedPercentage string
+
+	if plannedAllocation == nil {
+		plannedAllocationValue = 0
+		plannedPercentage = "0"
+	} else {
+		plannedAllocationValue = plannedAllocation.SliceSizePercentage.
+			Mul(decimal.NewFromInt(levelTotalMarketValue)).
+			Round(0).IntPart()
+		plannedPercentage = plannedAllocation.SliceSizePercentage.Mul(decimal.NewFromInt(100)).Round(2).String()
+	}
+
 	potentialDivergence.TotalMarketValueDivergence = potentialDivergence.TotalMarketValue - plannedAllocationValue
 
 	// TODO verification for debug logging, this should be logged only in debug mode
 	glog.Infof(
-		"Calculated divergence value for %s: planned %d%% of level total %d, so planned value %d, current value %d, divergence %d",
+		"Calculated divergence value for %s: planned %s%% of level total %d, so planned value %d, current value %d, divergence %d",
 		potentialDivergence.HierarchicalId,
-		plannedAllocation.SliceSizePercentage.Mul(decimal.NewFromInt(100)).Round(2).IntPart(),
+		plannedPercentage,
 		levelTotalMarketValue,
 		plannedAllocationValue,
 		potentialDivergence.TotalMarketValue,
