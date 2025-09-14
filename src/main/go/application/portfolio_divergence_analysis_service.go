@@ -462,45 +462,57 @@ func checkAndGeneratePotentialDivergencesOnHierarchy(
 
 	for i := hierarchytopLevelIndex; i >= 0; i-- {
 
-		var currentLevelHierarchicalId = currentPlannedHierarchicalId[i:hierarchySize]
-		var currentLevelHierarchicalIdString = currentLevelHierarchicalId.String()
-		var _, currentLevelExists = potentialDivergenceMap[currentLevelHierarchicalIdString]
+		var currentLevelHierarchicalId = currentPlannedHierarchicalId[i:hierarchySize].String()
+		var _, currentLevelExists = potentialDivergenceMap[currentLevelHierarchicalId]
 		if !currentLevelExists {
 
-			var parentLevelHierarchicalId = currentPlannedHierarchicalId[i+1 : hierarchySize]
+			var parentLevelHierarchicalId = currentPlannedHierarchicalId[i+1 : hierarchySize].String()
+			var parentPotentialDivergence = potentialDivergenceMap[parentLevelHierarchicalId]
 			var isLowestHierarchyLevel = i == 0
 			var isTopHierarchyLevel = i == hierarchytopLevelIndex
 
 			var createdPotentialDivergence = generateAndAttachPotentialDivergenceForPlannedAllocation(
 				analysisContext,
 				*currentPlannedHierarchicalId[i],
-				parentLevelHierarchicalId.String(),
-				currentLevelHierarchicalIdString,
+				parentPotentialDivergence,
+				currentLevelHierarchicalId,
 				isTopHierarchyLevel,
 				isLowestHierarchyLevel,
 			)
 
-			var parentTotalMarketValue int64 = 0
-			if isTopHierarchyLevel {
-				parentTotalMarketValue = analysisContextValue.divergenceAnalysis.PortfolioTotalMarketValue
-			} else {
-				var parentPotentialDivergence = potentialDivergenceMap[parentLevelHierarchicalId.String()]
-				parentTotalMarketValue = parentPotentialDivergence.TotalMarketValue
-			}
+			var parentTotalMarketValue = getParentTotalMarketValue(
+				analysisContextValue,
+				parentPotentialDivergence,
+				isTopHierarchyLevel,
+			)
 
 			calculateDivergenceValue(
 				createdPotentialDivergence,
-				plannedAllocationMap[currentLevelHierarchicalId.String()],
+				plannedAllocationMap[currentLevelHierarchicalId],
 				parentTotalMarketValue,
 			)
 		}
 	}
 }
 
+func getParentTotalMarketValue(
+	analysisContextValue *divergenceAnalysisContextValue,
+	parentPotentialDivergence *domain.PotentialDivergence,
+	isTopHierarchyLevel bool,
+) int64 {
+	var parentTotalMarketValue int64 = 0
+	if isTopHierarchyLevel {
+		parentTotalMarketValue = analysisContextValue.divergenceAnalysis.PortfolioTotalMarketValue
+	} else {
+		parentTotalMarketValue = parentPotentialDivergence.TotalMarketValue
+	}
+	return parentTotalMarketValue
+}
+
 func generateAndAttachPotentialDivergenceForPlannedAllocation(
 	analysisContext context.Context,
 	hierarchyLevelkey string,
-	parentLevelHierarchicalId string,
+	parentPotentialDivergence *domain.PotentialDivergence,
 	currentLevelHierarchicalId string,
 	isTopHierarchyLevel bool,
 	isLowestHierarchyLevel bool,
@@ -536,13 +548,12 @@ func generateAndAttachPotentialDivergenceForPlannedAllocation(
 		// TODO verification for debug logging, this should be logged only in debug mode\
 		glog.Infof("Potential divergence %s linked to parent root", currentLevelHierarchicalId)
 	} else {
-		var parentPotentialDivergence = potentialDivergenceMap[parentLevelHierarchicalId]
 		parentPotentialDivergence.AddInternalDivergence(potentialDivergence)
 		// TODO verification for debug logging, this should be logged only in debug mode\
 		glog.Infof(
 			"Potential divergence %s linked to parent %s",
 			currentLevelHierarchicalId,
-			parentLevelHierarchicalId,
+			parentPotentialDivergence.HierarchicalId,
 		)
 	}
 
