@@ -44,7 +44,8 @@ const initialStateSQL = `
 	    (1, '202501', '2025-01-01 00:00:00'::TIMESTAMP),
 		(2, '202503', '2025-03-01 00:00:00'::TIMESTAMP),
 		(3, '202504', '2025-04-01 00:00:00'::TIMESTAMP),
-		(4, '202506', '2025-06-01 00:00:00'::TIMESTAMP) 
+		(4, '202506', '2025-06-01 00:00:00'::TIMESTAMP),
+		(5, '202507', '2025-07-01 00:00:00'::TIMESTAMP) 
 	;
 
 	-- ###################################################################
@@ -218,17 +219,11 @@ const initialStateSQL = `
 	
 	INSERT INTO portfolio (id, "name", allocation_structure)
 	VALUES (
-			   3,
-			   'Set difference test portfolio',
-			   '{"hierarchy": [{"name": "Assets", "field": "assetTicker"}, {"name": "Classes", "field": "class"}]}'::jsonb
+	    3,
+	   	'Set difference test portfolio',
+	   	'{"hierarchy": [{"name": "Assets", "field": "assetTicker"}, {"name": "Classes", "field": "class"}]}'::jsonb
 	)
 	;
-	
-	
--- 	INSERT INTO portfolio_allocation_obs_time (id, observation_time_tag, observation_timestamp)
--- 	VALUES 
--- 		(2, '202503', '2025-03-01 00:00:00'::TIMESTAMP)
--- 	;
 	
 	-- ==================================================================
 	-- Lower level set difference tests
@@ -362,6 +357,30 @@ const initialStateSQL = `
 		)
 	;
 
+	-- Single unplanned asset
+	INSERT INTO portfolio_allocation_fact (
+		asset_id,
+		"class",
+		cash_reserve,
+		asset_quantity,
+		asset_market_price,
+		total_market_value,
+		portfolio_id,
+		observation_time_id
+	)
+	VALUES (
+			1, --'ARCA:BIL'
+			'A_TEST_CLASS',
+			FALSE,
+			10.00009,
+			100,
+			10000,
+			3,
+			5
+		)
+	;
+
+
 	-- Single bond and single stock portfolio allocation plan
 	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, portfolio_id)
 	VALUES (3, 'Single bond single stock plan', 'ALLOCATION_PLAN', NULL, 3)
@@ -401,6 +420,23 @@ const initialStateSQL = `
 	(id, allocation_plan_id, hierarchical_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
 	VALUES
 		(20, 4, '{"ARCA:BIL", "BONDS"}', 1, FALSE, 1, NULL)
+	;
+
+	-- Single bond for total divergence test
+	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, portfolio_id)
+	VALUES (5, 'Single bond total divergence test', 'ALLOCATION_PLAN', NULL, 3)
+	;
+
+	INSERT INTO planned_allocation
+	(id, allocation_plan_id, hierarchical_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
+	VALUES
+		(21, 5, '{NULL, "BONDS"}', NULL, FALSE, 1, NULL)
+	;
+	
+	INSERT INTO planned_allocation
+	(id, allocation_plan_id, hierarchical_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
+	VALUES
+		(22, 5, '{"NasdaqGM:TLT", "BONDS"}', 4, FALSE, 1, NULL)
 	;
 
 

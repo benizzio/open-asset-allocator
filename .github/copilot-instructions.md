@@ -56,6 +56,8 @@
       }
       ```
 - follow [Domain Driven Design](https://www.infoq.com/minibooks/domain-driven-design-quickly/) principles
+- commented code can exist for transitioning code betyween PRs, but it is a red flag and should be pointed in the review
+  comments to make sure it is necessary;
 - **all AI generated code**:
     - must contain proper minimal code comment documentation according to the language standards,
     - public API code (as in usable in other packages or modules) must contain very detailed usage instructions. It must

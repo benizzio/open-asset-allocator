@@ -378,18 +378,18 @@ func calculateCurrentDivergenceValuesFromReferencedPlan(
 
 			calculateDivergenceValue(potentialDivergence, plannedAllocation, levelTotalMarketValue)
 
-			if potentialDivergence.InternalDivergences != nil {
-				calculateCurrentDivergenceValuesFromReferencedPlan(
-					potentialDivergence.InternalDivergences,
-					plannedAllocationMap,
-					potentialDivergence.TotalMarketValue,
-				)
-			}
-
 			//To allow for planned side set difference
 			plannedAllocationMap.Remove(potentialDivergence.HierarchicalId)
 		} else {
 			potentialDivergence.TotalMarketValueDivergence = potentialDivergence.TotalMarketValue
+		}
+
+		if potentialDivergence.InternalDivergences != nil {
+			calculateCurrentDivergenceValuesFromReferencedPlan(
+				potentialDivergence.InternalDivergences,
+				plannedAllocationMap,
+				potentialDivergence.TotalMarketValue,
+			)
 		}
 	}
 }
