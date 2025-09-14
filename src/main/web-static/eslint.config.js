@@ -1,7 +1,7 @@
 import globals from "globals";
 import pluginJs from "@eslint/js";
 import tseslint from "typescript-eslint";
-import stylisticTs from "@stylistic/eslint-plugin-ts";
+import stylistic from "@stylistic/eslint-plugin";
 
 export default [
 
@@ -14,23 +14,23 @@ export default [
     ...tseslint.configs.recommended,
 
     {
-        plugins: { "@stylistic/ts": stylisticTs },
+        plugins: { "@stylistic": stylistic },
         // ESLint rules: https://eslint.org/docs/latest/rules/
-        // ESLint Stylistic rules for typescript: https://eslint.style/packages/ts
+        // ESLint Stylistic rules: https://eslint.style/packages/default
         rules: {
             "max-len": ["warn", { code: 120, tabWidth: 4 }],
             "no-unused-vars": "off",
             "@typescript-eslint/no-unused-vars": ["warn"],
-            "@stylistic/ts/indent": ["warn", 4],
-            "@stylistic/ts/semi": ["error", "always"],
-            "@stylistic/ts/quotes": ["warn", "double"],
-            "@stylistic/ts/quote-props": ["warn", "consistent-as-needed"],
-            "@stylistic/ts/object-curly-newline": ["warn", { multiline: true }],
-            "@stylistic/ts/object-curly-spacing": ["warn", "always"],
-            "@stylistic/ts/comma-dangle": ["warn", "always-multiline"],
-            "@stylistic/ts/comma-spacing": ["warn", { before: false, after: true }],
-            "@stylistic/ts/key-spacing": ["warn", { beforeColon: false, afterColon: true }],
-            "@stylistic/ts/padding-line-between-statements": [
+            "@stylistic/indent": ["warn", 4],
+            "@stylistic/semi": ["error", "always"],
+            "@stylistic/quotes": ["warn", "double"],
+            "@stylistic/quote-props": ["warn", "consistent-as-needed"],
+            "@stylistic/object-curly-newline": ["warn", { multiline: true }],
+            "@stylistic/object-curly-spacing": ["warn", "always"],
+            "@stylistic/comma-dangle": ["warn", "always-multiline"],
+            "@stylistic/comma-spacing": ["warn", { before: false, after: true }],
+            "@stylistic/key-spacing": ["warn", { beforeColon: false, afterColon: true }],
+            "@stylistic/padding-line-between-statements": [
                 "warn",
                 { blankLine: "always", prev: "import", next: "*" },
                 { blankLine: "never", prev: "import", next: "import" },
