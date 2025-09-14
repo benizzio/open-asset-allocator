@@ -1,4 +1,3 @@
-<!-- TODO move to components -->
 <div class="accordion"
      id="accordion-allocation-map"
      handlebars-template="template-allocation-map"
@@ -125,7 +124,7 @@
             {{{divergenceVisualization upperMarketValue this "divergenceBar"}}}
         </td>
     </tr>
-    
+
     {{#if internalDivergences}}
         {{#each internalDivergences}}
             {{> template-divergence-analysis-table-row upperMarketValue=../totalMarketValue upperLevelKey=../hierarchyLevelKey}}
