@@ -413,7 +413,7 @@ const initialStateSQL = `
 	SELECT setval('portfolio_id_seq', (SELECT max(id) FROM portfolio));
 	SELECT setval('allocation_plan_id_seq', (SELECT max(id) FROM allocation_plan));
 	SELECT setval('allocation_plan_unit_id_seq', (SELECT max(id) FROM planned_allocation));
-	SELECT setval('portfolio_allocation_obs_time_id_seq', (SELECT max(id) FROM asset));
+	SELECT setval('portfolio_allocation_obs_time_id_seq', (SELECT max(id) FROM portfolio_allocation_obs_time));
 	SELECT setval('asset_id_seq', (SELECT max(id) FROM asset));
 `
 
