@@ -15,15 +15,15 @@ export function registerPortfolioAnalysisHandlebarsHelpers() {
 
             switch(field) {
                 case "totalMarketValue": {
-                    return getDivergenceValueLabel(localMarketValue, totalMarketValue);
+                    return getValueLabel(localMarketValue, totalMarketValue);
                 }
 
                 case "plannedMarketValue": {
-                    return getDivergenceValueLabel(plannedMarketValue, totalMarketValue);
+                    return getValueLabel(plannedMarketValue, totalMarketValue);
                 }
 
                 case "divergence": {
-                    return getDivergenceValueLabel(localDivergence, totalMarketValue);
+                    return getValueLabel(localDivergence, totalMarketValue);
                 }
 
                 case "divergenceBar": {
@@ -47,6 +47,13 @@ export function registerPortfolioAnalysisHandlebarsHelpers() {
     );
 }
 
-function getDivergenceValueLabel(value: number, total: number) {
-    return format.formatCurrency(value) + " (" + format.formatPercent(new BigNumber(value).div(total).toNumber()) + ")";
+function getValueLabel(value: number, total: number) {
+
+    const formattedValue = format.formatCurrency(value);
+
+    const formattedPercent = total === 0
+        ? ""
+        : " (" + format.formatPercent(new BigNumber(value).div(total).toNumber()) + ")";
+
+    return `${ formattedValue } ${ formattedPercent }`;
 }
