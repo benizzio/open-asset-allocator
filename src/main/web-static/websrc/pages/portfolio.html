@@ -94,19 +94,30 @@
                 </form>
 
                 <script type="text/javascript">
+
                     function reloadPortfolio(event) {
 
-                        const portfolioId = event.detail.requestConfig.parameters.get("id");
+                        if (!event.detail?.successful) {
+                            return;
+                        }
 
+                        const requestConfig = event.detail?.requestConfig;
                         const form = event.target;
-                        if (form.checkValidity()) {
+                        const portfolioId =
+                            (requestConfig?.parameters && (requestConfig.parameters.id ?? requestConfig.parameters["id"])) ??
+                            new FormData(form).get("id");
+
+                        if (form.checkValidity() && portfolioId) {
+
                             form.reset();
+
                             const portfolioElement = document.querySelector("#portfolio-context");
                             htmx.trigger(portfolioElement, "reload-portfolio", {
                                 routerPathData: {
                                     portfolioId: portfolioId
                                 }
                             });
+
                             navigateTo(`/portfolio/${portfolioId}`);
                         }
                     }
@@ -126,6 +137,7 @@
                         const editPortfolioNameInput = editPortfolioForm.querySelector("input[name='name']");
                         editPortfolioNameInput.value = portfolionName;
                     }
+
                 </script>
 
             </div>
