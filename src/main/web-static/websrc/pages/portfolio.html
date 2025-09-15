@@ -66,10 +66,10 @@
                 <form id="edit-portfolio-form"
                       class="needs-validation"
                       hx-put="/api/portfolio"
-                      hx-ext="json-enc"
+                      hx-ext="form-json"
                       hx-validate="true"
                       hx-swap="none"
-                      hx-on-htmx-after-request="reloadPortfolio(event)"
+                      hx-on::after-request="reloadPortfolio(event)"
                 >
                     <div class="card-body">
 

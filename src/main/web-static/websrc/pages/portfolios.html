@@ -47,7 +47,7 @@
                 <form id="new-portfolio-form"
                       class="needs-validation"
                       hx-post="/api/portfolio"
-                      hx-ext="json-enc"
+                      hx-ext="form-json"
                       hx-validate="true"
                       hx-swap="none"
                       hx-on::after-request="reloadPortfolios(this)"
