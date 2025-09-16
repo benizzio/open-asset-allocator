@@ -30,6 +30,41 @@ const (
 	` + rdbms.WhereClausePlaceholder + `
 		ORDER BY ap.create_timestamp DESC, pa.cash_reserve DESC, pa.slice_size_percentage DESC
 	`
+	allocationPlanInsertSQL = `
+		INSERT INTO allocation_plan (portfolio_id, name, type)
+		VALUES ($1, $2, 'ALLOCATION_PLAN')
+    `
+	allocationPlanUpdateSQL = `
+		UPDATE allocation_plan 
+		SET name = $1
+		WHERE id = $2
+	`
+	plannedAllocationTempTableName   = "planned_allocation_merge_temp"
+	plannedAllocationTempTableDDLSQL = `
+		CREATE TEMPORARY TABLE ` + plannedAllocationTempTableName + `
+		(LIKE planned_allocation INCLUDING DEFAULTS)
+		ON COMMIT DROP
+	`
+	plannedAllocationMergeSQL = `
+		MERGE INTO planned_allocation pa
+		USING ` + plannedAllocationTempTableName + ` temp
+		ON pa.id = temp.id
+		WHEN NOT MATCHED BY TARGET THEN
+			INSERT (allocation_plan_id, hierarchical_id, cash_reserve, slice_size_percentage, asset_id)
+			VALUES (
+				temp.allocation_plan_id, 
+				temp.hierarchical_id, 
+				temp.cash_reserve, 
+				temp.slice_size_percentage, 
+				temp.asset_id
+			)
+		WHEN MATCHED THEN
+			UPDATE SET 
+				pa.cash_reserve = temp.cash_reserve,
+				pa.slice_size_percentage = temp.slice_size_percentage,
+		WHEN NOT MATCHED BY SOURCE AND pa.allocation_plan_id = $1 THEN
+			DELETE
+	`
 )
 
 type AllocationPlanRDBMSRepository struct {
