@@ -49,7 +49,7 @@ func (controller *PortfolioAllocationRESTController) BuildRoutes() []infra.RESTR
 func (controller *PortfolioAllocationRESTController) getPortfolioAllocationHistory(context *gin.Context) {
 
 	var portfolioIdParamValue = context.Param(portfolioIdParam)
-	portfolioId, err := strconv.ParseInt(portfolioIdParamValue, 10, 64)
+	portfolioId, err := langext.ParseInt64(portfolioIdParamValue)
 	if infra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
 		return
 	}
@@ -57,7 +57,7 @@ func (controller *PortfolioAllocationRESTController) getPortfolioAllocationHisto
 	var observationTimestampIdParamValue = context.Query(observationTimestampIdParam)
 	var observationTimestampId int64
 	if !langext.IsZeroValue(observationTimestampIdParamValue) {
-		observationTimestampId, err = strconv.ParseInt(observationTimestampIdParamValue, 10, 64)
+		observationTimestampId, err = langext.ParseInt64(observationTimestampIdParamValue)
 		if infra.HandleAPIError(context, getObservationTimestampIdErrorMessage, err) {
 			return
 		}
@@ -108,7 +108,7 @@ func (controller *PortfolioAllocationRESTController) getPortfolioAllocationHisto
 func (controller *PortfolioAllocationRESTController) getAvailableHistoryObservations(context *gin.Context) {
 
 	var portfolioIdParamValue = context.Param(portfolioIdParam)
-	portfolioId, err := strconv.ParseInt(portfolioIdParamValue, 10, 64)
+	portfolioId, err := langext.ParseInt64(portfolioIdParamValue)
 	if infra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
 		return
 	}
@@ -129,7 +129,7 @@ func (controller *PortfolioAllocationRESTController) getAvailableHistoryObservat
 func (controller *PortfolioAllocationRESTController) getAvailablePortfolioAllocationClasses(context *gin.Context) {
 
 	portfolioIdParamValue := context.Param(portfolioIdParam)
-	portfolioId, err := strconv.ParseInt(portfolioIdParamValue, 10, 64)
+	portfolioId, err := langext.ParseInt64(portfolioIdParamValue)
 	if infra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
 		return
 	}
@@ -145,7 +145,7 @@ func (controller *PortfolioAllocationRESTController) getAvailablePortfolioAlloca
 func (controller *PortfolioAllocationRESTController) postPortfolioAllocationHistory(context *gin.Context) {
 
 	var portfolioIdParamValue = context.Param(portfolioIdParam)
-	portfolioId, err := strconv.ParseInt(portfolioIdParamValue, 10, 64)
+	portfolioId, err := langext.ParseInt64(portfolioIdParamValue)
 	if infra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
 		return
 	}

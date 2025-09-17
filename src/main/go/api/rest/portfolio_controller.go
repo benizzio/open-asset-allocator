@@ -2,7 +2,6 @@ package rest
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/benizzio/open-asset-allocator/api/rest/model"
 	"github.com/benizzio/open-asset-allocator/domain/service"
@@ -56,7 +55,7 @@ func (controller *PortfolioRESTController) getPortfolios(context *gin.Context) {
 func (controller *PortfolioRESTController) getPortfolio(context *gin.Context) {
 
 	var portfolioIdParam = context.Param(portfolioIdParam)
-	portfolioId, err := strconv.ParseInt(portfolioIdParam, 10, 64)
+	portfolioId, err := langext.ParseInt64(portfolioIdParam)
 	if infra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
 		return
 	}

@@ -2,12 +2,12 @@ package rest
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/benizzio/open-asset-allocator/api/rest/model"
 	"github.com/benizzio/open-asset-allocator/domain/allocation"
 	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/infra"
+	"github.com/benizzio/open-asset-allocator/langext"
 	"github.com/gin-gonic/gin"
 )
 
@@ -28,7 +28,7 @@ func (controller *AllocationPlanRESTController) BuildRoutes() []infra.RESTRoute 
 func (controller *AllocationPlanRESTController) getAllocationPlans(context *gin.Context) {
 
 	var portfolioIdParamValue = context.Param(portfolioIdParam)
-	portfolioId, err := strconv.ParseInt(portfolioIdParamValue, 10, 64)
+	portfolioId, err := langext.ParseInt64(portfolioIdParamValue)
 
 	var planType = allocation.AssetAllocationPlan
 	allocationPlans, err := controller.allocationPlanService.GetAllocationPlans(

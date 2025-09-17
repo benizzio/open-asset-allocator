@@ -6,6 +6,14 @@ import (
 	"strconv"
 )
 
+// ParseInt64 parses a string representation of an integer to int64.
+// This is a utility function that wraps strconv.ParseInt with base 10 and 64-bit size.
+//
+// Authored by: GitHub Copilot
+func ParseInt64(numericString string) (int64, error) {
+	return strconv.ParseInt(numericString, 10, 64)
+}
+
 // ParseableInt64 provides JSON marshaling/unmarshaling for int64 values that can be either
 // numeric or string in JSON.
 //
