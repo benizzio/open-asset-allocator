@@ -17,7 +17,7 @@ type PortfolioAllocationManagementAppService struct {
 }
 
 func (service *PortfolioAllocationManagementAppService) MergePortfolioAllocations(
-	portfolioId int,
+	portfolioId int64,
 	observationTimestamp *domain.PortfolioObservationTimestamp,
 	allocations []*domain.PortfolioAllocation,
 ) error {

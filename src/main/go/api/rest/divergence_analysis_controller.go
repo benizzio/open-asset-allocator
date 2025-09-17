@@ -33,7 +33,7 @@ func (controller *DivergenceAnalysisRESTController) BuildRoutes() []infra.RESTRo
 func (controller *DivergenceAnalysisRESTController) getDivergenceAnalysisOptions(context *gin.Context) {
 
 	portfolioIdParam := context.Param(portfolioIdParam)
-	portfolioId, err := strconv.Atoi(portfolioIdParam)
+	portfolioId, err := strconv.ParseInt(portfolioIdParam, 10, 64)
 	if infra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
 		return
 	}
@@ -51,19 +51,19 @@ func (controller *DivergenceAnalysisRESTController) getDivergenceAnalysisOptions
 func (controller *DivergenceAnalysisRESTController) GetDivergenceAnalysis(context *gin.Context) {
 
 	portfolioIdParamValue := context.Param(portfolioIdParam)
-	portfolioId, err := strconv.Atoi(portfolioIdParamValue)
+	portfolioId, err := strconv.ParseInt(portfolioIdParamValue, 10, 64)
 	if infra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
 		return
 	}
 
 	var observationTimestampIdParamValue = context.Param(observationTimestampIdParam)
-	observationTimestampId, err := strconv.Atoi(observationTimestampIdParamValue)
+	observationTimestampId, err := strconv.ParseInt(observationTimestampIdParamValue, 10, 64)
 	if infra.HandleAPIError(context, getObservationTimestampIdErrorMessage, err) {
 		return
 	}
 
 	planIdParamValue := context.Param(planIdParam)
-	planId, err := strconv.Atoi(planIdParamValue)
+	planId, err := strconv.ParseInt(planIdParamValue, 10, 64)
 	if infra.HandleAPIError(context, getPlanIdErrorMessage, err) {
 		return
 	}

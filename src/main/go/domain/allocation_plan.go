@@ -18,14 +18,14 @@ func (plannedAllocationMap PlannedAllocationsPerHierarchicalId) Remove(hierarchi
 }
 
 type PlannedAllocation struct {
-	Id                  int
+	Id                  int64
 	HierarchicalId      HierarchicalId
 	CashReserve         bool
 	SliceSizePercentage decimal.Decimal
 }
 
 type AllocationPlanIdentifier struct {
-	Id   int
+	Id   int64
 	Name string
 }
 
@@ -41,7 +41,7 @@ func (allocationPlan *AllocationPlan) AddDetail(detail *PlannedAllocation) {
 }
 
 type AllocationPlanRepository interface {
-	GetAllAllocationPlans(portfolioId int, planType *allocation.PlanType) ([]*AllocationPlan, error)
-	GetAllocationPlan(id int) (*AllocationPlan, error)
-	GetAllAllocationPlanIdentifiers(portfolioId int, planType *allocation.PlanType) ([]*AllocationPlanIdentifier, error)
+	GetAllAllocationPlans(portfolioId int64, planType *allocation.PlanType) ([]*AllocationPlan, error)
+	GetAllocationPlan(id int64) (*AllocationPlan, error)
+	GetAllAllocationPlanIdentifiers(portfolioId int64, planType *allocation.PlanType) ([]*AllocationPlanIdentifier, error)
 }

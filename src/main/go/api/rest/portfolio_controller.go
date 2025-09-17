@@ -56,7 +56,7 @@ func (controller *PortfolioRESTController) getPortfolios(context *gin.Context) {
 func (controller *PortfolioRESTController) getPortfolio(context *gin.Context) {
 
 	var portfolioIdParam = context.Param(portfolioIdParam)
-	portfolioId, err := strconv.Atoi(portfolioIdParam)
+	portfolioId, err := strconv.ParseInt(portfolioIdParam, 10, 64)
 	if infra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
 		return
 	}

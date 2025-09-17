@@ -29,9 +29,9 @@ func (divergence *PotentialDivergence) AddInternalDivergence(internalDivergence 
 }
 
 type DivergenceAnalysis struct {
-	PortfolioId               int
+	PortfolioId               int64
 	ObservationTimestamp      *PortfolioObservationTimestamp
-	AllocationPlanId          int
+	AllocationPlanId          int64
 	PortfolioTotalMarketValue int64
 	Root                      []*PotentialDivergence
 }

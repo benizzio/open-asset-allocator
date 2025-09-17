@@ -13,7 +13,7 @@ func (service *PortfolioDomService) GetPortfolios() ([]*domain.Portfolio, error)
 	return service.portfolioRepository.GetAllPortfolios()
 }
 
-func (service *PortfolioDomService) GetPortfolio(id int) (*domain.Portfolio, error) {
+func (service *PortfolioDomService) GetPortfolio(id int64) (*domain.Portfolio, error) {
 	return service.portfolioRepository.FindPortfolio(id)
 }
 

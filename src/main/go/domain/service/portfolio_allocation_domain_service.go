@@ -14,7 +14,7 @@ type PortfolioAllocationDomService struct {
 	portfolioAllocationRepository        domain.PortfolioAllocationRepository
 }
 
-func (service *PortfolioAllocationDomService) GetPortfolioAllocationHistory(id int) (
+func (service *PortfolioAllocationDomService) GetPortfolioAllocationHistory(id int64) (
 	[]*domain.PortfolioAllocation,
 	error,
 ) {
@@ -22,8 +22,8 @@ func (service *PortfolioAllocationDomService) GetPortfolioAllocationHistory(id i
 }
 
 func (service *PortfolioAllocationDomService) FindPortfolioAllocationsByObservationTimestamp(
-	id int,
-	observationTimestampId int,
+	id int64,
+	observationTimestampId int64,
 ) ([]*domain.PortfolioAllocation, error) {
 	return service.portfolioAllocationRepository.FindPortfolioAllocationsByObservationTimestamp(
 		id,
@@ -32,7 +32,7 @@ func (service *PortfolioAllocationDomService) FindPortfolioAllocationsByObservat
 }
 
 func (service *PortfolioAllocationDomService) GetAvailableObservationTimestamps(
-	portfolioId int,
+	portfolioId int64,
 	observationTimestampsLimit int,
 ) ([]*domain.PortfolioObservationTimestamp, error) {
 	return service.portfolioAllocationRepository.FindAvailableObservationTimestamps(
@@ -92,14 +92,14 @@ func (service *PortfolioAllocationDomService) getHierarchyLevelFieldValue(
 }
 
 func (service *PortfolioAllocationDomService) FindAvailablePortfolioAllocationClasses(
-	portfolioId int,
+	portfolioId int64,
 ) ([]string, error) {
 	return service.portfolioAllocationRepository.FindAvailablePortfolioAllocationClasses(portfolioId)
 }
 
 func (service *PortfolioAllocationDomService) MergePortfolioAllocationsInTransaction(
 	transContext context.Context,
-	portfolioId int,
+	portfolioId int64,
 	observationTimestamp *domain.PortfolioObservationTimestamp,
 	allocations []*domain.PortfolioAllocation,
 ) error {

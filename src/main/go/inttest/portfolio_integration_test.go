@@ -290,7 +290,7 @@ func TestPutPortfolio(t *testing.T) {
 	var testPortfolioNameAfter = "Test Portfolio update"
 
 	testPortFolio := insertTestPortfolio(t, testPortfolioNameBefore)
-	var testPortfolioIdString = strconv.Itoa(testPortFolio.Id)
+	var testPortfolioIdString = strconv.FormatInt(testPortFolio.Id, 10)
 
 	var putPortfolioJSON = `
 		{
@@ -435,7 +435,7 @@ func TestPutPortfolioWithAllocationStructure(t *testing.T) {
 	var testPortfolioNameAfter = "Test Portfolio update"
 
 	testPortfolio := insertTestPortfolio(t, testPortfolioNameBefore)
-	var testPortfolioIdString = strconv.Itoa(testPortfolio.Id)
+	var testPortfolioIdString = strconv.FormatInt(testPortfolio.Id, 10)
 
 	var allocationStructureJSONFragment = `
 		"allocationStructure": {

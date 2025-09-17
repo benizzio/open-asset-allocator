@@ -37,7 +37,7 @@ type AllocationPlanRDBMSRepository struct {
 }
 
 func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlans(
-	portfolioId int,
+	portfolioId int64,
 	planType *allocation.PlanType,
 ) ([]*domain.AllocationPlan, error) {
 
@@ -58,7 +58,7 @@ func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlans(
 	return mapPlannedAllocationRows(queryResult)
 }
 
-func (repository *AllocationPlanRDBMSRepository) GetAllocationPlan(id int) (*domain.AllocationPlan, error) {
+func (repository *AllocationPlanRDBMSRepository) GetAllocationPlan(id int64) (*domain.AllocationPlan, error) {
 
 	var queryBuilder = repository.dbAdapter.BuildQuery(allocationPlanSQL)
 	queryBuilder.AddWhereClauseAndParam("AND ap.id = {:id}", "id", id)
@@ -82,7 +82,7 @@ func (repository *AllocationPlanRDBMSRepository) GetAllocationPlan(id int) (*dom
 }
 
 func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlanIdentifiers(
-	portfolioId int,
+	portfolioId int64,
 	planType *allocation.PlanType,
 ) ([]*domain.AllocationPlanIdentifier, error) {
 

@@ -28,7 +28,7 @@ func (controller *AllocationPlanRESTController) BuildRoutes() []infra.RESTRoute 
 func (controller *AllocationPlanRESTController) getAllocationPlans(context *gin.Context) {
 
 	var portfolioIdParamValue = context.Param(portfolioIdParam)
-	portfolioId, err := strconv.Atoi(portfolioIdParamValue)
+	portfolioId, err := strconv.ParseInt(portfolioIdParamValue, 10, 64)
 
 	var planType = allocation.AssetAllocationPlan
 	allocationPlans, err := controller.allocationPlanService.GetAllocationPlans(
