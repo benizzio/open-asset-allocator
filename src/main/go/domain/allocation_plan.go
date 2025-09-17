@@ -22,6 +22,7 @@ type PlannedAllocation struct {
 	HierarchicalId      HierarchicalId
 	CashReserve         bool
 	SliceSizePercentage decimal.Decimal
+	Asset               *Asset
 }
 
 type AllocationPlanIdentifier struct {
@@ -33,6 +34,7 @@ type AllocationPlan struct {
 	AllocationPlanIdentifier
 	PlanType             allocation.PlanType
 	PlannedExecutionDate *time.Time
+	PortfolioId          int
 	Details              []*PlannedAllocation
 }
 

@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"context"
+
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/domain/allocation"
 	"github.com/benizzio/open-asset-allocator/infra"
@@ -32,7 +34,7 @@ const (
 	`
 	allocationPlanInsertSQL = `
 		INSERT INTO allocation_plan (portfolio_id, name, type)
-		VALUES ($1, $2, 'ALLOCATION_PLAN')
+		VALUES ($1, $2, $3) RETURNING id
     `
 	allocationPlanUpdateSQL = `
 		UPDATE allocation_plan 
@@ -140,6 +142,151 @@ func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlanIdentifiers
 	}
 
 	return langext.ToPointerSlice(queryResult), nil
+}
+
+func (repository *AllocationPlanRDBMSRepository) InsertAllocationPlanInTransaction(
+	transContext context.Context,
+	plan *domain.AllocationPlan,
+) error {
+
+	var transactionalContext, ok = rdbms.ToSQLTransactionalContext(transContext)
+	if !ok {
+		return infra.BuildAppError(
+			"Context is not a SQL transactional context",
+			repository,
+		)
+	}
+
+	result, err := repository.dbAdapter.ExecuteInTransaction(
+		transactionalContext,
+		allocationPlanInsertSQL,
+		plan.PortfolioId,
+		plan.Name,
+		plan.PlanType.String(),
+	)
+	if err != nil {
+		return infra.PropagateAsAppErrorWithNewMessage(err, "Error inserting allocation plan", repository)
+	}
+
+	planId, err := result.LastInsertId()
+	if err != nil {
+		return infra.PropagateAsAppErrorWithNewMessage(
+			err,
+			"Error getting last insert id for allocation plan",
+			repository,
+		)
+	}
+
+	return repository.mergePlannedAllocationsInTransaction(transactionalContext, planId, plan.Details)
+}
+
+func (repository *AllocationPlanRDBMSRepository) UpdateAllocationPlanInTransaction(
+	transContext context.Context,
+	plan *domain.AllocationPlan,
+) error {
+
+	var transactionalContext, ok = rdbms.ToSQLTransactionalContext(transContext)
+	if !ok {
+		return infra.BuildAppError(
+			"Context is not a SQL transactional context",
+			repository,
+		)
+	}
+
+	_, err := repository.dbAdapter.ExecuteInTransaction(
+		transactionalContext,
+		allocationPlanUpdateSQL,
+		plan.Name,
+		plan.Id,
+	)
+	if err != nil {
+		return infra.PropagateAsAppErrorWithNewMessage(err, "Error updating allocation plan", repository)
+	}
+
+	return repository.mergePlannedAllocationsInTransaction(transactionalContext, int64(plan.Id), plan.Details)
+}
+
+func (repository *AllocationPlanRDBMSRepository) mergePlannedAllocationsInTransaction(
+	transContext *rdbms.SQLTransactionalContext,
+	allocationPlanId int64,
+	plannedAllocations []*domain.PlannedAllocation,
+) error {
+
+	var transactionalContext, ok = rdbms.ToSQLTransactionalContext(transContext)
+	if !ok {
+		return infra.BuildAppError(
+			"Context is not a SQL transactional context",
+			repository,
+		)
+	}
+
+	_, err := repository.dbAdapter.ExecuteInTransaction(
+		transactionalContext,
+		plannedAllocationTempTableDDLSQL,
+	)
+	if err != nil {
+		return infra.PropagateAsAppErrorWithNewMessage(
+			err,
+			"Error creating temporary table for planned allocations",
+			repository,
+		)
+	}
+
+	var columns = []string{
+		"id",
+		"allocation_plan_id",
+		"hierarchical_id",
+		"cash_reserve",
+		"slice_size_percentage",
+		"asset_id",
+	}
+
+	var insertValues = make([][]any, len(plannedAllocations))
+	for i, plannedAllocation := range plannedAllocations {
+
+		var assetId *int
+		if plannedAllocation.Asset != nil {
+			assetId = &plannedAllocation.Asset.Id
+		}
+
+		insertValues[i] = []any{
+			plannedAllocation.Id,
+			allocationPlanId,
+			plannedAllocation.HierarchicalId,
+			plannedAllocation.CashReserve,
+			plannedAllocation.SliceSizePercentage,
+			assetId,
+		}
+	}
+
+	err = repository.dbAdapter.InsertBulkInTransaction(
+		transactionalContext,
+		plannedAllocationTempTableName,
+		columns,
+		insertValues,
+	)
+	if err != nil {
+		return infra.PropagateAsAppErrorWithNewMessage(
+			err,
+			"Error inserting planned allocations into temporary table",
+			repository,
+		)
+	}
+
+	_, err = repository.dbAdapter.ExecuteInTransaction(
+		transactionalContext,
+		plannedAllocationMergeSQL,
+		allocationPlanId,
+	)
+	if err != nil {
+		return infra.PropagateAsAppErrorWithNewMessage(
+			err,
+			"Error merging planned allocations",
+			repository,
+		)
+	}
+
+	return nil
 }
 
 func BuildAllocationPlanRepository(dbAdapter rdbms.RepositoryRDBMSAdapter) *AllocationPlanRDBMSRepository {
