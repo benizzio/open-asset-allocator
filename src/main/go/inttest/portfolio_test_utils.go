@@ -59,7 +59,7 @@ func assertPersistedPortfolioFromDTS(
 ) {
 	assertPersistedPortfolioFromAttributes(
 		t,
-		int(*actualPortfolioDTS.Id),
+		int64(*actualPortfolioDTS.Id),
 		actualPortfolioDTS.Name,
 		actualPortFolioAllocationStructure,
 	)
@@ -67,12 +67,12 @@ func assertPersistedPortfolioFromDTS(
 
 func assertPersistedPortfolioFromAttributes(
 	t *testing.T,
-	actualPortfolioID int,
+	actualPortfolioID int64,
 	actualPortfolioName string,
 	actualPortFolioAllocationStructure string,
 ) {
 
-	var portfolioIdString = strconv.Itoa(actualPortfolioID)
+	var portfolioIdString = strconv.FormatInt(actualPortfolioID, 10)
 	var portfolioNullStringMap = dbx.NullStringMap{
 		"id":                   util.ToNullString(portfolioIdString),
 		"name":                 util.ToNullString(actualPortfolioName),

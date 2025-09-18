@@ -8,11 +8,11 @@ import (
 )
 
 type plannedAllocationJoinedRowDTS struct {
-	AllocationPlanId     int
+	AllocationPlanId     int64
 	Name                 string
 	Type                 allocation.PlanType
 	PlannedExecutionDate sqlext.NullTime
-	PlannedAllocationId  int
+	PlannedAllocationId  int64
 	HierarchicalId       sqlext.NullStringSlice
 	CashReserve          bool
 	SliceSizePercentage  decimal.Decimal
@@ -20,7 +20,7 @@ type plannedAllocationJoinedRowDTS struct {
 
 func mapPlannedAllocationRows(rows []plannedAllocationJoinedRowDTS) ([]*domain.AllocationPlan, error) {
 
-	var allocationPlanCacheMap = make(map[int]*domain.AllocationPlan)
+	var allocationPlanCacheMap = make(map[int64]*domain.AllocationPlan)
 	var allocationPlans = make([]*domain.AllocationPlan, 0)
 
 	for _, row := range rows {
@@ -36,7 +36,7 @@ func mapPlannedAllocationRows(rows []plannedAllocationJoinedRowDTS) ([]*domain.A
 
 func mapPlannedAllocationRow(
 	row *plannedAllocationJoinedRowDTS,
-	allocationPlanCacheMap map[int]*domain.AllocationPlan,
+	allocationPlanCacheMap map[int64]*domain.AllocationPlan,
 ) *domain.AllocationPlan {
 
 	allocationPlanUnit := buildPlannedAllocationFromRow(row)

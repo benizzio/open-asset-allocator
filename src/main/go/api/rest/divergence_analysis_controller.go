@@ -2,11 +2,11 @@ package rest
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/benizzio/open-asset-allocator/api/rest/model"
 	"github.com/benizzio/open-asset-allocator/application"
 	"github.com/benizzio/open-asset-allocator/infra"
+	"github.com/benizzio/open-asset-allocator/langext"
 	"github.com/gin-gonic/gin"
 )
 
@@ -33,7 +33,7 @@ func (controller *DivergenceAnalysisRESTController) BuildRoutes() []infra.RESTRo
 func (controller *DivergenceAnalysisRESTController) getDivergenceAnalysisOptions(context *gin.Context) {
 
 	portfolioIdParam := context.Param(portfolioIdParam)
-	portfolioId, err := strconv.Atoi(portfolioIdParam)
+	portfolioId, err := langext.ParseInt64(portfolioIdParam)
 	if infra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
 		return
 	}
@@ -51,19 +51,19 @@ func (controller *DivergenceAnalysisRESTController) getDivergenceAnalysisOptions
 func (controller *DivergenceAnalysisRESTController) GetDivergenceAnalysis(context *gin.Context) {
 
 	portfolioIdParamValue := context.Param(portfolioIdParam)
-	portfolioId, err := strconv.Atoi(portfolioIdParamValue)
+	portfolioId, err := langext.ParseInt64(portfolioIdParamValue)
 	if infra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
 		return
 	}
 
 	var observationTimestampIdParamValue = context.Param(observationTimestampIdParam)
-	observationTimestampId, err := strconv.Atoi(observationTimestampIdParamValue)
+	observationTimestampId, err := langext.ParseInt64(observationTimestampIdParamValue)
 	if infra.HandleAPIError(context, getObservationTimestampIdErrorMessage, err) {
 		return
 	}
 
 	planIdParamValue := context.Param(planIdParam)
-	planId, err := strconv.Atoi(planIdParamValue)
+	planId, err := langext.ParseInt64(planIdParamValue)
 	if infra.HandleAPIError(context, getPlanIdErrorMessage, err) {
 		return
 	}

@@ -120,7 +120,7 @@ type PortfolioAllocationRDBMSRepository struct {
 }
 
 func (repository *PortfolioAllocationRDBMSRepository) FindAllPortfolioAllocationsWithinObservationTimestampsLimit(
-	id int,
+	id int64,
 	observationTimestampsLimit int,
 ) ([]*domain.PortfolioAllocation, error) {
 
@@ -144,8 +144,8 @@ func (repository *PortfolioAllocationRDBMSRepository) FindAllPortfolioAllocation
 }
 
 func (repository *PortfolioAllocationRDBMSRepository) FindPortfolioAllocationsByObservationTimestamp(
-	id int,
-	observationTimestampId int,
+	id int64,
+	observationTimestampId int64,
 ) ([]*domain.PortfolioAllocation, error) {
 
 	var queryResult []domain.PortfolioAllocation
@@ -169,7 +169,7 @@ func (repository *PortfolioAllocationRDBMSRepository) FindPortfolioAllocationsBy
 }
 
 func (repository *PortfolioAllocationRDBMSRepository) FindAvailableObservationTimestamps(
-	portfolioId int,
+	portfolioId int64,
 	observationTimestampsLimit int,
 ) ([]*domain.PortfolioObservationTimestamp, error) {
 
@@ -190,7 +190,7 @@ func (repository *PortfolioAllocationRDBMSRepository) FindAvailableObservationTi
 	return result, nil
 }
 
-func (repository *PortfolioAllocationRDBMSRepository) FindAvailablePortfolioAllocationClasses(portfolioId int) (
+func (repository *PortfolioAllocationRDBMSRepository) FindAvailablePortfolioAllocationClasses(portfolioId int64) (
 	[]string,
 	error,
 ) {
@@ -206,7 +206,7 @@ func (repository *PortfolioAllocationRDBMSRepository) FindAvailablePortfolioAllo
 }
 
 func (repository *PortfolioAllocationRDBMSRepository) findAvailablePortfolioAllocationClassesRows(
-	portfolioId int,
+	portfolioId int64,
 	query string,
 ) (*dbx.Rows, error) {
 
@@ -246,7 +246,7 @@ func (repository *PortfolioAllocationRDBMSRepository) scanAvailablePortfolioAllo
 
 func (repository *PortfolioAllocationRDBMSRepository) MergePortfolioAllocationsInTransaction(
 	transContext context.Context,
-	portfolioId int,
+	portfolioId int64,
 	observationTimestamp *domain.PortfolioObservationTimestamp,
 	allocations []*domain.PortfolioAllocation,
 ) error {
@@ -273,7 +273,7 @@ func (repository *PortfolioAllocationRDBMSRepository) MergePortfolioAllocationsI
 
 func (repository *PortfolioAllocationRDBMSRepository) insertPortfolioAllocationsInTempTable(
 	transContext *rdbms.SQLTransactionalContext,
-	portfolioId int,
+	portfolioId int64,
 	allocations []*domain.PortfolioAllocation,
 ) error {
 
@@ -308,7 +308,7 @@ func (repository *PortfolioAllocationRDBMSRepository) insertPortfolioAllocations
 
 func preparePortfolioAllocationTempInserts(
 	allocations []*domain.PortfolioAllocation,
-	id int,
+	id int64,
 ) ([]string, [][]any) {
 
 	var columns = []string{
@@ -341,7 +341,7 @@ func preparePortfolioAllocationTempInserts(
 
 func (repository *PortfolioAllocationRDBMSRepository) mergePortfolioAllocations(
 	transContext *rdbms.SQLTransactionalContext,
-	portfolioId int,
+	portfolioId int64,
 	observationTimestamp *domain.PortfolioObservationTimestamp,
 ) error {
 	_, err := repository.dbAdapter.ExecuteInTransaction(
@@ -384,7 +384,7 @@ func (repository *PortfolioAllocationRDBMSRepository) InsertObservationTimestamp
 	}
 
 	return &domain.PortfolioObservationTimestamp{
-		Id:        int(id),
+		Id:        id,
 		TimeTag:   observationTimestamp.TimeTag,
 		Timestamp: observationTimestamp.Timestamp,
 	}, nil

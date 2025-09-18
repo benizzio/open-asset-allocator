@@ -1,7 +1,7 @@
 package domain
 
 type Portfolio struct {
-	Id                  int
+	Id                  int64
 	Name                string
 	AllocationStructure AllocationStructure
 }
@@ -13,7 +13,7 @@ type AnalysisOptions struct {
 
 type PortfolioRepository interface {
 	GetAllPortfolios() ([]*Portfolio, error)
-	FindPortfolio(id int) (*Portfolio, error)
+	FindPortfolio(id int64) (*Portfolio, error)
 	InsertPortfolio(portfolio *Portfolio) (*Portfolio, error)
 	UpdatePortfolio(portfolio *Portfolio) (*Portfolio, error)
 }

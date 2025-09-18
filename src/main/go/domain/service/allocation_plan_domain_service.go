@@ -9,25 +9,25 @@ type AllocationPlanDomService struct {
 	allocationPlanRepository domain.AllocationPlanRepository
 }
 
-func (service *AllocationPlanDomService) GetAllocationPlans(portfolioId int, planType *allocation.PlanType) (
+func (service *AllocationPlanDomService) GetAllocationPlans(portfolioId int64, planType *allocation.PlanType) (
 	[]*domain.AllocationPlan,
 	error,
 ) {
 	return service.allocationPlanRepository.GetAllAllocationPlans(portfolioId, planType)
 }
 
-func (service *AllocationPlanDomService) GetAllocationPlan(id int) (*domain.AllocationPlan, error) {
+func (service *AllocationPlanDomService) GetAllocationPlan(id int64) (*domain.AllocationPlan, error) {
 	return service.allocationPlanRepository.GetAllocationPlan(id)
 }
 
 func (service *AllocationPlanDomService) GetAllAllocationPlanIdentifiers(
-	portfolioId int,
+	portfolioId int64,
 	planType *allocation.PlanType,
 ) ([]*domain.AllocationPlanIdentifier, error) {
 	return service.allocationPlanRepository.GetAllAllocationPlanIdentifiers(portfolioId, planType)
 }
 
-func (service *AllocationPlanDomService) GetPlannedAllocationsPerHyerarchicalIdMap(allocationPlanId int) (
+func (service *AllocationPlanDomService) GetPlannedAllocationsPerHyerarchicalIdMap(allocationPlanId int64) (
 	domain.PlannedAllocationsPerHierarchicalId,
 	error,
 ) {

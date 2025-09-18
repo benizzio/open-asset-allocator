@@ -18,25 +18,25 @@ type PortfolioAllocation struct {
 }
 
 type PortfolioObservationTimestamp struct {
-	Id        int
+	Id        int64
 	TimeTag   string
 	Timestamp time.Time
 }
 
 type PortfolioAllocationRepository interface {
 	FindAllPortfolioAllocationsWithinObservationTimestampsLimit(
-		id int,
+		id int64,
 		observationTimestampsLimit int,
 	) ([]*PortfolioAllocation, error)
-	FindPortfolioAllocationsByObservationTimestamp(id int, observationTimestampId int) ([]*PortfolioAllocation, error)
+	FindPortfolioAllocationsByObservationTimestamp(id int64, observationTimestampId int64) ([]*PortfolioAllocation, error)
 	FindAvailableObservationTimestamps(
-		portfolioId int,
+		portfolioId int64,
 		observationTimestampsLimit int,
 	) ([]*PortfolioObservationTimestamp, error)
-	FindAvailablePortfolioAllocationClasses(portfolioId int) ([]string, error)
+	FindAvailablePortfolioAllocationClasses(portfolioId int64) ([]string, error)
 	MergePortfolioAllocationsInTransaction(
 		transContext context.Context,
-		portfolioId int,
+		portfolioId int64,
 		observationTimestamp *PortfolioObservationTimestamp,
 		allocations []*PortfolioAllocation,
 	) error

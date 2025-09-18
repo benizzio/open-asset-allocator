@@ -12,14 +12,14 @@ import (
 // ================================================
 
 type PlannedAllocationDTS struct {
-	Id                  int             `json:"id,omitempty"`
+	Id                  int64           `json:"id,omitempty"`
 	HierarchicalId      []*string       `json:"hierarchicalId,omitempty"`
 	CashReserve         bool            `json:"cashReserve"`
 	SliceSizePercentage decimal.Decimal `json:"sliceSizePercentage,omitempty"`
 }
 
 type AllocationPlanDTS struct {
-	Id                   int                    `json:"id,omitempty"`
+	Id                   int64                  `json:"id,omitempty"`
 	Name                 string                 `json:"name,omitempty"`
 	Type                 string                 `json:"type,omitempty"`
 	PlannedExecutionDate *time.Time             `json:"plannedExecutionDate,omitempty"`
