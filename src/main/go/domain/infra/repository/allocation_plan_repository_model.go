@@ -54,7 +54,7 @@ func mapPlannedAllocationRow(
 
 func buildPlannedAllocationFromRow(rowDTS *plannedAllocationJoinedRowDTS) *domain.PlannedAllocation {
 	return &domain.PlannedAllocation{
-		Id:                  int64(rowDTS.PlannedAllocationId),
+		Id:                  rowDTS.PlannedAllocationId,
 		HierarchicalId:      rowDTS.HierarchicalId.ToStringSlice(),
 		CashReserve:         rowDTS.CashReserve,
 		SliceSizePercentage: rowDTS.SliceSizePercentage,
@@ -68,7 +68,7 @@ func buildAllocationPlanFromRow(
 
 	var allocationPlan = domain.AllocationPlan{
 		AllocationPlanIdentifier: domain.AllocationPlanIdentifier{
-			Id:   int64(rowDTS.AllocationPlanId),
+			Id:   rowDTS.AllocationPlanId,
 			Name: rowDTS.Name,
 		},
 		PlanType:             rowDTS.Type,
