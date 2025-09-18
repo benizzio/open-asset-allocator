@@ -244,7 +244,7 @@ func (repository *AllocationPlanRDBMSRepository) mergePlannedAllocationsInTransa
 	var insertValues = make([][]any, len(plannedAllocations))
 	for i, plannedAllocation := range plannedAllocations {
 
-		var assetId *int
+		var assetId *int64
 		if plannedAllocation.Asset != nil {
 			assetId = &plannedAllocation.Asset.Id
 		}
