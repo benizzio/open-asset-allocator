@@ -15,8 +15,16 @@ export type AllocationPlan = {
     details: PlannedAllocation[],
 };
 
+/**
+ * Type that defines a Planned Allocation as it's tranferred via API,
+ * to allow conversion to property types needed locally
+ */
 export type PlannedAllocationDTO = Omit<PlannedAllocation, "sliceSizePercentage"> & { sliceSizePercentage: string, };
 
+/**
+ * Type that defines a Allocation Plan as it's tranferred via API,
+ * to allow conversion to property types needed locally
+ */
 export type AllocationPlanDTO = Omit<AllocationPlan, "details"> & { details: PlannedAllocationDTO[], };
 
 export type FractalPlannedAllocation = {

@@ -1,5 +1,5 @@
 import { AllocationHierarchyLevel, AllocationStructure, LOWEST_AVAILABLE_HIERARCHY_LEVEL } from "../allocation";
-import { mapAllocationPlanFractalHierarchy, mapToAllocationPlan } from "../mapping/allocation-plan-mapping";
+import { mapToAllocationPlan, mapToAllocationPlanFractalHierarchy } from "../mapping/allocation-plan-mapping";
 import { getTopLevelHierarchyIndexFromAllocationStructure } from "../utils/allocation-utils";
 import { mapToPortfolio } from "../mapping/portfolio-mapping";
 
@@ -50,6 +50,6 @@ export const allocationDomainService = {
 
     //TODO review this
     mapToAllocationPlan,
-    mapAllocationPlanFractalHierarchy,
+    mapToAllocationPlanFractalHierarchy,
     mapToPortfolio,
 };

@@ -156,7 +156,7 @@ const allocationPlanChart = {
 
         const allocationPlan = allocationDomainService.mapToAllocationPlan(allocationPlanDTO);
 
-        const fractalHierarchy = allocationDomainService.mapAllocationPlanFractalHierarchy(
+        const fractalHierarchy = allocationDomainService.mapToAllocationPlanFractalHierarchy(
             allocationPlan,
             allocationStructure,
         );
