@@ -35,7 +35,7 @@ func (repository *PortfolioRDBMSRepository) GetAllPortfolios() ([]*domain.Portfo
 	)
 }
 
-func (repository *PortfolioRDBMSRepository) FindPortfolio(id int) (*domain.Portfolio, error) {
+func (repository *PortfolioRDBMSRepository) FindPortfolio(id int64) (*domain.Portfolio, error) {
 
 	var query = portfolioSQL + `
 		WHERE p.id = {:id}

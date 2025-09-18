@@ -7,7 +7,7 @@ import "github.com/benizzio/open-asset-allocator/domain"
 // ================================================
 
 type AssetDTS struct {
-	Id     int    `json:"id"`
+	Id     int64  `json:"id"`
 	Name   string `json:"name"`
 	Ticker string `json:"ticker"`
 }

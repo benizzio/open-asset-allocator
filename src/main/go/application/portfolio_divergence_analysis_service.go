@@ -19,9 +19,9 @@ type PortfolioDivergenceAnalysisAppService struct {
 type potentialDivergencesPerHierarchicalId map[string]*domain.PotentialDivergence
 
 func (service *PortfolioDivergenceAnalysisAppService) GeneratePortfolioDivergenceAnalysis(
-	portfolioId int,
-	observationTimestampId int,
-	allocationPlanId int,
+	portfolioId int64,
+	observationTimestampId int64,
+	allocationPlanId int64,
 ) (*domain.DivergenceAnalysis, error) {
 
 	// TODO verification for debug logging, this should be logged only in debug mode
@@ -69,9 +69,9 @@ func (service *PortfolioDivergenceAnalysisAppService) GeneratePortfolioDivergenc
 // initializeAnalysisContextForObservationTimestamp initializes the all the basic structures needed to create a divergence analysis
 // and add them to a context.Context.
 func (service *PortfolioDivergenceAnalysisAppService) initializeAnalysisContextForObservationTimestamp(
-	portfolioId int,
-	observationTimestampId int,
-	allocationPlanId int,
+	portfolioId int64,
+	observationTimestampId int64,
+	allocationPlanId int64,
 ) (context.Context, error) {
 
 	portfolio, err := service.portfolioDomService.GetPortfolio(portfolioId)
@@ -146,7 +146,7 @@ func (service *PortfolioDivergenceAnalysisAppService) generateDivergenceAnalysis
 // for the planned allocations that are not allocated in the portfolio.
 func (service *PortfolioDivergenceAnalysisAppService) complementAnalysisWithAllocationPlanSetDifference(
 	analysisContext context.Context,
-	allocationPlanId int,
+	allocationPlanId int64,
 ) error {
 
 	var analysisContextValue = getDivergenceAnalysisContextValue(analysisContext)
@@ -284,7 +284,7 @@ func (service *PortfolioDivergenceAnalysisAppService) generatePotentialDivergenc
 func buildDivergenceAnalysis(
 	portfolio *domain.Portfolio,
 	observationTimestamp *domain.PortfolioObservationTimestamp,
-	allocationPlanId int,
+	allocationPlanId int64,
 ) *domain.DivergenceAnalysis {
 	return &domain.DivergenceAnalysis{
 		PortfolioId:               portfolio.Id,

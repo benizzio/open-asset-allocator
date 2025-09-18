@@ -11,7 +11,7 @@ type PortfolioAnalysisConfigurationAppService struct {
 	allocationPlanDomService      *service.AllocationPlanDomService
 }
 
-func (service *PortfolioAnalysisConfigurationAppService) GetDivergenceAnalysisOptions(portfolioId int) (
+func (service *PortfolioAnalysisConfigurationAppService) GetDivergenceAnalysisOptions(portfolioId int64) (
 	*domain.AnalysisOptions,
 	error,
 ) {

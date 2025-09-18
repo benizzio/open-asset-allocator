@@ -5,7 +5,7 @@ import (
 )
 
 type Asset struct {
-	Id     int
+	Id     int64
 	Name   string
 	Ticker string
 }

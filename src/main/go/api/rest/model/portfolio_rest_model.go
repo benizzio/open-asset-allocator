@@ -8,20 +8,20 @@ import (
 )
 
 type PortfolioDTS struct {
-	Id                  *langext.ParseableInt   `json:"id"`
+	Id                  *langext.ParseableInt64 `json:"id"`
 	Name                string                  `json:"name" validate:"required"`
 	AllocationStructure *AllocationStructureDTS `json:"allocationStructure"`
 }
 
 type PortfolioAllocationDTS struct {
-	AssetId          langext.ParseableInt `json:"assetId"`
-	AssetName        string               `json:"assetName"`
-	AssetTicker      string               `json:"assetTicker"`
-	Class            string               `json:"class" validate:"required"`
-	CashReserve      bool                 `json:"cashReserve"`
-	TotalMarketValue int64                `json:"totalMarketValue" validate:"required"`
-	AssetQuantity    decimal.Decimal      `json:"assetQuantity"`
-	AssetMarketPrice decimal.Decimal      `json:"assetMarketPrice"`
+	AssetId          langext.ParseableInt64 `json:"assetId"`
+	AssetName        string                 `json:"assetName"`
+	AssetTicker      string                 `json:"assetTicker"`
+	Class            string                 `json:"class" validate:"required"`
+	CashReserve      bool                   `json:"cashReserve"`
+	TotalMarketValue int64                  `json:"totalMarketValue" validate:"required"`
+	AssetQuantity    decimal.Decimal        `json:"assetQuantity"`
+	AssetMarketPrice decimal.Decimal        `json:"assetMarketPrice"`
 }
 
 type PortfolioSnapshotDTS struct {
@@ -63,14 +63,14 @@ func (aggregationMap portfolioAllocationsPerObservationTimestamp) getAggregatedM
 }
 
 type AllocationPlanIdentifierDTS struct {
-	Id   int    `json:"id"`
+	Id   int64  `json:"id"`
 	Name string `json:"name"`
 }
 
 type PortfolioObservationTimestampDTS struct {
-	Id        langext.ParseableInt `json:"id"`
-	TimeTag   string               `json:"timeTag"`
-	Timestamp time.Time            `json:"timestamp"`
+	Id        langext.ParseableInt64 `json:"id"`
+	TimeTag   string                 `json:"timeTag"`
+	Timestamp time.Time              `json:"timestamp"`
 }
 
 type AnalysisOptionsDTS struct {
@@ -88,9 +88,9 @@ type PotentialDivergenceDTS struct {
 }
 
 type DivergenceAnalysisDTS struct {
-	PortfolioId               int                               `json:"portfolioId"`
+	PortfolioId               int64                             `json:"portfolioId"`
 	ObservationTimestamp      *PortfolioObservationTimestampDTS `json:"observationTimestamp"`
-	AllocationPlanId          int                               `json:"allocationPlanId"`
+	AllocationPlanId          int64                             `json:"allocationPlanId"`
 	PortfolioTotalMarketValue int64                             `json:"portfolioTotalMarketValue"`
 	Root                      []*PotentialDivergenceDTS         `json:"root"`
 }
