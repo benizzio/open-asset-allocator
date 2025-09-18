@@ -14,11 +14,11 @@ type PortfolioAllocationDomService struct {
 	portfolioAllocationRepository        domain.PortfolioAllocationRepository
 }
 
-func (service *PortfolioAllocationDomService) GetPortfolioAllocationHistory(id int64) (
+func (service *PortfolioAllocationDomService) GetPortfolioAllocationHistory(portfolioId int64) (
 	[]*domain.PortfolioAllocation,
 	error,
 ) {
-	return service.portfolioAllocationRepository.FindAllPortfolioAllocationsWithinObservationTimestampsLimit(id, 10)
+	return service.portfolioAllocationRepository.FindAllPortfolioAllocationsWithinObservationTimestampsLimit(portfolioId, 10)
 }
 
 func (service *PortfolioAllocationDomService) FindPortfolioAllocationsByObservationTimestamp(
