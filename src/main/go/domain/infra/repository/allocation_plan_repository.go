@@ -26,9 +26,13 @@ const (
 		    pa.id AS planned_allocation_id,
 		    pa.hierarchical_id, 
 		    pa.cash_reserve, 
-		    pa.slice_size_percentage
+		    pa.slice_size_percentage,
+		    coalesce(ass.id, 0) AS "asset.id", 
+		    coalesce(ass.ticker, '') AS "asset.ticker", 
+		    coalesce(ass.name, '') AS "asset.name"
 		FROM planned_allocation pa 
 		JOIN allocation_plan ap ON pa.allocation_plan_id = ap.id
+		LEFT JOIN asset ass ON ass.id = pa.asset_id
 	` + rdbms.WhereClausePlaceholder + `
 		ORDER BY ap.create_timestamp DESC, pa.cash_reserve DESC, pa.slice_size_percentage DESC
 	`

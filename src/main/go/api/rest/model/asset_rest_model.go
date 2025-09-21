@@ -17,6 +17,11 @@ type AssetDTS struct {
 // ================================================
 
 func MapToAssetDTS(asset *domain.Asset) *AssetDTS {
+
+	if asset == nil {
+		return nil
+	}
+
 	return &AssetDTS{
 		Id:     asset.Id,
 		Name:   asset.Name,

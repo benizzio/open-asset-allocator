@@ -4,6 +4,7 @@ import (
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/domain/allocation"
 	"github.com/benizzio/open-asset-allocator/infra/sqlext"
+	"github.com/benizzio/open-asset-allocator/langext"
 	"github.com/shopspring/decimal"
 )
 
@@ -16,9 +17,12 @@ type plannedAllocationJoinedRowDTS struct {
 	HierarchicalId       sqlext.NullStringSlice
 	CashReserve          bool
 	SliceSizePercentage  decimal.Decimal
+	Asset                *domain.Asset
 }
 
 func mapPlannedAllocationRows(rows []plannedAllocationJoinedRowDTS) ([]*domain.AllocationPlan, error) {
+
+	langext.UnifyStructPointers(rows)
 
 	var allocationPlanCacheMap = make(map[int64]*domain.AllocationPlan)
 	var allocationPlans = make([]*domain.AllocationPlan, 0)
@@ -53,11 +57,18 @@ func mapPlannedAllocationRow(
 }
 
 func buildPlannedAllocationFromRow(rowDTS *plannedAllocationJoinedRowDTS) *domain.PlannedAllocation {
+
+	var asset *domain.Asset
+	if rowDTS.Asset != nil && !langext.IsZeroValue(rowDTS.Asset.Id) {
+		asset = rowDTS.Asset
+	}
+
 	return &domain.PlannedAllocation{
 		Id:                  rowDTS.PlannedAllocationId,
 		HierarchicalId:      rowDTS.HierarchicalId.ToStringSlice(),
 		CashReserve:         rowDTS.CashReserve,
 		SliceSizePercentage: rowDTS.SliceSizePercentage,
+		Asset:               asset,
 	}
 }
 

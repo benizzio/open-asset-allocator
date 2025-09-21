@@ -16,6 +16,7 @@ type PlannedAllocationDTS struct {
 	HierarchicalId      []*string       `json:"hierarchicalId,omitempty"`
 	CashReserve         bool            `json:"cashReserve"`
 	SliceSizePercentage decimal.Decimal `json:"sliceSizePercentage,omitempty"`
+	Asset               *AssetDTS       `json:"asset,omitempty"`
 }
 
 type AllocationPlanDTS struct {
@@ -64,10 +65,14 @@ func mapToPlannedAllocationDTSs(allocationPlan *domain.AllocationPlan) []Planned
 }
 
 func mapToPlannedAllocationDTS(allocation *domain.PlannedAllocation) PlannedAllocationDTS {
+
+	var assetDTS = MapToAssetDTS(allocation.Asset)
+
 	return PlannedAllocationDTS{
 		Id:                  allocation.Id,
 		HierarchicalId:      allocation.HierarchicalId,
 		CashReserve:         allocation.CashReserve,
 		SliceSizePercentage: allocation.SliceSizePercentage,
+		Asset:               assetDTS,
 	}
 }
