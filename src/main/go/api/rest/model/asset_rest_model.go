@@ -36,3 +36,24 @@ func MapToAssetDTSs(assets []*domain.Asset) []*AssetDTS {
 	}
 	return assetsDTS
 }
+
+func MapToAsset(assetDTS *AssetDTS) *domain.Asset {
+
+	if assetDTS == nil {
+		return nil
+	}
+
+	return &domain.Asset{
+		Id:     assetDTS.Id,
+		Name:   assetDTS.Name,
+		Ticker: assetDTS.Ticker,
+	}
+}
+
+func MapToAssets(assetsDTS []*AssetDTS) []*domain.Asset {
+	var assets = make([]*domain.Asset, len(assetsDTS))
+	for i, assetDTS := range assetsDTS {
+		assets[i] = MapToAsset(assetDTS)
+	}
+	return assets
+}

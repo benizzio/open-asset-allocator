@@ -126,6 +126,7 @@ func (controller *PortfolioAllocationRESTController) getAvailableHistoryObservat
 	context.JSON(http.StatusOK, availableTimestampsDTS)
 }
 
+// TODO make a unified version of this that get from portfolio AND from allocation plan
 func (controller *PortfolioAllocationRESTController) getAvailablePortfolioAllocationClasses(context *gin.Context) {
 
 	portfolioIdParamValue := context.Param(portfolioIdParam)

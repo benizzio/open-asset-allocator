@@ -51,6 +51,9 @@ func (app *App) completeConfig(config *infra.Configuration) {
 
 func (app *App) buildAppComponents() {
 
+	// =====================================================
+	// Domain
+	// =====================================================
 	var portfolioRepository = repository.BuildPortfolioRepository(app.databaseAdapter)
 	var portfolioAllocationRepository = repository.BuildPortfolioAllocationRepository(app.databaseAdapter)
 	var allocationPlanRepository = repository.BuildAllocationPlanRepository(app.databaseAdapter)
@@ -61,6 +64,9 @@ func (app *App) buildAppComponents() {
 	var allocationPlanDomService = service.BuildAllocationPlanDomService(allocationPlanRepository)
 	var assetDomService = service.BuildAssetDomService(assetRepository)
 
+	// =====================================================
+	// Application
+	// =====================================================
 	var portfolioDivergenceAnalysisAppService = application.BuildPortfolioDivergenceAnalysisAppService(
 		portfolioDomService,
 		portfolioAllocationDomService,
@@ -75,7 +81,15 @@ func (app *App) buildAppComponents() {
 		portfolioAllocationDomService,
 		assetDomService,
 	)
+	var allocationPlanManagementAppService = application.BuildAllocationPlanManagementAppService(
+		app.databaseAdapter,
+		allocationPlanDomService,
+		assetDomService,
+	)
 
+	// =====================================================
+	// API - REST
+	// =====================================================
 	var portfolioRESTController = rest.BuildPortfolioRESTController(portfolioDomService)
 	var portfolioAllocationRESTController = rest.BuildPortfolioAllocationRESTController(
 		portfolioAllocationDomService,
@@ -85,7 +99,10 @@ func (app *App) buildAppComponents() {
 		portfolioAnalysisConfigurationAppService,
 		portfolioDivergenceAnalysisAppService,
 	)
-	var allocationPlanRESTController = rest.BuildAllocationPlanRESTController(allocationPlanDomService)
+	var allocationPlanRESTController = rest.BuildAllocationPlanRESTController(
+		allocationPlanDomService,
+		allocationPlanManagementAppService,
+	)
 	var assetRESTController = rest.BuildAssetRESTController(assetDomService)
 
 	app.restControllers = []infra.GinServerRESTController{
