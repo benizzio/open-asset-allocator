@@ -210,6 +210,7 @@ func (repository *AllocationPlanRDBMSRepository) UpdateAllocationPlanInTransacti
 	return repository.mergePlannedAllocationsInTransaction(transactionalContext, int64(plan.Id), plan.Details)
 }
 
+// TODO clean
 func (repository *AllocationPlanRDBMSRepository) mergePlannedAllocationsInTransaction(
 	transContext *rdbms.SQLTransactionalContext,
 	allocationPlanId int64,

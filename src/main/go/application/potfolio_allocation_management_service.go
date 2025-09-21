@@ -83,25 +83,27 @@ func (service *PortfolioAllocationManagementAppService) persistNewAssets(
 	allocations []*domain.PortfolioAllocation,
 ) error {
 
-	assetsToInsertPerTicker := mapNewAssetsPerTicker(allocations)
+	assetsToInsertPerTicker := mapNewAssetsPerTickerFromPortfolioAllocations(allocations)
 
-	if len(assetsToInsertPerTicker) > 0 {
-
-		persistedAssetsPerTicker, err := service.assetDomService.InsertMappedAssetsInTransaction(
-			transContext,
-			assetsToInsertPerTicker,
-		)
-		if err != nil {
-			return err
-		}
-
-		replacePersistedAssetsOnAllocations(allocations, persistedAssetsPerTicker)
+	if len(assetsToInsertPerTicker) == 0 {
+		return nil
 	}
+
+	persistedAssetsPerTicker, err := service.assetDomService.InsertMappedAssetsInTransaction(
+		transContext,
+		assetsToInsertPerTicker,
+	)
+	if err != nil {
+		return err
+	}
+
+	replacePersistedAssetsOnPortfolioAllocations(allocations, persistedAssetsPerTicker)
+
 	return nil
 }
 
-func mapNewAssetsPerTicker(allocations []*domain.PortfolioAllocation) domain.AssetsPerTicker {
-	var assetsToInsertPerTicker = make(domain.AssetsPerTicker, len(allocations))
+func mapNewAssetsPerTickerFromPortfolioAllocations(allocations []*domain.PortfolioAllocation) domain.AssetsPerTicker {
+	var assetsToInsertPerTicker = make(domain.AssetsPerTicker)
 	for _, allocation := range allocations {
 		var asset = allocation.Asset
 		if langext.IsZeroValue(asset.Id) {
@@ -111,7 +113,7 @@ func mapNewAssetsPerTicker(allocations []*domain.PortfolioAllocation) domain.Ass
 	return assetsToInsertPerTicker
 }
 
-func replacePersistedAssetsOnAllocations(
+func replacePersistedAssetsOnPortfolioAllocations(
 	allocations []*domain.PortfolioAllocation,
 	persistedAssetsPerTicker domain.AssetsPerTicker,
 ) {

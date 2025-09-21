@@ -1,8 +1,11 @@
 package service
 
 import (
+	"context"
+
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/domain/allocation"
+	"github.com/benizzio/open-asset-allocator/langext"
 )
 
 type AllocationPlanDomService struct {
@@ -44,6 +47,22 @@ func (service *AllocationPlanDomService) GetPlannedAllocationsPerHyerarchicalIdM
 	}
 
 	return plannedAllocationMap, nil
+}
+
+func (service *AllocationPlanDomService) PersistAllocationPlanInTransaction(
+	transContext context.Context,
+	plan *domain.AllocationPlan,
+) error {
+
+	// TODO validate plan before persisting
+	// - unique hierarchical ids
+	// - sum of slice size percentages inside parent in hierarchy <= 100%
+
+	if langext.IsZeroValue(plan.Id) {
+		return service.allocationPlanRepository.InsertAllocationPlanInTransaction(transContext, plan)
+	} else {
+		return service.allocationPlanRepository.UpdateAllocationPlanInTransaction(transContext, plan)
+	}
 }
 
 func BuildAllocationPlanDomService(allocationPlanRepository domain.AllocationPlanRepository) *AllocationPlanDomService {
