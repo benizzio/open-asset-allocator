@@ -14,7 +14,7 @@ import (
 
 type PlannedAllocationDTS struct {
 	Id                  int64           `json:"id,omitempty"`
-	HierarchicalId      []*string       `json:"hierarchicalId,omitempty"`
+	HierarchicalId      []*string       `json:"hierarchicalId,omitempty" validate:"required"`
 	CashReserve         bool            `json:"cashReserve"`
 	SliceSizePercentage decimal.Decimal `json:"sliceSizePercentage,omitempty"`
 	Asset               *AssetDTS       `json:"asset,omitempty"`
@@ -22,10 +22,10 @@ type PlannedAllocationDTS struct {
 
 type AllocationPlanDTS struct {
 	Id                   int64                   `json:"id,omitempty"`
-	Name                 string                  `json:"name,omitempty"`
+	Name                 string                  `json:"name,omitempty" validate:"required"`
 	Type                 string                  `json:"type,omitempty"`
 	PlannedExecutionDate *time.Time              `json:"plannedExecutionDate,omitempty"`
-	Details              []*PlannedAllocationDTS `json:"details,omitempty"`
+	Details              []*PlannedAllocationDTS `json:"details,omitempty" validate:"required,min=1"`
 }
 
 // ================================================
@@ -76,16 +76,21 @@ func mapToPlannedAllocationDTS(allocation *domain.PlannedAllocation) *PlannedAll
 	}
 }
 
-func MapToAllocationPlan(allocationPlanDTS *AllocationPlanDTS) (*domain.AllocationPlan, error) {
+func MapToAllocationPlan(
+	allocationPlanDTS *AllocationPlanDTS,
+	portfolioId int64,
+	planType allocation.PlanType,
+) (*domain.AllocationPlan, error) {
 
 	if allocationPlanDTS == nil {
 		return nil, nil
 	}
 
 	var allocations = mapToPlannedAllocations(allocationPlanDTS.Details)
-	planType, err := allocation.GetPlanType(allocationPlanDTS.Type)
-	if err != nil {
-		return nil, err
+
+	var plannedExecutionDate *time.Time
+	if planType == allocation.BalancingExecutionPlan {
+		plannedExecutionDate = allocationPlanDTS.PlannedExecutionDate
 	}
 
 	return &domain.AllocationPlan{
@@ -93,8 +98,9 @@ func MapToAllocationPlan(allocationPlanDTS *AllocationPlanDTS) (*domain.Allocati
 			Id:   allocationPlanDTS.Id,
 			Name: allocationPlanDTS.Name,
 		},
+		PortfolioId:          portfolioId,
 		PlanType:             planType,
-		PlannedExecutionDate: allocationPlanDTS.PlannedExecutionDate,
+		PlannedExecutionDate: plannedExecutionDate,
 		Details:              allocations,
 	}, nil
 }

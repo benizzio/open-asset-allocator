@@ -153,11 +153,7 @@ func (controller *PortfolioAllocationRESTController) postPortfolioAllocationHist
 
 	var portfolioSnapshotDTS model.PortfolioSnapshotDTS
 	valid, err := util.BindAndValidateJSONWithInvalidResponse(context, &portfolioSnapshotDTS)
-	if err != nil {
-		infra.HandleAPIError(context, bindPortfolioSnapshotErrorMessage, err)
-		return
-	}
-	if !valid {
+	if infra.HandleAPIError(context, bindPortfolioSnapshotErrorMessage, err) || !valid {
 		return
 	}
 

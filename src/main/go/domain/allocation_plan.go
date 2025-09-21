@@ -35,7 +35,7 @@ type AllocationPlan struct {
 	AllocationPlanIdentifier
 	PlanType             allocation.PlanType
 	PlannedExecutionDate *time.Time
-	PortfolioId          int
+	PortfolioId          int64
 	Details              []*PlannedAllocation
 }
 
