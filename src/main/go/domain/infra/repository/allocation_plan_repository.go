@@ -278,15 +278,12 @@ func (repository *AllocationPlanRDBMSRepository) mergePlannedAllocationsInTransa
 		plannedAllocationMergeSQL,
 		allocationPlanId,
 	)
-	if err != nil {
-		return infra.PropagateAsAppErrorWithNewMessage(
-			err,
-			"Error merging planned allocations",
-			repository,
-		)
-	}
 
-	return nil
+	return infra.PropagateAsAppErrorWithNewMessage(
+		err,
+		"Error merging planned allocations",
+		repository,
+	)
 }
 
 func BuildAllocationPlanRepository(dbAdapter rdbms.RepositoryRDBMSAdapter) *AllocationPlanRDBMSRepository {

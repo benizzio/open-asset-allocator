@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"context"
 	"time"
 
 	"github.com/benizzio/open-asset-allocator/domain/allocation"
@@ -45,5 +46,10 @@ func (allocationPlan *AllocationPlan) AddDetail(detail *PlannedAllocation) {
 type AllocationPlanRepository interface {
 	GetAllAllocationPlans(portfolioId int64, planType *allocation.PlanType) ([]*AllocationPlan, error)
 	GetAllocationPlan(id int64) (*AllocationPlan, error)
-	GetAllAllocationPlanIdentifiers(portfolioId int64, planType *allocation.PlanType) ([]*AllocationPlanIdentifier, error)
+	GetAllAllocationPlanIdentifiers(
+		portfolioId int64,
+		planType *allocation.PlanType,
+	) ([]*AllocationPlanIdentifier, error)
+	InsertAllocationPlanInTransaction(transContext context.Context, plan *AllocationPlan) error
+	UpdateAllocationPlanInTransaction(transContext context.Context, plan *AllocationPlan) error
 }
