@@ -12,7 +12,7 @@ FROM read_csv(
         format('{}/*-us-complete-portfolio-summary-v2.csv', getenv('INTERNAL_DUCKDB_INPUT_PATH')),
         columns = {
             'asset': 'TEXT',
-            'total_shares': 'SMALLINT',
+            'total_shares': 'BIGINT',
             'current_price': 'TEXT',
             'current_value': 'NUMERIC(18,8)',
             'total_bought': 'NUMERIC(18,8)',
