@@ -1,3 +1,5 @@
+-- DISCONTINUED: should be replaced by direct API ingestion from Ghostfolio
+
 .bail on
 .changes on
 

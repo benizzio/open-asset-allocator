@@ -157,6 +157,8 @@ assessing portfolio vs. plan situation through time, helping re-balancing decisi
 - [ ] Data ingestion improvements:
     - [ ] equivalent tickers field for assets
     - [ ] UI to call ingestion
+    - [ ] Ghostfolio ingestion:
+        - [ ] direct integration from API (holdings call)
 
 #### Alpha - Phase 2
 
