@@ -154,6 +154,11 @@ assessing portfolio vs. plan situation through time, helping re-balancing decisi
 - [ ] UI improvements:
     - [ ] Color configuration per hierarchy level record for visual consistency (apply to charts and tables)
     - [ ] Change accordion header font to differentiate from content
+- [ ] Data ingestion improvements:
+    - [ ] equivalent tickers field for assets
+    - [ ] UI to call ingestion
+    - [ ] Ghostfolio ingestion:
+        - [ ] direct integration from API (holdings call)
 
 #### Alpha - Phase 2
 
