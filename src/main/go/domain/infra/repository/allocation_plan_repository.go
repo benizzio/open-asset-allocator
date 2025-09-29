@@ -66,8 +66,8 @@ const (
 			)
 		WHEN MATCHED THEN
 			UPDATE SET 
-				pa.cash_reserve = temp.cash_reserve,
-				pa.slice_size_percentage = temp.slice_size_percentage,
+				cash_reserve = temp.cash_reserve,
+				slice_size_percentage = temp.slice_size_percentage
 		WHEN NOT MATCHED BY SOURCE AND pa.allocation_plan_id = $1 THEN
 			DELETE
 	`
@@ -161,27 +161,15 @@ func (repository *AllocationPlanRDBMSRepository) InsertAllocationPlanInTransacti
 		)
 	}
 
-	result, err := repository.dbAdapter.ExecuteInTransaction(
-		transactionalContext,
-		allocationPlanInsertSQL,
-		plan.PortfolioId,
-		plan.Name,
-		plan.PlanType.String(),
-	)
+	id, err := rdbms.BuildQueryInTransaction[int64](transactionalContext, allocationPlanInsertSQL).
+		AddParams(plan.PortfolioId, plan.Name, plan.PlanType.String()).
+		Build().
+		Get(rdbms.ReturningIntIdSingleRowScanner)
 	if err != nil {
 		return infra.PropagateAsAppErrorWithNewMessage(err, "Error inserting allocation plan", repository)
 	}
 
-	planId, err := result.LastInsertId()
-	if err != nil {
-		return infra.PropagateAsAppErrorWithNewMessage(
-			err,
-			"Error getting last insert id for allocation plan",
-			repository,
-		)
-	}
-
-	return repository.mergePlannedAllocationsInTransaction(transactionalContext, planId, plan.Details)
+	return repository.mergePlannedAllocationsInTransaction(transactionalContext, id, plan.Details)
 }
 
 func (repository *AllocationPlanRDBMSRepository) UpdateAllocationPlanInTransaction(

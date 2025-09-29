@@ -1,9 +1,12 @@
 package domain
 
 import (
+	"database/sql"
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
+
+	"github.com/lib/pq"
 )
 
 const HierarchicalIdLevelSeparator = "|"
@@ -49,6 +52,8 @@ func (allocationStructure AllocationStructure) Value() (driver.Value, error) {
 
 type HierarchicalId []*string
 
+// String returns the hierarchical identifier as a single string using
+// HierarchicalIdLevelSeparator between non-nil levels.
 func (hierarchicalId HierarchicalId) String() string {
 	var result = ""
 	for index, level := range hierarchicalId {
@@ -60,4 +65,36 @@ func (hierarchicalId HierarchicalId) String() string {
 		}
 	}
 	return result
+}
+
+// Value implements driver.Valuer so HierarchicalId can be used directly as a
+// SQL parameter with database/sql and github.com/lib/pq. It encodes the
+// hierarchical levels as a PostgreSQL text[] array, preserving NULLs for any
+// nil entries.
+//
+// Usage:
+//
+//	// given: var id domain.HierarchicalId
+//	_, err := db.Exec("INSERT INTO table(col) VALUES($1)", id)
+//	// pq will receive a proper text[] representation
+//
+// Notes:
+//   - Each non-nil level becomes a valid array element.
+//   - Nil levels are encoded as SQL NULL within the array.
+//   - Escaping and formatting is delegated to pq.Array to ensure correctness.
+//
+// Authored by: GitHub Copilot
+func (hierarchicalId HierarchicalId) Value() (driver.Value, error) {
+	// Map []*string -> []sql.NullString to preserve NULLs.
+	var arr = make([]sql.NullString, len(hierarchicalId))
+	for i, ptr := range hierarchicalId {
+		if ptr == nil {
+			arr[i] = sql.NullString{String: "", Valid: false}
+		} else {
+			arr[i] = sql.NullString{String: *ptr, Valid: true}
+		}
+	}
+
+	// Delegate array formatting to pq to ensure proper escaping/quoting.
+	return pq.Array(arr).Value()
 }
