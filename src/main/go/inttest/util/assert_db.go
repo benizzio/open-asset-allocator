@@ -80,7 +80,7 @@ func executeQueryForMultipleRows(t *testing.T, query string) []dbx.NullStringMap
 // Authored by: GitHub Copilot
 func validateRowCount(t *testing.T, expected []AssertableNullStringMap, actual []dbx.NullStringMap) {
 	if len(actual) != len(expected) {
-		t.Fatalf("Expected %d rows, but got %d rows", len(expected), len(actual))
+		t.Fatalf("Expected %d rows, but got %d rows. \nActual data was %v", len(expected), len(actual), actual)
 	}
 }
 

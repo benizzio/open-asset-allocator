@@ -5,16 +5,15 @@ import (
 	"io"
 	"path/filepath"
 	"strings"
+	"testing"
 	"time"
 
 	"github.com/benizzio/open-asset-allocator/infra"
-	"github.com/benizzio/open-asset-allocator/infra/util"
 	"github.com/benizzio/open-asset-allocator/root"
 	"github.com/docker/docker/api/types/container"
 	dbx "github.com/go-ozzo/ozzo-dbx"
 	"github.com/golang/glog"
 	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
@@ -36,6 +35,7 @@ const (
 var (
 	PostgresqlConnectionString string
 	DatabaseConnection         *dbx.DB
+	postgresLogFan             = newLogFanOutConsumer(5000)
 )
 
 func SetupTestInfra(ctx context.Context) int {
@@ -67,52 +67,6 @@ func SetupTestInfra(ctx context.Context) int {
 	}
 
 	return 0
-}
-
-func buildAndRunPostgresqlTestcontainer(ctx context.Context) (string, error) {
-
-	glog.Info("Starting PostgreSQL testcontainer...")
-	postgresContainer, err := postgres.Run(
-		ctx, PostgresqlImage,
-		postgres.WithDatabase(PostgresqlDatabaseName),
-		postgres.WithUsername(PostgresqlUsername),
-		postgres.WithPassword(PostgresqlPassword),
-		testcontainers.WithWaitStrategy(
-			wait.ForLog("database system is ready to accept connections").
-				WithOccurrence(2).
-				WithStartupTimeout(5*time.Second),
-		),
-	)
-
-	var deferRegistry = ctx.Value(DeferRegistryKey).(*util.DeferRegistry)
-	var terminateContainerDefer = func() {
-		if err := testcontainers.TerminateContainer(postgresContainer); err != nil {
-			glog.Errorf("failed to terminate container: %s", err)
-		}
-	}
-	deferRegistry.RegisterDefer(terminateContainerDefer)
-
-	if err != nil {
-		glog.Errorf("failed to start container: %s", err)
-		return "", err
-	}
-
-	connectionString, err := postgresContainer.ConnectionString(ctx)
-	if err != nil {
-		glog.Errorf("failed to obtain connection string: %s", err)
-		return "", err
-	}
-
-	glog.Info("PostgreSQL testcontainer initialized with no errors as ", connectionString)
-
-	state, err := postgresContainer.State(ctx)
-	if err != nil {
-		glog.Errorf("failed to get container state: %s", err)
-		return "", err
-	}
-	glog.Infof("PostgreSQL container state is '%s'", state.Status)
-
-	return connectionString, nil
 }
 
 func runFlywayTestcontainer(ctx context.Context) error {
@@ -207,30 +161,6 @@ func runFlywayTestcontainer(ctx context.Context) error {
 	return nil
 }
 
-func buildDatabaseConnection(ctx context.Context) error {
-
-	var err error
-	DatabaseConnection, err = dbx.Open(
-		DBDriverName,
-		PostgresqlConnectionString+PostgresqlConnectionStringParameters,
-	)
-	if err != nil {
-		glog.Errorf("Error opening DB connection: %s", err)
-		return err
-	}
-
-	var deferRegistry = ctx.Value(DeferRegistryKey).(*util.DeferRegistry)
-	var closeDBConnectionDefer = func() {
-		err := DatabaseConnection.Close()
-		if err != nil {
-			glog.Errorf("Error closing DB connection: %s", err)
-		}
-	}
-	deferRegistry.RegisterDefer(closeDBConnectionDefer)
-
-	return nil
-}
-
 func BuildAndStartApplication() root.App {
 
 	// set up application test server
@@ -297,4 +227,33 @@ func FetchWithDBQuery(sql string, rowMappingFunction func(rows *dbx.Rows) error)
 	}
 
 	return nil
+}
+
+// AttachDatabaseLogsTo attaches a live log consumer so DB logs are printed
+// to the provided testing.TB (t.Logf) as they are written by the container.
+// It also dumps the buffered history immediately so the test has context.
+// A cleanup hook is registered (when available) to auto-detach after the test.
+//
+// Useful to debug test failures that might be related to DB issues.
+//
+// Usage:
+//
+//	inttestinfra.AttachDatabaseLogsTo(t)
+//
+// Authored by: GitHub Copilot
+func AttachDatabaseLogsTo(t testing.TB) {
+
+	t.Helper()
+
+	// Dump current buffer for context
+	postgresLogFan.DumpTo(t)
+
+	// Attach real-time sink
+	sinkID := postgresLogFan.Attach(t)
+
+	// Auto-detach when the test supports Cleanup
+	type cleaner interface{ Cleanup(func()) }
+	if c, ok := any(t).(cleaner); ok {
+		c.Cleanup(func() { postgresLogFan.Detach(sinkID) })
+	}
 }

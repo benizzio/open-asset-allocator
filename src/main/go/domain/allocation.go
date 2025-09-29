@@ -1,12 +1,11 @@
 package domain
 
 import (
-	"database/sql"
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
 
-	"github.com/lib/pq"
+	"github.com/benizzio/open-asset-allocator/infra/sqlext"
 )
 
 const HierarchicalIdLevelSeparator = "|"
@@ -72,29 +71,7 @@ func (hierarchicalId HierarchicalId) String() string {
 // hierarchical levels as a PostgreSQL text[] array, preserving NULLs for any
 // nil entries.
 //
-// Usage:
-//
-//	// given: var id domain.HierarchicalId
-//	_, err := db.Exec("INSERT INTO table(col) VALUES($1)", id)
-//	// pq will receive a proper text[] representation
-//
-// Notes:
-//   - Each non-nil level becomes a valid array element.
-//   - Nil levels are encoded as SQL NULL within the array.
-//   - Escaping and formatting is delegated to pq.Array to ensure correctness.
-//
-// Authored by: GitHub Copilot
+// Co-authored by: GitHub Copilot
 func (hierarchicalId HierarchicalId) Value() (driver.Value, error) {
-	// Map []*string -> []sql.NullString to preserve NULLs.
-	var arr = make([]sql.NullString, len(hierarchicalId))
-	for i, ptr := range hierarchicalId {
-		if ptr == nil {
-			arr[i] = sql.NullString{String: "", Valid: false}
-		} else {
-			arr[i] = sql.NullString{String: *ptr, Valid: true}
-		}
-	}
-
-	// Delegate array formatting to pq to ensure proper escaping/quoting.
-	return pq.Array(arr).Value()
+	return sqlext.BuildNullStringSlice(hierarchicalId).Value()
 }
