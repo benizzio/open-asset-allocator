@@ -374,14 +374,14 @@ func TestPostAllocationPlanForUpdate_DoesNotOverwriteExistingAssetName(t *testin
 					"id": %s,
 					"hierarchicalId":["ARCA:BIL","BONDS"],
 					"cashReserve":false,
-					"sliceSizePercentage":"0.3",
+					"sliceSizePercentage":"0.9",
 					"asset":{ "id":1, "name":"SHOULD NOT OVERWRITE", "ticker":"ARCA:BIL" }
 				},
 				{
 					"id": %s,
 					"hierarchicalId":["ARCA:SPY","STOCKS"],
 					"cashReserve":false,
-					"sliceSizePercentage":"0.6",
+					"sliceSizePercentage":"1.0",
 					"asset":{ "id":7, "name":"SPDR S&P 500 ETF Trust", "ticker":"ARCA:SPY" }
 				},
 				{
@@ -455,14 +455,14 @@ func TestPostAllocationPlanForUpdate_DoesNotOverwriteExistingAssetName(t *testin
 		[]inttestutil.AssertableNullStringMap{
 			{
 				"hierarchical_id":       inttestutil.ToAssertableNullString("{ARCA:BIL,BONDS}"),
-				"slice_size_percentage": inttestutil.ToAssertableNullString("0.30000"),
+				"slice_size_percentage": inttestutil.ToAssertableNullString("0.90000"),
 				"asset_id":              inttestutil.ToAssertableNullString("1"),
 				"cash_reserve":          inttestutil.ToAssertableNullString("false"),
 				"total_market_value":    inttestutil.NullAssertableNullString(),
 			},
 			{
 				"hierarchical_id":       inttestutil.ToAssertableNullString("{ARCA:SPY,STOCKS}"),
-				"slice_size_percentage": inttestutil.ToAssertableNullString("0.60000"),
+				"slice_size_percentage": inttestutil.ToAssertableNullString("1.00000"),
 				"asset_id":              inttestutil.ToAssertableNullString("7"),
 				"cash_reserve":          inttestutil.ToAssertableNullString("false"),
 				"total_market_value":    inttestutil.NullAssertableNullString(),
@@ -494,8 +494,139 @@ func TestPostAllocationPlanForUpdate_DoesNotOverwriteExistingAssetName(t *testin
 	)
 }
 
-// TODO test updating an allocation plan with deletion of planned allocations
-// for this test, create a specific allocation plan in the initial db script with planned allocations
+// TestPostAllocationPlanForUpdate_DeletesPlannedAllocationAndKeepsAsset updates the pre-seeded
+// plan and omits a previously existing planned allocation (ARCA:SPY under STOCKS), which triggers
+// a deletion via the MERGE operation. It asserts the row was deleted and verifies the related
+// asset still exists with the same data. The deleted row is reinserted in a cleanup hook.
+//
+// Authored by: GitHub Copilot
+func TestPostAllocationPlanForUpdate_DeletesPlannedAllocationAndKeepsAsset(t *testing.T) {
+
+	// 1) Fetch the pre-seeded plan id
+	var fetchPlanSQL = `
+		SELECT ap.id, ap.name
+		FROM allocation_plan ap
+		WHERE ap.portfolio_id = 2 AND ap.name = 'Update Allocation Plan Fixture'
+	`
+	var allocationPlanIdString string
+	inttestutil.AssertDBWithQueryMultipleRows(
+		t,
+		fetchPlanSQL,
+		[]inttestutil.AssertableNullStringMap{
+			{
+				"id":   inttestutil.NotNullValueCapturingAssertableNullString(&allocationPlanIdString),
+				"name": inttestutil.ToAssertableNullString("Update Allocation Plan Fixture"),
+			},
+		},
+	)
+
+	// 2) Fetch planned allocation ids for this plan so update can match existing rows
+	var idBil, idSpy, idBondsTop, idStocksTop string
+	var fetchPlannedAllocationsSQL = `
+		SELECT pa.id, pa.hierarchical_id
+		FROM planned_allocation pa
+		WHERE pa.allocation_plan_id = ` + allocationPlanIdString + `
+		ORDER BY pa.hierarchical_id
+	`
+	inttestutil.AssertDBWithQueryMultipleRows(
+		t,
+		fetchPlannedAllocationsSQL,
+		[]inttestutil.AssertableNullStringMap{
+			{
+				"id":              inttestutil.NotNullValueCapturingAssertableNullString(&idBil),
+				"hierarchical_id": inttestutil.ToAssertableNullString("{ARCA:BIL,BONDS}"),
+			},
+			{
+				"id":              inttestutil.NotNullValueCapturingAssertableNullString(&idSpy),
+				"hierarchical_id": inttestutil.ToAssertableNullString("{ARCA:SPY,STOCKS}"),
+			},
+			{
+				"id":              inttestutil.NotNullValueCapturingAssertableNullString(&idBondsTop),
+				"hierarchical_id": inttestutil.ToAssertableNullString("{NULL,BONDS}"),
+			},
+			{
+				"id":              inttestutil.NotNullValueCapturingAssertableNullString(&idStocksTop),
+				"hierarchical_id": inttestutil.ToAssertableNullString("{NULL,STOCKS}"),
+			},
+		},
+	)
+
+	// Cleanup: reinsert the deleted planned allocation for ARCA:SPY and keep fixture stable
+	t.Cleanup(
+		inttestutil.BuildCleanupFunctionBuilder().
+			AddCleanupQuery(
+				`INSERT INTO planned_allocation (id, allocation_plan_id, hierarchical_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
+				 VALUES (33, 6, '{"ARCA:SPY", "STOCKS"}', 7, FALSE, 0.5, NULL) ON CONFLICT (id) DO NOTHING`,
+			).
+			Build(),
+	)
+
+	// 3) Update the plan omitting ARCA:SPY planned allocation to trigger deletion
+	var updatePlanJSON = fmt.Sprintf(
+		`{
+			"id": %s,
+			"name":"Update Allocation Plan Fixture",
+			"details":[
+				{ "id": %s, "hierarchicalId":[null,"BONDS"],  "sliceSizePercentage":"0.5" },
+				{ "id": %s, "hierarchicalId":[null,"STOCKS"], "sliceSizePercentage":"0.5" },
+				{ "id": %s, "hierarchicalId":["ARCA:BIL","BONDS"], "sliceSizePercentage":"1.0", "cashReserve":false }
+			]
+		}`,
+		allocationPlanIdString, idBondsTop, idStocksTop, idBil,
+	)
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLPrefix+"/portfolio/2/allocation-plan",
+		"application/json",
+		strings.NewReader(updatePlanJSON),
+	)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusNoContent, response.StatusCode)
+
+	// 4) Assert planned allocations no longer contain ARCA:SPY row and
+	//    that the remaining planned allocations keep the same asset_id values
+	//    as in the initial fixture (BIL=1, top-level rows have NULL).
+	var plannedAllocationsAssertSQL = `
+		SELECT pa.hierarchical_id, pa.asset_id
+		FROM planned_allocation pa
+		WHERE pa.allocation_plan_id = ` + allocationPlanIdString + `
+		ORDER BY pa.hierarchical_id
+	`
+	inttestutil.AssertDBWithQueryMultipleRows(
+		t,
+		plannedAllocationsAssertSQL,
+		[]inttestutil.AssertableNullStringMap{
+			{
+				"hierarchical_id": inttestutil.ToAssertableNullString("{ARCA:BIL,BONDS}"),
+				"asset_id":        inttestutil.ToAssertableNullString("1"),
+			},
+			{
+				"hierarchical_id": inttestutil.ToAssertableNullString("{NULL,BONDS}"),
+				"asset_id":        inttestutil.NullAssertableNullString(),
+			},
+			{
+				"hierarchical_id": inttestutil.ToAssertableNullString("{NULL,STOCKS}"),
+				"asset_id":        inttestutil.NullAssertableNullString(),
+			},
+		},
+	)
+
+	// 5) Assert SPY asset still exists unchanged
+	var assetAssertSQL = `
+		SELECT a.id, a.ticker, a.name FROM asset a WHERE a.id = 7
+	`
+	inttestutil.AssertDBWithQueryMultipleRows(
+		t,
+		assetAssertSQL,
+		[]inttestutil.AssertableNullStringMap{
+			{
+				"id":     inttestutil.ToAssertableNullString("7"),
+				"ticker": inttestutil.ToAssertableNullString("ARCA:SPY"),
+				"name":   inttestutil.ToAssertableNullString("SPDR S&P 500 ETF Trust"),
+			},
+		},
+	)
+}
 
 // TODO test validation: simple controller validations (required fields, string lengths, etc.)
 
