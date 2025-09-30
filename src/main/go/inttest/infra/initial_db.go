@@ -442,6 +442,32 @@ const initialStateSQL = `
 
 	-- ###################################################################
 	-- *******************************************************************
+	-- UPDATE ALLOCATION PLAN TEST FIXTURE (portfolio 2)
+	-- *******************************************************************
+	-- ###################################################################
+
+	-- Pre-seeded allocation plan specifically for update tests
+	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, portfolio_id)
+	VALUES (6, 'Update Allocation Plan Fixture', 'ALLOCATION_PLAN', NULL, 2)
+	;
+
+	-- Top-level categories
+	INSERT INTO planned_allocation (id, allocation_plan_id, hierarchical_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
+	VALUES
+		(30, 6, '{NULL, "BONDS"}', NULL, FALSE, 0.5, NULL),
+		(31, 6, '{NULL, "STOCKS"}', NULL, FALSE, 0.5, NULL)
+	;
+
+	-- Children
+	INSERT INTO planned_allocation (id, allocation_plan_id, hierarchical_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
+	VALUES
+		(32, 6, '{"ARCA:BIL", "BONDS"}', 1, FALSE, 0.5, NULL),
+		(33, 6, '{"ARCA:SPY", "STOCKS"}', 7, FALSE, 0.5, NULL)
+	;
+
+
+	-- ###################################################################
+	-- *******************************************************************
 	-- SEQUENCE RESETS AFTER MANUAL ID INSERTIONS
 	-- *******************************************************************
 	-- ###################################################################
