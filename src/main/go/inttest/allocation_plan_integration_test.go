@@ -628,7 +628,123 @@ func TestPostAllocationPlanForUpdate_DeletesPlannedAllocationAndKeepsAsset(t *te
 	)
 }
 
-// TODO test validation: simple controller validations (required fields, string lengths, etc.)
+// Test validation: missing required field 'name'
+// Expects 400 with message "Field 'name' failed validation: is required"
+//
+// Authored by: GitHub Copilot
+func TestPostAllocationPlanValidation_MissingName(t *testing.T) {
+
+	var payload = `{
+		"details": [
+			{ "hierarchicalId": [null, "BONDS"], "sliceSizePercentage": "1.0" }
+		]
+	}`
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLPrefix+"/portfolio/1/allocation-plan",
+		"application/json",
+		strings.NewReader(payload),
+	)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+
+	var expected = `{
+		"errorMessage": "Validation failed",
+		"details": ["Field 'name' failed validation: is required"]
+	}`
+	assert.JSONEq(t, expected, string(body))
+}
+
+// Test validation: missing required field 'details'
+// Expects 400 with message "Field 'details' failed validation: is required"
+//
+// Authored by: GitHub Copilot
+func TestPostAllocationPlanValidation_MissingDetails(t *testing.T) {
+
+	var payload = `{
+		"name": "Plan without details"
+	}`
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLPrefix+"/portfolio/1/allocation-plan",
+		"application/json",
+		strings.NewReader(payload),
+	)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+
+	var expected = `{
+		"errorMessage": "Validation failed",
+		"details": ["Field 'details' failed validation: is required"]
+	}`
+	assert.JSONEq(t, expected, string(body))
+}
+
+// Test validation: empty 'details' array (min length violation)
+// Expects 400 with message "Field 'details' failed validation: must be at least 1"
+//
+// Authored by: GitHub Copilot
+func TestPostAllocationPlanValidation_EmptyDetails(t *testing.T) {
+
+	var payload = `{
+		"name": "Plan with empty details",
+		"details": []
+	}`
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLPrefix+"/portfolio/1/allocation-plan",
+		"application/json",
+		strings.NewReader(payload),
+	)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+
+	var expected = `{
+		"errorMessage": "Validation failed",
+		"details": ["Field 'details' failed validation: must be at least 1"]
+	}`
+	assert.JSONEq(t, expected, string(body))
+}
+
+// Test validation: missing required field 'hierarchicalId' in a planned allocation
+// Expects 400 with message "Field 'details[0].hierarchicalId' failed validation: is required"
+//
+// Authored by: GitHub Copilot
+func TestPostAllocationPlanValidation_MissingHierarchicalId(t *testing.T) {
+
+	var payload = `{
+		"name": "Plan with invalid detail",
+		"details": [
+			{ "sliceSizePercentage": "1.0" }
+		]
+	}`
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLPrefix+"/portfolio/1/allocation-plan",
+		"application/json",
+		strings.NewReader(payload),
+	)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+
+	var expected = `{
+		"errorMessage": "Validation failed",
+		"details": ["Field 'details[0].hierarchicalId' failed validation: is required"]
+	}`
+	assert.JSONEq(t, expected, string(body))
+}
 
 // TODO test validation: domain unique hierarchical ids
 
