@@ -57,6 +57,7 @@ func (service *AllocationPlanDomService) PersistAllocationPlanInTransaction(
 	// TODO validate plan before persisting
 	// - unique hierarchical ids
 	// - sum of slice size percentages inside parent in hierarchy <= 100%
+	// - hierarchy matches portfolio hierarchy
 
 	if langext.IsZeroValue(plan.Id) {
 		return service.allocationPlanRepository.InsertAllocationPlanInTransaction(transContext, plan)

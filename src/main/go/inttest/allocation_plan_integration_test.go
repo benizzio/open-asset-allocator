@@ -494,12 +494,13 @@ func TestPostAllocationPlanForUpdate_DoesNotOverwriteExistingAssetName(t *testin
 	)
 }
 
-// TestPostAllocationPlanForUpdate_DeletesPlannedAllocationAndKeepsAsset updates the pre-seeded
-// plan and omits a previously existing planned allocation (ARCA:SPY under STOCKS), which triggers
-// a deletion via the MERGE operation. It asserts the row was deleted and verifies the related
-// asset still exists with the same data. The deleted row is reinserted in a cleanup hook.
+// TestPostAllocationPlanForUpdate_DoesNotOverwriteExistingAssetName updates a pre-seeded plan
+// and asserts an existing asset name is not overwritten, slice sizes are updated, and a new
+// planned allocation is inserted as part of the update operation. It also updates the plan name
+// and verifies the rename works, then cleans up to restore the original fixture state.
+// Uses fixture: portfolio 2, plan name 'Update Allocation Plan Fixture'.
 //
-// Authored by: GitHub Copilot
+// Co-authored by: GitHub Copilot
 func TestPostAllocationPlanForUpdate_DeletesPlannedAllocationAndKeepsAsset(t *testing.T) {
 
 	// 1) Fetch the pre-seeded plan id
@@ -746,6 +747,130 @@ func TestPostAllocationPlanValidation_MissingHierarchicalId(t *testing.T) {
 	assert.JSONEq(t, expected, string(body))
 }
 
-// TODO test validation: domain unique hierarchical ids
+// Test validation (domain): duplicate hierarchical ids within the same plan should be rejected.
+// Currently NOT implemented, so this test is expected to FAIL (receives 204/500 instead of 400).
+// Establishes desired error response contract for future implementation: a non-field-specific message
+// listing the duplicated hierarchical IDs found in the request.
+//
+// Co-authored by: GitHub Copilot
+func TestPostAllocationPlanValidation_DuplicateHierarchicalIds(t *testing.T) {
 
-// TODO test validation: domain sum of slice size percentages inside parent (or top level) in hierarchy <= 100%
+	// Top-level sums: 0.5 BONDS + 0.5 STOCKS = 1.0
+	// BONDS children: BIL 0.5 + BIL (duplicate) 0.5 = 1.0
+	// STOCKS children: SPY 1.0
+	var updatePlanJSON = `
+		{
+			"id":6,
+			"name":"Update Allocation Plan Fixture",
+			"details":[
+				{ "id": 30, "hierarchicalId":[null,"BONDS"],  "sliceSizePercentage":"0.5" },
+				{ "id": 31, "hierarchicalId":[null,"STOCKS"], "sliceSizePercentage":"0.5" },
+				{ "id": 32, "hierarchicalId":["ARCA:BIL","BONDS"], "sliceSizePercentage":"0.5", "cashReserve":false },
+				{ "id": 33, "hierarchicalId":["ARCA:SPY","STOCKS"], "sliceSizePercentage":"1.0", "cashReserve":false },
+				{ "hierarchicalId":["ARCA:BIL","BONDS"], "sliceSizePercentage":"0.5", "cashReserve":false }
+			]
+		}`
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLPrefix+"/portfolio/2/allocation-plan",
+		"application/json",
+		strings.NewReader(updatePlanJSON),
+	)
+	assert.NoError(t, err)
+
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+
+	var expected = `{
+		"errorMessage": "Validation failed",
+		"details": ["Planned allocations contain duplicated hierarchical IDs: {ARCA:BIL,BONDS}"]
+	}`
+	assert.JSONEq(t, expected, string(body))
+}
+
+// Test validation (domain): child slice sizes within a parent must not exceed 100%.
+// Currently NOT implemented, so this test is expected to FAIL (receives 204 instead of 400).
+// Establishes desired error response contract: non-field-specific message listing the offending hierarchy level(s).
+//
+// Co-authored by: GitHub Copilot
+func TestPostAllocationPlanValidation_PercentageSumExceedsParentLimit(t *testing.T) {
+
+	var updatePlanJSON = `
+		{
+            "id":6,
+            "name":"Update Allocation Plan Fixture",
+            "details":[
+                { "id": 30, "hierarchicalId":[null,"BONDS"],  "sliceSizePercentage":"0.5" },
+                { "id": 31, "hierarchicalId":[null,"STOCKS"], "sliceSizePercentage":"0.5" },
+                { "id": 32, "hierarchicalId":["ARCA:BIL","BONDS"], "sliceSizePercentage":"0.7", "cashReserve":false },
+                { "id": 33, "hierarchicalId":["ARCA:SPY","STOCKS"], "sliceSizePercentage":"1.0", "cashReserve":false },
+                { 
+					"hierarchicalId":["NasdaqGM:TLT","BONDS"], 
+					"sliceSizePercentage":"0.5", 
+					"cashReserve":false, 
+					"asset": {"id": 4, "ticker": "NasdaqGM:TLT", "name": "iShares 20+ Year Treasury Bond ETF"} 
+				}
+            ]
+        }
+	`
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLPrefix+"/portfolio/2/allocation-plan",
+		"application/json",
+		strings.NewReader(updatePlanJSON),
+	)
+	assert.NoError(t, err)
+
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+
+	var expected = `{
+        "errorMessage": "Validation failed",
+        "details": ["Planned allocations slice sizes exceed 100% within hierarchy level(s): BONDS"]
+    }`
+	assert.JSONEq(t, expected, string(body))
+}
+
+// Test validation (domain): top-level slice sizes must not exceed 100%.
+// Currently NOT implemented, so this test is expected to FAIL (receives 204 instead of 400).
+// Establishes desired error response contract: non-field-specific message for top-level overflow.
+//
+// Co-authored by: GitHub Copilot
+func TestPostAllocationPlanValidation_TopLevelPercentageSumExceedsLimit(t *testing.T) {
+
+	// Keep children within 1.0 to isolate the top-level violation
+	var updatePlanJSON = `
+		{
+            "id":6,
+            "name":"Update Allocation Plan Fixture",
+            "details":[
+                { "id": 30, "hierarchicalId":[null,"BONDS"],  "sliceSizePercentage":"0.7" },
+                { "id": 31, "hierarchicalId":[null,"STOCKS"], "sliceSizePercentage":"0.6" },
+                { "id": 32, "hierarchicalId":["ARCA:BIL","BONDS"],   "sliceSizePercentage":"1.0", "cashReserve":false },
+                { "id": 33, "hierarchicalId":["ARCA:SPY","STOCKS"],  "sliceSizePercentage":"1.0", "cashReserve":false }
+            ]
+        }
+	`
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLPrefix+"/portfolio/2/allocation-plan",
+		"application/json",
+		strings.NewReader(updatePlanJSON),
+	)
+	assert.NoError(t, err)
+
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+
+	var expected = `{
+        "errorMessage": "Validation failed",
+        "details": ["Planned allocations slice sizes exceed 100% within hierarchy level(s): TOP"]
+    }`
+	assert.JSONEq(t, expected, string(body))
+}
