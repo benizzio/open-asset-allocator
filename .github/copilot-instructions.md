@@ -8,6 +8,7 @@
 
 - use [clean code principles](https://gist.github.com/wojteklu/73c6914cc446146b8b533c0988cf8d29)
     - give special attention to decomposing code into smaller functions
+    - always use descriptive names for functions, variables, and types
 - be [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself)
     - before generation a function, look for existing functions that can be reused (more references in below language
       sections)
@@ -91,6 +92,8 @@
       <...>
       }
       ```
+- when implementing tests:
+    - follow standard names `expected` and `actual` for variables used in the appropriate context
 
 > [!IMPORTANT]
 > Code reviews must evaluate source code in all laguages cited below.

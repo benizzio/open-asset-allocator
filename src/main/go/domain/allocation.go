@@ -75,3 +75,8 @@ func (hierarchicalId HierarchicalId) String() string {
 func (hierarchicalId HierarchicalId) Value() (driver.Value, error) {
 	return sqlext.BuildNullStringSlice(hierarchicalId).Value()
 }
+
+func (hierarchicalId HierarchicalId) IsTopLevel() bool {
+	var lastIndex = len(hierarchicalId) - 1
+	return hierarchicalId[lastIndex] != nil && hierarchicalId[lastIndex-1] == nil
+}

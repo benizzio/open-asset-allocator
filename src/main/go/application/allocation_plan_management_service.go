@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"errors"
 
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/domain/service"
@@ -33,7 +34,13 @@ func (service *AllocationPlanManagementAppService) PersistAllocationPlan(plan *d
 		},
 	)
 
-	return infra.PropagateAsAppErrorWithNewMessage(err, "Failed to persist allocation plan", service)
+	// if error is DomainValidationError, sent it as is, otherwise propagate
+	var validationErr *infra.DomainValidationError
+	if errors.As(err, &validationErr) {
+		return err
+	} else {
+		return infra.PropagateAsAppErrorWithNewMessage(err, "Failed to persist allocation plan", service)
+	}
 }
 
 func (service *AllocationPlanManagementAppService) persistNewAssets(
