@@ -60,8 +60,6 @@ func (controller *AllocationPlanRESTController) postAssetAllocationPlan(context 
 		return
 	}
 
-	//TODO validate asset allocation plan model consistency
-
 	var allocationPlanDTS model.AllocationPlanDTS
 	valid, err := util.BindAndValidateJSONWithInvalidResponse(context, &allocationPlanDTS)
 	if infra.HandleAPIError(context, "Error binding allocation plan", err) || !valid {

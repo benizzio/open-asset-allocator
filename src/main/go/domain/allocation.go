@@ -77,6 +77,32 @@ func (hierarchicalId HierarchicalId) Value() (driver.Value, error) {
 }
 
 func (hierarchicalId HierarchicalId) IsTopLevel() bool {
-	var lastIndex = len(hierarchicalId) - 1
+
+	var length = len(hierarchicalId)
+	var lastIndex = length - 1
+
+	if lastIndex == 0 {
+		return true
+	}
+
 	return hierarchicalId[lastIndex] != nil && hierarchicalId[lastIndex-1] == nil
+}
+
+func (hierarchicalId HierarchicalId) GetLevelIndex() int {
+	for index := range hierarchicalId {
+		if hierarchicalId[index] != nil {
+			return index
+		}
+	}
+	return -1
+}
+
+func (hierarchicalId HierarchicalId) ParentLevelId() HierarchicalId {
+
+	if hierarchicalId.IsTopLevel() {
+		return nil
+	}
+
+	levelIndex := hierarchicalId.GetLevelIndex()
+	return hierarchicalId[levelIndex+1:]
 }
