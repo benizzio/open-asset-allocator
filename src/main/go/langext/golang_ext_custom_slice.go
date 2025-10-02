@@ -19,9 +19,6 @@ import (
 //	_ = s.PrettyString()
 //
 // Authored by: GitHub Copilot
-//
-// Note: This is a new named type (not an alias), so methods can be attached.
-// Authored by: GitHub Copilot
 type CustomSlice[T any] []T
 
 // PrettyString returns a bracketless, comma-separated string for the slice.
