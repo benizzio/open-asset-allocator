@@ -8,7 +8,7 @@ import (
 	"github.com/benizzio/open-asset-allocator/domain/allocation"
 	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/infra"
-	"github.com/benizzio/open-asset-allocator/infra/util"
+	gininfra "github.com/benizzio/open-asset-allocator/infra/gin"
 	"github.com/benizzio/open-asset-allocator/langext"
 	"github.com/gin-gonic/gin"
 )
@@ -61,7 +61,7 @@ func (controller *AllocationPlanRESTController) postAssetAllocationPlan(context 
 	}
 
 	var allocationPlanDTS model.AllocationPlanDTS
-	valid, err := util.BindAndValidateJSONWithInvalidResponse(context, &allocationPlanDTS)
+	valid, err := gininfra.BindAndValidateJSONWithInvalidResponse(context, &allocationPlanDTS)
 	if infra.HandleAPIError(context, "Error binding allocation plan", err) || !valid {
 		return
 	}

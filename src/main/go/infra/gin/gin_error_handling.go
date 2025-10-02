@@ -1,9 +1,10 @@
-package util
+package gin
 
 import (
+	"net/http"
+
 	"github.com/benizzio/open-asset-allocator/api/rest/model"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 // sendValidationErrorResponse sends a standardized HTTP response for validation validationErrors.

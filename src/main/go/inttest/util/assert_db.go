@@ -140,7 +140,7 @@ func assertRowColumn(
 // Authored by: GitHub Copilot
 func ToAssertableNullString(str string) AssertableNullString {
 	return AssertableNullString{
-		NullString: infrautil.ToNullString(str),
+		NullString: infrautil.StringToNullString(str),
 	}
 }
 

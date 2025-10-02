@@ -6,7 +6,7 @@ import (
 	"github.com/benizzio/open-asset-allocator/api/rest/model"
 	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/infra"
-	"github.com/benizzio/open-asset-allocator/infra/util"
+	gininfra "github.com/benizzio/open-asset-allocator/infra/gin"
 	"github.com/gin-gonic/gin"
 )
 
@@ -51,7 +51,7 @@ func (controller *AssetRESTController) getAssetById(context *gin.Context) {
 	}
 
 	if asset == nil {
-		util.SendDataNotFoundResponse(context, "Asset", assetIdOrTickerParamValue)
+		gininfra.SendDataNotFoundResponse(context, "Asset", assetIdOrTickerParamValue)
 		return
 	}
 
