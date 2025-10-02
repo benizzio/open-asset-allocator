@@ -198,7 +198,6 @@ func (repository *AllocationPlanRDBMSRepository) UpdateAllocationPlanInTransacti
 	return repository.mergePlannedAllocationsInTransaction(transactionalContext, int64(plan.Id), plan.Details)
 }
 
-// TODO clean
 func (repository *AllocationPlanRDBMSRepository) mergePlannedAllocationsInTransaction(
 	transContext *rdbms.SQLTransactionalContext,
 	allocationPlanId int64,
@@ -213,10 +212,25 @@ func (repository *AllocationPlanRDBMSRepository) mergePlannedAllocationsInTransa
 		)
 	}
 
-	_, err := repository.dbAdapter.ExecuteInTransaction(
+	err := repository.insertPlannedAllocationsInTempTable(
 		transactionalContext,
-		plannedAllocationTempTableDDLSQL,
+		plannedAllocations,
+		allocationPlanId,
 	)
+	if err != nil {
+		return err
+	}
+
+	return repository.mergePlannedAllocations(err, transactionalContext, allocationPlanId)
+}
+
+func (repository *AllocationPlanRDBMSRepository) insertPlannedAllocationsInTempTable(
+	transactionalContext *rdbms.SQLTransactionalContext,
+	plannedAllocations []*domain.PlannedAllocation,
+	allocationPlanId int64,
+) error {
+
+	_, err := repository.dbAdapter.ExecuteInTransaction(transactionalContext, plannedAllocationTempTableDDLSQL)
 	if err != nil {
 		return infra.PropagateAsAppErrorWithNewMessage(
 			err,
@@ -224,6 +238,26 @@ func (repository *AllocationPlanRDBMSRepository) mergePlannedAllocationsInTransa
 			repository,
 		)
 	}
+
+	columns, insertValues := repository.preparePlannedAllocationTempInserts(plannedAllocations, allocationPlanId)
+
+	err = repository.dbAdapter.InsertBulkInTransaction(
+		transactionalContext,
+		plannedAllocationTempTableName,
+		columns,
+		insertValues,
+	)
+	return infra.PropagateAsAppErrorWithNewMessage(
+		err,
+		"Error inserting planned allocations into temporary table",
+		repository,
+	)
+}
+
+func (repository *AllocationPlanRDBMSRepository) preparePlannedAllocationTempInserts(
+	plannedAllocations []*domain.PlannedAllocation,
+	allocationPlanId int64,
+) ([]string, [][]any) {
 
 	var columns = []string{
 		"id",
@@ -252,20 +286,14 @@ func (repository *AllocationPlanRDBMSRepository) mergePlannedAllocationsInTransa
 		}
 	}
 
-	err = repository.dbAdapter.InsertBulkInTransaction(
-		transactionalContext,
-		plannedAllocationTempTableName,
-		columns,
-		insertValues,
-	)
-	if err != nil {
-		return infra.PropagateAsAppErrorWithNewMessage(
-			err,
-			"Error inserting planned allocations into temporary table",
-			repository,
-		)
-	}
+	return columns, insertValues
+}
 
+func (repository *AllocationPlanRDBMSRepository) mergePlannedAllocations(
+	err error,
+	transactionalContext *rdbms.SQLTransactionalContext,
+	allocationPlanId int64,
+) error {
 	_, err = repository.dbAdapter.ExecuteInTransaction(
 		transactionalContext,
 		plannedAllocationMergeSQL,

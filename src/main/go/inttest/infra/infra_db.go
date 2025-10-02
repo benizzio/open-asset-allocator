@@ -21,11 +21,11 @@ import (
 //
 // Authored by: GitHub Copilot
 type logFanOutConsumer struct {
-	mu     sync.Mutex
-	cap    int
-	lines  []string
-	sinks  map[int]testing.TB
-	nextID int
+	mutex    sync.Mutex
+	capacity int
+	lines    []string
+	sinks    map[int]testing.TB
+	nextID   int
 }
 
 func newLogFanOutConsumer(capacity int) *logFanOutConsumer {
@@ -33,70 +33,71 @@ func newLogFanOutConsumer(capacity int) *logFanOutConsumer {
 		capacity = 1000
 	}
 	return &logFanOutConsumer{
-		cap:   capacity,
-		lines: make([]string, 0, capacity),
-		sinks: make(map[int]testing.TB),
+		capacity: capacity,
+		lines:    make([]string, 0, capacity),
+		sinks:    make(map[int]testing.TB),
 	}
 }
 
 // Accept appends a new log line to the buffer and forwards it to all attached sinks.
 //
 // Authored by: GitHub Copilot
-func (c *logFanOutConsumer) Accept(l testcontainers.Log) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+func (consumer *logFanOutConsumer) Accept(logEntry testcontainers.Log) {
 
-	var s = strings.TrimSuffix(string(l.Content), "\n")
-	if len(c.lines) >= c.cap {
+	consumer.mutex.Lock()
+	defer consumer.mutex.Unlock()
+
+	var line = strings.TrimSuffix(string(logEntry.Content), "\n")
+	if len(consumer.lines) >= consumer.capacity {
 		// drop oldest
-		copy(c.lines, c.lines[1:])
-		c.lines[len(c.lines)-1] = s
+		copy(consumer.lines, consumer.lines[1:])
+		consumer.lines[len(consumer.lines)-1] = line
 	} else {
-		c.lines = append(c.lines, s)
+		consumer.lines = append(consumer.lines, line)
 	}
 
-	for _, t := range c.sinks {
+	for _, sink := range consumer.sinks {
 		// best-effort logging; tests may have finished
-		t.Logf("[postgres] %s", s)
+		sink.Logf("[postgres] %s", line)
 	}
 }
 
 // Snapshot returns a copy of buffered lines for read-only use.
 //
 // Authored by: GitHub Copilot
-func (c *logFanOutConsumer) Snapshot() []string {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	out := make([]string, len(c.lines))
-	copy(out, c.lines)
+func (consumer *logFanOutConsumer) Snapshot() []string {
+	consumer.mutex.Lock()
+	defer consumer.mutex.Unlock()
+	var out = make([]string, len(consumer.lines))
+	copy(out, consumer.lines)
 	return out
 }
 
-func (c *logFanOutConsumer) DumpTo(t testing.TB) {
-	for _, line := range c.Snapshot() {
-		t.Logf("[postgres] %s", line)
+func (consumer *logFanOutConsumer) DumpTo(sink testing.TB) {
+	for _, line := range consumer.Snapshot() {
+		sink.Logf("[postgres] %s", line)
 	}
 }
 
 // Attach registers a testing.TB sink to receive live log lines. Returns an id for Detach.
 //
 // Authored by: GitHub Copilot
-func (c *logFanOutConsumer) Attach(t testing.TB) int {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	id := c.nextID
-	c.nextID++
-	c.sinks[id] = t
+func (consumer *logFanOutConsumer) Attach(sink testing.TB) int {
+	consumer.mutex.Lock()
+	defer consumer.mutex.Unlock()
+	var id = consumer.nextID
+	consumer.nextID++
+	consumer.sinks[id] = sink
 	return id
 }
 
 // Detach unregisters a sink by id.
 //
 // Authored by: GitHub Copilot
-func (c *logFanOutConsumer) Detach(id int) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	delete(c.sinks, id)
+func (consumer *logFanOutConsumer) Detach(id int) {
+	consumer.mutex.Lock()
+	defer consumer.mutex.Unlock()
+	delete(consumer.sinks, id)
 }
 
 func appendDebugLoggingCommand(req *testcontainers.GenericContainerRequest) error {
@@ -111,7 +112,7 @@ func appendDebugLoggingCommand(req *testcontainers.GenericContainerRequest) erro
 	return nil
 }
 
-func withPosltgresLogging() testcontainers.CustomizeRequestOption {
+func withPostgresLogging() testcontainers.CustomizeRequestOption {
 	return appendDebugLoggingCommand
 }
 
@@ -125,13 +126,13 @@ func buildAndRunPostgresqlTestcontainer(ctx context.Context) (string, error) {
 		postgres.WithUsername(PostgresqlUsername),
 		postgres.WithPassword(PostgresqlPassword),
 		// Apply lightweight logging parameters (no full config override)
-		withPosltgresLogging(),
+		withPostgresLogging(),
 		// Register our log consumer via ContainerRequest so logs are followed automatically
 		testcontainers.WithLogConsumers(postgresLogFan),
 		testcontainers.WithWaitStrategy(
 			wait.ForLog("database system is ready to accept connections").
 				WithOccurrence(2).
-				WithStartupTimeout(5*time.Second),
+				WithStartupTimeout(10*time.Second),
 		),
 	)
 

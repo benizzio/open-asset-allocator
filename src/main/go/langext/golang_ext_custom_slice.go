@@ -40,7 +40,7 @@ type CustomSlice[T any] []T
 //
 // Authored by: GitHub Copilot
 func (slice CustomSlice[T]) PrettyString() string {
-	return joinAny([]T(slice), ", ")
+	return joinAny(slice, ", ")
 }
 
 // joinAny joins any slice into a string using the given separator, rendering each

@@ -69,80 +69,42 @@ func (service *AllocationPlanDomService) PersistAllocationPlanInTransaction(
 
 }
 
-type AllocationPlanValidationValidation struct {
+type allocationPlanValidationValidationData struct {
 	hirerarchicalIdCounts map[string]int
 	levelPercentages      map[string]decimal.Decimal
 }
 
-// TODO clean code
 // TODO validate plan before persisting
 // - hierarchy matches portfolio hierarchy
 func (service *AllocationPlanDomService) validateAllocationPlan(plan *domain.AllocationPlan) []*infra.AppError {
 
-	var validation = &AllocationPlanValidationValidation{
+	var validation = &allocationPlanValidationValidationData{
 		hirerarchicalIdCounts: make(map[string]int),
 		levelPercentages:      make(map[string]decimal.Decimal),
 	}
-
 	// Use empty string key to track TOP-level percentage aggregation
 	validation.levelPercentages[""] = decimal.Zero
 
-	for _, plannedAllocation := range plan.Details {
+	readValidationData(plan, validation)
 
-		// Track duplicates by the full hierarchical id path
-		var hierarchicalIdString = plannedAllocation.HierarchicalId.String()
-
-		var count int
-		var exists bool
-		count, exists = validation.hirerarchicalIdCounts[hierarchicalIdString]
-		if !exists {
-			validation.hirerarchicalIdCounts[hierarchicalIdString] = 1
-		} else {
-			validation.hirerarchicalIdCounts[hierarchicalIdString] = count + 1
-		}
-
-		// Aggregate percentages per hierarchy level:
-		// - TOP level: accumulate into "" key
-		// - Child levels: accumulate into the parent hierarchical id (drop the lowest level element)
-		var parentHierarchicalId = plannedAllocation.HierarchicalId.ParentLevelId()
-		if parentHierarchicalId == nil {
-			validation.levelPercentages[""] = validation.levelPercentages[""].Add(plannedAllocation.SliceSizePercentage)
-		} else {
-
-			var parentHierarchicalIdString = parentHierarchicalId.String()
-
-			var percentageSum decimal.Decimal
-			var levelExists bool
-			percentageSum, levelExists = validation.levelPercentages[parentHierarchicalIdString]
-			if !levelExists {
-				validation.levelPercentages[parentHierarchicalIdString] = plannedAllocation.SliceSizePercentage
-			} else {
-				validation.levelPercentages[parentHierarchicalIdString] = percentageSum.Add(plannedAllocation.SliceSizePercentage)
-			}
-		}
-	}
-
-	var repeatedHierarchicalIds = make(langext.CustomSlice[string], 0)
-	var exceededLevels = make(langext.CustomSlice[string], 0)
 	var errors = make([]*infra.AppError, 0)
+	errors = service.validateHirearchicalIdUniqueness(validation, errors)
+	errors = service.validateHierarchyLevelsPercentageSums(validation, errors)
 
-	for hierarchicalId, count := range validation.hirerarchicalIdCounts {
-		if count > 1 {
-			repeatedHierarchicalIds = append(repeatedHierarchicalIds, hierarchicalId)
-		}
+	if len(errors) > 0 {
+		return errors
+	} else {
+		return nil
 	}
+}
 
-	if len(repeatedHierarchicalIds) > 0 {
-		errors = append(
-			errors,
-			infra.BuildAppErrorFormattedUnconverted(
-				service,
-				"Planned allocations contain duplicated hierarchical IDs: %s",
-				repeatedHierarchicalIds.PrettyString(),
-			),
-		)
-	}
+func (service *AllocationPlanDomService) validateHierarchyLevelsPercentageSums(
+	validation *allocationPlanValidationValidationData,
+	errors []*infra.AppError,
+) []*infra.AppError {
 
+	// TODO obtain hierarchy level names to print proper messages
+	var exceededLevels = make(langext.CustomSlice[string], 0)
 	for hierarchicalId, percentageSum := range validation.levelPercentages {
 		if percentageSum.GreaterThan(decimal.NewFromInt(1)) {
 			if hierarchicalId == "" {
@@ -162,12 +124,79 @@ func (service *AllocationPlanDomService) validateAllocationPlan(plan *domain.All
 			),
 		)
 	}
+	return errors
+}
 
-	if len(errors) > 0 {
-		return errors
-	} else {
-		return nil
+func readValidationData(plan *domain.AllocationPlan, validation *allocationPlanValidationValidationData) {
+	for _, plannedAllocation := range plan.Details {
+		readPlannedAllocationForRepeatedValidationData(plannedAllocation, validation)
+		readPlannedAllocationForPercentageTotals(plannedAllocation, validation)
 	}
+}
+
+// readPlannedAllocationForRepeatedValidationData reads counts of hierarchical ids to validate repetitions
+func readPlannedAllocationForRepeatedValidationData(
+	plannedAllocation *domain.PlannedAllocation,
+	validation *allocationPlanValidationValidationData,
+) {
+	var hierarchicalIdString = plannedAllocation.HierarchicalId.String()
+	var count, exists = validation.hirerarchicalIdCounts[hierarchicalIdString]
+	if !exists {
+		validation.hirerarchicalIdCounts[hierarchicalIdString] = 1
+	} else {
+		validation.hirerarchicalIdCounts[hierarchicalIdString] = count + 1
+	}
+}
+
+// readPlannedAllocationForPercentageTotals aggregates slice size percentages per hierarchy level to validate they do not exceed 100%
+func readPlannedAllocationForPercentageTotals(
+	plannedAllocation *domain.PlannedAllocation,
+	validation *allocationPlanValidationValidationData,
+) {
+
+	// Aggregate percentages per hierarchy level:
+	// - TOP level: accumulate into "" key
+	// - Child levels: accumulate into the parent hierarchical id (drop the lowest level element)
+	var parentHierarchicalId = plannedAllocation.HierarchicalId.ParentLevelId()
+	if parentHierarchicalId == nil {
+		validation.levelPercentages[""] = validation.levelPercentages[""].Add(plannedAllocation.SliceSizePercentage)
+	} else {
+
+		var parentHierarchicalIdString = parentHierarchicalId.String()
+		var percentageSum, levelExists = validation.levelPercentages[parentHierarchicalIdString]
+
+		if !levelExists {
+			validation.levelPercentages[parentHierarchicalIdString] = plannedAllocation.SliceSizePercentage
+		} else {
+			validation.levelPercentages[parentHierarchicalIdString] = percentageSum.Add(plannedAllocation.SliceSizePercentage)
+		}
+	}
+}
+
+func (service *AllocationPlanDomService) validateHirearchicalIdUniqueness(
+	validationData *allocationPlanValidationValidationData,
+	errors []*infra.AppError,
+) []*infra.AppError {
+
+	var repeatedHierarchicalIds = make(langext.CustomSlice[string], 0)
+	for hierarchicalId, count := range validationData.hirerarchicalIdCounts {
+		if count > 1 {
+			repeatedHierarchicalIds = append(repeatedHierarchicalIds, hierarchicalId)
+		}
+	}
+
+	if len(repeatedHierarchicalIds) > 0 {
+		errors = append(
+			errors,
+			infra.BuildAppErrorFormattedUnconverted(
+				service,
+				"Planned allocations contain duplicated hierarchical IDs: %s",
+				repeatedHierarchicalIds.PrettyString(),
+			),
+		)
+	}
+
+	return errors
 }
 
 func BuildAllocationPlanDomService(allocationPlanRepository domain.AllocationPlanRepository) *AllocationPlanDomService {
