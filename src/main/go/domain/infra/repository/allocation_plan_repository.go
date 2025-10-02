@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"context"
+
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/domain/allocation"
 	"github.com/benizzio/open-asset-allocator/infra"
@@ -24,11 +26,50 @@ const (
 		    pa.id AS planned_allocation_id,
 		    pa.hierarchical_id, 
 		    pa.cash_reserve, 
-		    pa.slice_size_percentage
+		    pa.slice_size_percentage,
+		    coalesce(ass.id, 0) AS "asset.id", 
+		    coalesce(ass.ticker, '') AS "asset.ticker", 
+		    coalesce(ass.name, '') AS "asset.name"
 		FROM planned_allocation pa 
 		JOIN allocation_plan ap ON pa.allocation_plan_id = ap.id
+		LEFT JOIN asset ass ON ass.id = pa.asset_id
 	` + rdbms.WhereClausePlaceholder + `
 		ORDER BY ap.create_timestamp DESC, pa.cash_reserve DESC, pa.slice_size_percentage DESC
+	`
+	allocationPlanInsertSQL = `
+		INSERT INTO allocation_plan (portfolio_id, name, type)
+		VALUES ($1, $2, $3) RETURNING id
+    `
+	allocationPlanUpdateSQL = `
+		UPDATE allocation_plan 
+		SET name = $1
+		WHERE id = $2
+	`
+	plannedAllocationTempTableName   = "planned_allocation_merge_temp"
+	plannedAllocationTempTableDDLSQL = `
+		CREATE TEMPORARY TABLE ` + plannedAllocationTempTableName + `
+		(LIKE planned_allocation INCLUDING DEFAULTS)
+		ON COMMIT DROP
+	`
+	plannedAllocationMergeSQL = `
+		MERGE INTO planned_allocation pa
+		USING ` + plannedAllocationTempTableName + ` temp
+		ON pa.id = temp.id
+		WHEN NOT MATCHED BY TARGET THEN
+			INSERT (allocation_plan_id, hierarchical_id, cash_reserve, slice_size_percentage, asset_id)
+			VALUES (
+				temp.allocation_plan_id, 
+				temp.hierarchical_id, 
+				temp.cash_reserve, 
+				temp.slice_size_percentage, 
+				temp.asset_id
+			)
+		WHEN MATCHED THEN
+			UPDATE SET 
+				cash_reserve = temp.cash_reserve,
+				slice_size_percentage = temp.slice_size_percentage
+		WHEN NOT MATCHED BY SOURCE AND pa.allocation_plan_id = $1 THEN
+			DELETE
 	`
 )
 
@@ -105,6 +146,165 @@ func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlanIdentifiers
 	}
 
 	return langext.ToPointerSlice(queryResult), nil
+}
+
+func (repository *AllocationPlanRDBMSRepository) InsertAllocationPlanInTransaction(
+	transContext context.Context,
+	plan *domain.AllocationPlan,
+) error {
+
+	var transactionalContext, ok = rdbms.ToSQLTransactionalContext(transContext)
+	if !ok {
+		return infra.BuildAppError(
+			"Context is not a SQL transactional context",
+			repository,
+		)
+	}
+
+	id, err := rdbms.BuildQueryInTransaction[int64](transactionalContext, allocationPlanInsertSQL).
+		AddParams(plan.PortfolioId, plan.Name, plan.PlanType.String()).
+		Build().
+		Get(rdbms.ReturningIntIdSingleRowScanner)
+	if err != nil {
+		return infra.PropagateAsAppErrorWithNewMessage(err, "Error inserting allocation plan", repository)
+	}
+
+	return repository.mergePlannedAllocationsInTransaction(transactionalContext, id, plan.Details)
+}
+
+func (repository *AllocationPlanRDBMSRepository) UpdateAllocationPlanInTransaction(
+	transContext context.Context,
+	plan *domain.AllocationPlan,
+) error {
+
+	var transactionalContext, ok = rdbms.ToSQLTransactionalContext(transContext)
+	if !ok {
+		return infra.BuildAppError(
+			"Context is not a SQL transactional context",
+			repository,
+		)
+	}
+
+	_, err := repository.dbAdapter.ExecuteInTransaction(
+		transactionalContext,
+		allocationPlanUpdateSQL,
+		plan.Name,
+		plan.Id,
+	)
+	if err != nil {
+		return infra.PropagateAsAppErrorWithNewMessage(err, "Error updating allocation plan", repository)
+	}
+
+	return repository.mergePlannedAllocationsInTransaction(transactionalContext, int64(plan.Id), plan.Details)
+}
+
+func (repository *AllocationPlanRDBMSRepository) mergePlannedAllocationsInTransaction(
+	transContext *rdbms.SQLTransactionalContext,
+	allocationPlanId int64,
+	plannedAllocations []*domain.PlannedAllocation,
+) error {
+
+	var transactionalContext, ok = rdbms.ToSQLTransactionalContext(transContext)
+	if !ok {
+		return infra.BuildAppError(
+			"Context is not a SQL transactional context",
+			repository,
+		)
+	}
+
+	err := repository.insertPlannedAllocationsInTempTable(
+		transactionalContext,
+		plannedAllocations,
+		allocationPlanId,
+	)
+	if err != nil {
+		return err
+	}
+
+	return repository.mergePlannedAllocations(err, transactionalContext, allocationPlanId)
+}
+
+func (repository *AllocationPlanRDBMSRepository) insertPlannedAllocationsInTempTable(
+	transactionalContext *rdbms.SQLTransactionalContext,
+	plannedAllocations []*domain.PlannedAllocation,
+	allocationPlanId int64,
+) error {
+
+	_, err := repository.dbAdapter.ExecuteInTransaction(transactionalContext, plannedAllocationTempTableDDLSQL)
+	if err != nil {
+		return infra.PropagateAsAppErrorWithNewMessage(
+			err,
+			"Error creating temporary table for planned allocations",
+			repository,
+		)
+	}
+
+	columns, insertValues := repository.preparePlannedAllocationTempInserts(plannedAllocations, allocationPlanId)
+
+	err = repository.dbAdapter.InsertBulkInTransaction(
+		transactionalContext,
+		plannedAllocationTempTableName,
+		columns,
+		insertValues,
+	)
+	return infra.PropagateAsAppErrorWithNewMessage(
+		err,
+		"Error inserting planned allocations into temporary table",
+		repository,
+	)
+}
+
+func (repository *AllocationPlanRDBMSRepository) preparePlannedAllocationTempInserts(
+	plannedAllocations []*domain.PlannedAllocation,
+	allocationPlanId int64,
+) ([]string, [][]any) {
+
+	var columns = []string{
+		"id",
+		"allocation_plan_id",
+		"hierarchical_id",
+		"cash_reserve",
+		"slice_size_percentage",
+		"asset_id",
+	}
+
+	var insertValues = make([][]any, len(plannedAllocations))
+	for i, plannedAllocation := range plannedAllocations {
+
+		var assetId *int64
+		if plannedAllocation.Asset != nil {
+			assetId = &plannedAllocation.Asset.Id
+		}
+
+		insertValues[i] = []any{
+			plannedAllocation.Id,
+			allocationPlanId,
+			plannedAllocation.HierarchicalId,
+			plannedAllocation.CashReserve,
+			plannedAllocation.SliceSizePercentage,
+			assetId,
+		}
+	}
+
+	return columns, insertValues
+}
+
+func (repository *AllocationPlanRDBMSRepository) mergePlannedAllocations(
+	err error,
+	transactionalContext *rdbms.SQLTransactionalContext,
+	allocationPlanId int64,
+) error {
+	_, err = repository.dbAdapter.ExecuteInTransaction(
+		transactionalContext,
+		plannedAllocationMergeSQL,
+		allocationPlanId,
+	)
+
+	return infra.PropagateAsAppErrorWithNewMessage(
+		err,
+		"Error merging planned allocations",
+		repository,
+	)
 }
 
 func BuildAllocationPlanRepository(dbAdapter rdbms.RepositoryRDBMSAdapter) *AllocationPlanRDBMSRepository {

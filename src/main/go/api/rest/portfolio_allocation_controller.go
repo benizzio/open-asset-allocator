@@ -11,7 +11,8 @@ import (
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/infra"
-	"github.com/benizzio/open-asset-allocator/infra/util"
+	gininfra "github.com/benizzio/open-asset-allocator/infra/gin"
+	"github.com/benizzio/open-asset-allocator/infra/validation"
 	"github.com/benizzio/open-asset-allocator/langext"
 	"github.com/gin-gonic/gin"
 )
@@ -126,6 +127,7 @@ func (controller *PortfolioAllocationRESTController) getAvailableHistoryObservat
 	context.JSON(http.StatusOK, availableTimestampsDTS)
 }
 
+// TODO make a unified version of this that get from portfolio AND from allocation plan
 func (controller *PortfolioAllocationRESTController) getAvailablePortfolioAllocationClasses(context *gin.Context) {
 
 	portfolioIdParamValue := context.Param(portfolioIdParam)
@@ -151,12 +153,8 @@ func (controller *PortfolioAllocationRESTController) postPortfolioAllocationHist
 	}
 
 	var portfolioSnapshotDTS model.PortfolioSnapshotDTS
-	valid, err := util.BindAndValidateJSONWithInvalidResponse(context, &portfolioSnapshotDTS)
-	if err != nil {
-		infra.HandleAPIError(context, bindPortfolioSnapshotErrorMessage, err)
-		return
-	}
-	if !valid {
+	valid, err := gininfra.BindAndValidateJSONWithInvalidResponse(context, &portfolioSnapshotDTS)
+	if infra.HandleAPIError(context, bindPortfolioSnapshotErrorMessage, err) || !valid {
 		return
 	}
 
@@ -200,7 +198,7 @@ func (controller *PortfolioAllocationRESTController) validateCleanPortfolioAlloc
 	)
 	portfolioSnapshotDTS.Allocations = cleanAllocations
 
-	var validationErrorsBuilder = util.BuildCustomValidationErrorsBuilder()
+	var validationErrorsBuilder = validation.BuildCustomValidationErrorsBuilder()
 	for index, allocation := range portfolioSnapshotDTS.Allocations {
 
 		var isAssetIdentified = langext.IsZeroValue(allocation.AssetId) &&
@@ -218,7 +216,7 @@ func (controller *PortfolioAllocationRESTController) validateCleanPortfolioAlloc
 
 	var validationErrors = validationErrorsBuilder.Build()
 	if len(validationErrors) > 0 {
-		util.RespondWithCustomValidationErrors(context, validationErrors, portfolioSnapshotDTS)
+		gininfra.RespondWithCustomValidationErrors(context, validationErrors, portfolioSnapshotDTS)
 		return false
 	}
 

@@ -1,8 +1,7 @@
-package util
+package validation
 
 import (
 	"github.com/benizzio/open-asset-allocator/langext"
-	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -182,49 +181,4 @@ func buildCustomValidationError(
 		paramValue:      param,
 		valueValue:      value,
 	}
-}
-
-// RespondWithCustomValidationErrors takes custom validation errors and sends a standardized
-// validation error response using Gin. This is useful when you want to send validation errors
-// that were generated programmatically rather than from binding/validation.
-//
-// Parameters:
-//   - context: The Gin context used to send the HTTP response
-//   - validationErrors: Validation errors created with CustomValidationErrorsBuilder
-//   - targetStruct: The struct that contains field information (used for JSON field names)
-//
-// Example:
-//
-//	// Create validation errors using the builder pattern
-//	validationErrors := BuildCustomValidationErrorsBuilder().
-//	    CustomValidationError(
-//	        user,           // Target struct
-//	        "Email",        // Field namespace
-//	        "required",     // Validation tag
-//	        "",             // Parameter
-//	        "",             // Value that failed
-//	    ).
-//	    CustomValidationError(
-//	        user,           // Target struct
-//	        "Age",          // Field namespace
-//	        "min",          // Validation tag
-//	        "18",           // Parameter
-//	        16,             // Value that failed
-//	    ).
-//	    Build()
-//
-//	// Send HTTP response with these errors
-//	util.RespondWithCustomValidationErrors(ctx, validationErrors, user)
-//
-// Authored by: GitHub Copilot
-func RespondWithCustomValidationErrors(
-	context *gin.Context,
-	validationErrors validator.ValidationErrors,
-	targetStruct interface{},
-) {
-	// Format the error messages using the existing formatValidationErrorMessages function
-	errorMessages := formatValidationErrorMessages(validationErrors, targetStruct)
-
-	// Send the validation error response using the existing function
-	sendValidationErrorResponse(context, errorMessages)
 }

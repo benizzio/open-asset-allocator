@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"context"
 	"time"
 
 	"github.com/benizzio/open-asset-allocator/domain/allocation"
@@ -18,10 +19,12 @@ func (plannedAllocationMap PlannedAllocationsPerHierarchicalId) Remove(hierarchi
 }
 
 type PlannedAllocation struct {
-	Id                  int64
-	HierarchicalId      HierarchicalId
-	CashReserve         bool
+	Id             int64
+	HierarchicalId HierarchicalId
+	CashReserve    bool
+	//TODO remove the percentage from this name in all the stack
 	SliceSizePercentage decimal.Decimal
+	Asset               *Asset
 }
 
 type AllocationPlanIdentifier struct {
@@ -33,6 +36,7 @@ type AllocationPlan struct {
 	AllocationPlanIdentifier
 	PlanType             allocation.PlanType
 	PlannedExecutionDate *time.Time
+	PortfolioId          int64
 	Details              []*PlannedAllocation
 }
 
@@ -43,5 +47,10 @@ func (allocationPlan *AllocationPlan) AddDetail(detail *PlannedAllocation) {
 type AllocationPlanRepository interface {
 	GetAllAllocationPlans(portfolioId int64, planType *allocation.PlanType) ([]*AllocationPlan, error)
 	GetAllocationPlan(id int64) (*AllocationPlan, error)
-	GetAllAllocationPlanIdentifiers(portfolioId int64, planType *allocation.PlanType) ([]*AllocationPlanIdentifier, error)
+	GetAllAllocationPlanIdentifiers(
+		portfolioId int64,
+		planType *allocation.PlanType,
+	) ([]*AllocationPlanIdentifier, error)
+	InsertAllocationPlanInTransaction(transContext context.Context, plan *AllocationPlan) error
+	UpdateAllocationPlanInTransaction(transContext context.Context, plan *AllocationPlan) error
 }

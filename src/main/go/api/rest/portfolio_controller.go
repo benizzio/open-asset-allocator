@@ -6,7 +6,8 @@ import (
 	"github.com/benizzio/open-asset-allocator/api/rest/model"
 	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/infra"
-	"github.com/benizzio/open-asset-allocator/infra/util"
+	gininfra "github.com/benizzio/open-asset-allocator/infra/gin"
+	"github.com/benizzio/open-asset-allocator/infra/validation"
 	"github.com/benizzio/open-asset-allocator/langext"
 	"github.com/gin-gonic/gin"
 )
@@ -73,7 +74,7 @@ func (controller *PortfolioRESTController) getPortfolio(context *gin.Context) {
 func (controller *PortfolioRESTController) postPortfolio(context *gin.Context) {
 
 	var portfolioDTS model.PortfolioDTS
-	valid, err := util.BindAndValidateJSONWithInvalidResponse(context, &portfolioDTS)
+	valid, err := gininfra.BindAndValidateJSONWithInvalidResponse(context, &portfolioDTS)
 	if err != nil {
 		infra.HandleAPIError(context, bindPortfolioErrorMessage, err)
 		return
@@ -95,7 +96,7 @@ func (controller *PortfolioRESTController) postPortfolio(context *gin.Context) {
 func (controller *PortfolioRESTController) putPortfolio(context *gin.Context) {
 
 	var portfolioDTS model.PortfolioDTS
-	valid, err := util.BindAndValidateJSONWithInvalidResponse(context, &portfolioDTS)
+	valid, err := gininfra.BindAndValidateJSONWithInvalidResponse(context, &portfolioDTS)
 	if err != nil {
 		infra.HandleAPIError(context, bindPortfolioErrorMessage, err)
 		return
@@ -105,7 +106,8 @@ func (controller *PortfolioRESTController) putPortfolio(context *gin.Context) {
 	}
 
 	if portfolioDTS.Id == nil || langext.IsZeroValue(portfolioDTS.Id) {
-		var validationErrors = util.BuildCustomValidationErrorsBuilder().
+
+		var validationErrors = validation.BuildCustomValidationErrorsBuilder().
 			CustomValidationError(
 				portfolioDTS,
 				"Id",
@@ -114,7 +116,9 @@ func (controller *PortfolioRESTController) putPortfolio(context *gin.Context) {
 				nil,
 			).
 			Build()
-		util.RespondWithCustomValidationErrors(context, validationErrors, portfolioDTS)
+
+		gininfra.RespondWithCustomValidationErrors(context, validationErrors, portfolioDTS)
+
 		return
 	}
 

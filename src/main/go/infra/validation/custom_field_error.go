@@ -1,9 +1,10 @@
-package util
+package validation
 
 import (
 	"fmt"
-	universalTranslator "github.com/go-playground/universal-translator"
 	"reflect"
+
+	universalTranslator "github.com/go-playground/universal-translator"
 )
 
 // CustomFieldError implements validator.FieldError interface for custom validation errors.

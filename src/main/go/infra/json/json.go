@@ -1,15 +1,18 @@
-package util
+package json
 
 import (
-	"github.com/benizzio/open-asset-allocator/langext"
 	"reflect"
 	"strings"
+
+	"github.com/benizzio/open-asset-allocator/langext"
 )
 
-// getJSONFieldName returns the field name from the JSON tag of the struct field.
+// TODO verify if this functionality already exists in some library
+
+// GetJSONFieldName returns the field name from the JSON tag of the struct field.
 //
 // Authored by: GitHub Copilot
-func getJSONFieldName(namespace string, fieldName string, structType reflect.Type) string {
+func GetJSONFieldName(namespace string, fieldName string, structType reflect.Type) string {
 	// Get the struct field
 	field := findFieldByNamespace(namespace, structType)
 	if field == nil {

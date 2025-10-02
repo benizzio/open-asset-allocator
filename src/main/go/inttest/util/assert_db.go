@@ -80,7 +80,7 @@ func executeQueryForMultipleRows(t *testing.T, query string) []dbx.NullStringMap
 // Authored by: GitHub Copilot
 func validateRowCount(t *testing.T, expected []AssertableNullStringMap, actual []dbx.NullStringMap) {
 	if len(actual) != len(expected) {
-		t.Fatalf("Expected %d rows, but got %d rows", len(expected), len(actual))
+		t.Fatalf("Expected %d rows, but got %d rows. \nActual data was %v", len(expected), len(actual), actual)
 	}
 }
 
@@ -140,7 +140,7 @@ func assertRowColumn(
 // Authored by: GitHub Copilot
 func ToAssertableNullString(str string) AssertableNullString {
 	return AssertableNullString{
-		NullString: infrautil.ToNullString(str),
+		NullString: infrautil.StringToNullString(str),
 	}
 }
 
@@ -164,4 +164,62 @@ func ToAssertableNullStringWithAssertion(
 	return AssertableNullString{
 		assertFunction: assertFunc,
 	}
+}
+
+// NotNullAssertableNullString creates an AssertableNullString that asserts the value is not null or empty.
+//
+// This is a convenience function for creating AssertableNullString instances that specifically
+// validate that the database field is neither null nor an empty string. The resulting
+// AssertableNullString will use a custom assertion function to enforce this condition.
+//
+// Returns:
+//   - AssertableNullString with a custom assertion function that checks for non-null and non-empty values
+func NotNullAssertableNullString() AssertableNullString {
+	return ToAssertableNullStringWithAssertion(
+		func(t *testing.T, actual sql.NullString) {
+			assert.NotEmpty(t, actual.String)
+			assert.True(t, actual.Valid)
+		},
+	)
+}
+
+// NotNullValueCapturingAssertableNullString creates an AssertableNullString that asserts the value is not null or empty,
+// and captures the actual value into the provided pointer.
+//
+// This is a convenience function for creating AssertableNullString instances that specifically
+// validate that the database field is neither null nor an empty string, while also capturing
+// the actual value for further use. The resulting AssertableNullString will use a custom
+// assertion function to enforce this condition and store the value.
+//
+// Parameters:
+//   - capturingPointer: Pointer to a string where the actual value will be stored if the assertion passes
+//
+// Returns:
+//   - AssertableNullString with a custom assertion function that checks for non-null and non-empty values,
+//     and captures the actual value
+func NotNullValueCapturingAssertableNullString(capturingPointer *string) AssertableNullString {
+	return ToAssertableNullStringWithAssertion(
+		func(t *testing.T, actual sql.NullString) {
+			assert.NotEmpty(t, actual.String)
+			assert.True(t, actual.Valid)
+			*capturingPointer = actual.String
+		},
+	)
+}
+
+// NullAssertableNullString creates an AssertableNullString that asserts the value is null.
+//
+// This is a convenience function for creating AssertableNullString instances that specifically
+// validate that the database field is null. The resulting AssertableNullString will use a custom
+// assertion function to enforce this condition.
+//
+// Returns:
+//   - AssertableNullString with a custom assertion function that checks for null values
+func NullAssertableNullString() AssertableNullString {
+	return ToAssertableNullStringWithAssertion(
+		func(t *testing.T, actual sql.NullString) {
+			assert.False(t, actual.Valid)
+			assert.Empty(t, actual.String)
+		},
+	)
 }

@@ -74,9 +74,9 @@ func assertPersistedPortfolioFromAttributes(
 
 	var portfolioIdString = strconv.FormatInt(actualPortfolioID, 10)
 	var portfolioNullStringMap = dbx.NullStringMap{
-		"id":                   util.ToNullString(portfolioIdString),
-		"name":                 util.ToNullString(actualPortfolioName),
-		"allocation_structure": util.ToNullString(actualPortFolioAllocationStructure),
+		"id":                   util.StringToNullString(portfolioIdString),
+		"name":                 util.StringToNullString(actualPortfolioName),
+		"allocation_structure": util.StringToNullString(actualPortFolioAllocationStructure),
 	}
 
 	inttestutil.AssertDBWithQuery(

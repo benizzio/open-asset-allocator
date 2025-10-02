@@ -56,13 +56,13 @@ const (
 	`
 	portfolioAllocationsMergeSQL = `
 		MERGE INTO portfolio_allocation_fact paf
-		USING ` + portfolioAllocationsTempTableName + ` pafmt
+		USING ` + portfolioAllocationsTempTableName + ` temp
 		ON 
-			paf.asset_id = pafmt.asset_id
-			AND paf."class" = pafmt."class"
-			AND paf.cash_reserve = pafmt.cash_reserve
-			AND paf.portfolio_id = pafmt.portfolio_id
-			AND paf.observation_time_id = pafmt.observation_time_id
+			paf.asset_id = temp.asset_id
+			AND paf."class" = temp."class"
+			AND paf.cash_reserve = temp.cash_reserve
+			AND paf.portfolio_id = temp.portfolio_id
+			AND paf.observation_time_id = temp.observation_time_id
 		WHEN NOT MATCHED BY TARGET THEN
     		INSERT (
 				asset_id, 
@@ -75,24 +75,24 @@ const (
 				observation_time_id
 			)
 			VALUES (
-				pafmt.asset_id, 
-				pafmt."class", 
-				pafmt.cash_reserve, 
-				pafmt.asset_quantity, 
-				pafmt.asset_market_price, 
-				pafmt.total_market_value, 
-				pafmt.portfolio_id, 
-				pafmt.observation_time_id
+				temp.asset_id, 
+				temp."class", 
+				temp.cash_reserve, 
+				temp.asset_quantity, 
+				temp.asset_market_price, 
+				temp.total_market_value, 
+				temp.portfolio_id, 
+				temp.observation_time_id
 			)
 		WHEN MATCHED AND (
-				paf.asset_quantity != pafmt.asset_quantity
-				OR paf.asset_market_price != pafmt.asset_market_price
-				OR paf.total_market_value != pafmt.total_market_value
+				paf.asset_quantity != temp.asset_quantity
+				OR paf.asset_market_price != temp.asset_market_price
+				OR paf.total_market_value != temp.total_market_value
 			) THEN
 				UPDATE SET 
-					asset_quantity = pafmt.asset_quantity,
-					asset_market_price = pafmt.asset_market_price,
-					total_market_value = pafmt.total_market_value
+					asset_quantity = temp.asset_quantity,
+					asset_market_price = temp.asset_market_price,
+					total_market_value = temp.total_market_value
 		WHEN NOT MATCHED BY SOURCE AND (
 				paf.portfolio_id = $1
 				AND paf.observation_time_id = $2

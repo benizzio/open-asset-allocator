@@ -15,7 +15,7 @@ import {
     PlannedAllocation,
 } from "../allocation-plan";
 
-export function mapAllocationPlanFractalHierarchy(
+export function mapToAllocationPlanFractalHierarchy(
     allocationPlan: AllocationPlan,
     allocationStructure: AllocationStructure,
 ): FractalPlannedAllocationHierarchy {

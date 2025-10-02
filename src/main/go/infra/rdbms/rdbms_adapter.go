@@ -107,18 +107,6 @@ func (adapter *Adapter) BuildQuery(sql string) *QueryBuilder {
 	}
 }
 
-func BuildQueryInTransaction[T any](
-	transContext *SQLTransactionalContext,
-	sql string,
-) *SQLTransactionalQueryBuilder[T] {
-	return &SQLTransactionalQueryBuilder[T]{
-		transaction:  transContext.GetTransaction(),
-		querySQL:     sql,
-		params:       make([]any, 0),
-		whereClauses: make([]string, 0),
-	}
-}
-
 func (adapter *Adapter) buildTransactionalContext() (*SQLTransactionalContext, error) {
 	var transactionContext, err = withTransaction(adapter.connectionPool)
 	if err != nil {
@@ -247,8 +235,24 @@ func executeBulkInsertPreparedStatement(copyStatement *sql.Stmt, values [][]any)
 	return err
 }
 
+// =================================================
+// RDBMS ADAPTER - Public Builders
+// =================================================
+
 func BuildDatabaseAdapter(config *infra.Configuration) *Adapter {
 	return &Adapter{config: config.RdbmsConfig}
+}
+
+func BuildQueryInTransaction[T any](
+	transContext *SQLTransactionalContext,
+	sql string,
+) *SQLTransactionalQueryBuilder[T] {
+	return &SQLTransactionalQueryBuilder[T]{
+		transaction:  transContext.GetTransaction(),
+		querySQL:     sql,
+		params:       make([]any, 0),
+		whereClauses: make([]string, 0),
+	}
 }
 
 // =================================================
