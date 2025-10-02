@@ -54,19 +54,6 @@ func BuildAppErrorFormattedUnconverted(origin any, message string, params ...any
 	return newAppError(fmt.Sprintf(message, params...), nil, origin)
 }
 
-func newAppError(message string, cause error, originType any) *AppError {
-	logError(message, cause, originType)
-	return &AppError{Message: message, Cause: cause}
-}
-
-func logError(message string, cause error, origin any) {
-	var errorLog = "Error in " + reflect.TypeOf(origin).String() + ": " + message
-	if cause != nil {
-		errorLog += ". Cause: " + cause.Error()
-	}
-	glog.Error(errorLog)
-}
-
 func PropagateAsAppError(cause error, origin any) error {
 	return PropagateAsAppErrorWithNewMessage(cause, cause.Error(), origin)
 }
@@ -99,6 +86,23 @@ func HandleAPIError(context *gin.Context, message string, cause error) bool {
 	}
 
 	return handle
+}
+
+// ======================================================================
+// Internal functionality
+// ======================================================================
+
+func newAppError(message string, cause error, originType any) *AppError {
+	logError(message, cause, originType)
+	return &AppError{Message: message, Cause: cause}
+}
+
+func logError(message string, cause error, origin any) {
+	var errorLog = "Error in " + reflect.TypeOf(origin).String() + ": " + message
+	if cause != nil {
+		errorLog += ". Cause: " + cause.Error()
+	}
+	glog.Error(errorLog)
 }
 
 func handleDomainError(context *gin.Context, cause error) bool {
