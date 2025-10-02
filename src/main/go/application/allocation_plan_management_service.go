@@ -84,8 +84,8 @@ func replacePersistedAssetsOnPlannedAllocations(
 ) {
 	for _, allocation := range allocations {
 		if allocation.Asset != nil && langext.IsZeroValue(allocation.Asset.Id) {
-			persitedAsset := persistedAssetsPerTicker[allocation.Asset.Ticker]
-			allocation.Asset = persitedAsset
+			var persistedAsset = persistedAssetsPerTicker[allocation.Asset.Ticker]
+			allocation.Asset = persistedAsset
 		}
 	}
 }
