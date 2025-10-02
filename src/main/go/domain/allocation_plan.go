@@ -19,9 +19,10 @@ func (plannedAllocationMap PlannedAllocationsPerHierarchicalId) Remove(hierarchi
 }
 
 type PlannedAllocation struct {
-	Id                  int64
-	HierarchicalId      HierarchicalId
-	CashReserve         bool
+	Id             int64
+	HierarchicalId HierarchicalId
+	CashReserve    bool
+	//TODO remove the percentage from this name in all the stack
 	SliceSizePercentage decimal.Decimal
 	Asset               *Asset
 }
