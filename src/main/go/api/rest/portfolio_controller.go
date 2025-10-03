@@ -13,8 +13,8 @@ import (
 )
 
 type PortfolioRESTController struct {
-	portfolioDomService           *service.PortfolioDomService
-	portfolioAllocationDomService *service.PortfolioAllocationDomService
+	portfolioDomService  *service.PortfolioDomService
+	allocationDomService *service.AllocationDomService
 }
 
 func (controller *PortfolioRESTController) BuildRoutes() []infra.RESTRoute {
@@ -151,7 +151,7 @@ func (controller *PortfolioRESTController) getAvailablePortfolioAllocationClasse
 		return
 	}
 
-	availableClasses, err := controller.portfolioAllocationDomService.FindAvailablePortfolioAllocationClassesFromAllSources(portfolioId)
+	availableClasses, err := controller.allocationDomService.FindAvailableAllocationClassesFromAllSources(portfolioId)
 	if infra.HandleAPIError(context, "Error getting available portfolio allocation classes", err) {
 		return
 	}
@@ -161,10 +161,10 @@ func (controller *PortfolioRESTController) getAvailablePortfolioAllocationClasse
 
 func BuildPortfolioRESTController(
 	portfolioDomService *service.PortfolioDomService,
-	portfolioAllocationDomService *service.PortfolioAllocationDomService,
+	allocationDomService *service.AllocationDomService,
 ) *PortfolioRESTController {
 	return &PortfolioRESTController{
 		portfolioDomService,
-		portfolioAllocationDomService,
+		allocationDomService,
 	}
 }

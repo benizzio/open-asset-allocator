@@ -507,3 +507,76 @@ func putForValidationFailure(t *testing.T, putPortfolioJSON string) []byte {
 	assert.NotEmpty(t, body)
 	return body
 }
+
+// TestGetAvailablePortfolioAllocationClasses tests the unified endpoint that retrieves
+// allocation classes from both portfolio_allocation_fact and planned_allocation tables.
+// Portfolio 1 has "BONDS" and "STOCKS" classes in both tables.
+//
+// Authored by: GitHub Copilot
+func TestGetAvailablePortfolioAllocationClasses(t *testing.T) {
+
+	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/allocation-classes")
+	assert.NoError(t, err)
+
+	assert.Equal(t, http.StatusOK, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+
+	var actualResponseJSON = string(body)
+	var expectedResponseJSON = `
+		["BONDS", "STOCKS"]
+	`
+
+	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
+}
+
+// TestGetAvailablePortfolioAllocationClassesNoneFound tests when no allocation classes are found
+// for a portfolio that has neither portfolio_allocation_fact nor planned_allocation data.
+//
+// Authored by: GitHub Copilot
+func TestGetAvailablePortfolioAllocationClassesNoneFound(t *testing.T) {
+
+	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/2/allocation-classes")
+	assert.NoError(t, err)
+
+	assert.Equal(t, http.StatusOK, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+
+	var actualResponseJSON = string(body)
+	var expectedResponseJSON = `
+		[]
+	`
+
+	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
+}
+
+// TestGetAvailablePortfolioAllocationClassesFromPlansOnly tests the unified endpoint
+// when portfolio has classes from both allocation history and allocation plans.
+// Portfolio 3 has "A_TEST_CLASS", "BONDS", and "STOCKS" classes.
+//
+// Authored by: GitHub Copilot
+func TestGetAvailablePortfolioAllocationClassesFromPlansOnly(t *testing.T) {
+
+	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/3/allocation-classes")
+	assert.NoError(t, err)
+
+	assert.Equal(t, http.StatusOK, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+
+	var actualResponseJSON = string(body)
+	// Portfolio 3 has allocation history with "A_TEST_CLASS", "BONDS", and "STOCKS"
+	// And allocation plans with "BONDS" and "STOCKS"
+	var expectedResponseJSON = `
+		["A_TEST_CLASS", "BONDS", "STOCKS"]
+	`
+
+	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
+}
