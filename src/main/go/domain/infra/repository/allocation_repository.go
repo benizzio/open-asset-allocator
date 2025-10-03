@@ -63,6 +63,7 @@ func (repository *AllocationRDBMSRepository) FindAvailableAllocationClassesFromA
 			repository,
 		)
 	}
+	defer rows.Close()
 
 	return repository.scanAllocationClassesRows(rows)
 }
@@ -89,6 +90,15 @@ func (repository *AllocationRDBMSRepository) scanAllocationClassesRows(
 
 		queryResult = append(queryResult, class)
 	}
+
+	if err := rows.Err(); err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(
+			err,
+			"Error iterating allocation class rows",
+			repository,
+		)
+	}
+
 	return queryResult, nil
 }
 
