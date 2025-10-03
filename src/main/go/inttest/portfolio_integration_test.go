@@ -91,6 +91,22 @@ func TestGetPortfolios(t *testing.T) {
 				}
 			},
 			{
+				"id":4,
+				"name":"Allocation Classes Test Portfolio",
+				"allocationStructure": {
+					"hierarchy": [
+						{
+							"name":"Assets",
+							"field":"assetTicker"
+						},
+						{
+							"name":"Classes",
+							"field":"class"
+						}
+					]
+				}
+			},
+			{
 				"id":3,
 				"name":"Set difference test portfolio",
 				"allocationStructure": {
@@ -510,14 +526,16 @@ func putForValidationFailure(t *testing.T, putPortfolioJSON string) []byte {
 
 // TestGetAvailablePortfolioAllocationClasses tests the unified endpoint that retrieves
 // allocation classes from both portfolio_allocation_fact and planned_allocation tables.
-// Portfolio 1 has "BONDS" and "STOCKS" classes in portfolio_allocation_fact table,
-// and "BONDS", "STOCKS", and "COMMODITIES" in planned_allocation table.
-// The endpoint should return all three unique classes.
+// Portfolio 4 has:
+// - "BONDS" and "STOCKS" in both tables
+// - "REALESTATE" only in portfolio_allocation_fact
+// - "COMMODITIES" only in planned_allocation
+// The endpoint should return all four unique classes.
 //
 // Authored by: GitHub Copilot
 func TestGetAvailablePortfolioAllocationClasses(t *testing.T) {
 
-	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/allocation-classes")
+	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/4/allocation-classes")
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -528,7 +546,7 @@ func TestGetAvailablePortfolioAllocationClasses(t *testing.T) {
 
 	var actualResponseJSON = string(body)
 	var expectedResponseJSON = `
-		["BONDS", "COMMODITIES", "STOCKS"]
+		["BONDS", "COMMODITIES", "REALESTATE", "STOCKS"]
 	`
 
 	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
