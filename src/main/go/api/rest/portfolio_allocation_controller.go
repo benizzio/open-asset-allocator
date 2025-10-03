@@ -39,11 +39,6 @@ func (controller *PortfolioAllocationRESTController) BuildRoutes() []infra.RESTR
 			Path:     "/api/portfolio/:" + portfolioIdParam + "/history/observation",
 			Handlers: gin.HandlersChain{controller.getAvailableHistoryObservations},
 		},
-		{
-			Method:   http.MethodGet,
-			Path:     "/api/portfolio/:" + portfolioIdParam + "/allocation-classes",
-			Handlers: gin.HandlersChain{controller.getAvailablePortfolioAllocationClasses},
-		},
 	}
 }
 
