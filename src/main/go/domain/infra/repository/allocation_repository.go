@@ -6,21 +6,8 @@ import (
 	dbx "github.com/go-ozzo/ozzo-dbx"
 )
 
-type AllocationRDBMSRepository struct {
-	dbAdapter rdbms.RepositoryRDBMSAdapter
-}
-
-// FindAvailableAllocationClassesFromAllSources retrieves unique allocation classes
-// from both portfolio_allocation_fact and planned_allocation tables. For planned_allocation,
-// it extracts the class value from the hierarchical_id array using the position defined in
-// the portfolio's allocation_structure.
-//
-// Authored by: GitHub Copilot
-func (repository *AllocationRDBMSRepository) FindAvailableAllocationClassesFromAllSources(
-	portfolioId int64,
-) ([]string, error) {
-
-	var query = `
+const (
+	allocationClassesFromAllSourcesSQL = `
 		WITH class_hierarchy_position AS (
 			SELECT
 				p.id AS portfolio_id,
@@ -49,8 +36,23 @@ func (repository *AllocationRDBMSRepository) FindAvailableAllocationClassesFromA
 		) AS combined_classes
 		ORDER BY class ASC
 	`
+)
 
-	rows, err := repository.dbAdapter.BuildQuery(query).
+type AllocationRDBMSRepository struct {
+	dbAdapter rdbms.RepositoryRDBMSAdapter
+}
+
+// FindAvailableAllocationClassesFromAllSources retrieves unique allocation classes
+// from both portfolio_allocation_fact and planned_allocation tables. For planned_allocation,
+// it extracts the class value from the hierarchical_id array using the position defined in
+// the portfolio's allocation_structure.
+//
+// Authored by: GitHub Copilot
+func (repository *AllocationRDBMSRepository) FindAvailableAllocationClassesFromAllSources(
+	portfolioId int64,
+) ([]string, error) {
+
+	rows, err := repository.dbAdapter.BuildQuery(allocationClassesFromAllSourcesSQL).
 		AddParam("portfolioId", portfolioId).
 		Build().GetRows()
 

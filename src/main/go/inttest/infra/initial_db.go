@@ -191,7 +191,8 @@ const initialStateSQL = `
 	(id, allocation_plan_id, hierarchical_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
 	VALUES
 		(1, 1, '{NULL, "STOCKS"}', NULL, FALSE, 0.4, NULL),
-		(2, 1, '{NULL, "BONDS"}', NULL, FALSE, 0.6, NULL)
+		(2, 1, '{NULL, "BONDS"}', NULL, FALSE, 0.6, NULL),
+		(23, 1, '{NULL, "COMMODITIES"}', NULL, FALSE, 0.0, NULL)
 	;
 	
 	INSERT INTO planned_allocation

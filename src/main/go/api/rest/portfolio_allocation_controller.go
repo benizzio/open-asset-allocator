@@ -126,7 +126,7 @@ func (controller *PortfolioAllocationRESTController) getAvailableHistoryObservat
 // This endpoint only returns classes from portfolio_allocation_fact table.
 // The new endpoint returns classes from both portfolio_allocation_fact and planned_allocation tables.
 //
-// TODO make a unified version of this that get from portfolio AND from allocation plan
+// TODO remove this deprecated implementation once all clients have migrated to the new endpoint
 func (controller *PortfolioAllocationRESTController) getAvailablePortfolioAllocationClasses(context *gin.Context) {
 
 	portfolioIdParamValue := context.Param(portfolioIdParam)

@@ -510,7 +510,9 @@ func putForValidationFailure(t *testing.T, putPortfolioJSON string) []byte {
 
 // TestGetAvailablePortfolioAllocationClasses tests the unified endpoint that retrieves
 // allocation classes from both portfolio_allocation_fact and planned_allocation tables.
-// Portfolio 1 has "BONDS" and "STOCKS" classes in both tables.
+// Portfolio 1 has "BONDS" and "STOCKS" classes in portfolio_allocation_fact table,
+// and "BONDS", "STOCKS", and "COMMODITIES" in planned_allocation table.
+// The endpoint should return all three unique classes.
 //
 // Authored by: GitHub Copilot
 func TestGetAvailablePortfolioAllocationClasses(t *testing.T) {
@@ -526,7 +528,7 @@ func TestGetAvailablePortfolioAllocationClasses(t *testing.T) {
 
 	var actualResponseJSON = string(body)
 	var expectedResponseJSON = `
-		["BONDS", "STOCKS"]
+		["BONDS", "COMMODITIES", "STOCKS"]
 	`
 
 	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
