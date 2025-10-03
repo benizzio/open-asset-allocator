@@ -205,6 +205,61 @@ func (repository *PortfolioAllocationRDBMSRepository) FindAvailablePortfolioAllo
 	return repository.scanAvailablePortfolioAllocationClassesRows(rows, err)
 }
 
+// FindAvailablePortfolioAllocationClassesFromAllSources retrieves unique allocation classes
+// from both portfolio_allocation_fact and planned_allocation tables. For planned_allocation,
+// it extracts the class value from the hierarchical_id array using the position defined in
+// the portfolio's allocation_structure.
+//
+// Authored by: GitHub Copilot
+func (repository *PortfolioAllocationRDBMSRepository) FindAvailablePortfolioAllocationClassesFromAllSources(
+	portfolioId int64,
+) ([]string, error) {
+
+	var query = `
+		WITH class_hierarchy_position AS (
+			SELECT
+				p.id AS portfolio_id,
+				(
+					SELECT pos - 1
+					FROM jsonb_array_elements(p.allocation_structure->'hierarchy') WITH ORDINALITY AS t(elem, pos)
+					WHERE elem->>'field' = 'class'
+					LIMIT 1
+				) AS class_position
+			FROM portfolio p
+			WHERE p.id = {:portfolioId}
+		)
+		SELECT DISTINCT class
+		FROM (
+			SELECT pa.class
+			FROM portfolio_allocation_fact pa
+			WHERE pa.portfolio_id = {:portfolioId}
+			UNION
+			SELECT pa.hierarchical_id[chp.class_position + 1] AS class
+			FROM planned_allocation pa
+			JOIN allocation_plan ap ON pa.allocation_plan_id = ap.id
+			CROSS JOIN class_hierarchy_position chp
+			WHERE ap.portfolio_id = {:portfolioId}
+				AND chp.class_position IS NOT NULL
+				AND pa.hierarchical_id[chp.class_position + 1] IS NOT NULL
+		) AS combined_classes
+		ORDER BY class ASC
+	`
+
+	rows, err := repository.dbAdapter.BuildQuery(query).
+		AddParam("portfolioId", portfolioId).
+		Build().GetRows()
+
+	if err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(
+			err,
+			"Error querying portfolio allocation classes from all sources",
+			repository,
+		)
+	}
+
+	return repository.scanAvailablePortfolioAllocationClassesRows(rows, err)
+}
+
 func (repository *PortfolioAllocationRDBMSRepository) findAvailablePortfolioAllocationClassesRows(
 	portfolioId int64,
 	query string,

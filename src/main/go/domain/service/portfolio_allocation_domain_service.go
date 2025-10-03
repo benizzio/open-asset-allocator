@@ -97,6 +97,16 @@ func (service *PortfolioAllocationDomService) FindAvailablePortfolioAllocationCl
 	return service.portfolioAllocationRepository.FindAvailablePortfolioAllocationClasses(portfolioId)
 }
 
+// FindAvailablePortfolioAllocationClassesFromAllSources retrieves allocation classes from
+// both portfolio allocation history and planned allocations in allocation plans.
+//
+// Authored by: GitHub Copilot
+func (service *PortfolioAllocationDomService) FindAvailablePortfolioAllocationClassesFromAllSources(
+	portfolioId int64,
+) ([]string, error) {
+	return service.portfolioAllocationRepository.FindAvailablePortfolioAllocationClassesFromAllSources(portfolioId)
+}
+
 func (service *PortfolioAllocationDomService) MergePortfolioAllocationsInTransaction(
 	transContext context.Context,
 	portfolioId int64,

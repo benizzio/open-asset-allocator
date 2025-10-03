@@ -127,6 +127,10 @@ func (controller *PortfolioAllocationRESTController) getAvailableHistoryObservat
 	context.JSON(http.StatusOK, availableTimestampsDTS)
 }
 
+// Deprecated: Use PortfolioRESTController.getAvailablePortfolioAllocationClasses instead.
+// This endpoint only returns classes from portfolio_allocation_fact table.
+// The new endpoint returns classes from both portfolio_allocation_fact and planned_allocation tables.
+//
 // TODO make a unified version of this that get from portfolio AND from allocation plan
 func (controller *PortfolioAllocationRESTController) getAvailablePortfolioAllocationClasses(context *gin.Context) {
 

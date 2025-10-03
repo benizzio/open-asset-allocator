@@ -90,7 +90,10 @@ func (app *App) buildAppComponents() {
 	// =====================================================
 	// API - REST
 	// =====================================================
-	var portfolioRESTController = rest.BuildPortfolioRESTController(portfolioDomService)
+	var portfolioRESTController = rest.BuildPortfolioRESTController(
+		portfolioDomService,
+		portfolioAllocationDomService,
+	)
 	var portfolioAllocationRESTController = rest.BuildPortfolioAllocationRESTController(
 		portfolioAllocationDomService,
 		portfolioAllocationManagementAppService,
