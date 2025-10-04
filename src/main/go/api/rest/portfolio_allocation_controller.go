@@ -39,11 +39,6 @@ func (controller *PortfolioAllocationRESTController) BuildRoutes() []infra.RESTR
 			Path:     "/api/portfolio/:" + portfolioIdParam + "/history/observation",
 			Handlers: gin.HandlersChain{controller.getAvailableHistoryObservations},
 		},
-		{
-			Method:   http.MethodGet,
-			Path:     "/api/portfolio/:" + portfolioIdParam + "/allocation-classes",
-			Handlers: gin.HandlersChain{controller.getAvailablePortfolioAllocationClasses},
-		},
 	}
 }
 
@@ -127,7 +122,11 @@ func (controller *PortfolioAllocationRESTController) getAvailableHistoryObservat
 	context.JSON(http.StatusOK, availableTimestampsDTS)
 }
 
-// TODO make a unified version of this that get from portfolio AND from allocation plan
+// Deprecated: Use PortfolioRESTController.getAvailablePortfolioAllocationClasses instead.
+// This endpoint only returns classes from portfolio_allocation_fact table.
+// The new endpoint returns classes from both portfolio_allocation_fact and planned_allocation tables.
+//
+// TODO remove this deprecated implementation once all clients have migrated to the new endpoint
 func (controller *PortfolioAllocationRESTController) getAvailablePortfolioAllocationClasses(context *gin.Context) {
 
 	portfolioIdParamValue := context.Param(portfolioIdParam)

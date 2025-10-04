@@ -106,3 +106,11 @@ func (hierarchicalId HierarchicalId) ParentLevelId() HierarchicalId {
 	levelIndex := hierarchicalId.GetLevelIndex()
 	return hierarchicalId[levelIndex+1:]
 }
+
+// AllocationRepository provides operations for querying allocation data across
+// portfolio allocations and planned allocations.
+//
+// Authored by: GitHub Copilot
+type AllocationRepository interface {
+	FindAvailableAllocationClassesFromAllSources(portfolioId int64) ([]string, error)
+}

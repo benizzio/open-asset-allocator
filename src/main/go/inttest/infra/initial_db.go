@@ -213,6 +213,60 @@ const initialStateSQL = `
 
 	-- ###################################################################
 	-- *******************************************************************
+	-- ALLOCATION CLASSES FROM ALL SOURCES TEST DATA
+	-- *******************************************************************
+	-- ###################################################################
+	
+	-- Test that allocation classes endpoint returns classes from both
+	-- portfolio_allocation_fact AND planned_allocation tables
+	-- Uses a dedicated portfolio (portfolio 4) to avoid interfering with other tests
+	
+	INSERT INTO portfolio (id, "name", allocation_structure)
+	VALUES (
+		4,
+		'Allocation Classes Test Portfolio',
+		'{"hierarchy": [{"name": "Assets", "field": "assetTicker"}, {"name": "Classes", "field": "class"}]}'::jsonb
+	)
+	ON CONFLICT (id) DO UPDATE set "name" = EXCLUDED."name", allocation_structure = EXCLUDED.allocation_structure
+	;
+	
+	-- Add observation time for portfolio 4
+	INSERT INTO portfolio_allocation_obs_time (id, observation_time_tag, observation_timestamp)
+	VALUES (6, '202508', '2025-08-01 00:00:00'::TIMESTAMP)
+	;
+	
+	-- Add classes in portfolio_allocation_fact: BONDS, STOCKS, REALESTATE
+	INSERT INTO portfolio_allocation_fact (
+		asset_id,
+		"class",
+		cash_reserve,
+		asset_quantity,
+		asset_market_price,
+		total_market_value,
+		portfolio_id,
+		observation_time_id
+	)
+	VALUES 
+		(1, 'BONDS', FALSE, 10, 100, 1000, 4, 6),
+		(5, 'STOCKS', FALSE, 10, 100, 1000, 4, 6),
+		(1, 'REALESTATE', FALSE, 10, 100, 1000, 4, 6)
+	;
+	
+	-- Add allocation plan with classes: BONDS, STOCKS, COMMODITIES
+	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, portfolio_id)
+	VALUES (8, 'Portfolio 4 Test Plan', 'ALLOCATION_PLAN', NULL, 4)
+	;
+	
+	INSERT INTO planned_allocation
+	(id, allocation_plan_id, hierarchical_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
+	VALUES
+		(25, 8, '{NULL, "BONDS"}', NULL, FALSE, 0.4, NULL),
+		(26, 8, '{NULL, "STOCKS"}', NULL, FALSE, 0.4, NULL),
+		(27, 8, '{NULL, "COMMODITIES"}', NULL, FALSE, 0.2, NULL)
+	;
+
+	-- ###################################################################
+	-- *******************************************************************
 	-- DIVERGENCE ANALYSIS SET DIFFERENCE TESTS
 	-- *******************************************************************
 	-- ###################################################################

@@ -57,11 +57,13 @@ func (app *App) buildAppComponents() {
 	var portfolioRepository = repository.BuildPortfolioRepository(app.databaseAdapter)
 	var portfolioAllocationRepository = repository.BuildPortfolioAllocationRepository(app.databaseAdapter)
 	var allocationPlanRepository = repository.BuildAllocationPlanRepository(app.databaseAdapter)
+	var allocationRepository = repository.BuildAllocationRepository(app.databaseAdapter)
 	var assetRepository = repository.BuildAssetRDBMSRepository(app.databaseAdapter)
 
 	var portfolioDomService = service.BuildPortfolioDomService(portfolioRepository)
 	var portfolioAllocationDomService = service.BuildPortfolioAllocationDomService(portfolioAllocationRepository)
 	var allocationPlanDomService = service.BuildAllocationPlanDomService(allocationPlanRepository)
+	var allocationDomService = service.BuildAllocationDomService(allocationRepository)
 	var assetDomService = service.BuildAssetDomService(assetRepository)
 
 	// =====================================================
@@ -90,7 +92,10 @@ func (app *App) buildAppComponents() {
 	// =====================================================
 	// API - REST
 	// =====================================================
-	var portfolioRESTController = rest.BuildPortfolioRESTController(portfolioDomService)
+	var portfolioRESTController = rest.BuildPortfolioRESTController(
+		portfolioDomService,
+		allocationDomService,
+	)
 	var portfolioAllocationRESTController = rest.BuildPortfolioAllocationRESTController(
 		portfolioAllocationDomService,
 		portfolioAllocationManagementAppService,

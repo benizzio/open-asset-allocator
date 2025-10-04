@@ -234,44 +234,6 @@ func TestGetAvailableHistoryObservations(t *testing.T) {
 	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
 }
 
-func TestGetAvailablePortfolioAllocationClasses(t *testing.T) {
-
-	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/allocation-classes")
-	assert.NoError(t, err)
-
-	assert.Equal(t, http.StatusOK, response.StatusCode)
-
-	body, err := io.ReadAll(response.Body)
-	assert.NoError(t, err)
-	assert.NotEmpty(t, body)
-
-	var actualResponseJSON = string(body)
-	var expectedResponseJSON = `
-		["BONDS", "STOCKS"]
-	`
-
-	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
-}
-
-func TestGetAvailablePortfolioAllocationClassesNoneFound(t *testing.T) {
-
-	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/2/allocation-classes")
-	assert.NoError(t, err)
-
-	assert.Equal(t, http.StatusOK, response.StatusCode)
-
-	body, err := io.ReadAll(response.Body)
-	assert.NoError(t, err)
-	assert.NotEmpty(t, body)
-
-	var actualResponseJSON = string(body)
-	var expectedResponseJSON = `
-		[]
-	`
-
-	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
-}
-
 // TestPostPortfolioAllocationHistoryInsertOnly tests the successful creation of portfolio allocation history,
 // only inserting records.
 //

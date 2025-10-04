@@ -13,7 +13,8 @@ import (
 )
 
 type PortfolioRESTController struct {
-	portfolioDomService *service.PortfolioDomService
+	portfolioDomService  *service.PortfolioDomService
+	allocationDomService *service.AllocationDomService
 }
 
 func (controller *PortfolioRESTController) BuildRoutes() []infra.RESTRoute {
@@ -37,6 +38,11 @@ func (controller *PortfolioRESTController) BuildRoutes() []infra.RESTRoute {
 			Method:   http.MethodPut,
 			Path:     "/api/portfolio",
 			Handlers: gin.HandlersChain{controller.putPortfolio},
+		},
+		{
+			Method:   http.MethodGet,
+			Path:     "/api/portfolio/:" + portfolioIdParam + "/allocation-classes",
+			Handlers: gin.HandlersChain{controller.getAvailablePortfolioAllocationClasses},
 		},
 	}
 }
@@ -132,8 +138,33 @@ func (controller *PortfolioRESTController) putPortfolio(context *gin.Context) {
 	context.JSON(http.StatusOK, responseBody)
 }
 
-func BuildPortfolioRESTController(portfolioDomService *service.PortfolioDomService) *PortfolioRESTController {
+// getAvailablePortfolioAllocationClasses returns allocation classes from both portfolio
+// allocation history and planned allocations. This endpoint replaces the deprecated endpoint
+// in PortfolioAllocationRESTController.
+//
+// Authored by: GitHub Copilot
+func (controller *PortfolioRESTController) getAvailablePortfolioAllocationClasses(context *gin.Context) {
+
+	portfolioIdParamValue := context.Param(portfolioIdParam)
+	portfolioId, err := langext.ParseInt64(portfolioIdParamValue)
+	if infra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
+		return
+	}
+
+	availableClasses, err := controller.allocationDomService.FindAvailableAllocationClassesFromAllSources(portfolioId)
+	if infra.HandleAPIError(context, "Error getting available portfolio allocation classes", err) {
+		return
+	}
+
+	context.JSON(http.StatusOK, availableClasses)
+}
+
+func BuildPortfolioRESTController(
+	portfolioDomService *service.PortfolioDomService,
+	allocationDomService *service.AllocationDomService,
+) *PortfolioRESTController {
 	return &PortfolioRESTController{
 		portfolioDomService,
+		allocationDomService,
 	}
 }
