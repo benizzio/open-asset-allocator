@@ -38,7 +38,7 @@
             <div class="col"
                  data-hx-trigger-on-route="/portfolio/:portfolioId/allocation!load-allocation"
                  data-display-on-route="/portfolio/:portfolioId/allocation"
-                 hx-get="/websrc/pages/allocation-plan.html"
+                 hx-get="/websrc/components/allocation-plan.html"
                  hx-trigger="load-allocation once"
                  style="display: none"
             ></div>
@@ -154,9 +154,9 @@
         const hierarchy = portfolio.allocationStructure.hierarchy;
 
         const hierarchyLevelElements = document.querySelectorAll(elementIdPrefix);
-        hierarchyLevelElements.forEach((element) => {
-            element.textContent = hierarchy[hierarchy.length - 1].name;
-        });
+        for (const element of hierarchyLevelElements) {
+            element.textContent = hierarchy.at(-1).name;
+        }
     }
 
 </script>
