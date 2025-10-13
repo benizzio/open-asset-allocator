@@ -11,7 +11,7 @@
     "parcel": "^2.16.0",
     "rimraf": "^6.0.1",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.45.0"
+    "typescript-eslint": "^8.46.0"
   },
   "dependencies": {
     "bignumber.js": "^9.3.1",
