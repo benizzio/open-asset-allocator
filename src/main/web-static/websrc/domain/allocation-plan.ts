@@ -29,10 +29,10 @@ export type PlannedAllocationDTO = Omit<PlannedAllocation, "sliceSizePercentage"
 export type AllocationPlanDTO = Omit<AllocationPlan, "details"> & { details: PlannedAllocationDTO[], };
 
 export type FractalPlannedAllocation = {
+    allocation: PlannedAllocation;
     key: string;
     level: AllocationHierarchyLevel;
     subLevel?: AllocationHierarchyLevel;
-    allocation: PlannedAllocation;
     subAllocations?: FractalPlannedAllocation[];
     superAllocation?: FractalPlannedAllocation;
 };

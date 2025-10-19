@@ -7,7 +7,7 @@ import {
     MeasuramentUnit,
 } from "../chart/chart-types";
 import DomUtils from "../dom/dom-utils";
-import application from "../../application/application";
+import Application from "../../application";
 
 const handlebarsChartHelper = (
     source: object,
@@ -19,7 +19,7 @@ const handlebarsChartHelper = (
 ) => {
 
     const contextData = DomUtils.getContextDataFromRoot(contextDataSelector);
-    const chartContent = application.chartContents.toChartContent(chartDataType, source, contextData);
+    const chartContent = Application.chartContents.toChartContent(chartDataType, source, contextData);
 
     const options = DomUtils.getContextDataFromRoot("#" + optionsJSonElementId) as LocalChartOptions;
     options.measuramentUnit = options.measuramentUnit || MeasuramentUnit.CURRENCY;

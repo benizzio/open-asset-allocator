@@ -1,5 +1,5 @@
 import { infra } from "./infra/infra";
-import application from "./application/application";
+import Application from "./application";
 
 export default infra.init();
-application.init();
+Application.init();
