@@ -10,16 +10,16 @@
     <div class="card-header">Manage allocation plan data</div>
 
     <div class="card-body">
-        <!--        <div id="accordion-portfolio-history-management"-->
-        <!--             class="accordion container-fluid"-->
-        <!--             hx-get="/api/portfolio/:portfolioId/history/observation"-->
-        <!--             hx-include="[name='portfolioId']"-->
-        <!--             hx-trigger="load, reload-portfolio-history-management"-->
-        <!--             handlebars-template="template-portfolio-history-management"-->
-        <!--             data-hx-transform-response="addObservationZero"-->
-        <!--             data-hx-transform-response-on-route-matching="^\/api\/portfolio\/.+\/history\/observation$"-->
-        <!--        >-->
-        <!--        </div>-->
+        <div id="accordion-allocation-plan-management"
+             class="accordion container-fluid"
+             hx-get="/api/portfolio/:portfolioId/allocation-plan"
+             hx-include="[name='portfolioId']"
+             hx-trigger="load, reload-allocation-plan-management"
+             handlebars-template="template-allocation-plan-management"
+             data-hx-transform-response="mapToCompleteAllocationPlans"
+             data-hx-transform-response-on-route-matching="^\/api\/portfolio\/.+\/allocation\-plan$"
+        >
+        </div>
     </div>
 
 </div>

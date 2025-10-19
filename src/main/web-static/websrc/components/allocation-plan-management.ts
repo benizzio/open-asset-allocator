@@ -4,18 +4,23 @@ import { AllocationPlanDTO } from "../domain/allocation-plan";
 import { DomainService } from "../domain/service";
 import { htmxInfra } from "../infra/htmx/htmx";
 
-function mapToCompleteAllocationPlan(originalServerResponseJSON: string): string {
+function mapToCompleteAllocationPlans(originalServerResponseJSON: string): string {
+
     const portfolioDTO = DomUtils.getContextDataFromRoot("#portfolio-context #portfolio") as PortfolioDTO;
-    const allocationPlanDTO = JSON.parse(originalServerResponseJSON) as AllocationPlanDTO;
-    const completeAllocationPlan = DomainService.mapping.mapToCompleteAllocationPlan(portfolioDTO, allocationPlanDTO);
+    const allocationPlanDTOs = JSON.parse(originalServerResponseJSON) as AllocationPlanDTO[];
+
+    const completeAllocationPlan = DomainService.mapping.mapToSerializableCompleteAllocationPlans(
+        portfolioDTO,
+        allocationPlanDTOs,
+    );
     return JSON.stringify(completeAllocationPlan);
 }
 
 const allocationPlanManagement = {
     init() {
         htmxInfra.htmxTransformResponse.registerTransformResponseFunction(
-            "mapToCompleteAllocationPlan",
-            mapToCompleteAllocationPlan,
+            "mapToCompleteAllocationPlans",
+            mapToCompleteAllocationPlans,
         );
     },
 };

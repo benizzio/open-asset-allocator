@@ -49,3 +49,15 @@ export type CompleteAllocationPlan = {
     fractalHierarchicalPlan: FractalHierarchicalAllocationPlan;
     topLevelKey: string;
 };
+
+export type SerializableFractalPlannedAllocation =
+    Omit<FractalPlannedAllocation, "subAllocations" | "superAllocation">
+    & { subAllocations?: SerializableFractalPlannedAllocation[]; };
+
+export type SerializableFractalHierarchicalAllocationPlan =
+    Omit<FractalHierarchicalAllocationPlan, "topAllocations" | "aggregatorAllocationMap">
+    & { topAllocations: SerializableFractalPlannedAllocation[]; };
+
+export type SerializableCompleteAllocationPlan =
+    Omit<CompleteAllocationPlan, "fractalHierarchicalPlan">
+    & { fractalHierarchicalPlan: SerializableFractalHierarchicalAllocationPlan; };
