@@ -5,8 +5,8 @@ import chartModule from "../infra/chart/chart";
 import DomUtils from "../infra/dom/dom-utils";
 import {
     AllocationPlanDTO,
+    FractalHierarchicalAllocationPlan,
     FractalPlannedAllocation,
-    FractalPlannedAllocationHierarchy,
 } from "../domain/allocation-plan";
 import { PortfolioDTO } from "../domain/portfolio";
 import { DomainService } from "../domain/service";
@@ -18,24 +18,24 @@ class FractalPlannedAllocationMultiChartDataSource extends MultiChartDataSource 
     constructor(
         chartDataMap: Map<string, ChartData>,
         initialDataKey: string,
-        private readonly fractalHierarchy: FractalPlannedAllocationHierarchy,
+        private readonly fractalHierarchicalPlan: FractalHierarchicalAllocationPlan,
     ) {
         super(chartDataMap, initialDataKey);
     }
 
     getChartData(dataKey?: string): ChartData {
-        this.currentAggregator = dataKey ? this.fractalHierarchy.aggregatorAllocationMap.get(dataKey) : null;
+        this.currentAggregator = dataKey ? this.fractalHierarchicalPlan.aggregatorAllocationMap.get(dataKey) : null;
         return super.getChartData(dataKey);
     }
 
     getSubAllocationKeyByIndex(index: number): string {
         return !this.currentAggregator
-            ? this.fractalHierarchy.topAllocations[index].key
+            ? this.fractalHierarchicalPlan.topAllocations[index].key
             : this.currentAggregator.subAllocations[index].key;
     }
 
-    getFractalHierarchy(): FractalPlannedAllocationHierarchy {
-        return this.fractalHierarchy;
+    getFractalHierarchicalPlan(): FractalHierarchicalAllocationPlan {
+        return this.fractalHierarchicalPlan;
     }
 
     getCurrentAggregator(): FractalPlannedAllocation {
@@ -43,9 +43,12 @@ class FractalPlannedAllocationMultiChartDataSource extends MultiChartDataSource 
     }
 }
 
-function mapChildDatasets(fractalHierarchy: FractalPlannedAllocationHierarchy, chartDataMap: Map<string, ChartData>) {
-
-    fractalHierarchy.aggregatorAllocationMap.forEach((fractalAllocation) => {
+function mapChildDatasets(
+    fractalHierarchicalPlan: FractalHierarchicalAllocationPlan,
+    chartDataMap: Map<string, ChartData>,
+) {
+    
+    fractalHierarchicalPlan.aggregatorAllocationMap.forEach((fractalAllocation) => {
 
         const subAllocations = fractalAllocation.subAllocations;
 
@@ -81,15 +84,15 @@ function mapDataset(
     chartDataMap.set(datasetLabel, chartData);
 }
 
-function toChartDataMap(fractalHierarchy: FractalPlannedAllocationHierarchy): Map<string, ChartData> {
+function toChartDataMap(fractalHierarchicalPlan: FractalHierarchicalAllocationPlan): Map<string, ChartData> {
 
     const chartDataMap = new Map<string, ChartData>();
-    const topFractalAllocations = fractalHierarchy.topAllocations;
+    const topFractalAllocations = fractalHierarchicalPlan.topAllocations;
 
     const datasetLabel = topFractalAllocations[0].level.name;
     mapDataset(datasetLabel, topFractalAllocations, chartDataMap);
 
-    mapChildDatasets(fractalHierarchy, chartDataMap);
+    mapChildDatasets(fractalHierarchicalPlan, chartDataMap);
 
     return chartDataMap;
 }
@@ -137,7 +140,7 @@ function interactionObserverCallback(event: ChartEvent, elements: ActiveElement[
 
     const currentFractalAllocationLevelName = currentAggregator
         ? currentAggregator.subLevel.name
-        : chartDataSource.getFractalHierarchy().subLevel.name;
+        : chartDataSource.getFractalHierarchicalPlan().subLevel.name;
     const currentFractalAllocationLevelValue = currentAggregator ? "for " + currentAggregator.key : "";
     const levelLabel = currentFractalAllocationLevelName + " " + currentFractalAllocationLevelValue;
 
@@ -156,12 +159,12 @@ const allocationPlanChart = {
             allocationPlanDTO,
         );
 
-        const chartDataMap = toChartDataMap(completeAllocationPlan.fractalHierarchy);
-        
+        const chartDataMap = toChartDataMap(completeAllocationPlan.fractalHierarchicalPlan);
+
         const dataSource = new FractalPlannedAllocationMultiChartDataSource(
             chartDataMap,
             completeAllocationPlan.topLevelKey,
-            completeAllocationPlan.fractalHierarchy,
+            completeAllocationPlan.fractalHierarchicalPlan,
         );
 
         return {

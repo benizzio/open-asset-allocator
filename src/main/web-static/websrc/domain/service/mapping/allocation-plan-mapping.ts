@@ -14,15 +14,15 @@ import BigNumber from "bignumber.js";
 import {
     AllocationPlan,
     AllocationPlanDTO,
+    FractalHierarchicalAllocationPlan,
     FractalPlannedAllocation,
-    FractalPlannedAllocationHierarchy,
     PlannedAllocation,
 } from "../../allocation-plan";
 
-export function mapToAllocationPlanFractalHierarchy(
+export function mapToFractalHierarchicalAllocationPlan(
     allocationPlan: AllocationPlan,
     allocationStructure: AllocationStructure,
-): FractalPlannedAllocationHierarchy {
+): FractalHierarchicalAllocationPlan {
 
     const allocationsPerHierarchyLevel = mapAllocationsPerHierarchyLevel(allocationPlan);
 

@@ -37,7 +37,7 @@ export type FractalPlannedAllocation = {
     superAllocation?: FractalPlannedAllocation;
 };
 
-export type FractalPlannedAllocationHierarchy = {
+export type FractalHierarchicalAllocationPlan = {
     subLevel: AllocationHierarchyLevel;
     topAllocations: FractalPlannedAllocation[];
     aggregatorAllocationMap: Map<string, FractalPlannedAllocation>;
@@ -46,6 +46,6 @@ export type FractalPlannedAllocationHierarchy = {
 export type CompleteAllocationPlan = {
     portfolio: Portfolio;
     allocationPlan: AllocationPlan;
-    fractalHierarchy: FractalPlannedAllocationHierarchy;
+    fractalHierarchicalPlan: FractalHierarchicalAllocationPlan;
     topLevelKey: string;
 };

@@ -1,5 +1,5 @@
 import { AllocationDomainService } from "./allocation-service";
-import { mapToAllocationPlan, mapToAllocationPlanFractalHierarchy } from "./mapping/allocation-plan-mapping";
+import { mapToAllocationPlan, mapToFractalHierarchicalAllocationPlan } from "./mapping/allocation-plan-mapping";
 import { mapToPortfolio } from "./mapping/portfolio-mapping";
 import { AllocationPlanDTO, CompleteAllocationPlan } from "../allocation-plan";
 import { PortfolioDTO } from "../portfolio";
@@ -8,7 +8,7 @@ export const DomainService = {
     allocation: AllocationDomainService,
     mapping: {
         mapToAllocationPlan,
-        mapToAllocationPlanFractalHierarchy,
+        mapToFractalHierarchicalAllocationPlan,
         mapToPortfolio,
         mapToCompleteAllocationPlan(
             portfolioDTO: PortfolioDTO,
@@ -20,7 +20,7 @@ export const DomainService = {
 
             const allocationPlan = DomainService.mapping.mapToAllocationPlan(allocationPlanDTO);
 
-            const fractalHierarchy = DomainService.mapping.mapToAllocationPlanFractalHierarchy(
+            const fractalHierarchicalPlan = DomainService.mapping.mapToFractalHierarchicalAllocationPlan(
                 allocationPlan,
                 allocationStructure,
             );
@@ -32,7 +32,7 @@ export const DomainService = {
             return {
                 portfolio,
                 allocationPlan,
-                fractalHierarchy,
+                fractalHierarchicalPlan,
                 topLevelKey,
             };
         },
