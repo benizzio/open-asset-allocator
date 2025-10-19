@@ -5,6 +5,7 @@ import portfolioHistoryManagement from "../components/portfolio-history-manageme
 /**
  * Component that represents the central application code tied to the underlying infrastructure.
  */
+//TODO restrict folder imports to this module only
 const application = {
     init() {
         registerPortfolioAnalysisHandlebarsHelpers();

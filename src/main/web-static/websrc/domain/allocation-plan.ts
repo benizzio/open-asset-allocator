@@ -1,5 +1,6 @@
 import BigNumber from "bignumber.js";
 import { AllocationHierarchyLevel, AllocationType } from "./allocation";
+import { Portfolio } from "./portfolio";
 
 export type PlannedAllocation = {
     hierarchicalId: string[];
@@ -40,4 +41,11 @@ export type FractalPlannedAllocationHierarchy = {
     subLevel: AllocationHierarchyLevel;
     topAllocations: FractalPlannedAllocation[];
     aggregatorAllocationMap: Map<string, FractalPlannedAllocation>;
+};
+
+export type CompleteAllocationPlan = {
+    portfolio: Portfolio;
+    allocationPlan: AllocationPlan;
+    fractalHierarchy: FractalPlannedAllocationHierarchy;
+    topLevelKey: string;
 };

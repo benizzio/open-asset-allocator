@@ -1,6 +1,5 @@
 import { ChartContent, MultiChartDataSource } from "../infra/chart/chart-types";
 import { ActiveElement, Chart, ChartData, ChartDataset, ChartEvent } from "chart.js";
-import { allocationDomainService } from "../domain/service/allocation-service";
 import { changeChartDataOnDatasource } from "../infra/chart/chart-utils";
 import chartModule from "../infra/chart/chart";
 import DomUtils from "../infra/dom/dom-utils";
@@ -10,6 +9,7 @@ import {
     FractalPlannedAllocationHierarchy,
 } from "../domain/allocation-plan";
 import { PortfolioDTO } from "../domain/portfolio";
+import { DomainService } from "../domain/service";
 
 class FractalPlannedAllocationMultiChartDataSource extends MultiChartDataSource {
 
@@ -151,26 +151,17 @@ const allocationPlanChart = {
 
     toUnidimensionalChartContent(allocationPlanDTO: AllocationPlanDTO, portfolioDTO: PortfolioDTO): ChartContent {
 
-        const portfolio = allocationDomainService.mapToPortfolio(portfolioDTO);
-        const allocationStructure = portfolio.allocationStructure;
-
-        const allocationPlan = allocationDomainService.mapToAllocationPlan(allocationPlanDTO);
-
-        const fractalHierarchy = allocationDomainService.mapToAllocationPlanFractalHierarchy(
-            allocationPlan,
-            allocationStructure,
+        const completeAllocationPlan = DomainService.mapping.mapToCompleteAllocationPlan(
+            portfolioDTO,
+            allocationPlanDTO,
         );
 
-        const chartDataMap = toChartDataMap(fractalHierarchy);
-
-        const topLevelKey = allocationDomainService.getTopLevelHierarchyKeyFromAllocationPlan(
-            allocationStructure,
-        );
-
+        const chartDataMap = toChartDataMap(completeAllocationPlan.fractalHierarchy);
+        
         const dataSource = new FractalPlannedAllocationMultiChartDataSource(
             chartDataMap,
-            topLevelKey,
-            fractalHierarchy,
+            completeAllocationPlan.topLevelKey,
+            completeAllocationPlan.fractalHierarchy,
         );
 
         return {
