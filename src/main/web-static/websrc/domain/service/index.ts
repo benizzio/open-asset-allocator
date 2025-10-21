@@ -9,7 +9,9 @@ import { AllocationPlanDTO, CompleteAllocationPlan, SerializableCompleteAllocati
 import { PortfolioDTO } from "../portfolio";
 
 export const DomainService = {
+
     allocation: AllocationDomainService,
+
     mapping: {
 
         mapToPortfolio,
