@@ -36,7 +36,6 @@ export const DomainService = {
             );
 
             return {
-                portfolio,
                 allocationPlan,
                 fractalHierarchicalPlan,
                 topLevelKey,

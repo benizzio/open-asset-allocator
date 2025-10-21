@@ -2,10 +2,10 @@
 
     <div class="accordion"
          id="accordion-allocation-plan"
-         handlebars-template="template-allocation-plan-item"
          hx-get="/api/portfolio/:portfolioId/allocation-plan"
-         hx-trigger="load"
          hx-include="[name='portfolioId']"
+         hx-trigger="load"
+         handlebars-template="template-allocation-plan-item"
          hx-on::after-settle="initAllocationPlanHierarchyLabels()"
          data-display-on-route="/portfolio/:portfolioId/allocation"
     >

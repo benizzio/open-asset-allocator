@@ -36,8 +36,8 @@
                  style="display: none"
             ></div>
             <div class="col"
-                 data-hx-trigger-on-route="/portfolio/:portfolioId/allocation!load-allocation"
-                 data-display-on-route="/portfolio/:portfolioId/allocation"
+                 data-hx-trigger-on-route="/portfolio/:portfolioId/allocation/*!load-allocation"
+                 data-display-on-route="/portfolio/:portfolioId/allocation/*"
                  hx-get="/websrc/components/allocation-plan.html"
                  hx-trigger="load-allocation once"
                  style="display: none"
