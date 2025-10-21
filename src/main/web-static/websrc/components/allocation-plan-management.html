@@ -10,6 +10,7 @@
     <div class="card-header">Manage allocation plan data</div>
 
     <div class="card-body">
+        <!-- TODO add a trigger on route to reload the allocation plans when navigating back to this component -->
         <div id="accordion-allocation-plan-management"
              class="accordion container-fluid"
              hx-get="/api/portfolio/:portfolioId/allocation-plan"
@@ -23,3 +24,54 @@
     </div>
 
 </div>
+
+<script id="template-allocation-plan-management" type="text/x-handlebars-template">
+
+    {{#each  .}}
+
+        <div id="allocation-plan-management-container-{{allocationPlan.id}}" class="accordion-item">
+
+            <h2 id="allocation-plan-management-trigger-{{allocationPlan.id}}" class="accordion-header">
+                <button class="accordion-button collapsed"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#allocation-plan-management-{{allocationPlan.id}}"
+                        aria-expanded="true"
+                        aria-controls="allocation-plan-management-{{allocationPlan.id}}"
+                >
+                    {{#if allocationPlan.id}}
+                        {{allocationPlan.name}}
+                    {{else}}
+                        <input type="text"
+                               placeholder="New allocation plan *"
+                               aria-label="New allocation plan name"
+                               autocomplete="off"
+                               class="form-control me-3"
+                               oninput=""
+                               onkeyup="event.preventDefault()"
+                        />
+                    {{/if}}
+                </button>
+            </h2>
+
+            <div id="allocation-plan-management-{{allocationPlan.id}}"
+                 class="accordion-collapse collapse"
+                 data-bs-parent="#accordion-allocation-plan-management"
+            >
+                <div class="accordion-body row justify-content-center">
+
+                    <form id="allocation-plan-management-form-{{id}}"
+                          class="needs-validation"
+                          hx-post="/api/portfolio/:portfolioId/allocation-plan"
+                          hx-ext="form-json"
+                          hx-on::after-request=""
+                    >
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+    {{/each}}
+
+</script>
