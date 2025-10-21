@@ -41,6 +41,40 @@ export default [
                 { blankLine: "always", prev: "*", next: "multiline-let" },
                 { blankLine: "always", prev: "*", next: "multiline-var" }],
 
+            // Restrict deep imports under domain/service and application; enforce public API imports only
+            // Authored by: GitHub Copilot
+            "no-restricted-imports": [
+                "error",
+                {
+                    patterns: [
+                        // domain/service public API only
+                        {
+                            group: [
+                                "**/domain/service/**",
+                                "domain/service/**",
+                                "./domain/service/**",
+                                "../domain/service/**",
+                            ],
+                            message:
+                                "Import from the public API 'domain/service' (index.ts) only; " +
+                                "deep imports are not allowed.",
+                        },
+                        // application public API only (outside the module)
+                        {
+                            group: [
+                                "**/application/**",
+                                "application/**",
+                                "./application/**",
+                                "../application/**",
+                            ],
+                            message:
+                                "Import from the public API 'application' (index.ts) only; " +
+                                "deep imports are not allowed.",
+                        },
+                    ],
+                },
+            ],
+
         },
     },
 

@@ -1,24 +1,32 @@
-import { AllocationHierarchyLevel, AllocationStructure, LOWEST_AVAILABLE_HIERARCHY_LEVEL_INDEX } from "../allocation";
+import {
+    AllocationHierarchyLevel,
+    AllocationStructure,
+    LOWEST_AVAILABLE_HIERARCHY_LEVEL_INDEX,
+} from "../../allocation";
 import {
     getAllocationHierarchySize,
     getHierarchicalIdAsString,
     getHierarchyLevelIndex,
     getPlannedAllocationHierarchicalIdAsString,
     getTopLevelHierarchyIndexFromAllocationStructure,
-} from "../utils/allocation-utils";
+} from "../allocation-utils";
 import BigNumber from "bignumber.js";
 import {
     AllocationPlan,
     AllocationPlanDTO,
+    CompleteAllocationPlan,
+    FractalHierarchicalAllocationPlan,
     FractalPlannedAllocation,
-    FractalPlannedAllocationHierarchy,
     PlannedAllocation,
-} from "../allocation-plan";
+    SerializableCompleteAllocationPlan,
+    SerializableFractalHierarchicalAllocationPlan,
+    SerializableFractalPlannedAllocation,
+} from "../../allocation-plan";
 
-export function mapToAllocationPlanFractalHierarchy(
+export function mapToFractalHierarchicalAllocationPlan(
     allocationPlan: AllocationPlan,
     allocationStructure: AllocationStructure,
-): FractalPlannedAllocationHierarchy {
+): FractalHierarchicalAllocationPlan {
 
     const allocationsPerHierarchyLevel = mapAllocationsPerHierarchyLevel(allocationPlan);
 
@@ -179,5 +187,44 @@ export function mapToAllocationPlan(
     return {
         ...allocationPlanDTO,
         details: allocations,
+    };
+}
+
+export function mapToSerializableFractalHierarchicalAllocationPlan(
+    fractalHierarchicalPlan: FractalHierarchicalAllocationPlan,
+): SerializableFractalHierarchicalAllocationPlan {
+
+    function mapToSerializableFractalPlannedAllocation(
+        fractalPlannedAllocation: FractalPlannedAllocation,
+    ): SerializableFractalPlannedAllocation {
+
+        return {
+            key: fractalPlannedAllocation.key,
+            level: fractalPlannedAllocation.level,
+            subLevel: fractalPlannedAllocation.subLevel,
+            allocation: fractalPlannedAllocation.allocation,
+            subAllocations: fractalPlannedAllocation.subAllocations
+                ? fractalPlannedAllocation.subAllocations.map(mapToSerializableFractalPlannedAllocation)
+                : undefined,
+        };
+    }
+
+    return {
+        subLevel: fractalHierarchicalPlan.subLevel,
+        topAllocations: fractalHierarchicalPlan.topAllocations.map(mapToSerializableFractalPlannedAllocation),
+    };
+}
+
+export function mapToSerializableCompleteAllocationPlan(
+    completeAllocationPlan: CompleteAllocationPlan,
+): SerializableCompleteAllocationPlan {
+    return {
+        portfolio: completeAllocationPlan.portfolio,
+        allocationPlan: completeAllocationPlan.allocationPlan,
+        fractalHierarchicalPlan:
+            mapToSerializableFractalHierarchicalAllocationPlan(
+                completeAllocationPlan.fractalHierarchicalPlan,
+            ),
+        topLevelKey: completeAllocationPlan.topLevelKey,
     };
 }

@@ -8,17 +8,28 @@ function getCacheableContextData(
         return null;
     }
 
-    let elementData: unknown;
+    let elementData: unknown = null;
 
     if(contextDataCache.has(contextDataElement)) {
         elementData = contextDataCache.get(contextDataElement);
     }
-    else {
+    else if(contextDataElement.textContent.trim()) {
         elementData = JSON.parse(contextDataElement.textContent);
         contextDataCache.set(contextDataElement, elementData);
+        addRemoveObserver(contextDataElement);
     }
 
     return elementData;
+}
+
+function addRemoveObserver(contextDataElement: HTMLElement) {
+    const observer = new MutationObserver(() => {
+        if(DomUtils.wasElementRemoved(contextDataElement)) {
+            contextDataCache.delete(contextDataElement);
+            observer.disconnect();
+        }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
 }
 
 function queryFirst(selector: string): HTMLElement {
@@ -39,6 +50,16 @@ const DomUtils = {
     wasElementRemoved(element: HTMLElement) {
         return !document.body.contains(element);
     },
+    /**
+     * Gets context data from root document element matching the given selector.
+     * Caches the parsed data for future retrievals.
+     *
+     * Context data elements are expected to be script tags on the document with type "application/json" and content
+     * relevant to the current structure of pages.
+     *
+     * @param contextDataSelector CSS selector to find the context data element in the root document.
+     * @returns The parsed context data object, or null if the element is not found.
+     */
     getContextDataFromRoot(contextDataSelector: string): unknown {
         const dataElement = queryFirst(contextDataSelector);
         return getCacheableContextData(dataElement);

@@ -1,10 +1,8 @@
 import { AllocationHierarchyLevel, AllocationStructure, LOWEST_AVAILABLE_HIERARCHY_LEVEL } from "../allocation";
-import { mapToAllocationPlan, mapToAllocationPlanFractalHierarchy } from "../mapping/allocation-plan-mapping";
-import { getTopLevelHierarchyIndexFromAllocationStructure } from "../utils/allocation-utils";
-import { mapToPortfolio } from "../mapping/portfolio-mapping";
+import { getTopLevelHierarchyIndexFromAllocationStructure } from "./allocation-utils";
 
 
-export const allocationDomainService = {
+export const AllocationDomainService = {
 
     getTopLevelHierarchyKeyFromAllocationPlan(
         portFolioAllocationStructure: AllocationStructure,
@@ -47,9 +45,4 @@ export const allocationDomainService = {
 
         return { topHierarchyLevel, topLevelIndex };
     },
-
-    //TODO review this
-    mapToAllocationPlan,
-    mapToAllocationPlanFractalHierarchy,
-    mapToPortfolio,
 };
