@@ -24,6 +24,7 @@ const (
 				SELECT DISTINCT paot.*
 				FROM portfolio_allocation_fact pa
 				JOIN portfolio_allocation_obs_time paot ON pa.observation_time_id = paot.id
+				WHERE pa.portfolio_id = {:portfolioId}
 				ORDER BY paot.observation_timestamp DESC 
 				LIMIT {:observationTimestampLimit}
 			)
