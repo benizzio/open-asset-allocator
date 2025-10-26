@@ -71,6 +71,25 @@ export default [
                                 "Import from the public API 'application' (index.ts) only; " +
                                 "deep imports are not allowed.",
                         },
+                        // Block deep imports into the local 'infra/handlebars' module; import only from its public API
+                        // Authored by: GitHub Copilot
+                        {
+                            group: [
+                                // generic patterns
+                                "**/infra/handlebars/*",
+                                "**/infra/handlebars/**",
+                                // common relative forms
+                                "infra/handlebars/*",
+                                "infra/handlebars/**",
+                                "./infra/handlebars/*",
+                                "./infra/handlebars/**",
+                                "../infra/handlebars/*",
+                                "../infra/handlebars/**",
+                            ],
+                            message:
+                                "Import from the public API 'infra/handlebars' (index.ts) only; " +
+                                "deep imports are not allowed.",
+                        },
                     ],
                 },
             ],

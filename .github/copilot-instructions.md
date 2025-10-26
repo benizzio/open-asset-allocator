@@ -63,6 +63,7 @@
     - must contain proper minimal code comment documentation according to the language standards,
     - public API code (as in usable in other packages or modules) must contain very detailed usage instructions. It must
       also contain authoring documentation.
+    - if the laguage has authoring documentation standards, it must be followed
     - Examples:
       ```go
       // private function:
@@ -91,6 +92,20 @@
       func GetStructNamespaceDescription(targetStruct interface{}, fieldNamespace string) (namespace, fieldName string) {
       <...>
       }
+      ```
+      ```javascript
+      /**
+       * Converts a JavaScript value to a JSON string.
+       *
+       * @param object - The value to serialize.
+       * @returns A JSON string representation of the value.
+       * 
+       * @example
+       * <pre>{{stringify data}}</pre>
+       * 
+       * @author GitHub Copilot
+       */
+      function stringifyHelper(object: unknown): string {}
       ```
 - when implementing tests:
     - follow standard names `expected` and `actual` for variables used in the appropriate context

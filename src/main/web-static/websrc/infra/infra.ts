@@ -1,6 +1,6 @@
 import { Chart, registerables } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import { handlebarsInfra } from "./handlebars/handlebars";
+import { handlebarsInfra } from "./handlebars";
 import { htmxInfra } from "./htmx/htmx";
 import router from "./routing/router";
 import * as bootstrap from "bootstrap";

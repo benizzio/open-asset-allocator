@@ -78,10 +78,9 @@
 
                             <thead class="sticky-header">
                             <tr>
-                                <!-- TODO invert this iteration with a custom helper -->
-                                {{#each @root.portfolio.allocationStructure.hierarchy}}
+                                {{#eachReverse @root.portfolio.allocationStructure.hierarchy}}
                                     <th scope="col">{{this.name}}</th>
-                                {{/each}}
+                                {{/eachReverse}}
                                 <th scope="col">Cash reserve?</th>
                                 <th scope="col">Slice size (%)</th>
                                 <th scope="col"></th>
