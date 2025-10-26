@@ -1,24 +1,26 @@
-import { AllocationHierarchyLevel, AllocationStructure, LOWEST_AVAILABLE_HIERARCHY_LEVEL_INDEX } from "../allocation";
+import {
+    AllocationPlan,
+    FractalHierarchicalAllocationPlan,
+    FractalPlannedAllocation,
+    PlannedAllocation,
+} from "../../../allocation-plan";
+import {
+    AllocationHierarchyLevel,
+    AllocationStructure,
+    LOWEST_AVAILABLE_HIERARCHY_LEVEL_INDEX,
+} from "../../../allocation";
 import {
     getAllocationHierarchySize,
     getHierarchicalIdAsString,
     getHierarchyLevelIndex,
     getPlannedAllocationHierarchicalIdAsString,
     getTopLevelHierarchyIndexFromAllocationStructure,
-} from "../utils/allocation-utils";
-import BigNumber from "bignumber.js";
-import {
-    AllocationPlan,
-    AllocationPlanDTO,
-    FractalPlannedAllocation,
-    FractalPlannedAllocationHierarchy,
-    PlannedAllocation,
-} from "../allocation-plan";
+} from "../../allocation-utils";
 
-export function mapToAllocationPlanFractalHierarchy(
+export function mapToFractalHierarchicalAllocationPlan(
     allocationPlan: AllocationPlan,
     allocationStructure: AllocationStructure,
-): FractalPlannedAllocationHierarchy {
+): FractalHierarchicalAllocationPlan {
 
     const allocationsPerHierarchyLevel = mapAllocationsPerHierarchyLevel(allocationPlan);
 
@@ -163,21 +165,4 @@ function connectAllocationsToFractalStructure(
         parent.subAllocations.push(fractalAllocation);
         fractalAllocation.superAllocation = parent;
     });
-}
-
-export function mapToAllocationPlan(
-    allocationPlanDTO: AllocationPlanDTO,
-): AllocationPlan {
-
-    const allocations = allocationPlanDTO.details.map((allocation) => {
-        return {
-            ...allocation,
-            sliceSizePercentage: new BigNumber(allocation.sliceSizePercentage),
-        } as PlannedAllocation;
-    });
-
-    return {
-        ...allocationPlanDTO,
-        details: allocations,
-    };
 }
