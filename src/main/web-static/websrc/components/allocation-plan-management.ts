@@ -9,11 +9,11 @@ function mapToCompleteAllocationPlans(originalServerResponseJSON: string): strin
     const portfolioDTO = DomUtils.getContextDataFromRoot("#portfolio-context #portfolio") as PortfolioDTO;
     const allocationPlanDTOs = JSON.parse(originalServerResponseJSON) as AllocationPlanDTO[];
 
-    const completeAllocationPlan = DomainService.mapping.mapToSerializableCompleteAllocationPlans(
+    const completeAllocationPlanSet = DomainService.mapping.mapToSerializablePortfolioCompleteAllocationPlanSet(
         portfolioDTO,
         allocationPlanDTOs,
     );
-    return JSON.stringify(completeAllocationPlan);
+    return JSON.stringify(completeAllocationPlanSet);
 }
 
 const allocationPlanManagement = {

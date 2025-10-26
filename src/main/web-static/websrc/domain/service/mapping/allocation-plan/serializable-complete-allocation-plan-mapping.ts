@@ -3,9 +3,11 @@ import {
     AllocationPlanDTO,
     CompleteAllocationPlan,
     SerializableCompleteAllocationPlan,
+    SerializablePortfolioCompleteAllocationPlanSet,
 } from "../../../allocation-plan";
 import { mapToSerializableFractalHierarchicalAllocationPlan } from "./serializable-fractal-allocation-plan-mapping";
 import { mapToCompleteAllocationPlans } from "./complete-allocation-plan-mapping";
+import { mapToPortfolio } from "../portfolio-mapping";
 
 export function mapToSerializableCompleteAllocationPlans(
     portfolioDTO: PortfolioDTO,
@@ -29,5 +31,17 @@ export function mapToSerializableCompleteAllocationPlan(
                 completeAllocationPlan.fractalHierarchicalPlan,
             ),
         topLevelKey: completeAllocationPlan.topLevelKey,
+    };
+}
+
+export function mapToSerializablePortfolioCompleteAllocationPlanSet(
+    portfolioDTO: PortfolioDTO,
+    allocationPlanDTOs: AllocationPlanDTO[],
+): SerializablePortfolioCompleteAllocationPlanSet {
+    const portfolio = mapToPortfolio(portfolioDTO);
+    const completeAllocationPlans = mapToSerializableCompleteAllocationPlans(portfolioDTO, allocationPlanDTOs);
+    return {
+        portfolio,
+        completeAllocationPlans,
     };
 }

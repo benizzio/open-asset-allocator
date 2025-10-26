@@ -1,5 +1,6 @@
 import BigNumber from "bignumber.js";
 import { AllocationHierarchyLevel, AllocationType } from "./allocation";
+import { Portfolio } from "./portfolio";
 
 export type PlannedAllocation = {
     hierarchicalId: string[];
@@ -59,3 +60,8 @@ export type SerializableFractalHierarchicalAllocationPlan =
 export type SerializableCompleteAllocationPlan =
     Omit<CompleteAllocationPlan, "fractalHierarchicalPlan">
     & { fractalHierarchicalPlan: SerializableFractalHierarchicalAllocationPlan; };
+
+export type SerializablePortfolioCompleteAllocationPlanSet = {
+    portfolio: Portfolio;
+    completeAllocationPlans: SerializableCompleteAllocationPlan[];
+};
