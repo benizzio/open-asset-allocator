@@ -1068,6 +1068,8 @@ func postPortfolioAllocationForValidationFailure(t *testing.T, postPortfolioJSON
 //
 // This test verifies that when the LIMIT clause in the availableObservationTimestampsComplement CTE is applied,
 // it correctly filters by portfolio_id so that data for a specific portfolio is not incorrectly skipped.
+//
+// Authored by: GitHub Copilot
 func TestGetPortfolioAllocationHistoryWithMultiplePortfoliosAndManyObservations(t *testing.T) {
 
 	// Setup: Create 15 observation timestamps (more than the default limit of 10)
