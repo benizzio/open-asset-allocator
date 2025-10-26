@@ -1,3 +1,4 @@
+<!-- TODO add button functionality -->
 <button type="button"
         class="btn btn-secondary mb-2"
         onclick=""
@@ -42,6 +43,7 @@
                     {{#if allocationPlan.id}}
                         {{allocationPlan.name}}
                     {{else}}
+                        <!-- TODO mask oninput -->
                         <input type="text"
                                placeholder="New allocation plan *"
                                aria-label="New allocation plan name"
@@ -60,12 +62,18 @@
             >
                 <div class="accordion-body row justify-content-center">
 
+                    <!-- TODO after request, reload -->
                     <form id="allocation-plan-management-form-{{id}}"
                           class="needs-validation"
                           hx-post="/api/portfolio/:portfolioId/allocation-plan"
                           hx-ext="form-json"
                           hx-on::after-request=""
                     >
+
+                        <input type="hidden" name="id" value="{{allocationPlan.id}}" />
+                        {{#unless allocationPlan.id}}<input type="hidden" name="name" />{{/unless}}
+                        <input type="hidden" name="type" value="ALLOCATION_PLAN" />
+
                     </form>
                 </div>
             </div>

@@ -1,27 +1,21 @@
 import {
+    AllocationPlan,
+    FractalHierarchicalAllocationPlan,
+    FractalPlannedAllocation,
+    PlannedAllocation,
+} from "../../../allocation-plan";
+import {
     AllocationHierarchyLevel,
     AllocationStructure,
     LOWEST_AVAILABLE_HIERARCHY_LEVEL_INDEX,
-} from "../../allocation";
+} from "../../../allocation";
 import {
     getAllocationHierarchySize,
     getHierarchicalIdAsString,
     getHierarchyLevelIndex,
     getPlannedAllocationHierarchicalIdAsString,
     getTopLevelHierarchyIndexFromAllocationStructure,
-} from "../allocation-utils";
-import BigNumber from "bignumber.js";
-import {
-    AllocationPlan,
-    AllocationPlanDTO,
-    CompleteAllocationPlan,
-    FractalHierarchicalAllocationPlan,
-    FractalPlannedAllocation,
-    PlannedAllocation,
-    SerializableCompleteAllocationPlan,
-    SerializableFractalHierarchicalAllocationPlan,
-    SerializableFractalPlannedAllocation,
-} from "../../allocation-plan";
+} from "../../allocation-utils";
 
 export function mapToFractalHierarchicalAllocationPlan(
     allocationPlan: AllocationPlan,
@@ -171,60 +165,4 @@ function connectAllocationsToFractalStructure(
         parent.subAllocations.push(fractalAllocation);
         fractalAllocation.superAllocation = parent;
     });
-}
-
-export function mapToAllocationPlan(
-    allocationPlanDTO: AllocationPlanDTO,
-): AllocationPlan {
-
-    const allocations = allocationPlanDTO.details.map((allocation) => {
-        return {
-            ...allocation,
-            sliceSizePercentage: new BigNumber(allocation.sliceSizePercentage),
-        } as PlannedAllocation;
-    });
-
-    return {
-        ...allocationPlanDTO,
-        details: allocations,
-    };
-}
-
-export function mapToSerializableFractalHierarchicalAllocationPlan(
-    fractalHierarchicalPlan: FractalHierarchicalAllocationPlan,
-): SerializableFractalHierarchicalAllocationPlan {
-
-    function mapToSerializableFractalPlannedAllocation(
-        fractalPlannedAllocation: FractalPlannedAllocation,
-    ): SerializableFractalPlannedAllocation {
-
-        return {
-            key: fractalPlannedAllocation.key,
-            level: fractalPlannedAllocation.level,
-            subLevel: fractalPlannedAllocation.subLevel,
-            allocation: fractalPlannedAllocation.allocation,
-            subAllocations: fractalPlannedAllocation.subAllocations
-                ? fractalPlannedAllocation.subAllocations.map(mapToSerializableFractalPlannedAllocation)
-                : undefined,
-        };
-    }
-
-    return {
-        subLevel: fractalHierarchicalPlan.subLevel,
-        topAllocations: fractalHierarchicalPlan.topAllocations.map(mapToSerializableFractalPlannedAllocation),
-    };
-}
-
-export function mapToSerializableCompleteAllocationPlan(
-    completeAllocationPlan: CompleteAllocationPlan,
-): SerializableCompleteAllocationPlan {
-    return {
-        portfolio: completeAllocationPlan.portfolio,
-        allocationPlan: completeAllocationPlan.allocationPlan,
-        fractalHierarchicalPlan:
-            mapToSerializableFractalHierarchicalAllocationPlan(
-                completeAllocationPlan.fractalHierarchicalPlan,
-            ),
-        topLevelKey: completeAllocationPlan.topLevelKey,
-    };
 }
