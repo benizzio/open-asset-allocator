@@ -1062,3 +1062,113 @@ func postPortfolioAllocationForValidationFailure(t *testing.T, postPortfolioJSON
 	assert.NotEmpty(t, body)
 	return body
 }
+
+// TestGetPortfolioAllocationHistoryWithMultiplePortfoliosAndManyObservations tests the fix for the issue where
+// portfolio history data was being skipped when there are more than 10 observations across multiple portfolios.
+//
+// This test verifies that when the LIMIT clause in the availableObservationTimestampsComplement CTE is applied,
+// it correctly filters by portfolio_id so that data for a specific portfolio is not incorrectly skipped.
+//
+// Authored by: GitHub Copilot
+func TestGetPortfolioAllocationHistoryWithMultiplePortfoliosAndManyObservations(t *testing.T) {
+
+	// Setup: Create 15 observation timestamps (more than the default limit of 10)
+	// for portfolio 2, ensuring they all get newer timestamps than portfolio 1
+	var setupSQL = `
+		-- Insert 15 observation timestamps for testing
+		INSERT INTO portfolio_allocation_obs_time (observation_time_tag, observation_timestamp)
+		VALUES 
+			('test_obs_1', '2025-10-01 00:00:00'::TIMESTAMP),
+			('test_obs_2', '2025-10-02 00:00:00'::TIMESTAMP),
+			('test_obs_3', '2025-10-03 00:00:00'::TIMESTAMP),
+			('test_obs_4', '2025-10-04 00:00:00'::TIMESTAMP),
+			('test_obs_5', '2025-10-05 00:00:00'::TIMESTAMP),
+			('test_obs_6', '2025-10-06 00:00:00'::TIMESTAMP),
+			('test_obs_7', '2025-10-07 00:00:00'::TIMESTAMP),
+			('test_obs_8', '2025-10-08 00:00:00'::TIMESTAMP),
+			('test_obs_9', '2025-10-09 00:00:00'::TIMESTAMP),
+			('test_obs_10', '2025-10-10 00:00:00'::TIMESTAMP),
+			('test_obs_11', '2025-10-11 00:00:00'::TIMESTAMP),
+			('test_obs_12', '2025-10-12 00:00:00'::TIMESTAMP),
+			('test_obs_13', '2025-10-13 00:00:00'::TIMESTAMP),
+			('test_obs_14', '2025-10-14 00:00:00'::TIMESTAMP),
+			('test_obs_15', '2025-10-15 00:00:00'::TIMESTAMP)
+		;
+
+		-- Add portfolio allocations for portfolio 2 with all 15 observation timestamps
+		INSERT INTO portfolio_allocation_fact (
+			asset_id, "class", cash_reserve, asset_quantity, asset_market_price,
+			total_market_value, portfolio_id, observation_time_id
+		)
+		SELECT 
+			1, 'BONDS', FALSE, 100, 100, 10000, 2,
+			id
+		FROM portfolio_allocation_obs_time 
+		WHERE observation_time_tag LIKE 'test_obs_%'
+		;
+	`
+
+	err := inttestinfra.ExecuteDBQuery(setupSQL)
+	assert.NoError(t, err)
+
+	t.Cleanup(
+		inttestutil.BuildCleanupFunctionBuilder().
+			AddCleanupQuery(
+				`DELETE FROM portfolio_allocation_fact 
+				WHERE observation_time_id IN (
+					SELECT id FROM portfolio_allocation_obs_time WHERE observation_time_tag ~ '^test_obs_'
+				)`,
+			).
+			AddCleanupQuery(`DELETE FROM portfolio_allocation_obs_time WHERE observation_time_tag ~ '^test_obs_'`).
+			Build(),
+	)
+
+	// Act: Get portfolio history for portfolio 2 with the default limit of 10 observations
+	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/2/history")
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+
+	// Assert: Verify that we get exactly 10 observations for portfolio 2
+	// (the most recent 10 based on the LIMIT)
+	var actualResponseJSON = string(body)
+
+	// The response should contain 10 snapshots with observation timestamps from test_obs_15 down to test_obs_6
+	// This verifies that the CTE correctly filters by portfolio_id and doesn't skip data
+	assert.Contains(t, actualResponseJSON, "test_obs_15")
+	assert.Contains(t, actualResponseJSON, "test_obs_14")
+	assert.Contains(t, actualResponseJSON, "test_obs_13")
+	assert.Contains(t, actualResponseJSON, "test_obs_12")
+	assert.Contains(t, actualResponseJSON, "test_obs_11")
+	assert.Contains(t, actualResponseJSON, "test_obs_10")
+	assert.Contains(t, actualResponseJSON, "test_obs_9")
+	assert.Contains(t, actualResponseJSON, "test_obs_8")
+	assert.Contains(t, actualResponseJSON, "test_obs_7")
+	assert.Contains(t, actualResponseJSON, "test_obs_6")
+	
+	// test_obs_1 through test_obs_5 should NOT be in the response (beyond the LIMIT of 10)
+	// Use specific format to avoid substring matching issues (e.g., test_obs_1 appearing in test_obs_10)
+	assert.NotContains(t, actualResponseJSON, "\"test_obs_5\"")
+	assert.NotContains(t, actualResponseJSON, "\"test_obs_4\"")
+	assert.NotContains(t, actualResponseJSON, "\"test_obs_3\"")
+	assert.NotContains(t, actualResponseJSON, "\"test_obs_2\"")
+	assert.NotContains(t, actualResponseJSON, "\"test_obs_1\"")
+
+	// Additional verification: Ensure portfolio 1 history is still working correctly
+	// and hasn't been affected by the changes
+	response1, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/history")
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, response1.StatusCode)
+
+	body1, err := io.ReadAll(response1.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body1)
+
+	// Portfolio 1 should still have its original 2 observations
+	var actualResponse1JSON = string(body1)
+	assert.Contains(t, actualResponse1JSON, "202503")
+	assert.Contains(t, actualResponse1JSON, "202501")
+}
