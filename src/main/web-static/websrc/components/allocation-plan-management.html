@@ -83,13 +83,22 @@
                                 {{/eachReverse}}
                                 <th scope="col">Cash reserve?</th>
                                 <th scope="col">Slice size (%)</th>
-                                <th scope="col"></th>
                             </tr>
                             </thead>
 
                             <tbody class="table-group-divider">
-                            </tbody>
 
+                            {{#each fractalHierarchicalPlan.topAllocations}}
+
+                                {{> template-allocation-plan-management-form-tbody-row
+                                        fractalPlannedAllocation=.
+                                        hierarchy=@root.portfolio.allocationStructure.hierarchy
+                                        allocationIndex=@index
+                                }}
+
+                            {{/each}}
+
+                            </tbody>
 
                         </table>
 
@@ -100,5 +109,87 @@
         </div>
 
     {{/each}}
+
+</script>
+
+<script id="template-allocation-plan-management-form-tbody-row" type="text/x-handlebars-template">
+
+    <tr id="allocation-plan-management-row-{{allocationIndex}}">
+
+        {{#eachReverse hierarchy}}
+
+            {{#ifNotEquals field "assetTicker"}}
+
+                <td>
+                    {{#ifEquals @key ../fractalPlannedAllocation.level.index}}
+                        other fields edit mode
+                    {{else}}
+                        other fields display mode
+                    {{/ifEquals}}
+                </td>
+
+            {{else}}
+
+                <td>
+                    {{#ifEquals @key ../fractalPlannedAllocation.level.index}}
+                        assetTicker fields edit mode
+                    {{else}}
+                        assetTicker fields display mode
+                    {{/ifEquals}}
+                </td>
+
+            {{/ifNotEquals}}
+
+        {{/eachReverse}}
+
+        <td class="align-middle text-center">
+            <input type="checkbox"
+                   name="details[{{allocationIndex}}][cashReserve]"
+                   {{#if fractalPlannedAllocation.allocation.cashReserve}}checked{{/if}}
+            />
+        </td>
+
+        <td>
+
+            <!-- TODO mask oninput -->
+            <input type="number"
+                   name="details[{{allocationIndex}}][sliceSizePercentage]"
+                   placeholder="Slice size %"
+                   aria-label="Slice size percentage"
+                   autocomplete="off"
+                   class="form-control"
+                   value="{{fractalPlannedAllocation.allocation.sliceSizePercentage}}"
+                   step="any"
+                   min="0"
+                   data-null-if-empty
+                   oninput=""
+            />
+        </td>
+
+    </tr>
+
+    {{#if subLevel}}
+
+        {{#each subAllocations}}
+
+            <!-- TODO index like this wont work. Create iterator helper? -->
+            {{> template-allocation-plan-management-form-tbody-row
+                    fractalPlannedAllocation=.
+                    hierarchy=../hierarchy
+                    allocationIndex=(math ../allocationIndex "+" 1)
+            }}
+
+        {{/each}}
+
+    {{/if}}
+
+</script>
+
+<script>
+
+    HandlebarsUtils.registerPartialToContainer(
+        "accordion-allocation-plan",
+        "template-allocation-plan-management-form-tbody-row"
+    );
 
 </script>
