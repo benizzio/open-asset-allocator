@@ -1,5 +1,7 @@
 import * as handlebars from "handlebars";
 
+const PARTIALS_REGISTRY = new Map<string, HTMLElement>();
+
 /**
  * Registers a Handlebars partial template to a container element.
  * The partial template is identified by its ID, and the main container is identified by its ID.
@@ -11,16 +13,24 @@ import * as handlebars from "handlebars";
 export function registerPartialToContainer(containerId: string, partialTemplateId: string) {
 
     const mainContainerElement = window[containerId];
-    const partialTemplateHTML = window[partialTemplateId].innerHTML;
-    handlebars.registerPartial(partialTemplateId, partialTemplateHTML);
+    const partialTemplateElement = window[partialTemplateId];
+    const partialTemplateHTML = partialTemplateElement.innerHTML;
 
-    const allocationMapObserver = new MutationObserver((_, observer) => {
-        if(!document.body.contains(mainContainerElement)) {
-            console.info(`Main container removed, unregistering ${ partialTemplateId } partial and observer`);
-            observer.disconnect();
-            Handlebars.unregisterPartial(partialTemplateId);
-        }
-    });
-    allocationMapObserver.observe(document, { childList: true, subtree: true });
+    if(!PARTIALS_REGISTRY.has(partialTemplateId)) {
+
+        handlebars.registerPartial(partialTemplateId, partialTemplateHTML);
+
+        const allocationMapObserver = new MutationObserver((_, observer) => {
+            if(!document.body.contains(mainContainerElement)) {
+                console.info(`Main container removed, unregistering ${ partialTemplateId } partial and observer`);
+                observer.disconnect();
+                Handlebars.unregisterPartial(partialTemplateId);
+                PARTIALS_REGISTRY.delete(partialTemplateId);
+            }
+        });
+        allocationMapObserver.observe(document, { childList: true, subtree: true });
+
+        PARTIALS_REGISTRY.set(partialTemplateId, partialTemplateElement);
+    }
 
 }

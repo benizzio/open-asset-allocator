@@ -1,147 +1,13 @@
 import htmx from "htmx.org";
-import api from "../api/api";
-import { Asset } from "../domain/asset";
 import BigNumber from "bignumber.js";
-import { BootstrapClasses, BootstrapIconClasses } from "../infra/bootstrap/constants";
 import { AfterRequestEventDetail, htmxInfra } from "../infra/htmx/htmx";
 import { ObservationTimestamp } from "../domain/portfolio-allocation";
 import router from "../infra/routing/router";
+import AssetComposedColumnsInput from "./asset-composed-columns-input";
 
 const PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER = "accordion-portfolio-history-management";
 const PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX = "portfolio-history-management-form-";
 const PORTFOLIO_ALLOCATION_MANAGEMENT_TBODY_PREFIX = "portfolio-history-management-form-tbody-";
-
-const ASSET_ACTION_BUTTON_IDENTITIES = {
-    search: {
-        classes: `${ BootstrapClasses.BUTTON_PRIMARY } btn-xs`,
-        iconClasses: `${ BootstrapIconClasses.SEARCH }`,
-    },
-    reset: {
-        classes: `${ BootstrapClasses.BUTTON_DANGER } btn-xs`,
-        iconClasses: `${ BootstrapIconClasses.RESET }`,
-    },
-};
-
-class FormRowAssetElements {
-
-    assetIdInput: HTMLInputElement;
-    assetTickerInput: HTMLInputElement;
-    assetActionButton: HTMLButtonElement;
-    newAssetTickerMessage: HTMLDivElement;
-    assetNameInput: HTMLInputElement;
-
-    constructor(formUniqueId: string, formRowIndex: number) {
-
-        const formRowId = `${ PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX }${ formUniqueId }-row-${ formRowIndex }`;
-        const formRow = window[formRowId] as HTMLElement;
-
-        this.assetIdInput = formRow.querySelector("[name$='[assetId]']");
-        this.assetTickerInput = formRow.querySelector("[name$='[assetTicker]']");
-        this.assetActionButton = formRow.querySelector("[data-asset-action-button]");
-        this.newAssetTickerMessage = formRow.querySelector("[data-new-asset-ticker-message]");
-        this.assetNameInput = formRow.querySelector("[name$='[assetName]']");
-    }
-
-    isInSearchMode(): boolean {
-        return this.assetActionButton.className === ASSET_ACTION_BUTTON_IDENTITIES.search.classes;
-    }
-
-    isInResetMode(): boolean {
-        return this.assetActionButton.className === ASSET_ACTION_BUTTON_IDENTITIES.reset.classes;
-    }
-
-    switchAssetActionButtonIdentity(identity: typeof ASSET_ACTION_BUTTON_IDENTITIES.search) {
-        this.assetActionButton.className = identity.classes;
-        this.assetActionButton.innerHTML = `<span class="${ identity.iconClasses }"></span>`;
-    }
-
-    activateExistingAssetMode(asset: Asset) {
-
-        this.switchAssetActionButtonIdentity(ASSET_ACTION_BUTTON_IDENTITIES.reset);
-
-        this.assetTickerInput.readOnly = true;
-        this.assetTickerInput.value = asset.ticker;
-
-        this.assetNameInput.style.display = "";
-        this.assetNameInput.readOnly = true;
-        this.assetNameInput.value = asset.name;
-
-        this.assetIdInput.value = asset.id.toString();
-
-        this.newAssetTickerMessage.style.display = "none";
-    }
-
-    activateNewAssetMode() {
-
-        this.switchAssetActionButtonIdentity(ASSET_ACTION_BUTTON_IDENTITIES.reset);
-
-        this.assetTickerInput.readOnly = false;
-
-        this.assetNameInput.style.display = "";
-        this.assetNameInput.readOnly = false;
-        this.assetNameInput.required = true;
-
-        this.newAssetTickerMessage.style.display = "";
-    }
-
-    resetToSearchMode() {
-
-        this.switchAssetActionButtonIdentity(ASSET_ACTION_BUTTON_IDENTITIES.search);
-
-        this.assetTickerInput.value = "";
-        this.assetTickerInput.focus();
-        this.assetTickerInput.readOnly = false;
-
-        this.assetNameInput.value = "";
-        this.assetNameInput.style.display = "none";
-        this.assetNameInput.readOnly = false;
-        this.assetNameInput.required = false;
-
-        this.assetIdInput.value = "";
-
-        this.newAssetTickerMessage.style.display = "none";
-    }
-
-    clearSearchFieldValidation() {
-        this.assetTickerInput.setCustomValidity("");
-        this.assetTickerInput.reportValidity();
-    }
-
-    validateSearchUniqueIdentifier(): string {
-
-        const assetUniqueIdentifier = this.assetTickerInput.value.trim();
-
-        if(!assetUniqueIdentifier) {
-            this.assetTickerInput.setCustomValidity("Required for search");
-            this.assetTickerInput.reportValidity();
-        }
-
-        return assetUniqueIdentifier;
-    }
-
-    handleAssetActionButtonClick() {
-
-        if(this.isInSearchMode()) {
-
-            this.clearSearchFieldValidation();
-            const searchUniqueIdentifier = this.validateSearchUniqueIdentifier();
-
-            if(searchUniqueIdentifier) {
-                getAsset(this, searchUniqueIdentifier);
-            }
-        }
-        else if(this.isInResetMode()) {
-            this.resetToSearchMode();
-        }
-    }
-
-    validateForPost() {
-        if(this.isInSearchMode()) {
-            this.assetTickerInput.setCustomValidity("Reference an existing asset or create a new one");
-            this.assetTickerInput.reportValidity();
-        }
-    }
-}
 
 class FormRowValueElements {
 
@@ -196,30 +62,6 @@ function getNextPortfolioHistoryManagementIndex(tbody: HTMLElement): number {
     return lastRowIdIndex ? parseInt(lastRowIdIndex, 10) + 1 : 0;
 }
 
-function getAsset(rowAssetElements: FormRowAssetElements, searchUniqueIdentifier: string) {
-
-    api.getAsset(searchUniqueIdentifier)
-        .then(responseBody => {
-
-            if(api.isAPIErrorResponse(responseBody)) {
-                if(responseBody.errorMessage === "Data not found") {
-                    rowAssetElements.activateNewAssetMode();
-                }
-                else {
-                    // TODO add toast for errors
-                    console.error("Error fetching asset:", responseBody.errorMessage);
-                }
-                return;
-            }
-
-            rowAssetElements.activateExistingAssetMode(responseBody as Asset);
-        })
-        .catch(error => {
-            // TODO add toast for errors
-            console.error("Error fetching asset:", error);
-        });
-}
-
 function modifyObservationsResponse(originalServerResponseJSON: string): string {
 
     const originalServerResponse = JSON.parse(originalServerResponseJSON) as ObservationTimestamp[];
@@ -256,22 +98,7 @@ function propagateRefreshDataAfterPost(observationTimestampId: number) {
     const portfolioHistoryViewContainerElement = window["accordion-portfolio-history"];
     htmx.trigger(portfolioHistoryViewContainerElement, "reload-portfolio-history");
 
-    loadPortfolioHistoryDatalists();
-}
-
-function loadClassesDatalist() {
-    const datalist = window["datalist-classes"];
-    htmx.trigger(datalist, "load-classes");
-}
-
-function loadAssetsDatalist() {
-    const datalist = window["datalist-assets"];
-    htmx.trigger(datalist, "load-assets");
-}
-
-function loadPortfolioHistoryDatalists() {
-    loadClassesDatalist();
-    loadAssetsDatalist();
+    AssetComposedColumnsInput.loadDatalists();
 }
 
 const portfolioHistoryManagement = {
@@ -306,13 +133,13 @@ const portfolioHistoryManagement = {
     },
 
     assetActionButtonClickHandler(formRowIndex: number, formUniqueId: string) {
-        const rowAssetElements = new FormRowAssetElements(formUniqueId, formRowIndex);
-        rowAssetElements.handleAssetActionButtonClick();
+        const formRowId = `${ PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX }${ formUniqueId }-row-${ formRowIndex }`;
+        AssetComposedColumnsInput.assetActionButtonClickHandler(formRowId);
     },
 
     validateAssetElementsForPost(formRowIndex: number, formUniqueId: string) {
-        const rowAssetElements = new FormRowAssetElements(formUniqueId, formRowIndex);
-        rowAssetElements.validateForPost();
+        const formRowId = `${ PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX }${ formUniqueId }-row-${ formRowIndex }`;
+        AssetComposedColumnsInput.validateAssetElementsForPost(formRowId);
     },
 
     handleInputQuantityOrMarketPrice(formRowIndex: number, formUniqueId: string) {

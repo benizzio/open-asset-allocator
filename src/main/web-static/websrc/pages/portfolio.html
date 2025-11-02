@@ -160,3 +160,11 @@
     }
 
 </script>
+
+<div id="asset-composed-columns-input-container"
+     hx-get="/websrc/components/asset-composed-columns-input.html"
+     hx-trigger="load once"
+     hx-sync="#portfolio-context, queue"
+     hx-on::after-settle="initAssetComposedColumnsInput('asset-composed-columns-input')"
+>
+</div>
