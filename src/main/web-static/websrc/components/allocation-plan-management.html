@@ -88,12 +88,14 @@
 
                             <tbody class="table-group-divider">
 
+                            {{iteratorInit "plannedAllocationIndex"}}
+
                             {{#each fractalHierarchicalPlan.topAllocations}}
 
                                 {{> template-allocation-plan-management-form-tbody-row
                                         fractalPlannedAllocation=.
                                         hierarchy=@root.portfolio.allocationStructure.hierarchy
-                                        allocationIndex=@index
+                                        allocationIndex=(iteratorNext "plannedAllocationIndex")
                                 }}
 
                             {{/each}}
@@ -172,11 +174,10 @@
 
         {{#each subAllocations}}
 
-            <!-- TODO index like this wont work. Create iterator helper? -->
             {{> template-allocation-plan-management-form-tbody-row
                     fractalPlannedAllocation=.
                     hierarchy=../hierarchy
-                    allocationIndex=(math ../allocationIndex "+" 1)
+                    allocationIndex=(iteratorNext "plannedAllocationIndex")
             }}
 
         {{/each}}
