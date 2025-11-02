@@ -22,15 +22,20 @@ class AssetComposedColumnInput {
     newAssetTickerMessage: HTMLDivElement;
     assetNameInput: HTMLInputElement;
 
-    constructor(containerId: string) {
+    constructor(
+        containerId: string,
+        assetIdHiddenFieldName: string,
+        assetTickerFieldName: string,
+        assetNameFieldName: string,
+    ) {
 
         const container = window[containerId] as HTMLElement;
 
-        this.assetIdInput = container.querySelector("[name$='[assetId]']");
-        this.assetTickerInput = container.querySelector("[name$='[assetTicker]']");
+        this.assetIdInput = container.querySelector(`[name='${ assetIdHiddenFieldName }']`);
+        this.assetTickerInput = container.querySelector(`[name='${ assetTickerFieldName }']`);
         this.assetActionButton = container.querySelector("[data-asset-action-button]");
         this.newAssetTickerMessage = container.querySelector("[data-new-asset-ticker-message]");
-        this.assetNameInput = container.querySelector("[name$='[assetName]']");
+        this.assetNameInput = container.querySelector(`[name='${ assetNameFieldName }']`);
     }
 
     isInSearchMode(): boolean {
@@ -171,13 +176,33 @@ function loadAssetsDatalist() {
 
 const AssetComposedColumnsInput = {
 
-    assetActionButtonClickHandler(containerId: string) {
-        const rowAssetElements = new AssetComposedColumnInput(containerId);
+    assetActionButtonClickHandler(
+        containerId: string,
+        assetIdHiddenFieldName: string,
+        assetTickerFieldName: string,
+        assetNameFieldName: string,
+    ) {
+        const rowAssetElements = new AssetComposedColumnInput(
+            containerId,
+            assetIdHiddenFieldName,
+            assetTickerFieldName,
+            assetNameFieldName,
+        );
         rowAssetElements.handleAssetActionButtonClick();
     },
 
-    validateAssetElementsForPost(containerId: string) {
-        const rowAssetElements = new AssetComposedColumnInput(containerId);
+    validateAssetElementsForPost(
+        containerId: string,
+        assetIdHiddenFieldName: string,
+        assetTickerFieldName: string,
+        assetNameFieldName: string,
+    ) {
+        const rowAssetElements = new AssetComposedColumnInput(
+            containerId,
+            assetIdHiddenFieldName,
+            assetTickerFieldName,
+            assetNameFieldName,
+        );
         rowAssetElements.validateForPost();
     },
 

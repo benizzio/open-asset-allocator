@@ -133,13 +133,33 @@ const portfolioHistoryManagement = {
     },
 
     assetActionButtonClickHandler(formRowIndex: number, formUniqueId: string) {
+
         const formRowId = `${ PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX }${ formUniqueId }-row-${ formRowIndex }`;
-        AssetComposedColumnsInput.assetActionButtonClickHandler(formRowId);
+        const assetIdHiddenFieldName = `allocations[${ formRowIndex }][assetId]`;
+        const assetTickerFieldName = `allocations[${ formRowIndex }][assetTicker]`;
+        const assetNameFieldName = `allocations[${ formRowIndex }][assetName]`;
+
+        AssetComposedColumnsInput.assetActionButtonClickHandler(
+            formRowId,
+            assetIdHiddenFieldName,
+            assetTickerFieldName,
+            assetNameFieldName,
+        );
     },
 
     validateAssetElementsForPost(formRowIndex: number, formUniqueId: string) {
+
         const formRowId = `${ PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX }${ formUniqueId }-row-${ formRowIndex }`;
-        AssetComposedColumnsInput.validateAssetElementsForPost(formRowId);
+        const assetIdHiddenFieldName = `allocations[${ formRowIndex }][assetId]`;
+        const assetTickerFieldName = `allocations[${ formRowIndex }][assetTicker]`;
+        const assetNameFieldName = `allocations[${ formRowIndex }][assetName]`;
+
+        AssetComposedColumnsInput.validateAssetElementsForPost(
+            formRowId,
+            assetIdHiddenFieldName,
+            assetTickerFieldName,
+            assetNameFieldName,
+        );
     },
 
     handleInputQuantityOrMarketPrice(formRowIndex: number, formUniqueId: string) {
