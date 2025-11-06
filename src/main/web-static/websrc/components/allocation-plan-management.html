@@ -79,10 +79,12 @@
                             <thead class="sticky-header">
                             <tr>
                                 {{#eachReverse @root.portfolio.allocationStructure.hierarchy}}
-                                    <th scope="col">{{this.name}}</th>
+                                    <th scope="col" {{#ifEquals field "assetTicker"}}colspan="2"{{/ifEquals}}>
+                                        {{name}}
+                                    </th>
                                 {{/eachReverse}}
-                                <th scope="col">Cash reserve?</th>
-                                <th scope="col">Slice size (%)</th>
+                                <th scope="col" class="w-10">Cash reserve?</th>
+                                <th scope="col" class="w-15">Slice size (%)</th>
                             </tr>
                             </thead>
 
@@ -124,21 +126,47 @@
 
                 <td>
                     {{#ifEquals @key ../fractalPlannedAllocation.level.index}}
-                        other fields edit mode
+                        <input type="text"
+                               name="details[{{../allocationIndex}}][hierarchicalId][{{@key}}]"
+                               placeholder="Class"
+                               aria-label="Class"
+                               autocomplete="off"
+                               class="form-control"
+                               value="{{../key}}"
+                               list="datalist-classes"
+                               oninput="maskTagInput(this)"
+                               required
+                        />
                     {{else}}
-                        other fields display mode
+
+                        <!-- TODO change to only level key after fixing bug -->
+                        {{../key}}
+
                     {{/ifEquals}}
                 </td>
 
             {{else}}
 
-                <td>
-                    {{#ifEquals @key ../fractalPlannedAllocation.level.index}}
-                        assetTicker fields edit mode
-                    {{else}}
-                        assetTicker fields display mode
-                    {{/ifEquals}}
-                </td>
+                {{#if ../allocation.asset}}
+
+                    <!-- TODO add handlers to actions -->
+                    {{> asset-composed-columns-input
+                            assetId=../allocation.asset.id
+                            assetTicker=../allocation.asset.ticker
+                            assetName=../allocation.asset.name
+                            assetIdHiddenFieldName=(concat "details[" ../allocationIndex "][asset][id]")
+                            assetTickerFieldName=(concat "details[" ../allocationIndex "][asset][name]")
+                            assetNameFieldName=(concat "details[" ../allocationIndex "][asset][ticker]")
+                            assetTickerFieldHTMXOnValidate=""
+                            assetActionButtonOnClick=""
+                    }}
+
+                {{else}}
+
+                    <td></td>
+                    <td></td>
+
+                {{/if}}
 
             {{/ifNotEquals}}
 
