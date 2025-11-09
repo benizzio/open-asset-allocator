@@ -1,6 +1,8 @@
 import * as handlebars from "handlebars";
 import { HelperOptions } from "handlebars";
 
+// TODO generalize and componentize generic utility functions from here
+
 /**
  * Internal store that keeps iterator maps per template render root using WeakMap.
  * The state is scoped to the lifetime of a single template rendering (data.root).
@@ -495,6 +497,146 @@ function splitHelper(
 }
 
 /**
+ * Determines whether a value is a finite number primitive.
+ *
+ * @param value - Value to test.
+ * @returns True when value is a number and Number.isFinite(value) is true.
+ *
+ * @author GitHub Copilot
+ */
+function isFiniteNumberValue(value: unknown): value is number {
+    return typeof value === "number" && Number.isFinite(value);
+}
+
+/**
+ * Attempts to coerce an arbitrary value into a finite number.
+ * Returns an object indicating success with the coerced number or failure.
+ *
+ * Rules:
+ * - Numbers: accepted if finite.
+ * - Strings: trimmed; empty strings are rejected; numeric strings must coerce to finite numbers.
+ * - Dates: coerced using getTime().
+ * - Other values: coerced via Number(); symbols will throw and be treated as failure.
+ *
+ * @param value - The input value to try to coerce to a finite number.
+ * @returns { ok: true, value: number } on success; { ok: false } on failure.
+ *
+ * @author GitHub Copilot
+ */
+function tryCoerceToFiniteNumber(value: unknown): { ok: true; value: number } | { ok: false } {
+
+    if(isFiniteNumberValue(value)) {
+        return { ok: true, value: value };
+    }
+
+    if(typeof value === "string") {
+        const trimmed = value.trim();
+
+        if(trimmed.length === 0) {
+            return { ok: false };
+        }
+
+        const n = Number(trimmed);
+        return Number.isFinite(n) ? { ok: true, value: n } : { ok: false };
+    }
+
+    if(value instanceof Date) {
+        const n = value.getTime();
+        return Number.isFinite(n) ? { ok: true, value: n } : { ok: false };
+    }
+
+    try {
+        const n = Number(value as never);
+        return Number.isFinite(n) ? { ok: true, value: n } : { ok: false };
+    } catch {
+        return { ok: false };
+    }
+}
+
+/**
+ * Builds a deterministic string representation for a value used in fallback comparison.
+ *
+ * Rules:
+ * - null/undefined: String(value)
+ * - string: returned as-is
+ * - symbol: symbol.toString()
+ * - objects/arrays: JSON with sorted keys when possible; falls back to String(value) on failure
+ * - others: String(value)
+ *
+ * @param value - Value to convert to a stable comparable string.
+ * @returns Deterministic string representation used for lexicographic comparison.
+ *
+ * @author GitHub Copilot
+ */
+function toComparatorString(value: unknown): string {
+
+    if(value === null || typeof value === "undefined") {
+        return String(value);
+    }
+
+    if(typeof value === "string") {
+        return value;
+    }
+
+    if(typeof value === "symbol") {
+        return value.toString();
+    }
+
+    if(typeof value === "object") {
+        try {
+            const obj = value as Record<string, unknown>;
+            const keys = Object.keys(obj).sort();
+            const json = JSON.stringify(obj, keys);
+
+            if(json !== undefined) {
+                return json as string;
+            }
+        } catch {
+            // ignore and fallback
+        }
+    }
+
+    return String(value);
+}
+
+/**
+ * Compares two values prioritizing numeric comparison when both values are number-like.
+ * Internal helper logic extracted to reduce cognitive complexity.
+ *
+ * @param a - Left value for comparison.
+ * @param b - Right value for comparison.
+ * @returns -1 if a < b, 1 if a > b, 0 if equal under the comparator rules.
+ *
+ * @example
+ * <pre>{{comparator 1 2}}</pre>                <!-- -1 (numeric) -->
+ * <pre>{{comparator "10" "2"}}</pre>         <!-- 1 when numeric (10 > 2) -->
+ * <pre>{{comparator "x10" "x2"}}</pre>       <!-- string compare when not numeric -->
+ *
+ * @author GitHub Copilot
+ */
+function comparatorHelper(a: unknown, b: unknown): number {
+
+    const leftNumberCoercion = tryCoerceToFiniteNumber(a);
+    const rightNumberCoercion = tryCoerceToFiniteNumber(b);
+
+    if(leftNumberCoercion.ok && rightNumberCoercion.ok) {
+        if(leftNumberCoercion.value === rightNumberCoercion.value) {
+            return 0;
+        }
+        return leftNumberCoercion.value < rightNumberCoercion.value ? -1 : 1;
+    }
+
+    const leftComparableKey = toComparatorString(a);
+    const rightComparableKey = toComparatorString(b);
+
+    if(leftComparableKey === rightComparableKey) {
+        return 0;
+    }
+    return leftComparableKey < rightComparableKey ? -1 : 1;
+}
+
+
+/**
  * Registers custom Handlebars helpers that extend language functionality for template rendering.
  *
  * @author GitHub Copilot
@@ -514,4 +656,5 @@ export function registerHandlebarsLangHelpers() {
     handlebars.registerHelper("iteratorInit", iteratorInitHelper);
     handlebars.registerHelper("iteratorNext", iteratorNextHelper);
     handlebars.registerHelper("split", splitHelper);
+    handlebars.registerHelper("comparator", comparatorHelper);
 }

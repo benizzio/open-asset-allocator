@@ -98,6 +98,7 @@
                                         fractalPlannedAllocation=.
                                         hierarchy=@root.portfolio.allocationStructure.hierarchy
                                         allocationIndex=(iteratorNext "plannedAllocationIndex")
+                                        targetLevel=../fractalHierarchicalPlan.subLevel
                                 }}
 
                             {{/each}}
@@ -122,9 +123,18 @@
 
         {{#eachReverse hierarchy}}
 
-            {{#ifEquals field "assetTicker"}}
+            {{#ifEquals (comparator index ../targetLevel.index) -1}}
 
-                {{#if ../allocation.asset}}
+                {{#ifEquals field "assetTicker"}}
+                    <td></td>
+                    <td></td>
+                {{else}}
+                    <td></td>
+                {{/ifEquals}}
+                
+            {{else}}
+
+                {{#ifEquals field "assetTicker"}}
 
                     <!-- TODO add handlers to actions -->
                     {{> asset-composed-columns-input
@@ -138,36 +148,44 @@
                             assetActionButtonOnClick=""
                     }}
 
+                    <!-- TODO Copy ticker to here before posting -->
+                    <input type="hidden"
+                           name="details[{{../allocationIndex}}][hierarchicalId][{{@key}}]"
+                           value="{{../targetLevelKey}}"
+                    />
+
                 {{else}}
 
-                    <td></td>
-                    <td></td>
+                    {{#ifEquals (comparator index ../targetLevel.index) 0}}
 
-                {{/if}}
+                        <td>
+                            <input type="text"
+                                   name="details[{{../allocationIndex}}][hierarchicalId][{{@key}}]"
+                                   placeholder="Class"
+                                   aria-label="Class"
+                                   autocomplete="off"
+                                   class="form-control"
+                                   value="{{../targetLevelKey}}"
+                                   list="datalist-classes"
+                                   oninput="maskTagInput(this)"
+                                   required
+                            />
+                        </td>
 
-            {{else}}
-
-                <td>
-
-                    {{#ifEquals @key ../fractalPlannedAllocation.level.index}}
-                        <input type="text"
-                               name="details[{{../allocationIndex}}][hierarchicalId][{{@key}}]"
-                               placeholder="Class"
-                               aria-label="Class"
-                               autocomplete="off"
-                               class="form-control"
-                               value="{{../targetLevelKey}}"
-                               list="datalist-classes"
-                               oninput="maskTagInput(this)"
-                               required
-                        />
                     {{else}}
 
-                        {{lookup ../allocation.hierarchicalId @key}}
+                        <td>
+                            {{lookup ../allocation.hierarchicalId @key}}
+
+                            <input type="hidden"
+                                   name="details[{{../allocationIndex}}][hierarchicalId][{{@key}}]"
+                                   value="{{lookup ../allocation.hierarchicalId @key}}"
+                            />
+                        </td>
 
                     {{/ifEquals}}
 
-                </td>
+                {{/ifEquals}}
 
             {{/ifEquals}}
 
@@ -207,6 +225,7 @@
                     fractalPlannedAllocation=.
                     hierarchy=../hierarchy
                     allocationIndex=(iteratorNext "plannedAllocationIndex")
+                    targetLevel=../subLevel
             }}
 
         {{/each}}
