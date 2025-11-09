@@ -374,15 +374,19 @@ function iteratorInitHelper(
     let options: HelperOptions | undefined = undefined;
     let startValue = 0;
 
-    if(isHelperOptions(maybeOptions)) {
-        options = maybeOptions;
+    const maybeOptionsIsHelper = isHelperOptions(maybeOptions);
+    const startOrOptionsIsHelper = isHelperOptions(startOrOptions);
 
-        if(!isHelperOptions(startOrOptions) && typeof startOrOptions !== "undefined") {
+    if(maybeOptionsIsHelper) {
+
+        options = maybeOptions as HelperOptions;
+
+        if(!startOrOptionsIsHelper && typeof startOrOptions !== "undefined") {
             startValue = coerceToFiniteNumber(startOrOptions);
         }
     }
-    else if(isHelperOptions(startOrOptions)) {
-        options = startOrOptions;
+    else if(startOrOptionsIsHelper) {
+        options = startOrOptions as HelperOptions;
         startValue = 0;
     }
     else {
@@ -426,6 +430,71 @@ function iteratorNextHelper(this: unknown, id: unknown, options: HelperOptions):
 }
 
 /**
+ * Splits a string value into an array using a separator.
+ *
+ * Non-string values are coerced via String(). If the separator is omitted it defaults to ','.
+ * When the provided value is null/undefined or an empty string, an empty array is returned.
+ *
+ * This helper gracefully handles the Handlebars options object being passed as the second
+ * argument when the separator is omitted (e.g. {{split value}}).
+ *
+ * @param value - Source value to split (coerced to string when not null/undefined).
+ * @param separatorOrOptions - Separator string (optional) or implicitly the Handlebars options object when omitted.
+ * @param maybeOptions - Handlebars options object when both value and separator are provided.
+ * @returns Array of substrings produced by String(value).split(separator).
+ *
+ * @example
+ * {{#each (split "a,b,c" ",")}}
+ *   {{this}}
+ * {{/each}}            {{!-- yields: a b c --}}
+ *
+ * @example
+ * {{#each (split csv)}}            {{!-- defaults to comma separator --}}
+ *   {{this}}
+ * {{/each}}
+ *
+ * @author GitHub Copilot
+ */
+function splitHelper(
+    value: unknown,
+    separatorOrOptions?: unknown,
+    maybeOptions?: HelperOptions,
+): string[] {
+
+    if(value === null || typeof value === "undefined") {
+        return [];
+    }
+
+    const str = String(value);
+
+    if(str.length === 0) {
+        return [];
+    }
+
+    let separator = ","; // default separator
+
+    const maybeOptionsIsHelper = isHelperOptions(maybeOptions);
+    const separatorOrOptionsIsHelper = isHelperOptions(separatorOrOptions);
+
+    // Determine if the second argument is actually the options object.
+    if(maybeOptionsIsHelper) {
+        // Both value and separator provided.
+        if(!separatorOrOptionsIsHelper && typeof separatorOrOptions !== "undefined") {
+            separator = String(separatorOrOptions);
+        }
+    }
+    else if(separatorOrOptionsIsHelper) {
+        // Only value provided; keep default separator.
+    }
+    else if(typeof separatorOrOptions !== "undefined") {
+        // Separator provided without options (unlikely in normal Handlebars usage, but supported).
+        separator = String(separatorOrOptions);
+    }
+
+    return str.split(separator);
+}
+
+/**
  * Registers custom Handlebars helpers that extend language functionality for template rendering.
  *
  * @author GitHub Copilot
@@ -444,4 +513,5 @@ export function registerHandlebarsLangHelpers() {
     handlebars.registerHelper("math", mathHelper);
     handlebars.registerHelper("iteratorInit", iteratorInitHelper);
     handlebars.registerHelper("iteratorNext", iteratorNextHelper);
+    handlebars.registerHelper("split", splitHelper);
 }

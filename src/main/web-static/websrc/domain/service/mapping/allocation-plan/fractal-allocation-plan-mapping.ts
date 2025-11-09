@@ -105,8 +105,11 @@ function mapFractalAllocationsAtHierarchyLevel(
             ? hierarchy[hierarchyLevelIndex - 1]
             : null;
 
+        const allocationHierarchicalId = allocation.hierarchicalId;
+
         const fractalAggregationAllocation = {
             key: fractalAllocationKey,
+            targetLevelKey: allocationHierarchicalId[hierarchyLevelIndex],
             level: hierarchy[hierarchyLevelIndex],
             subLevel: hierarchySublevel,
             allocation: allocation,

@@ -21,6 +21,7 @@ export function mapToSerializableFractalHierarchicalAllocationPlan(
             subAllocations: fractalPlannedAllocation.subAllocations
                 ? fractalPlannedAllocation.subAllocations.map(mapToSerializableFractalPlannedAllocation)
                 : undefined,
+            targetLevelKey: fractalPlannedAllocation.targetLevelKey,
         };
     }
 

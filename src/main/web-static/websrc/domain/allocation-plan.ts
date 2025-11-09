@@ -31,6 +31,7 @@ export type AllocationPlanDTO = Omit<AllocationPlan, "details"> & { details: Pla
 export type FractalPlannedAllocation = {
     allocation: PlannedAllocation;
     key: string;
+    targetLevelKey: string;
     level: AllocationHierarchyLevel;
     subLevel?: AllocationHierarchyLevel;
     subAllocations?: FractalPlannedAllocation[];

@@ -122,30 +122,7 @@
 
         {{#eachReverse hierarchy}}
 
-            {{#ifNotEquals field "assetTicker"}}
-
-                <td>
-                    {{#ifEquals @key ../fractalPlannedAllocation.level.index}}
-                        <input type="text"
-                               name="details[{{../allocationIndex}}][hierarchicalId][{{@key}}]"
-                               placeholder="Class"
-                               aria-label="Class"
-                               autocomplete="off"
-                               class="form-control"
-                               value="{{../key}}"
-                               list="datalist-classes"
-                               oninput="maskTagInput(this)"
-                               required
-                        />
-                    {{else}}
-
-                        <!-- TODO change to only level key after fixing bug -->
-                        {{../key}}
-
-                    {{/ifEquals}}
-                </td>
-
-            {{else}}
+            {{#ifEquals field "assetTicker"}}
 
                 {{#if ../allocation.asset}}
 
@@ -168,7 +145,31 @@
 
                 {{/if}}
 
-            {{/ifNotEquals}}
+            {{else}}
+
+                <td>
+
+                    {{#ifEquals @key ../fractalPlannedAllocation.level.index}}
+                        <input type="text"
+                               name="details[{{../allocationIndex}}][hierarchicalId][{{@key}}]"
+                               placeholder="Class"
+                               aria-label="Class"
+                               autocomplete="off"
+                               class="form-control"
+                               value="{{../targetLevelKey}}"
+                               list="datalist-classes"
+                               oninput="maskTagInput(this)"
+                               required
+                        />
+                    {{else}}
+
+                        {{lookup ../allocation.hierarchicalId @key}}
+
+                    {{/ifEquals}}
+
+                </td>
+
+            {{/ifEquals}}
 
         {{/eachReverse}}
 
