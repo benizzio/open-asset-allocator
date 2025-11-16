@@ -12,6 +12,7 @@ const Application = {
         portfolioHistoryManagement.init();
         allocationPlanManagement.init();
         window["portfolioHistoryManagement"] = portfolioHistoryManagement;
+        window["allocationPlanManagement"] = allocationPlanManagement;
     },
     chartContents: { toChartContent },
 };

@@ -13,8 +13,35 @@ function mapToCompleteAllocationPlans(originalServerResponseJSON: string): strin
         portfolioDTO,
         allocationPlanDTOs,
     );
+    console.log(completeAllocationPlanSet);
     return JSON.stringify(completeAllocationPlanSet);
 }
+
+function handleHierarchicalIdLevelChange(targetElement: HTMLInputElement) {
+
+    const ancestorTable = targetElement.closest("form");
+
+    if(!ancestorTable) {
+        return;
+    }
+
+    const targetElementName = targetElement.getAttribute("name");
+
+    const fieldsToUpdate =
+        ancestorTable.querySelectorAll<HTMLInputElement>(`[data-bind-to-name$='${ targetElementName }']`);
+
+    fieldsToUpdate.forEach((field) => {
+        field.value = targetElement.value;
+    });
+
+    const spansToUpdat =
+        ancestorTable.querySelectorAll<HTMLSpanElement>(`[data-label-for-name='${ targetElementName }']`);
+
+    spansToUpdat.forEach((span) => {
+        span.textContent = targetElement.value;
+    });
+}
+
 
 const allocationPlanManagement = {
     init() {
@@ -23,6 +50,8 @@ const allocationPlanManagement = {
             mapToCompleteAllocationPlans,
         );
     },
+
+    handleHierarchicalIdLevelChange,
 };
 
 export default allocationPlanManagement;

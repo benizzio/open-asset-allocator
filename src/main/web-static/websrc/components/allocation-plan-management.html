@@ -121,9 +121,11 @@
 
     <tr id="allocation-plan-management-row-{{allocationIndex}}">
 
+        <!-- loop through the portfolio's available hierarchy, configuring hierarchy definition fields in expected order -->
         {{#eachReverse hierarchy}}
 
             {{#ifEquals (comparator index ../targetLevel.index) -1}}
+                <!-- hierarchy level is lower than current edit target level, show nothing (editing a higher level) -->
 
                 {{#ifEquals field "assetTicker"}}
                     <td></td>
@@ -131,10 +133,11 @@
                 {{else}}
                     <td></td>
                 {{/ifEquals}}
-                
+
             {{else}}
 
                 {{#ifEquals field "assetTicker"}}
+                    <!-- it is the asset level, always lower and knows how to handle it's read-only/edit modes -->
 
                     <!-- TODO add handlers to actions -->
                     {{> asset-composed-columns-input
@@ -157,6 +160,7 @@
                 {{else}}
 
                     {{#ifEquals (comparator index ../targetLevel.index) 0}}
+                        <!-- same level as edit target, show field -->
 
                         <td>
                             <input type="text"
@@ -168,19 +172,31 @@
                                    value="{{../targetLevelKey}}"
                                    list="datalist-classes"
                                    oninput="maskTagInput(this)"
+                                   onchange="allocationPlanManagement.handleHierarchicalIdLevelChange(this)"
                                    required
                             />
                         </td>
 
+                        {{setProperty @this "currentManagingFieldName" (concat "details[" ../allocationIndex "][hierarchicalId][" @key "]")}}
+
                     {{else}}
+                        <!--
+                            hierarchy level is higher than current edit target level,
+                            show read-only (editing a child level)
+                        -->
 
                         <td>
-                            {{lookup ../allocation.hierarchicalId @key}}
+
+                            <span data-label-for-name="{{currentManagingFieldName}}">
+                                {{lookup ../allocation.hierarchicalId @key}}
+                            </span>
 
                             <input type="hidden"
+                                   data-bind-to-name="{{currentManagingFieldName}}"
                                    name="details[{{../allocationIndex}}][hierarchicalId][{{@key}}]"
                                    value="{{lookup ../allocation.hierarchicalId @key}}"
                             />
+
                         </td>
 
                     {{/ifEquals}}
@@ -223,8 +239,8 @@
 
             {{> template-allocation-plan-management-form-tbody-row
                     fractalPlannedAllocation=.
-                    hierarchy=../hierarchy
                     allocationIndex=(iteratorNext "plannedAllocationIndex")
+                    hierarchy=../hierarchy
                     targetLevel=../subLevel
             }}
 

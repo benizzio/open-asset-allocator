@@ -1,7 +1,14 @@
 import * as handlebars from "handlebars";
 import { HelperOptions } from "handlebars";
+import { logger, LogLevel } from "../logging";
+import {
+    assignValueAtPath,
+    coerceToFiniteNumber,
+    toCompararableString,
+    toPropertyPathSegments,
+    tryCoerceToFiniteNumber,
+} from "../../utils/lang";
 
-// TODO generalize and componentize generic utility functions from here
 
 /**
  * Internal store that keeps iterator maps per template render root using WeakMap.
@@ -145,37 +152,78 @@ function getPropertyHelper(obj: Record<string, unknown> | undefined | null, prop
 }
 
 /**
- * Safely coerces a value to a finite number.
+ * Sets (mutates) a property on a target object, supporting dot-separated nested paths.
+ * Intermediate objects are created when missing. Non-object targets are ignored.
+ * Returns the assigned value to allow inline usage inside expressions.
  *
- * Supported coercions:
- * - number: returned if finite; otherwise 0
- * - string: Number(trimmed); non-finite becomes 0
- * - boolean: true => 1, false => 0
- * - bigint: converted via Number()
- * - others (null/undefined/object/symbol): 0
+ * Usage patterns:
+ *   {{setProperty obj "name" value}}            -> sets obj.name = value
+ *   {{setProperty obj "stats.count" 10}}       -> creates stats if missing and sets count
+ *   {{setProperty obj dynamicPath value}}       -> path can be computed
  *
- * Authored by: GitHub Copilot
+ * Edge cases & safety:
+ * - When target is null/undefined or not an object, no mutation occurs (returns value).
+ * - Empty or invalid path produces no mutation (returns value).
+ * - Existing non-object intermediate segment is replaced with a plain object to continue path creation.
+ * - Does not attempt array index semantics; numeric segments become plain object keys.
+ *
+ * @param target - Target object to mutate.
+ * @param path - Property key or dot-separated path string.
+ * @param value - Value to assign at the path.
+ * @param _options - Handlebars helper options (unused but required by helper signature).
+ * @returns The empty string (no direct output) to avoid interfering with template rendering.
+ *
+ * @example
+ * {{setProperty user "firstName" "Alice"}}
+ * {{setProperty user "profile.details.age" 42}}
+ * <pre>{{stringify user}}</pre>
+ *
+ * @author GitHub Copilot
  */
-function coerceToFiniteNumber(value: unknown): number {
+function setPropertyHelper(
+    target: unknown,
+    path: unknown,
+    value: unknown,
+    _options: HelperOptions, // underscore to indicate intentionally unused per Handlebars signature
+): string { // returns empty string to avoid interfering with template output
 
-    if(typeof value === "number") {
-        return Number.isFinite(value) ? value : 0;
+    // Explicit no-op usage to satisfy eslint unused variable rule while documenting intention.
+    void _options;
+
+    if(typeof target !== "object" || target === null) {
+        logger(
+            LogLevel.ERROR,
+            "[handlebars:setProperty] Target is not an object. Skipping assignment.",
+            { targetType: typeof target, path, value },
+        );
+        return "";
     }
 
-    if(typeof value === "string") {
-        const n = Number(value.trim());
-        return Number.isFinite(n) ? n : 0;
+    const segments = toPropertyPathSegments(path);
+
+    if(segments.length === 0) {
+        logger(
+            LogLevel.ERROR,
+            "[handlebars:setProperty] Empty or invalid path. Skipping assignment.",
+            { path, value },
+        );
+        return ""; // nothing to assign
     }
 
-    if(typeof value === "boolean") {
-        return value ? 1 : 0;
-    }
+    // Delegate the traversal and assignment to reduce cognitive complexity
+    assignValueAtPath(
+        target as Record<string, unknown>,
+        segments,
+        value,
+        {
+            onWarn: (message, details) =>
+                logger(LogLevel.WARN, `[handlebars:setProperty] ${ message }`, details ?? {}),
+            onError: (message, details) =>
+                logger(LogLevel.ERROR, `[handlebars:setProperty] ${ message }`, details ?? {}),
+        },
+    );
 
-    if(typeof value === "bigint") {
-        return Number(value);
-    }
-
-    return 0;
+    return ""; // always empty output
 }
 
 /**
@@ -496,108 +544,6 @@ function splitHelper(
     return str.split(separator);
 }
 
-/**
- * Determines whether a value is a finite number primitive.
- *
- * @param value - Value to test.
- * @returns True when value is a number and Number.isFinite(value) is true.
- *
- * @author GitHub Copilot
- */
-function isFiniteNumberValue(value: unknown): value is number {
-    return typeof value === "number" && Number.isFinite(value);
-}
-
-/**
- * Attempts to coerce an arbitrary value into a finite number.
- * Returns an object indicating success with the coerced number or failure.
- *
- * Rules:
- * - Numbers: accepted if finite.
- * - Strings: trimmed; empty strings are rejected; numeric strings must coerce to finite numbers.
- * - Dates: coerced using getTime().
- * - Other values: coerced via Number(); symbols will throw and be treated as failure.
- *
- * @param value - The input value to try to coerce to a finite number.
- * @returns { ok: true, value: number } on success; { ok: false } on failure.
- *
- * @author GitHub Copilot
- */
-function tryCoerceToFiniteNumber(value: unknown): { ok: true; value: number } | { ok: false } {
-
-    if(isFiniteNumberValue(value)) {
-        return { ok: true, value: value };
-    }
-
-    if(typeof value === "string") {
-        const trimmed = value.trim();
-
-        if(trimmed.length === 0) {
-            return { ok: false };
-        }
-
-        const n = Number(trimmed);
-        return Number.isFinite(n) ? { ok: true, value: n } : { ok: false };
-    }
-
-    if(value instanceof Date) {
-        const n = value.getTime();
-        return Number.isFinite(n) ? { ok: true, value: n } : { ok: false };
-    }
-
-    try {
-        const n = Number(value as never);
-        return Number.isFinite(n) ? { ok: true, value: n } : { ok: false };
-    } catch {
-        return { ok: false };
-    }
-}
-
-/**
- * Builds a deterministic string representation for a value used in fallback comparison.
- *
- * Rules:
- * - null/undefined: String(value)
- * - string: returned as-is
- * - symbol: symbol.toString()
- * - objects/arrays: JSON with sorted keys when possible; falls back to String(value) on failure
- * - others: String(value)
- *
- * @param value - Value to convert to a stable comparable string.
- * @returns Deterministic string representation used for lexicographic comparison.
- *
- * @author GitHub Copilot
- */
-function toComparatorString(value: unknown): string {
-
-    if(value === null || typeof value === "undefined") {
-        return String(value);
-    }
-
-    if(typeof value === "string") {
-        return value;
-    }
-
-    if(typeof value === "symbol") {
-        return value.toString();
-    }
-
-    if(typeof value === "object") {
-        try {
-            const obj = value as Record<string, unknown>;
-            const keys = Object.keys(obj).sort();
-            const json = JSON.stringify(obj, keys);
-
-            if(json !== undefined) {
-                return json as string;
-            }
-        } catch {
-            // ignore and fallback
-        }
-    }
-
-    return String(value);
-}
 
 /**
  * Compares two values prioritizing numeric comparison when both values are number-like.
@@ -626,8 +572,8 @@ function comparatorHelper(a: unknown, b: unknown): number {
         return leftNumberCoercion.value < rightNumberCoercion.value ? -1 : 1;
     }
 
-    const leftComparableKey = toComparatorString(a);
-    const rightComparableKey = toComparatorString(b);
+    const leftComparableKey = toCompararableString(a);
+    const rightComparableKey = toCompararableString(b);
 
     if(leftComparableKey === rightComparableKey) {
         return 0;
@@ -650,6 +596,7 @@ export function registerHandlebarsLangHelpers() {
     handlebars.registerHelper("concat", concatHelper);
     handlebars.registerHelper("eachReverse", eachReverseHelper);
     handlebars.registerHelper("getProperty", getPropertyHelper);
+    handlebars.registerHelper("setProperty", setPropertyHelper); // newly added helper
     handlebars.registerHelper("ifEquals", ifEqualsHelper);
     handlebars.registerHelper("ifNotEquals", ifNotEqualsHelper);
     handlebars.registerHelper("math", mathHelper);
