@@ -334,6 +334,56 @@ function ifNotEqualsHelper(this: unknown, arg1: unknown, arg2: unknown, options:
 }
 
 /**
+ * Renders the block when the provided value is null or undefined; otherwise renders the inverse block.
+ *
+ * This helper matches JavaScript "nullish" semantics (value === null || value === undefined).
+ *
+ * @this unknown
+ * @param value - Value to test for nullishness.
+ * @param options - Handlebars block options providing `fn`/`inverse`.
+ * @returns The rendered block depending on whether the value is nullish.
+ *
+ * @example
+ * {{#ifNullish user.middleName}}
+ *   <span class="muted">N/A</span>
+ * {{else}}
+ *   {{user.middleName}}
+ * {{/ifNullish}}
+ *
+ * @author GitHub Copilot
+ */
+function ifNullishHelper(this: unknown, value: unknown, options: HelperOptions): string {
+    return (value === null || typeof value === "undefined")
+        ? options.fn(this)
+        : options.inverse(this);
+}
+
+/**
+ * Renders the block when the provided value is NOT null or undefined; otherwise renders the inverse block.
+ *
+ * This helper matches the inverted JavaScript nullish check: value !== null && value !== undefined.
+ *
+ * @this unknown
+ * @param value - Value to test for not-nullishness.
+ * @param options - Handlebars block options providing `fn`/`inverse`.
+ * @returns The rendered block depending on whether the value is not nullish.
+ *
+ * @example
+ * {{#ifNotNullish user.middleName}}
+ *   {{user.middleName}}
+ * {{else}}
+ *   <span class="muted">N/A</span>
+ * {{/notNullish}}
+ *
+ * @author GitHub Copilot
+ */
+function ifNotNullishHelper(this: unknown, value: unknown, options: HelperOptions): string {
+    return (value !== null && typeof value !== "undefined")
+        ? options.fn(this)
+        : options.inverse(this);
+}
+
+/**
  * Narrow unknown to Handlebars HelperOptions.
  *
  * @param value - Unknown value to test.
@@ -599,6 +649,8 @@ export function registerHandlebarsLangHelpers() {
     handlebars.registerHelper("setProperty", setPropertyHelper); // newly added helper
     handlebars.registerHelper("ifEquals", ifEqualsHelper);
     handlebars.registerHelper("ifNotEquals", ifNotEqualsHelper);
+    handlebars.registerHelper("ifNullish", ifNullishHelper);
+    handlebars.registerHelper("ifNotNullish", ifNotNullishHelper);
     handlebars.registerHelper("math", mathHelper);
     handlebars.registerHelper("iteratorInit", iteratorInitHelper);
     handlebars.registerHelper("iteratorNext", iteratorNextHelper);

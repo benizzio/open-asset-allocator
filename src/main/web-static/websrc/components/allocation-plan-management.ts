@@ -42,6 +42,12 @@ function handleHierarchicalIdLevelChange(targetElement: HTMLInputElement) {
     });
 }
 
+function handleRemovePlannedAllocationRow(targetElement: HTMLElement) {
+    const row = targetElement.closest("tr");
+    const rowId = row.id;
+    row.closest("table").querySelectorAll(`[data-parent-row-id=${ rowId }]`).forEach(row => row.remove());
+    row.remove();
+}
 
 const allocationPlanManagement = {
     init() {
@@ -52,6 +58,7 @@ const allocationPlanManagement = {
     },
 
     handleHierarchicalIdLevelChange,
+    handleRemovePlannedAllocationRow,
 };
 
 export default allocationPlanManagement;

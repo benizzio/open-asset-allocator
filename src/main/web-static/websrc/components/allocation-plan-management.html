@@ -63,9 +63,10 @@
                 <div class="accordion-body row justify-content-center">
 
                     <!-- TODO after request, reload -->
+                    <!-- TODO post to /api/portfolio/:portfolioId/allocation-plan -->
                     <form id="allocation-plan-management-form-{{id}}"
                           class="needs-validation"
-                          hx-post="/api/portfolio/:portfolioId/allocation-plan"
+                          hx-post="/test"
                           hx-ext="form-json"
                           hx-on::after-request=""
                     >
@@ -85,6 +86,7 @@
                                 {{/eachReverse}}
                                 <th scope="col" class="w-10">Cash reserve?</th>
                                 <th scope="col" class="w-15">Slice size (%)</th>
+                                <th scope="col"></th>
                             </tr>
                             </thead>
 
@@ -105,6 +107,28 @@
 
                             </tbody>
 
+                            <tfoot class="sticky-footer">
+                            <tr>
+                                <td colspan="8">
+                                    <div class="d-flex w-100">
+
+                                        <!-- TODO add base planned allocation handler -->
+                                        <button class="btn btn-secondary"
+                                                type="button"
+                                                onclick=""
+                                        >
+                                            <span class="bi bi-plus-circle h5"></span>
+                                        </button>
+
+                                        <button class="btn btn-primary ms-auto" type="submit">
+                                            <span class="bi bi-save-fill h5"></span>
+                                        </button>
+
+                                    </div>
+                                </td>
+                            </tr>
+                            </tfoot>
+
                         </table>
 
                     </form>
@@ -119,7 +143,9 @@
 
 <script id="template-allocation-plan-management-form-tbody-row" type="text/x-handlebars-template">
 
-    <tr id="allocation-plan-management-row-{{allocationIndex}}">
+    <tr id="allocation-plan-management-row-{{allocationIndex}}"
+        {{#ifNotNullish parentRowIndex}}data-parent-row-id="allocation-plan-management-row-{{parentRowIndex}}"{{/ifNotNullish}}
+    >
 
         <!-- loop through the portfolio's available hierarchy, configuring hierarchy definition fields in expected order -->
         {{#eachReverse hierarchy}}
@@ -231,6 +257,15 @@
             />
         </td>
 
+        <td>
+            <button type="button"
+                    class="btn btn-danger btn-xs"
+                    onclick="allocationPlanManagement.handleRemovePlannedAllocationRow(this)"
+            >
+                <span class="bi bi-dash-circle"></span>
+            </button>
+        </td>
+
     </tr>
 
     {{#if subLevel}}
@@ -242,6 +277,7 @@
                     allocationIndex=(iteratorNext "plannedAllocationIndex")
                     hierarchy=../hierarchy
                     targetLevel=../subLevel
+                    parentRowIndex=../allocationIndex
             }}
 
         {{/each}}
