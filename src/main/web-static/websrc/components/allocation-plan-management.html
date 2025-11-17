@@ -265,13 +265,26 @@
 
         </td>
 
-        <td>
+        <td class="text-end">
+
+            {{#if subLevel}}
+
+                <button type="button"
+                        class="btn btn-secondary btn-xs me-2"
+                        onclick=""
+                >
+                    <span class="bi bi-plus-circle"></span>
+                </button>
+
+            {{/if}}
+
             <button type="button"
                     class="btn btn-danger btn-xs"
                     onclick="allocationPlanManagement.handleRemovePlannedAllocationRow(this)"
             >
                 <span class="bi bi-dash-circle"></span>
             </button>
+
         </td>
 
     </tr>
