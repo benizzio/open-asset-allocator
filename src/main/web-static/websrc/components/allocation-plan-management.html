@@ -255,6 +255,14 @@
                    data-null-if-empty
                    oninput=""
             />
+
+            {{#if fractalPlannedAllocation.allocation.id}}
+                <input type="hidden"
+                       name="details[{{allocationIndex}}][id]"
+                       value="{{fractalPlannedAllocation.allocation.id}}"
+                />
+            {{/if}}
+
         </td>
 
         <td>
