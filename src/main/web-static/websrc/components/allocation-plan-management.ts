@@ -1,12 +1,12 @@
-import DomUtils from "../infra/dom/dom-utils";
-import { PortfolioDTO } from "../domain/portfolio";
-import { AllocationPlanDTO } from "../domain/allocation-plan";
+import PortfolioPage from "../pages/portfolio";
+import { AllocationPlanDTO, SerializableFractalPlannedAllocation } from "../domain/allocation-plan";
 import { DomainService } from "../domain/service";
+import { Asset } from "../domain/asset";
 import { htmxInfra } from "../infra/htmx/htmx";
 
 function mapToCompleteAllocationPlans(originalServerResponseJSON: string): string {
 
-    const portfolioDTO = DomUtils.getContextDataFromRoot("#portfolio-context #portfolio") as PortfolioDTO;
+    const portfolioDTO = PortfolioPage.getContextPortfolio();
     const allocationPlanDTOs = JSON.parse(originalServerResponseJSON) as AllocationPlanDTO[];
 
     const completeAllocationPlanSet = DomainService.mapping.mapToSerializablePortfolioCompleteAllocationPlanSet(
@@ -47,6 +47,34 @@ function handleRemovePlannedAllocationRow(targetElement: HTMLElement) {
     const rowId = row.id;
     row.closest("table").querySelectorAll(`[data-parent-row-id=${ rowId }]`).forEach(row => row.remove());
     row.remove();
+}
+
+function handleAddPlannedAllocationRow(levelIndex: number) {
+
+    const portfolio = PortfolioPage.getContextPortfolio();
+
+    const newPlannedAllocationLevel = portfolio.allocationStructure.hierarchy[levelIndex - 1];
+
+    let newPlannedAllocationAsset: Asset;
+
+    if(newPlannedAllocationLevel.field === "asset") {
+        newPlannedAllocationAsset = { ticker: "" };
+    }
+
+    // TODO get parent hierarchical id values from inputs
+
+
+    const newPlannedAllocation: SerializableFractalPlannedAllocation = {
+        key: "",
+        targetLevelKey: "",
+        level: newPlannedAllocationLevel,
+        allocation: {
+            hierarchicalId: [],
+            cashReserve: false,
+            sliceSizePercentage: new BigNumber(0),
+            asset: newPlannedAllocationAsset,
+        },
+    };
 }
 
 const allocationPlanManagement = {

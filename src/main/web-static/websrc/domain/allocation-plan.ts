@@ -1,11 +1,13 @@
 import BigNumber from "bignumber.js";
 import { AllocationHierarchyLevel, AllocationType } from "./allocation";
 import { Portfolio } from "./portfolio";
+import { Asset } from "./asset";
 
 export type PlannedAllocation = {
     hierarchicalId: string[];
     cashReserve: boolean;
     sliceSizePercentage: BigNumber;
+    asset?: Asset;
 };
 
 export type AllocationPlan = {
