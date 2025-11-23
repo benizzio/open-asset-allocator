@@ -1,11 +1,13 @@
-import { Portfolio } from "../domain/portfolio";
+import { Portfolio, PortfolioDTO } from "../domain/portfolio";
+import { DomainService } from "../domain/service";
 
 const PortfolioPage = {
 
     getContextPortfolio(): Portfolio {
         const portfolioElement = window["portfolio"] as HTMLScriptElement;
         const portfolioJSON = portfolioElement.textContent;
-        return JSON.parse(portfolioJSON) as Portfolio;
+        const porfolioDTO = JSON.parse(portfolioJSON) as PortfolioDTO;
+        return DomainService.mapping.mapToPortfolio(porfolioDTO);
     },
 };
 
