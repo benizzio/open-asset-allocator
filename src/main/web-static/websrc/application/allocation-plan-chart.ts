@@ -2,7 +2,6 @@ import { ChartContent, MultiChartDataSource } from "../infra/chart/chart-types";
 import { ActiveElement, Chart, ChartData, ChartDataset, ChartEvent } from "chart.js";
 import { changeChartDataOnDatasource } from "../infra/chart/chart-utils";
 import chartModule from "../infra/chart/chart";
-import DomUtils from "../infra/dom/dom-utils";
 import {
     AllocationPlanDTO,
     FractalHierarchicalAllocationPlan,
@@ -10,6 +9,7 @@ import {
 } from "../domain/allocation-plan";
 import { PortfolioDTO } from "../domain/portfolio";
 import { DomainService } from "../domain/service";
+import DomInfra from "../infra/dom";
 
 class FractalPlannedAllocationMultiChartDataSource extends MultiChartDataSource {
 
@@ -47,7 +47,7 @@ function mapChildDatasets(
     fractalHierarchicalPlan: FractalHierarchicalAllocationPlan,
     chartDataMap: Map<string, ChartData>,
 ) {
-    
+
     fractalHierarchicalPlan.aggregatorAllocationMap.forEach((fractalAllocation) => {
 
         const subAllocations = fractalAllocation.subAllocations;
@@ -146,7 +146,7 @@ function interactionObserverCallback(event: ChartEvent, elements: ActiveElement[
 
     if(event.type === "click") {
         const labelId = `#hierarchy-level-${ chartId }`;
-        DomUtils.queryFirst(labelId).textContent = levelLabel;
+        DomInfra.DomUtils.queryFirst(labelId).textContent = levelLabel;
     }
 }
 

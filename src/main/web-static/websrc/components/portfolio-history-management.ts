@@ -103,8 +103,8 @@ function propagateRefreshDataAfterPost(observationTimestampId: number) {
 
 const portfolioHistoryManagement = {
 
-    handlebarPortfolioHistoryManagementRowTemplate: null,
-    handlebarPortfolioHistoryManagementContainerTemplate: null,
+    handlebarsPortfolioHistoryManagementRowTemplate: null as Handlebars.TemplateDelegate,
+    handlebarsPortfolioHistoryManagementContainerTemplate: null as Handlebars.TemplateDelegate,
 
     init() {
         htmxInfra.htmxTransformResponse.registerTransformResponseFunction(

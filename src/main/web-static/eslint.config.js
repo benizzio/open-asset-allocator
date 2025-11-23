@@ -90,6 +90,25 @@ export default [
                                 "Import from the public API 'infra/handlebars' (index.ts) only; " +
                                 "deep imports are not allowed.",
                         },
+                        // Block deep imports into the local 'infra/dom' module; import only from its public API
+                        // Authored by: GitHub Copilot
+                        {
+                            group: [
+                                // generic patterns
+                                "**/infra/dom/*",
+                                "**/infra/dom/**",
+                                // common relative forms
+                                "infra/dom/*",
+                                "infra/dom/**",
+                                "./infra/dom/*",
+                                "./infra/dom/**",
+                                "../infra/dom/*",
+                                "../infra/dom/**",
+                            ],
+                            message:
+                                "Import from the public API 'infra/dom' (index.ts) only; " +
+                                "deep imports are not allowed.",
+                        },
                     ],
                 },
             ],

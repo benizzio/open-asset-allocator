@@ -109,7 +109,7 @@
                                         <button class="btn btn-primary ms-auto" type="submit">
                                             <span class="bi bi-save-fill h5"></span>
                                         </button>
-                                        
+
                                     </div>
                                 </td>
                             </tr>
@@ -246,7 +246,11 @@
         "template-portfolio-history-management-form-tbody-row"
     );
 
-    portfolioHistoryManagement.handlebarPortfolioHistoryManagementRowTemplate = Handlebars.compile(window["template-portfolio-history-management-form-tbody-row"].innerHTML);
-    portfolioHistoryManagement.handlebarPortfolioHistoryManagementContainerTemplate = Handlebars.compile(window["template-portfolio-history-management"].innerHTML);
+    portfolioHistoryManagement.handlebarsPortfolioHistoryManagementRowTemplate = Handlebars.compile(
+        window["template-portfolio-history-management-form-tbody-row"].innerHTML
+    );
+    portfolioHistoryManagement.handlebarsPortfolioHistoryManagementContainerTemplate = Handlebars.compile(
+        window["template-portfolio-history-management"].innerHTML
+    );
 
 </script>

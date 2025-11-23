@@ -4,9 +4,9 @@ import { handlebarsInfra } from "./handlebars";
 import { htmxInfra } from "./htmx/htmx";
 import router from "./routing/router";
 import * as bootstrap from "bootstrap";
-import { domInfra } from "./dom/dom";
 import chart from "./chart/chart";
 import { CustomEventHandler } from "./infra-types";
+import DomInfra from "./dom";
 
 /**
  * Ties multiple components of the application infrastructure to HTMX async DOM behaviour.
@@ -19,7 +19,7 @@ const DOM_SETTLING_BEHAVIOR_EVENT_HANDLER: CustomEventHandler = (event: CustomEv
     const target = event.target as HTMLElement;
     router.bindDescendants(target);
     router.boot();
-    domInfra.bindDescendants(target);
+    DomInfra.bindDescendants(target);
     chart.loadDescendantCharts(target);
 };
 
@@ -36,7 +36,7 @@ export const infra = {
         window.Handlebars = handlebarsInfra.register();
         window["HandlebarsUtils"] = handlebarsInfra.utils;
 
-        domInfra.bindGlobalFunctions();
+        DomInfra.bindGlobalFunctions();
 
         htmxInfra.init(DOM_SETTLING_BEHAVIOR_EVENT_HANDLER);
 

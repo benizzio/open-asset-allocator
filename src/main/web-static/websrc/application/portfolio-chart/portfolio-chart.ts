@@ -6,9 +6,9 @@ import { changeChartDataOnDatasource } from "../../infra/chart/chart-utils";
 import { FractalPortfolioMultiChartDataSource } from "./portfolio-chart-datasource";
 import { MappedChartData } from "./portfolio-chart-model";
 import { mapChartData } from "./portfolio-chart-mapping";
-import DomUtils from "../../infra/dom/dom-utils";
 import { PortfolioSnapshot } from "../../domain/portfolio-allocation";
 import { DomainService } from "../../domain/service";
+import DomInfra from "../../infra/dom";
 
 function changeChartData(
     dataKey: string,
@@ -56,7 +56,7 @@ function interactionObserverCallback(event: ChartEvent, elements: ActiveElement[
 
     if(event.type === "click") {
         const labelId = `#hierarchy-level-${ chartId }`;
-        DomUtils.queryFirst(labelId).textContent = levelLabel;
+        DomInfra.DomUtils.queryFirst(labelId).textContent = levelLabel;
     }
 }
 
