@@ -100,7 +100,6 @@
                                         fractalPlannedAllocation=.
                                         hierarchy=@root.portfolio.allocationStructure.hierarchy
                                         allocationIndex=(iteratorNext "plannedAllocationIndex")
-                                        targetLevel=../fractalHierarchicalPlan.subLevel
                                 }}
 
                             {{/each}}
@@ -125,6 +124,12 @@
                                         </button>
 
                                     </div>
+
+                                    <input type="hidden"
+                                           name="last-planned-allocation-row-index"
+                                           value="{{math allocationPlan.details.length "-" 1}}"
+                                           disabled
+                                    />
                                 </td>
                             </tr>
                             </tfoot>
@@ -150,7 +155,7 @@
         <!-- loop through the portfolio's available hierarchy, configuring hierarchy definition fields in expected order -->
         {{#eachReverse hierarchy}}
 
-            {{#ifEquals (comparator index ../targetLevel.index) -1}}
+            {{#ifEquals (comparator index ../fractalPlannedAllocation.level.index) -1}}
                 <!-- hierarchy level is lower than current edit target level, show nothing (editing a higher level) -->
 
                 {{#ifEquals field "assetTicker"}}
@@ -167,9 +172,9 @@
 
                     <!-- TODO add handlers to actions -->
                     {{> asset-composed-columns-input
-                            assetId=../allocation.asset.id
-                            assetTicker=../allocation.asset.ticker
-                            assetName=../allocation.asset.name
+                            assetId=../fractalPlannedAllocation.allocation.asset.id
+                            assetTicker=../fractalPlannedAllocation.allocation.asset.ticker
+                            assetName=../fractalPlannedAllocation.allocation.asset.name
                             assetIdHiddenFieldName=(concat "details[" ../allocationIndex "][asset][id]")
                             assetTickerFieldName=(concat "details[" ../allocationIndex "][asset][name]")
                             assetNameFieldName=(concat "details[" ../allocationIndex "][asset][ticker]")
@@ -179,18 +184,18 @@
 
                     <!-- TODO Copy ticker to here before posting -->
                     <input type="hidden"
-                           name="details[{{../allocationIndex}}][hierarchicalId][{{@key}}]"
+                           name="details[{{../allocationIndex}}][hierarchicalId][{{index}}]"
                            value="{{../targetLevelKey}}"
                     />
 
                 {{else}}
 
-                    {{#ifEquals (comparator index ../targetLevel.index) 0}}
+                    {{#ifEquals (comparator index ../fractalPlannedAllocation.level.index) 0}}
                         <!-- same level as edit target, show field -->
 
                         <td>
                             <input type="text"
-                                   name="details[{{../allocationIndex}}][hierarchicalId][{{@key}}]"
+                                   name="details[{{../allocationIndex}}][hierarchicalId][{{index}}]"
                                    placeholder="Class"
                                    aria-label="Class"
                                    autocomplete="off"
@@ -203,7 +208,8 @@
                             />
                         </td>
 
-                        {{setProperty @this "currentManagingFieldName" (concat "details[" ../allocationIndex "][hierarchicalId][" @key "]")}}
+                        <!-- set currentManagingFieldName for use in lower hierarchy levels, during recursion -->
+                        {{setProperty @this "currentManagingFieldName" (concat "details[" ../allocationIndex "][hierarchicalId][" index "]")}}
 
                     {{else}}
                         <!--
@@ -214,13 +220,13 @@
                         <td>
 
                             <span data-label-for-name="{{currentManagingFieldName}}">
-                                {{lookup ../allocation.hierarchicalId @key}}
+                                {{lookup ../fractalPlannedAllocation.allocation.hierarchicalId index}}
                             </span>
 
                             <input type="hidden"
                                    data-bind-to-name="{{currentManagingFieldName}}"
-                                   name="details[{{../allocationIndex}}][hierarchicalId][{{@key}}]"
-                                   value="{{lookup ../allocation.hierarchicalId @key}}"
+                                   name="details[{{../allocationIndex}}][hierarchicalId][{{index}}]"
+                                   value="{{lookup ../fractalPlannedAllocation.allocation.hierarchicalId index}}"
                             />
 
                         </td>
@@ -271,7 +277,7 @@
 
                 <button type="button"
                         class="btn btn-secondary btn-xs me-2"
-                        onclick=""
+                        onclick="allocationPlanManagement.handleAddPlannedAllocationRow(this, {{allocationIndex}}, {{fractalPlannedAllocation.level.index}})"
                 >
                     <span class="bi bi-plus-circle"></span>
                 </button>
@@ -297,7 +303,6 @@
                     fractalPlannedAllocation=.
                     allocationIndex=(iteratorNext "plannedAllocationIndex")
                     hierarchy=../hierarchy
-                    targetLevel=../subLevel
                     parentRowIndex=../allocationIndex
             }}
 
@@ -307,11 +312,15 @@
 
 </script>
 
-<script>
+<script type="text/javascript">
 
     HandlebarsUtils.registerPartialToContainer(
         "accordion-allocation-plan",
         "template-allocation-plan-management-form-tbody-row"
+    );
+
+    allocationPlanManagement.handlebarsAllocationPlanManagementRowTemplate = Handlebars.compile(
+        window["template-allocation-plan-management-form-tbody-row"].innerHTML
     );
 
 </script>
