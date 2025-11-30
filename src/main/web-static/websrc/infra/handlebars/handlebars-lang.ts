@@ -4,7 +4,7 @@ import { logger, LogLevel } from "../logging";
 import {
     assignValueAtPath,
     coerceToFiniteNumber,
-    toCompararableString,
+    toComparableString,
     toPropertyPathSegments,
     tryCoerceToFiniteNumber,
 } from "../../utils/lang";
@@ -622,8 +622,8 @@ function comparatorHelper(a: unknown, b: unknown): number {
         return leftNumberCoercion.value < rightNumberCoercion.value ? -1 : 1;
     }
 
-    const leftComparableKey = toCompararableString(a);
-    const rightComparableKey = toCompararableString(b);
+    const leftComparableKey = toComparableString(a);
+    const rightComparableKey = toComparableString(b);
 
     if(leftComparableKey === rightComparableKey) {
         return 0;
