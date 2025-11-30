@@ -111,10 +111,9 @@
                                 <td colspan="8">
                                     <div class="d-flex w-100">
 
-                                        <!-- TODO add base planned allocation handler -->
                                         <button class="btn btn-secondary"
                                                 type="button"
-                                                onclick=""
+                                                onclick="allocationPlanManagement.handleAddPlannedAllocationRow(this, {{@root.portfolio.allocationStructure.hierarchy.length}})"
                                         >
                                             <span class="bi bi-plus-circle h5"></span>
                                         </button>
@@ -274,11 +273,11 @@
 
         <td class="text-end">
 
-            {{#if subLevel}}
+            {{#if fractalPlannedAllocation.subLevel}}
 
                 <button type="button"
                         class="btn btn-secondary btn-xs"
-                        onclick="allocationPlanManagement.handleAddPlannedAllocationRow(this, {{allocationIndex}}, {{fractalPlannedAllocation.level.index}})"
+                        onclick="allocationPlanManagement.handleAddPlannedAllocationRow(this, {{fractalPlannedAllocation.level.index}}, {{allocationIndex}})"
                 >
                     <span class="bi bi-plus-circle"></span>
                 </button>
@@ -296,7 +295,7 @@
 
     </tr>
 
-    {{#if subLevel}}
+    {{#if fractalPlannedAllocation.subLevel}}
 
         {{#each subAllocations}}
 

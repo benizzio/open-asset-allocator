@@ -302,7 +302,7 @@ export function tryCoerceToFiniteNumber(value: unknown): { ok: true; value: numb
  */
 export function toComparableString(value: unknown): string {
 
-    if(value === null || typeof value === "undefined") {
+    if(isNullish(value)) {
         return String(value);
     }
 
@@ -502,4 +502,29 @@ export function toInt(value: unknown, options?: ToIntOptions): number | undefine
                 : reportToIntCoercion(options, "unsupported type conversion disallowed", value);
         }
     }
+}
+
+/**
+ * Determines whether a value is null or undefined (JavaScript "nullish").
+ *
+ * @param value - Arbitrary value to test.
+ * @returns True when the value is exactly null or undefined.
+ *
+ * @example
+ * isNullish(null) // => true
+ * isNullish(undefined) // => true
+ * isNullish(0) // => false
+ * isNullish("") // => false
+ * isNullish(false) // => false
+ *
+ * @example
+ * // Safe defaulting pattern without touching other falsy values:
+ * const height = maybeHeightValue;
+ * const resolved = isNullish(height) ? 100 : height;
+ *
+ * @author GitHub Copilot
+ */
+export function isNullish(value: unknown): value is null | undefined {
+    // Loose equality is intentional: only matches null or undefined.
+    return value == null;
 }
