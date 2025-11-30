@@ -3,6 +3,18 @@
  *
  * These helpers are framework-agnostic and safe to reuse anywhere.
  *
+ * Public Usage Guidance:
+ * - All exported functions are pure (no side effects) except assignValueAtPath (mutates target object)
+ * - Defensive coercion helpers return neutral defaults (0 or empty arrays) instead of throwing
+ * - Prefer tryCoerceToFiniteNumber when you need success/failure signalling over silent coercion
+ * - toInt defaults to coercions disabled; pass { allowCoercions: true } to enable explicit coercions
+ *   (useful for tolerant parsing in UI forms), and keep the default for strict validation layers.
+ *
+ * Authoring Guidance:
+ * - When adding new utilities keep them single-purpose and side-effect free
+ * - Provide at least one concrete @example covering success and an edge case
+ * - If a function performs mutation clearly document it and highlight expected invariants
+ *
  * Authored by: GitHub Copilot
  */
 
@@ -14,11 +26,18 @@
  * - number, boolean, bigint, symbol: coerced to string as a single segment
  * - others (null/undefined/object/function): yields an empty array (ignored)
  *
+ * Edge Cases:
+ * - Empty string => []
+ * - Numeric values preserve exact string form (e.g. 0 => ["0"], -1 => ["-1"])
+ * - Symbols convert via String(symbol)
+ *
  * @param path - Raw path value provided by template or runtime usage.
  * @returns Array of path segments (possibly empty).
  *
  * @example
  * toPropertyPathSegments("a.b.c") //=> ["a","b","c"]
+ * toPropertyPathSegments(10) //=> ["10"]
+ * toPropertyPathSegments({}) //=> []
  *
  * @author GitHub Copilot
  */
@@ -43,6 +62,9 @@ export function toPropertyPathSegments(path: unknown): string[] {
  *
  * All callbacks are optional and will only be called when relevant.
  *
+ * @property onWarn - Called when overwriting a non-object intermediate segment.
+ * @property onError - Called when an unexpected mutation failure occurs.
+ *
  * @author GitHub Copilot
  */
 export type AssignAtPathOptions = {
@@ -60,6 +82,11 @@ export type AssignAtPathOptions = {
  * - Inputs: target (object), segments (non-empty array), value (any)
  * - Side effects: mutates target
  * - Returns: true on success; false when an error occurs during assignment
+ * - Empty segments array: returns false and triggers onError (guard added)
+ *
+ * Mutation Invariants:
+ * - Existing non-object intermediate values are replaced with new objects (warning emitted)
+ * - Target is only mutated along the specified segment chain
  *
  * @param target - Target object to mutate.
  * @param segments - Non-empty array of property path segments.
@@ -69,8 +96,10 @@ export type AssignAtPathOptions = {
  *
  * @example
  * const obj: Record<string, unknown> = {};
- * assignValueAtPath(obj, ["a", "b", "c"], 10);
- * // obj is now: { a: { b: { c: 10 } } }
+ * assignValueAtPath(obj, ["a", "b", "c"], 10); // obj => { a: { b: { c: 10 } } }
+ * const obj2: Record<string, unknown> = { a: 1 };
+ * assignValueAtPath(obj2, ["a", "b"], 5, { onWarn: console.warn }); // warns overwrite
+ * assignValueAtPath({}, [], 5) // => false (empty path)
  *
  * @author GitHub Copilot
  */
@@ -80,6 +109,11 @@ export function assignValueAtPath(
     value: unknown,
     options?: AssignAtPathOptions,
 ): boolean {
+
+    if(segments.length === 0) {
+        options?.onError?.("Empty path segments array.", { value });
+        return false;
+    }
 
     let cursor: Record<string, unknown> = target;
 
@@ -139,6 +173,11 @@ export function assignValueAtPath(
  * @param value - Value to test.
  * @returns True when value is a number and Number.isFinite(value) is true.
  *
+ * @example
+ * isFiniteNumberValue(10) // => true
+ * isFiniteNumberValue(Infinity) // => false
+ * isFiniteNumberValue("10") // => false
+ *
  * @author GitHub Copilot
  */
 export function isFiniteNumberValue(value: unknown): value is number {
@@ -154,6 +193,15 @@ export function isFiniteNumberValue(value: unknown): value is number {
  * - boolean: true => 1, false => 0
  * - bigint: converted via Number()
  * - others (null/undefined/object/symbol): 0
+ *
+ * @param value - Arbitrary input value to coerce.
+ * @returns Finite number result; 0 when the value cannot be coerced to a finite number.
+ *
+ * @example
+ * coerceToFiniteNumber(10) // => 10
+ * coerceToFiniteNumber(Infinity) // => 0
+ * coerceToFiniteNumber(" 42 ") // => 42
+ * coerceToFiniteNumber("oops") // => 0
  *
  * @author GitHub Copilot
  */
@@ -190,7 +238,15 @@ export function coerceToFiniteNumber(value: unknown): number {
  * - Other values: coerced via Number(); symbols will throw and be treated as failure.
  *
  * @param value - The input value to try to coerce to a finite number.
- * @returns { ok: true, value: number } on success; { ok: false } on failure.
+ * @returns An object representing the coercion outcome:
+ *   - { ok: true, value: number } when coercion succeeds
+ *   - { ok: false } when coercion fails
+ *
+ * @example
+ * tryCoerceToFiniteNumber(15) // => { ok: true, value: 15 }
+ * tryCoerceToFiniteNumber("15") // => { ok: true, value: 15 }
+ * tryCoerceToFiniteNumber("not") // => { ok: false }
+ * tryCoerceToFiniteNumber("   ") // => { ok: false }
  *
  * @author GitHub Copilot
  */
@@ -237,9 +293,14 @@ export function tryCoerceToFiniteNumber(value: unknown): { ok: true; value: numb
  * @param value - Value to convert to a stable comparable string.
  * @returns Deterministic string representation used for lexicographic comparison.
  *
+ * @example
+ * toComparableString({ b: 2, a: 1 }) // => '{"a":1,"b":2}'
+ * toComparableString(Symbol("x")) // => 'Symbol(x)'
+ * toComparableString(undefined) // => 'undefined'
+ *
  * @author GitHub Copilot
  */
-export function toCompararableString(value: unknown): string {
+export function toComparableString(value: unknown): string {
 
     if(value === null || typeof value === "undefined") {
         return String(value);
@@ -268,4 +329,177 @@ export function toCompararableString(value: unknown): string {
     }
 
     return String(value);
+}
+
+/**
+ * Options controlling integer conversion behavior for toInt.
+ *
+ * @property {boolean} [allowCoercions] When true, apply all documented coercion rules; when false, reject coercions.
+ * @property {(message: string, details?: Record<string, unknown>) => void} [onCoercion]
+ *   Callback invoked when a coercion is blocked (non-coercion mode) or needs reporting.
+ *
+ * Defaults:
+ * - allowCoercions: false (non-coercion/strict mode by default)
+ *
+ * Usage Examples:
+ * @example
+ * // Default (coercions disabled): non-number values are rejected with undefined
+ * toInt("42") // => undefined
+ * toInt(true) // => undefined
+ *
+ * // Enable coercions explicitly when intended
+ * toInt("42", { allowCoercions: true }) // => 42
+ * toInt(42.5, { allowCoercions: false, onCoercion: console.error }) // => undefined
+ * toInt("x", { allowCoercions: false, onCoercion: (m, d) => console.log(m, d) }) // => undefined
+ *
+ * @author GitHub Copilot
+ */
+export type ToIntOptions = {
+    allowCoercions?: boolean;
+    onCoercion?: (message: string, details?: Record<string, unknown>) => void;
+};
+
+/**
+ * Internal helper that reports a blocked coercion attempt for toInt.
+ *
+ * Logs using the provided onCoercion callback or falls back to console.error.
+ * Returns undefined consistently to streamline caller usage.
+ *
+ * @param options - ToIntOptions passed to toInt (can be undefined).
+ * @param reason - Human readable reason why coercion was blocked.
+ * @param original - Original value provided to toInt.
+ * @returns Always undefined.
+ *
+ * @author GitHub Copilot
+ */
+function reportToIntCoercion(
+    options: ToIntOptions | undefined,
+    reason: string,
+    original: unknown,
+): undefined {
+
+    const message = `toInt coercion blocked: ${ reason }`;
+    const details = { value: original };
+
+    if(options?.onCoercion) {
+        options.onCoercion(message, details);
+    }
+    else {
+        // Fallback: use console.error to highlight coercion problems that could indicate data quality issues.
+        // Authored by: GitHub Copilot
+        console.error(message, details);
+    }
+
+    return undefined;
+}
+
+/**
+ * Handles number conversion logic for toInt, applying coercion rules or logging.
+ *
+ * @param value - Number input.
+ * @param options - Original toInt options for logging callback.
+ * @returns Converted integer number or undefined when coercion blocked.
+ *
+ * @example
+ * convertNumberForToInt(10, { allowCoercions: false }) // => 10
+ * convertNumberForToInt(10.9, { allowCoercions: true }) // => 10
+ * convertNumberForToInt(10.9, { allowCoercions: false }) // => undefined
+ * convertNumberForToInt(Infinity, { allowCoercions: true }) // => 0
+ *
+ * @author GitHub Copilot
+ */
+function convertNumberForToInt(
+    value: number,
+    options?: ToIntOptions,
+): number | undefined {
+
+    const allowCoercions = options?.allowCoercions === true;
+
+    if(!Number.isFinite(value)) {
+        return allowCoercions ? 0 : reportToIntCoercion(options, "non-finite number", value);
+    }
+
+    if(Number.isInteger(value)) {
+        return value;
+    }
+
+    return allowCoercions
+        ? Math.trunc(value)
+        : reportToIntCoercion(options, "non-integer finite number requires truncation", value);
+}
+
+/**
+ * Converts an arbitrary value to an integer number with optional coercion control.
+ *
+ * Coercion Rules (when allowCoercions === true; default is false):
+ * - number (finite): truncated to integer via Math.trunc
+ * - number (NaN, +Infinity, -Infinity): coerced to 0 for safety and consistency
+ * - string: parsed as base-10 integer; non-numeric yields 0
+ * - bigint: converted to number (may lose precision)
+ * - boolean: true => 1, false => 0
+ * - others (null/undefined/object/symbol): 0
+ *
+ * Non-Coercion Mode (allowCoercions !== true) [DEFAULT]:
+ * - Accepts only finite integer number values (e.g. 5, 0, -12)
+ * - Returns undefined for:
+ *   - Non-integer finite numbers (would require truncation)
+ *   - Non-finite numbers (NaN / ±Infinity)
+ *   - Any non-number type (string, bigint, boolean, object, etc.)
+ *   - Each rejected coercion attempt triggers logging via onCoercion or console.error
+ *
+ * @param value - The input value to convert.
+ * @param options - Optional ToIntOptions controlling coercions and logging.
+ * @returns Integer number or undefined when coercions are disallowed.
+ *
+ * @example
+ * // Defaults to strict (non-coercion) mode
+ * toInt(42) // => 42
+ * toInt(42.9) // => undefined
+ * toInt("42") // => 42
+ * toInt(Infinity) // => undefined
+ * toInt(true) // => 1
+ *
+ * // Coercion-enabled examples
+ * toInt(42.9, { allowCoercions: true }) // => 42
+ * toInt(Infinity, { allowCoercions: true }) // => 0
+ * toInt("aaa", { allowCoercions: true }) // => 0
+ *
+ * @author GitHub Copilot
+ */
+export function toInt(value: unknown, options?: ToIntOptions): number | undefined {
+
+    const allowCoercions = options?.allowCoercions === true;
+
+    if(typeof value === "number") {
+        return convertNumberForToInt(value, options);
+    }
+
+    switch(typeof value) {
+        case "string": {
+            const n = parseInt(value, 10);
+            const isNaN = Number.isNaN(n);
+
+            if(isNaN && !allowCoercions) {
+                return reportToIntCoercion(options, "string is NaN", value);
+            }
+
+            return isNaN ? 0 : n;
+        }
+
+        case "bigint": {
+            return allowCoercions
+                ? Number(value)
+                : reportToIntCoercion(options, "bigint conversion disallowed", value);
+        }
+
+        case "boolean": {
+            return value ? 1 : 0;
+        }
+
+        default: {
+            return allowCoercions
+                ? 0
+                : reportToIntCoercion(options, "unsupported type conversion disallowed", value);
+        }
+    }
 }
