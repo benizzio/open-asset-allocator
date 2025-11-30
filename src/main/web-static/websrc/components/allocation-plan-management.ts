@@ -6,6 +6,14 @@ import { htmxInfra } from "../infra/htmx/htmx";
 import DomInfra from "../infra/dom";
 import BigNumber from "bignumber.js";
 import * as handlebars from "handlebars";
+import { toInt } from "../utils/lang";
+import { Portfolio } from "../domain/portfolio";
+import { AllocationHierarchyLevel } from "../domain/allocation";
+
+const FORM_LAST_ROW_INDEX_INPUT_NAME = "last-planned-allocation-row-index";
+const FORM_FIELD_DEPENDENT_ATTRIBUTE = "data-bind-to-name";
+
+const ALLOCATION_HIERARCHY_LEVEL_MANAGING_FIELD_TEMP_PROPERTY_NAME = "currentManagingFieldName";
 
 function mapToCompleteAllocationPlans(originalServerResponseJSON: string): string {
 
@@ -36,10 +44,10 @@ function handleHierarchicalIdLevelChange(targetElement: HTMLInputElement) {
         field.value = targetElement.value;
     });
 
-    const spansToUpdat =
+    const spansToUpdate =
         ancestorTable.querySelectorAll<HTMLSpanElement>(`[data-label-for-name='${ targetElementName }']`);
 
-    spansToUpdat.forEach((span) => {
+    spansToUpdate.forEach((span) => {
         span.textContent = targetElement.value;
     });
 }
@@ -51,6 +59,93 @@ function handleRemovePlannedAllocationRow(targetElement: HTMLElement) {
     row.remove();
 }
 
+function createNewPlannedAllocation(
+    portfolio: Portfolio,
+    parentHierarchyLevelIndex: number,
+): SerializableFractalPlannedAllocation {
+
+    const portfolioAllocationHierarchy = portfolio.allocationStructure.hierarchy;
+    const newPlannedAllocationLevel = portfolioAllocationHierarchy[parentHierarchyLevelIndex - 1];
+    const hierarchySize = portfolioAllocationHierarchy.length;
+
+    let newPlannedAllocationAsset: Asset;
+
+    if(newPlannedAllocationLevel.field === "assetTicker") {
+        newPlannedAllocationAsset = { ticker: "" };
+    }
+
+    const newPlannedAllocation: SerializableFractalPlannedAllocation = {
+        key: "",
+        targetLevelKey: "",
+        level: newPlannedAllocationLevel,
+        allocation: {
+            hierarchicalId: new Array(hierarchySize),
+            cashReserve: false,
+            sliceSizePercentage: new BigNumber(0),
+            asset: newPlannedAllocationAsset,
+        },
+    };
+
+    newPlannedAllocation.allocation.hierarchicalId[newPlannedAllocationLevel.index] = null;
+
+    return newPlannedAllocation;
+}
+
+function setHierarchicalIdFromParentRow(
+    newPlannedAllocation: SerializableFractalPlannedAllocation,
+    formElement: HTMLFormElement,
+    parentRowIndex: number,
+    portfolioAllocationHierarchy: AllocationHierarchyLevel[],
+) {
+    DomInfra.DomUtils.queryAllInDescendants(formElement, `[name^='details[${ parentRowIndex }][hierarchicalId]']`)
+        .forEach((hierarchicalIdInput: HTMLInputElement) => {
+
+            const hierarchicalIdValue = hierarchicalIdInput.value;
+            const hierarchicalIdFieldName = hierarchicalIdInput.getAttribute("name");
+
+            const hierarchicalIdIndexString = hierarchicalIdFieldName
+                .substring(
+                    hierarchicalIdFieldName.indexOf("[hierarchicalId][") + "[hierarchicalId][".length,
+                    hierarchicalIdFieldName.length - 1,
+                );
+            const hierarchicalIdIndex = toInt(hierarchicalIdIndexString);
+
+            newPlannedAllocation.allocation.hierarchicalId[hierarchicalIdIndex] = hierarchicalIdValue;
+
+            const bindedFieldName = hierarchicalIdInput.getAttribute(FORM_FIELD_DEPENDENT_ATTRIBUTE);
+            const allocationHierarchyLevelForInput = portfolioAllocationHierarchy[hierarchicalIdIndex];
+
+            allocationHierarchyLevelForInput[ALLOCATION_HIERARCHY_LEVEL_MANAGING_FIELD_TEMP_PROPERTY_NAME] =
+                bindedFieldName ?? hierarchicalIdFieldName;
+        });
+}
+
+function addPlannedAllocationRow(
+    newPlannedAllocation: SerializableFractalPlannedAllocation,
+    formElement: HTMLFormElement,
+    portfolioAllocationHierarchy: AllocationHierarchyLevel[],
+    parentRowIndex: number,
+    parentRowElement: HTMLTableRowElement,
+) {
+    const lastRowIndexElement = DomInfra.DomUtils.queryFirstInDescendants(
+        formElement,
+        `[name="${ FORM_LAST_ROW_INDEX_INPUT_NAME }"]`,
+    ) as HTMLInputElement;
+
+    const lastRowIndex = toInt(lastRowIndexElement.value);
+    const newRowIndex = lastRowIndex + 1;
+
+    const newRowHtml = allocationPlanManagement.handlebarsAllocationPlanManagementRowTemplate({
+        fractalPlannedAllocation: newPlannedAllocation,
+        allocationIndex: newRowIndex,
+        hierarchy: portfolioAllocationHierarchy,
+        parentRowIndex,
+    });
+
+    parentRowElement.insertAdjacentHTML("afterend", newRowHtml);
+
+    lastRowIndexElement.value = newRowIndex.toString();
+}
 
 const allocationPlanManagement = {
 
@@ -66,74 +161,33 @@ const allocationPlanManagement = {
     handleHierarchicalIdLevelChange,
     handleRemovePlannedAllocationRow,
 
-    // TODO clean
-    handleAddPlannedAllocationRow(targetButton: HTMLButtonElement, parentRowIndex: number, parentLevelIndex: number) {
+    handleAddPlannedAllocationRow(
+        targetButton: HTMLButtonElement,
+        parentRowIndex: number,
+        parentHierarchyLevelIndex: number,
+    ) {
 
         const portfolio = PortfolioPage.getContextPortfolio();
-
-        const newPlannedAllocationLevel = portfolio.allocationStructure.hierarchy[parentLevelIndex - 1];
         const portfolioAllocationHierarchy = portfolio.allocationStructure.hierarchy;
-        const hierarchySize = portfolioAllocationHierarchy.length;
+
+        const newPlannedAllocation = createNewPlannedAllocation(
+            portfolio,
+            parentHierarchyLevelIndex,
+        );
 
         const formElement = targetButton.closest("form");
+
+        setHierarchicalIdFromParentRow(newPlannedAllocation, formElement, parentRowIndex, portfolioAllocationHierarchy);
+
         const parentRowElement = targetButton.closest("tr");
 
-        let newPlannedAllocationAsset: Asset;
-
-        if(newPlannedAllocationLevel.field === "assetTicker") {
-            newPlannedAllocationAsset = { ticker: "" };
-        }
-
-        const newPlannedAllocation: SerializableFractalPlannedAllocation = {
-            key: "",
-            targetLevelKey: "",
-            level: newPlannedAllocationLevel,
-            allocation: {
-                hierarchicalId: new Array(hierarchySize),
-                cashReserve: false,
-                sliceSizePercentage: new BigNumber(0),
-                asset: newPlannedAllocationAsset,
-            },
-        };
-
-        newPlannedAllocation.allocation.hierarchicalId[newPlannedAllocationLevel.index] = null;
-
-        DomInfra.DomUtils.queryAllInDescendants(formElement, `[name^='details[${ parentRowIndex }][hierarchicalId]']`)
-            .forEach((hierarchicalIdInput: HTMLInputElement) => {
-
-                const hierarchicalIdValue = hierarchicalIdInput.value;
-                const hierarchicalIdFieldName = hierarchicalIdInput.getAttribute("name");
-
-                const hierarchicalIdIndexString = hierarchicalIdFieldName
-                    .substring(
-                        hierarchicalIdFieldName.indexOf("[hierarchicalId][") + "[hierarchicalId][".length,
-                        hierarchicalIdFieldName.length - 1,
-                    );
-                const hierarchicalIdIndex = parseInt(hierarchicalIdIndexString, 10);
-
-                newPlannedAllocation.allocation.hierarchicalId[hierarchicalIdIndex] = hierarchicalIdValue;
-            });
-
-        const lastRowIndexElement = DomInfra.DomUtils.queryFirstInDescendants(
+        addPlannedAllocationRow(
+            newPlannedAllocation,
             formElement,
-            "[name='last-planned-allocation-row-index']",
-        ) as HTMLInputElement;
-        const lastRowIndex = parseInt(lastRowIndexElement.value, 10);
-        const newRowIndex = lastRowIndex + 1;
-
-        const newRowHtml = allocationPlanManagement.handlebarsAllocationPlanManagementRowTemplate({
-            fractalPlannedAllocation: newPlannedAllocation,
-            allocationIndex: newRowIndex,
-            hierarchy: portfolioAllocationHierarchy,
+            portfolioAllocationHierarchy,
             parentRowIndex,
-        });
-
-        parentRowElement.insertAdjacentHTML("afterend", newRowHtml);
-
-        lastRowIndexElement.value = newRowIndex.toString();
-
-        console.log(newPlannedAllocation);
-        console.log(portfolioAllocationHierarchy);
+            parentRowElement,
+        );
     },
 };
 

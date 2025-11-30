@@ -464,7 +464,7 @@ function convertNumberForToInt(
  * toInt(Infinity, { allowCoercions: true }) // => 0
  * toInt("aaa", { allowCoercions: true }) // => 0
  *
- * @author GitHub Copilot
+ * @author GitHub Copilot and others
  */
 export function toInt(value: unknown, options?: ToIntOptions): number | undefined {
 
