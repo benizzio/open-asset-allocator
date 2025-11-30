@@ -4,6 +4,8 @@ import { AfterRequestEventDetail, htmxInfra } from "../infra/htmx/htmx";
 import { ObservationTimestamp } from "../domain/portfolio-allocation";
 import router from "../infra/routing/router";
 import AssetComposedColumnsInput from "./asset-composed-columns-input";
+import { toInt } from "../utils/lang";
+import type { TemplateDelegate } from "handlebars";
 
 const PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER = "accordion-portfolio-history-management";
 const PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX = "portfolio-history-management-form-";
@@ -59,7 +61,7 @@ function getNextPortfolioHistoryManagementIndex(tbody: HTMLElement): number {
     const lastRow = rows[rows.length - 1] as HTMLElement;
     const lastRowId = lastRow?.id;
     const lastRowIdIndex = lastRowId?.split("-").pop();
-    return lastRowIdIndex ? parseInt(lastRowIdIndex, 10) + 1 : 0;
+    return lastRowIdIndex ? toInt(lastRowIdIndex) + 1 : 0;
 }
 
 function modifyObservationsResponse(originalServerResponseJSON: string): string {
@@ -103,8 +105,8 @@ function propagateRefreshDataAfterPost(observationTimestampId: number) {
 
 const portfolioHistoryManagement = {
 
-    handlebarsPortfolioHistoryManagementRowTemplate: null as Handlebars.TemplateDelegate,
-    handlebarsPortfolioHistoryManagementContainerTemplate: null as Handlebars.TemplateDelegate,
+    handlebarsPortfolioHistoryManagementRowTemplate: null as TemplateDelegate,
+    handlebarsPortfolioHistoryManagementContainerTemplate: null as TemplateDelegate,
 
     init() {
         htmxInfra.htmxTransformResponse.registerTransformResponseFunction(
@@ -119,7 +121,7 @@ const portfolioHistoryManagement = {
         const tbody: HTMLElement = window[tbodyId];
         const nextIndex = getNextPortfolioHistoryManagementIndex(tbody);
 
-        const newRowHtml = this.handlebarPortfolioHistoryManagementRowTemplate({
+        const newRowHtml = this.handlebarsPortfolioHistoryManagementRowTemplate({
             allocationIndex: nextIndex,
             observationTimestampId: observationTimestampId,
         });
