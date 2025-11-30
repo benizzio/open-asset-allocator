@@ -52,4 +52,4 @@
 ## DB related code standards
 
 - when handling database related code (SQL, PL/pgSQL, database migration files, ORM related code), read
-  [db copilot instructions](copilot_specific_instructions/db.copilot.instructions.md)
+  [db copilot instructions](copilot_specific_instructions/db.instructions.md)
