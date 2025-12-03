@@ -64,7 +64,7 @@
 
                     <!-- TODO after request, reload -->
                     <!-- TODO post to /api/portfolio/:portfolioId/allocation-plan -->
-                    <form id="allocation-plan-management-form-{{id}}"
+                    <form id="allocation-plan-management-form-{{allocationPlan.id}}"
                           class="needs-validation"
                           hx-post="/test"
                           hx-ext="form-json"
@@ -97,6 +97,7 @@
                             {{#each fractalHierarchicalPlan.topAllocations}}
 
                                 {{> template-allocation-plan-management-form-tbody-row
+                                        allocationPlanId=../allocationPlan.id
                                         fractalPlannedAllocation=.
                                         hierarchy=@root.portfolio.allocationStructure.hierarchy
                                         allocationIndex=(iteratorNext "plannedAllocationIndex")
@@ -113,7 +114,7 @@
 
                                         <button class="btn btn-secondary"
                                                 type="button"
-                                                onclick="allocationPlanManagement.handleAddPlannedAllocationRow(this, {{@root.portfolio.allocationStructure.hierarchy.length}})"
+                                                onclick="allocationPlanManagement.handleAddPlannedAllocationRow({{allocationPlan.id}}, this, {{@root.portfolio.allocationStructure.hierarchy.length}})"
                                         >
                                             <span class="bi bi-plus-circle h5"></span>
                                         </button>
@@ -148,8 +149,10 @@
 
 <script id="template-allocation-plan-management-form-tbody-row" type="text/x-handlebars-template">
 
-    <tr id="allocation-plan-management-row-{{allocationIndex}}"
-        {{#ifNotNullish parentRowIndex}}data-parent-row-id="allocation-plan-management-row-{{parentRowIndex}}"{{/ifNotNullish}}
+    <tr id="allocation-plan-management-form-{{allocationPlanId}}-row-{{allocationIndex}}"
+        {{#ifNotNullish parentRowIndex}}
+        data-parent-row-id="allocation-plan-management-form-{{allocationPlanId}}-row-{{parentRowIndex}}"
+        {{/ifNotNullish}}
     >
 
         <!-- loop through the portfolio's available hierarchy, configuring hierarchy definition fields in expected order -->
@@ -178,8 +181,8 @@
                             assetIdHiddenFieldName=(concat "details[" ../allocationIndex "][asset][id]")
                             assetTickerFieldName=(concat "details[" ../allocationIndex "][asset][name]")
                             assetNameFieldName=(concat "details[" ../allocationIndex "][asset][ticker]")
-                            assetTickerFieldHTMXOnValidate=""
-                            assetActionButtonOnClick=""
+                            assetTickerFieldHTMXOnValidate=(concat "allocationPlanManagement.validateAssetElementsForPost(" ../allocationPlanId ", " ../allocationIndex ")")
+                            assetActionButtonOnClick=(concat "allocationPlanManagement.assetActionButtonClickHandler(" ../allocationPlanId ", " ../allocationIndex ")")
                     }}
 
                     <!-- TODO Copy ticker to here before posting -->
@@ -277,7 +280,7 @@
 
                 <button type="button"
                         class="btn btn-secondary btn-xs"
-                        onclick="allocationPlanManagement.handleAddPlannedAllocationRow(this, {{fractalPlannedAllocation.level.index}}, {{allocationIndex}})"
+                        onclick="allocationPlanManagement.handleAddPlannedAllocationRow({{allocationPlanId}}, this, {{fractalPlannedAllocation.level.index}}, {{allocationIndex}})"
                 >
                     <span class="bi bi-plus-circle"></span>
                 </button>
@@ -300,6 +303,7 @@
         {{#each subAllocations}}
 
             {{> template-allocation-plan-management-form-tbody-row
+                    allocationPlanId=../allocationPlanId
                     fractalPlannedAllocation=.
                     allocationIndex=(iteratorNext "plannedAllocationIndex")
                     hierarchy=../hierarchy

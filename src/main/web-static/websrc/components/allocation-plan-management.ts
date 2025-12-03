@@ -9,11 +9,13 @@ import * as handlebars from "handlebars";
 import { isNullish, toInt } from "../utils/lang";
 import { Portfolio } from "../domain/portfolio";
 import { AllocationHierarchyLevel } from "../domain/allocation";
+import AssetComposedColumnsInput from "./asset-composed-columns-input";
 
 const FORM_LAST_ROW_INDEX_INPUT_NAME = "last-planned-allocation-row-index";
 const FORM_FIELD_DEPENDENT_ATTRIBUTE = "data-bind-to-name";
 
 const ALLOCATION_HIERARCHY_LEVEL_MANAGING_FIELD_TEMP_PROPERTY_NAME = "currentManagingFieldName";
+const ALLOCATION_PLAN_MANAGEMENT_FORM_PREFIX = "allocation-plan-management-form-";
 
 function mapToCompleteAllocationPlans(originalServerResponseJSON: string): string {
 
@@ -127,6 +129,7 @@ function setHierarchicalIdFromParentRow(
 }
 
 function addPlannedAllocationRow(
+    allocationPlanId: number,
     newPlannedAllocation: SerializableFractalPlannedAllocation,
     formElement: HTMLFormElement,
     portfolioAllocationHierarchy: AllocationHierarchyLevel[],
@@ -143,6 +146,7 @@ function addPlannedAllocationRow(
     const newRowIndex = lastRowIndex + 1;
 
     const newRowHtml = allocationPlanManagement.handlebarsAllocationPlanManagementRowTemplate({
+        allocationPlanId,
         fractalPlannedAllocation: newPlannedAllocation,
         allocationIndex: newRowIndex,
         hierarchy: portfolioAllocationHierarchy,
@@ -174,6 +178,7 @@ const allocationPlanManagement = {
     handleRemovePlannedAllocationRow,
 
     handleAddPlannedAllocationRow(
+        allocationPlanId: number,
         targetButton: HTMLButtonElement,
         parentHierarchyLevelIndex: number,
         parentRowIndex?: number,
@@ -204,11 +209,42 @@ const allocationPlanManagement = {
         }
 
         addPlannedAllocationRow(
+            allocationPlanId,
             newPlannedAllocation,
             formElement,
             portfolioAllocationHierarchy,
             parentRowIndex,
             parentRowElement,
+        );
+    },
+
+    assetActionButtonClickHandler(allocationPlanId: number, formRowIndex: number) {
+
+        const formRowId = `${ ALLOCATION_PLAN_MANAGEMENT_FORM_PREFIX }${ allocationPlanId }-row-${ formRowIndex }`;
+        const assetIdHiddenFieldName = `details[${ formRowIndex }][asset][id]`;
+        const assetTickerFieldName = `details[${ formRowIndex }][asset][name]`;
+        const assetNameFieldName = `details[${ formRowIndex }][asset][ticker]`;
+
+        AssetComposedColumnsInput.assetActionButtonClickHandler(
+            formRowId,
+            assetIdHiddenFieldName,
+            assetTickerFieldName,
+            assetNameFieldName,
+        );
+    },
+
+    validateAssetElementsForPost(allocationPlanId: string, formRowIndex: number) {
+
+        const formRowId = `${ ALLOCATION_PLAN_MANAGEMENT_FORM_PREFIX }${ allocationPlanId }-row-${ formRowIndex }`;
+        const assetIdHiddenFieldName = `details[${ formRowIndex }][asset][id]`;
+        const assetTickerFieldName = `details[${ formRowIndex }][asset][name]`;
+        const assetNameFieldName = `details[${ formRowIndex }][asset][ticker]`;
+
+        AssetComposedColumnsInput.validateAssetElementsForPost(
+            formRowId,
+            assetIdHiddenFieldName,
+            assetTickerFieldName,
+            assetNameFieldName,
         );
     },
 };
