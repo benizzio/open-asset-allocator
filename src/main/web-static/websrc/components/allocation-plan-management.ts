@@ -169,6 +169,7 @@ function addPlannedAllocationRow(
     lastRowIndexElement.value = newRowIndex.toString();
 
     htmx.process(newRow);
+    DomInfra.bindDescendants(newRow);
 }
 
 const allocationPlanManagement = {

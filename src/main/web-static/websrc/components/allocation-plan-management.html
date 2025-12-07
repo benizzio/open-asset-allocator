@@ -251,18 +251,14 @@
 
         <td>
 
-            <!-- TODO mask oninput -->
             <input type="number"
-                   name="details[{{allocationIndex}}][sliceSizePercentage]"
                    placeholder="Slice size %"
                    aria-label="Slice size percentage"
                    autocomplete="off"
                    class="form-control"
-                   value="{{fractalPlannedAllocation.allocation.sliceSizePercentage}}"
-                   step="any"
-                   min="0"
+                   value="{{math fractalPlannedAllocation.allocation.sliceSizePercentage "*" 100}}"
+                   data-percentage-input="details[{{allocationIndex}}][sliceSizePercentage]"
                    data-null-if-empty
-                   oninput=""
             />
 
             {{#if fractalPlannedAllocation.allocation.id}}
