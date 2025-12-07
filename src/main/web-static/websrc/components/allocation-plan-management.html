@@ -68,7 +68,7 @@
                           class="needs-validation"
                           hx-post="/test"
                           hx-ext="form-json"
-                          hx-on::after-request=""
+                          hx-on::after-request="allocationPlanManagement.postRequestHandler()"
                           onsubmit="allocationPlanManagement.preSubmitHandler(this)"
                     >
 
@@ -175,7 +175,6 @@
                 {{#ifEquals field "assetTicker"}}
                     <!-- it is the asset level, always lower and knows how to handle it's read-only/edit modes -->
 
-                    <!-- TODO add handlers to actions -->
                     {{> asset-composed-columns-input
                             assetId=../fractalPlannedAllocation.allocation.asset.id
                             assetTicker=../fractalPlannedAllocation.allocation.asset.ticker
@@ -187,7 +186,6 @@
                             assetActionButtonOnClick=(concat "allocationPlanManagement.assetActionButtonClickHandler(" ../allocationPlanId ", " ../allocationIndex ")")
                     }}
 
-                    <!-- TODO Copy ticker to here before posting -->
                     <input type="hidden"
                            name="details[{{../allocationIndex}}][hierarchicalId][{{index}}]"
                            value="{{../targetLevelKey}}"

@@ -10,6 +10,7 @@ import { isNullish, toInt } from "../utils/lang";
 import { Portfolio } from "../domain/portfolio";
 import { AllocationHierarchyLevel } from "../domain/allocation";
 import AssetComposedColumnsInput from "./asset-composed-columns-input";
+import htmx from "htmx.org";
 
 const FORM_LAST_ROW_INDEX_INPUT_NAME = "last-planned-allocation-row-index";
 const FORM_FIELD_DEPENDENT_ATTRIBUTE = "data-bind-to-name";
@@ -153,14 +154,21 @@ function addPlannedAllocationRow(
         parentRowIndex,
     });
 
+    let newRow: HTMLElement;
+
     if(parentRowElement) {
         parentRowElement.insertAdjacentHTML("afterend", newRowHtml);
+        newRow = parentRowElement.nextElementSibling as HTMLElement;
     }
     else {
-        formElement.querySelector("tbody").insertAdjacentHTML("beforeend", newRowHtml);
+        const tbody = formElement.querySelector("tbody");
+        tbody.insertAdjacentHTML("beforeend", newRowHtml);
+        newRow = tbody.lastElementChild as HTMLElement;
     }
 
     lastRowIndexElement.value = newRowIndex.toString();
+
+    htmx.process(newRow);
 }
 
 const allocationPlanManagement = {
@@ -265,6 +273,12 @@ const allocationPlanManagement = {
             ) as HTMLInputElement;
             assetIdInput.value = assetTickerValue;
         });
+
+        return true;
+    },
+
+    postRequestHandler() {
+        //TODO
     },
 };
 
