@@ -222,8 +222,8 @@ const allocationPlanManagement = {
 
         const formRowId = `${ ALLOCATION_PLAN_MANAGEMENT_FORM_PREFIX }${ allocationPlanId }-row-${ formRowIndex }`;
         const assetIdHiddenFieldName = `details[${ formRowIndex }][asset][id]`;
-        const assetTickerFieldName = `details[${ formRowIndex }][asset][name]`;
-        const assetNameFieldName = `details[${ formRowIndex }][asset][ticker]`;
+        const assetTickerFieldName = `details[${ formRowIndex }][asset][ticker]`;
+        const assetNameFieldName = `details[${ formRowIndex }][asset][name]`;
 
         AssetComposedColumnsInput.assetActionButtonClickHandler(
             formRowId,
@@ -237,8 +237,8 @@ const allocationPlanManagement = {
 
         const formRowId = `${ ALLOCATION_PLAN_MANAGEMENT_FORM_PREFIX }${ allocationPlanId }-row-${ formRowIndex }`;
         const assetIdHiddenFieldName = `details[${ formRowIndex }][asset][id]`;
-        const assetTickerFieldName = `details[${ formRowIndex }][asset][name]`;
-        const assetNameFieldName = `details[${ formRowIndex }][asset][ticker]`;
+        const assetTickerFieldName = `details[${ formRowIndex }][asset][ticker]`;
+        const assetNameFieldName = `details[${ formRowIndex }][asset][name]`;
 
         AssetComposedColumnsInput.validateAssetElementsForPost(
             formRowId,
@@ -246,6 +246,25 @@ const allocationPlanManagement = {
             assetTickerFieldName,
             assetNameFieldName,
         );
+    },
+
+    preSubmitHandler(form: HTMLFormElement) {
+
+        DomInfra.DomUtils.queryAllInDescendants(
+            form,
+            "input[name$='[asset][ticker]']",
+        ).forEach((assetTickerInput: HTMLInputElement) => {
+
+            const assetTickerValue = assetTickerInput.value;
+
+            const parentTr = assetTickerInput.closest("tr");
+            const allocationIndexString = parentTr.getAttribute("data-allocation-index");
+
+            const assetIdInput = form.elements.namedItem(
+                `details[${ allocationIndexString }][hierarchicalId][0]`,
+            ) as HTMLInputElement;
+            assetIdInput.value = assetTickerValue;
+        });
     },
 };
 

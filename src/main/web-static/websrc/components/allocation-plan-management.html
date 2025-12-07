@@ -69,6 +69,7 @@
                           hx-post="/test"
                           hx-ext="form-json"
                           hx-on::after-request=""
+                          onsubmit="allocationPlanManagement.preSubmitHandler(this)"
                     >
 
                         <input type="hidden" name="id" value="{{allocationPlan.id}}" />
@@ -153,6 +154,7 @@
         {{#ifNotNullish parentRowIndex}}
         data-parent-row-id="allocation-plan-management-form-{{allocationPlanId}}-row-{{parentRowIndex}}"
         {{/ifNotNullish}}
+        data-allocation-index="{{allocationIndex}}"
     >
 
         <!-- loop through the portfolio's available hierarchy, configuring hierarchy definition fields in expected order -->
@@ -179,8 +181,8 @@
                             assetTicker=../fractalPlannedAllocation.allocation.asset.ticker
                             assetName=../fractalPlannedAllocation.allocation.asset.name
                             assetIdHiddenFieldName=(concat "details[" ../allocationIndex "][asset][id]")
-                            assetTickerFieldName=(concat "details[" ../allocationIndex "][asset][name]")
-                            assetNameFieldName=(concat "details[" ../allocationIndex "][asset][ticker]")
+                            assetTickerFieldName=(concat "details[" ../allocationIndex "][asset][ticker]")
+                            assetNameFieldName=(concat "details[" ../allocationIndex "][asset][name]")
                             assetTickerFieldHTMXOnValidate=(concat "allocationPlanManagement.validateAssetElementsForPost(" ../allocationPlanId ", " ../allocationIndex ")")
                             assetActionButtonOnClick=(concat "allocationPlanManagement.assetActionButtonClickHandler(" ../allocationPlanId ", " ../allocationIndex ")")
                     }}
