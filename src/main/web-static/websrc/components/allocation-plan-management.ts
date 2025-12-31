@@ -23,6 +23,8 @@ const FORM_FIELD_DEPENDENT_ATTRIBUTE = "data-bind-to-name";
 const ALLOCATION_HIERARCHY_LEVEL_MANAGING_FIELD_TEMP_PROPERTY_NAME = "currentManagingFieldName";
 const ALLOCATION_PLAN_MANAGEMENT_FORM_PREFIX = "allocation-plan-management-form-";
 
+const ASSET_TICKER_FIELD_NAME_SUFFIX = "[asset][ticker]";
+
 function mapToCompleteAllocationPlans(originalServerResponseJSON: string): string {
 
     const portfolioDTO = PortfolioPage.getContextPortfolio();
@@ -177,6 +179,142 @@ function addPlannedAllocationRow(
     DomInfra.bindDescendants(newRow);
 }
 
+function copyAssetTickersToHierarchicalIdFields(form: HTMLFormElement) {
+
+    DomInfra.DomUtils.queryAllInDescendants(
+        form,
+        `input[name$='${ ASSET_TICKER_FIELD_NAME_SUFFIX }']`,
+    ).forEach((assetTickerInput: HTMLInputElement) => {
+
+        const assetTickerValue = assetTickerInput.value;
+
+        const parentTr = assetTickerInput.closest("tr");
+        const allocationIndexString = parentTr.getAttribute("data-allocation-index");
+
+        const assetIdInput = form.elements.namedItem(
+            `details[${ allocationIndexString }][hierarchicalId][0]`,
+        ) as HTMLInputElement;
+        assetIdInput.value = assetTickerValue;
+    });
+}
+
+function mapFormRowHierarchicalStructure(formTableRow: HTMLTableRowElement, hierarchySize: number) {
+
+    const lastHierarchyLevelIndex = hierarchySize - 1;
+
+    const formRowHierarchicalStructure = {
+        formRowHierarchicalFields: [] as HTMLInputElement[],
+        formRowHierarchicalId: "",
+    };
+
+    for(let hierarchyLevelIndex = lastHierarchyLevelIndex; hierarchyLevelIndex >= 0; hierarchyLevelIndex--) {
+
+        const allocationHierarchyLevelFieldNameSuffix = `[hierarchicalId][${ hierarchyLevelIndex }]`;
+
+        const hierarchicalField = DomInfra.DomUtils.queryFirstInDescendants(
+            formTableRow,
+            `input[name$='${ allocationHierarchyLevelFieldNameSuffix }']`,
+        ) as HTMLInputElement;
+
+        if(!hierarchicalField) {
+            continue;
+        }
+
+        if(!hierarchicalField.value.trim()) {
+            // hierarchical fields are required, let the form validation handle this
+            return undefined;
+        }
+
+        const separator = hierarchyLevelIndex < lastHierarchyLevelIndex ? "|" : "";
+        formRowHierarchicalStructure.formRowHierarchicalId += `${ separator }${ hierarchicalField.value }`;
+
+        if(hierarchyLevelIndex > 0 && hierarchicalField.type !== "hidden") {
+            formRowHierarchicalStructure.formRowHierarchicalFields.push(hierarchicalField);
+        }
+        else if(hierarchyLevelIndex == 0) {
+
+            const assertSearchField = DomInfra.DomUtils.queryFirstInDescendants(
+                formTableRow,
+                `input[name$='${ ASSET_TICKER_FIELD_NAME_SUFFIX }']`,
+            ) as HTMLInputElement;
+
+            if(assertSearchField) {
+                formRowHierarchicalStructure.formRowHierarchicalFields.push(assertSearchField);
+            }
+        }
+    }
+
+    return formRowHierarchicalStructure;
+}
+
+function mapPlannedAllocationFormEntriesPerHierarchicalKey(form: HTMLFormElement, hierarchySize: number) {
+
+    const formEntriesPerHierarchicalKey = new Map<string, AllocationPlanningHierarchicalFormEntry>();
+
+    DomInfra.DomUtils.queryAllInDescendants(
+        form,
+        "tr",
+    ).forEach((formTableRow: HTMLTableRowElement) => {
+
+        const { formRowHierarchicalId, formRowHierarchicalFields } = mapFormRowHierarchicalStructure(
+            formTableRow,
+            hierarchySize,
+        );
+
+        if(!formRowHierarchicalId) {
+            return;
+        }
+
+        let formEntry = formEntriesPerHierarchicalKey.get(formRowHierarchicalId);
+
+        if(!formEntry) {
+            formEntry = {
+                inputFields: [],
+                occurences: 0,
+            };
+            formEntriesPerHierarchicalKey.set(formRowHierarchicalId, formEntry);
+        }
+
+        formEntry.occurences++;
+        formEntry.inputFields.push(...formRowHierarchicalFields);
+    });
+
+    return formEntriesPerHierarchicalKey;
+}
+
+function validateDuplicateEntries(
+    hierarchicalFormEntriesPerHierarchicalKey: Map<string, AllocationPlanningHierarchicalFormEntry>,
+) {
+
+    let containsDuplicates = false;
+
+    hierarchicalFormEntriesPerHierarchicalKey.forEach((formEntriesForKey) => {
+
+        if(formEntriesForKey.occurences > 1) {
+
+            formEntriesForKey.inputFields.forEach((field) => {
+
+                if(field.name.endsWith(ASSET_TICKER_FIELD_NAME_SUFFIX)) {
+                    AssetComposedColumnsInput.invalidateSelectedAsset(
+                        field,
+                        "Duplicate hierarchical id in allocation plan",
+                    );
+                }
+                else {
+                    field.setCustomValidity("Duplicate hierarchical id in allocation plan");
+                    field.reportValidity();
+                }
+            });
+            containsDuplicates = true;
+        }
+        else if(formEntriesForKey.inputFields.length > 0) {
+            formEntriesForKey.inputFields[0].setCustomValidity("");
+            formEntriesForKey.inputFields[0].reportValidity();
+        }
+    });
+    return containsDuplicates;
+}
+
 const allocationPlanManagement = {
 
     handlebarsAllocationPlanManagementRowTemplate: null as handlebars.TemplateDelegate,
@@ -236,7 +374,7 @@ const allocationPlanManagement = {
 
         const formRowId = `${ ALLOCATION_PLAN_MANAGEMENT_FORM_PREFIX }${ allocationPlanId }-row-${ formRowIndex }`;
         const assetIdHiddenFieldName = `details[${ formRowIndex }][asset][id]`;
-        const assetTickerFieldName = `details[${ formRowIndex }][asset][ticker]`;
+        const assetTickerFieldName = `details[${ formRowIndex }]${ ASSET_TICKER_FIELD_NAME_SUFFIX }`;
         const assetNameFieldName = `details[${ formRowIndex }][asset][name]`;
 
         AssetComposedColumnsInput.assetActionButtonClickHandler(
@@ -251,7 +389,7 @@ const allocationPlanManagement = {
 
         const formRowId = `${ ALLOCATION_PLAN_MANAGEMENT_FORM_PREFIX }${ allocationPlanId }-row-${ formRowIndex }`;
         const assetIdHiddenFieldName = `details[${ formRowIndex }][asset][id]`;
-        const assetTickerFieldName = `details[${ formRowIndex }][asset][ticker]`;
+        const assetTickerFieldName = `details[${ formRowIndex }]${ ASSET_TICKER_FIELD_NAME_SUFFIX }`;
         const assetNameFieldName = `details[${ formRowIndex }][asset][name]`;
 
         AssetComposedColumnsInput.validateAssetElementsForPost(
@@ -265,114 +403,16 @@ const allocationPlanManagement = {
     //TODO clean code
     preSubmitHandler(form: HTMLFormElement, hierarchySize: number) {
 
-        DomInfra.DomUtils.queryAllInDescendants(
+        copyAssetTickersToHierarchicalIdFields(form);
+
+        const hierarchicalFormEntriesPerHierarchicalKey = mapPlannedAllocationFormEntriesPerHierarchicalKey(
             form,
-            "input[name$='[asset][ticker]']",
-        ).forEach((assetTickerInput: HTMLInputElement) => {
+            hierarchySize,
+        );
 
-            const assetTickerValue = assetTickerInput.value;
+        const containsDuplicateEntries = validateDuplicateEntries(hierarchicalFormEntriesPerHierarchicalKey);
 
-            const parentTr = assetTickerInput.closest("tr");
-            const allocationIndexString = parentTr.getAttribute("data-allocation-index");
-
-            const assetIdInput = form.elements.namedItem(
-                `details[${ allocationIndexString }][hierarchicalId][0]`,
-            ) as HTMLInputElement;
-            assetIdInput.value = assetTickerValue;
-        });
-
-        const hirarchicalFormEntriesPerHierarchicalKey = new Map<string, AllocationPlanningHierarchicalFormEntry>();
-
-        DomInfra.DomUtils.queryAllInDescendants(
-            form,
-            "tr",
-        ).forEach((tableRow: HTMLTableRowElement) => {
-
-            const lastHierarchyLevelIndex = hierarchySize - 1;
-            const hierarchicalFieldsForKey: HTMLInputElement[] = [];
-            let fieldHierarchicalId = "";
-
-            for(let hierarchyLevelIndex = lastHierarchyLevelIndex; hierarchyLevelIndex >= 0; hierarchyLevelIndex--) {
-
-                const allocationHierarchyLevelFieldNameSuffix = `[hierarchicalId][${ hierarchyLevelIndex }]`;
-
-                const hierarchicalField = DomInfra.DomUtils.queryFirstInDescendants(
-                    tableRow,
-                    `input[name$='${ allocationHierarchyLevelFieldNameSuffix }']`,
-                ) as HTMLInputElement;
-
-                if(hierarchicalField) {
-
-                    if(!hierarchicalField.value.trim()) {
-                        return;
-                    }
-
-                    const separator = hierarchyLevelIndex < lastHierarchyLevelIndex ? "|" : "";
-                    fieldHierarchicalId += `${ separator }${ hierarchicalField.value }`;
-
-                    // if the field is not on the last level and its not a hidden input, add to map
-                    if(hierarchyLevelIndex > 0 && hierarchicalField.type !== "hidden") {
-                        hierarchicalFieldsForKey.push(hierarchicalField);
-                    }
-                    else if(hierarchyLevelIndex == 0) {
-                        const assertSearchField = DomInfra.DomUtils.queryFirstInDescendants(
-                            tableRow,
-                            "input[name$='[asset][ticker]']",
-                        ) as HTMLInputElement;
-
-                        if(assertSearchField) {
-                            hierarchicalFieldsForKey.push(assertSearchField);
-                        }
-                    }
-                }
-            }
-
-            if(!fieldHierarchicalId) {
-                return;
-            }
-
-            let formEntry = hirarchicalFormEntriesPerHierarchicalKey.get(fieldHierarchicalId);
-
-            if(!formEntry) {
-                formEntry = {
-                    inputFields: [],
-                    occurences: 0,
-                };
-                hirarchicalFormEntriesPerHierarchicalKey.set(fieldHierarchicalId, formEntry);
-            }
-
-            formEntry.occurences++;
-            formEntry.inputFields.push(...hierarchicalFieldsForKey);
-        });
-
-        let containsDuplicates = false;
-
-        hirarchicalFormEntriesPerHierarchicalKey.forEach((formEntriesForKey, key) => {
-
-            if(formEntriesForKey.occurences > 1) {
-
-                formEntriesForKey.inputFields.forEach((field) => {
-
-                    if(field.name.endsWith("[asset][ticker]")) {
-                        AssetComposedColumnsInput.invalidateSelectedAsset(
-                            field,
-                            "Duplicate hierarchical id in allocation plan",
-                        );
-                    }
-                    else {
-                        field.setCustomValidity("Duplicate hierarchical id in allocation plan");
-                        field.reportValidity();
-                    }
-                });
-                containsDuplicates = true;
-            }
-            else if(formEntriesForKey.inputFields.length > 0) {
-                formEntriesForKey.inputFields[0].setCustomValidity("");
-                formEntriesForKey.inputFields[0].reportValidity();
-            }
-        });
-
-        if(containsDuplicates) {
+        if(containsDuplicateEntries) {
             return;
         }
 
