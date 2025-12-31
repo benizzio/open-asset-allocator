@@ -69,7 +69,6 @@
                           hx-post="/test"
                           hx-ext="form-json"
                           hx-on::after-request="allocationPlanManagement.postRequestHandler()"
-                          onsubmit="allocationPlanManagement.preSubmitHandler(this)"
                     >
 
                         <input type="hidden" name="id" value="{{allocationPlan.id}}" />
@@ -120,7 +119,10 @@
                                             <span class="bi bi-plus-circle h5"></span>
                                         </button>
 
-                                        <button class="btn btn-primary ms-auto" type="submit">
+                                        <button class="btn btn-primary ms-auto"
+                                                type="button"
+                                                onclick="allocationPlanManagement.preSubmitHandler(this.closest('form'), {{@root.portfolio.allocationStructure.hierarchy.length}})"
+                                        >
                                             <span class="bi bi-save-fill h5"></span>
                                         </button>
 

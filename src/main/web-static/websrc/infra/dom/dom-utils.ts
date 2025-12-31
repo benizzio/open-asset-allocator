@@ -41,7 +41,7 @@ const DomUtils = {
     queryAll(selector: string): NodeListOf<HTMLElement> {
         return document.querySelectorAll(selector);
     },
-    queryFirstInDescendants(element: HTMLElement, selector: string): HTMLElement {
+    queryFirstInDescendants(element: HTMLElement, selector: string): HTMLElement | null {
         return element.querySelector(selector);
     },
     queryAllInDescendants(element: HTMLElement, selector: string): NodeListOf<HTMLElement> {

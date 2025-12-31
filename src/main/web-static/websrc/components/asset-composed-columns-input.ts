@@ -3,6 +3,8 @@ import { BootstrapClasses, BootstrapIconClasses } from "../infra/bootstrap/const
 import api from "../api/api";
 import htmx from "htmx.org";
 
+const TICKER_EXTRA_ERROR_MESSAGE_ATTRIBUTE = "data-asset-ticker-extra-error-message";
+
 const ASSET_ACTION_BUTTON_IDENTITIES = {
     search: {
         classes: `${ BootstrapClasses.BUTTON_PRIMARY } btn-xs`,
@@ -20,6 +22,7 @@ class AssetComposedColumnInput {
     assetTickerInput: HTMLInputElement;
     assetActionButton: HTMLButtonElement;
     newAssetTickerMessage: HTMLDivElement;
+    assetTickerExtraErrorMessageDiv: HTMLDivElement;
     assetNameInput: HTMLInputElement;
 
     constructor(
@@ -36,6 +39,7 @@ class AssetComposedColumnInput {
         this.assetActionButton = container.querySelector("[data-asset-action-button]");
         this.newAssetTickerMessage = container.querySelector("[data-new-asset-ticker-message]");
         this.assetNameInput = container.querySelector(`[name='${ assetNameFieldName }']`);
+        this.assetTickerExtraErrorMessageDiv = container.querySelector(`[${ TICKER_EXTRA_ERROR_MESSAGE_ATTRIBUTE }]`);
     }
 
     isInSearchMode(): boolean {
@@ -71,7 +75,7 @@ class AssetComposedColumnInput {
 
         this.switchAssetActionButtonIdentity(ASSET_ACTION_BUTTON_IDENTITIES.reset);
 
-        this.assetTickerInput.readOnly = false;
+        this.assetTickerInput.readOnly = true;
 
         this.assetNameInput.style.display = "";
         this.assetNameInput.readOnly = false;
@@ -85,8 +89,11 @@ class AssetComposedColumnInput {
         this.switchAssetActionButtonIdentity(ASSET_ACTION_BUTTON_IDENTITIES.search);
 
         this.assetTickerInput.value = "";
+        this.assetTickerInput.setCustomValidity("");
+        this.assetTickerInput.reportValidity();
         this.assetTickerInput.focus();
         this.assetTickerInput.readOnly = false;
+        this.assetTickerInput.classList.remove("is-invalid");
 
         this.assetNameInput.value = "";
         this.assetNameInput.style.display = "none";
@@ -96,6 +103,8 @@ class AssetComposedColumnInput {
         this.assetIdInput.value = "";
 
         this.newAssetTickerMessage.style.display = "none";
+        this.assetTickerExtraErrorMessageDiv.textContent = "";
+        this.assetTickerExtraErrorMessageDiv.style.display = "none";
     }
 
     clearSearchFieldValidation() {
@@ -209,6 +218,21 @@ const AssetComposedColumnsInput = {
     loadDatalists() {
         loadClassesDatalist();
         loadAssetsDatalist();
+    },
+
+    invalidateSelectedAsset(field: HTMLInputElement, errorMessage: string) {
+
+        field.classList.add("is-invalid");
+
+        const parentColumn = field.closest("td");
+
+        const extraErrorMessageDiv =
+            parentColumn.querySelector(`[data-asset-ticker-extra-error-message="${ field.name }"]`) as HTMLDivElement;
+
+        extraErrorMessageDiv.textContent = errorMessage;
+        extraErrorMessageDiv.style.display = "contents";
+        field.setCustomValidity("errorMessage");
+        field.reportValidity();
     },
 };
 
