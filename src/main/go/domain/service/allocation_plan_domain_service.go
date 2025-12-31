@@ -63,9 +63,9 @@ func (service *AllocationPlanDomService) PersistAllocationPlanInTransaction(
 
 	if langext.IsZeroValue(plan.Id) {
 		return service.allocationPlanRepository.InsertAllocationPlanInTransaction(transContext, plan)
-	} else {
-		return service.allocationPlanRepository.UpdateAllocationPlanInTransaction(transContext, plan)
 	}
+
+	return service.allocationPlanRepository.UpdateAllocationPlanInTransaction(transContext, plan)
 
 }
 
@@ -76,6 +76,7 @@ type allocationPlanValidationValidationData struct {
 
 // TODO validate plan before persisting
 // - hierarchy matches portfolio hierarchy
+// - hierarchical ids with asset match asset ticker from reference
 func (service *AllocationPlanDomService) validateAllocationPlan(plan *domain.AllocationPlan) []*infra.AppError {
 
 	var validation = &allocationPlanValidationValidationData{
