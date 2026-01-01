@@ -231,7 +231,7 @@ const AssetComposedColumnsInput = {
 
         extraErrorMessageDiv.textContent = errorMessage;
         extraErrorMessageDiv.style.display = "contents";
-        field.setCustomValidity("errorMessage");
+        field.setCustomValidity(errorMessage);
         field.reportValidity();
     },
 };

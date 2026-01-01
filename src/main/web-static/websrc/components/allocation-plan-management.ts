@@ -198,6 +198,7 @@ function copyAssetTickersToHierarchicalIdFields(form: HTMLFormElement) {
     });
 }
 
+// TODO clean code
 function mapFormRowHierarchicalStructure(formTableRow: HTMLTableRowElement, hierarchySize: number) {
 
     const lastHierarchyLevelIndex = hierarchySize - 1;
@@ -244,7 +245,7 @@ function mapFormRowHierarchicalStructure(formTableRow: HTMLTableRowElement, hier
         }
     }
 
-    return formRowHierarchicalStructure;
+    return formRowHierarchicalStructure.formRowHierarchicalId ? formRowHierarchicalStructure : undefined;
 }
 
 function mapPlannedAllocationFormEntriesPerHierarchicalKey(form: HTMLFormElement, hierarchySize: number) {
@@ -256,14 +257,16 @@ function mapPlannedAllocationFormEntriesPerHierarchicalKey(form: HTMLFormElement
         "tr",
     ).forEach((formTableRow: HTMLTableRowElement) => {
 
-        const { formRowHierarchicalId, formRowHierarchicalFields } = mapFormRowHierarchicalStructure(
+        const formRowHirarchicalStructure = mapFormRowHierarchicalStructure(
             formTableRow,
             hierarchySize,
         );
 
-        if(!formRowHierarchicalId) {
+        if(!formRowHirarchicalStructure) {
             return;
         }
+
+        const { formRowHierarchicalId, formRowHierarchicalFields } = formRowHirarchicalStructure;
 
         let formEntry = formEntriesPerHierarchicalKey.get(formRowHierarchicalId);
 
@@ -400,7 +403,6 @@ const allocationPlanManagement = {
         );
     },
 
-    //TODO clean code
     preSubmitHandler(form: HTMLFormElement, hierarchySize: number) {
 
         copyAssetTickersToHierarchicalIdFields(form);
