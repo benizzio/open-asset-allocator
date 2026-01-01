@@ -63,10 +63,9 @@
                 <div class="accordion-body row justify-content-center">
 
                     <!-- TODO after request, reload -->
-                    <!-- TODO post to /api/portfolio/:portfolioId/allocation-plan -->
                     <form id="allocation-plan-management-form-{{allocationPlan.id}}"
                           class="needs-validation"
-                          hx-post="/test"
+                          hx-post="/api/portfolio/:portfolioId/allocation-plan"
                           hx-ext="form-json"
                           hx-on::after-request="allocationPlanManagement.postRequestHandler()"
                     >

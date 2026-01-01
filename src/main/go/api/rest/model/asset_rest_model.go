@@ -1,15 +1,18 @@
 package model
 
-import "github.com/benizzio/open-asset-allocator/domain"
+import (
+	"github.com/benizzio/open-asset-allocator/domain"
+	"github.com/benizzio/open-asset-allocator/langext"
+)
 
 // ================================================
 // TYPES
 // ================================================
 
 type AssetDTS struct {
-	Id     int64  `json:"id"`
-	Name   string `json:"name"`
-	Ticker string `json:"ticker"`
+	Id     *langext.ParseableInt64 `json:"id"`
+	Name   string                  `json:"name"`
+	Ticker string                  `json:"ticker"`
 }
 
 // ================================================
@@ -22,8 +25,9 @@ func MapToAssetDTS(asset *domain.Asset) *AssetDTS {
 		return nil
 	}
 
+	var assetId = langext.ParseableInt64(asset.Id)
 	return &AssetDTS{
-		Id:     asset.Id,
+		Id:     &assetId,
 		Name:   asset.Name,
 		Ticker: asset.Ticker,
 	}
@@ -43,8 +47,12 @@ func MapToAsset(assetDTS *AssetDTS) *domain.Asset {
 		return nil
 	}
 
+	var assetId int64
+	if assetDTS.Id != nil {
+		assetId = int64(*assetDTS.Id)
+	}
 	return &domain.Asset{
-		Id:     assetDTS.Id,
+		Id:     assetId,
 		Name:   assetDTS.Name,
 		Ticker: assetDTS.Ticker,
 	}
