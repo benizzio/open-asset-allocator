@@ -17,6 +17,11 @@ type AllocationPlanningHierarchicalFormEntry = {
     inputFields: HTMLInputElement[];
 };
 
+type FormRowHierarchicalStructure = {
+    formRowHierarchicalFields: HTMLInputElement[];
+    formRowHierarchicalId: string
+};
+
 const FORM_LAST_ROW_INDEX_INPUT_NAME = "last-planned-allocation-row-index";
 const FORM_FIELD_DEPENDENT_ATTRIBUTE = "data-bind-to-name";
 
@@ -198,7 +203,47 @@ function copyAssetTickersToHierarchicalIdFields(form: HTMLFormElement) {
     });
 }
 
-// TODO clean code
+
+function addHierarchicalFieldMapping(
+    formTableRow: HTMLTableRowElement,
+    hierarchyLevelIndex: number,
+    hierarchicalField: HTMLInputElement,
+    formRowHierarchicalStructure: FormRowHierarchicalStructure,
+) {
+
+    if(hierarchyLevelIndex > 0 && hierarchicalField.type !== "hidden") {
+        formRowHierarchicalStructure.formRowHierarchicalFields.push(hierarchicalField);
+    }
+    else if(hierarchyLevelIndex == 0) {
+
+        const assertSearchField = DomInfra.DomUtils.queryFirstInDescendants(
+            formTableRow,
+            `input[name$='${ ASSET_TICKER_FIELD_NAME_SUFFIX }']`,
+        ) as HTMLInputElement;
+
+        if(assertSearchField) {
+            formRowHierarchicalStructure.formRowHierarchicalFields.push(assertSearchField);
+        }
+    }
+}
+
+function getHierarchicalFieldForValidation(
+    formTableRow: HTMLTableRowElement,
+    hierarchyLevelIndex: number,
+    hierarchicalField: HTMLInputElement,
+) {
+
+    if(hierarchyLevelIndex > 0 && hierarchicalField.type !== "hidden") {
+        return hierarchicalField;
+    }
+    else if(hierarchyLevelIndex == 0) {
+        return DomInfra.DomUtils.queryFirstInDescendants(
+            formTableRow,
+            `input[name$='${ ASSET_TICKER_FIELD_NAME_SUFFIX }']`,
+        ) as HTMLInputElement;
+    }
+}
+
 function mapFormRowHierarchicalStructure(formTableRow: HTMLTableRowElement, hierarchySize: number) {
 
     const lastHierarchyLevelIndex = hierarchySize - 1;
@@ -229,23 +274,14 @@ function mapFormRowHierarchicalStructure(formTableRow: HTMLTableRowElement, hier
         const separator = hierarchyLevelIndex < lastHierarchyLevelIndex ? "|" : "";
         formRowHierarchicalStructure.formRowHierarchicalId += `${ separator }${ hierarchicalField.value }`;
 
-        if(hierarchyLevelIndex > 0 && hierarchicalField.type !== "hidden") {
-            formRowHierarchicalStructure.formRowHierarchicalFields.push(hierarchicalField);
-        }
-        else if(hierarchyLevelIndex == 0) {
+        const field = getHierarchicalFieldForValidation(formTableRow, hierarchyLevelIndex, hierarchicalField);
 
-            const assertSearchField = DomInfra.DomUtils.queryFirstInDescendants(
-                formTableRow,
-                `input[name$='${ ASSET_TICKER_FIELD_NAME_SUFFIX }']`,
-            ) as HTMLInputElement;
-
-            if(assertSearchField) {
-                formRowHierarchicalStructure.formRowHierarchicalFields.push(assertSearchField);
-            }
+        if(field) {
+            formRowHierarchicalStructure.formRowHierarchicalFields.push(field);
         }
     }
 
-    return formRowHierarchicalStructure.formRowHierarchicalId ? formRowHierarchicalStructure : undefined;
+    return formRowHierarchicalStructure.formRowHierarchicalId.trim() ? formRowHierarchicalStructure : undefined;
 }
 
 function mapPlannedAllocationFormEntriesPerHierarchicalKey(form: HTMLFormElement, hierarchySize: number) {
