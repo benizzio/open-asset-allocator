@@ -1,6 +1,7 @@
 import { HtmxBeforeSwapDetails, HtmxRequestConfig, HtmxResponseInfo } from "htmx.org";
 import { bindHTMXTransformResponseInDescendants, htmxTransformResponse } from "./binding-htmx-transform-response";
-import { CustomEventHandler } from "../infra-types";
+import { CustomEventHandler, ErrorResponse } from "../infra-types";
+import InfraTypesUtils from "../infra-types-utils";
 
 const NULL_IF_EMPTY_ATTRIBUTE = "data-null-if-empty";
 
@@ -123,7 +124,19 @@ function addEventListeners(domSettlingBehaviorEventHandler: CustomEventHandler) 
     document.body.addEventListener("htmx:afterSettle", afterSettleCustomEventHandler);
 }
 
-export const htmxInfra = {
+function toErrorResponse(eventDetail: AfterRequestEventDetail): ErrorResponse | undefined {
+
+    const contentType = eventDetail.xhr.getResponseHeader("content-type");
+
+    if(contentType && contentType.includes("application/json")) {
+        return InfraTypesUtils.toErrorResponse(eventDetail.xhr.response);
+    }
+
+    return undefined;
+}
+
+export const HtmxInfra = {
+
     /**
      * Initializes the htmx infrastructure of the application.
      *
@@ -133,5 +146,7 @@ export const htmxInfra = {
     init(domSettlingBehaviorEventHandler: CustomEventHandler) {
         addEventListeners(domSettlingBehaviorEventHandler);
     },
+
     htmxTransformResponse,
+    toErrorResponse,
 };

@@ -1,5 +1,5 @@
 import DomUtils from "../dom/dom-utils";
-import { BeforeSwapEventDetail } from "./htmx";
+import { BeforeSwapEventDetail } from "./index";
 import { logger, LogLevel } from "../logging";
 
 // =============================================================================

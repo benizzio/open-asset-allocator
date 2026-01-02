@@ -1,6 +1,6 @@
 import htmx from "htmx.org";
 import BigNumber from "bignumber.js";
-import { AfterRequestEventDetail, htmxInfra } from "../infra/htmx/htmx";
+import { AfterRequestEventDetail, HtmxInfra } from "../infra/htmx";
 import { ObservationTimestamp } from "../domain/portfolio-allocation";
 import router from "../infra/routing/router";
 import AssetComposedColumnsInput from "./asset-composed-columns-input";
@@ -109,7 +109,7 @@ const portfolioHistoryManagement = {
     handlebarsPortfolioHistoryManagementContainerTemplate: null as TemplateDelegate,
 
     init() {
-        htmxInfra.htmxTransformResponse.registerTransformResponseFunction(
+        HtmxInfra.htmxTransformResponse.registerTransformResponseFunction(
             "addObservationZero",
             modifyObservationsResponse,
         );

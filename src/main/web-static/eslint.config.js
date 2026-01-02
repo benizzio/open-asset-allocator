@@ -109,6 +109,25 @@ export default [
                                 "Import from the public API 'infra/dom' (index.ts) only; " +
                                 "deep imports are not allowed.",
                         },
+                        // Block deep imports into the local 'infra/htmx' module; import only from its public API
+                        // Authored by: GitHub Copilot
+                        {
+                            group: [
+                                // generic patterns
+                                "**/infra/htmx/*",
+                                "**/infra/htmx/**",
+                                // common relative forms
+                                "infra/htmx/*",
+                                "infra/htmx/**",
+                                "./infra/htmx/*",
+                                "./infra/htmx/**",
+                                "../infra/htmx/*",
+                                "../infra/htmx/**",
+                            ],
+                            message:
+                                "Import from the public API 'infra/htmx' (index.ts) only; " +
+                                "deep imports are not allowed.",
+                        },
                     ],
                 },
             ],

@@ -1,0 +1,78 @@
+import { ErrorResponse, Notification, NotificationType } from "../infra/infra-types";
+import * as handlebars from "handlebars";
+import * as bootstrap from "bootstrap";
+
+const NotificationTypeBootstrapClasses = {
+    info: "text-bg-primary",
+    warning: "text-bg-warning",
+    error: "text-bg-danger",
+    success: "text-bg-success",
+};
+
+type BootstrapNotification = Notification & { contextClasses: string; };
+
+function buildBootstrapNotification(notification: Notification): BootstrapNotification {
+    const contextClasses =
+        NotificationTypeBootstrapClasses[notification.type] || NotificationTypeBootstrapClasses.info;
+    return { ...notification, contextClasses };
+}
+
+function buildBootstrapErrorNotification(errorResponse: ErrorResponse): BootstrapNotification {
+
+    const title = "Error";
+    let content = errorResponse.error;
+
+    if(errorResponse.details && errorResponse.details.length > 0) {
+        const detailsList = errorResponse.details.map(detail => `<li>${ detail }</li>`).join("");
+        content += `<ul>${ detailsList }</ul>`;
+    }
+
+    return {
+        title,
+        content,
+        type: NotificationType.ERROR,
+        contextClasses: NotificationTypeBootstrapClasses.error,
+    };
+}
+
+const notifications = {
+
+    toastTemplate: null as HandlebarsTemplateDelegate,
+    notificationsContainer: null as HTMLDivElement,
+
+    init() {
+        this.notificationsContainer = window["toast-notification-container"] as HTMLDivElement;
+        const toastTemplateElement = window["template-toast-notification"];
+        this.toastTemplate = handlebars.compile(toastTemplateElement.innerHTML);
+    },
+
+    notify(notification: Notification) {
+        const bootstrapNotification = buildBootstrapNotification(notification);
+        this._notifyAsToast(bootstrapNotification);
+    },
+
+    notifyErrorResponse(errorResponse: ErrorResponse) {
+        const bootstrapNotification = buildBootstrapErrorNotification(errorResponse);
+        this._notifyAsToast(bootstrapNotification);
+    },
+
+    _notifyAsToast(bootstrapNotification: Notification & { contextClasses: string }) {
+
+        const notificationHTML = this.toastTemplate(bootstrapNotification);
+
+        const notificationElement = document.createElement("div");
+        notificationElement.innerHTML = notificationHTML;
+        const toastElement = notificationElement.firstElementChild as HTMLElement;
+
+        this.notificationsContainer.appendChild(toastElement);
+
+        const toast = new bootstrap.Toast(toastElement, { delay: 5000 });
+        toast.show();
+
+        toastElement.addEventListener("hidden.bs.toast", () => {
+            toastElement.remove();
+        });
+    },
+};
+
+export default notifications;

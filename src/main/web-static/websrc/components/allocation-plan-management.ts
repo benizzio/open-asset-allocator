@@ -2,7 +2,7 @@ import PortfolioPage from "../pages/portfolio";
 import { AllocationPlanDTO, SerializableFractalPlannedAllocation } from "../domain/allocation-plan";
 import { DomainService } from "../domain/service";
 import { Asset } from "../domain/asset";
-import { AfterRequestEventDetail, htmxInfra } from "../infra/htmx/htmx";
+import { AfterRequestEventDetail, HtmxInfra } from "../infra/htmx";
 import DomInfra from "../infra/dom";
 import BigNumber from "bignumber.js";
 import * as handlebars from "handlebars";
@@ -12,6 +12,8 @@ import { AllocationHierarchyLevel } from "../domain/allocation";
 import AssetComposedColumnsInput from "./asset-composed-columns-input";
 import htmx from "htmx.org";
 import router from "../infra/routing/router";
+import notifications from "./notifications";
+import { NotificationType } from "../infra/infra-types";
 
 type AllocationPlanningHierarchicalFormEntry = {
     occurences: number;
@@ -360,7 +362,7 @@ const allocationPlanManagement = {
     handlebarsAllocationPlanManagementRowTemplate: null as handlebars.TemplateDelegate,
 
     init() {
-        htmxInfra.htmxTransformResponse.registerTransformResponseFunction(
+        HtmxInfra.htmxTransformResponse.registerTransformResponseFunction(
             "mapToCompleteAllocationPlans",
             mapToCompleteAllocationPlans,
         );
@@ -463,6 +465,17 @@ const allocationPlanManagement = {
         const eventDetail = event.detail as AfterRequestEventDetail;
 
         if(!eventDetail.successful) {
+
+            const errorResponse = HtmxInfra.toErrorResponse(eventDetail);
+
+            if(errorResponse) {
+                notifications.notifyErrorResponse(errorResponse);
+            }
+            else {
+                const fallbackErrorMessage = "An unexpected error occurred while saving the allocation plan";
+                notifications.notifyErrorResponse({ error: fallbackErrorMessage });
+            }
+
             return;
         }
 
@@ -473,6 +486,12 @@ const allocationPlanManagement = {
         htmx.trigger(allocationPlansContainer, "reload-allocation-plans");
 
         AssetComposedColumnsInput.loadDatalists();
+
+        notifications.notify({
+            title: "Success",
+            content: "Allocation plan saved successfully",
+            type: NotificationType.SUCCESS,
+        });
     },
 
     navigateToAllocationPlansViewing() {

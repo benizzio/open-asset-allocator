@@ -1,7 +1,7 @@
 import { Chart, registerables } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import { handlebarsInfra } from "./handlebars";
-import { htmxInfra } from "./htmx/htmx";
+import { HtmxInfra } from "./htmx";
 import router from "./routing/router";
 import * as bootstrap from "bootstrap";
 import chart from "./chart/chart";
@@ -38,7 +38,7 @@ export const infra = {
 
         DomInfra.bindGlobalFunctions();
 
-        htmxInfra.init(DOM_SETTLING_BEHAVIOR_EVENT_HANDLER);
+        HtmxInfra.init(DOM_SETTLING_BEHAVIOR_EVENT_HANDLER);
 
         const onPageLoad = () => {
             router.init(window);

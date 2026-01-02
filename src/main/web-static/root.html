@@ -49,6 +49,12 @@
     >
     </div>
 
+    <div id="notifications-container"
+         hx-get="/websrc/components/notifications.html"
+         hx-trigger="load once"
+         hx-on::after-settle="notifications.init()"
+    ></div>
+
 </div>
 
 <script src="./node_modules/htmx.org/dist/htmx.js"></script>
