@@ -440,7 +440,7 @@ const allocationPlanManagement = {
         );
     },
 
-    preSubmitHandler(form: HTMLFormElement, hierarchySize: number) {
+    submitHandler(form: HTMLFormElement, hierarchySize: number) {
 
         copyAssetTickersToHierarchicalIdFields(form);
 
