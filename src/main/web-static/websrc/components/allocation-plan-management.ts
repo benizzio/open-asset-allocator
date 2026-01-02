@@ -2,7 +2,7 @@ import PortfolioPage from "../pages/portfolio";
 import { AllocationPlanDTO, SerializableFractalPlannedAllocation } from "../domain/allocation-plan";
 import { DomainService } from "../domain/service";
 import { Asset } from "../domain/asset";
-import { htmxInfra } from "../infra/htmx/htmx";
+import { AfterRequestEventDetail, htmxInfra } from "../infra/htmx/htmx";
 import DomInfra from "../infra/dom";
 import BigNumber from "bignumber.js";
 import * as handlebars from "handlebars";
@@ -11,6 +11,7 @@ import { Portfolio } from "../domain/portfolio";
 import { AllocationHierarchyLevel } from "../domain/allocation";
 import AssetComposedColumnsInput from "./asset-composed-columns-input";
 import htmx from "htmx.org";
+import router from "../infra/routing/router";
 
 type AllocationPlanningHierarchicalFormEntry = {
     occurences: number;
@@ -457,8 +458,27 @@ const allocationPlanManagement = {
         form.requestSubmit();
     },
 
-    postRequestHandler() {
-        //TODO
+    postRequestHandler(event: CustomEvent) {
+
+        const eventDetail = event.detail as AfterRequestEventDetail;
+
+        if(!eventDetail.successful) {
+            return;
+        }
+
+        const allocationPlanManagementContainer = window["accordion-allocation-plan-management"];
+        htmx.trigger(allocationPlanManagementContainer, "reload-allocation-plan-management");
+
+        const allocationPlansContainer = window["accordion-allocation-plan"];
+        htmx.trigger(allocationPlansContainer, "reload-allocation-plans");
+
+        AssetComposedColumnsInput.loadDatalists();
+    },
+
+    navigateToAllocationPlansViewing() {
+        const globalPortfolioIdField = document.querySelector("[name='portfolioId']") as HTMLInputElement;
+        const portfolioId = globalPortfolioIdField.value;
+        router.navigateTo(`/portfolio/${ portfolioId }/allocation`);
     },
 };
 

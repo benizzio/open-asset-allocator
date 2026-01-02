@@ -1,7 +1,6 @@
-<!-- TODO add button functionality -->
 <button type="button"
         class="btn btn-secondary mb-2"
-        onclick=""
+        onclick="allocationPlanManagement.navigateToAllocationPlansViewing()"
 >
     <span class="h2 bi bi-pie-chart-fill"></span>
 </button>
@@ -63,12 +62,11 @@
             >
                 <div class="accordion-body row justify-content-center">
 
-                    <!-- TODO after request, reload -->
                     <form id="allocation-plan-management-form-{{allocationPlan.id}}"
                           class="needs-validation"
                           hx-post="/api/portfolio/:portfolioId/allocation-plan"
                           hx-ext="form-json"
-                          hx-on::after-request="allocationPlanManagement.postRequestHandler()"
+                          hx-on::after-request="allocationPlanManagement.postRequestHandler(event)"
                     >
 
                         <input type="hidden" name="id" value="{{allocationPlan.id}}" />

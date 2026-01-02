@@ -37,6 +37,7 @@ function queryFirst(selector: string): HTMLElement {
 }
 
 const DomUtils = {
+    //TODO remove simple queries from here and use directly
     queryFirst,
     queryAll(selector: string): NodeListOf<HTMLElement> {
         return document.querySelectorAll(selector);

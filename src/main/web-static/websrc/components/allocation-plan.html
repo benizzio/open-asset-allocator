@@ -4,7 +4,7 @@
          id="accordion-allocation-plan"
          hx-get="/api/portfolio/:portfolioId/allocation-plan"
          hx-include="[name='portfolioId']"
-         hx-trigger="load"
+         hx-trigger="load, reload-allocation-plans"
          handlebars-template="template-allocation-plan-item"
          hx-on::after-settle="initAllocationPlanHierarchyLabels()"
          data-display-on-route="/portfolio/:portfolioId/allocation"

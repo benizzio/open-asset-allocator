@@ -77,6 +77,7 @@ type allocationPlanValidationValidationData struct {
 // TODO validate plan before persisting
 // - hierarchy matches portfolio hierarchy
 // - hierarchical ids with asset match asset ticker from reference
+// - slice sizes sum to 100% per hierarchy level
 func (service *AllocationPlanDomService) validateAllocationPlan(plan *domain.AllocationPlan) []*infra.AppError {
 
 	var validation = &allocationPlanValidationValidationData{
