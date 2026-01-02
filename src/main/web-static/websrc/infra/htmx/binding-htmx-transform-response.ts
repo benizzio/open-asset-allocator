@@ -8,16 +8,18 @@ import { logger, LogLevel } from "../logging";
 // using a specified function on the beforeSwap event
 // allows configuration of a validating RegExp to call function only when needed
 // =============================================================================
+// TODO make this binding work with the URL already configured for HTMX instead of extras
 
 const HTMX_TRANSFORM_RESPONSE_ATTRIBUTE = "data-hx-transform-response";
-const HTMX_TRANSFORM_RESPONSE_ON_ROUTE_MATCHING_ATTRIBUTE = "data-hx-transform-response-on-route-matching";
+const HTMX_TRANSFORM_RESPONSE_ON_PATH_MATCHING_ATTRIBUTE = "data-hx-transform-response-on-path-matching";
+const HTMX_TRANSFORM_RESPONSE_ON_VERB_MATCHING_ATTRIBUTE = "data-hx-transform-response-on-verb-matching";
 const HTMX_TRANSFORM_RESPONSE_BOUND_FLAG = "data-hx-trigger-on-route-bound";
 
 const TRANSFORM_RESPONSE_FUNCTION_MAP = new Map<string, (responseBody: string) => string>();
 
-function extractRouteRegExpForTransform(element: HTMLElement) {
+function extractPathRegExpForTransform(element: HTMLElement) {
     const transformResponseRouteAttribute =
-        element.getAttribute(HTMX_TRANSFORM_RESPONSE_ON_ROUTE_MATCHING_ATTRIBUTE);
+        element.getAttribute(HTMX_TRANSFORM_RESPONSE_ON_PATH_MATCHING_ATTRIBUTE);
     return transformResponseRouteAttribute
         ? new RegExp(transformResponseRouteAttribute)
         : null;
@@ -37,14 +39,23 @@ function transformResponse(eventDetail: BeforeSwapEventDetail, transformFunction
 
 function bindHTMXTransformResponseElement(element: HTMLElement) {
 
-    const transformResponseRegExp = extractRouteRegExpForTransform(element);
+    const transformResponsePathRegExp = extractPathRegExpForTransform(element);
+    const transformResponseVerbAttribute = element.getAttribute(HTMX_TRANSFORM_RESPONSE_ON_VERB_MATCHING_ATTRIBUTE);
+
+    const hasTransformPathMatching = !!transformResponsePathRegExp;
+    const hasTransformVerbMatching = !!transformResponseVerbAttribute?.trim();
 
     element.addEventListener("htmx:beforeSwap", (event: CustomEvent) => {
 
         const eventDetail = event.detail as BeforeSwapEventDetail;
         const eventRequestPath = eventDetail.pathInfo.finalRequestPath;
 
-        if(eventDetail.isError || (!transformResponseRegExp || !eventRequestPath.match(transformResponseRegExp))) {
+        const matchesTransformPath = hasTransformPathMatching && eventRequestPath.match(transformResponsePathRegExp);
+
+        const matchesTransformVerb = hasTransformPathMatching && hasTransformVerbMatching
+            && transformResponseVerbAttribute === eventDetail.requestConfig.verb.toUpperCase();
+
+        if(eventDetail.isError || !matchesTransformPath || (hasTransformVerbMatching && !matchesTransformVerb)) {
             return;
         }
 
