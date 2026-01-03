@@ -3,7 +3,7 @@
 - all go code is located in the `src/main/go` directory
 - when declaring a variable, give preference to `var` over `:=` as it is more explicit and more similar to other
   languages
-    - exception, multiple varible declarations with reusage, e.g.:
+    - exception, multiple variable declarations with reusage, e.g.:
         ```go
         err := doSomething()
         <...>
