@@ -26,7 +26,7 @@
     - when dividing a code unit into blocks, if it is a function, a blank line after the function declaration and before
       the first instruction is preferred, as it makes it more readable
     - Examples: check `EXAMPLE REF: CODE TOO BIG` in language specific instructions below
-- commented code can exist for transitioning code betyween PRs, but it is a red flag and should be pointed in the review
+- commented code can exist for transitioning code between PRs, but it is a red flag and should be pointed in the review
   comments to make sure it is necessary;
 - **all AI generated code**:
     - must contain proper minimal code comment documentation according to the language standards,
