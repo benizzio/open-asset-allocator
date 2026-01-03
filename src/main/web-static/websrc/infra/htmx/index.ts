@@ -111,7 +111,10 @@ function prepareFormData(event: CustomEvent) {
 
 }
 
-function addEventListeners(domSettlingBehaviorEventHandler: CustomEventHandler) {
+function addEventListeners(
+    domSettlingBehaviorEventHandler: CustomEventHandler,
+    afterRequestErrorHandler: CustomEventHandler,
+) {
 
     document.addEventListener("htmx:configRequest", configEnhancedRequestEventListener);
 
@@ -122,6 +125,8 @@ function addEventListeners(domSettlingBehaviorEventHandler: CustomEventHandler) 
         bindHTMXTransformResponseInDescendants(eventTarget);
     };
     document.body.addEventListener("htmx:afterSettle", afterSettleCustomEventHandler);
+
+    document.body.addEventListener("htmx:afterRequest", afterRequestErrorHandler);
 }
 
 function toErrorResponse(eventDetail: AfterRequestEventDetail): ErrorResponse | undefined {
@@ -139,12 +144,13 @@ export const HtmxInfra = {
 
     /**
      * Initializes the htmx infrastructure of the application.
+     * All handlers will be applied to the body and be triggered in after the events of any child element.
      *
      * @param domSettlingBehaviorEventHandler - The handler for the default DOM settling behavior event.
-     * Will be applied to the body and be triggered in after settling of any child element.
+     * @param afterRequestErrorHandler - The handler for after request error events.
      */
-    init(domSettlingBehaviorEventHandler: CustomEventHandler) {
-        addEventListeners(domSettlingBehaviorEventHandler);
+    init(domSettlingBehaviorEventHandler: CustomEventHandler, afterRequestErrorHandler: CustomEventHandler) {
+        addEventListeners(domSettlingBehaviorEventHandler, afterRequestErrorHandler);
     },
 
     htmxTransformResponse,

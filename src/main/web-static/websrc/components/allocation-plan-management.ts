@@ -465,17 +465,6 @@ const allocationPlanManagement = {
         const eventDetail = event.detail as AfterRequestEventDetail;
 
         if(!eventDetail.successful) {
-
-            const errorResponse = HtmxInfra.toErrorResponse(eventDetail);
-
-            if(errorResponse) {
-                notifications.notifyErrorResponse(errorResponse);
-            }
-            else {
-                const fallbackErrorMessage = "An unexpected error occurred while saving the allocation plan";
-                notifications.notifyErrorResponse({ error: fallbackErrorMessage });
-            }
-
             return;
         }
 

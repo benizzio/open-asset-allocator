@@ -27,9 +27,9 @@ const DOM_SETTLING_BEHAVIOR_EVENT_HANDLER: CustomEventHandler = (event: CustomEv
  * Component that controls the multiple external libraries and its components to the desired behaviour of the
  * application.
  */
-export const infra = {
+export const Infra = {
 
-    init: () => {
+    init: (afterRequestErrorHandler: CustomEventHandler) => {
 
         Chart.register(...registerables, ChartDataLabels);
 
@@ -38,7 +38,7 @@ export const infra = {
 
         DomInfra.bindGlobalFunctions();
 
-        HtmxInfra.init(DOM_SETTLING_BEHAVIOR_EVENT_HANDLER);
+        HtmxInfra.init(DOM_SETTLING_BEHAVIOR_EVENT_HANDLER, afterRequestErrorHandler);
 
         const onPageLoad = () => {
             router.init(window);
