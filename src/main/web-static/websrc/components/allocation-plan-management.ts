@@ -272,16 +272,16 @@ function mapPlannedAllocationFormEntriesPerHierarchicalKey(form: HTMLFormElement
         "tr",
     ).forEach((formTableRow: HTMLTableRowElement) => {
 
-        const formRowHirarchicalStructure = mapFormRowHierarchicalStructure(
+        const formRowHierarchicalStructure = mapFormRowHierarchicalStructure(
             formTableRow,
             hierarchySize,
         );
 
-        if(!formRowHirarchicalStructure) {
+        if(!formRowHierarchicalStructure) {
             return;
         }
 
-        const { formRowHierarchicalId, formRowHierarchicalFields } = formRowHirarchicalStructure;
+        const { formRowHierarchicalId, formRowHierarchicalFields } = formRowHierarchicalStructure;
 
         let formEntry = formEntriesPerHierarchicalKey.get(formRowHierarchicalId);
 
