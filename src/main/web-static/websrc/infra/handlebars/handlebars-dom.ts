@@ -15,9 +15,9 @@ import DomUtils from "../dom/dom-utils";
  */
 function domJSONHelper(id: string, object: object): string {
     const safeId = DomUtils.escapeHtml(id ?? "");
-    const safeJson = DomUtils.escapeHtml(JSON.stringify(object));
+    const safeJson = DomUtils.escapeHtmlPreserveQuotes(JSON.stringify(object));
 
-    return `\n            <script id="${ safeId }" type="application/json">${ safeJson }</script>\n        `;
+    return `\n <script id="${ safeId }" type="application/json">${ safeJson }</script> \n`;
 }
 
 export function registerHandlebarsDOMHelpers() {

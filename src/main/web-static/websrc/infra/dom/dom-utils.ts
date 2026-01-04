@@ -63,6 +63,13 @@ function escapeHtmlValue(value: string): string {
         .replace(/'/g, "&#39;");
 }
 
+function escapeHtmlValuePreserveQuotes(value: string): string {
+    return (value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+}
+
 const DomUtils = {
 
     //TODO remove simple queries from here and use directly
@@ -89,21 +96,6 @@ const DomUtils = {
     },
 
     /**
-     * Gets context data from root document element matching the given selector.
-     * Caches the parsed data for future retrievals.
-     *
-     * Context data elements are expected to be script tags on the document with type "application/json" and content
-     * relevant to the current structure of pages.
-     *
-     * @param contextDataSelector CSS selector to find the context data element in the root document.
-     * @returns The parsed context data object, or null if the element is not found.
-     */
-    getContextDataFromRoot(contextDataSelector: string): unknown {
-        const dataElement = queryFirst(contextDataSelector);
-        return getCacheableContextData(dataElement);
-    },
-
-    /**
      * Escapes HTML special characters in untrusted text
      * to prevent DOM injection when rendering server-provided content.
      *
@@ -123,6 +115,40 @@ const DomUtils = {
      */
     escapeHtml(rawValue: string): string {
         return escapeHtmlValue(rawValue);
+    },
+    /**
+     * Escapes HTML special characters while preserving quotes, suitable for JSON placed in script tags.
+     *
+     * Usage Guidance:
+     * - Use for text inside <script type="application/json"> where quotes must remain intact for parsers.
+     * - Encodes &, < and > to avoid breaking out of script tags; leaves ' and " untouched.
+     * - Null/undefined inputs become empty strings.
+     *
+     * @param rawValue Raw text value that may contain unsafe characters.
+     * @returns Escaped string safe for script tag text content.
+     *
+     * @example
+     * const safe = DomUtils.escapeHtmlPreserveQuotes('{"a":"b"}'); // "{\"a\":\"b\"}" remains valid JSON
+     *
+     * @author GitHub Copilot
+     */
+    escapeHtmlPreserveQuotes(rawValue: string): string {
+        return escapeHtmlValuePreserveQuotes(rawValue);
+    },
+
+    /**
+     * Gets context data from root document element matching the given selector.
+     * Caches the parsed data for future retrievals.
+     *
+     * Context data elements are expected to be script tags on the document with type "application/json" and content
+     * relevant to the current structure of pages.
+     *
+     * @param contextDataSelector CSS selector to find the context data element in the root document.
+     * @returns The parsed context data object, or null if the element is not found.
+     */
+    getContextDataFromRoot(contextDataSelector: string): unknown {
+        const dataElement = queryFirst(contextDataSelector);
+        return getCacheableContextData(dataElement);
     },
 };
 
