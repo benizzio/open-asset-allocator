@@ -50,7 +50,7 @@
         };
     ```
 - EXAMPLE REF: CODE DOCS
-  ```javascript
+  ```typescript
       // private function:
       /**
        * Checks if a value is serializable to JSON.
