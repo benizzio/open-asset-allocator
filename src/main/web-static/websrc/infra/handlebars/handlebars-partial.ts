@@ -24,7 +24,7 @@ export function registerPartialToContainer(containerId: string, partialTemplateI
             if(!document.body.contains(mainContainerElement)) {
                 console.info(`Main container removed, unregistering ${ partialTemplateId } partial and observer`);
                 observer.disconnect();
-                Handlebars.unregisterPartial(partialTemplateId);
+                handlebars.unregisterPartial(partialTemplateId);
                 PARTIALS_REGISTRY.delete(partialTemplateId);
             }
         });

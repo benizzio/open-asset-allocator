@@ -477,13 +477,13 @@ export function toInt(value: unknown, options?: ToIntOptions): number | undefine
     switch(typeof value) {
         case "string": {
             const n = parseInt(value, 10);
-            const isNaN = Number.isNaN(n);
+            const isNotANumber = Number.isNaN(n);
 
-            if(isNaN && !allowCoercions) {
+            if(isNotANumber && !allowCoercions) {
                 return reportToIntCoercion(options, "string is NaN", value);
             }
 
-            return isNaN ? 0 : n;
+            return isNotANumber ? 0 : n;
         }
 
         case "bigint": {
