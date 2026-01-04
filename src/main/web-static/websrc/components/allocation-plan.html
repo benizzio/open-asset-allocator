@@ -1,21 +1,38 @@
-<!-- TODO move to components -->
-<div class="accordion"
-     id="accordion-allocation-plan"
-     handlebars-template="template-allocation-plan-item"
-     hx-get="/api/portfolio/:portfolioId/allocation-plan"
-     hx-trigger="load"
-     hx-include="[name='portfolioId']"
-     hx-on-htmx-after-settle="initAllocationPlanHierarchyLabels()"
->
-    <div class="accordion-item placeholder-glow">
-        <h2 class="accordion-header placeholder col-12">placeholder</h2>
+<div data-exclusive-display-container>
+
+    <div class="accordion"
+         id="accordion-allocation-plan"
+         hx-get="/api/portfolio/:portfolioId/allocation-plan"
+         hx-include="[name='portfolioId']"
+         hx-trigger="load, reload-allocation-plans"
+         handlebars-template="template-allocation-plan-item"
+         hx-on::after-settle="initAllocationPlanHierarchyLabels()"
+         data-display-on-route="/portfolio/:portfolioId/allocation"
+    >
+        <div class="accordion-item placeholder-glow">
+            <h2 class="accordion-header placeholder col-12">placeholder</h2>
+        </div>
+        <div class="accordion-item placeholder-glow">
+            <h2 class="accordion-header placeholder col-12">placeholder</h2>
+        </div>
     </div>
-    <div class="accordion-item placeholder-glow">
-        <h2 class="accordion-header placeholder col-12">placeholder</h2>
+
+    <div data-display-on-route="/portfolio/:portfolioId/allocation/manage"
+         hx-get="/websrc/components/allocation-plan-management.html"
+         hx-trigger="load"
+    >
     </div>
+
 </div>
 
 <script id="template-allocation-plan-item" type="text/x-handlebars-template">
+
+    <button type="button"
+            class="btn btn-outline-primary mb-2"
+            onclick="navigateToPortfolioAllocationPlanManagement()"
+    >
+        <span class="h2 bi bi-database-gear"></span>
+    </button>
 
     {{#each .}}
         <div class="accordion-item">
@@ -25,7 +42,6 @@
                         type="button"
                         data-bs-toggle="collapse"
                         data-bs-target="#allocation-plan-{{id}}"
-                        aria-expanded="true"
                         aria-controls="allocation-plan-{{id}}"
                 >
                     {{name}}
@@ -64,9 +80,16 @@
 </script>
 
 <script type="text/javascript">
+
     function initAllocationPlanHierarchyLabels() {
         setTextContentWithTopHierarchyName("[id^='hierarchy-level-allocation-plan-chart-']");
     }
+
+    function navigateToPortfolioAllocationPlanManagement() {
+        const portfolioId = document.querySelector("[name='portfolioId']").value;
+        navigateTo(`/portfolio/${portfolioId}/allocation/manage`);
+    }
+
 </script>
 
 <script id="allocation-plan-chart-options" type="application/json">

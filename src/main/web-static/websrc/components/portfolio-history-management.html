@@ -17,7 +17,7 @@
              hx-trigger="load, reload-portfolio-history-management"
              handlebars-template="template-portfolio-history-management"
              data-hx-transform-response="addObservationZero"
-             data-hx-transform-response-on-route-matching="^\/api\/portfolio\/.+\/history\/observation$"
+             data-hx-transform-response-on-path-matching="^\/api\/portfolio\/.+\/history\/observation$"
         >
         </div>
     </div>
@@ -91,24 +91,25 @@
                             </tr>
                             </thead>
 
-                            <tbody class="table-group-divider"
-                                   id="portfolio-history-management-form-tbody-{{id}}"
-                            >
+                            <tbody class="table-group-divider" id="portfolio-history-management-form-tbody-{{id}}">
                             </tbody>
 
                             <tfoot class="sticky-footer">
                             <tr>
                                 <td colspan="8">
                                     <div class="d-flex w-100">
+
                                         <button class="btn btn-secondary"
                                                 type="button"
                                                 onclick="portfolioHistoryManagement.addPortfolioHistoryManagementRow({{id}})"
                                         >
                                             <span class="bi bi-plus-circle h5"></span>
                                         </button>
+
                                         <button class="btn btn-primary ms-auto" type="submit">
                                             <span class="bi bi-save-fill h5"></span>
                                         </button>
+
                                     </div>
                                 </td>
                             </tr>
@@ -137,70 +138,17 @@
 <script id="template-portfolio-history-management-form-tbody-row" type="text/x-handlebars-template">
 
     <tr id="portfolio-history-management-form-{{observationTimestampId}}-row-{{allocationIndex}}">
-        <td>
 
-            <input type="hidden"
-                   name="allocations[{{allocationIndex}}][assetId]"
-                   value="{{assetId}}"
-                   data-null-if-empty
-            />
-
-            {{#if assetId}}
-                {{assetTicker}}
-            {{else}}
-
-                <div class="input-group">
-
-                    <input type="text"
-                           name="allocations[{{allocationIndex}}][assetTicker]"
-                           placeholder="Asset ticker"
-                           aria-label="Asset ticker"
-                           autocomplete="off"
-                           class="form-control"
-                           value="{{assetTicker}}"
-                           list="datalist-assets"
-                           hx-validate="true"
-                           hx-on::validation:validate="portfolioHistoryManagement.validateAssetElementsForPost({{allocationIndex}}, {{observationTimestampId}})"
-                           oninput="maskTickerInput(this)"
-                    />
-                    <button data-asset-action-button
-                            type="button"
-                            class="btn btn-primary btn-xs"
-                            onclick="portfolioHistoryManagement.assetActionButtonClickHandler({{allocationIndex}}, {{observationTimestampId}})"
-                    >
-                        <span class="bi bi-search"></span>
-                    </button>
-
-                </div>
-
-                <div data-new-asset-ticker-message
-                     class="form-text"
-                     style="display: none"
-                >
-                    * Creating new asset
-                </div>
-
-            {{/if}}
-
-        </td>
-
-        <td>
-
-            {{#if assetName}}
-                {{assetName}}
-            {{else}}
-                <input type="text"
-                       name="allocations[{{allocationIndex}}][assetName]"
-                       placeholder="Asset name"
-                       aria-label="Asset name"
-                       autocomplete="off"
-                       class="form-control"
-                       value="{{assetName}}"
-                       style="display: none"
-                />
-            {{/if}}
-
-        </td>
+        {{> asset-composed-columns-input
+                assetId=assetId
+                assetTicker=assetTicker
+                assetName=assetName
+                assetIdHiddenFieldName=(concat "allocations[" allocationIndex "][assetId]")
+                assetTickerFieldName=(concat "allocations[" allocationIndex "][assetTicker]")
+                assetNameFieldName=(concat "allocations[" allocationIndex "][assetName]")
+                assetTickerFieldHTMXOnValidate=(concat "portfolioHistoryManagement.validateAssetElementsForPost(" allocationIndex ", " observationTimestampId ")")
+                assetActionButtonOnClick=(concat "portfolioHistoryManagement.assetActionButtonClickHandler(" allocationIndex ", " observationTimestampId ")")
+        }}
 
         <td>
             <input type="text"
@@ -291,55 +239,11 @@
 
 </script>
 
-<datalist id="datalist-classes"
-          hx-get="/api/portfolio/:portfolioId/allocation-classes"
-          hx-include="[name='portfolioId']"
-          hx-trigger="load, load-classes"
-          handlebars-template="template-monovalue-datalist"
->
-</datalist>
-
-<datalist id="datalist-assets"
-          hx-get="/api/asset"
-          hx-trigger="load, load-assets"
-          handlebars-template="template-asset-datalist"
->
-</datalist>
-
-<script id="template-monovalue-datalist" type="text/x-handlebars-template">
-
-    {{#each .}}
-
-        {{#if (getProperty this ../propertyKey) }}
-            <option value="{{getProperty this ../propertyKey}}">{{getProperty this ../propertyKey}}</option>
-        {{else}}
-            <option value="{{this}}">{{this}}</option>
-        {{/if}}
-
-    {{/each}}
-
-</script>
-
-<script id="template-asset-datalist" type="text/x-handlebars-template">
-
-    {{> template-monovalue-datalist propertyKey="ticker"}}
-
-</script>
-
-
 <script type="text/javascript">
-
-    HandlebarsUtils.registerPartialToContainer(
-        "accordion-portfolio-history",
-        "template-monovalue-datalist"
-    );
 
     HandlebarsUtils.registerPartialToContainer(
         "accordion-portfolio-history",
         "template-portfolio-history-management-form-tbody-row"
     );
-
-    portfolioHistoryManagement.handlebarPortfolioHistoryManagementRowTemplate = Handlebars.compile(window["template-portfolio-history-management-form-tbody-row"].innerHTML);
-    portfolioHistoryManagement.handlebarPortfolioHistoryManagementContainerTemplate = Handlebars.compile(window["template-portfolio-history-management"].innerHTML);
-
+    
 </script>

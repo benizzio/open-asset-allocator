@@ -1,0 +1,326 @@
+<button type="button"
+        class="btn btn-secondary mb-2"
+        onclick="allocationPlanManagement.navigateToAllocationPlansViewing()"
+>
+    <span class="h2 bi bi-pie-chart-fill"></span>
+</button>
+
+<div class="card border-dark mb-3">
+
+    <div class="card-header">Manage allocation plan data</div>
+
+    <div class="card-body">
+        <!-- TODO add a trigger on route to reload the allocation plans when navigating back to this component -->
+        <div id="accordion-allocation-plan-management"
+             class="accordion container-fluid"
+             hx-get="/api/portfolio/:portfolioId/allocation-plan"
+             hx-include="[name='portfolioId']"
+             hx-trigger="load, reload-allocation-plan-management"
+             handlebars-template="template-allocation-plan-management"
+             data-hx-transform-response="mapToCompleteAllocationPlans"
+             data-hx-transform-response-on-path-matching="^\/api\/portfolio\/.+\/allocation\-plan$"
+             data-hx-transform-response-on-verb-matching="GET"
+        >
+        </div>
+    </div>
+
+</div>
+
+<script id="template-allocation-plan-management" type="text/x-handlebars-template">
+
+    {{#each  @root.completeAllocationPlans}}
+
+        <div id="allocation-plan-management-container-{{allocationPlan.id}}" class="accordion-item">
+
+            <h2 id="allocation-plan-management-trigger-{{allocationPlan.id}}" class="accordion-header">
+                <button class="accordion-button collapsed"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#allocation-plan-management-{{allocationPlan.id}}"
+                        aria-expanded="true"
+                        aria-controls="allocation-plan-management-{{allocationPlan.id}}"
+                >
+                    {{#if allocationPlan.id}}
+                        {{allocationPlan.name}}
+                    {{else}}
+                        <!-- TODO mask oninput -->
+                        <input type="text"
+                               placeholder="New allocation plan *"
+                               aria-label="New allocation plan name"
+                               autocomplete="off"
+                               class="form-control me-3"
+                               oninput=""
+                               onkeyup="event.preventDefault()"
+                        />
+                    {{/if}}
+                </button>
+            </h2>
+
+            <div id="allocation-plan-management-{{allocationPlan.id}}"
+                 class="accordion-collapse collapse"
+                 data-bs-parent="#accordion-allocation-plan-management"
+            >
+                <div class="accordion-body row justify-content-center">
+
+                    <form id="allocation-plan-management-form-{{allocationPlan.id}}"
+                          class="needs-validation"
+                          hx-post="/api/portfolio/:portfolioId/allocation-plan"
+                          hx-ext="form-json"
+                          hx-on::after-request="allocationPlanManagement.postRequestHandler(event)"
+                    >
+
+                        <input type="hidden" name="id" value="{{allocationPlan.id}}" />
+                        <input type="hidden" name="name" value="{{allocationPlan.name}}" />
+                        <input type="hidden" name="type" value="ALLOCATION_PLAN" />
+
+                        <table class="table table-striped">
+
+                            <thead class="sticky-header">
+                            <tr>
+                                {{#eachReverse @root.portfolio.allocationStructure.hierarchy}}
+                                    <th scope="col" {{#ifEquals field "assetTicker"}}colspan="2"{{/ifEquals}}>
+                                        {{name}}
+                                    </th>
+                                {{/eachReverse}}
+                                <th scope="col" class="w-10">Cash reserve?</th>
+                                <th scope="col" class="w-15">Slice size (%)</th>
+                                <th scope="col"></th>
+                            </tr>
+                            </thead>
+
+                            <tbody class="table-group-divider">
+
+                            {{iteratorInit "plannedAllocationIndex"}}
+
+                            {{#each fractalHierarchicalPlan.topAllocations}}
+
+                                {{> template-allocation-plan-management-form-tbody-row
+                                        allocationPlanId=../allocationPlan.id
+                                        fractalPlannedAllocation=.
+                                        hierarchy=@root.portfolio.allocationStructure.hierarchy
+                                        allocationIndex=(iteratorNext "plannedAllocationIndex")
+                                }}
+
+                            {{/each}}
+
+                            </tbody>
+
+                            <tfoot class="sticky-footer">
+                            <tr>
+                                <td colspan="8">
+                                    <div class="d-flex w-100">
+
+                                        <button class="btn btn-secondary"
+                                                type="button"
+                                                onclick="allocationPlanManagement.handleAddPlannedAllocationRow({{allocationPlan.id}}, this, {{@root.portfolio.allocationStructure.hierarchy.length}})"
+                                        >
+                                            <span class="bi bi-plus-circle h5"></span>
+                                        </button>
+
+                                        <button class="btn btn-primary ms-auto"
+                                                type="button"
+                                                onclick="allocationPlanManagement.submitHandler(this.closest('form'), {{@root.portfolio.allocationStructure.hierarchy.length}})"
+                                        >
+                                            <span class="bi bi-save-fill h5"></span>
+                                        </button>
+
+                                    </div>
+
+                                    <!-- keep track of last index for adding new rows -->
+                                    <input type="hidden"
+                                           name="last-planned-allocation-row-index"
+                                           value="{{math allocationPlan.details.length "-" 1}}"
+                                           disabled
+                                    />
+                                </td>
+                            </tr>
+                            </tfoot>
+
+                        </table>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+    {{/each}}
+
+</script>
+
+<script id="template-allocation-plan-management-form-tbody-row" type="text/x-handlebars-template">
+
+    <tr id="allocation-plan-management-form-{{allocationPlanId}}-row-{{allocationIndex}}"
+        {{#ifNotNullish parentRowIndex}}
+        data-parent-row-id="allocation-plan-management-form-{{allocationPlanId}}-row-{{parentRowIndex}}"
+        {{/ifNotNullish}}
+        data-allocation-index="{{allocationIndex}}"
+    >
+
+        <!-- loop through the portfolio's available hierarchy, configuring hierarchy definition fields in expected order -->
+        {{#eachReverse hierarchy}}
+
+            {{#ifEquals (comparator index ../fractalPlannedAllocation.level.index) -1}}
+                <!-- hierarchy level is lower than current edit target level, show nothing (editing a higher level) -->
+
+                {{#ifEquals field "assetTicker"}}
+                    <td></td>
+                    <td></td>
+                {{else}}
+                    <td></td>
+                {{/ifEquals}}
+
+            {{else}}
+
+                {{#ifEquals field "assetTicker"}}
+                    <!-- it is the asset level, always lower and knows how to handle it's read-only/edit modes -->
+
+                    {{> asset-composed-columns-input
+                            assetId=../fractalPlannedAllocation.allocation.asset.id
+                            assetTicker=../fractalPlannedAllocation.allocation.asset.ticker
+                            assetName=../fractalPlannedAllocation.allocation.asset.name
+                            assetIdHiddenFieldName=(concat "details[" ../allocationIndex "][asset][id]")
+                            assetTickerFieldName=(concat "details[" ../allocationIndex "][asset][ticker]")
+                            assetNameFieldName=(concat "details[" ../allocationIndex "][asset][name]")
+                            assetTickerFieldHTMXOnValidate=(concat "allocationPlanManagement.validateAssetElementsForPost(" ../allocationPlanId ", " ../allocationIndex ")")
+                            assetActionButtonOnClick=(concat "allocationPlanManagement.assetActionButtonClickHandler(" ../allocationPlanId ", " ../allocationIndex ")")
+                    }}
+
+                    <input type="hidden"
+                           name="details[{{../allocationIndex}}][hierarchicalId][{{index}}]"
+                           value="{{../targetLevelKey}}"
+                    />
+
+                {{else}}
+
+                    {{#ifEquals (comparator index ../fractalPlannedAllocation.level.index) 0}}
+                        <!-- same level as edit target, show field -->
+
+                        <td>
+                            <input type="text"
+                                   name="details[{{../allocationIndex}}][hierarchicalId][{{index}}]"
+                                   placeholder="Class"
+                                   aria-label="Class"
+                                   autocomplete="off"
+                                   class="form-control"
+                                   value="{{../targetLevelKey}}"
+                                   list="datalist-classes"
+                                   oninput="maskTagInput(this)"
+                                   onchange="allocationPlanManagement.handleHierarchicalIdLevelChange(this)"
+                                   required
+                            />
+                        </td>
+
+                        <!-- set currentManagingFieldName for use in lower hierarchy levels, during recursion -->
+                        {{setProperty @this "currentManagingFieldName" (concat "details[" ../allocationIndex "][hierarchicalId][" index "]")}}
+
+                    {{else}}
+                        <!--
+                            hierarchy level is higher than current edit target level,
+                            show read-only (editing a child level)
+                        -->
+
+                        <td>
+
+                            <span data-label-for-name="{{currentManagingFieldName}}">
+                                {{lookup ../fractalPlannedAllocation.allocation.hierarchicalId index}}
+                            </span>
+
+                            <input type="hidden"
+                                   data-bind-to-name="{{currentManagingFieldName}}"
+                                   name="details[{{../allocationIndex}}][hierarchicalId][{{index}}]"
+                                   value="{{lookup ../fractalPlannedAllocation.allocation.hierarchicalId index}}"
+                            />
+
+                        </td>
+
+                    {{/ifEquals}}
+
+                {{/ifEquals}}
+
+            {{/ifEquals}}
+
+        {{/eachReverse}}
+
+        <td class="align-middle text-center">
+            <input type="checkbox"
+                   name="details[{{allocationIndex}}][cashReserve]"
+                   {{#if fractalPlannedAllocation.allocation.cashReserve}}checked{{/if}}
+            />
+        </td>
+
+        <td>
+
+            <input type="number"
+                   placeholder="Slice size %"
+                   aria-label="Slice size percentage"
+                   autocomplete="off"
+                   class="form-control"
+                   value="{{math fractalPlannedAllocation.allocation.sliceSizePercentage "*" 100}}"
+                   data-percentage-input="details[{{allocationIndex}}][sliceSizePercentage]"
+                   data-null-if-empty
+            />
+
+            {{#if fractalPlannedAllocation.allocation.id}}
+                <input type="hidden"
+                       name="details[{{allocationIndex}}][id]"
+                       value="{{fractalPlannedAllocation.allocation.id}}"
+                />
+            {{/if}}
+
+        </td>
+
+        <td class="text-end">
+
+            {{#if fractalPlannedAllocation.subLevel}}
+
+                <button type="button"
+                        class="btn btn-secondary btn-xs"
+                        onclick="allocationPlanManagement.handleAddPlannedAllocationRow({{allocationPlanId}}, this, {{fractalPlannedAllocation.level.index}}, {{allocationIndex}})"
+                >
+                    <span class="bi bi-plus-circle"></span>
+                </button>
+
+            {{/if}}
+
+            <button type="button"
+                    class="btn btn-danger btn-xs ms-2"
+                    onclick="allocationPlanManagement.handleRemovePlannedAllocationRow(this)"
+            >
+                <span class="bi bi-dash-circle"></span>
+            </button>
+
+        </td>
+
+    </tr>
+
+    {{#if fractalPlannedAllocation.subLevel}}
+
+        {{#each subAllocations}}
+
+            {{> template-allocation-plan-management-form-tbody-row
+                    allocationPlanId=../allocationPlanId
+                    fractalPlannedAllocation=.
+                    allocationIndex=(iteratorNext "plannedAllocationIndex")
+                    hierarchy=../hierarchy
+                    parentRowIndex=../allocationIndex
+            }}
+
+        {{/each}}
+
+    {{/if}}
+
+</script>
+
+<script type="text/javascript">
+
+    HandlebarsUtils.registerPartialToContainer(
+        "accordion-allocation-plan",
+        "template-allocation-plan-management-form-tbody-row"
+    );
+
+    allocationPlanManagement.handlebarsAllocationPlanManagementRowTemplate = Handlebars.compile(
+        window["template-allocation-plan-management-form-tbody-row"].innerHTML
+    );
+
+</script>

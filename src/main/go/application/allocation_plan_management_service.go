@@ -38,9 +38,9 @@ func (service *AllocationPlanManagementAppService) PersistAllocationPlan(plan *d
 	var validationErr *infra.DomainValidationError
 	if errors.As(err, &validationErr) {
 		return err
-	} else {
-		return infra.PropagateAsAppErrorWithNewMessage(err, "Failed to persist allocation plan", service)
 	}
+
+	return infra.PropagateAsAppErrorWithNewMessage(err, "Failed to persist allocation plan", service)
 }
 
 func (service *AllocationPlanManagementAppService) persistNewAssets(

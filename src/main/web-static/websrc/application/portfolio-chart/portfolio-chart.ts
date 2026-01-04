@@ -3,12 +3,12 @@ import { ChartContent } from "../../infra/chart/chart-types";
 import { ActiveElement, Chart, ChartEvent } from "chart.js";
 import chartModule from "../../infra/chart/chart";
 import { changeChartDataOnDatasource } from "../../infra/chart/chart-utils";
-import { allocationDomainService } from "../../domain/service/allocation-service";
 import { FractalPortfolioMultiChartDataSource } from "./portfolio-chart-datasource";
 import { MappedChartData } from "./portfolio-chart-model";
 import { mapChartData } from "./portfolio-chart-mapping";
-import DomUtils from "../../infra/dom/dom-utils";
 import { PortfolioSnapshot } from "../../domain/portfolio-allocation";
+import { DomainService } from "../../domain/service";
+import DomInfra from "../../infra/dom";
 
 function changeChartData(
     dataKey: string,
@@ -56,7 +56,7 @@ function interactionObserverCallback(event: ChartEvent, elements: ActiveElement[
 
     if(event.type === "click") {
         const labelId = `#hierarchy-level-${ chartId }`;
-        DomUtils.queryFirst(labelId).textContent = levelLabel;
+        DomInfra.DomUtils.queryFirst(labelId).textContent = levelLabel;
     }
 }
 
@@ -77,11 +77,11 @@ const portfolioChart = {
         portfolioDTO: PortfolioDTO,
     ): ChartContent {
 
-        const portfolio = allocationDomainService.mapToPortfolio(portfolioDTO);
+        const portfolio = DomainService.mapping.mapToPortfolio(portfolioDTO);
         const portfolioAllocationStructure = portfolio.allocationStructure;
 
         const { topLevelIndex } =
-            allocationDomainService.getTopHierarchyLevelInfoFromAllocationStructure(portfolioAllocationStructure);
+            DomainService.allocation.getTopHierarchyLevelInfoFromAllocationStructure(portfolioAllocationStructure);
 
         const chartData = mapChartData(portfolioAtTime, portfolio.allocationStructure, topLevelIndex);
 

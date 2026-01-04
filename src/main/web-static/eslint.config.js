@@ -41,6 +41,97 @@ export default [
                 { blankLine: "always", prev: "*", next: "multiline-let" },
                 { blankLine: "always", prev: "*", next: "multiline-var" }],
 
+            // Restrict deep imports under domain/service and application; enforce public API imports only
+            // Authored by: GitHub Copilot
+            "no-restricted-imports": [
+                "error",
+                {
+                    patterns: [
+                        // domain/service public API only
+                        {
+                            group: [
+                                "**/domain/service/**",
+                                "domain/service/**",
+                                "./domain/service/**",
+                                "../domain/service/**",
+                            ],
+                            message:
+                                "Import from the public API 'domain/service' (index.ts) only; " +
+                                "deep imports are not allowed.",
+                        },
+                        // application public API only (outside the module)
+                        {
+                            group: [
+                                "**/application/**",
+                                "application/**",
+                                "./application/**",
+                                "../application/**",
+                            ],
+                            message:
+                                "Import from the public API 'application' (index.ts) only; " +
+                                "deep imports are not allowed.",
+                        },
+                        // Block deep imports into the local 'infra/handlebars' module; import only from its public API
+                        // Authored by: GitHub Copilot
+                        {
+                            group: [
+                                // generic patterns
+                                "**/infra/handlebars/*",
+                                "**/infra/handlebars/**",
+                                // common relative forms
+                                "infra/handlebars/*",
+                                "infra/handlebars/**",
+                                "./infra/handlebars/*",
+                                "./infra/handlebars/**",
+                                "../infra/handlebars/*",
+                                "../infra/handlebars/**",
+                            ],
+                            message:
+                                "Import from the public API 'infra/handlebars' (index.ts) only; " +
+                                "deep imports are not allowed.",
+                        },
+                        // Block deep imports into the local 'infra/dom' module; import only from its public API
+                        // Authored by: GitHub Copilot
+                        {
+                            group: [
+                                // generic patterns
+                                "**/infra/dom/*",
+                                "**/infra/dom/**",
+                                // common relative forms
+                                "infra/dom/*",
+                                "infra/dom/**",
+                                "./infra/dom/*",
+                                "./infra/dom/**",
+                                "../infra/dom/*",
+                                "../infra/dom/**",
+                            ],
+                            message:
+                                "Import from the public API 'infra/dom' (index.ts) only; " +
+                                "deep imports are not allowed.",
+                        },
+                        // Block deep imports into the local 'infra/htmx' module; import only from its public API
+                        // Authored by: GitHub Copilot
+                        {
+                            group: [
+                                // generic patterns
+                                "**/infra/htmx/*",
+                                "**/infra/htmx/**",
+                                // common relative forms
+                                "infra/htmx/*",
+                                "infra/htmx/**",
+                                "./infra/htmx/*",
+                                "./infra/htmx/**",
+                                "../infra/htmx/*",
+                                "../infra/htmx/**",
+                            ],
+                            message:
+                                "Import from the public API 'infra/htmx' (index.ts) only; " +
+                                "deep imports are not allowed.",
+                        },
+                    ],
+                },
+            ],
+
         },
     },
 

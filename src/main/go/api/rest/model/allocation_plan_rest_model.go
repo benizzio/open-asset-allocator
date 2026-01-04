@@ -5,6 +5,7 @@ import (
 
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/domain/allocation"
+	"github.com/benizzio/open-asset-allocator/langext"
 	"github.com/shopspring/decimal"
 )
 
@@ -13,15 +14,15 @@ import (
 // ================================================
 
 type PlannedAllocationDTS struct {
-	Id                  int64           `json:"id,omitempty"`
-	HierarchicalId      []*string       `json:"hierarchicalId,omitempty" validate:"required"`
-	CashReserve         bool            `json:"cashReserve"`
-	SliceSizePercentage decimal.Decimal `json:"sliceSizePercentage,omitempty"`
-	Asset               *AssetDTS       `json:"asset,omitempty"`
+	Id                  *langext.ParseableInt64 `json:"id,omitempty"`
+	HierarchicalId      []*string               `json:"hierarchicalId,omitempty" validate:"required"`
+	CashReserve         bool                    `json:"cashReserve"`
+	SliceSizePercentage decimal.Decimal         `json:"sliceSizePercentage,omitempty"`
+	Asset               *AssetDTS               `json:"asset,omitempty"`
 }
 
 type AllocationPlanDTS struct {
-	Id                   int64                   `json:"id,omitempty"`
+	Id                   *langext.ParseableInt64 `json:"id,omitempty"`
 	Name                 string                  `json:"name,omitempty" validate:"required"`
 	Type                 string                  `json:"type,omitempty"`
 	PlannedExecutionDate *time.Time              `json:"plannedExecutionDate,omitempty"`
@@ -43,8 +44,9 @@ func MapToAllocationPlanDTSs(allocationPlans []*domain.AllocationPlan) []*Alloca
 
 func mapToAllocationPlanDTS(allocationPlan *domain.AllocationPlan) *AllocationPlanDTS {
 	var allocations = mapToPlannedAllocationDTSs(allocationPlan)
+	var allocationPlanId = langext.ParseableInt64(allocationPlan.Id)
 	return &AllocationPlanDTS{
-		Id:                   allocationPlan.Id,
+		Id:                   &allocationPlanId,
 		Name:                 allocationPlan.Name,
 		Type:                 allocationPlan.PlanType.String(),
 		PlannedExecutionDate: allocationPlan.PlannedExecutionDate,
@@ -67,8 +69,9 @@ func mapToPlannedAllocationDTSs(allocationPlan *domain.AllocationPlan) []*Planne
 
 func mapToPlannedAllocationDTS(allocation *domain.PlannedAllocation) *PlannedAllocationDTS {
 	var assetDTS = MapToAssetDTS(allocation.Asset)
+	var plannedAllocationId = langext.ParseableInt64(allocation.Id)
 	return &PlannedAllocationDTS{
-		Id:                  allocation.Id,
+		Id:                  &plannedAllocationId,
 		HierarchicalId:      allocation.HierarchicalId,
 		CashReserve:         allocation.CashReserve,
 		SliceSizePercentage: allocation.SliceSizePercentage,
@@ -93,9 +96,14 @@ func MapToAllocationPlan(
 		plannedExecutionDate = allocationPlanDTS.PlannedExecutionDate
 	}
 
+	var allocationPlanId int64
+	if allocationPlanDTS.Id != nil {
+		allocationPlanId = int64(*allocationPlanDTS.Id)
+	}
+
 	return &domain.AllocationPlan{
 		AllocationPlanIdentifier: domain.AllocationPlanIdentifier{
-			Id:   allocationPlanDTS.Id,
+			Id:   allocationPlanId,
 			Name: allocationPlanDTS.Name,
 		},
 		PortfolioId:          portfolioId,
@@ -121,8 +129,13 @@ func mapToPlannedAllocation(allocationDTS *PlannedAllocationDTS) *domain.Planned
 	}
 
 	var asset = MapToAsset(allocationDTS.Asset)
+
+	var plannedAllocationId int64
+	if allocationDTS.Id != nil {
+		plannedAllocationId = int64(*allocationDTS.Id)
+	}
 	return &domain.PlannedAllocation{
-		Id:                  allocationDTS.Id,
+		Id:                  plannedAllocationId,
 		HierarchicalId:      allocationDTS.HierarchicalId,
 		CashReserve:         allocationDTS.CashReserve,
 		SliceSizePercentage: allocationDTS.SliceSizePercentage,

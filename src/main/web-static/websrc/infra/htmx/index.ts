@@ -1,6 +1,7 @@
 import { HtmxBeforeSwapDetails, HtmxRequestConfig, HtmxResponseInfo } from "htmx.org";
 import { bindHTMXTransformResponseInDescendants, htmxTransformResponse } from "./binding-htmx-transform-response";
-import { CustomEventHandler } from "../infra-types";
+import { CustomEventHandler, ErrorResponse } from "../infra-types";
+import InfraTypesUtils from "../infra-types-utils";
 
 const NULL_IF_EMPTY_ATTRIBUTE = "data-null-if-empty";
 
@@ -110,7 +111,10 @@ function prepareFormData(event: CustomEvent) {
 
 }
 
-function addEventListeners(domSettlingBehaviorEventHandler: CustomEventHandler) {
+function addEventListeners(
+    domSettlingBehaviorEventHandler: CustomEventHandler,
+    afterRequestErrorHandler: CustomEventHandler,
+) {
 
     document.addEventListener("htmx:configRequest", configEnhancedRequestEventListener);
 
@@ -121,17 +125,34 @@ function addEventListeners(domSettlingBehaviorEventHandler: CustomEventHandler) 
         bindHTMXTransformResponseInDescendants(eventTarget);
     };
     document.body.addEventListener("htmx:afterSettle", afterSettleCustomEventHandler);
+
+    document.body.addEventListener("htmx:afterRequest", afterRequestErrorHandler);
 }
 
-export const htmxInfra = {
+function toErrorResponse(eventDetail: AfterRequestEventDetail): ErrorResponse | undefined {
+
+    const contentType = eventDetail.xhr.getResponseHeader("content-type");
+
+    if(contentType && contentType.includes("application/json")) {
+        return InfraTypesUtils.toErrorResponse(eventDetail.xhr.response);
+    }
+
+    return undefined;
+}
+
+export const HtmxInfra = {
+
     /**
      * Initializes the htmx infrastructure of the application.
+     * All handlers will be applied to the body and be triggered in after the events of any child element.
      *
      * @param domSettlingBehaviorEventHandler - The handler for the default DOM settling behavior event.
-     * Will be applied to the body and be triggered in after settling of any child element.
+     * @param afterRequestErrorHandler - The handler for after request error events.
      */
-    init(domSettlingBehaviorEventHandler: CustomEventHandler) {
-        addEventListeners(domSettlingBehaviorEventHandler);
+    init(domSettlingBehaviorEventHandler: CustomEventHandler, afterRequestErrorHandler: CustomEventHandler) {
+        addEventListeners(domSettlingBehaviorEventHandler, afterRequestErrorHandler);
     },
+
     htmxTransformResponse,
+    toErrorResponse,
 };

@@ -1,12 +1,12 @@
 import { Chart, registerables } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import { handlebarsInfra } from "./handlebars/handlebars";
-import { htmxInfra } from "./htmx/htmx";
+import { handlebarsInfra } from "./handlebars";
+import { HtmxInfra } from "./htmx";
 import router from "./routing/router";
 import * as bootstrap from "bootstrap";
-import { domInfra } from "./dom/dom";
 import chart from "./chart/chart";
 import { CustomEventHandler } from "./infra-types";
+import DomInfra from "./dom";
 
 /**
  * Ties multiple components of the application infrastructure to HTMX async DOM behaviour.
@@ -19,7 +19,7 @@ const DOM_SETTLING_BEHAVIOR_EVENT_HANDLER: CustomEventHandler = (event: CustomEv
     const target = event.target as HTMLElement;
     router.bindDescendants(target);
     router.boot();
-    domInfra.bindDescendants(target);
+    DomInfra.bindDescendants(target);
     chart.loadDescendantCharts(target);
 };
 
@@ -27,18 +27,18 @@ const DOM_SETTLING_BEHAVIOR_EVENT_HANDLER: CustomEventHandler = (event: CustomEv
  * Component that controls the multiple external libraries and its components to the desired behaviour of the
  * application.
  */
-export const infra = {
+export const Infra = {
 
-    init: () => {
+    init: (afterRequestErrorHandler: CustomEventHandler) => {
 
         Chart.register(...registerables, ChartDataLabels);
 
         window.Handlebars = handlebarsInfra.register();
         window["HandlebarsUtils"] = handlebarsInfra.utils;
 
-        domInfra.bindGlobalFunctions();
+        DomInfra.bindGlobalFunctions();
 
-        htmxInfra.init(DOM_SETTLING_BEHAVIOR_EVENT_HANDLER);
+        HtmxInfra.init(DOM_SETTLING_BEHAVIOR_EVENT_HANDLER, afterRequestErrorHandler);
 
         const onPageLoad = () => {
             router.init(window);

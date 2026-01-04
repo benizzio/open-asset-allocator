@@ -4,10 +4,10 @@ import {
     AllocationStructure,
     LOWEST_AVAILABLE_HIERARCHY_LEVEL_INDEX,
 } from "../../domain/allocation";
-import { allocationDomainService } from "../../domain/service/allocation-service";
 import { AppliedAllocationHierarchyLevel, MappedChartData } from "./portfolio-chart-model";
 import { mapChartData } from "./portfolio-chart-mapping";
 import { PortfolioSnapshot } from "../../domain/portfolio-allocation";
+import { DomainService } from "../../domain/service";
 
 /**
  * MultiChartDataSource that keeps track of an applied hierarchy level,
@@ -29,7 +29,7 @@ export class FractalPortfolioMultiChartDataSource extends MultiChartDataSource {
         const {
             topHierarchyLevel,
             topLevelIndex,
-        } = allocationDomainService.getTopHierarchyLevelInfoFromAllocationStructure(portfolioAllocationStructure);
+        } = DomainService.allocation.getTopHierarchyLevelInfoFromAllocationStructure(portfolioAllocationStructure);
 
         const initialDataKey = generateDataKey(topHierarchyLevel.field);
         const chartDataMap = new Map([[initialDataKey, initialChartData]]);
@@ -51,7 +51,7 @@ export class FractalPortfolioMultiChartDataSource extends MultiChartDataSource {
 
     private movePropertiesToNextLevel(filteringValue: string | number) {
 
-        const currentHierarchyLevel = allocationDomainService.getHierarchyLevelFromAllocationStructure(
+        const currentHierarchyLevel = DomainService.allocation.getHierarchyLevelFromAllocationStructure(
             this.portfolioAllocationStructure,
             this.currentHierarchyLevelIndex,
         );
@@ -84,7 +84,9 @@ export class FractalPortfolioMultiChartDataSource extends MultiChartDataSource {
     toPreviousLevel() {
 
         const hierarchyTopLevelIndex =
-            allocationDomainService.getTopLevelHierarchyIndexFromAllocationStructure(this.portfolioAllocationStructure);
+            DomainService.allocation.getTopLevelHierarchyIndexFromAllocationStructure(
+                this.portfolioAllocationStructure,
+            );
 
         if(this.currentHierarchyLevelIndex === hierarchyTopLevelIndex) {
             return;
@@ -106,7 +108,7 @@ export class FractalPortfolioMultiChartDataSource extends MultiChartDataSource {
     }
 
     public getCurrentHierarchyLevel(): AllocationHierarchyLevel {
-        return allocationDomainService.getHierarchyLevelFromAllocationStructure(
+        return DomainService.allocation.getHierarchyLevelFromAllocationStructure(
             this.portfolioAllocationStructure,
             this.currentHierarchyLevelIndex,
         );

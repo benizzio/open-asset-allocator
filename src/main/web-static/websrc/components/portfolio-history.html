@@ -20,6 +20,7 @@
     <div data-display-on-route="/portfolio/:portfolioId/history/manage"
          hx-get="/websrc/components/portfolio-history-management.html"
          hx-trigger="load"
+         hx-on::after-settle="portfolioHistoryManagement.init()"
     >
     </div>
 
@@ -90,11 +91,11 @@
 
 <script type="module">
 
-    window.initPortfolioHistoryHierarchyLabels = () => {
+    globalThis.initPortfolioHistoryHierarchyLabels = () => {
         setTextContentWithTopHierarchyName("[id^='hierarchy-level-portfolio-chart-']");
     }
 
-    window.navigateToPortfolioAllocationManagement = () => {
+    globalThis.navigateToPortfolioAllocationManagement = () => {
         const portfolioId = document.querySelector("[name='portfolioId']").value;
         navigateTo(`/portfolio/${portfolioId}/history/manage`);
     }
