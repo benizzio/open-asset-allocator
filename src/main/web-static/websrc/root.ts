@@ -15,7 +15,7 @@ const AFTER_REQUEST_ERROR_HANDLER = (event: CustomEvent) => {
             notifications.notifyErrorResponse(errorResponse);
         }
         else {
-            const fallbackErrorMessage = "An unexpected error occurred while comunicating with the server.";
+            const fallbackErrorMessage = "An unexpected error occurred while communicating with the server.";
             notifications.notifyErrorResponse({ error: fallbackErrorMessage });
         }
 
