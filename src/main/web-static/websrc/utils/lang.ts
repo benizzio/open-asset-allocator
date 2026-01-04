@@ -457,14 +457,15 @@ function convertNumberForToInt(
  * toInt(42.9) // => undefined
  * toInt("42") // => 42
  * toInt(Infinity) // => undefined
- * toInt(true) // => 1
  *
  * // Coercion-enabled examples
  * toInt(42.9, { allowCoercions: true }) // => 42
  * toInt(Infinity, { allowCoercions: true }) // => 0
  * toInt("aaa", { allowCoercions: true }) // => 0
+ * toInt(true, { allowCoercions: true }) // => 1
  *
- * @author GitHub Copilot and others
+ * @author GitHub Copilot
+ * @author benizzio
  */
 export function toInt(value: unknown, options?: ToIntOptions): number | undefined {
 
