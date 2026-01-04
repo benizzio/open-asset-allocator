@@ -457,6 +457,7 @@ function convertNumberForToInt(
  * toInt(42.9) // => undefined
  * toInt("42") // => 42
  * toInt(Infinity) // => undefined
+ * toInt(true) // => undefined
  *
  * // Coercion-enabled examples
  * toInt(42.9, { allowCoercions: true }) // => 42
