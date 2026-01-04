@@ -36,24 +36,40 @@ function queryFirst(selector: string): HTMLElement {
     return document.querySelector(selector);
 }
 
+function escapeHtmlValue(value: string): string {
+    return (value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
 const DomUtils = {
+
     //TODO remove simple queries from here and use directly
     queryFirst,
+
     queryAll(selector: string): NodeListOf<HTMLElement> {
         return document.querySelectorAll(selector);
     },
+
     queryFirstInDescendants(element: HTMLElement, selector: string): HTMLElement | null {
         return element.querySelector(selector);
     },
+
     queryAllInDescendants(element: HTMLElement, selector: string): NodeListOf<HTMLElement> {
         return element.querySelectorAll(selector);
     },
+
     queryDirectDescendants(element: HTMLElement, selector: string): NodeListOf<HTMLElement> {
         return element.querySelectorAll(`:scope > ${ selector }`);
     },
+
     wasElementRemoved(element: HTMLElement) {
         return !document.body.contains(element);
     },
+
     /**
      * Gets context data from root document element matching the given selector.
      * Caches the parsed data for future retrievals.
@@ -67,6 +83,28 @@ const DomUtils = {
     getContextDataFromRoot(contextDataSelector: string): unknown {
         const dataElement = queryFirst(contextDataSelector);
         return getCacheableContextData(dataElement);
+    },
+
+    /**
+     * Escapes HTML special characters in untrusted text
+     * to prevent DOM injection when rendering server-provided content.
+     *
+     * Usage Guidance:
+     * - Call before inserting dynamic strings into innerHTML or template output.
+     * - This is a conservative encoder; it targets &, <, >, " and '.
+     * - Keeps input null-safe by treating null/undefined as an empty string.
+     *
+     * @param rawValue Raw text value that may contain unsafe characters.
+     * @returns Safe, escaped string suitable for HTML contexts.
+     *
+     * @example
+     * // "&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;"
+     * const safe = DomUtils.escapeHtml('<script>alert("x")</script>');
+     *
+     * @author GitHub Copilot
+     */
+    escapeHtml(rawValue: string): string {
+        return escapeHtmlValue(rawValue);
     },
 };
 

@@ -1,6 +1,7 @@
 import { ErrorResponse, Notification, NotificationType } from "../infra/infra-types";
 import * as handlebars from "handlebars";
 import * as bootstrap from "bootstrap";
+import DomInfra from "../infra/dom";
 
 const NotificationTypeBootstrapClasses = {
     info: "text-bg-primary",
@@ -20,10 +21,14 @@ function buildBootstrapNotification(notification: Notification): BootstrapNotifi
 function buildBootstrapErrorNotification(errorResponse: ErrorResponse): BootstrapNotification {
 
     const title = "Error";
-    let content = errorResponse.error;
+    let content = DomInfra.DomUtils.escapeHtml(errorResponse.error ?? "");
 
     if(errorResponse.details && errorResponse.details.length > 0) {
-        const detailsList = errorResponse.details.map(detail => `<li>${ detail }</li>`).join("");
+
+        const detailsList = errorResponse.details.map(
+            detail => `<li>${ DomInfra.DomUtils.escapeHtml(detail ?? "") }</li>`,
+        ).join("");
+
         content += `<ul>${ detailsList }</ul>`;
     }
 
