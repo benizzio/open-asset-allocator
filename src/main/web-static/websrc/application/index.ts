@@ -11,7 +11,6 @@ import notifications from "../components/notifications";
 const Application = {
     init() {
         registerPortfolioAnalysisHandlebarsHelpers();
-        portfolioHistoryManagement.init();
         allocationPlanManagement.init();
         window["portfolioHistoryManagement"] = portfolioHistoryManagement;
         window["allocationPlanManagement"] = allocationPlanManagement;

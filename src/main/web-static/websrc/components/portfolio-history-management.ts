@@ -109,9 +109,21 @@ const portfolioHistoryManagement = {
     handlebarsPortfolioHistoryManagementContainerTemplate: null as TemplateDelegate,
 
     init() {
+
         HtmxInfra.htmxTransformResponse.registerTransformResponseFunction(
             "addObservationZero",
             modifyObservationsResponse,
+        );
+
+        const managementFormRowTemplateElement = window["template-portfolio-history-management-form-tbody-row"];
+        const managementTemplateElement = window["template-portfolio-history-management"];
+
+        this.handlebarsPortfolioHistoryManagementRowTemplate = Handlebars.compile(
+            managementFormRowTemplateElement.innerHTML,
+        );
+
+        this.handlebarsPortfolioHistoryManagementContainerTemplate = Handlebars.compile(
+            managementTemplateElement.innerHTML,
         );
     },
 
