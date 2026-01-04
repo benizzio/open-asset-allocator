@@ -206,30 +206,6 @@ function copyAssetTickersToHierarchicalIdFields(form: HTMLFormElement) {
     });
 }
 
-
-function addHierarchicalFieldMapping(
-    formTableRow: HTMLTableRowElement,
-    hierarchyLevelIndex: number,
-    hierarchicalField: HTMLInputElement,
-    formRowHierarchicalStructure: FormRowHierarchicalStructure,
-) {
-
-    if(hierarchyLevelIndex > 0 && hierarchicalField.type !== "hidden") {
-        formRowHierarchicalStructure.formRowHierarchicalFields.push(hierarchicalField);
-    }
-    else if(hierarchyLevelIndex == 0) {
-
-        const assertSearchField = DomInfra.DomUtils.queryFirstInDescendants(
-            formTableRow,
-            `input[name$='${ ASSET_TICKER_FIELD_NAME_SUFFIX }']`,
-        ) as HTMLInputElement;
-
-        if(assertSearchField) {
-            formRowHierarchicalStructure.formRowHierarchicalFields.push(assertSearchField);
-        }
-    }
-}
-
 function getHierarchicalFieldForValidation(
     formTableRow: HTMLTableRowElement,
     hierarchyLevelIndex: number,
