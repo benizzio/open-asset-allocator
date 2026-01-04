@@ -146,7 +146,6 @@ function getPropertyHelper(obj: Record<string, unknown> | undefined | null, prop
 /**
  * Sets (mutates) a property on a target object, supporting dot-separated nested paths.
  * Intermediate objects are created when missing. Non-object targets are ignored.
- * Returns the assigned value to allow inline usage inside expressions.
  *
  * Usage patterns:
  *   {{setProperty obj "name" value}}            -> sets obj.name = value
