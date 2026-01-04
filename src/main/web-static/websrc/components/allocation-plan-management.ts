@@ -16,7 +16,7 @@ import notifications from "./notifications";
 import { NotificationType } from "../infra/infra-types";
 
 type AllocationPlanningHierarchicalFormEntry = {
-    occurences: number;
+    occurrences: number;
     inputFields: HTMLInputElement[];
 };
 
@@ -288,12 +288,12 @@ function mapPlannedAllocationFormEntriesPerHierarchicalKey(form: HTMLFormElement
         if(!formEntry) {
             formEntry = {
                 inputFields: [],
-                occurences: 0,
+                occurrences: 0,
             };
             formEntriesPerHierarchicalKey.set(formRowHierarchicalId, formEntry);
         }
 
-        formEntry.occurences++;
+        formEntry.occurrences++;
         formEntry.inputFields.push(...formRowHierarchicalFields);
     });
 
@@ -308,7 +308,7 @@ function validateDuplicateEntries(
 
     hierarchicalFormEntriesPerHierarchicalKey.forEach((formEntriesForKey) => {
 
-        if(formEntriesForKey.occurences > 1) {
+        if(formEntriesForKey.occurrences > 1) {
 
             formEntriesForKey.inputFields.forEach((field) => {
 
