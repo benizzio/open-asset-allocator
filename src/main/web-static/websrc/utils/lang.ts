@@ -493,7 +493,9 @@ export function toInt(value: unknown, options?: ToIntOptions): number | undefine
         }
 
         case "boolean": {
-            return value ? 1 : 0;
+            return allowCoercions
+                ? (value ? 1 : 0)
+                : reportToIntCoercion(options, "boolean conversion disallowed", value);
         }
 
         default: {
