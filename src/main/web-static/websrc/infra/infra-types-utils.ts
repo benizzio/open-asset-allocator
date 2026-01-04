@@ -9,7 +9,18 @@ const InfraTypesUtils = {
 
             const errorResponse = JSON.parse(errorResponseJson) as ErrorResponse;
 
-            if(errorResponse && typeof errorResponse.error === "string") {
+            const hasErrorProperty = errorResponse && typeof errorResponse.error === "string";
+
+            const hasValidDetails = errorResponse
+                && (
+                    errorResponse.details === undefined
+                    || (
+                        Array.isArray(errorResponse.details)
+                        && errorResponse.details.every((detail) => typeof detail === "string")
+                    )
+                );
+
+            if(errorResponse && hasErrorProperty && hasValidDetails) {
                 return errorResponse;
             }
         } catch(jsonParseError) {
