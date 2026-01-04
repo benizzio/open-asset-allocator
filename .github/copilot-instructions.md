@@ -32,7 +32,7 @@
     - must contain proper minimal code comment documentation according to the language standards,
     - public API code (as in usable in other packages or modules) must contain very detailed usage instructions. It must
       also contain authoring documentation.
-    - if the laguage has authoring documentation standards, it must be followed
+    - if the language has authoring documentation standards, it must be followed
     - Examples: check `EXAMPLE REF: CODE DOCS` in language specific instructions below
 - when implementing tests:
     - follow standard names `expected` and `actual` for variables used in the appropriate context
