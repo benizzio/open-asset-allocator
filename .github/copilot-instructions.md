@@ -38,11 +38,11 @@
     - follow standard names `expected` and `actual` for variables used in the appropriate context
 
 > [!IMPORTANT]
-> Code reviews must evaluate source code in all laguages cited below.
+> Code reviews must evaluate source code in all languages cited below.
 
 ## Go standards
 
-- when handling go language code, read [go copilot instructions](copilot_specific_instructions/go.instructions.md)
+- when handling Go language code, read [go copilot instructions](copilot_specific_instructions/go.instructions.md)
 
 ## Browser code standards
 

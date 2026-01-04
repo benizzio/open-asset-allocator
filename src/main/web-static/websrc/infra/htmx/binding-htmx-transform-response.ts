@@ -52,7 +52,7 @@ function bindHTMXTransformResponseElement(element: HTMLElement) {
 
         const matchesTransformPath = hasTransformPathMatching && eventRequestPath.match(transformResponsePathRegExp);
 
-        const matchesTransformVerb = hasTransformPathMatching && hasTransformVerbMatching
+        const matchesTransformVerb = matchesTransformPath && hasTransformVerbMatching
             && transformResponseVerbAttribute === eventDetail.requestConfig.verb.toUpperCase();
 
         if(eventDetail.isError || !matchesTransformPath || (hasTransformVerbMatching && !matchesTransformVerb)) {

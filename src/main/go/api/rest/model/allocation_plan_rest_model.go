@@ -96,14 +96,14 @@ func MapToAllocationPlan(
 		plannedExecutionDate = allocationPlanDTS.PlannedExecutionDate
 	}
 
-	var plannedAllocationId int64
+	var allocationPlanId int64
 	if allocationPlanDTS.Id != nil {
-		plannedAllocationId = int64(*allocationPlanDTS.Id)
+		allocationPlanId = int64(*allocationPlanDTS.Id)
 	}
 
 	return &domain.AllocationPlan{
 		AllocationPlanIdentifier: domain.AllocationPlanIdentifier{
-			Id:   plannedAllocationId,
+			Id:   allocationPlanId,
 			Name: allocationPlanDTS.Name,
 		},
 		PortfolioId:          portfolioId,
