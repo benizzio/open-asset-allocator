@@ -8,15 +8,7 @@ import {
     toPropertyPathSegments,
     tryCoerceToFiniteNumber,
 } from "../../utils/lang";
-
-
-/**
- * Internal store that keeps iterator maps per template render root using WeakMap.
- * The state is scoped to the lifetime of a single template rendering (data.root).
- *
- * Authored by: GitHub Copilot
- */
-const RENDER_ITERATORS_STORE: WeakMap<object, Map<string, number>> = new WeakMap();
+import { isHelperOptions } from "./handlebars-util";
 
 /**
  * Creates an object from named hash parameters.
@@ -384,152 +376,6 @@ function ifNotNullishHelper(this: unknown, value: unknown, options: HelperOption
 }
 
 /**
- * Narrow unknown to Handlebars HelperOptions.
- *
- * @param value - Unknown value to test.
- * @returns True if value looks like HelperOptions.
- *
- * Authored by: GitHub Copilot
- */
-function isHelperOptions(value: unknown): value is HelperOptions {
-
-    if(typeof value !== "object" || value === null) {
-        return false;
-    }
-
-    const record = value as Record<string, unknown>;
-    return (
-        Object.prototype.hasOwnProperty.call(record, "data") &&
-        Object.prototype.hasOwnProperty.call(record, "hash")
-    );
-}
-
-/**
- * Gets (or creates) the iterator map for the current template rendering.
- *
- * @param options - Handlebars helper options (must contain data.root).
- * @returns The iterator map bound to the current render root.
- *
- * Authored by: GitHub Copilot
- */
-function getRenderIteratorMap(options?: HelperOptions): Map<string, number> {
-
-    const dataUnknown = options?.data as unknown;
-
-    let root: object | undefined = undefined;
-
-    if(typeof dataUnknown === "object" && dataUnknown !== null) {
-        const candidate = (dataUnknown as Record<string, unknown>)["root"];
-
-        if(typeof candidate === "object" && candidate !== null) {
-            root = candidate as object;
-        }
-    }
-
-    if(!root) {
-        // As a last resort, use a unique per-call object to avoid leaking across renders.
-        // Note: without data.root, iterators won't share state between helper calls.
-        const isolatedRoot = {} as object;
-        const isolated = new Map<string, number>();
-        RENDER_ITERATORS_STORE.set(isolatedRoot, isolated);
-        return isolated;
-    }
-
-    let map = RENDER_ITERATORS_STORE.get(root);
-
-    if(!map) {
-        map = new Map<string, number>();
-        RENDER_ITERATORS_STORE.set(root, map);
-    }
-
-    return map;
-}
-
-/**
- * Initializes (or resets) a named iterator for the current template rendering.
- * The iterator starts at the provided initial value; the first {{iteratorNext id}} call
- * will yield that initial value, then increment by 1 for subsequent calls.
- * If no initial value is supplied, it starts at 0.
- *
- * @param id - Unique iterator id within this template rendering.
- * @param startOrOptions - Initial value (number-like) or the Handlebars options when omitted.
- * @param maybeOptions - The Handlebars options object when start is provided.
- * @returns An empty string (no output); use {{iteratorNext id}} to consume values.
- *
- * @example
- * {{iteratorInit "row"}}        {{!-- starts at 0 --}}
- * {{iteratorInit "row" 10}}     {{!-- starts at 10 --}}
- * {{iteratorNext "row"}}        {{!-- 10 --}}
- *
- * @author GitHub Copilot
- */
-function iteratorInitHelper(
-    this: unknown,
-    id: unknown,
-    startOrOptions?: unknown,
-    maybeOptions?: HelperOptions,
-): string {
-
-    // Determine options and start value allowing {{iteratorInit id}} and {{iteratorInit id start}}
-    let options: HelperOptions | undefined = undefined;
-    let startValue = 0;
-
-    const maybeOptionsIsHelper = isHelperOptions(maybeOptions);
-    const startOrOptionsIsHelper = isHelperOptions(startOrOptions);
-
-    if(maybeOptionsIsHelper) {
-
-        options = maybeOptions as HelperOptions;
-
-        if(!startOrOptionsIsHelper && typeof startOrOptions !== "undefined") {
-            startValue = coerceToFiniteNumber(startOrOptions);
-        }
-    }
-    else if(startOrOptionsIsHelper) {
-        options = startOrOptions as HelperOptions;
-        startValue = 0;
-    }
-    else {
-        // Fallback: no options detected (should not happen in normal Handlebars usage)
-        startValue = typeof startOrOptions !== "undefined" ? coerceToFiniteNumber(startOrOptions) : 0;
-    }
-
-    const map = getRenderIteratorMap(options);
-    const key = String(id);
-
-    map.set(key, startValue);
-
-    return "";
-}
-
-/**
- * Returns the current value for the named iterator and advances it by 1.
- * If the iterator doesn't exist yet, it is implicitly initialized at 0.
- *
- * @param id - Iterator id.
- * @param options - Handlebars helper options providing data.root for render scoping.
- * @returns The iterator's current value (number).
- *
- * @example
- * {{iteratorInit "seq" 3}}
- * {{iteratorNext "seq"}}  {{!-- 3 --}}
- * {{iteratorNext "seq"}}  {{!-- 4 --}}
- *
- * @author GitHub Copilot
- */
-function iteratorNextHelper(this: unknown, id: unknown, options: HelperOptions): number {
-
-    const map = getRenderIteratorMap(options);
-    const key = String(id);
-
-    const current = map.has(key) ? (map.get(key) as number) : 0;
-
-    map.set(key, current + 1);
-
-    return current;
-}
-
-/**
  * Splits a string value into an array using a separator.
  *
  * Non-string values are coerced via String(). If the separator is omitted it defaults to ','.
@@ -652,8 +498,6 @@ export function registerHandlebarsLangHelpers() {
     handlebars.registerHelper("ifNullish", ifNullishHelper);
     handlebars.registerHelper("ifNotNullish", ifNotNullishHelper);
     handlebars.registerHelper("math", mathHelper);
-    handlebars.registerHelper("iteratorInit", iteratorInitHelper);
-    handlebars.registerHelper("iteratorNext", iteratorNextHelper);
     handlebars.registerHelper("split", splitHelper);
     handlebars.registerHelper("comparator", comparatorHelper);
 }
