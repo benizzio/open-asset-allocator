@@ -237,7 +237,7 @@ function setPropertyHelper(
  * {{math "10" "/" x}}      {{!-- coerces inputs; division by zero => 0 --}}
  * {{math price "*" qty}}    {{!-- multiplication --}}
  *
- * Authored by: GitHub Copilot
+ * @author GitHub Copilot
  */
 function mathHelper(a: unknown, op: unknown, b: unknown): number {
 
