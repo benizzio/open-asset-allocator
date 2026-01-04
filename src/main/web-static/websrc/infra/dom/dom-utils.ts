@@ -1,5 +1,8 @@
 const contextDataCache = new WeakMap<HTMLElement, unknown>();
 
+const observedElements = new Set<HTMLElement>();
+let sharedObserver: MutationObserver | null = null;
+
 function getCacheableContextData(
     contextDataElement: HTMLElement,
 ): unknown {
@@ -22,14 +25,29 @@ function getCacheableContextData(
     return elementData;
 }
 
+function ensureSharedObserver() {
+
+    if(!sharedObserver) {
+        sharedObserver = new MutationObserver(() => {
+            observedElements.forEach(element => {
+                if(DomUtils.wasElementRemoved(element)) {
+                    contextDataCache.delete(element);
+                    observedElements.delete(element);
+                }
+            });
+
+            if(observedElements.size === 0) {
+                sharedObserver?.disconnect();
+                sharedObserver = null;
+            }
+        });
+        sharedObserver.observe(document.body, { childList: true, subtree: true });
+    }
+}
+
 function addRemoveObserver(contextDataElement: HTMLElement) {
-    const observer = new MutationObserver(() => {
-        if(DomUtils.wasElementRemoved(contextDataElement)) {
-            contextDataCache.delete(contextDataElement);
-            observer.disconnect();
-        }
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
+    observedElements.add(contextDataElement);
+    ensureSharedObserver();
 }
 
 function queryFirst(selector: string): HTMLElement {
