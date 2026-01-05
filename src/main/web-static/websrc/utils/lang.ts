@@ -562,11 +562,22 @@ export function isNullish(value: unknown): value is null | undefined {
  * @author GitHub Copilot
  */
 export function coerceToBigNumber(value: unknown): BigNumber {
+
     try {
-        const bn = new BigNumber(value ?? 0);
-        if (bn.isNaN()) {
+        // Convert unknown value to BigNumber.Value type before passing to constructor
+        const coercedValue: BigNumber.Value = (typeof value === "string" ||
+            typeof value === "number" ||
+            typeof value === "bigint" ||
+            value instanceof BigNumber)
+            ? value as BigNumber.Value
+            : 0;
+
+        const bn = new BigNumber(coercedValue);
+
+        if(bn.isNaN()) {
             return new BigNumber(0);
         }
+
         return bn;
     } catch {
         return new BigNumber(0);
