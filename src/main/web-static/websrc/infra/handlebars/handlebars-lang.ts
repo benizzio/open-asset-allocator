@@ -4,7 +4,6 @@ import BigNumber from "bignumber.js";
 import { logger, LogLevel } from "../logging";
 import {
     assignValueAtPath,
-    coerceToFiniteNumber,
     toComparableString,
     toPropertyPathSegments,
     tryCoerceToFiniteNumber,
@@ -242,24 +241,13 @@ function setPropertyHelper(
  */
 function mathHelper(a: unknown, op: unknown, b: unknown): number {
 
-    let leftBN: BigNumber;
-    let rightBN: BigNumber;
-    
-    try {
-        leftBN = new BigNumber(a);
-        if (leftBN.isNaN()) {
-            leftBN = new BigNumber(0);
-        }
-    } catch {
+    let leftBN = new BigNumber(a ?? 0);
+    if (leftBN.isNaN()) {
         leftBN = new BigNumber(0);
     }
-    
-    try {
-        rightBN = new BigNumber(b);
-        if (rightBN.isNaN()) {
-            rightBN = new BigNumber(0);
-        }
-    } catch {
+
+    let rightBN = new BigNumber(b ?? 0);
+    if (rightBN.isNaN()) {
         rightBN = new BigNumber(0);
     }
 
