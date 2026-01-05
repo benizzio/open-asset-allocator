@@ -3,16 +3,16 @@
     "@eslint/js": "^9.35.0",
     "@parcel/transformer-raw": "^2.16.0",
     "@parcel/transformer-sass": "^2.16.0",
-    "@stylistic/eslint-plugin": "^5.4.0",
+    "@stylistic/eslint-plugin": "^5.6.1",
     "@types/bootstrap": "^5.2.10",
     "@types/chroma-js": "^3.1.1",
-    "eslint": "^9.37.0",
+    "eslint": "^9.39.2",
     "globals": "^16.4.0",
     "http-proxy-middleware": "^3.0.5",
     "parcel": "^2.16.0",
     "rimraf": "^6.0.1",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.45.0"
+    "typescript-eslint": "^8.52.0"
   },
   "dependencies": {
     "bignumber.js": "^9.3.1",
