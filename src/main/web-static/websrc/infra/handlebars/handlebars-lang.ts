@@ -1,5 +1,6 @@
 import * as handlebars from "handlebars";
 import { HelperOptions } from "handlebars";
+import BigNumber from "bignumber.js";
 import { logger, LogLevel } from "../logging";
 import {
     assignValueAtPath,
@@ -241,50 +242,69 @@ function setPropertyHelper(
  */
 function mathHelper(a: unknown, op: unknown, b: unknown): number {
 
-    const left = coerceToFiniteNumber(a);
-    const right = coerceToFiniteNumber(b);
+    let leftBN: BigNumber;
+    let rightBN: BigNumber;
+    
+    try {
+        leftBN = new BigNumber(a as string | number);
+        if (leftBN.isNaN()) {
+            leftBN = new BigNumber(0);
+        }
+    } catch {
+        leftBN = new BigNumber(0);
+    }
+    
+    try {
+        rightBN = new BigNumber(b as string | number);
+        if (rightBN.isNaN()) {
+            rightBN = new BigNumber(0);
+        }
+    } catch {
+        rightBN = new BigNumber(0);
+    }
 
     const opStr = typeof op === "string" ? op.trim().toLowerCase() : String(op);
 
-    let result: number;
+    let resultBN: BigNumber;
 
     switch(opStr) {
         case "+":
         case "add":
         case "plus":
         case "sum":
-            result = left + right;
+            resultBN = leftBN.plus(rightBN);
             break;
 
         case "-":
         case "sub":
         case "minus":
-            result = left - right;
+            resultBN = leftBN.minus(rightBN);
             break;
 
         case "*":
         case "x":
         case "mul":
         case "times":
-            result = left * right;
+            resultBN = leftBN.multipliedBy(rightBN);
             break;
 
         case "/":
         case "div":
-            result = right === 0 ? 0 : left / right;
+            resultBN = rightBN.isZero() ? new BigNumber(0) : leftBN.dividedBy(rightBN);
             break;
 
         case "%":
         case "mod":
         case "rem":
-            result = right === 0 ? 0 : left % right;
+            resultBN = rightBN.isZero() ? new BigNumber(0) : leftBN.modulo(rightBN);
             break;
 
         default:
-            result = 0;
+            resultBN = new BigNumber(0);
             break;
     }
 
+    const result = resultBN.toNumber();
     return Number.isFinite(result) ? result : 0;
 }
 
