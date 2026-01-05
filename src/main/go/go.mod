@@ -3,7 +3,7 @@ module github.com/benizzio/open-asset-allocator
 go 1.25.5
 
 require (
-	github.com/docker/docker v28.5.1+incompatible
+	github.com/docker/docker v28.5.2+incompatible
 	github.com/gin-gonic/gin v1.11.0
 	github.com/go-ozzo/ozzo-dbx v1.5.0
 	github.com/go-playground/universal-translator v0.18.1
@@ -14,7 +14,7 @@ require (
 	github.com/shopspring/decimal v1.4.0
 	github.com/stretchr/testify v1.11.1
 	github.com/testcontainers/testcontainers-go v0.40.0
-	github.com/testcontainers/testcontainers-go/modules/postgres v0.39.0
+	github.com/testcontainers/testcontainers-go/modules/postgres v0.40.0
 )
 
 require (
