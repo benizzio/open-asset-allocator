@@ -1,3 +1,5 @@
+import BigNumber from "bignumber.js";
+
 /**
  * Generic language utilities for internal use across the websrc codebase.
  *
@@ -531,4 +533,42 @@ export function toInt(value: unknown, options?: ToIntOptions): number | undefine
 export function isNullish(value: unknown): value is null | undefined {
     // Loose equality is intentional: only matches null or undefined.
     return value == null;
+}
+
+/**
+ * Safely coerces a value to a BigNumber instance.
+ *
+ * This function handles all edge cases including null, undefined, invalid types,
+ * and values that cannot be converted to valid numbers. It uses try-catch to
+ * handle BigNumber constructor errors and checks for NaN results.
+ *
+ * Coercion Rules:
+ * - Valid numeric values (numbers, numeric strings, etc.): converted to BigNumber
+ * - null or undefined: coalesced to 0, then converted to BigNumber(0)
+ * - Invalid inputs (objects, functions, NaN results): returns BigNumber(0)
+ * - BigNumber constructor errors: caught and returns BigNumber(0)
+ *
+ * @param value - Arbitrary input value to coerce.
+ * @returns A valid BigNumber instance; BigNumber(0) when the value cannot be coerced.
+ *
+ * @example
+ * coerceToBigNumber(10) // => BigNumber(10)
+ * coerceToBigNumber("0.00111") // => BigNumber(0.00111)
+ * coerceToBigNumber(null) // => BigNumber(0)
+ * coerceToBigNumber(undefined) // => BigNumber(0)
+ * coerceToBigNumber({}) // => BigNumber(0)
+ * coerceToBigNumber("invalid") // => BigNumber(0)
+ *
+ * @author GitHub Copilot
+ */
+export function coerceToBigNumber(value: unknown): BigNumber {
+    try {
+        const bn = new BigNumber(value ?? 0);
+        if (bn.isNaN()) {
+            return new BigNumber(0);
+        }
+        return bn;
+    } catch {
+        return new BigNumber(0);
+    }
 }
