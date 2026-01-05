@@ -246,7 +246,7 @@ function mathHelper(a: unknown, op: unknown, b: unknown): number {
     let rightBN: BigNumber;
     
     try {
-        leftBN = new BigNumber(a as string | number);
+        leftBN = new BigNumber(a);
         if (leftBN.isNaN()) {
             leftBN = new BigNumber(0);
         }
@@ -255,7 +255,7 @@ function mathHelper(a: unknown, op: unknown, b: unknown): number {
     }
     
     try {
-        rightBN = new BigNumber(b as string | number);
+        rightBN = new BigNumber(b);
         if (rightBN.isNaN()) {
             rightBN = new BigNumber(0);
         }
