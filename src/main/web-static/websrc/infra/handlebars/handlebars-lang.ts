@@ -241,13 +241,24 @@ function setPropertyHelper(
  */
 function mathHelper(a: unknown, op: unknown, b: unknown): number {
 
-    let leftBN = new BigNumber(a ?? 0);
-    if (leftBN.isNaN()) {
+    let leftBN: BigNumber;
+    let rightBN: BigNumber;
+    
+    try {
+        leftBN = new BigNumber(a ?? 0);
+        if (leftBN.isNaN()) {
+            leftBN = new BigNumber(0);
+        }
+    } catch {
         leftBN = new BigNumber(0);
     }
-
-    let rightBN = new BigNumber(b ?? 0);
-    if (rightBN.isNaN()) {
+    
+    try {
+        rightBN = new BigNumber(b ?? 0);
+        if (rightBN.isNaN()) {
+            rightBN = new BigNumber(0);
+        }
+    } catch {
         rightBN = new BigNumber(0);
     }
 
