@@ -574,7 +574,7 @@ export function coerceToBigNumber(value: unknown): BigNumber {
 
         const bn = new BigNumber(coercedValue);
 
-        if(bn.isNaN()) {
+        if (bn.isNaN()) {
             return new BigNumber(0);
         }
 
