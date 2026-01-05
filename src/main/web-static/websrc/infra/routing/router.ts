@@ -7,6 +7,7 @@ import { bootNavigoRouter, navigoRouter } from "./routing-navigo";
 const router = {
     init(browserGlobal: Window) {
         router.bindDocumentToRouting();
+        router.boot();
         browserGlobal["navigateTo"] = this.navigateTo;
     },
     bindDescendants(element: HTMLElement) {
