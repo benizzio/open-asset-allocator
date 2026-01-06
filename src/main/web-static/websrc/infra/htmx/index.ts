@@ -118,6 +118,8 @@ function addEventListeners(
 
     document.addEventListener("htmx:configRequest", configEnhancedRequestEventListener);
 
+    document.body.addEventListener("htmx:afterRequest", afterRequestErrorHandler);
+
     // Add settling behaviour needed for HTMX own bindings
     const afterSettleCustomEventHandler = (event: CustomEvent) => {
         domSettlingBehaviorEventHandler(event);
@@ -125,8 +127,6 @@ function addEventListeners(
         bindHTMXTransformResponseInDescendants(eventTarget);
     };
     document.body.addEventListener("htmx:afterSettle", afterSettleCustomEventHandler);
-
-    document.body.addEventListener("htmx:afterRequest", afterRequestErrorHandler);
 }
 
 function toErrorResponse(eventDetail: AfterRequestEventDetail): ErrorResponse | undefined {

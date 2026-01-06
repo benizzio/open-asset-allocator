@@ -34,6 +34,7 @@
                  hx-get="/websrc/components/portfolio-history.html"
                  hx-trigger="load-portfolio once"
                  style="display: none"
+                 hx-sync="#asset-composed-columns-input-container, queue"
             ></div>
             <div class="col"
                  data-hx-trigger-on-route="/portfolio/:portfolioId/allocation/*!load-allocation"
@@ -41,6 +42,7 @@
                  hx-get="/websrc/components/allocation-plan.html"
                  hx-trigger="load-allocation once"
                  style="display: none"
+                 hx-sync="#asset-composed-columns-input-container, queue"
             ></div>
             <div class="col"
                  data-hx-trigger-on-route="/portfolio/:portfolioId/allocation-map!load-allocation-map"
@@ -48,6 +50,7 @@
                  hx-get="/websrc/components/allocation-map.html"
                  hx-trigger="load-allocation-map once"
                  style="display: none"
+                 hx-sync="#asset-composed-columns-input-container, queue"
             ></div>
         </div>
     </div>
@@ -163,7 +166,7 @@
 
 <div id="asset-composed-columns-input-container"
      hx-get="/websrc/components/asset-composed-columns-input.html"
-     hx-trigger="load once"
+     hx-trigger="route-reached once from:#portfolio-context"
      hx-sync="#portfolio-context, queue"
      hx-on::after-settle="initAssetComposedColumnsInput('asset-composed-columns-input')"
 >
