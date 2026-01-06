@@ -8,6 +8,22 @@ import chart from "./chart/chart";
 import { CustomEventHandler } from "./infra-types";
 import DomInfra from "./dom";
 
+const ROUTER_BOOT_DELAY_MS = 500;
+let routerBootTimeoutId: number | undefined;
+
+function bootRouterDebouncing() {
+
+    // Debounce router boot to avoid repeated immediate calls on rapid DOM settle events.
+    if(routerBootTimeoutId) {
+        clearTimeout(routerBootTimeoutId);
+    }
+
+    routerBootTimeoutId = window.setTimeout(() => {
+        routerBootTimeoutId = undefined;
+        router.boot();
+    }, ROUTER_BOOT_DELAY_MS);
+}
+
 /**
  * Ties multiple components of the application infrastructure to HTMX async DOM behaviour.
  * When the DOM "settles" after HTMX modifying it, this function controls and binds other components from different
@@ -16,11 +32,12 @@ import DomInfra from "./dom";
  * @param event - The event that is triggered when the DOM settles.
  */
 const DOM_SETTLING_BEHAVIOR_EVENT_HANDLER: CustomEventHandler = (event: CustomEvent) => {
+
     const target = event.target as HTMLElement;
     router.bindDescendants(target);
-    router.boot();
     DomInfra.bindDescendants(target);
     chart.loadDescendantCharts(target);
+    bootRouterDebouncing();
 };
 
 /**
