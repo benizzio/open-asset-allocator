@@ -35,11 +35,20 @@ function buildDestinationPath(element: HTMLElement) {
 }
 
 function bindNavigateToElements(navigationElement: NodeListOf<HTMLElement>) {
+
     navigationElement.forEach((element) => {
-        logger(LogLevel.INFO, "Binding navigation element", element);
-        bindKeypressNavigation(element);
-        bindCLickNavigation(element);
-        element.setAttribute(NAVIGATE_TO_BOUND_FLAG, "true");
+
+        element.setAttribute(NAVIGATE_TO_BOUND_FLAG, "binding");
+
+        try {
+            logger(LogLevel.INFO, "Binding navigation element", element);
+            bindKeypressNavigation(element);
+            bindCLickNavigation(element);
+            element.setAttribute(NAVIGATE_TO_BOUND_FLAG, "true");
+        } catch(error) {
+            element.removeAttribute(NAVIGATE_TO_BOUND_FLAG);
+            throw error;
+        }
     });
 }
 

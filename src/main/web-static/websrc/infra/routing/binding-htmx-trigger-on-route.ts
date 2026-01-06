@@ -53,17 +53,25 @@ function bindRouteToHTMXEventOnElements(htmxRoutedElements: NodeListOf<HTMLEleme
 
     htmxRoutedElements.forEach((element) => {
 
-        logger(LogLevel.INFO, "Binding HTMX event on route for element", element);
+        element.setAttribute(HTMX_TRIGGER_ON_ROUTE_BOUND_FLAG, "binding");
 
-        const { route, event } = extractBindingData(element);
+        try {
 
-        bindRouteToHTMXTriggerOnElement(element, route, event);
-        bindCleanOnExitRouteBehaviourOnElement(element, route);
-        addDisableRouteRemovalObserver(element, route);
+            logger(LogLevel.INFO, "Binding HTMX event on route for element", element);
 
-        element.setAttribute(HTMX_TRIGGER_ON_ROUTE_BOUND_FLAG, "true");
+            const { route, event } = extractBindingData(element);
 
-        executeImmediatelyIfOnRoute(route, element, event);
+            bindRouteToHTMXTriggerOnElement(element, route, event);
+            bindCleanOnExitRouteBehaviourOnElement(element, route);
+            addDisableRouteRemovalObserver(element, route);
+
+            element.setAttribute(HTMX_TRIGGER_ON_ROUTE_BOUND_FLAG, "true");
+
+            executeImmediatelyIfOnRoute(route, element, event);
+        } catch(error) {
+            element.removeAttribute(HTMX_TRIGGER_ON_ROUTE_BOUND_FLAG);
+            throw error;
+        }
     });
 }
 

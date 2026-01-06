@@ -4,6 +4,7 @@ import { BootstrapClasses } from "../bootstrap/constants";
 const ATTRIBUTE_BOOTSRAP_VALIDATION_BOUND_FLAG = "data-bootstrap-validation-bound";
 
 function bindBootstrapValidationOnSubmit(form: HTMLFormElement) {
+
     form.addEventListener("submit", event => {
 
         if(!form.checkValidity()) {
@@ -37,15 +38,22 @@ export function bindFormsInDescendants(element: HTMLElement) {
 
     forms.forEach((form: HTMLFormElement) => {
 
-        if(form.noValidate) {
-            bindBootstrapValidationOnSubmit(form);
-        }
-        else {
-            bindBootstrapValidationToDefaultForm(form);
-        }
+        form.setAttribute(ATTRIBUTE_BOOTSRAP_VALIDATION_BOUND_FLAG, "binding");
 
-        bindBootstrapValidationCleaning(form);
+        try {
+            if(form.noValidate) {
+                bindBootstrapValidationOnSubmit(form);
+            }
+            else {
+                bindBootstrapValidationToDefaultForm(form);
+            }
 
-        form.setAttribute(ATTRIBUTE_BOOTSRAP_VALIDATION_BOUND_FLAG, "true");
+            bindBootstrapValidationCleaning(form);
+
+            form.setAttribute(ATTRIBUTE_BOOTSRAP_VALIDATION_BOUND_FLAG, "true");
+        } catch(error) {
+            form.removeAttribute(ATTRIBUTE_BOOTSRAP_VALIDATION_BOUND_FLAG);
+            throw error;
+        }
     });
 }

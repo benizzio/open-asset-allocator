@@ -24,26 +24,42 @@ export function bindAttributeOnRouteInDescendants(element: HTMLElement) {
 }
 
 function bindAttributeOnRouteElements(attributeOnRouteElements: NodeListOf<HTMLElement>) {
+
     attributeOnRouteElements.forEach((element) => {
-        bindAttributeOnRoute(element);
+
+        element.setAttribute(ATTRIBUTE_ON_ROUTE_BOUND_FLAG, "binding");
+
+        try {
+            const isBound = bindAttributeOnRoute(element);
+
+            if(!isBound) {
+                element.removeAttribute(ATTRIBUTE_ON_ROUTE_BOUND_FLAG);
+                return;
+            }
+
+            element.setAttribute(ATTRIBUTE_ON_ROUTE_BOUND_FLAG, "true");
+        } catch(error) {
+            element.removeAttribute(ATTRIBUTE_ON_ROUTE_BOUND_FLAG);
+            throw error;
+        }
     });
 }
 
-function bindAttributeOnRoute(element: HTMLElement) {
+function bindAttributeOnRoute(element: HTMLElement): boolean {
 
     const { route, attributesStrings } = extractBindingData(element);
 
     logger(LogLevel.INFO, "Binding attributes on route for element", element, route, attributesStrings);
 
     if(attributesStrings.length === 0) {
-        return;
+        return false;
     }
 
     addRouterHooks(route, attributesStrings, element);
 
     executeImmediatelyIfOnRoute(route, attributesStrings, element);
 
-    element.setAttribute(ATTRIBUTE_ON_ROUTE_BOUND_FLAG, "true");
+    return true;
 }
 
 function extractBindingData(element: HTMLElement) {

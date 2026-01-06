@@ -71,10 +71,19 @@ function bindHTMXTransformResponseElement(element: HTMLElement) {
 }
 
 function bindHTMXTransformResponseElements(elementsToBind: NodeListOf<HTMLElement>) {
+
     elementsToBind.forEach((element) => {
-        logger(LogLevel.INFO, "Binding HTMX transform response for element", element);
-        bindHTMXTransformResponseElement(element);
-        element.setAttribute(HTMX_TRANSFORM_RESPONSE_BOUND_FLAG, "true");
+
+        element.setAttribute(HTMX_TRANSFORM_RESPONSE_BOUND_FLAG, "binding");
+
+        try {
+            logger(LogLevel.INFO, "Binding HTMX transform response for element", element);
+            bindHTMXTransformResponseElement(element);
+            element.setAttribute(HTMX_TRANSFORM_RESPONSE_BOUND_FLAG, "true");
+        } catch(error) {
+            element.removeAttribute(HTMX_TRANSFORM_RESPONSE_BOUND_FLAG);
+            throw error;
+        }
     });
 }
 

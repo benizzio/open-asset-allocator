@@ -45,15 +45,23 @@ function bindPercentageInputElements(percentageInputs: NodeListOf<HTMLElement>):
 
         logger(LogLevel.INFO, "Binding percentage input for element", inputElement);
 
-        const fieldName = inputElement.getAttribute(PERCENTAGE_INPUT_ATTRIBUTE);
+        inputElement.setAttribute(PERCENTAGE_INPUT_BOUND_FLAG, "binding");
 
-        if(!fieldName) {
-            logger(LogLevel.WARN, "Percentage input element missing field name", inputElement);
-            return;
+        try {
+            const fieldName = inputElement.getAttribute(PERCENTAGE_INPUT_ATTRIBUTE);
+
+            if(!fieldName) {
+                logger(LogLevel.WARN, "Percentage input element missing field name", inputElement);
+                inputElement.removeAttribute(PERCENTAGE_INPUT_BOUND_FLAG);
+                return;
+            }
+
+            bindPercentageInput(inputElement, fieldName);
+            inputElement.setAttribute(PERCENTAGE_INPUT_BOUND_FLAG, "true");
+        } catch(error) {
+            inputElement.removeAttribute(PERCENTAGE_INPUT_BOUND_FLAG);
+            throw error;
         }
-
-        bindPercentageInput(inputElement, fieldName);
-        inputElement.setAttribute(PERCENTAGE_INPUT_BOUND_FLAG, "true");
     });
 }
 
@@ -294,4 +302,3 @@ function syncPercentageToDecimal(percentageInput: HTMLInputElement, decimalInput
         decimalInput.value = "";
     }
 }
-
