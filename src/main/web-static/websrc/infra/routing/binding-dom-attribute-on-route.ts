@@ -121,7 +121,10 @@ function removeAttributes(attributesStrings: string[], element: HTMLElement) {
 }
 
 function executeImmediatelyIfOnRoute(route: string, attributesStrings: string[], element: HTMLElement) {
-    if(navigoRouter.matchLocation(route)) {
+
+    const routerMatch = navigoRouter.matchLocation(route);
+
+    if(routerMatch) {
         addAttributes(attributesStrings, element);
     }
     else {

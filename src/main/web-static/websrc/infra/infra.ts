@@ -37,6 +37,7 @@ const DOM_SETTLING_BEHAVIOR_EVENT_HANDLER: CustomEventHandler = (event: CustomEv
     router.bindDescendants(target);
     DomInfra.bindDescendants(target);
     chart.loadDescendantCharts(target);
+
     bootRouterDebouncing();
 };
 
@@ -55,10 +56,9 @@ export const Infra = {
 
         DomInfra.bindGlobalFunctions();
 
-        HtmxInfra.init(DOM_SETTLING_BEHAVIOR_EVENT_HANDLER, afterRequestErrorHandler);
-
         const onPageLoad = () => {
             router.init(window);
+            HtmxInfra.init(DOM_SETTLING_BEHAVIOR_EVENT_HANDLER, afterRequestErrorHandler);
         };
         document.addEventListener("DOMContentLoaded", onPageLoad);
 

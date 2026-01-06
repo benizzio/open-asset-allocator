@@ -126,6 +126,7 @@ function addEventListeners(
         const eventTarget = event.target as HTMLElement;
         bindHTMXTransformResponseInDescendants(eventTarget);
     };
+
     document.body.addEventListener("htmx:afterSettle", afterSettleCustomEventHandler);
 }
 
