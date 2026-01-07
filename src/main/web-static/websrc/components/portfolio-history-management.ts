@@ -2,7 +2,7 @@ import htmx from "htmx.org";
 import BigNumber from "bignumber.js";
 import { AfterRequestEventDetail, HtmxInfra } from "../infra/htmx";
 import { ObservationTimestamp } from "../domain/portfolio-allocation";
-import router from "../infra/routing/router";
+import Router from "../infra/routing/router";
 import AssetComposedColumnsInput from "./asset-composed-columns-input";
 import { toInt } from "../utils/lang";
 import type { TemplateDelegate } from "handlebars";
@@ -216,7 +216,7 @@ const portfolioHistoryManagement = {
     navigateToPortfolioAllocationViewing() {
         const globalPortfolioIdField = document.querySelector("[name='portfolioId']") as HTMLInputElement;
         const portfolioId = globalPortfolioIdField.value;
-        router.navigateTo(`/portfolio/${ portfolioId }/history`);
+        Router.navigateTo(`/portfolio/${ portfolioId }/history`);
     },
 };
 

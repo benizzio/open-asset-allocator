@@ -11,7 +11,7 @@ import { Portfolio } from "../domain/portfolio";
 import { AllocationHierarchyLevel } from "../domain/allocation";
 import AssetComposedColumnsInput from "./asset-composed-columns-input";
 import htmx from "htmx.org";
-import router from "../infra/routing/router";
+import Router from "../infra/routing/router";
 import notifications from "./notifications";
 import { NotificationType } from "../infra/infra-types";
 
@@ -223,7 +223,10 @@ function getHierarchicalFieldForValidation(
     }
 }
 
-function mapFormRowHierarchicalStructure(formTableRow: HTMLTableRowElement, hierarchySize: number) {
+function mapFormRowHierarchicalStructure(
+    formTableRow: HTMLTableRowElement,
+    hierarchySize: number,
+): FormRowHierarchicalStructure {
 
     const lastHierarchyLevelIndex = hierarchySize - 1;
 
@@ -476,7 +479,7 @@ const allocationPlanManagement = {
     navigateToAllocationPlansViewing() {
         const globalPortfolioIdField = document.querySelector("[name='portfolioId']") as HTMLInputElement;
         const portfolioId = globalPortfolioIdField.value;
-        router.navigateTo(`/portfolio/${ portfolioId }/allocation`);
+        Router.navigateTo(`/portfolio/${ portfolioId }/allocation`);
     },
 };
 

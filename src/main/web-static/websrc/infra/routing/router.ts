@@ -10,28 +10,35 @@ import {
 } from "./routing-navigo";
 
 // TODO Convert to index file and block direct imports, pass exposed functions and constants through here
-const router = {
+const Router = {
+
     NAVIGO_PATH_PARAM_PREFIX,
+
     init(browserGlobal: Window) {
-        router.bindDocumentToRouting();
+        Router.bindDocumentToRouting();
         browserGlobal["navigateTo"] = this.navigateTo;
     },
+
     bindDescendants(element: HTMLElement) {
         bindHTMXTriggerOnRouteInDescendants(element);
         bindNavigateToInDescendants(element);
         bindAttributeOnRouteInDescendants(element);
         bindDisplayOnRouteInDescendants(element);
     },
+
     bindDocumentToRouting() {
         this.bindDescendants(document.body);
     },
+
     boot() {
         bootNavigoRouter();
     },
+
     navigateTo(destinationPath: string) {
         navigoRouter.navigate(destinationPath);
     },
+
     buildParameterizedDestinationPathFromCurrentLocationContext,
 };
 
-export default router;
+export default Router;

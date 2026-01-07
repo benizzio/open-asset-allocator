@@ -2,7 +2,7 @@ import { HtmxBeforeSwapDetails, HtmxRequestConfig, HtmxResponseInfo } from "htmx
 import { bindHTMXTransformResponseInDescendants, htmxTransformResponse } from "./binding-htmx-transform-response";
 import { CustomEventHandler, ErrorResponse } from "../infra-types";
 import InfraTypesUtils from "../infra-types-utils";
-import router from "../routing/router";
+import Router from "../routing/router";
 import { logger, LogLevel } from "../logging";
 
 const NULL_IF_EMPTY_ATTRIBUTE = "data-null-if-empty";
@@ -36,7 +36,7 @@ function replaceRequestPathParams(event: CustomEvent) {
 
     const requestPath = event.detail.path as string;
 
-    if(requestPath.includes(router.NAVIGO_PATH_PARAM_PREFIX)) {
+    if(requestPath.includes(Router.NAVIGO_PATH_PARAM_PREFIX)) {
         logger(LogLevel.WARN, "Could not resolve all path parameters for htmx request", event.detail.path);
     }
 }
@@ -52,7 +52,7 @@ function replaceRequestPathParamsFromEventChain(event: CustomEvent) {
 
     const requestPath = event.detail.path as string;
 
-    if(!requestPath.includes(router.NAVIGO_PATH_PARAM_PREFIX)) {
+    if(!requestPath.includes(Router.NAVIGO_PATH_PARAM_PREFIX)) {
         return;
     }
 
@@ -79,7 +79,7 @@ function replaceRequestPathParamsFromFormData(event: CustomEvent) {
 
     const requestPath = event.detail.path as string;
 
-    if(!requestPath.includes(router.NAVIGO_PATH_PARAM_PREFIX)) {
+    if(!requestPath.includes(Router.NAVIGO_PATH_PARAM_PREFIX)) {
         return;
     }
 
@@ -112,12 +112,12 @@ function replaceRequestPathParamsFromCurrentRoute(event: CustomEvent) {
 
     const requestPath = event.detail.path as string;
 
-    if(!requestPath.includes(router.NAVIGO_PATH_PARAM_PREFIX)) {
+    if(!requestPath.includes(Router.NAVIGO_PATH_PARAM_PREFIX)) {
         return;
     }
 
     let path = requestPath;
-    path = router.buildParameterizedDestinationPathFromCurrentLocationContext(path);
+    path = Router.buildParameterizedDestinationPathFromCurrentLocationContext(path);
     event.detail.path = path;
 }
 

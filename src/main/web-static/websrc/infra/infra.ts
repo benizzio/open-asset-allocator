@@ -2,7 +2,7 @@ import { Chart, registerables } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import { handlebarsInfra } from "./handlebars";
 import { HtmxInfra } from "./htmx";
-import router from "./routing/router";
+import Router from "./routing/router";
 import * as bootstrap from "bootstrap";
 import chart from "./chart/chart";
 import { CustomEventHandler } from "./infra-types";
@@ -20,7 +20,7 @@ function bootRouterDebouncing() {
 
     routerBootTimeoutId = window.setTimeout(() => {
         routerBootTimeoutId = undefined;
-        router.boot();
+        Router.boot();
     }, ROUTER_BOOT_DELAY_MS);
 }
 
@@ -34,7 +34,7 @@ function bootRouterDebouncing() {
 const DOM_SETTLING_BEHAVIOR_EVENT_HANDLER: CustomEventHandler = (event: CustomEvent) => {
 
     const target = event.target as HTMLElement;
-    router.bindDescendants(target);
+    Router.bindDescendants(target);
     DomInfra.bindDescendants(target);
     chart.loadDescendantCharts(target);
 
@@ -57,7 +57,7 @@ export const Infra = {
         DomInfra.bindGlobalFunctions();
 
         const onPageLoad = () => {
-            router.init(window);
+            Router.init(window);
             HtmxInfra.init(DOM_SETTLING_BEHAVIOR_EVENT_HANDLER, afterRequestErrorHandler);
         };
         document.addEventListener("DOMContentLoaded", onPageLoad);

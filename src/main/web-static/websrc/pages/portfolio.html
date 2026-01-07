@@ -3,7 +3,7 @@
      hx-get="/api/portfolio/:portfolioId"
      hx-trigger="load once, reload-portfolio"
      handlebars-template="portfolio-data"
-     hx-on-htmx-after-settle="preFillEditPortfolioForm()"
+     hx-on-htmx-after-settle="portfolioPage.preFillEditPortfolioForm()"
 ></div>
 
 <script id="portfolio-data" type="text/x-handlebars-template">
@@ -88,7 +88,7 @@
                       hx-ext="form-json"
                       hx-validate="true"
                       hx-swap="none"
-                      hx-on::after-request="reloadPortfolio(event)"
+                      hx-on::after-request="portfolioPage.reloadPortfolio(event)"
                 >
                     <div class="card-body">
 
@@ -111,53 +111,6 @@
                         <button type="submit" class="btn btn-primary">Save</button>
                     </div>
                 </form>
-
-                <script type="text/javascript">
-
-                    function reloadPortfolio(event) {
-
-                        if (!event.detail?.successful) {
-                            return;
-                        }
-
-                        const requestConfig = event.detail?.requestConfig;
-                        const form = event.target;
-                        const portfolioId =
-                            (requestConfig?.parameters && (requestConfig.parameters.id ?? requestConfig.parameters["id"])) ??
-                            new FormData(form).get("id");
-
-                        if (form.checkValidity() && portfolioId) {
-
-                            form.reset();
-
-                            const portfolioElement = document.querySelector("#portfolio-context");
-                            htmx.trigger(portfolioElement, "reload-portfolio", {
-                                routerPathData: {
-                                    portfolioId: portfolioId
-                                }
-                            });
-
-                            navigateTo(`/portfolio/${portfolioId}`);
-                        }
-                    }
-
-                    function preFillEditPortfolioForm() {
-
-                        const portfolioDataElement = document.querySelector("#portfolio-context");
-                        const portfolioIdField = portfolioDataElement.querySelector("input[name='portfolioId']");
-                        const portfolionNameField = portfolioDataElement.querySelector("input[name='portfolioName']");
-
-                        const portfolioId = portfolioIdField.value;
-                        const portfolionName = portfolionNameField.value;
-
-                        const editPortfolioForm = document.querySelector("#edit-portfolio-form");
-                        const editPortfolioIdInput = editPortfolioForm.querySelector("input[name='id']");
-                        editPortfolioIdInput.value = portfolioId;
-                        const editPortfolioNameInput = editPortfolioForm.querySelector("input[name='name']");
-                        editPortfolioNameInput.value = portfolionName;
-                    }
-
-                </script>
 
             </div>
         </div>
