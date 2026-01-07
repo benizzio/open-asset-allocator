@@ -7,6 +7,9 @@ import * as bootstrap from "bootstrap";
 import chart from "./chart/chart";
 import { CustomEventHandler } from "./infra-types";
 import DomInfra from "./dom";
+import { logger, LogLevel } from "./logging";
+
+type GeneralErrorHandler = (error: Error) => void;
 
 const ROUTER_BOOT_DELAY_MS = 500;
 let routerBootTimeoutId: number | undefined;
@@ -41,13 +44,54 @@ const DOM_SETTLING_BEHAVIOR_EVENT_HANDLER: CustomEventHandler = (event: CustomEv
     bootRouterDebouncing();
 };
 
+function handleError(
+    errorMessage: string,
+    error: Error,
+    uncaughtErrorHandler: (error: Error) => void,
+    message: Event | string,
+) {
+
+    logger(LogLevel.ERROR, errorMessage, error);
+
+    if(error) {
+        uncaughtErrorHandler(error);
+    }
+    else {
+        uncaughtErrorHandler(new Error(String(message)));
+    }
+}
+
+/**
+ * Sets up global error handlers to capture and log any uncaught errors in the application.
+ * Handles both synchronous errors via `window.onerror` and unhandled promise rejections
+ * via `unhandledrejection` event.
+ *
+ * @param uncaughtErrorHandler - Custom handler to be called when an uncaught error occurs.
+ *
+ * @author GitHub Copilot
+ */
+function setupGlobalErrorHandler(uncaughtErrorHandler: GeneralErrorHandler): void {
+
+    window.onerror = (message, source, lineno, colno, error) => {
+        const errorMessage = `Uncaught error: ${ message } at ${ source }:${ lineno }:${ colno }`;
+        handleError(errorMessage, error, uncaughtErrorHandler, message);
+        return true;
+    };
+
+    window.addEventListener("unhandledrejection", (event: PromiseRejectionEvent) => {
+        const reason = event.reason;
+        const errorMessage = "Unhandled promise rejection:";
+        handleError(errorMessage, reason instanceof Error ? reason : null, uncaughtErrorHandler, event);
+    });
+}
+
 /**
  * Component that controls the multiple external libraries and its components to the desired behaviour of the
  * application.
  */
 export const Infra = {
 
-    init: (afterRequestErrorHandler: CustomEventHandler) => {
+    init: (afterRequestErrorHandler: CustomEventHandler, generalUncaughtErrorHandler: GeneralErrorHandler) => {
 
         Chart.register(...registerables, ChartDataLabels);
 
@@ -55,6 +99,7 @@ export const Infra = {
         window["HandlebarsUtils"] = handlebarsInfra.utils;
 
         DomInfra.bindGlobalFunctions();
+        setupGlobalErrorHandler(generalUncaughtErrorHandler);
 
         const onPageLoad = () => {
             Router.init(window);

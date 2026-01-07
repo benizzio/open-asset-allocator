@@ -23,5 +23,9 @@ const AFTER_REQUEST_ERROR_HANDLER = (event: CustomEvent) => {
     }
 };
 
-export default Infra.init(AFTER_REQUEST_ERROR_HANDLER);
+const GENERAL_UNCAUGHT_ERROR_HANDLER = (error: Error) => {
+    notifications.notifyErrorResponse({ error: error.message });
+};
+
+export default Infra.init(AFTER_REQUEST_ERROR_HANDLER, GENERAL_UNCAUGHT_ERROR_HANDLER);
 Application.init();
