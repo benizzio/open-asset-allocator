@@ -2,7 +2,7 @@ import { Chart, registerables } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import { handlebarsInfra } from "./handlebars";
 import { HtmxInfra } from "./htmx";
-import Router from "./routing/router";
+import Router from "./routing";
 import * as bootstrap from "bootstrap";
 import chart from "./chart/chart";
 import { CustomEventHandler } from "./infra-types";

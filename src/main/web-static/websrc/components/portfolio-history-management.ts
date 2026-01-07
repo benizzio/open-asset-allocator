@@ -2,7 +2,7 @@ import htmx from "htmx.org";
 import BigNumber from "bignumber.js";
 import { AfterRequestEventDetail, HtmxInfra } from "../infra/htmx";
 import { ObservationTimestamp } from "../domain/portfolio-allocation";
-import Router from "../infra/routing/router";
+import Router from "../infra/routing";
 import AssetComposedColumnsInput from "./asset-composed-columns-input";
 import { toInt } from "../utils/lang";
 import type { TemplateDelegate } from "handlebars";

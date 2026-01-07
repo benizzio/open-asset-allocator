@@ -11,7 +11,7 @@ import { Portfolio } from "../domain/portfolio";
 import { AllocationHierarchyLevel } from "../domain/allocation";
 import AssetComposedColumnsInput from "./asset-composed-columns-input";
 import htmx from "htmx.org";
-import Router from "../infra/routing/router";
+import Router from "../infra/routing";
 import notifications from "./notifications";
 import { NotificationType } from "../infra/infra-types";
 

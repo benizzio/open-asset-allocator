@@ -2,7 +2,7 @@ import { HtmxBeforeSwapDetails, HtmxRequestConfig, HtmxResponseInfo } from "htmx
 import { bindHTMXTransformResponseInDescendants, htmxTransformResponse } from "./binding-htmx-transform-response";
 import { CustomEventHandler, ErrorResponse } from "../infra-types";
 import InfraTypesUtils from "../infra-types-utils";
-import Router from "../routing/router";
+import Router from "../routing";
 import { logger, LogLevel } from "../logging";
 
 const NULL_IF_EMPTY_ATTRIBUTE = "data-null-if-empty";

@@ -1,7 +1,7 @@
 import { Portfolio, PortfolioDTO } from "../domain/portfolio";
 import { DomainService } from "../domain/service";
 import htmx from "htmx.org";
-import Router from "../infra/routing/router";
+import Router from "../infra/routing";
 
 const PortfolioPage = {
 

@@ -9,7 +9,6 @@ import {
     navigoRouter,
 } from "./routing-navigo";
 
-// TODO Convert to index file and block direct imports, pass exposed functions and constants through here
 const Router = {
 
     NAVIGO_PATH_PARAM_PREFIX,
