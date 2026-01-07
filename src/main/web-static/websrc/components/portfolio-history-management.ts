@@ -6,6 +6,8 @@ import Router from "../infra/routing";
 import AssetComposedColumnsInput from "./asset-composed-columns-input";
 import { toInt } from "../utils/lang";
 import type { TemplateDelegate } from "handlebars";
+import notifications from "./notifications";
+import { NotificationType } from "../infra/infra-types";
 
 const PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER = "accordion-portfolio-history-management";
 const PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX = "portfolio-history-management-form-";
@@ -211,6 +213,12 @@ const portfolioHistoryManagement = {
         }
 
         propagateRefreshDataAfterPost(observationTimestampId);
+
+        notifications.notify({
+            title: "Success",
+            content: "Portfolio observation data saved successfully.",
+            type: NotificationType.SUCCESS,
+        });
     },
 
     navigateToPortfolioAllocationViewing() {
