@@ -16,10 +16,9 @@ const ATTRIBUTE_ON_ROUTE_ATTRIBUTE_NAME_VALUE_GROUP_PREFIX = "[";
 const ATTRIBUTE_ON_ROUTE_ATTRIBUTE_NAME_VALUE_GROUP_SUFFIX = "]";
 
 export function bindAttributeOnRouteInDescendants(element: HTMLElement) {
-    const attributeOnRouteElements = DomUtils.queryAllInDescendants(
-        element,
+    const attributeOnRouteElements = element.querySelectorAll(
         `[${ ATTRIBUTE_ON_ROUTE_ATTRIBUTE }]:not([${ ATTRIBUTE_ON_ROUTE_BOUND_FLAG }])`,
-    );
+    ) as NodeListOf<HTMLElement>;
     bindAttributeOnRouteElements(attributeOnRouteElements);
 }
 

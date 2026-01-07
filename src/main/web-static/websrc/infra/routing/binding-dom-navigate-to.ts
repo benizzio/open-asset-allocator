@@ -1,6 +1,5 @@
 import { buildParameterizedDestinationPathFromCurrentLocationContext, navigoRouter } from "./routing-navigo";
 import { logger, LogLevel } from "../logging";
-import DomUtils from "../dom/dom-utils";
 
 // =============================================================================
 // NAVIGATE TO
@@ -53,9 +52,8 @@ function bindNavigateToElements(navigationElement: NodeListOf<HTMLElement>) {
 }
 
 export function bindNavigateToInDescendants(element: HTMLElement) {
-    const navigationElements = DomUtils.queryAllInDescendants(
-        element,
+    const navigationElements = element.querySelectorAll(
         `[${ NAVIGATE_TO_ATTRIBUTE }]:not([${ NAVIGATE_TO_BOUND_FLAG }])`,
-    );
+    ) as NodeListOf<HTMLElement>;
     bindNavigateToElements(navigationElements);
 }

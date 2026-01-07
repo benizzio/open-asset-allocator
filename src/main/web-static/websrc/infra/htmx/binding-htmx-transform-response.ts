@@ -1,4 +1,3 @@
-import DomUtils from "../dom/dom-utils";
 import { BeforeSwapEventDetail } from "./index";
 import { logger, LogLevel } from "../logging";
 
@@ -88,10 +87,9 @@ function bindHTMXTransformResponseElements(elementsToBind: NodeListOf<HTMLElemen
 }
 
 export function bindHTMXTransformResponseInDescendants(element: HTMLElement) {
-    const elementsToBind = DomUtils.queryAllInDescendants(
-        element,
+    const elementsToBind = element.querySelectorAll(
         `[${ HTMX_TRANSFORM_RESPONSE_ATTRIBUTE }]:not([${ HTMX_TRANSFORM_RESPONSE_BOUND_FLAG }])`,
-    );
+    ) as NodeListOf<HTMLElement>;
     bindHTMXTransformResponseElements(elementsToBind);
 }
 

@@ -5,10 +5,9 @@ const EXCLUSIVE_DISPLAY_ATTRIBUTE = "data-exclusive-display-container";
 const EXCLUSIVE_DISPLAY_BOUND_FLAG = "data-exclusive-display-bound";
 
 export function bindExclusiveDisplayContainerInDescendants(element: HTMLElement) {
-    const exclusiveDisplayElements = DomUtils.queryAllInDescendants(
-        element,
+    const exclusiveDisplayElements = element.querySelectorAll(
         `[${ EXCLUSIVE_DISPLAY_ATTRIBUTE }]:not([${ EXCLUSIVE_DISPLAY_BOUND_FLAG }])`,
-    );
+    ) as NodeListOf<HTMLElement>;
     bindExclusiveDisplayInDescendants(exclusiveDisplayElements);
 }
 

@@ -12,11 +12,10 @@ const DISPLAY_ON_REGULAR_EXPRESSION_ROUTE_ATTRIBUTE = "data-display-on-regexp-ro
 const DISPLAY_ON_ROUTE_BOUND_FLAG = "display-on-route-bound";
 
 export function bindDisplayOnRouteInDescendants(element: HTMLElement) {
-    const displayOnRouteElements = DomUtils.queryAllInDescendants(
-        element,
+    const displayOnRouteElements = element.querySelectorAll(
         `[${ DISPLAY_ON_ROUTE_ATTRIBUTE }]:not([${ DISPLAY_ON_ROUTE_BOUND_FLAG }])`
         + `, [${ DISPLAY_ON_REGULAR_EXPRESSION_ROUTE_ATTRIBUTE }]:not([${ DISPLAY_ON_ROUTE_BOUND_FLAG }])`,
-    );
+    ) as NodeListOf<HTMLElement>;
     bindDisplayOnRouteElements(displayOnRouteElements);
 }
 

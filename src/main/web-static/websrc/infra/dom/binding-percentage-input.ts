@@ -1,4 +1,3 @@
-import DomUtils from "./dom-utils";
 import { logger, LogLevel } from "../logging";
 import BigNumber from "bignumber.js";
 
@@ -23,12 +22,9 @@ const PERCENTAGE_INPUT_NULL_IF_EMPTY_ATTRIBUTE = "data-null-if-empty";
  * @author GitHub Copilot
  */
 export function bindPercentageInputsInDescendants(element: HTMLElement): void {
-
-    const percentageInputs = DomUtils.queryAllInDescendants(
-        element,
+    const percentageInputs = element.querySelectorAll(
         `[${ PERCENTAGE_INPUT_ATTRIBUTE }]:not([${ PERCENTAGE_INPUT_BOUND_FLAG }])`,
-    );
-
+    ) as NodeListOf<HTMLElement>;
     bindPercentageInputElements(percentageInputs);
 }
 

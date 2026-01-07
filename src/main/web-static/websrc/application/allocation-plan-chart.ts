@@ -9,7 +9,6 @@ import {
 } from "../domain/allocation-plan";
 import { PortfolioDTO } from "../domain/portfolio";
 import { DomainService } from "../domain/service";
-import DomInfra from "../infra/dom";
 
 class FractalPlannedAllocationMultiChartDataSource extends MultiChartDataSource {
 
@@ -146,7 +145,7 @@ function interactionObserverCallback(event: ChartEvent, elements: ActiveElement[
 
     if(event.type === "click") {
         const labelId = `#hierarchy-level-${ chartId }`;
-        DomInfra.DomUtils.queryFirst(labelId).textContent = levelLabel;
+        document.querySelector(labelId).textContent = levelLabel;
     }
 }
 

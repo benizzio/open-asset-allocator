@@ -121,7 +121,7 @@ function setHierarchicalIdFromParentRow(
     portfolioAllocationHierarchy: AllocationHierarchyLevel[],
 ) {
 
-    DomInfra.DomUtils.queryAllInDescendants(formElement, `[name^='details[${ parentRowIndex }][hierarchicalId]']`)
+    formElement.querySelectorAll(`[name^='details[${ parentRowIndex }][hierarchicalId]']`)
         .forEach((hierarchicalIdInput: HTMLInputElement) => {
 
             const hierarchicalIdValue = hierarchicalIdInput.value;
@@ -153,9 +153,8 @@ function addPlannedAllocationRow(
     parentRowElement?: HTMLTableRowElement,
 ) {
 
-    const lastRowIndexElement = DomInfra.DomUtils.queryFirstInDescendants(
-        formElement,
-        `[name="${ FORM_LAST_ROW_INDEX_INPUT_NAME }"]`,
+    const lastRowIndexElement = formElement.elements.namedItem(
+        FORM_LAST_ROW_INDEX_INPUT_NAME,
     ) as HTMLInputElement;
 
     const lastRowIndex = toInt(lastRowIndexElement.value);
@@ -189,21 +188,19 @@ function addPlannedAllocationRow(
 
 function copyAssetTickersToHierarchicalIdFields(form: HTMLFormElement) {
 
-    DomInfra.DomUtils.queryAllInDescendants(
-        form,
-        `input[name$='${ ASSET_TICKER_FIELD_NAME_SUFFIX }']`,
-    ).forEach((assetTickerInput: HTMLInputElement) => {
+    form.querySelectorAll<HTMLInputElement>(`input[name$='${ ASSET_TICKER_FIELD_NAME_SUFFIX }']`)
+        .forEach((assetTickerInput: HTMLInputElement) => {
 
-        const assetTickerValue = assetTickerInput.value;
+            const assetTickerValue = assetTickerInput.value;
 
-        const parentTr = assetTickerInput.closest("tr");
-        const allocationIndexString = parentTr.getAttribute("data-allocation-index");
+            const parentTr = assetTickerInput.closest("tr");
+            const allocationIndexString = parentTr.getAttribute("data-allocation-index");
 
-        const assetIdInput = form.elements.namedItem(
-            `details[${ allocationIndexString }][hierarchicalId][0]`,
-        ) as HTMLInputElement;
-        assetIdInput.value = assetTickerValue;
-    });
+            const assetIdInput = form.elements.namedItem(
+                `details[${ allocationIndexString }][hierarchicalId][0]`,
+            ) as HTMLInputElement;
+            assetIdInput.value = assetTickerValue;
+        });
 }
 
 function getHierarchicalFieldForValidation(
@@ -216,10 +213,7 @@ function getHierarchicalFieldForValidation(
         return hierarchicalField;
     }
     else if(hierarchyLevelIndex == 0) {
-        return DomInfra.DomUtils.queryFirstInDescendants(
-            formTableRow,
-            `input[name$='${ ASSET_TICKER_FIELD_NAME_SUFFIX }']`,
-        ) as HTMLInputElement;
+        return formTableRow.querySelector(`input[name$='${ ASSET_TICKER_FIELD_NAME_SUFFIX }']`) as HTMLInputElement;
     }
 }
 
@@ -239,8 +233,7 @@ function mapFormRowHierarchicalStructure(
 
         const allocationHierarchyLevelFieldNameSuffix = `[hierarchicalId][${ hierarchyLevelIndex }]`;
 
-        const hierarchicalField = DomInfra.DomUtils.queryFirstInDescendants(
-            formTableRow,
+        const hierarchicalField = formTableRow.querySelector(
             `input[name$='${ allocationHierarchyLevelFieldNameSuffix }']`,
         ) as HTMLInputElement;
 
@@ -270,35 +263,33 @@ function mapPlannedAllocationFormEntriesPerHierarchicalKey(form: HTMLFormElement
 
     const formEntriesPerHierarchicalKey = new Map<string, AllocationPlanningHierarchicalFormEntry>();
 
-    DomInfra.DomUtils.queryAllInDescendants(
-        form,
-        "tr",
-    ).forEach((formTableRow: HTMLTableRowElement) => {
+    form.querySelectorAll<HTMLTableRowElement>("tbody > tr")
+        .forEach((formTableRow: HTMLTableRowElement) => {
 
-        const formRowHierarchicalStructure = mapFormRowHierarchicalStructure(
-            formTableRow,
-            hierarchySize,
-        );
+            const formRowHierarchicalStructure = mapFormRowHierarchicalStructure(
+                formTableRow,
+                hierarchySize,
+            );
 
-        if(!formRowHierarchicalStructure) {
-            return;
-        }
+            if(!formRowHierarchicalStructure) {
+                return;
+            }
 
-        const { formRowHierarchicalId, formRowHierarchicalFields } = formRowHierarchicalStructure;
+            const { formRowHierarchicalId, formRowHierarchicalFields } = formRowHierarchicalStructure;
 
-        let formEntry = formEntriesPerHierarchicalKey.get(formRowHierarchicalId);
+            let formEntry = formEntriesPerHierarchicalKey.get(formRowHierarchicalId);
 
-        if(!formEntry) {
-            formEntry = {
-                inputFields: [],
-                occurrences: 0,
-            };
-            formEntriesPerHierarchicalKey.set(formRowHierarchicalId, formEntry);
-        }
+            if(!formEntry) {
+                formEntry = {
+                    inputFields: [],
+                    occurrences: 0,
+                };
+                formEntriesPerHierarchicalKey.set(formRowHierarchicalId, formEntry);
+            }
 
-        formEntry.occurrences++;
-        formEntry.inputFields.push(...formRowHierarchicalFields);
-    });
+            formEntry.occurrences++;
+            formEntry.inputFields.push(...formRowHierarchicalFields);
+        });
 
     return formEntriesPerHierarchicalKey;
 }

@@ -42,10 +42,9 @@ const CLEAN_ON_EXIT_HTMX_EVENT_HANDLERS = {
 };
 
 export function bindHTMXTriggerOnRouteInDescendants(element: HTMLElement) {
-    const htmxRoutedElements = DomUtils.queryAllInDescendants(
-        element,
+    const htmxRoutedElements = element.querySelectorAll(
         `[${ HTMX_TRIGGER_ON_ROUTE_ATTRIBUTE }]:not([${ HTMX_TRIGGER_ON_ROUTE_BOUND_FLAG }])`,
-    );
+    ) as NodeListOf<HTMLElement>;
     bindRouteToHTMXEventOnElements(htmxRoutedElements);
 }
 

@@ -1,4 +1,3 @@
-import DomUtils from "./dom-utils";
 import { BootstrapClasses } from "../bootstrap/constants";
 
 const ATTRIBUTE_BOOTSRAP_VALIDATION_BOUND_FLAG = "data-bootstrap-validation-bound";
@@ -31,10 +30,9 @@ function bindBootstrapValidationToDefaultForm(form: HTMLFormElement) {
 
 export function bindFormsInDescendants(element: HTMLElement) {
 
-    const forms = DomUtils.queryAllInDescendants(
-        element,
+    const forms = element.querySelectorAll(
         `form.${ BootstrapClasses.NEEDS_VALIDATION }:not([${ ATTRIBUTE_BOOTSRAP_VALIDATION_BOUND_FLAG }])`,
-    );
+    ) as NodeListOf<HTMLFormElement>;
 
     forms.forEach((form: HTMLFormElement) => {
 
