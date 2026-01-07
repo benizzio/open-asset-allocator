@@ -2,9 +2,16 @@ import { bindHTMXTriggerOnRouteInDescendants } from "./binding-htmx-trigger-on-r
 import { bindNavigateToInDescendants } from "./binding-dom-navigate-to";
 import { bindDisplayOnRouteInDescendants } from "./binding-dom-display-on-route";
 import { bindAttributeOnRouteInDescendants } from "./binding-dom-attribute-on-route";
-import { bootNavigoRouter, navigoRouter } from "./routing-navigo";
+import {
+    bootNavigoRouter,
+    buildParameterizedDestinationPathFromCurrentLocationContext,
+    NAVIGO_PATH_PARAM_PREFIX,
+    navigoRouter,
+} from "./routing-navigo";
 
+// TODO Convert to index file and block direct imports, pass exposed functions and constants through here
 const router = {
+    NAVIGO_PATH_PARAM_PREFIX,
     init(browserGlobal: Window) {
         router.bindDocumentToRouting();
         browserGlobal["navigateTo"] = this.navigateTo;
@@ -24,6 +31,7 @@ const router = {
     navigateTo(destinationPath: string) {
         navigoRouter.navigate(destinationPath);
     },
+    buildParameterizedDestinationPathFromCurrentLocationContext,
 };
 
 export default router;

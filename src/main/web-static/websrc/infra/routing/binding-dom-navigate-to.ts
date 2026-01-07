@@ -1,4 +1,4 @@
-import { buildParameterizedDestinationPath, navigoRouter } from "./routing-navigo";
+import { buildParameterizedDestinationPathFromCurrentLocationContext, navigoRouter } from "./routing-navigo";
 import { logger, LogLevel } from "../logging";
 import DomUtils from "../dom/dom-utils";
 
@@ -31,7 +31,7 @@ function navigate(element: HTMLElement) {
 
 function buildDestinationPath(element: HTMLElement) {
     const destinationPath = element.getAttribute(NAVIGATE_TO_ATTRIBUTE);
-    return buildParameterizedDestinationPath(destinationPath);
+    return buildParameterizedDestinationPathFromCurrentLocationContext(destinationPath);
 }
 
 function bindNavigateToElements(navigationElement: NodeListOf<HTMLElement>) {

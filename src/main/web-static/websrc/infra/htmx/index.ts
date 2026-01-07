@@ -2,6 +2,8 @@ import { HtmxBeforeSwapDetails, HtmxRequestConfig, HtmxResponseInfo } from "htmx
 import { bindHTMXTransformResponseInDescendants, htmxTransformResponse } from "./binding-htmx-transform-response";
 import { CustomEventHandler, ErrorResponse } from "../infra-types";
 import InfraTypesUtils from "../infra-types-utils";
+import router from "../routing/router";
+import { logger, LogLevel } from "../logging";
 
 const NULL_IF_EMPTY_ATTRIBUTE = "data-null-if-empty";
 
@@ -28,11 +30,14 @@ const configEnhancedRequestEventListener = (event: CustomEvent) => {
  */
 function replaceRequestPathParams(event: CustomEvent) {
 
+    replaceRequestPathParamsFromEventChain(event);
+    replaceRequestPathParamsFromFormData(event);
+    replaceRequestPathParamsFromCurrentRoute(event);
+
     const requestPath = event.detail.path as string;
 
-    if(requestPath.includes(":")) {
-        replaceFromEventChain(event);
-        replaceFromFormData(event);
+    if(requestPath.includes(router.NAVIGO_PATH_PARAM_PREFIX)) {
+        logger(LogLevel.WARN, "Could not resolve all path parameters for htmx request", event.detail.path);
     }
 }
 
@@ -43,14 +48,20 @@ function replaceRequestPathParams(event: CustomEvent) {
  * @param event - The htmx event, where the triggering event may contain
  * { detail: { routerPathData: { [key: string]: unknown } } }
  */
-function replaceFromEventChain(event: CustomEvent) {
+function replaceRequestPathParamsFromEventChain(event: CustomEvent) {
+
+    const requestPath = event.detail.path as string;
+
+    if(!requestPath.includes(router.NAVIGO_PATH_PARAM_PREFIX)) {
+        return;
+    }
 
     const triggeringEvent = event.detail?.triggeringEvent as CustomEvent;
     const detail = triggeringEvent?.detail as RequestConfigEventDetail;
 
     if(detail?.routerPathData) {
 
-        let path = event.detail.path as string;
+        let path = requestPath;
 
         for(const key in detail.routerPathData) {
             path = path.replace(`:${ key }`, detail.routerPathData[key] as string);
@@ -64,10 +75,15 @@ function replaceFromEventChain(event: CustomEvent) {
  *
  * @param event - The htmx event
  */
-function replaceFromFormData(event: CustomEvent) {
+function replaceRequestPathParamsFromFormData(event: CustomEvent) {
+
+    const requestPath = event.detail.path as string;
+
+    if(!requestPath.includes(router.NAVIGO_PATH_PARAM_PREFIX)) {
+        return;
+    }
 
     const formData = event.detail.formData as FormData;
-    const requestPath = event.detail.path as string;
 
     const splittedRequestPath = requestPath.split("/");
 
@@ -90,6 +106,19 @@ function replaceFromFormData(event: CustomEvent) {
     });
 
     event.detail.path = resolvedSplittedRequestPath.join("/");
+}
+
+function replaceRequestPathParamsFromCurrentRoute(event: CustomEvent) {
+
+    const requestPath = event.detail.path as string;
+
+    if(!requestPath.includes(router.NAVIGO_PATH_PARAM_PREFIX)) {
+        return;
+    }
+
+    let path = requestPath;
+    path = router.buildParameterizedDestinationPathFromCurrentLocationContext(path);
+    event.detail.path = path;
 }
 
 function prepareFormData(event: CustomEvent) {
