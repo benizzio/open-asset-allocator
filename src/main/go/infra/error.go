@@ -1,12 +1,9 @@
 package infra
 
 import (
-	"errors"
 	"fmt"
-	"net/http"
 	"reflect"
 
-	"github.com/gin-gonic/gin"
 	"github.com/golang/glog"
 )
 
@@ -69,25 +66,6 @@ func BuildDomainValidationError(message string, causes []*AppError) error {
 	return &DomainValidationError{Message: message, Causes: causes}
 }
 
-func HandleAPIError(context *gin.Context, message string, cause error) bool {
-
-	var handle = cause != nil
-	if handle {
-
-		glog.Error(message, ": ", cause)
-
-		var handled = handleDomainError(context, cause)
-		if handled {
-			return true
-		}
-
-		// Fallback for unhandled errors
-		context.JSON(http.StatusInternalServerError, gin.H{"error": message})
-	}
-
-	return handle
-}
-
 // ======================================================================
 // Internal functionality
 // ======================================================================
@@ -103,26 +81,4 @@ func logError(message string, cause error, origin any) {
 		errorLog += ". Cause: " + cause.Error()
 	}
 	glog.Error(errorLog)
-}
-
-func handleDomainError(context *gin.Context, cause error) bool {
-
-	var domValidationError *DomainValidationError
-	if errors.As(cause, &domValidationError) {
-
-		var validationMessages = make([]string, len(domValidationError.Causes))
-		for i, validationError := range domValidationError.Causes {
-			validationMessages[i] = validationError.Message
-		}
-		context.JSON(
-			http.StatusBadRequest, gin.H{
-				"error":   domValidationError.Message,
-				"details": validationMessages,
-			},
-		)
-
-		return true
-	}
-
-	return false
 }

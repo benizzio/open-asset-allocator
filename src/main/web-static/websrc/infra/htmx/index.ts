@@ -1,9 +1,10 @@
 import { HtmxBeforeSwapDetails, HtmxRequestConfig, HtmxResponseInfo } from "htmx.org";
 import { bindHTMXTransformResponseInDescendants, htmxTransformResponse } from "./binding-htmx-transform-response";
-import { CustomEventHandler, ErrorResponse } from "../infra-types";
+import { CustomEventHandler } from "../infra-types";
 import InfraTypesUtils from "../infra-types-utils";
 import Router from "../routing";
 import { logger, LogLevel } from "../logging";
+import { APIErrorResponse } from "../../api/api";
 
 const NULL_IF_EMPTY_ATTRIBUTE = "data-null-if-empty";
 
@@ -159,7 +160,7 @@ function addEventListeners(
     document.body.addEventListener("htmx:afterSettle", afterSettleCustomEventHandler);
 }
 
-function toErrorResponse(eventDetail: AfterRequestEventDetail): ErrorResponse | undefined {
+function toErrorResponse(eventDetail: AfterRequestEventDetail): APIErrorResponse | undefined {
 
     const contentType = eventDetail.xhr.getResponseHeader("content-type");
 

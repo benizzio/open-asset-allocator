@@ -50,7 +50,7 @@ func (controller *PortfolioRESTController) BuildRoutes() []infra.RESTRoute {
 func (controller *PortfolioRESTController) getPortfolios(context *gin.Context) {
 
 	portfolios, err := controller.portfolioDomService.GetPortfolios()
-	if infra.HandleAPIError(context, "Error getting portfolios", err) {
+	if HandleAPIError(context, "Error getting portfolios", err) {
 		return
 	}
 
@@ -63,12 +63,12 @@ func (controller *PortfolioRESTController) getPortfolio(context *gin.Context) {
 
 	var portfolioIdParam = context.Param(portfolioIdParam)
 	portfolioId, err := langext.ParseInt64(portfolioIdParam)
-	if infra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
+	if HandleAPIError(context, getPortfolioIdErrorMessage, err) {
 		return
 	}
 
 	portfolio, err := controller.portfolioDomService.GetPortfolio(portfolioId)
-	if infra.HandleAPIError(context, "Error getting portfolio", err) {
+	if HandleAPIError(context, "Error getting portfolio", err) {
 		return
 	}
 
@@ -82,7 +82,7 @@ func (controller *PortfolioRESTController) postPortfolio(context *gin.Context) {
 	var portfolioDTS model.PortfolioDTS
 	valid, err := gininfra.BindAndValidateJSONWithInvalidResponse(context, &portfolioDTS)
 	if err != nil {
-		infra.HandleAPIError(context, bindPortfolioErrorMessage, err)
+		HandleAPIError(context, bindPortfolioErrorMessage, err)
 		return
 	}
 	if !valid {
@@ -91,7 +91,7 @@ func (controller *PortfolioRESTController) postPortfolio(context *gin.Context) {
 
 	var portfolio = model.MapToPortfolio(&portfolioDTS)
 	persistedPortfolio, err := controller.portfolioDomService.PersistPortfolio(portfolio)
-	if infra.HandleAPIError(context, "Error creating portfolio", err) {
+	if HandleAPIError(context, "Error creating portfolio", err) {
 		return
 	}
 
@@ -104,7 +104,7 @@ func (controller *PortfolioRESTController) putPortfolio(context *gin.Context) {
 	var portfolioDTS model.PortfolioDTS
 	valid, err := gininfra.BindAndValidateJSONWithInvalidResponse(context, &portfolioDTS)
 	if err != nil {
-		infra.HandleAPIError(context, bindPortfolioErrorMessage, err)
+		HandleAPIError(context, bindPortfolioErrorMessage, err)
 		return
 	}
 	if !valid {
@@ -130,7 +130,7 @@ func (controller *PortfolioRESTController) putPortfolio(context *gin.Context) {
 
 	var portfolio = model.MapToPortfolio(&portfolioDTS)
 	persistedPortfolio, err := controller.portfolioDomService.PersistPortfolio(portfolio)
-	if infra.HandleAPIError(context, "Error updating portfolio", err) {
+	if HandleAPIError(context, "Error updating portfolio", err) {
 		return
 	}
 
@@ -147,12 +147,12 @@ func (controller *PortfolioRESTController) getAvailablePortfolioAllocationClasse
 
 	portfolioIdParamValue := context.Param(portfolioIdParam)
 	portfolioId, err := langext.ParseInt64(portfolioIdParamValue)
-	if infra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
+	if HandleAPIError(context, getPortfolioIdErrorMessage, err) {
 		return
 	}
 
 	availableClasses, err := controller.allocationDomService.FindAvailableAllocationClassesFromAllSources(portfolioId)
-	if infra.HandleAPIError(context, "Error getting available portfolio allocation classes", err) {
+	if HandleAPIError(context, "Error getting available portfolio allocation classes", err) {
 		return
 	}
 

@@ -784,7 +784,7 @@ func TestPostAllocationPlanValidation_DuplicateHierarchicalIds(t *testing.T) {
 	assert.NoError(t, err)
 
 	var expected = `{
-		"error": "Allocation plan validation failed",
+		"errorMessage": "Allocation plan validation failed",
 		"details": ["Planned allocations contain duplicated hierarchical IDs: ARCA:BIL|BONDS"]
 	}`
 	assert.JSONEq(t, expected, string(body))
@@ -829,7 +829,7 @@ func TestPostAllocationPlanValidation_PercentageSumExceedsParentLimit(t *testing
 	assert.NoError(t, err)
 
 	var expected = `{
-        "error": "Allocation plan validation failed",
+        "errorMessage": "Allocation plan validation failed",
         "details": ["Planned allocations slice sizes exceed 100% within hierarchy level(s): BONDS"]
     }`
 	assert.JSONEq(t, expected, string(body))
@@ -869,7 +869,7 @@ func TestPostAllocationPlanValidation_TopLevelPercentageSumExceedsLimit(t *testi
 	assert.NoError(t, err)
 
 	var expected = `{
-       	"error": "Allocation plan validation failed",
+       	"errorMessage": "Allocation plan validation failed",
         "details": ["Planned allocations slice sizes exceed 100% within hierarchy level(s): TOP"]
     }`
 	assert.JSONEq(t, expected, string(body))

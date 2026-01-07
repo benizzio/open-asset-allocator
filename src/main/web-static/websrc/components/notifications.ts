@@ -1,7 +1,8 @@
-import { ErrorResponse, Notification, NotificationType } from "../infra/infra-types";
+import { Notification, NotificationType } from "../infra/infra-types";
 import * as handlebars from "handlebars";
 import * as bootstrap from "bootstrap";
 import DomInfra from "../infra/dom";
+import { APIErrorResponse } from "../api/api";
 
 const NotificationTypeBootstrapClasses = {
     info: "text-bg-primary",
@@ -18,10 +19,10 @@ function buildBootstrapNotification(notification: Notification): BootstrapNotifi
     return { ...notification, contextClasses };
 }
 
-function buildBootstrapErrorNotification(errorResponse: ErrorResponse): BootstrapNotification {
+function buildBootstrapErrorNotification(errorResponse: APIErrorResponse): BootstrapNotification {
 
     const title = "Error";
-    let content = DomInfra.DomUtils.escapeHtml(errorResponse.error ?? "");
+    let content = DomInfra.DomUtils.escapeHtml(errorResponse.errorMessage ?? "");
 
     if(errorResponse.details && errorResponse.details.length > 0) {
 
@@ -56,8 +57,17 @@ const notifications = {
         this._notifyAsToast(bootstrapNotification);
     },
 
-    notifyErrorResponse(errorResponse: ErrorResponse) {
+    notifyErrorResponse(errorResponse: APIErrorResponse) {
         const bootstrapNotification = buildBootstrapErrorNotification(errorResponse);
+        this._notifyAsToast(bootstrapNotification);
+    },
+
+    notifyError(error: Error) {
+        const bootstrapNotification = buildBootstrapNotification({
+            title: "Error",
+            content: DomInfra.DomUtils.escapeHtml(error.message),
+            type: NotificationType.ERROR,
+        });
         this._notifyAsToast(bootstrapNotification);
     },
 

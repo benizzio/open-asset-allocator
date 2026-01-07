@@ -32,7 +32,7 @@ func (controller *AssetRESTController) BuildRoutes() []infra.RESTRoute {
 func (controller *AssetRESTController) getKnownAssets(context *gin.Context) {
 
 	assets, err := controller.assetDomService.GetKnownAssets()
-	if infra.HandleAPIError(context, "Error getting known assets", err) {
+	if HandleAPIError(context, "Error getting known assets", err) {
 		return
 	}
 
@@ -46,7 +46,7 @@ func (controller *AssetRESTController) getAssetById(context *gin.Context) {
 	var assetIdOrTickerParamValue = context.Param(assetIdOrTickerParam)
 
 	asset, err := controller.assetDomService.FindAssetByUniqueIdentifier(assetIdOrTickerParamValue)
-	if infra.HandleAPIError(context, "Error getting asset by Id or Ticker", err) {
+	if HandleAPIError(context, "Error getting asset by Id or Ticker", err) {
 		return
 	}
 
