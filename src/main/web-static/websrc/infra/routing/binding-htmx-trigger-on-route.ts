@@ -84,6 +84,7 @@ function extractBindingData(element: HTMLElement) {
 function bindRouteToHTMXTriggerOnElement(element: HTMLElement, route: string, event: string) {
 
     const handler = ({ data }: Match) => {
+        logger(LogLevel.DEBUG, `Route matched (${ route }), triggering HTMX event (${ event }) on element`, element);
         htmx.trigger(element, event, { routerPathData: data } as RequestConfigEventDetail);
     };
 
