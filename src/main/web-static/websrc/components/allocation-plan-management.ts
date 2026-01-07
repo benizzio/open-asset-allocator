@@ -337,10 +337,24 @@ const allocationPlanManagement = {
 
     handlebarsAllocationPlanManagementRowTemplate: null as handlebars.TemplateDelegate,
 
+    handleAfterSettle(event: CustomEvent, element: HTMLElement) {
+
+        if(event.target !== element) {
+            return;
+        }
+
+        this.init();
+    },
+
     init() {
+
         HtmxInfra.htmxTransformResponse.registerTransformResponseFunction(
             "mapToCompleteAllocationPlans",
             mapToCompleteAllocationPlans,
+        );
+
+        this.handlebarsAllocationPlanManagementRowTemplate = Handlebars.compile(
+            window["template-allocation-plan-management-form-tbody-row"].innerHTML,
         );
     },
 

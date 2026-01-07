@@ -108,6 +108,15 @@ const portfolioHistoryManagement = {
     handlebarsPortfolioHistoryManagementRowTemplate: null as TemplateDelegate,
     handlebarsPortfolioHistoryManagementContainerTemplate: null as TemplateDelegate,
 
+    handleAfterSettle(event: CustomEvent, element: HTMLElement) {
+
+        if(event.target !== element) {
+            return;
+        }
+
+        this.init();
+    },
+
     init() {
 
         HtmxInfra.htmxTransformResponse.registerTransformResponseFunction(

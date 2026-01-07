@@ -128,11 +128,22 @@ function addDisableRouteRemovalObserver(element: HTMLElement, route: string) {
     observer.observe(document, { childList: true, subtree: true });
 }
 
+/**
+ * Executes the htmx trigger immediately if the current route matches the provided route.
+ * Uses setTimeout to defer the trigger, allowing htmx to fully process the element's trigger setup
+ * before the event is dispatched.
+ *
+ * @param route - The route pattern to match against the current location.
+ * @param element - The HTML element to trigger the event on.
+ * @param event - The event name to trigger.
+ */
 function executeImmediatelyIfOnRoute(route: string, element: HTMLElement, event: string) {
 
     const routerMatch = navigoRouter.matchLocation(route);
 
     if(routerMatch) {
-        htmx.trigger(element, event, { routerPathData: routerMatch.data } as RequestConfigEventDetail);
+        window.setTimeout(() => {
+            htmx.trigger(element, event, { routerPathData: routerMatch.data } as RequestConfigEventDetail);
+        }, 500);
     }
 }

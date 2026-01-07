@@ -17,9 +17,11 @@
         </div>
     </div>
 
-    <div data-display-on-route="/portfolio/:portfolioId/allocation/manage"
+    <div data-hx-trigger-on-route="/portfolio/:portfolioId/allocation/manage!load-allocation-plan-management"
+         data-display-on-route="/portfolio/:portfolioId/allocation/manage"
          hx-get="/websrc/components/allocation-plan-management.html"
-         hx-trigger="load"
+         hx-trigger="load-allocation-plan-management once"
+         hx-on::after-settle="allocationPlanManagement.handleAfterSettle(event, this)"
     >
     </div>
 
