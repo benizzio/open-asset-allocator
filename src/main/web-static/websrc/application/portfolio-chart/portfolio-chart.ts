@@ -6,9 +6,8 @@ import { changeChartDataOnDatasource } from "../../infra/chart/chart-utils";
 import { FractalPortfolioMultiChartDataSource } from "./portfolio-chart-datasource";
 import { MappedChartData } from "./portfolio-chart-model";
 import { mapChartData } from "./portfolio-chart-mapping";
-import { PortfolioSnapshot } from "../../domain/portfolio-allocation";
+import { PortfolioSnapshotDTO } from "../../domain/portfolio-allocation";
 import { DomainService } from "../../domain/service";
-import DomInfra from "../../infra/dom";
 
 function changeChartData(
     dataKey: string,
@@ -55,8 +54,9 @@ function interactionObserverCallback(event: ChartEvent, elements: ActiveElement[
     const levelLabel = currentHierarchyLevel.name + " " + currentAggregatorLevelValueLabel;
 
     if(event.type === "click") {
-        const labelId = `#hierarchy-level-${ chartId }`;
-        DomInfra.DomUtils.queryFirst(labelId).textContent = levelLabel;
+        const labelId = `hierarchy-level-${ chartId }`;
+        const labelElement = window[labelId] as HTMLElement;
+        labelElement.textContent = levelLabel;
     }
 }
 
@@ -73,7 +73,7 @@ function getChartContent(chart: Chart) {
 const portfolioChart = {
 
     toUnidimensionalChartContent(
-        portfolioAtTime: PortfolioSnapshot,
+        portfolioSnapshotDTO: PortfolioSnapshotDTO,
         portfolioDTO: PortfolioDTO,
     ): ChartContent {
 
@@ -83,12 +83,14 @@ const portfolioChart = {
         const { topLevelIndex } =
             DomainService.allocation.getTopHierarchyLevelInfoFromAllocationStructure(portfolioAllocationStructure);
 
-        const chartData = mapChartData(portfolioAtTime, portfolio.allocationStructure, topLevelIndex);
+        const portfolioSnapshot = DomainService.mapping.mapToPortfolioSnapshot(portfolioSnapshotDTO);
+
+        const chartData = mapChartData(portfolioSnapshot, portfolio.allocationStructure, topLevelIndex);
 
         return {
             chartDataSource: new FractalPortfolioMultiChartDataSource(
                 chartData,
-                portfolioAtTime,
+                portfolioSnapshot,
                 portfolioAllocationStructure,
             ),
             chartInteractions: { onClick: chartDataSelectionEventHandler },

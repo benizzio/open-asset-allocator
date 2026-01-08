@@ -7,11 +7,6 @@ export enum NotificationType {
     SUCCESS = "success",
 }
 
-export type ErrorResponse = {
-    error: string;
-    details?: string[];
-};
-
 export type Notification = {
     title: string;
     content: string;

@@ -1,7 +1,7 @@
 import * as handlebars from "handlebars";
 import { PotentialDivergence } from "../domain/portfolio-analysis";
 import BigNumber from "bignumber.js";
-import format from "../infra/format";
+import Format from "../infra/format";
 
 export function registerPortfolioAnalysisHandlebarsHelpers() {
 
@@ -49,11 +49,11 @@ export function registerPortfolioAnalysisHandlebarsHelpers() {
 
 function getValueLabel(value: number, total: number) {
 
-    const formattedValue = format.formatCurrency(value);
+    const formattedValue = Format.formatCurrency(value);
 
     const formattedPercent = total === 0
         ? ""
-        : " (" + format.formatPercent(new BigNumber(value).div(total).toNumber()) + ")";
+        : " (" + Format.formatPercent(new BigNumber(value).div(total).toNumber()) + ")";
 
     return `${ formattedValue } ${ formattedPercent }`;
 }

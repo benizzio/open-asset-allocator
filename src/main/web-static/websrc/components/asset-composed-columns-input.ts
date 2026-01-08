@@ -2,6 +2,7 @@ import { Asset } from "../domain/asset";
 import { BootstrapClasses, BootstrapIconClasses } from "../infra/bootstrap/constants";
 import api from "../api/api";
 import htmx from "htmx.org";
+import notifications from "./notifications";
 
 const TICKER_EXTRA_ERROR_MESSAGE_ATTRIBUTE = "data-asset-ticker-extra-error-message";
 
@@ -158,8 +159,7 @@ function getAsset(rowAssetElements: AssetComposedColumnInput, searchUniqueIdenti
                     rowAssetElements.activateNewAssetMode();
                 }
                 else {
-                    // TODO add toast for errors
-                    console.error("Error fetching asset:", responseBody.errorMessage);
+                    notifications.notifyErrorResponse(responseBody);
                 }
                 return;
             }
@@ -167,8 +167,8 @@ function getAsset(rowAssetElements: AssetComposedColumnInput, searchUniqueIdenti
             rowAssetElements.activateExistingAssetMode(responseBody as Asset);
         })
         .catch(error => {
-            // TODO add toast for errors
             console.error("Error fetching asset:", error);
+            notifications.notifyErrorResponse({ errorMessage: "Failed to fetch asset data: " + error.message });
         });
 }
 

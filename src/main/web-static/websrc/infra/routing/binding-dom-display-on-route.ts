@@ -12,27 +12,46 @@ const DISPLAY_ON_REGULAR_EXPRESSION_ROUTE_ATTRIBUTE = "data-display-on-regexp-ro
 const DISPLAY_ON_ROUTE_BOUND_FLAG = "display-on-route-bound";
 
 export function bindDisplayOnRouteInDescendants(element: HTMLElement) {
-    const displayOnRouteElements = DomUtils.queryAllInDescendants(
-        element,
+    const displayOnRouteElements = element.querySelectorAll(
         `[${ DISPLAY_ON_ROUTE_ATTRIBUTE }]:not([${ DISPLAY_ON_ROUTE_BOUND_FLAG }])`
         + `, [${ DISPLAY_ON_REGULAR_EXPRESSION_ROUTE_ATTRIBUTE }]:not([${ DISPLAY_ON_ROUTE_BOUND_FLAG }])`,
-    );
+    ) as NodeListOf<HTMLElement>;
     bindDisplayOnRouteElements(displayOnRouteElements);
 }
 
 function bindDisplayOnRouteElements(displayOnRouteElements: NodeListOf<HTMLElement>) {
+
     displayOnRouteElements.forEach((element) => {
-        bindDisplayOnRoute(element);
+
+        element.setAttribute(DISPLAY_ON_ROUTE_BOUND_FLAG, "binding");
+
+        try {
+            const isBound = bindDisplayOnRoute(element);
+
+            if(!isBound) {
+                element.removeAttribute(DISPLAY_ON_ROUTE_BOUND_FLAG);
+                return;
+            }
+
+            element.setAttribute(DISPLAY_ON_ROUTE_BOUND_FLAG, "true");
+        } catch(error) {
+            element.removeAttribute(DISPLAY_ON_ROUTE_BOUND_FLAG);
+            throw error;
+        }
     });
 }
 
-function bindDisplayOnRoute(element: HTMLElement) {
+function bindDisplayOnRoute(element: HTMLElement): boolean {
 
     const isRegularExpressionRoute = element.hasAttribute(DISPLAY_ON_REGULAR_EXPRESSION_ROUTE_ATTRIBUTE);
 
     let route: string | RegExp = isRegularExpressionRoute
         ? element.getAttribute(DISPLAY_ON_REGULAR_EXPRESSION_ROUTE_ATTRIBUTE)
         : element.getAttribute(DISPLAY_ON_ROUTE_ATTRIBUTE);
+
+    if(!route) {
+        return false;
+    }
 
     route = isRegularExpressionRoute ? new RegExp(route, "g") : route;
 
@@ -41,9 +60,9 @@ function bindDisplayOnRoute(element: HTMLElement) {
     const cleanupCallback = configDisplayOnRouteHooks(route, element);
     addDisplayOnRouteRemovalObserver(element, cleanupCallback);
 
-    element.setAttribute(DISPLAY_ON_ROUTE_BOUND_FLAG, "true");
-
     executeImmediatelyIfOnRoute(route, element);
+
+    return true;
 }
 
 function configDisplayOnRouteHooks(route: string | RegExp, element: HTMLElement): () => void {

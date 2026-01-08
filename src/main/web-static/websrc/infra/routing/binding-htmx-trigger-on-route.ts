@@ -42,10 +42,9 @@ const CLEAN_ON_EXIT_HTMX_EVENT_HANDLERS = {
 };
 
 export function bindHTMXTriggerOnRouteInDescendants(element: HTMLElement) {
-    const htmxRoutedElements = DomUtils.queryAllInDescendants(
-        element,
+    const htmxRoutedElements = element.querySelectorAll(
         `[${ HTMX_TRIGGER_ON_ROUTE_ATTRIBUTE }]:not([${ HTMX_TRIGGER_ON_ROUTE_BOUND_FLAG }])`,
-    );
+    ) as NodeListOf<HTMLElement>;
     bindRouteToHTMXEventOnElements(htmxRoutedElements);
 }
 
@@ -53,17 +52,25 @@ function bindRouteToHTMXEventOnElements(htmxRoutedElements: NodeListOf<HTMLEleme
 
     htmxRoutedElements.forEach((element) => {
 
-        logger(LogLevel.INFO, "Binding HTMX event on route for element", element);
+        element.setAttribute(HTMX_TRIGGER_ON_ROUTE_BOUND_FLAG, "binding");
 
-        const { route, event } = extractBindingData(element);
+        try {
 
-        bindRouteToHTMXTriggerOnElement(element, route, event);
-        bindCleanOnExitRouteBehaviourOnElement(element, route);
-        addDisableRouteRemovalObserver(element, route);
+            logger(LogLevel.INFO, "Binding HTMX event on route for element", element);
 
-        element.setAttribute(HTMX_TRIGGER_ON_ROUTE_BOUND_FLAG, "true");
+            const { route, event } = extractBindingData(element);
 
-        executeImmediatelyIfOnRoute(route, element, event);
+            bindRouteToHTMXTriggerOnElement(element, route, event);
+            bindCleanOnExitRouteBehaviourOnElement(element, route);
+            addDisableRouteRemovalObserver(element, route);
+
+            element.setAttribute(HTMX_TRIGGER_ON_ROUTE_BOUND_FLAG, "true");
+
+            executeImmediatelyIfOnRoute(route, element, event);
+        } catch(error) {
+            element.removeAttribute(HTMX_TRIGGER_ON_ROUTE_BOUND_FLAG);
+            throw error;
+        }
     });
 }
 
@@ -76,6 +83,7 @@ function extractBindingData(element: HTMLElement) {
 function bindRouteToHTMXTriggerOnElement(element: HTMLElement, route: string, event: string) {
 
     const handler = ({ data }: Match) => {
+        logger(LogLevel.DEBUG, `Route matched (${ route }), triggering HTMX event (${ event }) on element`, element);
         htmx.trigger(element, event, { routerPathData: data } as RequestConfigEventDetail);
     };
 
@@ -120,11 +128,22 @@ function addDisableRouteRemovalObserver(element: HTMLElement, route: string) {
     observer.observe(document, { childList: true, subtree: true });
 }
 
+/**
+ * Executes the htmx trigger immediately if the current route matches the provided route.
+ * Uses setTimeout to defer the trigger, allowing htmx to fully process the element's trigger setup
+ * before the event is dispatched.
+ *
+ * @param route - The route pattern to match against the current location.
+ * @param element - The HTML element to trigger the event on.
+ * @param event - The event name to trigger.
+ */
 function executeImmediatelyIfOnRoute(route: string, element: HTMLElement, event: string) {
 
     const routerMatch = navigoRouter.matchLocation(route);
 
     if(routerMatch) {
-        htmx.trigger(element, event, { routerPathData: routerMatch.data } as RequestConfigEventDetail);
+        window.setTimeout(() => {
+            htmx.trigger(element, event, { routerPathData: routerMatch.data } as RequestConfigEventDetail);
+        }, 500);
     }
 }

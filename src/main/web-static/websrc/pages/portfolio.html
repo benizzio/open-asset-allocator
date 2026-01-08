@@ -1,11 +1,33 @@
 <div id="portfolio-context"
      class="row justify-content-center align-items-center row-cols-auto my-5"
      hx-get="/api/portfolio/:portfolioId"
-     hx-trigger="route-reached once, reload-portfolio"
-     data-hx-trigger-on-route="/portfolio/:portfolioId/*!route-reached"
+     hx-trigger="load once, reload-portfolio"
      handlebars-template="portfolio-data"
-     hx-on-htmx-after-settle="preFillEditPortfolioForm()"
-></div>
+     hx-on-htmx-after-settle="portfolioPage.preFillEditPortfolioForm()"
+>
+    <div class="row justify-content-center align-items-center row-cols-auto my-5">
+            <span class="h2 placeholder-glow">
+                <span class="badge text-bg-secondary placeholder">Loading...</span>
+            </span>
+    </div>
+    <div class="row justify-content-center align-items-center row-cols-auto my-5">
+        <div class="btn-group placeholder-glow" role="group">
+            <span class="btn btn-outline-primary placeholder col-4">placeholder</span>
+            <span class="btn btn-outline-primary placeholder col-4">placeholder</span>
+            <span class="btn btn-outline-primary placeholder col-4">placeholder</span>
+        </div>
+    </div>
+    <div class="row justify-content-center align-items-center">
+        <div class="accordion placeholder-glow">
+            <div class="accordion-item">
+                <h2 class="accordion-header placeholder col-12">placeholder</h2>
+            </div>
+            <div class="accordion-item">
+                <h2 class="accordion-header placeholder col-12">placeholder</h2>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script id="portfolio-data" type="text/x-handlebars-template">
     <span class="h2"><span class="badge text-bg-secondary">{{name}}</span></span>
@@ -16,6 +38,26 @@
     <input type="hidden" name="portfolioName" value="{{name}}" autocomplete="portfolioName" />
     {{{ domJSON "portfolio" this }}}
 </script>
+
+<div id="datalist-container">
+
+    <datalist id="datalist-classes"
+              hx-get="/api/portfolio/:portfolioId/allocation-classes"
+              hx-trigger="load once, load-classes"
+              handlebars-template="template-monovalue-datalist"
+              hx-sync="#portfolio-context:queue"
+    >
+    </datalist>
+
+    <datalist id="datalist-assets"
+              hx-get="/api/asset"
+              hx-trigger="load once, load-assets"
+              handlebars-template="template-asset-datalist"
+              data-assets-initialized="false"
+    >
+    </datalist>
+
+</div>
 
 <div data-exclusive-display-container>
     <div data-display-on-regexp-route="portfolio\/([0-9]+)\/?(history|allocation\-map|allocation|$)"
@@ -36,8 +78,8 @@
                  style="display: none"
             ></div>
             <div class="col"
-                 data-hx-trigger-on-route="/portfolio/:portfolioId/allocation/*!load-allocation"
-                 data-display-on-route="/portfolio/:portfolioId/allocation/*"
+                 data-hx-trigger-on-route="/portfolio\/:portfolioId\/allocation($|\/.*$)!load-allocation"
+                 data-display-on-route="/portfolio\/:portfolioId\/allocation($|\/.*$)"
                  hx-get="/websrc/components/allocation-plan.html"
                  hx-trigger="load-allocation once"
                  style="display: none"
@@ -48,7 +90,16 @@
                  hx-get="/websrc/components/allocation-map.html"
                  hx-trigger="load-allocation-map once"
                  style="display: none"
-            ></div>
+            >
+                <div class="accordion placeholder-glow">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header placeholder col-12">placeholder</h2>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header placeholder col-12">placeholder</h2>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -69,7 +120,7 @@
                       hx-ext="form-json"
                       hx-validate="true"
                       hx-swap="none"
-                      hx-on::after-request="reloadPortfolio(event)"
+                      hx-on::after-request="portfolioPage.reloadPortfolio(event)"
                 >
                     <div class="card-body">
 
@@ -93,53 +144,6 @@
                     </div>
                 </form>
 
-                <script type="text/javascript">
-
-                    function reloadPortfolio(event) {
-
-                        if (!event.detail?.successful) {
-                            return;
-                        }
-
-                        const requestConfig = event.detail?.requestConfig;
-                        const form = event.target;
-                        const portfolioId =
-                            (requestConfig?.parameters && (requestConfig.parameters.id ?? requestConfig.parameters["id"])) ??
-                            new FormData(form).get("id");
-
-                        if (form.checkValidity() && portfolioId) {
-
-                            form.reset();
-
-                            const portfolioElement = document.querySelector("#portfolio-context");
-                            htmx.trigger(portfolioElement, "reload-portfolio", {
-                                routerPathData: {
-                                    portfolioId: portfolioId
-                                }
-                            });
-
-                            navigateTo(`/portfolio/${portfolioId}`);
-                        }
-                    }
-
-                    function preFillEditPortfolioForm() {
-
-                        const portfolioDataElement = document.querySelector("#portfolio-context");
-                        const portfolioIdField = portfolioDataElement.querySelector("input[name='portfolioId']");
-                        const portfolionNameField = portfolioDataElement.querySelector("input[name='portfolioName']");
-
-                        const portfolioId = portfolioIdField.value;
-                        const portfolionName = portfolionNameField.value;
-
-                        const editPortfolioForm = document.querySelector("#edit-portfolio-form");
-                        const editPortfolioIdInput = editPortfolioForm.querySelector("input[name='id']");
-                        editPortfolioIdInput.value = portfolioId;
-                        const editPortfolioNameInput = editPortfolioForm.querySelector("input[name='name']");
-                        editPortfolioNameInput.value = portfolionName;
-                    }
-
-                </script>
-
             </div>
         </div>
     </div>
@@ -161,10 +165,112 @@
 
 </script>
 
-<div id="asset-composed-columns-input-container"
-     hx-get="/websrc/components/asset-composed-columns-input.html"
-     hx-trigger="load once"
-     hx-sync="#portfolio-context, queue"
-     hx-on::after-settle="initAssetComposedColumnsInput('asset-composed-columns-input')"
->
-</div>
+<script id="template-monovalue-datalist" type="text/x-handlebars-template">
+
+    {{#each .}}
+
+        {{#if (getProperty this ../propertyKey) }}
+            <option value="{{getProperty this ../propertyKey}}">{{getProperty this ../propertyKey}}</option>
+        {{else}}
+            <option value="{{this}}">{{this}}</option>
+        {{/if}}
+
+    {{/each}}
+
+</script>
+
+<script id="template-asset-datalist" type="text/x-handlebars-template">
+
+    {{> template-monovalue-datalist propertyKey="ticker"}}
+
+</script>
+
+<script id="asset-composed-columns-input" type="text/x-handlebars-template">
+
+    <td>
+
+        <input type="hidden"
+               name="{{assetIdHiddenFieldName}}"
+               value="{{assetId}}"
+               data-null-if-empty
+        />
+
+        {{#if assetId}}
+            {{assetTicker}}
+        {{else}}
+
+            <div class="input-group">
+
+                <input type="text"
+                       name="{{assetTickerFieldName}}"
+                       placeholder="Asset ticker"
+                       aria-label="Asset ticker"
+                       autocomplete="off"
+                       class="form-control"
+                       value="{{assetTicker}}"
+                       list="datalist-assets"
+                       hx-validate="true"
+                       hx-on::validation:validate="{{assetTickerFieldHTMXOnValidate}}"
+                       oninput="maskTickerInput(this)"
+                />
+                <button data-asset-action-button
+                        type="button"
+                        class="btn btn-primary btn-xs"
+                        onclick="{{assetActionButtonOnClick}}"
+                >
+                    <span class="bi bi-search"></span>
+                </button>
+
+            </div>
+
+            <div data-new-asset-ticker-message
+                 class="form-text"
+                 style="display: none"
+            >
+                * Creating new asset
+            </div>
+
+            <div data-asset-ticker-extra-error-message="{{assetTickerFieldName}}" class="invalid-feedback"></div>
+
+        {{/if}}
+
+    </td>
+
+    <td>
+
+        {{#if assetName}}
+            {{assetName}}
+        {{else}}
+            <input type="text"
+                   name="{{assetNameFieldName}}"
+                   placeholder="Asset name"
+                   aria-label="Asset name"
+                   autocomplete="off"
+                   class="form-control"
+                   value="{{assetName}}"
+                   style="display: none"
+            />
+        {{/if}}
+
+    </td>
+
+</script>
+
+<script type="text/javascript">
+
+    HandlebarsUtils.registerPartialToContainer(
+        "datalist-container",
+        "template-monovalue-datalist"
+    );
+
+    HandlebarsUtils.registerPartialToContainer(
+        "datalist-container",
+        "template-asset-datalist"
+    );
+
+    HandlebarsUtils.registerPartialToContainer(
+        "datalist-container",
+        "asset-composed-columns-input"
+    );
+
+</script>

@@ -14,20 +14,20 @@ type PortfolioDTS struct {
 }
 
 type PortfolioAllocationDTS struct {
-	AssetId          langext.ParseableInt64 `json:"assetId"`
-	AssetName        string                 `json:"assetName"`
-	AssetTicker      string                 `json:"assetTicker"`
-	Class            string                 `json:"class" validate:"required"`
-	CashReserve      bool                   `json:"cashReserve"`
-	TotalMarketValue int64                  `json:"totalMarketValue" validate:"required"`
-	AssetQuantity    decimal.Decimal        `json:"assetQuantity"`
-	AssetMarketPrice decimal.Decimal        `json:"assetMarketPrice"`
+	AssetId          *langext.ParseableInt64 `json:"assetId"`
+	AssetName        string                  `json:"assetName"`
+	AssetTicker      string                  `json:"assetTicker"`
+	Class            string                  `json:"class" validate:"required"`
+	CashReserve      bool                    `json:"cashReserve"`
+	TotalMarketValue *decimal.Decimal        `json:"totalMarketValue" validate:"required"`
+	AssetQuantity    decimal.Decimal         `json:"assetQuantity"`    // TODO this should be a pointer downstream but we get errors
+	AssetMarketPrice decimal.Decimal         `json:"assetMarketPrice"` // TODO this should be a pointer downstream but we get errors
 }
 
 type PortfolioSnapshotDTS struct {
 	ObservationTimestamp *PortfolioObservationTimestampDTS `json:"observationTimestamp" validate:"required"`
 	Allocations          []*PortfolioAllocationDTS         `json:"allocations" validate:"required,min=1"`
-	TotalMarketValue     int64                             `json:"totalMarketValue"`
+	TotalMarketValue     *decimal.Decimal                  `json:"totalMarketValue"`
 }
 
 type portfolioAllocationsPerObservationTimestamp map[PortfolioObservationTimestampDTS][]*PortfolioAllocationDTS
@@ -53,13 +53,15 @@ func (aggregationMap portfolioAllocationsPerObservationTimestamp) aggregate(
 
 func (aggregationMap portfolioAllocationsPerObservationTimestamp) getAggregatedMarketValue(
 	observationTimestamp PortfolioObservationTimestampDTS,
-) int64 {
+) *decimal.Decimal {
 	var allocationAggregation = aggregationMap[observationTimestamp]
-	var totalMarketValue = int64(0)
+	var totalMarketValue = decimal.NewFromInt(0)
 	for _, allocation := range allocationAggregation {
-		totalMarketValue += allocation.TotalMarketValue
+		if allocation.TotalMarketValue != nil {
+			totalMarketValue = totalMarketValue.Add(*allocation.TotalMarketValue)
+		}
 	}
-	return totalMarketValue
+	return &totalMarketValue
 }
 
 type AllocationPlanIdentifierDTS struct {

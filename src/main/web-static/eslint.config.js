@@ -128,6 +128,25 @@ export default [
                                 "Import from the public API 'infra/htmx' (index.ts) only; " +
                                 "deep imports are not allowed.",
                         },
+                        // Block deep imports into the local 'infra/routing' module; import only from its public API
+                        // Authored by: GitHub Copilot
+                        {
+                            group: [
+                                // generic patterns
+                                "**/infra/routing/*",
+                                "**/infra/routing/**",
+                                // common relative forms
+                                "infra/routing/*",
+                                "infra/routing/**",
+                                "./infra/routing/*",
+                                "./infra/routing/**",
+                                "../infra/routing/*",
+                                "../infra/routing/**",
+                            ],
+                            message:
+                                "Import from the public API 'infra/routing' (index.ts) only; " +
+                                "deep imports are not allowed.",
+                        },
                     ],
                 },
             ],

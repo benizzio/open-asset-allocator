@@ -19,6 +19,12 @@
              data-hx-transform-response="addObservationZero"
              data-hx-transform-response-on-path-matching="^\/api\/portfolio\/.+\/history\/observation$"
         >
+            <div class="accordion-item placeholder-glow">
+                <h2 class="accordion-header placeholder col-12">placeholder</h2>
+            </div>
+            <div class="accordion-item placeholder-glow">
+                <h2 class="accordion-header placeholder col-12">placeholder</h2>
+            </div>
         </div>
     </div>
 
@@ -191,38 +197,28 @@
         </td>
 
         <td>
-            <input type="number"
-                   name="allocations[{{allocationIndex}}][assetMarketPrice]"
+            <input type="text"
+                   data-financial-input="allocations[{{allocationIndex}}][assetMarketPrice]"
                    placeholder="Market price"
                    aria-label="Market price"
                    autocomplete="off"
                    class="form-control"
                    value="{{assetMarketPrice}}"
-                   step="any"
-                   min="0"
                    data-null-if-empty
-                   oninput="
-                           maskNumberDecimalPlaces(this);
-                           portfolioHistoryManagement.handleInputQuantityOrMarketPrice({{allocationIndex}}, {{observationTimestampId}});
-                           "
+                   oninput="portfolioHistoryManagement.handleInputQuantityOrMarketPrice({{allocationIndex}}, {{observationTimestampId}})"
             />
         </td>
 
         <td>
-            <input type="number"
-                   name="allocations[{{allocationIndex}}][totalMarketValue]"
+            <input type="text"
+                   data-financial-input="allocations[{{allocationIndex}}][totalMarketValue]"
                    placeholder="Total market value"
                    aria-label="Total market value"
                    autocomplete="off"
-                   class="form-control "
+                   class="form-control"
                    value="{{totalMarketValue}}"
-                   step="any"
-                   min="0"
                    required
-                   oninput="
-                           maskNumberDecimalPlaces(this);
-                           portfolioHistoryManagement.handleInputTotalMarketValue({{allocationIndex}}, {{observationTimestampId}});
-                           "
+                   oninput="portfolioHistoryManagement.handleInputTotalMarketValue({{allocationIndex}}, {{observationTimestampId}})"
             />
         </td>
 
@@ -245,5 +241,5 @@
         "accordion-portfolio-history",
         "template-portfolio-history-management-form-tbody-row"
     );
-    
+
 </script>

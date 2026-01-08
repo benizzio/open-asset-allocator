@@ -37,7 +37,7 @@ export function mapChartData(
 
         chartData.labels.push(key + (value.cashReserve ? " (cash reserve)" : ""));
         chartData.keys.push(key);
-        dataset.data.push(value.totalMarketValue);
+        dataset.data.push(value.totalMarketValue.toNumber());
 
         if(value.cashReserve) {
             chartModule.convertUnidimensionalDatasetBackgroundToPattern(dataset, index);
@@ -79,7 +79,7 @@ function getAccumulatedAllocationsPerProperty(
         const reducedAllocation = {
             totalMarketValue: !currentValue
                 ? allocation.data
-                : currentValue.totalMarketValue + allocation.data,
+                : currentValue.totalMarketValue.plus(allocation.data),
             cashReserve: allocation.cashReserve,
         };
         accumulator.set(currentKey, reducedAllocation);

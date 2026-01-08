@@ -5,6 +5,7 @@ import (
 
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/langext"
+	"github.com/shopspring/decimal"
 )
 
 // ==========================================
@@ -90,13 +91,15 @@ func aggregateHistoryAsDTSMap(portfolioHistory []*domain.PortfolioAllocation) po
 }
 
 func mapToPortfolioAllocationDTS(portfolioAllocation *domain.PortfolioAllocation) *PortfolioAllocationDTS {
+	var assetId = langext.ParseableInt64(portfolioAllocation.Asset.Id)
+	var totalMarketValue = decimal.NewFromInt(portfolioAllocation.TotalMarketValue)
 	return &PortfolioAllocationDTS{
-		AssetId:          langext.ParseableInt64(portfolioAllocation.Asset.Id),
+		AssetId:          &assetId,
 		AssetName:        portfolioAllocation.Asset.Name,
 		AssetTicker:      portfolioAllocation.Asset.Ticker,
 		Class:            portfolioAllocation.Class,
 		CashReserve:      portfolioAllocation.CashReserve,
-		TotalMarketValue: portfolioAllocation.TotalMarketValue,
+		TotalMarketValue: &totalMarketValue,
 		AssetQuantity:    portfolioAllocation.AssetQuantity,
 		AssetMarketPrice: portfolioAllocation.AssetMarketPrice,
 	}
@@ -129,7 +132,7 @@ func buildHistoryDTS(
 func buildSnapshotDTS(
 	observationTimestamp *PortfolioObservationTimestampDTS,
 	allocations []*PortfolioAllocationDTS,
-	totalMarketValue int64,
+	totalMarketValue *decimal.Decimal,
 ) *PortfolioSnapshotDTS {
 	return &PortfolioSnapshotDTS{
 		ObservationTimestamp: observationTimestamp,
@@ -184,15 +187,27 @@ func MapToPortfolioAllocation(
 	portfolioAllocationDTS *PortfolioAllocationDTS,
 	observationTimestampId int64,
 ) *domain.PortfolioAllocation {
+
+	var assetId int64
+	if portfolioAllocationDTS.AssetId != nil {
+		assetId = int64(*portfolioAllocationDTS.AssetId)
+	}
+
+	var totalMarketValue = portfolioAllocationDTS.TotalMarketValue
+	var totalMarketValueInt int64
+	if totalMarketValue != nil {
+		totalMarketValueInt = totalMarketValue.Round(0).IntPart()
+	}
+
 	return &domain.PortfolioAllocation{
 		Asset: domain.Asset{
-			Id:     int64(portfolioAllocationDTS.AssetId),
+			Id:     assetId,
 			Name:   portfolioAllocationDTS.AssetName,
 			Ticker: portfolioAllocationDTS.AssetTicker,
 		},
 		Class:            portfolioAllocationDTS.Class,
 		CashReserve:      portfolioAllocationDTS.CashReserve,
-		TotalMarketValue: portfolioAllocationDTS.TotalMarketValue,
+		TotalMarketValue: totalMarketValueInt,
 		AssetQuantity:    portfolioAllocationDTS.AssetQuantity,
 		AssetMarketPrice: portfolioAllocationDTS.AssetMarketPrice,
 		ObservationTimestamp: &domain.PortfolioObservationTimestamp{

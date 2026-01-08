@@ -16,12 +16,16 @@ const AFTER_REQUEST_ERROR_HANDLER = (event: CustomEvent) => {
         }
         else {
             const fallbackErrorMessage = "An unexpected error occurred while communicating with the server.";
-            notifications.notifyErrorResponse({ error: fallbackErrorMessage });
+            notifications.notifyErrorResponse({ errorMessage: fallbackErrorMessage });
         }
 
         return;
     }
 };
 
-export default Infra.init(AFTER_REQUEST_ERROR_HANDLER);
+const GENERAL_UNCAUGHT_ERROR_HANDLER = (error: Error) => {
+    notifications.notifyError(error);
+};
+
+export default Infra.init(AFTER_REQUEST_ERROR_HANDLER, GENERAL_UNCAUGHT_ERROR_HANDLER);
 Application.init();

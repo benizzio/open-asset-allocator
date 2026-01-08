@@ -2,10 +2,12 @@ import htmx from "htmx.org";
 import BigNumber from "bignumber.js";
 import { AfterRequestEventDetail, HtmxInfra } from "../infra/htmx";
 import { ObservationTimestamp } from "../domain/portfolio-allocation";
-import router from "../infra/routing/router";
+import Router from "../infra/routing";
 import AssetComposedColumnsInput from "./asset-composed-columns-input";
 import { toInt } from "../utils/lang";
 import type { TemplateDelegate } from "handlebars";
+import notifications from "./notifications";
+import { NotificationType } from "../infra/infra-types";
 
 const PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER = "accordion-portfolio-history-management";
 const PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX = "portfolio-history-management-form-";
@@ -108,6 +110,15 @@ const portfolioHistoryManagement = {
     handlebarsPortfolioHistoryManagementRowTemplate: null as TemplateDelegate,
     handlebarsPortfolioHistoryManagementContainerTemplate: null as TemplateDelegate,
 
+    handleAfterSettle(event: CustomEvent, element: HTMLElement) {
+
+        if(event.target !== element) {
+            return;
+        }
+
+        this.init();
+    },
+
     init() {
 
         HtmxInfra.htmxTransformResponse.registerTransformResponseFunction(
@@ -202,12 +213,18 @@ const portfolioHistoryManagement = {
         }
 
         propagateRefreshDataAfterPost(observationTimestampId);
+
+        notifications.notify({
+            title: "Success",
+            content: "Portfolio observation data saved successfully.",
+            type: NotificationType.SUCCESS,
+        });
     },
 
     navigateToPortfolioAllocationViewing() {
         const globalPortfolioIdField = document.querySelector("[name='portfolioId']") as HTMLInputElement;
         const portfolioId = globalPortfolioIdField.value;
-        router.navigateTo(`/portfolio/${ portfolioId }/history`);
+        Router.navigateTo(`/portfolio/${ portfolioId }/history`);
     },
 };
 

@@ -72,21 +72,6 @@ function escapeHtmlValuePreserveQuotes(value: string): string {
 
 const DomUtils = {
 
-    //TODO remove simple queries from here and use directly
-    queryFirst,
-
-    queryAll(selector: string): NodeListOf<HTMLElement> {
-        return document.querySelectorAll(selector);
-    },
-
-    queryFirstInDescendants(element: HTMLElement, selector: string): HTMLElement | null {
-        return element.querySelector(selector);
-    },
-
-    queryAllInDescendants(element: HTMLElement, selector: string): NodeListOf<HTMLElement> {
-        return element.querySelectorAll(selector);
-    },
-
     queryDirectDescendants(element: HTMLElement, selector: string): NodeListOf<HTMLElement> {
         return element.querySelectorAll(`:scope > ${ selector }`);
     },

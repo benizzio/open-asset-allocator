@@ -34,12 +34,12 @@ func (controller *DivergenceAnalysisRESTController) getDivergenceAnalysisOptions
 
 	portfolioIdParam := context.Param(portfolioIdParam)
 	portfolioId, err := langext.ParseInt64(portfolioIdParam)
-	if infra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
+	if HandleAPIError(context, getPortfolioIdErrorMessage, err) {
 		return
 	}
 
 	analysisOptions, err := controller.portfolioAnalysisConfigService.GetDivergenceAnalysisOptions(portfolioId)
-	if infra.HandleAPIError(context, "Error getting divergence analysis options", err) {
+	if HandleAPIError(context, "Error getting divergence analysis options", err) {
 		return
 	}
 
@@ -52,19 +52,19 @@ func (controller *DivergenceAnalysisRESTController) GetDivergenceAnalysis(contex
 
 	portfolioIdParamValue := context.Param(portfolioIdParam)
 	portfolioId, err := langext.ParseInt64(portfolioIdParamValue)
-	if infra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
+	if HandleAPIError(context, getPortfolioIdErrorMessage, err) {
 		return
 	}
 
 	var observationTimestampIdParamValue = context.Param(observationTimestampIdParam)
 	observationTimestampId, err := langext.ParseInt64(observationTimestampIdParamValue)
-	if infra.HandleAPIError(context, getObservationTimestampIdErrorMessage, err) {
+	if HandleAPIError(context, getObservationTimestampIdErrorMessage, err) {
 		return
 	}
 
 	planIdParamValue := context.Param(planIdParam)
 	planId, err := langext.ParseInt64(planIdParamValue)
-	if infra.HandleAPIError(context, getPlanIdErrorMessage, err) {
+	if HandleAPIError(context, getPlanIdErrorMessage, err) {
 		return
 	}
 
@@ -73,7 +73,7 @@ func (controller *DivergenceAnalysisRESTController) GetDivergenceAnalysis(contex
 		observationTimestampId,
 		planId,
 	)
-	if infra.HandleAPIError(context, "Error generating portfolio divergence analysis", err) {
+	if HandleAPIError(context, "Error generating portfolio divergence analysis", err) {
 		return
 	}
 

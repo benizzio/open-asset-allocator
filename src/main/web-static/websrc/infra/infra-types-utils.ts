@@ -1,15 +1,15 @@
-import { ErrorResponse } from "./infra-types";
 import { logger, LogLevel } from "./logging";
+import { APIErrorResponse } from "../api/api";
 
 const InfraTypesUtils = {
 
-    toErrorResponse(errorResponseJson: string): ErrorResponse | undefined {
+    toErrorResponse(errorResponseJson: string): APIErrorResponse | undefined {
 
         try {
 
-            const errorResponse = JSON.parse(errorResponseJson) as ErrorResponse;
+            const errorResponse = JSON.parse(errorResponseJson) as APIErrorResponse;
 
-            const hasErrorProperty = errorResponse && typeof errorResponse.error === "string";
+            const hasErrorProperty = errorResponse && typeof errorResponse.errorMessage === "string";
 
             const hasValidDetails = errorResponse
                 && (

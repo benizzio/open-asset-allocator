@@ -32,7 +32,7 @@ function resolvePathParamsFromCurrentLocationContext(path: string) {
     return resolvedPath;
 }
 
-export function buildParameterizedDestinationPath(destinationPath: string) {
+export function buildParameterizedDestinationPathFromCurrentLocationContext(destinationPath: string) {
     if(hasPathParam(destinationPath)) {
         return resolvePathParamsFromCurrentLocationContext(destinationPath);
     }

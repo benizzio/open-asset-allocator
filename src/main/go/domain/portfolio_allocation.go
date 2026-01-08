@@ -28,7 +28,10 @@ type PortfolioAllocationRepository interface {
 		id int64,
 		observationTimestampsLimit int,
 	) ([]*PortfolioAllocation, error)
-	FindPortfolioAllocationsByObservationTimestamp(id int64, observationTimestampId int64) ([]*PortfolioAllocation, error)
+	FindPortfolioAllocationsByObservationTimestamp(id int64, observationTimestampId int64) (
+		[]*PortfolioAllocation,
+		error,
+	)
 	FindAvailableObservationTimestamps(
 		portfolioId int64,
 		observationTimestampsLimit int,

@@ -17,11 +17,25 @@
         </div>
     </div>
 
-    <div data-display-on-route="/portfolio/:portfolioId/history/manage"
+    <div data-hx-trigger-on-route="/portfolio/:portfolioId/history/manage!load-portfolio-management"
+         data-display-on-route="/portfolio/:portfolioId/history/manage"
          hx-get="/websrc/components/portfolio-history-management.html"
-         hx-trigger="load"
-         hx-on::after-settle="portfolioHistoryManagement.init()"
+         hx-trigger="load-portfolio-management once"
+         hx-on::after-settle="portfolioHistoryManagement.handleAfterSettle(event, this)"
     >
+        <div class="card border-dark mb-3 placeholder-glow">
+            <div class="card-header placeholder col-6">placeholder</div>
+            <div class="card-body">
+                <div class="accordion container-fluid">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header placeholder col-12">placeholder</h2>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header placeholder col-12">placeholder</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
 </div>

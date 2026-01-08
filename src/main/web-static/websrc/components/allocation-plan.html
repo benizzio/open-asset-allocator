@@ -17,10 +17,25 @@
         </div>
     </div>
 
-    <div data-display-on-route="/portfolio/:portfolioId/allocation/manage"
+    <div data-hx-trigger-on-route="/portfolio/:portfolioId/allocation/manage!load-allocation-plan-management"
+         data-display-on-route="/portfolio/:portfolioId/allocation/manage"
          hx-get="/websrc/components/allocation-plan-management.html"
-         hx-trigger="load"
+         hx-trigger="load-allocation-plan-management once"
+         hx-on::after-settle="allocationPlanManagement.handleAfterSettle(event, this)"
     >
+        <div class="card border-dark mb-3 placeholder-glow">
+            <div class="card-header placeholder col-6">placeholder</div>
+            <div class="card-body">
+                <div class="accordion container-fluid">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header placeholder col-12">placeholder</h2>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header placeholder col-12">placeholder</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
 </div>

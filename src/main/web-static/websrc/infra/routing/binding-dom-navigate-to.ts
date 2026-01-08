@@ -1,6 +1,5 @@
-import { buildParameterizedDestinationPath, navigoRouter } from "./routing-navigo";
+import { buildParameterizedDestinationPathFromCurrentLocationContext, navigoRouter } from "./routing-navigo";
 import { logger, LogLevel } from "../logging";
-import DomUtils from "../dom/dom-utils";
 
 // =============================================================================
 // NAVIGATE TO
@@ -31,22 +30,30 @@ function navigate(element: HTMLElement) {
 
 function buildDestinationPath(element: HTMLElement) {
     const destinationPath = element.getAttribute(NAVIGATE_TO_ATTRIBUTE);
-    return buildParameterizedDestinationPath(destinationPath);
+    return buildParameterizedDestinationPathFromCurrentLocationContext(destinationPath);
 }
 
 function bindNavigateToElements(navigationElement: NodeListOf<HTMLElement>) {
+
     navigationElement.forEach((element) => {
-        logger(LogLevel.INFO, "Binding navigation element", element);
-        bindKeypressNavigation(element);
-        bindCLickNavigation(element);
-        element.setAttribute(NAVIGATE_TO_BOUND_FLAG, "true");
+
+        element.setAttribute(NAVIGATE_TO_BOUND_FLAG, "binding");
+
+        try {
+            logger(LogLevel.INFO, "Binding navigation element", element);
+            bindKeypressNavigation(element);
+            bindCLickNavigation(element);
+            element.setAttribute(NAVIGATE_TO_BOUND_FLAG, "true");
+        } catch(error) {
+            element.removeAttribute(NAVIGATE_TO_BOUND_FLAG);
+            throw error;
+        }
     });
 }
 
 export function bindNavigateToInDescendants(element: HTMLElement) {
-    const navigationElements = DomUtils.queryAllInDescendants(
-        element,
+    const navigationElements = element.querySelectorAll(
         `[${ NAVIGATE_TO_ATTRIBUTE }]:not([${ NAVIGATE_TO_BOUND_FLAG }])`,
-    );
+    ) as NodeListOf<HTMLElement>;
     bindNavigateToElements(navigationElements);
 }

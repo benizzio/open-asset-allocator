@@ -5,7 +5,9 @@ const EXCLUSIVE_DISPLAY_ATTRIBUTE = "data-exclusive-display-container";
 const EXCLUSIVE_DISPLAY_BOUND_FLAG = "data-exclusive-display-bound";
 
 export function bindExclusiveDisplayContainerInDescendants(element: HTMLElement) {
-    const exclusiveDisplayElements = DomUtils.queryAllInDescendants(element, `[${ EXCLUSIVE_DISPLAY_ATTRIBUTE }]`);
+    const exclusiveDisplayElements = element.querySelectorAll(
+        `[${ EXCLUSIVE_DISPLAY_ATTRIBUTE }]:not([${ EXCLUSIVE_DISPLAY_BOUND_FLAG }])`,
+    ) as NodeListOf<HTMLElement>;
     bindExclusiveDisplayInDescendants(exclusiveDisplayElements);
 }
 
@@ -15,14 +17,22 @@ function bindExclusiveDisplayInDescendants(exclusiveDisplayElements: NodeListOf<
 
         if(!element.getAttribute(EXCLUSIVE_DISPLAY_BOUND_FLAG)) {
 
-            logger(LogLevel.INFO, "Binding exclusive display for element", element);
+            element.setAttribute(EXCLUSIVE_DISPLAY_BOUND_FLAG, "binding");
 
-            const exclusiveDisplayElements = DomUtils.queryDirectDescendants(
-                element,
-                "*:not(script):not(style):not(link)",
-            );
-            bindExclusiveDisplay(exclusiveDisplayElements);
-            element.setAttribute(EXCLUSIVE_DISPLAY_BOUND_FLAG, "true");
+            try {
+
+                logger(LogLevel.INFO, "Binding exclusive display for element", element);
+
+                const exclusiveDisplayElements = DomUtils.queryDirectDescendants(
+                    element,
+                    "*:not(script):not(style):not(link)",
+                );
+                bindExclusiveDisplay(exclusiveDisplayElements);
+                element.setAttribute(EXCLUSIVE_DISPLAY_BOUND_FLAG, "true");
+            } catch(error) {
+                element.removeAttribute(EXCLUSIVE_DISPLAY_BOUND_FLAG);
+                throw error;
+            }
         }
     });
 }
