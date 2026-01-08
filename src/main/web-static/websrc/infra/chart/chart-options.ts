@@ -1,5 +1,5 @@
 import { ChartOptions } from "chart.js";
-import format from "../format";
+import Format from "../format";
 import { ChartInteraction, ChartInteractions, LocalChartOptions } from "./chart-types";
 import { LABEL_CALLBACKS, valueAsPercentageOfDataset } from "./chart-utils";
 import { BOOTSTRAP_BODY_BACKGROUND_COLOR } from "../color";
@@ -31,7 +31,7 @@ const PIE_DOUGHNUT_CHART_OPTIONS: ChartOptions<"pie" | "doughnut"> = {
                     return "";
                 }
 
-                return format.formatPercent(percent.toNumber());
+                return Format.formatPercent(percent.toNumber());
             },
         },
     },

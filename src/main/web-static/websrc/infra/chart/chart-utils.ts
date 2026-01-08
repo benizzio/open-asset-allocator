@@ -1,6 +1,6 @@
 import { Chart, ChartDataset, ChartType, TooltipItem } from "chart.js";
 import { ChartContent, MeasuramentUnit, MultiChartDataSource, UNIDIMENSIONAL_DATASET_SUM_FIELD } from "./chart-types";
-import format from "../format";
+import Format from "../format";
 import BigNumber from "bignumber.js";
 import { Context } from "chartjs-plugin-datalabels/types/context";
 import { PAUL_TOL_PALETTE } from "../color";
@@ -36,14 +36,14 @@ export const LABEL_CALLBACKS = {
         let percentLabel = "";
 
         if(chartType === "pie" || chartType === "doughnut") {
-            percentLabel = percent.isLessThan(0.03) ? " (" + format.formatPercent(percent.toNumber()) + ")" : "";
+            percentLabel = percent.isLessThan(0.03) ? " (" + Format.formatPercent(percent.toNumber()) + ")" : "";
         }
 
-        return label + format.formatCurrency(context.parsed) + percentLabel;
+        return label + Format.formatCurrency(context.parsed) + percentLabel;
     },
     [MeasuramentUnit.PERCENTAGE]: (context: TooltipItem<ChartType>) => {
         const label = buildLabelPrefix(context);
-        return label + format.formatPercent(context.parsed);
+        return label + Format.formatPercent(context.parsed);
     },
 };
 
