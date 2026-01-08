@@ -193,6 +193,12 @@ func MapToPortfolioAllocation(
 		assetId = int64(*portfolioAllocationDTS.AssetId)
 	}
 
+	var totalMarketValue = portfolioAllocationDTS.TotalMarketValue
+	var totalMarketValueInt int64
+	if totalMarketValue != nil {
+		totalMarketValueInt = totalMarketValue.Round(0).IntPart()
+	}
+
 	return &domain.PortfolioAllocation{
 		Asset: domain.Asset{
 			Id:     assetId,
@@ -201,7 +207,7 @@ func MapToPortfolioAllocation(
 		},
 		Class:            portfolioAllocationDTS.Class,
 		CashReserve:      portfolioAllocationDTS.CashReserve,
-		TotalMarketValue: portfolioAllocationDTS.TotalMarketValue.Round(0).IntPart(),
+		TotalMarketValue: totalMarketValueInt,
 		AssetQuantity:    portfolioAllocationDTS.AssetQuantity,
 		AssetMarketPrice: portfolioAllocationDTS.AssetMarketPrice,
 		ObservationTimestamp: &domain.PortfolioObservationTimestamp{
