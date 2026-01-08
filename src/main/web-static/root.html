@@ -39,6 +39,28 @@
          data-hx-trigger-on-route="/portfolios/*!route-reached"
          data-hx-trigger-on-route-clean-on-exit
     >
+        <div data-display-on-route="/portfolios/*"
+             style="display: none"
+        >
+            <div class="row justify-content-center align-items-stretch row-cols-auto my-5 gy-4">
+                <div class="col">
+                    <div class="card portfolio-card placeholder-glow">
+                        <div class="card-body">
+                            <h5 class="card-title placeholder col-8">placeholder</h5>
+                            <p class="card-text placeholder col-12">placeholder</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card portfolio-card placeholder-glow">
+                        <div class="card-body">
+                            <h5 class="card-title placeholder col-8">placeholder</h5>
+                            <p class="card-text placeholder col-12">placeholder</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="portfolio-container"
@@ -47,6 +69,32 @@
          data-hx-trigger-on-route="/portfolio/:portfolioId/*!route-reached"
          data-hx-trigger-on-route-clean-on-exit
     >
+        <div data-display-on-route="/portfolios{0}\/.*"
+             style="display: none"
+        >
+            <div class="row justify-content-center align-items-center row-cols-auto my-5">
+                <span class="h2 placeholder-glow">
+                    <span class="badge text-bg-secondary placeholder">Loading...</span>
+                </span>
+            </div>
+            <div class="row justify-content-center align-items-center row-cols-auto my-5">
+                <div class="btn-group placeholder-glow" role="group">
+                    <span class="btn btn-outline-primary placeholder col-4">placeholder</span>
+                    <span class="btn btn-outline-primary placeholder col-4">placeholder</span>
+                    <span class="btn btn-outline-primary placeholder col-4">placeholder</span>
+                </div>
+            </div>
+            <div class="row justify-content-center align-items-center">
+                <div class="accordion placeholder-glow">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header placeholder col-12">placeholder</h2>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header placeholder col-12">placeholder</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="notifications-container"
