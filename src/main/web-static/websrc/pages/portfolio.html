@@ -4,7 +4,11 @@
      hx-trigger="load once, reload-portfolio"
      handlebars-template="portfolio-data"
      hx-on-htmx-after-settle="portfolioPage.preFillEditPortfolioForm()"
-></div>
+>
+    <span class="h2 placeholder-glow">
+        <span class="badge text-bg-secondary placeholder col-4">placeholder</span>
+    </span>
+</div>
 
 <script id="portfolio-data" type="text/x-handlebars-template">
     <span class="h2"><span class="badge text-bg-secondary">{{name}}</span></span>
