@@ -5,6 +5,7 @@ import {
     mapToSerializablePortfolioCompleteAllocationPlanSet,
 } from "./mapping/allocation-plan/serializable-complete-allocation-plan-mapping";
 import { mapToCompleteAllocationPlan } from "./mapping/allocation-plan/complete-allocation-plan-mapping";
+import { mapToPortfolioSnapshot } from "./mapping/portfolio-allocation-mapping";
 
 export const DomainService = {
 
@@ -15,5 +16,6 @@ export const DomainService = {
         mapToCompleteAllocationPlan,
         mapToSerializableCompleteAllocationPlans,
         mapToSerializablePortfolioCompleteAllocationPlanSet,
+        mapToPortfolioSnapshot,
     },
 };

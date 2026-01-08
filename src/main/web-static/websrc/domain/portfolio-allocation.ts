@@ -1,3 +1,5 @@
+import BigNumber from "bignumber.js";
+
 export type ObservationTimestamp = {
     id: number;
     timeTag: string;
@@ -9,10 +11,15 @@ export type PortfolioAllocation = {
     assetTicker: string;
     class: string;
     cashReserve: boolean;
-    totalMarketValue: number;
+    totalMarketValue: BigNumber;
 };
 
 export type PortfolioSnapshot = {
     observationTimestamp: ObservationTimestamp;
     allocations: PortfolioAllocation[];
 };
+
+export type PortfolioAllocationDTO = Omit<PortfolioAllocation, "totalMarketValue"> & { totalMarketValue: string, };
+
+export type PortfolioSnapshotDTO = Omit<PortfolioSnapshot, "allocations">
+    & { allocations: PortfolioAllocationDTO[]; };

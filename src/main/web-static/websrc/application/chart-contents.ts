@@ -3,7 +3,7 @@ import portfolioChart from "./portfolio-chart/portfolio-chart";
 import { PortfolioDTO } from "../domain/portfolio";
 import allocationPlanChart from "./allocation-plan-chart";
 import { AllocationPlanDTO } from "../domain/allocation-plan";
-import { PortfolioSnapshot } from "../domain/portfolio-allocation";
+import { PortfolioSnapshotDTO } from "../domain/portfolio-allocation";
 
 function toUnidimensionalMultiChartContent(
     chartDataType: string,
@@ -15,7 +15,7 @@ function toUnidimensionalMultiChartContent(
 
     if(chartDataType === ChartDataType.PORTFOLIO_HISTORY_1D) {
         baseChartContent = portfolioChart.toUnidimensionalChartContent(
-            sourceData as PortfolioSnapshot,
+            sourceData as PortfolioSnapshotDTO,
             contextData as PortfolioDTO,
         );
     }
