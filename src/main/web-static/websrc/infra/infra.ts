@@ -57,7 +57,8 @@ function handleError(
         uncaughtErrorHandler(error);
     }
     else {
-        uncaughtErrorHandler(new Error(String(message)));
+        const errorMsg = typeof message === "string" ? message : errorMessage;
+        uncaughtErrorHandler(new Error(errorMsg));
     }
 }
 
