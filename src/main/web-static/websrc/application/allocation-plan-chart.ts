@@ -144,8 +144,13 @@ function interactionObserverCallback(event: ChartEvent, elements: ActiveElement[
     const levelLabel = currentFractalAllocationLevelName + " " + currentFractalAllocationLevelValue;
 
     if(event.type === "click") {
+
         const labelId = `#hierarchy-level-${ chartId }`;
-        document.querySelector(labelId).textContent = levelLabel;
+        const element = document.querySelector(labelId);
+
+        if(element) {
+            element.textContent = levelLabel;
+        }
     }
 }
 
