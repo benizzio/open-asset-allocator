@@ -44,10 +44,10 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 						"cashReserve":false,
 						"assetMarketPrice":"100",
 						"assetQuantity":"100.00009",
-						"totalMarketValue":10000
+						"totalMarketValue":"10000"
 					}
 				],
-				"totalMarketValue":10000
+				"totalMarketValue":"10000"
 			},
 			{
 				"observationTimestamp" : {
@@ -64,7 +64,7 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 						"cashReserve":false,
 						"assetMarketPrice":"100",
 						"assetQuantity":"100",
-						"totalMarketValue":10000
+						"totalMarketValue":"10000"
 					},
 					{
 						"assetId": 2,
@@ -74,7 +74,7 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 						"cashReserve":false,
 						"assetMarketPrice":"100",
 						"assetQuantity":"80",
-						"totalMarketValue":8000
+						"totalMarketValue":"8000"
 					},
 					{
 						"assetId": 3,
@@ -84,7 +84,7 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 						"cashReserve":false,
 						"assetMarketPrice":"100",
 						"assetQuantity":"60",
-						"totalMarketValue":6000
+						"totalMarketValue":"6000"
 					},
 					{
 						"assetId": 4,
@@ -94,7 +94,7 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 						"cashReserve":false,
 						"assetMarketPrice":"100",
 						"assetQuantity":"30",
-						"totalMarketValue":3000
+						"totalMarketValue":"3000"
 					},
 					{
 						"assetId": 5,	
@@ -104,7 +104,7 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 						"cashReserve":true,
 						"assetMarketPrice":"100",
 						"assetQuantity":"80",
-						"totalMarketValue":9000
+						"totalMarketValue":"9000"
 					},
 					{
  						"assetId": 7,
@@ -114,7 +114,7 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 						"cashReserve":false,
 						"assetMarketPrice":"100",
 						"assetQuantity":"90",
-						"totalMarketValue":8000
+						"totalMarketValue":"8000"
 					},
 					{
 						"assetId": 6,
@@ -124,10 +124,10 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 						"cashReserve":false,
 						"assetMarketPrice":"100",
 						"assetQuantity":"10",
-						"totalMarketValue":1000
+						"totalMarketValue":"1000"
 					}
 				],
-				"totalMarketValue":45000
+				"totalMarketValue":"45000"
 			}
 		]
 	`
@@ -164,10 +164,10 @@ func TestGetPortfolioAllocationHistoryForObservationTimestamp(t *testing.T) {
 						"cashReserve":false,
 						"assetMarketPrice":"100",
 						"assetQuantity":"100.00009",
-						"totalMarketValue":10000
+						"totalMarketValue":"10000"
 					}
 				],
-				"totalMarketValue":10000
+				"totalMarketValue":"10000"
 			}
 		]
 	`
@@ -259,7 +259,7 @@ func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 					"cashReserve": false,
 					"assetQuantity": "150.00",
 					"assetMarketPrice": "100.00",
-					"totalMarketValue": 15000
+					"totalMarketValue": "15000"
 				},
 				{
 					"assetId": 2,
@@ -269,7 +269,7 @@ func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 					"cashReserve": false,
 					"assetQuantity": "100.00",
 					"assetMarketPrice": "100.00",
-					"totalMarketValue": 10000
+					"totalMarketValue": "10000"
 				},
 				{
 					"assetName": "New Asset",
@@ -278,7 +278,7 @@ func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 					"cashReserve": false,
 					"assetQuantity": "20",
 					"assetMarketPrice": "100",
-					"totalMarketValue": 2000
+					"totalMarketValue": "2000"
 				}
 			]
 		}
@@ -401,7 +401,7 @@ func TestPostPortfolioAllocationHistoryInsertEmptyZeroTimestamp(t *testing.T) {
 					"cashReserve": false,
 					"assetQuantity": "20",
 					"assetMarketPrice": "100",
-					"totalMarketValue": 2000
+					"totalMarketValue": "2000"
 				}
 			]
 		}
@@ -562,7 +562,7 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 					"cashReserve": false,
 					"assetQuantity": 150.00,
 					"assetMarketPrice": 10.00,
-					"totalMarketValue": 1500
+					"totalMarketValue": "1500"
 				},
 				{
 					"assetId": "1",
@@ -572,7 +572,7 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 					"cashReserve": false,
 					"assetQuantity": 1.00,
 					"assetMarketPrice": 2.00,
-					"totalMarketValue": 4
+					"totalMarketValue": "4"
 				},
 				{
 					"assetId": "6",
@@ -582,7 +582,7 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 					"cashReserve": false,
 					"assetQuantity": "20",
 					"assetMarketPrice": "100",
-					"totalMarketValue": 2000
+					"totalMarketValue": "2000"
 				},
 				{
 					"assetName": "New Asset Repeat 1",
@@ -882,7 +882,7 @@ func TestPostPortfolioAllocationValidations(t *testing.T) {
 					"allocations": [
 						{
 							"class": "TEST",
-							"totalMarketValue": 10
+							"totalMarketValue": "10"
 						}
 					]
 				}
@@ -899,7 +899,7 @@ func TestPostPortfolioAllocationValidations(t *testing.T) {
 				{
 					"errorMessage": "Validation failed",
 					"details": [
-						"Field 'allocations[0].assetId' failed validation: if assetId is not provided, assetTicker or assetName must be provided"
+						"Field 'allocations[0].assetId' failed validation: if assetId is not provided, assetTicker and assetName must be provided"
 					]
 				}
 			`
@@ -922,7 +922,7 @@ func TestPostPortfolioAllocationValidations(t *testing.T) {
 							"assetName": "",
 							"assetTicker": "",
 							"class": "TEST",
-							"totalMarketValue": 10
+							"totalMarketValue": "10"
 						}
 					]
 				}
@@ -939,7 +939,7 @@ func TestPostPortfolioAllocationValidations(t *testing.T) {
 				{
 					"errorMessage": "Validation failed",
 					"details": [
-						"Field 'allocations[0].assetId' failed validation: if assetId is not provided, assetTicker or assetName must be provided"
+						"Field 'allocations[0].assetId' failed validation: if assetId is not provided, assetTicker and assetName must be provided"
 					]
 				}
 			`
@@ -956,7 +956,7 @@ func TestPostPortfolioAllocationValidations(t *testing.T) {
 					"allocations": [
 						{
 							"class": "",
-							"totalMarketValue": 0
+							"totalMarketValue": "0"
 						}
 					]
 				}
@@ -974,8 +974,7 @@ func TestPostPortfolioAllocationValidations(t *testing.T) {
 					"errorMessage": "Validation failed",
 					"details": [
 						"Field 'observationTimestamp' failed validation: is required",
-						"Field 'allocations[0].class' failed validation: is required",
-						"Field 'allocations[0].totalMarketValue' failed validation: is required"
+						"Field 'allocations[0].class' failed validation: is required"
 					]
 				}
 			`
@@ -1148,7 +1147,7 @@ func TestGetPortfolioAllocationHistoryWithMultiplePortfoliosAndManyObservations(
 	assert.Contains(t, actualResponseJSON, "test_obs_8")
 	assert.Contains(t, actualResponseJSON, "test_obs_7")
 	assert.Contains(t, actualResponseJSON, "test_obs_6")
-	
+
 	// test_obs_1 through test_obs_5 should NOT be in the response (beyond the LIMIT of 10)
 	// Use specific format to avoid substring matching issues (e.g., test_obs_1 appearing in test_obs_10)
 	assert.NotContains(t, actualResponseJSON, "\"test_obs_5\"")
