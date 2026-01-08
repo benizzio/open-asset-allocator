@@ -54,7 +54,7 @@ function interactionObserverCallback(event: ChartEvent, elements: ActiveElement[
     const levelLabel = currentHierarchyLevel.name + " " + currentAggregatorLevelValueLabel;
 
     if(event.type === "click") {
-        const labelId = `#hierarchy-level-${ chartId }`;
+        const labelId = `hierarchy-level-${ chartId }`;
         const labelElement = window[labelId] as HTMLElement;
         labelElement.textContent = levelLabel;
     }
