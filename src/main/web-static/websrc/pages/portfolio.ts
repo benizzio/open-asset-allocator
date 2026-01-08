@@ -42,17 +42,17 @@ const PortfolioPage = {
         const portfolioDataElement = window["portfolio-context"] as HTMLDivElement;
         const portfolioIdField = portfolioDataElement.querySelector("input[name='portfolioId']") as HTMLInputElement;
 
-        const portfolionNameField =
+        const portfolioNameField =
             portfolioDataElement.querySelector("input[name='portfolioName']") as HTMLInputElement;
 
         const portfolioId = portfolioIdField.value;
-        const portfolionName = portfolionNameField.value;
+        const portfolioName = portfolioNameField.value;
 
         const editPortfolioForm = window["edit-portfolio-form"] as HTMLFormElement;
         const editPortfolioIdInput = editPortfolioForm.querySelector("input[name='id']") as HTMLInputElement;
         editPortfolioIdInput.value = portfolioId;
         const editPortfolioNameInput = editPortfolioForm.querySelector("input[name='name']") as HTMLInputElement;
-        editPortfolioNameInput.value = portfolionName;
+        editPortfolioNameInput.value = portfolioName;
     },
 };
 
