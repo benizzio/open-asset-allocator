@@ -833,6 +833,46 @@ func TestPostAllocationPlanValidation_PercentageSumExceedsParentLimit(t *testing
 	assert.JSONEq(t, expected, string(body))
 }
 
+func TestPostAllocationPlanValidation_PercentageSumBelowParentLimit(t *testing.T) {
+
+	var updatePlanJSON = `
+		{
+            "id":6,
+            "name":"Update Allocation Plan Fixture",
+            "details":[
+                { "id": 30, "hierarchicalId":[null,"BONDS"],  "sliceSizePercentage":"0.5" },
+                { "id": 31, "hierarchicalId":[null,"STOCKS"], "sliceSizePercentage":"0.5" },
+                { "id": 32, "hierarchicalId":["ARCA:BIL","BONDS"], "sliceSizePercentage":"0.7", "cashReserve":false },
+                { "id": 33, "hierarchicalId":["ARCA:SPY","STOCKS"], "sliceSizePercentage":"1.0", "cashReserve":false },
+                { 
+					"hierarchicalId":["NasdaqGM:TLT","BONDS"], 
+					"sliceSizePercentage":"0.1", 
+					"cashReserve":false, 
+					"asset": {"id": 4, "ticker": "NasdaqGM:TLT", "name": "iShares 20+ Year Treasury Bond ETF"} 
+				}
+            ]
+        }
+	`
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLPrefix+"/portfolio/1/allocation-plan",
+		"application/json",
+		strings.NewReader(updatePlanJSON),
+	)
+	assert.NoError(t, err)
+
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+
+	var expected = `{
+        "errorMessage": "Allocation plan validation failed",
+        "details": ["Planned allocations slice sizes sum to less than 100% within hierarchy level(s): Classes: BONDS"]
+    }`
+	assert.JSONEq(t, expected, string(body))
+}
+
 // Test validation (domain): top-level slice sizes must not exceed 100%.
 //
 // Co-authored by: GitHub Copilot
@@ -867,6 +907,41 @@ func TestPostAllocationPlanValidation_TopLevelPercentageSumExceedsLimit(t *testi
 	var expected = `{
        	"errorMessage": "Allocation plan validation failed",
         "details": ["Planned allocations slice sizes exceed 100% within hierarchy level(s): Classes (TOP)"]
+    }`
+	assert.JSONEq(t, expected, string(body))
+}
+
+func TestPostAllocationPlanValidation_TopLevelPercentageSumBelowLimit(t *testing.T) {
+
+	// Keep children within 1.0 to isolate the top-level violation
+	var updatePlanJSON = `
+		{
+            "id":6,
+            "name":"Update Allocation Plan Fixture",
+            "details":[
+                { "id": 30, "hierarchicalId":[null,"BONDS"],  "sliceSizePercentage":"0.7" },
+                { "id": 31, "hierarchicalId":[null,"STOCKS"], "sliceSizePercentage":"0.1" },
+                { "id": 32, "hierarchicalId":["ARCA:BIL","BONDS"],   "sliceSizePercentage":"1.0", "cashReserve":false },
+                { "id": 33, "hierarchicalId":["ARCA:SPY","STOCKS"],  "sliceSizePercentage":"1.0", "cashReserve":false }
+            ]
+        }
+	`
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLPrefix+"/portfolio/1/allocation-plan",
+		"application/json",
+		strings.NewReader(updatePlanJSON),
+	)
+	assert.NoError(t, err)
+
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+
+	var expected = `{
+       	"errorMessage": "Allocation plan validation failed",
+        "details": ["Planned allocations slice sizes sum to less than 100% within hierarchy level(s): Classes (TOP)"]
     }`
 	assert.JSONEq(t, expected, string(body))
 }

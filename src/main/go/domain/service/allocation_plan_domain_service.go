@@ -93,7 +93,6 @@ func (validationData *levelSliceSizeValidadationData) describeLevel(
 // TODO validate plan before persisting
 // - hierarchy matches portfolio hierarchy
 // - hierarchical ids with asset match asset ticker from reference
-// - slice sizes sum to 100% per hierarchy level
 func (service *AllocationPlanDomService) validateAllocationPlan(
 	plan *domain.AllocationPlan,
 	allocationStructure *domain.AllocationStructure,
@@ -210,10 +209,24 @@ func (service *AllocationPlanDomService) validateHierarchyLevelsSliceSizeSums(
 ) []*infra.AppError {
 
 	var exceededLevelDescriptions = make(langext.CustomSlice[string], 0)
+	var insufficientLevelDescriptions = make(langext.CustomSlice[string], 0)
+
 	for hierarchicalId, validationData := range validation.levelSliceSizes {
+
 		if validationData.sliceSize.GreaterThan(decimal.NewFromInt(1)) {
-			var levelDescription = validationData.describeLevel(hierarchyLevels, hierarchicalId)
-			exceededLevelDescriptions = append(exceededLevelDescriptions, levelDescription)
+			exceededLevelDescriptions = appendLevelDescription(
+				validationData,
+				exceededLevelDescriptions,
+				hierarchyLevels,
+				hierarchicalId,
+			)
+		} else if validationData.sliceSize.LessThan(decimal.NewFromInt(1)) {
+			insufficientLevelDescriptions = appendLevelDescription(
+				validationData,
+				insufficientLevelDescriptions,
+				hierarchyLevels,
+				hierarchicalId,
+			)
 		}
 	}
 
@@ -227,7 +240,29 @@ func (service *AllocationPlanDomService) validateHierarchyLevelsSliceSizeSums(
 			),
 		)
 	}
+
+	if len(insufficientLevelDescriptions) > 0 {
+		errors = append(
+			errors,
+			infra.BuildAppErrorFormattedUnconverted(
+				service,
+				"Planned allocations slice sizes sum to less than 100%% within hierarchy level(s): %s",
+				insufficientLevelDescriptions.PrettyString(),
+			),
+		)
+	}
+
 	return errors
+}
+
+func appendLevelDescription(
+	validationData *levelSliceSizeValidadationData,
+	levelDescriptionsSlice langext.CustomSlice[string],
+	hierarchyLevels domain.AllocationHierarchy,
+	hierarchicalId string,
+) langext.CustomSlice[string] {
+	var levelDescription = validationData.describeLevel(hierarchyLevels, hierarchicalId)
+	return append(levelDescriptionsSlice, levelDescription)
 }
 
 func BuildAllocationPlanDomService(allocationPlanRepository domain.AllocationPlanRepository) *AllocationPlanDomService {
