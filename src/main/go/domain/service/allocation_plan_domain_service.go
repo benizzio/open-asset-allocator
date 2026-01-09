@@ -91,7 +91,7 @@ func (validationData *levelSliceSizeValidadationData) describeLevel(
 }
 
 // TODO validate plan before persisting
-// - hierarchy matches portfolio hierarchy
+// - hierarchy matches portfolio hierarchy (allocation structure):
 //   - has expected hierarchical structure with correct level number
 //   - no parents without children and vice versa, except top and bottom levels
 //
