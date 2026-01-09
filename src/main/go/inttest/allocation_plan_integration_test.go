@@ -296,7 +296,7 @@ func TestPostAllocationPlanForUpdate_DoesNotOverwriteExistingAssetName(t *testin
 	var fetchPlanSQL = `
 		SELECT ap.id, ap.name
 		FROM allocation_plan ap
-		WHERE ap.portfolio_id = 2 AND ap.name = 'Update Allocation Plan Fixture'
+		WHERE ap.portfolio_id = 5 AND ap.name = 'Update Allocation Plan Fixture'
 	`
 	var allocationPlanIdString string
 	inttestutil.AssertDBWithQueryMultipleRows(
@@ -507,7 +507,7 @@ func TestPostAllocationPlanForUpdate_DeletesPlannedAllocationAndKeepsAsset(t *te
 	var fetchPlanSQL = `
 		SELECT ap.id, ap.name
 		FROM allocation_plan ap
-		WHERE ap.portfolio_id = 2 AND ap.name = 'Update Allocation Plan Fixture'
+		WHERE ap.portfolio_id = 5 AND ap.name = 'Update Allocation Plan Fixture'
 	`
 	var allocationPlanIdString string
 	inttestutil.AssertDBWithQueryMultipleRows(
@@ -624,6 +624,198 @@ func TestPostAllocationPlanForUpdate_DeletesPlannedAllocationAndKeepsAsset(t *te
 				"id":     inttestutil.ToAssertableNullString("7"),
 				"ticker": inttestutil.ToAssertableNullString("ARCA:SPY"),
 				"name":   inttestutil.ToAssertableNullString("SPDR S&P 500 ETF Trust"),
+			},
+		},
+	)
+}
+
+func TestPostAllocationPlanForUpdate_ChangesHierarchicalId(t *testing.T) {
+
+	var allocationPlanIdString = "6"
+	var idBil = "32"
+	var idSpy = "33"
+	var idBondsTop = "30"
+	var idStocksTop = "31"
+
+	// Register cleanup to restore fixture state after update
+	t.Cleanup(
+		inttestutil.BuildCleanupFunctionBuilder().
+			AddCleanupQuery(
+				`
+					DELETE FROM planned_allocation 
+					WHERE allocation_plan_id = %s AND hierarchical_id = '{TEST:ALTBOND,BONDS}'
+				`,
+				allocationPlanIdString,
+			).
+			AddCleanupQuery(
+				`
+					UPDATE planned_allocation 
+					SET slice_size_percentage = 0.5, hierarchical_id = '{"ARCA:BIL", "BONDS"}' 
+					WHERE id = %s
+				`,
+				idBil,
+			).
+			AddCleanupQuery(
+				`
+					UPDATE planned_allocation 
+					SET slice_size_percentage = 0.5, hierarchical_id = '{"ARCA:SPY", "STOCKS"}'
+					WHERE id = %s
+				`,
+				idSpy,
+			).
+			AddCleanupQuery(
+				`
+					UPDATE planned_allocation 
+					SET slice_size_percentage = 0.5, hierarchical_id = '{NULL, "BONDS"}' 
+					WHERE id = %s
+				`,
+				idBondsTop,
+			).
+			AddCleanupQuery(
+				`
+					UPDATE planned_allocation 
+					SET slice_size_percentage = 0.5, hierarchical_id = '{NULL, "STOCKS"}' 
+					WHERE id = %s
+				`,
+				idStocksTop,
+			).
+			AddCleanupQuery(
+				`UPDATE allocation_plan SET name = 'Update Allocation Plan Fixture' WHERE id = %s`,
+				allocationPlanIdString,
+			).
+			AddCleanupQuery(`DELETE FROM asset WHERE name LIKE '%%DELETE'`).
+			Build(),
+	)
+
+	// 1) Update the plan: change some slices, send a different name for existing asset id=1,
+	// insert a new planned allocation for NasdaqGM:TLT under BONDS, and update plan name
+	var updatedPlanName = "Update Allocation Plan Fixture Updated"
+	var updatePlanJSON = fmt.Sprintf(
+		`{
+			"id": %s,
+			"name":"%s",
+			"details":[
+				{ "id": %s, "hierarchicalId":[null,"BONDS2"],  "sliceSizePercentage":"0.4" },
+				{ "id": %s, "hierarchicalId":[null,"STOCKS"], "sliceSizePercentage":"0.6" },
+				{
+					"id": %s,
+					"hierarchicalId":["ARCA:BIL","BONDS2"],
+					"cashReserve":false,
+					"sliceSizePercentage":"0.9",
+					"asset":{ "id":1, "name":"SHOULD NOT OVERWRITE", "ticker":"ARCA:BIL" }
+				},
+				{
+					"id": %s,
+					"hierarchicalId":["ARCA:SPY","STOCKS"],
+					"cashReserve":false,
+					"sliceSizePercentage":"1.0",
+					"asset":{ "id":7, "name":"SPDR S&P 500 ETF Trust", "ticker":"ARCA:SPY" }
+				},
+				{
+					"hierarchicalId":["TEST:ALTBOND","BONDS2"],
+					"cashReserve":true,
+					"sliceSizePercentage":"0.1",
+					"asset":{ "name":"Test Cash Reserve Bond DELETE", "ticker":"TEST:ALTBOND" }
+				}
+			]
+		}`,
+		allocationPlanIdString, updatedPlanName, idBondsTop, idStocksTop, idBil, idSpy,
+	)
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLPrefix+"/portfolio/5/allocation-plan",
+		"application/json",
+		strings.NewReader(updatePlanJSON),
+	)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusNoContent, response.StatusCode)
+
+	// 2) Assert asset with id=1 kept its original name
+	var assetAssertSQL = `
+		SELECT a.id, a.ticker, a.name FROM asset a WHERE a.id = 1
+	`
+	inttestutil.AssertDBWithQueryMultipleRows(
+		t,
+		assetAssertSQL,
+		[]inttestutil.AssertableNullStringMap{
+			{
+				"id":     inttestutil.ToAssertableNullString("1"),
+				"ticker": inttestutil.ToAssertableNullString("ARCA:BIL"),
+				"name":   inttestutil.ToAssertableNullString("SPDR Bloomberg 1-3 Month T-Bill ETF"),
+			},
+		},
+	)
+
+	// 3) Assert the plan name was updated
+	var planAssertSQL = `
+		SELECT ap.id, ap.name FROM allocation_plan ap WHERE ap.id = ` + allocationPlanIdString + `
+	`
+	inttestutil.AssertDBWithQueryMultipleRows(
+		t,
+		planAssertSQL,
+		[]inttestutil.AssertableNullStringMap{
+			{
+				"id":   inttestutil.ToAssertableNullString(allocationPlanIdString),
+				"name": inttestutil.ToAssertableNullString(updatedPlanName),
+			},
+		},
+	)
+
+	// 4) Assert planned allocation rows reflect the update and insertion
+	var plannedAllocationsAssertSQL = `
+		SELECT 
+		    pa.hierarchical_id, 
+		    pa.slice_size_percentage, 
+		    pa.asset_id, 
+		    pa.cash_reserve, 
+		    pa.total_market_value,
+			ass.ticker AS asset_ticker,
+		    ass.name AS asset_name
+		FROM planned_allocation pa
+		LEFT JOIN asset ass ON ass.id = pa.asset_id
+		WHERE pa.allocation_plan_id = ` + allocationPlanIdString + `
+		ORDER BY pa.hierarchical_id
+	`
+	inttestutil.AssertDBWithQueryMultipleRows(
+		t,
+		plannedAllocationsAssertSQL,
+		[]inttestutil.AssertableNullStringMap{
+			{
+				"hierarchical_id":       inttestutil.ToAssertableNullString("{ARCA:BIL,BONDS2}"),
+				"slice_size_percentage": inttestutil.ToAssertableNullString("0.90000"),
+				"asset_id":              inttestutil.ToAssertableNullString("1"),
+				"cash_reserve":          inttestutil.ToAssertableNullString("false"),
+				"total_market_value":    inttestutil.NullAssertableNullString(),
+			},
+			{
+				"hierarchical_id":       inttestutil.ToAssertableNullString("{ARCA:SPY,STOCKS}"),
+				"slice_size_percentage": inttestutil.ToAssertableNullString("1.00000"),
+				"asset_id":              inttestutil.ToAssertableNullString("7"),
+				"cash_reserve":          inttestutil.ToAssertableNullString("false"),
+				"total_market_value":    inttestutil.NullAssertableNullString(),
+			},
+			{
+				"hierarchical_id":       inttestutil.ToAssertableNullString("{TEST:ALTBOND,BONDS2}"),
+				"slice_size_percentage": inttestutil.ToAssertableNullString("0.10000"),
+				"cash_reserve":          inttestutil.ToAssertableNullString("true"),
+				"total_market_value":    inttestutil.NullAssertableNullString(),
+				"asset_id":              inttestutil.NotNullAssertableNullString(),
+				"asset_ticker":          inttestutil.ToAssertableNullString("TEST:ALTBOND"),
+				"asset_name":            inttestutil.ToAssertableNullString("Test Cash Reserve Bond DELETE"),
+			},
+			{
+				"hierarchical_id":       inttestutil.ToAssertableNullString("{NULL,BONDS2}"),
+				"slice_size_percentage": inttestutil.ToAssertableNullString("0.40000"),
+				"asset_id":              inttestutil.NullAssertableNullString(),
+				"cash_reserve":          inttestutil.ToAssertableNullString("false"),
+				"total_market_value":    inttestutil.NullAssertableNullString(),
+			},
+			{
+				"hierarchical_id":       inttestutil.ToAssertableNullString("{NULL,STOCKS}"),
+				"slice_size_percentage": inttestutil.ToAssertableNullString("0.60000"),
+				"asset_id":              inttestutil.NullAssertableNullString(),
+				"cash_reserve":          inttestutil.ToAssertableNullString("false"),
+				"total_market_value":    inttestutil.NullAssertableNullString(),
 			},
 		},
 	)
