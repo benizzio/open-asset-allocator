@@ -140,7 +140,7 @@ func (adapter *Adapter) recoverPanicInTransaction(
 			glog.Errorf("Transaction rollback failed: %v", rollbackErr)
 		}
 
-		panic("Re-panicking after transaction rollback")
+		panic(r)
 	}
 }
 
