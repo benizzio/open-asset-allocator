@@ -828,7 +828,7 @@ func TestPostAllocationPlanValidation_PercentageSumExceedsParentLimit(t *testing
 
 	var expected = `{
         "errorMessage": "Allocation plan validation failed",
-        "details": ["Planned allocations slice sizes exceed 100% within hierarchy level(s): Classes: BONDS"]
+        "details": ["Planned allocations slice sizes exceed 100% within hierarchy level(s): Classes = BONDS (1.2%)"]
     }`
 	assert.JSONEq(t, expected, string(body))
 }
@@ -868,7 +868,7 @@ func TestPostAllocationPlanValidation_PercentageSumBelowParentLimit(t *testing.T
 
 	var expected = `{
         "errorMessage": "Allocation plan validation failed",
-        "details": ["Planned allocations slice sizes sum to less than 100% within hierarchy level(s): Classes: BONDS"]
+        "details": ["Planned allocations slice sizes sum to less than 100% within hierarchy level(s): Classes = BONDS (0.8%)"]
     }`
 	assert.JSONEq(t, expected, string(body))
 }
@@ -906,7 +906,7 @@ func TestPostAllocationPlanValidation_TopLevelPercentageSumExceedsLimit(t *testi
 
 	var expected = `{
        	"errorMessage": "Allocation plan validation failed",
-        "details": ["Planned allocations slice sizes exceed 100% within hierarchy level(s): Classes (TOP)"]
+        "details": ["Planned allocations slice sizes exceed 100% within hierarchy level(s): Classes (TOP) (1.3%)"]
     }`
 	assert.JSONEq(t, expected, string(body))
 }
@@ -941,7 +941,7 @@ func TestPostAllocationPlanValidation_TopLevelPercentageSumBelowLimit(t *testing
 
 	var expected = `{
        	"errorMessage": "Allocation plan validation failed",
-        "details": ["Planned allocations slice sizes sum to less than 100% within hierarchy level(s): Classes (TOP)"]
+        "details": ["Planned allocations slice sizes sum to less than 100% within hierarchy level(s): Classes (TOP) (0.8%)"]
     }`
 	assert.JSONEq(t, expected, string(body))
 }

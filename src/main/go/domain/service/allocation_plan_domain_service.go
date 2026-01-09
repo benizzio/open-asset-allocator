@@ -87,7 +87,7 @@ func (validationData *levelSliceSizeValidadationData) describeLevel(
 	if validationData.levelIndex == -1 {
 		return hierarchyLevels[len(hierarchyLevels)-1].Name + " (TOP)"
 	}
-	return hierarchyLevels[validationData.levelIndex].Name + ": " + levelId
+	return hierarchyLevels[validationData.levelIndex].Name + " = " + levelId
 }
 
 // TODO validate plan before persisting
@@ -262,7 +262,7 @@ func appendLevelDescription(
 	hierarchicalId string,
 ) langext.CustomSlice[string] {
 	var levelDescription = validationData.describeLevel(hierarchyLevels, hierarchicalId)
-	return append(levelDescriptionsSlice, levelDescription)
+	return append(levelDescriptionsSlice, levelDescription+" ("+validationData.sliceSize.String()+"%)")
 }
 
 func BuildAllocationPlanDomService(allocationPlanRepository domain.AllocationPlanRepository) *AllocationPlanDomService {
