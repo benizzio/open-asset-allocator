@@ -15,6 +15,7 @@ type AllocationPlanManagementAppService struct {
 	transactionManager       rdbms.TransactionManager
 	allocationPlanDomService *service.AllocationPlanDomService
 	assetDomService          *service.AssetDomService
+	portfolioDomService      *service.PortfolioDomService
 }
 
 func (service *AllocationPlanManagementAppService) PersistAllocationPlan(plan *domain.AllocationPlan) error {
@@ -27,9 +28,15 @@ func (service *AllocationPlanManagementAppService) PersistAllocationPlan(plan *d
 				return err
 			}
 
+			portfolio, err := service.portfolioDomService.GetPortfolio(plan.PortfolioId)
+			if err != nil {
+				return err
+			}
+
 			return service.allocationPlanDomService.PersistAllocationPlanInTransaction(
 				transContext,
 				plan,
+				&portfolio.AllocationStructure,
 			)
 		},
 	)
@@ -94,10 +101,12 @@ func BuildAllocationPlanManagementAppService(
 	transactionManager rdbms.TransactionManager,
 	allocationPlanDomService *service.AllocationPlanDomService,
 	assetDomService *service.AssetDomService,
+	portfolioDomService *service.PortfolioDomService,
 ) *AllocationPlanManagementAppService {
 	return &AllocationPlanManagementAppService{
 		transactionManager:       transactionManager,
 		allocationPlanDomService: allocationPlanDomService,
 		assetDomService:          assetDomService,
+		portfolioDomService:      portfolioDomService,
 	}
 }

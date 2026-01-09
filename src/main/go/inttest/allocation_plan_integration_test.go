@@ -791,8 +791,6 @@ func TestPostAllocationPlanValidation_DuplicateHierarchicalIds(t *testing.T) {
 }
 
 // Test validation (domain): child slice sizes within a parent must not exceed 100%.
-// Currently NOT implemented, so this test is expected to FAIL (receives 204 instead of 400).
-// Establishes desired error response contract: non-field-specific message listing the offending hierarchy level(s).
 //
 // Co-authored by: GitHub Copilot
 func TestPostAllocationPlanValidation_PercentageSumExceedsParentLimit(t *testing.T) {
@@ -817,7 +815,7 @@ func TestPostAllocationPlanValidation_PercentageSumExceedsParentLimit(t *testing
 	`
 
 	response, err := http.Post(
-		inttestinfra.TestAPIURLPrefix+"/portfolio/2/allocation-plan",
+		inttestinfra.TestAPIURLPrefix+"/portfolio/1/allocation-plan",
 		"application/json",
 		strings.NewReader(updatePlanJSON),
 	)
@@ -830,14 +828,12 @@ func TestPostAllocationPlanValidation_PercentageSumExceedsParentLimit(t *testing
 
 	var expected = `{
         "errorMessage": "Allocation plan validation failed",
-        "details": ["Planned allocations slice sizes exceed 100% within hierarchy level(s): BONDS"]
+        "details": ["Planned allocations slice sizes exceed 100% within hierarchy level(s): Classes: BONDS"]
     }`
 	assert.JSONEq(t, expected, string(body))
 }
 
 // Test validation (domain): top-level slice sizes must not exceed 100%.
-// Currently NOT implemented, so this test is expected to FAIL (receives 204 instead of 400).
-// Establishes desired error response contract: non-field-specific message for top-level overflow.
 //
 // Co-authored by: GitHub Copilot
 func TestPostAllocationPlanValidation_TopLevelPercentageSumExceedsLimit(t *testing.T) {
@@ -857,7 +853,7 @@ func TestPostAllocationPlanValidation_TopLevelPercentageSumExceedsLimit(t *testi
 	`
 
 	response, err := http.Post(
-		inttestinfra.TestAPIURLPrefix+"/portfolio/2/allocation-plan",
+		inttestinfra.TestAPIURLPrefix+"/portfolio/1/allocation-plan",
 		"application/json",
 		strings.NewReader(updatePlanJSON),
 	)
@@ -870,7 +866,7 @@ func TestPostAllocationPlanValidation_TopLevelPercentageSumExceedsLimit(t *testi
 
 	var expected = `{
        	"errorMessage": "Allocation plan validation failed",
-        "details": ["Planned allocations slice sizes exceed 100% within hierarchy level(s): TOP"]
+        "details": ["Planned allocations slice sizes exceed 100% within hierarchy level(s): Classes (TOP)"]
     }`
 	assert.JSONEq(t, expected, string(body))
 }
