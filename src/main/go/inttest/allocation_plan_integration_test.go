@@ -643,7 +643,7 @@ func TestPostAllocationPlanForUpdate_ChangesHierarchicalId(t *testing.T) {
 			AddCleanupQuery(
 				`
 					DELETE FROM planned_allocation 
-					WHERE allocation_plan_id = %s AND hierarchical_id = '{TEST:ALTBOND,BONDS}'
+					WHERE allocation_plan_id = %s AND hierarchical_id = '{TEST:ALTBOND,BONDS2}'
 				`,
 				allocationPlanIdString,
 			).
