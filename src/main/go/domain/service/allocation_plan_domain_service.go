@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/domain/allocation"
@@ -84,8 +85,12 @@ func (validationData *levelSliceSizeValidationData) describeLevel(
 	hierarchyLevels domain.AllocationHierarchy,
 	levelId string,
 ) string {
+	var hierarchySize = len(hierarchyLevels)
 	if validationData.levelIndex == -1 {
-		return hierarchyLevels[len(hierarchyLevels)-1].Name + " (TOP)"
+		return hierarchyLevels[hierarchySize-1].Name + " (TOP)"
+	}
+	if validationData.levelIndex < 0 || validationData.levelIndex >= hierarchySize {
+		return "Unknown hierarchy level" + " = " + levelId + " (index " + strconv.Itoa(validationData.levelIndex) + ")"
 	}
 	return hierarchyLevels[validationData.levelIndex].Name + " = " + levelId
 }
@@ -109,7 +114,7 @@ func (service *AllocationPlanDomService) validateAllocationPlan(
 	}
 	// Use empty string key to track TOP-level percentage aggregation
 	validationData.levelSliceSizes[""] = &levelSliceSizeValidationData{
-		levelIndex: hierarchyLevels.Size() - 1,
+		levelIndex: -1,
 		sliceSize:  decimal.Zero,
 	}
 
