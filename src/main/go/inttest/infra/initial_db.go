@@ -506,7 +506,6 @@ const initialStateSQL = `
 			   'Test Portfolio 5',
 			   '{"hierarchy": [{"name": "Assets", "field": "assetTicker"}, {"name": "Classes", "field": "class"}]}'::jsonb
 		   )
-		ON CONFLICT (id) DO UPDATE set "name" = EXCLUDED."name", allocation_structure = EXCLUDED.allocation_structure
 	;
 
 	-- Pre-seeded allocation plan specifically for update tests
