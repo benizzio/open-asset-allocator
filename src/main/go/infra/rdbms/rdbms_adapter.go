@@ -107,14 +107,6 @@ func (adapter *Adapter) BuildQuery(sql string) *QueryBuilder {
 	}
 }
 
-func (adapter *Adapter) buildTransactionalContext() (*SQLTransactionalContext, error) {
-	var transactionContext, err = withTransaction(adapter.connectionPool)
-	if err != nil {
-		return nil, err
-	}
-	return transactionContext, nil
-}
-
 func (adapter *Adapter) RunInTransaction(
 	transactionalFunction func(transContext *SQLTransactionalContext) error,
 ) error {
@@ -124,17 +116,32 @@ func (adapter *Adapter) RunInTransaction(
 		return err
 	}
 
-	defer func() {
-		if r := recover(); r != nil {
-			glog.Errorf("Recovered from panic during transactional operation: %v", r)
-			var transaction = transContext.GetTransaction()
-			if rollbackErr := transaction.Rollback(); rollbackErr != nil {
-				glog.Errorf("Transaction rollback failed: %v", rollbackErr)
-			}
-		}
-	}()
+	defer adapter.recoverPanicInTransaction(transContext)
 
 	return adapter.runInTransaction(transContext, transactionalFunction)
+}
+
+func (adapter *Adapter) buildTransactionalContext() (*SQLTransactionalContext, error) {
+	var transactionContext, err = withTransaction(adapter.connectionPool)
+	if err != nil {
+		return nil, err
+	}
+	return transactionContext, nil
+}
+
+func (adapter *Adapter) recoverPanicInTransaction(
+	transContext *SQLTransactionalContext,
+) {
+	if r := recover(); r != nil {
+
+		glog.Errorf("Recovered from panic during transactional operation: %v", r)
+		var transaction = transContext.GetTransaction()
+		if rollbackErr := transaction.Rollback(); rollbackErr != nil {
+			glog.Errorf("Transaction rollback failed: %v", rollbackErr)
+		}
+
+		panic(r)
+	}
 }
 
 func (adapter *Adapter) runInTransaction(

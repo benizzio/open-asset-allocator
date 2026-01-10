@@ -66,6 +66,7 @@ const (
 			)
 		WHEN MATCHED THEN
 			UPDATE SET 
+				hierarchical_id = temp.hierarchical_id, 
 				cash_reserve = temp.cash_reserve,
 				slice_size_percentage = temp.slice_size_percentage
 		WHEN NOT MATCHED BY SOURCE AND pa.allocation_plan_id = $1 THEN

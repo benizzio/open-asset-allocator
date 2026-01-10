@@ -121,6 +121,22 @@ func TestGetPortfolios(t *testing.T) {
 						}
 					]
 				}
+			},
+			{
+				"id":5,
+				"name":"Test Portfolio 5",
+				"allocationStructure": {
+					"hierarchy": [
+						{
+							"name":"Assets",
+							"field":"assetTicker"
+						},
+						{
+							"name":"Classes",
+							"field":"class"
+						}
+					]
+				}
 			}
 		]	
 	`

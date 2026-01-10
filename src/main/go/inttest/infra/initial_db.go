@@ -496,13 +496,21 @@ const initialStateSQL = `
 
 	-- ###################################################################
 	-- *******************************************************************
-	-- UPDATE ALLOCATION PLAN TEST FIXTURE (portfolio 2)
+	-- UPDATE ALLOCATION PLAN TEST FIXTURE (portfolio 5)
 	-- *******************************************************************
 	-- ###################################################################
 
+	INSERT INTO portfolio (id, "name", allocation_structure)
+	VALUES (
+			   5,
+			   'Test Portfolio 5',
+			   '{"hierarchy": [{"name": "Assets", "field": "assetTicker"}, {"name": "Classes", "field": "class"}]}'::jsonb
+		   )
+	;
+
 	-- Pre-seeded allocation plan specifically for update tests
 	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, portfolio_id)
-	VALUES (6, 'Update Allocation Plan Fixture', 'ALLOCATION_PLAN', NULL, 2)
+	VALUES (6, 'Update Allocation Plan Fixture', 'ALLOCATION_PLAN', NULL, 5)
 	;
 
 	-- Top-level categories

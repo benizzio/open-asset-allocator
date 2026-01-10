@@ -87,6 +87,7 @@ func (app *App) buildAppComponents() {
 		app.databaseAdapter,
 		allocationPlanDomService,
 		assetDomService,
+		portfolioDomService,
 	)
 
 	// =====================================================

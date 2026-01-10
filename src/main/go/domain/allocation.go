@@ -107,6 +107,21 @@ func (hierarchicalId HierarchicalId) ParentLevelId() HierarchicalId {
 	return hierarchicalId[levelIndex+1:]
 }
 
+func (hierarchicalId HierarchicalId) GetParentLevelIndex() int {
+
+	var levelIndex = hierarchicalId.GetLevelIndex()
+
+	if levelIndex == -1 {
+		return -2
+	}
+
+	if levelIndex == len(hierarchicalId)-1 {
+		return -1
+	}
+
+	return levelIndex + 1
+}
+
 // AllocationRepository provides operations for querying allocation data across
 // portfolio allocations and planned allocations.
 //
