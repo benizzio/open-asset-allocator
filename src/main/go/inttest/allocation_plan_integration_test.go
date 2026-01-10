@@ -287,7 +287,6 @@ func TestPostAllocationPlanForInsertion(t *testing.T) {
 // and asserts an existing asset name is not overwritten, slice sizes are updated, and a new
 // planned allocation is inserted as part of the update operation. It also updates the plan name
 // and verifies the rename works, then cleans up to restore the original fixture state.
-// Uses fixture: portfolio 2, plan name 'Update Allocation Plan Fixture'.
 //
 // Co-authored by: GitHub Copilot
 func TestPostAllocationPlanForUpdate_DoesNotOverwriteExistingAssetName(t *testing.T) {
@@ -396,7 +395,7 @@ func TestPostAllocationPlanForUpdate_DoesNotOverwriteExistingAssetName(t *testin
 	)
 
 	response, err := http.Post(
-		inttestinfra.TestAPIURLPrefix+"/portfolio/2/allocation-plan",
+		inttestinfra.TestAPIURLPrefix+"/portfolio/5/allocation-plan",
 		"application/json",
 		strings.NewReader(updatePlanJSON),
 	)
@@ -498,7 +497,6 @@ func TestPostAllocationPlanForUpdate_DoesNotOverwriteExistingAssetName(t *testin
 // and asserts an existing asset name is not overwritten, slice sizes are updated, and a new
 // planned allocation is inserted as part of the update operation. It also updates the plan name
 // and verifies the rename works, then cleans up to restore the original fixture state.
-// Uses fixture: portfolio 2, plan name 'Update Allocation Plan Fixture'.
 //
 // Co-authored by: GitHub Copilot
 func TestPostAllocationPlanForUpdate_DeletesPlannedAllocationAndKeepsAsset(t *testing.T) {
@@ -577,7 +575,7 @@ func TestPostAllocationPlanForUpdate_DeletesPlannedAllocationAndKeepsAsset(t *te
 	)
 
 	response, err := http.Post(
-		inttestinfra.TestAPIURLPrefix+"/portfolio/2/allocation-plan",
+		inttestinfra.TestAPIURLPrefix+"/portfolio/5/allocation-plan",
 		"application/json",
 		strings.NewReader(updatePlanJSON),
 	)
