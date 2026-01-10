@@ -70,17 +70,17 @@ func (service *AllocationPlanDomService) PersistAllocationPlanInTransaction(
 
 }
 
-type allocationPlanValidationValidationData struct {
+type allocationPlanValidationData struct {
 	hierarchicalIdCounts map[string]int
-	levelSliceSizes      map[string]*levelSliceSizeValidadationData
+	levelSliceSizes      map[string]*levelSliceSizeValidationData
 }
 
-type levelSliceSizeValidadationData struct {
+type levelSliceSizeValidationData struct {
 	levelIndex int
 	sliceSize  decimal.Decimal
 }
 
-func (validationData *levelSliceSizeValidadationData) describeLevel(
+func (validationData *levelSliceSizeValidationData) describeLevel(
 	hierarchyLevels domain.AllocationHierarchy,
 	levelId string,
 ) string {
@@ -103,12 +103,12 @@ func (service *AllocationPlanDomService) validateAllocationPlan(
 
 	var hierarchyLevels = allocationStructure.Hierarchy
 
-	var validationData = &allocationPlanValidationValidationData{
+	var validationData = &allocationPlanValidationData{
 		hierarchicalIdCounts: make(map[string]int),
-		levelSliceSizes:      make(map[string]*levelSliceSizeValidadationData),
+		levelSliceSizes:      make(map[string]*levelSliceSizeValidationData),
 	}
 	// Use empty string key to track TOP-level percentage aggregation
-	validationData.levelSliceSizes[""] = &levelSliceSizeValidadationData{
+	validationData.levelSliceSizes[""] = &levelSliceSizeValidationData{
 		levelIndex: hierarchyLevels.Size() - 1,
 		sliceSize:  decimal.Zero,
 	}
@@ -126,7 +126,7 @@ func (service *AllocationPlanDomService) validateAllocationPlan(
 	return nil
 }
 
-func readValidationData(plan *domain.AllocationPlan, validation *allocationPlanValidationValidationData) {
+func readValidationData(plan *domain.AllocationPlan, validation *allocationPlanValidationData) {
 	for _, plannedAllocation := range plan.Details {
 		readPlannedAllocationForRepeatedValidationData(plannedAllocation, validation)
 		readPlannedAllocationForSliceSizeTotals(plannedAllocation, validation)
@@ -136,7 +136,7 @@ func readValidationData(plan *domain.AllocationPlan, validation *allocationPlanV
 // readPlannedAllocationForRepeatedValidationData reads counts of hierarchical ids to validate repetitions
 func readPlannedAllocationForRepeatedValidationData(
 	plannedAllocation *domain.PlannedAllocation,
-	validation *allocationPlanValidationValidationData,
+	validation *allocationPlanValidationData,
 ) {
 	var hierarchicalIdString = plannedAllocation.HierarchicalId.String()
 	var count, exists = validation.hierarchicalIdCounts[hierarchicalIdString]
@@ -150,7 +150,7 @@ func readPlannedAllocationForRepeatedValidationData(
 // readPlannedAllocationForSliceSizeTotals aggregates slice size percentages per hierarchy level for validations
 func readPlannedAllocationForSliceSizeTotals(
 	plannedAllocation *domain.PlannedAllocation,
-	validation *allocationPlanValidationValidationData,
+	validation *allocationPlanValidationData,
 ) {
 
 	// Aggregate percentages per hierarchy level:
@@ -169,7 +169,7 @@ func readPlannedAllocationForSliceSizeTotals(
 		var levelValidationData, levelExists = validation.levelSliceSizes[parentHierarchicalIdString]
 
 		if !levelExists {
-			validation.levelSliceSizes[parentHierarchicalIdString] = &levelSliceSizeValidadationData{
+			validation.levelSliceSizes[parentHierarchicalIdString] = &levelSliceSizeValidationData{
 				levelIndex: plannedAllocation.HierarchicalId.GetParentLevelIndex(),
 				sliceSize:  plannedAllocation.SliceSizePercentage,
 			}
@@ -180,7 +180,7 @@ func readPlannedAllocationForSliceSizeTotals(
 }
 
 func (service *AllocationPlanDomService) validateHierarchicalIdUniqueness(
-	validationData *allocationPlanValidationValidationData,
+	validationData *allocationPlanValidationData,
 	errors []*infra.AppError,
 ) []*infra.AppError {
 
@@ -207,7 +207,7 @@ func (service *AllocationPlanDomService) validateHierarchicalIdUniqueness(
 
 func (service *AllocationPlanDomService) validateHierarchyLevelsSliceSizeSums(
 	hierarchyLevels domain.AllocationHierarchy,
-	validation *allocationPlanValidationValidationData,
+	validation *allocationPlanValidationData,
 	errors []*infra.AppError,
 ) []*infra.AppError {
 
@@ -259,13 +259,14 @@ func (service *AllocationPlanDomService) validateHierarchyLevelsSliceSizeSums(
 }
 
 func appendLevelDescription(
-	validationData *levelSliceSizeValidadationData,
+	validationData *levelSliceSizeValidationData,
 	levelDescriptionsSlice langext.CustomSlice[string],
 	hierarchyLevels domain.AllocationHierarchy,
 	hierarchicalId string,
 ) langext.CustomSlice[string] {
 	var levelDescription = validationData.describeLevel(hierarchyLevels, hierarchicalId)
-	return append(levelDescriptionsSlice, levelDescription+" ("+validationData.sliceSize.String()+"%)")
+	var sliceSizePercentage = validationData.sliceSize.Mul(decimal.NewFromInt(100)).String()
+	return append(levelDescriptionsSlice, levelDescription+" ("+sliceSizePercentage+"%)")
 }
 
 func BuildAllocationPlanDomService(allocationPlanRepository domain.AllocationPlanRepository) *AllocationPlanDomService {
