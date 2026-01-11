@@ -17,7 +17,7 @@
              hx-include="[name='portfolioId']"
              hx-trigger="load, reload-allocation-plan-management"
              handlebars-template="template-allocation-plan-management"
-             data-hx-transform-response="mapToCompleteAllocationPlans"
+             data-hx-transform-response="mapForAllocationPlanManagent"
              data-hx-transform-response-on-path-matching="^\/api\/portfolio\/.+\/allocation\-plan$"
              data-hx-transform-response-on-verb-matching="GET"
         >
@@ -135,7 +135,9 @@
                                     <!-- keep track of last index for adding new rows -->
                                     <input type="hidden"
                                            name="last-planned-allocation-row-index"
-                                           value="{{math allocationPlan.details.length "-" 1}}"
+                                           value="{{#if allocationPlan.details.length}}
+                                               {{math allocationPlan.details.length "-" 1}}
+                                           {{else}}0{{/if}}"
                                            disabled
                                     />
                                 </td>
