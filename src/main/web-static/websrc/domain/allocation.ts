@@ -1,4 +1,4 @@
-export enum AllocationType {
+export enum AllocationPlanType {
     ASSET_ALLOCATION_PLAN = "ALLOCATION_PLAN",
     BALANCING_EXECUTION_PLAN = "EXECUTION_PLAN",
 }
