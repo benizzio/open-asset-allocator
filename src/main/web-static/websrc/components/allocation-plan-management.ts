@@ -1,5 +1,9 @@
 import PortfolioPage from "../pages/portfolio";
-import { AllocationPlanDTO, SerializableFractalPlannedAllocation } from "../domain/allocation-plan";
+import {
+    AllocationPlanDTO,
+    SerializableCompleteAllocationPlan,
+    SerializableFractalPlannedAllocation,
+} from "../domain/allocation-plan";
 import { DomainService } from "../domain/service";
 import { Asset } from "../domain/asset";
 import { AfterRequestEventDetail, HtmxInfra } from "../infra/htmx";
@@ -8,7 +12,7 @@ import BigNumber from "bignumber.js";
 import * as handlebars from "handlebars";
 import { isNullish, toInt } from "../utils/lang";
 import { Portfolio } from "../domain/portfolio";
-import { AllocationHierarchyLevel } from "../domain/allocation";
+import { AllocationHierarchyLevel, AllocationPlanType } from "../domain/allocation";
 import AssetComposedColumnsInput from "./asset-composed-columns-input";
 import htmx from "htmx.org";
 import Router from "../infra/routing";
@@ -33,7 +37,7 @@ const ALLOCATION_PLAN_MANAGEMENT_FORM_PREFIX = "allocation-plan-management-form-
 
 const ASSET_TICKER_FIELD_NAME_SUFFIX = "[asset][ticker]";
 
-function mapToCompleteAllocationPlans(originalServerResponseJSON: string): string {
+function mapForAllocationPlanManagement(originalServerResponseJSON: string): string {
 
     const portfolioDTO = PortfolioPage.getContextPortfolio();
     const allocationPlanDTOs = JSON.parse(originalServerResponseJSON) as AllocationPlanDTO[];
@@ -42,6 +46,27 @@ function mapToCompleteAllocationPlans(originalServerResponseJSON: string): strin
         portfolioDTO,
         allocationPlanDTOs,
     );
+
+    const portfolio = DomainService.mapping.mapToPortfolio(portfolioDTO);
+    const hierarchy = portfolio.allocationStructure.hierarchy;
+    const topHierarchyLevel = hierarchy[hierarchy.length - 1];
+
+    const planZero: SerializableCompleteAllocationPlan = {
+        allocationPlan: {
+            id: 0,
+            name: "",
+            type: AllocationPlanType.ASSET_ALLOCATION_PLAN,
+            details: [],
+        },
+        fractalHierarchicalPlan: {
+            subLevel: topHierarchyLevel,
+            topAllocations: [],
+        },
+        topLevelKey: topHierarchyLevel.name,
+    };
+
+    completeAllocationPlanSet.completeAllocationPlans.unshift(planZero);
+
     return JSON.stringify(completeAllocationPlanSet);
 }
 
@@ -343,8 +368,8 @@ const allocationPlanManagement = {
     init() {
 
         HtmxInfra.htmxTransformResponse.registerTransformResponseFunction(
-            "mapToCompleteAllocationPlans",
-            mapToCompleteAllocationPlans,
+            "mapForAllocationPlanManagement",
+            mapForAllocationPlanManagement,
         );
 
         this.handlebarsAllocationPlanManagementRowTemplate = Handlebars.compile(
@@ -426,7 +451,7 @@ const allocationPlanManagement = {
         );
     },
 
-    submitHandler(form: HTMLFormElement, hierarchySize: number) {
+    handleSubmit(form: HTMLFormElement, hierarchySize: number) {
 
         copyAssetTickersToHierarchicalIdFields(form);
 
@@ -444,7 +469,7 @@ const allocationPlanManagement = {
         form.requestSubmit();
     },
 
-    postRequestHandler(event: CustomEvent) {
+    handleAfterRequest(event: CustomEvent) {
 
         const eventDetail = event.detail as AfterRequestEventDetail;
 
@@ -465,6 +490,13 @@ const allocationPlanManagement = {
             content: "Allocation plan saved successfully",
             type: NotificationType.SUCCESS,
         });
+    },
+
+    handleInputAllocationPlanName(nameInput: HTMLInputElement, allocationPlanId: number) {
+        const formId = `${ ALLOCATION_PLAN_MANAGEMENT_FORM_PREFIX }${ allocationPlanId }`;
+        const form = window[formId] as HTMLFormElement;
+        const allocationPlanNameInput = form.elements.namedItem("name") as HTMLInputElement;
+        allocationPlanNameInput.value = nameInput.value;
     },
 
     navigateToAllocationPlansViewing() {

@@ -2,6 +2,7 @@ package langext
 
 import (
 	"reflect"
+	"slices"
 )
 
 func ToPointerSlice[S any](slice []S) []*S {
@@ -81,4 +82,14 @@ func IsSlice(value any) bool {
 
 	var valueType = UnwrapType(reflect.TypeOf(value))
 	return valueType.Kind() == reflect.Slice
+}
+
+func CleanNilPointersInSlice[T any](slice []*T) []*T {
+	var cleanSlice = slices.DeleteFunc(
+		slice,
+		func(item *T) bool {
+			return item == nil
+		},
+	)
+	return cleanSlice
 }

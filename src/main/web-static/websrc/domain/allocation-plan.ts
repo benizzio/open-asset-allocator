@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import { AllocationHierarchyLevel, AllocationType } from "./allocation";
+import { AllocationHierarchyLevel, AllocationPlanType } from "./allocation";
 import { Portfolio } from "./portfolio";
 import { Asset } from "./asset";
 
@@ -13,7 +13,7 @@ export type PlannedAllocation = {
 export type AllocationPlan = {
     id: number;
     name: string;
-    type: AllocationType;
+    type: AllocationPlanType;
     plannedExecutionDate?: Date,
     details: PlannedAllocation[],
 };

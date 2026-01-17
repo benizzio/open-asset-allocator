@@ -17,7 +17,7 @@
              hx-include="[name='portfolioId']"
              hx-trigger="load, reload-allocation-plan-management"
              handlebars-template="template-allocation-plan-management"
-             data-hx-transform-response="mapToCompleteAllocationPlans"
+             data-hx-transform-response="mapForAllocationPlanManagement"
              data-hx-transform-response-on-path-matching="^\/api\/portfolio\/.+\/allocation\-plan$"
              data-hx-transform-response-on-verb-matching="GET"
         >
@@ -49,13 +49,12 @@
                     {{#if allocationPlan.id}}
                         {{allocationPlan.name}}
                     {{else}}
-                        <!-- TODO mask oninput -->
                         <input type="text"
                                placeholder="New allocation plan *"
                                aria-label="New allocation plan name"
                                autocomplete="off"
                                class="form-control me-3"
-                               oninput=""
+                               oninput="allocationPlanManagement.handleInputAllocationPlanName(this, {{allocationPlan.id}})"
                                onkeyup="event.preventDefault()"
                         />
                     {{/if}}
@@ -72,7 +71,7 @@
                           class="needs-validation"
                           hx-post="/api/portfolio/:portfolioId/allocation-plan"
                           hx-ext="form-json"
-                          hx-on::after-request="allocationPlanManagement.postRequestHandler(event)"
+                          hx-on::after-request="allocationPlanManagement.handleAfterRequest(event)"
                     >
 
                         <input type="hidden" name="id" value="{{allocationPlan.id}}" />
@@ -125,7 +124,7 @@
 
                                         <button class="btn btn-primary ms-auto"
                                                 type="button"
-                                                onclick="allocationPlanManagement.submitHandler(this.closest('form'), {{@root.portfolio.allocationStructure.hierarchy.length}})"
+                                                onclick="allocationPlanManagement.handleSubmit(this.closest('form'), {{@root.portfolio.allocationStructure.hierarchy.length}})"
                                         >
                                             <span class="bi bi-save-fill h5"></span>
                                         </button>
@@ -135,7 +134,9 @@
                                     <!-- keep track of last index for adding new rows -->
                                     <input type="hidden"
                                            name="last-planned-allocation-row-index"
-                                           value="{{math allocationPlan.details.length "-" 1}}"
+                                           value="{{#if allocationPlan.details.length}}
+                                               {{math allocationPlan.details.length "-" 1}}
+                                           {{else}}0{{/if}}"
                                            disabled
                                     />
                                 </td>
