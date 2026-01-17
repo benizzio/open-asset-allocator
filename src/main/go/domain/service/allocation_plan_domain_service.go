@@ -98,7 +98,7 @@ func (validationData *levelSliceSizeValidationData) describeLevel(
 // TODO validate plan before persisting
 // - hierarchy matches portfolio hierarchy (allocation structure):
 //   - has expected hierarchical structure with correct level number
-//   - no parents without children and vice versa, except top and bottom levels
+//   - no parents without children and vice versa (all levels must be complete in a branch)
 //
 // - hierarchical ids with asset match asset ticker from reference
 func (service *AllocationPlanDomService) validateAllocationPlan(
