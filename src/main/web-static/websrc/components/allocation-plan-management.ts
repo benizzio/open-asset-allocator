@@ -54,7 +54,7 @@ function mapForAllocationPlanManagent(originalServerResponseJSON: string): strin
     const planZero: SerializableCompleteAllocationPlan = {
         allocationPlan: {
             id: 0,
-            name: "New Allocation Plan *",
+            name: "",
             type: AllocationPlanType.ASSET_ALLOCATION_PLAN,
             details: [],
         },
@@ -453,7 +453,7 @@ const allocationPlanManagement = {
         );
     },
 
-    submitHandler(form: HTMLFormElement, hierarchySize: number) {
+    handleSubmit(form: HTMLFormElement, hierarchySize: number) {
 
         copyAssetTickersToHierarchicalIdFields(form);
 
@@ -471,7 +471,7 @@ const allocationPlanManagement = {
         form.requestSubmit();
     },
 
-    postRequestHandler(event: CustomEvent) {
+    handleAfterRequest(event: CustomEvent) {
 
         const eventDetail = event.detail as AfterRequestEventDetail;
 
@@ -492,6 +492,13 @@ const allocationPlanManagement = {
             content: "Allocation plan saved successfully",
             type: NotificationType.SUCCESS,
         });
+    },
+
+    handleInputAllocationPlanName(nameInput: HTMLInputElement, allocationPlanId: number) {
+        const formId = `${ ALLOCATION_PLAN_MANAGEMENT_FORM_PREFIX }${ allocationPlanId }`;
+        const form = window[formId] as HTMLFormElement;
+        const allocationPlanNameInput = form.elements.namedItem("name") as HTMLInputElement;
+        allocationPlanNameInput.value = nameInput.value;
     },
 
     navigateToAllocationPlansViewing() {

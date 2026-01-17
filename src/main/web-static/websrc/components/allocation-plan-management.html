@@ -55,7 +55,7 @@
                                aria-label="New allocation plan name"
                                autocomplete="off"
                                class="form-control me-3"
-                               oninput=""
+                               oninput="allocationPlanManagement.handleInputAllocationPlanName(this, {{allocationPlan.id}})"
                                onkeyup="event.preventDefault()"
                         />
                     {{/if}}
@@ -72,7 +72,7 @@
                           class="needs-validation"
                           hx-post="/api/portfolio/:portfolioId/allocation-plan"
                           hx-ext="form-json"
-                          hx-on::after-request="allocationPlanManagement.postRequestHandler(event)"
+                          hx-on::after-request="allocationPlanManagement.handleAfterRequest(event)"
                     >
 
                         <input type="hidden" name="id" value="{{allocationPlan.id}}" />
@@ -125,7 +125,7 @@
 
                                         <button class="btn btn-primary ms-auto"
                                                 type="button"
-                                                onclick="allocationPlanManagement.submitHandler(this.closest('form'), {{@root.portfolio.allocationStructure.hierarchy.length}})"
+                                                onclick="allocationPlanManagement.handleSubmit(this.closest('form'), {{@root.portfolio.allocationStructure.hierarchy.length}})"
                                         >
                                             <span class="bi bi-save-fill h5"></span>
                                         </button>
