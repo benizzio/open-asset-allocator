@@ -261,6 +261,7 @@ func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 					"assetMarketPrice": "100.00",
 					"totalMarketValue": "15000"
 				},
+				null,
 				{
 					"assetId": 2,
 					"assetName": "This name should not affect asset record 2",

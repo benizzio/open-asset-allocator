@@ -66,6 +66,9 @@ func (controller *AllocationPlanRESTController) postAssetAllocationPlan(context 
 		return
 	}
 
+	var cleanedPlannedAllocations = langext.CleanNilPointersInSlice(allocationPlanDTS.Details)
+	allocationPlanDTS.Details = cleanedPlannedAllocations
+
 	allocationPlan, err := model.MapToAllocationPlan(&allocationPlanDTS, portfolioId, allocation.AssetAllocationPlan)
 	if HandleAPIError(context, "Error mapping allocation plan", err) {
 		return

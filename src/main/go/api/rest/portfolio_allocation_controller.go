@@ -3,7 +3,6 @@ package rest
 import (
 	"fmt"
 	"net/http"
-	"slices"
 	"strconv"
 
 	"github.com/benizzio/open-asset-allocator/api/rest/model"
@@ -203,17 +202,7 @@ func (controller *PortfolioAllocationRESTController) validateCleanPortfolioAlloc
 }
 
 func cleanNilAllocations(portfolioSnapshotDTS *model.PortfolioSnapshotDTS) {
-
-	var cleanAllocations = slices.DeleteFunc(
-		portfolioSnapshotDTS.Allocations,
-		func(allocation *model.PortfolioAllocationDTS) bool {
-			if allocation == nil {
-				return true
-			}
-			return false
-		},
-	)
-
+	var cleanAllocations = langext.CleanNilPointersInSlice(portfolioSnapshotDTS.Allocations)
 	portfolioSnapshotDTS.Allocations = cleanAllocations
 }
 

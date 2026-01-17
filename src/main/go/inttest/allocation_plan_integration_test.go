@@ -121,6 +121,7 @@ func TestPostAllocationPlanForInsertion(t *testing.T) {
 					"sliceSizePercentage":"0.5",
 					"asset":{ "id":7, "name":"SPDR S&P 500 ETF Trust", "ticker":"ARCA:SPY" }
 				},
+				null,
 				{
 					"hierarchicalId":["TEST:ALTBOND","STOCKS"],
 					"cashReserve":true,
