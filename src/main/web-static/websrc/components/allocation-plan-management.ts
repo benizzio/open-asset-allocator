@@ -67,8 +67,6 @@ function mapForAllocationPlanManagement(originalServerResponseJSON: string): str
 
     completeAllocationPlanSet.completeAllocationPlans.unshift(planZero);
 
-    console.log(completeAllocationPlanSet);
-
     return JSON.stringify(completeAllocationPlanSet);
 }
 
