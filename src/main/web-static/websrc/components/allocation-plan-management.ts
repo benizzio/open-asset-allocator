@@ -37,7 +37,7 @@ const ALLOCATION_PLAN_MANAGEMENT_FORM_PREFIX = "allocation-plan-management-form-
 
 const ASSET_TICKER_FIELD_NAME_SUFFIX = "[asset][ticker]";
 
-function mapForAllocationPlanManagent(originalServerResponseJSON: string): string {
+function mapForAllocationPlanManagement(originalServerResponseJSON: string): string {
 
     const portfolioDTO = PortfolioPage.getContextPortfolio();
     const allocationPlanDTOs = JSON.parse(originalServerResponseJSON) as AllocationPlanDTO[];
@@ -370,8 +370,8 @@ const allocationPlanManagement = {
     init() {
 
         HtmxInfra.htmxTransformResponse.registerTransformResponseFunction(
-            "mapForAllocationPlanManagent",
-            mapForAllocationPlanManagent,
+            "mapForAllocationPlanManagement",
+            mapForAllocationPlanManagement,
         );
 
         this.handlebarsAllocationPlanManagementRowTemplate = Handlebars.compile(
