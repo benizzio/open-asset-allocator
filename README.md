@@ -139,7 +139,7 @@ assessing portfolio vs. plan situation through time, helping re-balancing decisi
     - [ ] ui to handle data ingestion from known sources
     - [ ] no content message
 - Allocation Plan
-    - [ ] add form based data input (beginner-user-friendly)
+    - [x] add form based data input (beginner-user-friendly)
     - [ ] copy data from other plans
     - [ ] no content message
 - Allocation map:
