@@ -155,6 +155,7 @@ const portfolioHistoryManagement = {
         focusOnNewLine(newRow);
         // Process the newly added row with htmx to enable bindings
         htmx.process(newRow);
+        htmx.trigger(newRow, "htmx:afterSettle");
     },
 
     assetActionButtonClickHandler(formRowIndex: number, formUniqueId: string) {
