@@ -24,10 +24,10 @@ CREATE VIEW asset_price_last_market_data AS
     FROM asset_market_data_source amds
     JOIN asset ass ON amds.asset_id = ass.id
     LEFT JOIN (
-        SELECT asset_data_source_id, max(market_date) as max_marked_date FROM asset_price_market_data
+        SELECT asset_data_source_id, max(market_date) as max_market_date FROM asset_price_market_data
         GROUP BY asset_data_source_id
     ) apmdmd ON amds.id = apmdmd.asset_data_source_id
-    LEFT JOIN asset_price_market_data apmd ON amds.id = apmd.asset_data_source_id AND apmd.market_date = apmdmd.max_marked_date
+    LEFT JOIN asset_price_market_data apmd ON amds.id = apmd.asset_data_source_id AND apmd.market_date = apmdmd.max_market_date
 ;
 
 -- Portfolio table: name constraint
