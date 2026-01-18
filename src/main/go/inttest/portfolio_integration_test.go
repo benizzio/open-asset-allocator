@@ -611,7 +611,7 @@ func TestPostPortfolioFailureWithNameExceedingMaxLength(t *testing.T) {
 		{
 			"errorMessage": "Validation failed",
 			"details": [
-				"Field 'name' failed validation: must be at most 100 characters"
+				"Field 'name' failed validation: must not exceed 100"
 			]
 		}
 	`
@@ -687,7 +687,7 @@ func TestPutPortfolioFailureWithNameExceedingMaxLength(t *testing.T) {
 		{
 			"errorMessage": "Validation failed",
 			"details": [
-				"Field 'name' failed validation: must be at most 100 characters"
+				"Field 'name' failed validation: must not exceed 100"
 			]
 		}
 	`

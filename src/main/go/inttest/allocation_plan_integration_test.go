@@ -1136,3 +1136,70 @@ func TestPostAllocationPlanValidation_TopLevelPercentageSumBelowLimit(t *testing
     }`
 	assert.JSONEq(t, expected, string(body))
 }
+
+// TestPostAllocationPlanValidation_NameExceedsMaxLength tests that posting an allocation plan
+// with a name exceeding the max length (100 characters) returns a validation error.
+//
+// Authored by: GitHub Copilot
+func TestPostAllocationPlanValidation_NameExceedsMaxLength(t *testing.T) {
+
+	var longName = strings.Repeat("a", 101) // 101 characters exceeds max=100
+
+	var payload = `{
+		"name": "` + longName + `",
+		"details": [
+			{ "hierarchicalId": [null, "TEST"], "sliceSizePercentage": "1.0" }
+		]
+	}`
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLPrefix+"/portfolio/1/allocation-plan",
+		"application/json",
+		strings.NewReader(payload),
+	)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+
+	var expected = `{
+		"errorMessage": "Validation failed",
+		"details": ["Field 'name' failed validation: must not exceed 100"]
+	}`
+	assert.JSONEq(t, expected, string(body))
+}
+
+// TestPostAllocationPlanValidation_TypeExceedsMaxLength tests that posting an allocation plan
+// with a type exceeding the max length (50 characters) returns a validation error.
+//
+// Authored by: GitHub Copilot
+func TestPostAllocationPlanValidation_TypeExceedsMaxLength(t *testing.T) {
+
+	var longType = strings.Repeat("T", 51) // 51 characters exceeds max=50
+
+	var payload = `{
+		"name": "Test Plan",
+		"type": "` + longType + `",
+		"details": [
+			{ "hierarchicalId": [null, "TEST"], "sliceSizePercentage": "1.0" }
+		]
+	}`
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLPrefix+"/portfolio/1/allocation-plan",
+		"application/json",
+		strings.NewReader(payload),
+	)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+
+	var expected = `{
+		"errorMessage": "Validation failed",
+		"details": ["Field 'type' failed validation: must not exceed 50"]
+	}`
+	assert.JSONEq(t, expected, string(body))
+}

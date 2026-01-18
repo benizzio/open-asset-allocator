@@ -1172,3 +1172,126 @@ func TestGetPortfolioAllocationHistoryWithMultiplePortfoliosAndManyObservations(
 	assert.Contains(t, actualResponse1JSON, "202503")
 	assert.Contains(t, actualResponse1JSON, "202501")
 }
+
+// TestPostPortfolioAllocationHistoryValidation_ClassExceedsMaxLength tests that posting
+// a portfolio allocation with a class exceeding the max length (100 characters) returns a validation error.
+//
+// Authored by: GitHub Copilot
+func TestPostPortfolioAllocationHistoryValidation_ClassExceedsMaxLength(t *testing.T) {
+
+	var longClass = strings.Repeat("C", 101) // 101 characters exceeds max=100
+
+	var payload = `{
+		"observationTimestamp": {
+			"timeTag": "TEST_LONG_CLASS",
+			"timestamp": "2025-12-01T00:00:00Z"
+		},
+		"allocations": [
+			{
+				"assetTicker": "TEST:TICKER",
+				"assetName": "Test Asset",
+				"class": "` + longClass + `",
+				"totalMarketValue": "1000"
+			}
+		]
+	}`
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLPrefix+"/portfolio/1/history",
+		"application/json",
+		strings.NewReader(payload),
+	)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+
+	var expected = `{
+		"errorMessage": "Validation failed",
+		"details": ["Field 'allocations[0].class' failed validation: must not exceed 100"]
+	}`
+	assert.JSONEq(t, expected, string(body))
+}
+
+// TestPostPortfolioAllocationHistoryValidation_AssetTickerExceedsMaxLength tests that posting
+// a portfolio allocation with an asset ticker exceeding the max length (40 characters) returns a validation error.
+//
+// Authored by: GitHub Copilot
+func TestPostPortfolioAllocationHistoryValidation_AssetTickerExceedsMaxLength(t *testing.T) {
+
+	var longTicker = strings.Repeat("T", 41) // 41 characters exceeds max=40
+
+	var payload = `{
+		"observationTimestamp": {
+			"timeTag": "TEST_LONG_TICKER",
+			"timestamp": "2025-12-01T00:00:00Z"
+		},
+		"allocations": [
+			{
+				"assetTicker": "` + longTicker + `",
+				"assetName": "Test Asset",
+				"class": "STOCKS",
+				"totalMarketValue": "1000"
+			}
+		]
+	}`
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLPrefix+"/portfolio/1/history",
+		"application/json",
+		strings.NewReader(payload),
+	)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+
+	var expected = `{
+		"errorMessage": "Validation failed",
+		"details": ["Field 'allocations[0].assetTicker' failed validation: must not exceed 40"]
+	}`
+	assert.JSONEq(t, expected, string(body))
+}
+
+// TestPostPortfolioAllocationHistoryValidation_AssetNameExceedsMaxLength tests that posting
+// a portfolio allocation with an asset name exceeding the max length (100 characters) returns a validation error.
+//
+// Authored by: GitHub Copilot
+func TestPostPortfolioAllocationHistoryValidation_AssetNameExceedsMaxLength(t *testing.T) {
+
+	var longName = strings.Repeat("N", 101) // 101 characters exceeds max=100
+
+	var payload = `{
+		"observationTimestamp": {
+			"timeTag": "TEST_LONG_NAME",
+			"timestamp": "2025-12-01T00:00:00Z"
+		},
+		"allocations": [
+			{
+				"assetTicker": "TEST:TICKER",
+				"assetName": "` + longName + `",
+				"class": "STOCKS",
+				"totalMarketValue": "1000"
+			}
+		]
+	}`
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLPrefix+"/portfolio/1/history",
+		"application/json",
+		strings.NewReader(payload),
+	)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+
+	var expected = `{
+		"errorMessage": "Validation failed",
+		"details": ["Field 'allocations[0].assetName' failed validation: must not exceed 100"]
+	}`
+	assert.JSONEq(t, expected, string(body))
+}
