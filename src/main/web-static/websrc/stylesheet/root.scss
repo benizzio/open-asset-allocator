@@ -39,3 +39,17 @@
   padding: 0.25rem 0.5rem;
   font-size: 0.75rem;
 }
+
+// Text wrapping styles for table columns with constrained field values
+
+// For class names: wrap text breaking even single long words
+.text-wrap-break-all {
+  word-break: break-all;
+  overflow-wrap: break-word;
+}
+
+// For asset names: wrap only at word boundaries
+.text-wrap-break-word {
+  word-break: normal;
+  overflow-wrap: break-word;
+}
