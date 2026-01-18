@@ -14,7 +14,7 @@ package validation
 // 3. HTML maxlength attributes
 const (
 	// Asset field constraints
-	AssetTickerMaxLength = 20
+	AssetTickerMaxLength = 40
 	AssetNameMaxLength   = 100
 
 	// Portfolio field constraints

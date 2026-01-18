@@ -12,7 +12,7 @@ import (
 type AssetDTS struct {
 	Id     *langext.ParseableInt64 `json:"id"`
 	Name   string                  `json:"name" validate:"max=100"`
-	Ticker string                  `json:"ticker" validate:"max=20"`
+	Ticker string                  `json:"ticker" validate:"max=40"`
 }
 
 // ================================================

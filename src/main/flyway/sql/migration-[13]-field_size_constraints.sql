@@ -8,7 +8,7 @@ DROP VIEW IF EXISTS asset_ticker_market_data_source;
 
 -- Asset table: ticker and name constraints
 ALTER TABLE asset
-    ALTER COLUMN ticker SET DATA TYPE varchar(20),
+    ALTER COLUMN ticker SET DATA TYPE varchar(40),
     ALTER COLUMN name SET DATA TYPE varchar(100);
 
 -- Recreate views that were dropped
