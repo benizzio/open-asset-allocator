@@ -133,6 +133,7 @@
                                aria-label="Name"
                                required
                                autocomplete="off"
+                               maxlength="100"
                         />
 
                     </div>
@@ -187,7 +188,7 @@
 
 <script id="asset-composed-columns-input" type="text/x-handlebars-template">
 
-    <td>
+    <td class="text-wrap-break-word">
 
         <input type="hidden"
                name="{{assetIdHiddenFieldName}}"
@@ -212,6 +213,7 @@
                        hx-validate="true"
                        hx-on::validation:validate="{{assetTickerFieldHTMXOnValidate}}"
                        oninput="maskTickerInput(this)"
+                       maxlength="40"
                 />
                 <button data-asset-action-button
                         type="button"
@@ -236,7 +238,7 @@
 
     </td>
 
-    <td>
+    <td class="text-wrap-break-word">
 
         {{#if assetName}}
             {{assetName}}
@@ -249,6 +251,7 @@
                    class="form-control"
                    value="{{assetName}}"
                    style="display: none"
+                   maxlength="100"
             />
         {{/if}}
 
