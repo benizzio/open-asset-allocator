@@ -108,6 +108,8 @@ func (service *AllocationPlanDomService) validateAllocationPlan(
 
 	var hierarchyLevels = allocationStructure.Hierarchy
 
+	// TODO add a matrix representing the hierarchy structure to validate completeness of levels
+	// "no parent" can be added to the matrix with a tag
 	var validationData = &allocationPlanValidationData{
 		hierarchicalIdCounts: make(map[string]int),
 		levelSliceSizes:      make(map[string]*levelSliceSizeValidationData),
