@@ -590,3 +590,106 @@ func TestGetAvailablePortfolioAllocationClassesNoneFound(t *testing.T) {
 
 	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
 }
+
+// TestPostPortfolioFailureWithNameExceedingMaxLength tests that creating a portfolio
+// with a name exceeding the max length (100 characters) returns a validation error.
+//
+// Authored by: GitHub Copilot
+func TestPostPortfolioFailureWithNameExceedingMaxLength(t *testing.T) {
+
+	var longName = strings.Repeat("a", 101) // 101 characters exceeds max=100
+
+	var postPortfolioJSON = `
+		{
+			"name":"` + longName + `"
+		}
+	`
+
+	actualResponseJSON := string(postPortfolioForValidationFailure(t, postPortfolioJSON))
+
+	var expectedResponseJSON = `
+		{
+			"errorMessage": "Validation failed",
+			"details": [
+				"Field 'name' failed validation: must be at most 100 characters"
+			]
+		}
+	`
+	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
+}
+
+// TestPostPortfolioSuccessWithNameAtMaxLength tests that creating a portfolio
+// with a name at exactly the max length (100 characters) succeeds.
+//
+// Authored by: GitHub Copilot
+func TestPostPortfolioSuccessWithNameAtMaxLength(t *testing.T) {
+
+	var maxLengthName = strings.Repeat("a", 100) // exactly 100 characters
+
+	var postPortfolioJSON = `
+		{
+			"name":"` + maxLengthName + `"
+		}
+	`
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLPrefix+"/portfolio",
+		"application/json",
+		strings.NewReader(postPortfolioJSON),
+	)
+
+	t.Cleanup(
+		inttestutil.CreateDBCleanupFunction(
+			"DELETE FROM portfolio WHERE name='%s'",
+			maxLengthName,
+		),
+	)
+
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusCreated, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+
+	var actualPortfolioDTS restmodel.PortfolioDTS
+	err = json.Unmarshal(body, &actualPortfolioDTS)
+	assert.NoError(t, err)
+	assert.Equal(t, maxLengthName, actualPortfolioDTS.Name)
+}
+
+// TestPutPortfolioFailureWithNameExceedingMaxLength tests that updating a portfolio
+// with a name exceeding the max length (100 characters) returns a validation error.
+//
+// Authored by: GitHub Copilot
+func TestPutPortfolioFailureWithNameExceedingMaxLength(t *testing.T) {
+
+	var testPortfolioName = "This Test Portfolio will be updated with long name"
+	testPortFolio := insertTestPortfolio(t, testPortfolioName)
+
+	var longName = strings.Repeat("a", 101) // 101 characters exceeds max=100
+
+	var putPortfolioJSON = `
+		{
+			"id":%d,
+			"name":"` + longName + `"
+		}
+	`
+
+	var actualResponseJSON = string(
+		putForValidationFailure(
+			t,
+			fmt.Sprintf(putPortfolioJSON, testPortFolio.Id),
+		),
+	)
+
+	var expectedResponseJSON = `
+		{
+			"errorMessage": "Validation failed",
+			"details": [
+				"Field 'name' failed validation: must be at most 100 characters"
+			]
+		}
+	`
+	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
+}

@@ -1,6 +1,7 @@
 -- Migration: Add field size constraints to text fields
 -- This migration adds VARCHAR constraints to text fields to enforce size limits
 -- that will be synchronized with front-end and back-end validation
+-- Authored by: GitHub Copilot
 
 -- Drop views that depend on asset.ticker before altering column types
 DROP VIEW IF EXISTS asset_price_last_market_data;

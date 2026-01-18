@@ -42,13 +42,19 @@
 
 // Text wrapping styles for table columns with constrained field values
 
-// For class names: wrap text breaking even single long words
+/**
+ * For class names: wrap text breaking even single long words
+ * @author GitHub Copilot
+ */
 .text-wrap-break-all {
   word-break: break-all;
   overflow-wrap: break-word;
 }
 
-// For asset names: wrap only at word boundaries
+/**
+ * For asset names: wrap only at word boundaries
+ * @author GitHub Copilot
+ */
 .text-wrap-break-word {
   word-break: normal;
   overflow-wrap: break-word;
