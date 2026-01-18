@@ -1,3 +1,7 @@
+---
+applyTo: "src/main/web-static/**"
+---
+
 ## Javascript, Typescript, and HTML standards
 
 - all javascript, typescript, and HTML code is located in the `src/main/web-static` directory

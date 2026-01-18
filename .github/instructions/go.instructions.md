@@ -1,3 +1,7 @@
+---
+applyTo: "src/main/go/**"
+---
+
 # Go standards
 
 - all go code is located in the `src/main/go` directory
