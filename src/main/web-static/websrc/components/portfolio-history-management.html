@@ -62,6 +62,7 @@
                            class="form-control me-3"
                            oninput="maskTagInput(this); portfolioHistoryManagement.handleInputObservationTimeTag(this, {{id}})"
                            onkeyup="event.preventDefault()"
+                           maxlength="100"
                     />
                 {{/if}}
             </button>
@@ -167,6 +168,7 @@
                    list="datalist-classes"
                    oninput="maskTagInput(this)"
                    required
+                   maxlength="100"
             />
         </td>
 

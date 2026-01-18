@@ -56,6 +56,7 @@
                                class="form-control me-3"
                                oninput="allocationPlanManagement.handleInputAllocationPlanName(this, {{allocationPlan.id}})"
                                onkeyup="event.preventDefault()"
+                               maxlength="100"
                         />
                     {{/if}}
                 </button>
@@ -215,6 +216,7 @@
                                    oninput="maskTagInput(this)"
                                    onchange="allocationPlanManagement.handleHierarchicalIdLevelChange(this)"
                                    required
+                                   maxlength="100"
                             />
                         </td>
 

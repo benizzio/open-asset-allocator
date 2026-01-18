@@ -133,6 +133,7 @@
                                aria-label="Name"
                                required
                                autocomplete="off"
+                               maxlength="100"
                         />
 
                     </div>
@@ -212,6 +213,7 @@
                        hx-validate="true"
                        hx-on::validation:validate="{{assetTickerFieldHTMXOnValidate}}"
                        oninput="maskTickerInput(this)"
+                       maxlength="20"
                 />
                 <button data-asset-action-button
                         type="button"
@@ -249,6 +251,7 @@
                    class="form-control"
                    value="{{assetName}}"
                    style="display: none"
+                   maxlength="100"
             />
         {{/if}}
 

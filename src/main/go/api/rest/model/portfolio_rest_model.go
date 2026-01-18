@@ -9,15 +9,15 @@ import (
 
 type PortfolioDTS struct {
 	Id                  *langext.ParseableInt64 `json:"id"`
-	Name                string                  `json:"name" validate:"required"`
+	Name                string                  `json:"name" validate:"required,max=100"`
 	AllocationStructure *AllocationStructureDTS `json:"allocationStructure"`
 }
 
 type PortfolioAllocationDTS struct {
 	AssetId          *langext.ParseableInt64 `json:"assetId"`
-	AssetName        string                  `json:"assetName"`
-	AssetTicker      string                  `json:"assetTicker"`
-	Class            string                  `json:"class" validate:"required"`
+	AssetName        string                  `json:"assetName" validate:"max=100"`
+	AssetTicker      string                  `json:"assetTicker" validate:"max=20"`
+	Class            string                  `json:"class" validate:"required,max=100"`
 	CashReserve      bool                    `json:"cashReserve"`
 	TotalMarketValue *decimal.Decimal        `json:"totalMarketValue" validate:"required"`
 	AssetQuantity    decimal.Decimal         `json:"assetQuantity"`    // TODO this should be a pointer downstream but we get errors
@@ -66,12 +66,12 @@ func (aggregationMap portfolioAllocationsPerObservationTimestamp) getAggregatedM
 
 type AllocationPlanIdentifierDTS struct {
 	Id   int64  `json:"id"`
-	Name string `json:"name"`
+	Name string `json:"name" validate:"max=100"`
 }
 
 type PortfolioObservationTimestampDTS struct {
 	Id        langext.ParseableInt64 `json:"id"`
-	TimeTag   string                 `json:"timeTag"`
+	TimeTag   string                 `json:"timeTag" validate:"max=100"`
 	Timestamp time.Time              `json:"timestamp"`
 }
 
