@@ -1,3 +1,30 @@
+# open-asset-allocator
+
+Open source tool to manage an asset portfolio using asset allocation strategies as a first-class citizen.
+
+## Project Overview
+
+This is a pre-alpha stage application that allows the continued management of asset allocation strategies for long term
+portfolios in a "fractal" structure. The allocation follows a bottom-up, repeatable structure, composed of assets on the
+lowest level that can be grouped by any criteria defined by the implemented model.
+
+## Tech Stack
+
+- **Backend**: Go (Gin framework)
+- **Frontend**: TypeScript, HTML, CSS (vanilla web-static approach)
+- **Database**: PostgreSQL with Flyway migrations, DuckDB for analytics
+- **Build**: Make, Docker, Docker Compose
+- **Node version**: Check `.nvmrc` for the required version
+
+## Build & Run
+
+- Build the application: `make`
+- Start services: `make start`
+- Stop services: `make stop`
+- Run tests: `make test`
+
+---
+
 # Code syntax preferences
 
 > [!IMPORTANT]
@@ -42,14 +69,14 @@
 
 ## Go standards
 
-- when handling Go language code, read [go copilot instructions](copilot_specific_instructions/go.instructions.md)
+- when handling Go language code, read [go copilot instructions](instructions/go.instructions.md)
 
 ## Browser code standards
 
 - when handling code for browser environments (Javascript, Typescript, HTML, CSS and similar), read
-  [browser copilot instructions](copilot_specific_instructions/browser.instructions.md)
+  [browser copilot instructions](instructions/browser.instructions.md)
 
 ## DB related code standards
 
 - when handling database related code (SQL, PL/pgSQL, database migration files, ORM related code), read
-  [db copilot instructions](copilot_specific_instructions/db.instructions.md)
+  [db copilot instructions](instructions/db.instructions.md)
