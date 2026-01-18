@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/benizzio/open-asset-allocator/infra/validation"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -12,24 +13,24 @@ func TestPortfolioDTSMaxLengthValidation(t *testing.T) {
 	validate := validator.New()
 
 	tests := []struct {
-		name        string
-		portfolioName  string
-		shouldPass  bool
+		name          string
+		portfolioName string
+		shouldPass    bool
 	}{
 		{
-			name:        "valid name - under max length",
-			portfolioName:  "My Portfolio",
-			shouldPass:  true,
+			name:          "valid name - under max length",
+			portfolioName: "My Portfolio",
+			shouldPass:    true,
 		},
 		{
-			name:        "valid name - exactly at max length",
-			portfolioName:  strings.Repeat("a", 100),
-			shouldPass:  true,
+			name:          "valid name - exactly at max length",
+			portfolioName: strings.Repeat("a", validation.PortfolioNameMaxLength),
+			shouldPass:    true,
 		},
 		{
-			name:        "invalid name - exceeds max length",
-			portfolioName:  strings.Repeat("a", 101),
-			shouldPass:  false,
+			name:          "invalid name - exceeds max length",
+			portfolioName: strings.Repeat("a", validation.PortfolioNameMaxLength+1),
+			shouldPass:    false,
 		},
 	}
 
@@ -72,26 +73,26 @@ func TestAssetDTSMaxLengthValidation(t *testing.T) {
 		},
 		{
 			name:       "ticker at max length",
-			ticker:     strings.Repeat("A", 20),
+			ticker:     strings.Repeat("A", validation.AssetTickerMaxLength),
 			assetName:  "Test Asset",
 			shouldPass: true,
 		},
 		{
 			name:       "ticker exceeds max length",
-			ticker:     strings.Repeat("A", 21),
+			ticker:     strings.Repeat("A", validation.AssetTickerMaxLength+1),
 			assetName:  "Test Asset",
 			shouldPass: false,
 		},
 		{
 			name:       "name at max length",
 			ticker:     "TEST",
-			assetName:  strings.Repeat("a", 100),
+			assetName:  strings.Repeat("a", validation.AssetNameMaxLength),
 			shouldPass: true,
 		},
 		{
 			name:       "name exceeds max length",
 			ticker:     "TEST",
-			assetName:  strings.Repeat("a", 101),
+			assetName:  strings.Repeat("a", validation.AssetNameMaxLength+1),
 			shouldPass: false,
 		},
 	}
@@ -135,26 +136,26 @@ func TestAllocationPlanDTSMaxLengthValidation(t *testing.T) {
 		},
 		{
 			name:       "plan name at max length",
-			planName:   strings.Repeat("a", 100),
+			planName:   strings.Repeat("a", validation.AllocationPlanNameMaxLength),
 			planType:   "ALLOCATION_PLAN",
 			shouldPass: true,
 		},
 		{
 			name:       "plan name exceeds max length",
-			planName:   strings.Repeat("a", 101),
+			planName:   strings.Repeat("a", validation.AllocationPlanNameMaxLength+1),
 			planType:   "ALLOCATION_PLAN",
 			shouldPass: false,
 		},
 		{
 			name:       "plan type at max length",
 			planName:   "Test Plan",
-			planType:   strings.Repeat("T", 50),
+			planType:   strings.Repeat("T", validation.AllocationPlanTypeMaxLength),
 			shouldPass: true,
 		},
 		{
 			name:       "plan type exceeds max length",
 			planName:   "Test Plan",
-			planType:   strings.Repeat("T", 51),
+			planType:   strings.Repeat("T", validation.AllocationPlanTypeMaxLength+1),
 			shouldPass: false,
 		},
 	}
@@ -205,14 +206,14 @@ func TestPortfolioAllocationDTSMaxLengthValidation(t *testing.T) {
 		},
 		{
 			name:        "class at max length",
-			class:       strings.Repeat("C", 100),
+			class:       strings.Repeat("C", validation.AllocationClassMaxLength),
 			assetTicker: "TEST",
 			assetName:   "Test Asset",
 			shouldPass:  true,
 		},
 		{
 			name:        "class exceeds max length",
-			class:       strings.Repeat("C", 101),
+			class:       strings.Repeat("C", validation.AllocationClassMaxLength+1),
 			assetTicker: "TEST",
 			assetName:   "Test Asset",
 			shouldPass:  false,
