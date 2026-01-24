@@ -72,8 +72,12 @@ func (service *AllocationPlanDomService) PersistAllocationPlanInTransaction(
 }
 
 type allocationPlanValidationData struct {
-	hierarchicalIdCounts map[string]int
-	levelSliceSizes      map[string]*levelSliceSizeValidationData
+	hierarchicalIdCounts           map[string]int
+	levelSliceSizes                map[string]*levelSliceSizeValidationData
+	hierarchicalAllocationPlanTree *langext.MapTreeNode[string]
+	invalidSizeHierarchyBranches   langext.CustomSliceTable[string]
+	noParentHierarchyBranches      langext.CustomSliceTable[string]
+	childlessHierarchyBranches     langext.CustomSliceTable[string]
 }
 
 type levelSliceSizeValidationData struct {
@@ -96,10 +100,6 @@ func (validationData *levelSliceSizeValidationData) describeLevel(
 }
 
 // TODO validate plan before persisting
-// - hierarchy matches portfolio hierarchy (allocation structure):
-//   - has expected hierarchical structure with correct level number
-//   - no parents without children and vice versa (all levels must be complete in a branch)
-//
 // - hierarchical ids with asset match asset ticker from reference
 func (service *AllocationPlanDomService) validateAllocationPlan(
 	plan *domain.AllocationPlan,
@@ -111,8 +111,12 @@ func (service *AllocationPlanDomService) validateAllocationPlan(
 	// TODO add a matrix representing the hierarchy structure to validate completeness of levels
 	// "no parent" can be added to the matrix with a tag
 	var validationData = &allocationPlanValidationData{
-		hierarchicalIdCounts: make(map[string]int),
-		levelSliceSizes:      make(map[string]*levelSliceSizeValidationData),
+		hierarchicalIdCounts:           make(map[string]int),
+		levelSliceSizes:                make(map[string]*levelSliceSizeValidationData),
+		hierarchicalAllocationPlanTree: langext.NewMapTree("ALLOCATION_PLAN_ROOT"),
+		invalidSizeHierarchyBranches:   make(langext.CustomSliceTable[string], 0),
+		childlessHierarchyBranches:     make(langext.CustomSliceTable[string], 0),
+		noParentHierarchyBranches:      make(langext.CustomSliceTable[string], 0),
 	}
 	// Use empty string key to track TOP-level percentage aggregation
 	validationData.levelSliceSizes[""] = &levelSliceSizeValidationData{
@@ -120,11 +124,12 @@ func (service *AllocationPlanDomService) validateAllocationPlan(
 		sliceSize:  decimal.Zero,
 	}
 
-	readValidationData(plan, validationData)
+	readValidationData(hierarchyLevels, plan, validationData)
 
 	var errors = make([]*infra.AppError, 0)
 	errors = service.validateHierarchicalIdUniqueness(validationData, errors)
 	errors = service.validateHierarchyLevelsSliceSizeSums(hierarchyLevels, validationData, errors)
+	errors = service.validateHierarchyBranchesCompleteness(validationData, errors)
 
 	if len(errors) > 0 {
 		return errors
@@ -133,11 +138,19 @@ func (service *AllocationPlanDomService) validateAllocationPlan(
 	return nil
 }
 
-func readValidationData(plan *domain.AllocationPlan, validation *allocationPlanValidationData) {
+func readValidationData(
+	hierarchyLevels domain.AllocationHierarchy,
+	plan *domain.AllocationPlan,
+	validation *allocationPlanValidationData,
+) {
+
 	for _, plannedAllocation := range plan.Details {
 		readPlannedAllocationForRepeatedValidationData(plannedAllocation, validation)
-		readPlannedAllocationForSliceSizeTotals(plannedAllocation, validation)
+		readPlannedAllocationForSliceSizeTotalsValidationData(plannedAllocation, validation)
+		readPlannedAllocationHierarchicalBranchValidationData(hierarchyLevels, plannedAllocation, validation)
 	}
+
+	readPlannedAllocationChildlessHierarchyBranchesValidationData(validation)
 }
 
 // readPlannedAllocationForRepeatedValidationData reads counts of hierarchical ids to validate repetitions
@@ -154,8 +167,8 @@ func readPlannedAllocationForRepeatedValidationData(
 	}
 }
 
-// readPlannedAllocationForSliceSizeTotals aggregates slice size percentages per hierarchy level for validations
-func readPlannedAllocationForSliceSizeTotals(
+// readPlannedAllocationForSliceSizeTotalsValidationData aggregates slice size percentages per hierarchy level for validations
+func readPlannedAllocationForSliceSizeTotalsValidationData(
 	plannedAllocation *domain.PlannedAllocation,
 	validation *allocationPlanValidationData,
 ) {
@@ -182,6 +195,69 @@ func readPlannedAllocationForSliceSizeTotals(
 			}
 		} else {
 			levelValidationData.sliceSize = levelValidationData.sliceSize.Add(plannedAllocation.SliceSizePercentage)
+		}
+	}
+}
+
+// TODO clean
+func readPlannedAllocationHierarchicalBranchValidationData(
+	hierarchy domain.AllocationHierarchy,
+	plannedAllocation *domain.PlannedAllocation,
+	validation *allocationPlanValidationData,
+) {
+
+	var hierarchySize = len(hierarchy)
+	var plannedAllocationBranchInverted = langext.DereferenceSliceContent(plannedAllocation.HierarchicalId)
+	var plannedAllocationBranch = langext.ReverseSlice(plannedAllocationBranchInverted)
+	var branchSize = len(plannedAllocationBranchInverted)
+
+	if branchSize != hierarchySize {
+		validation.invalidSizeHierarchyBranches = append(
+			validation.invalidSizeHierarchyBranches,
+			plannedAllocationBranch,
+		)
+	}
+
+	var previousLevelWasZeroValue = langext.IsZeroValue(plannedAllocationBranch[0])
+
+	if !previousLevelWasZeroValue {
+		validation.childlessHierarchyBranches = append(
+			validation.childlessHierarchyBranches,
+			plannedAllocationBranch,
+		)
+	} else {
+
+		for i := 1; i < branchSize; i++ {
+
+			var currentLevelIsZeroValue = langext.IsZeroValue(plannedAllocationBranch[i])
+
+			if previousLevelWasZeroValue && !currentLevelIsZeroValue {
+				validation.noParentHierarchyBranches = append(
+					validation.noParentHierarchyBranches,
+					plannedAllocationBranch,
+				)
+				break
+			}
+
+			previousLevelWasZeroValue = currentLevelIsZeroValue
+		}
+	}
+
+	validation.hierarchicalAllocationPlanTree.AddBranch(plannedAllocationBranch)
+}
+
+func readPlannedAllocationChildlessHierarchyBranchesValidationData(
+	validation *allocationPlanValidationData,
+) {
+
+	var allBranches = validation.hierarchicalAllocationPlanTree.ExtractBranches()
+
+	for _, branch := range allBranches {
+		if langext.SliceContainsZeroValue(branch) {
+			validation.childlessHierarchyBranches = append(
+				validation.childlessHierarchyBranches,
+				langext.ReverseSlice(branch),
+			)
 		}
 	}
 }
@@ -258,6 +334,47 @@ func (service *AllocationPlanDomService) validateHierarchyLevelsSliceSizeSums(
 				service,
 				"Planned allocations slice sizes sum to less than 100%% within hierarchy level(s): %s",
 				insufficientLevelDescriptions.PrettyString(),
+			),
+		)
+	}
+
+	return errors
+}
+
+func (service *AllocationPlanDomService) validateHierarchyBranchesCompleteness(
+	validationData *allocationPlanValidationData,
+	errors []*infra.AppError,
+) []*infra.AppError {
+
+	if len(validationData.invalidSizeHierarchyBranches) > 0 {
+		errors = append(
+			errors,
+			infra.BuildAppErrorFormattedUnconverted(
+				service,
+				"Planned allocations contain hierarchy branches with invalid size: \n%s",
+				validationData.invalidSizeHierarchyBranches.ArrowString(),
+			),
+		)
+	}
+
+	if len(validationData.noParentHierarchyBranches) > 0 {
+		errors = append(
+			errors,
+			infra.BuildAppErrorFormattedUnconverted(
+				service,
+				"Planned allocations contain hierarchy branches with missing parent levels: \n%s",
+				validationData.noParentHierarchyBranches.ArrowString(),
+			),
+		)
+	}
+
+	if len(validationData.childlessHierarchyBranches) > 0 {
+		errors = append(
+			errors,
+			infra.BuildAppErrorFormattedUnconverted(
+				service,
+				"Planned allocations contain hierarchy branches with missing child levels: \n%s",
+				validationData.childlessHierarchyBranches.ArrowString(),
 			),
 		)
 	}

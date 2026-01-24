@@ -17,10 +17,6 @@ type AllocationHierarchyLevel struct {
 
 type AllocationHierarchy []AllocationHierarchyLevel
 
-func (hierarchy AllocationHierarchy) Size() int {
-	return len(hierarchy)
-}
-
 type AllocationStructure struct {
 	Hierarchy AllocationHierarchy `json:"hierarchy,omitempty"`
 }
