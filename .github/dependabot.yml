@@ -6,15 +6,34 @@ updates:
     directory: "/src/main/go"
     schedule:
       interval: "weekly"
+    # Ignore pre-release versions (alpha, beta, rc, dev, snapshot, preview, etc.)
+    ignore:
+      - dependency-name: "*"
+        versions: ["*-alpha*", "*-beta*", "*-rc*", "*-RC*", "*-dev*", "*-snapshot*", "*-SNAPSHOT*", "*-preview*"]
+
   - package-ecosystem: "npm"
     directory: "/src/main/web-static"
     schedule:
       interval: "weekly"
+    # Ignore pre-release versions (alpha, beta, rc, dev, snapshot, preview, etc.)
+    ignore:
+      - dependency-name: "*"
+        versions: ["*-alpha*", "*-beta*", "*-rc*", "*-RC*", "*-dev*", "*-snapshot*", "*-SNAPSHOT*", "*-preview*"]
+
   - package-ecosystem: "docker"
     directory: "/src/main/docker/backend"
     schedule:
       interval: "weekly"
+    # Ignore pre-release versions (alpha, beta, rc, dev, snapshot, preview, etc.)
+    ignore:
+      - dependency-name: "*"
+        versions: ["*-alpha*", "*-beta*", "*-rc*", "*-RC*", "*-dev*", "*-snapshot*", "*-SNAPSHOT*", "*-preview*"]
+
   - package-ecosystem: "docker-compose"
     directory: "/src/main/docker"
     schedule:
       interval: "weekly"
+    # Ignore pre-release versions (alpha, beta, rc, dev, snapshot, preview, etc.)
+    ignore:
+      - dependency-name: "*"
+        versions: ["*-alpha*", "*-beta*", "*-rc*", "*-RC*", "*-dev*", "*-snapshot*", "*-SNAPSHOT*", "*-preview*"]
