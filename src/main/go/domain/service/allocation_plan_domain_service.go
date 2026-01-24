@@ -129,7 +129,7 @@ func (service *AllocationPlanDomService) validateAllocationPlan(
 	var errors = make([]*infra.AppError, 0)
 	errors = service.validateHierarchicalIdUniqueness(validationData, errors)
 	errors = service.validateHierarchyLevelsSliceSizeSums(hierarchyLevels, validationData, errors)
-	errors = service.validateHierarchyBranchesCompleteness(validationData, errors)
+	errors = service.validateHierarchyBranchesCompleteness(hierarchyLevels, validationData, errors)
 
 	if len(errors) > 0 {
 		return errors
@@ -150,7 +150,7 @@ func readValidationData(
 		readPlannedAllocationHierarchicalBranchValidationData(hierarchyLevels, plannedAllocation, validation)
 	}
 
-	readPlannedAllocationChildlessHierarchyBranchesValidationData(validation)
+	readPlannedAllocationChildlessHierarchyBranchesValidationData(hierarchyLevels, validation)
 }
 
 // readPlannedAllocationForRepeatedValidationData reads counts of hierarchical ids to validate repetitions
@@ -220,11 +220,8 @@ func readPlannedAllocationHierarchicalBranchValidationData(
 
 	var previousLevelWasZeroValue = langext.IsZeroValue(plannedAllocationBranch[0])
 
-	if !previousLevelWasZeroValue {
-		validation.childlessHierarchyBranches = append(
-			validation.childlessHierarchyBranches,
-			plannedAllocationBranch,
-		)
+	if previousLevelWasZeroValue {
+		validation.noParentHierarchyBranches = append(validation.noParentHierarchyBranches, plannedAllocationBranch)
 	} else {
 
 		for i := 1; i < branchSize; i++ {
@@ -243,21 +240,20 @@ func readPlannedAllocationHierarchicalBranchValidationData(
 		}
 	}
 
-	validation.hierarchicalAllocationPlanTree.AddBranch(plannedAllocationBranch)
+	validation.hierarchicalAllocationPlanTree.AddBranchBreakingOnZeroValues(plannedAllocationBranch)
 }
 
 func readPlannedAllocationChildlessHierarchyBranchesValidationData(
+	hierarchy domain.AllocationHierarchy,
 	validation *allocationPlanValidationData,
 ) {
 
+	var hierarchySize = len(hierarchy)
 	var allBranches = validation.hierarchicalAllocationPlanTree.ExtractBranches()
 
 	for _, branch := range allBranches {
-		if langext.SliceContainsZeroValue(branch) {
-			validation.childlessHierarchyBranches = append(
-				validation.childlessHierarchyBranches,
-				langext.ReverseSlice(branch),
-			)
+		if len(branch) < hierarchySize {
+			validation.childlessHierarchyBranches = append(validation.childlessHierarchyBranches, branch)
 		}
 	}
 }
@@ -342,6 +338,7 @@ func (service *AllocationPlanDomService) validateHierarchyLevelsSliceSizeSums(
 }
 
 func (service *AllocationPlanDomService) validateHierarchyBranchesCompleteness(
+	hierarchyLevels domain.AllocationHierarchy,
 	validationData *allocationPlanValidationData,
 	errors []*infra.AppError,
 ) []*infra.AppError {
@@ -351,8 +348,9 @@ func (service *AllocationPlanDomService) validateHierarchyBranchesCompleteness(
 			errors,
 			infra.BuildAppErrorFormattedUnconverted(
 				service,
-				"Planned allocations contain hierarchy branches with invalid size: \n%s",
+				"Planned allocations contain hierarchy branches with invalid size: \n%s\n for portfolio hierarchy: %s",
 				validationData.invalidSizeHierarchyBranches.ArrowString(),
+				hierarchyLevels,
 			),
 		)
 	}
@@ -362,8 +360,9 @@ func (service *AllocationPlanDomService) validateHierarchyBranchesCompleteness(
 			errors,
 			infra.BuildAppErrorFormattedUnconverted(
 				service,
-				"Planned allocations contain hierarchy branches with missing parent levels: \n%s",
+				"Planned allocations contain hierarchy branches with missing parent levels: \n%s\n for portfolio hierarchy: %s",
 				validationData.noParentHierarchyBranches.ArrowString(),
+				hierarchyLevels,
 			),
 		)
 	}
@@ -373,8 +372,9 @@ func (service *AllocationPlanDomService) validateHierarchyBranchesCompleteness(
 			errors,
 			infra.BuildAppErrorFormattedUnconverted(
 				service,
-				"Planned allocations contain hierarchy branches with missing child levels: \n%s",
+				"Planned allocations contain hierarchy branches with missing child levels: \n%s\n for portfolio hierarchy: %s",
 				validationData.childlessHierarchyBranches.ArrowString(),
+				hierarchyLevels,
 			),
 		)
 	}

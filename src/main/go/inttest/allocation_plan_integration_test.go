@@ -963,7 +963,7 @@ func TestPostAllocationPlanValidation_DuplicateHierarchicalIds(t *testing.T) {
 		}`
 
 	response, err := http.Post(
-		inttestinfra.TestAPIURLPrefix+"/portfolio/2/allocation-plan",
+		inttestinfra.TestAPIURLPrefix+"/portfolio/5/allocation-plan",
 		"application/json",
 		strings.NewReader(updatePlanJSON),
 	)
@@ -1136,3 +1136,5 @@ func TestPostAllocationPlanValidation_TopLevelPercentageSumBelowLimit(t *testing
     }`
 	assert.JSONEq(t, expected, string(body))
 }
+
+// TODO validations for hierarchy conformity (size and completeness)

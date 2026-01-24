@@ -25,6 +25,16 @@ func (node *MapTreeNode[T]) AddBranch(branch []T) *MapTreeNode[T] {
 	return currentNode
 }
 
+func (node *MapTreeNode[T]) AddBranchBreakingOnZeroValues(branch []T) {
+	currentNode := node
+	for _, value := range branch {
+		if IsZeroValue(value) {
+			break
+		}
+		currentNode = currentNode.AddChild(value)
+	}
+}
+
 func (node *MapTreeNode[T]) AddInvertedBranchBreakingOnZeroValues(branch []T) {
 	currentNode := node
 	for i := len(branch) - 1; i >= 0; i-- {

@@ -17,6 +17,20 @@ type AllocationHierarchyLevel struct {
 
 type AllocationHierarchy []AllocationHierarchyLevel
 
+func (allocationHierarchy AllocationHierarchy) String() string {
+
+	var result = ""
+
+	for index, level := range allocationHierarchy {
+		result += level.Name
+		if index < len(allocationHierarchy)-1 {
+			result += " -> "
+		}
+	}
+
+	return result
+}
+
 type AllocationStructure struct {
 	Hierarchy AllocationHierarchy `json:"hierarchy,omitempty"`
 }
