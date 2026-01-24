@@ -23,8 +23,8 @@ type PlannedAllocationDTS struct {
 
 type AllocationPlanDTS struct {
 	Id                   *langext.ParseableInt64 `json:"id,omitempty"`
-	Name                 string                  `json:"name,omitempty" validate:"required"`
-	Type                 string                  `json:"type,omitempty"`
+	Name                 string                  `json:"name,omitempty" validate:"required,max=100"`
+	Type                 string                  `json:"type,omitempty" validate:"max=50"`
 	PlannedExecutionDate *time.Time              `json:"plannedExecutionDate,omitempty"`
 	Details              []*PlannedAllocationDTS `json:"details,omitempty" validate:"required,min=1"`
 }
