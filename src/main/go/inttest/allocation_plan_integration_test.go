@@ -1332,7 +1332,7 @@ func TestPostAllocationPlanValidation_ChildlessHierarchyBranches(t *testing.T) {
 
 	var expected = `{
         "errorMessage": "Allocation plan validation failed",
-        "details": ["Planned allocations contain hierarchy branches with missing child levels: \nALLOCATION_PLAN_ROOT -> STOCKS\n for portfolio hierarchy: Classes -> Assets"]
+        "details": ["Planned allocations contain hierarchy branches with missing child levels: \nSTOCKS\n for portfolio hierarchy: Classes -> Assets"]
     }`
 	assert.JSONEq(t, expected, string(body))
 }
@@ -1369,10 +1369,10 @@ func TestPostAllocationPlanValidation_MultipleChildlessHierarchyBranches(t *test
 	body, err := io.ReadAll(response.Body)
 	assert.NoError(t, err)
 
-	// Both BONDS and STOCKS branches are childless (including the root node in output)
+	// Both BONDS and STOCKS branches are childless (root node stripped from output)
 	var expected = `{
         "errorMessage": "Allocation plan validation failed",
-        "details": ["Planned allocations contain hierarchy branches with missing child levels: \nALLOCATION_PLAN_ROOT -> BONDS\nALLOCATION_PLAN_ROOT -> STOCKS\n for portfolio hierarchy: Classes -> Assets"]
+        "details": ["Planned allocations contain hierarchy branches with missing child levels: \nBONDS\nSTOCKS\n for portfolio hierarchy: Classes -> Assets"]
     }`
 	assert.JSONEq(t, expected, string(body))
 }

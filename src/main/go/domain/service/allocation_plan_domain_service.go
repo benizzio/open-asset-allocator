@@ -371,18 +371,37 @@ func (service *AllocationPlanDomService) validateHierarchyBranchesCompleteness(
 	}
 
 	if len(validationData.childlessHierarchyBranches) > 0 {
+
+		var userFriendlyChildlessBranches = stripRootFromBranches(validationData.childlessHierarchyBranches)
+
 		errors = append(
 			errors,
 			infra.BuildAppErrorFormattedUnconverted(
 				service,
 				"Planned allocations contain hierarchy branches with missing child levels: \n%s\n for portfolio hierarchy: %s",
-				validationData.childlessHierarchyBranches.ArrowString(),
+				userFriendlyChildlessBranches.ArrowString(),
 				userFriendlyHierarchyLevels.PrettyString(),
 			),
 		)
 	}
 
 	return errors
+}
+
+// stripRootFromBranches removes the first element (root node) from each branch for user-friendly display.
+//
+// Authored by: GitHub Copilot
+func stripRootFromBranches(branches langext.CustomSliceTable[string]) langext.CustomSliceTable[string] {
+
+	var result = make(langext.CustomSliceTable[string], 0, len(branches))
+
+	for _, branch := range branches {
+		if len(branch) > 1 {
+			result = append(result, branch[1:])
+		}
+	}
+
+	return result
 }
 
 func appendLevelDescription(

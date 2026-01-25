@@ -4,18 +4,20 @@ import * as bootstrap from "bootstrap";
 import DomInfra from "../infra/dom";
 import { APIErrorResponse } from "../api/api";
 
-const NotificationTypeBootstrapClasses = {
+type BootstrapNotification = Notification & { contextClasses: string; };
+
+const NOTIFICATION_TOAST_DISPLAY_TIME_MS = 10000;
+
+const NOTIFICATION_TYPE_BOOTSTRAP_CLASSES = {
     info: "text-bg-primary",
     warning: "text-bg-warning",
     error: "text-bg-danger",
     success: "text-bg-success",
 };
 
-type BootstrapNotification = Notification & { contextClasses: string; };
-
 function buildBootstrapNotification(notification: Notification): BootstrapNotification {
     const contextClasses =
-        NotificationTypeBootstrapClasses[notification.type] || NotificationTypeBootstrapClasses.info;
+        NOTIFICATION_TYPE_BOOTSTRAP_CLASSES[notification.type] || NOTIFICATION_TYPE_BOOTSTRAP_CLASSES.info;
     return { ...notification, contextClasses };
 }
 
@@ -37,7 +39,7 @@ function buildBootstrapErrorNotification(errorResponse: APIErrorResponse): Boots
         title,
         content,
         type: NotificationType.ERROR,
-        contextClasses: NotificationTypeBootstrapClasses.error,
+        contextClasses: NOTIFICATION_TYPE_BOOTSTRAP_CLASSES.error,
     };
 }
 
@@ -81,7 +83,7 @@ const notifications = {
 
         this.notificationsContainer.appendChild(toastElement);
 
-        const toast = new bootstrap.Toast(toastElement, { delay: 5000 });
+        const toast = new bootstrap.Toast(toastElement, { delay: NOTIFICATION_TOAST_DISPLAY_TIME_MS });
         toast.show();
 
         toastElement.addEventListener("hidden.bs.toast", () => {
