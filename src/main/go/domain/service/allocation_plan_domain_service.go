@@ -252,7 +252,8 @@ func readPlannedAllocationChildlessHierarchyBranchesValidationData(
 	var allBranches = validation.hierarchicalAllocationPlanTree.ExtractBranches()
 
 	for _, branch := range allBranches {
-		if len(branch) < hierarchySize {
+		// Branch length includes the root node, so a complete branch has hierarchySize + 1 elements
+		if len(branch) <= hierarchySize {
 			validation.childlessHierarchyBranches = append(validation.childlessHierarchyBranches, branch)
 		}
 	}
@@ -343,6 +344,8 @@ func (service *AllocationPlanDomService) validateHierarchyBranchesCompleteness(
 	errors []*infra.AppError,
 ) []*infra.AppError {
 
+	var userFriendlyHierarchyLevels = domain.AllocationHierarchy(langext.ReverseSlice(hierarchyLevels))
+
 	if len(validationData.invalidSizeHierarchyBranches) > 0 {
 		errors = append(
 			errors,
@@ -350,7 +353,7 @@ func (service *AllocationPlanDomService) validateHierarchyBranchesCompleteness(
 				service,
 				"Planned allocations contain hierarchy branches with invalid size: \n%s\n for portfolio hierarchy: %s",
 				validationData.invalidSizeHierarchyBranches.ArrowString(),
-				hierarchyLevels,
+				userFriendlyHierarchyLevels.PrettyString(),
 			),
 		)
 	}
@@ -362,7 +365,7 @@ func (service *AllocationPlanDomService) validateHierarchyBranchesCompleteness(
 				service,
 				"Planned allocations contain hierarchy branches with missing parent levels: \n%s\n for portfolio hierarchy: %s",
 				validationData.noParentHierarchyBranches.ArrowString(),
-				hierarchyLevels,
+				userFriendlyHierarchyLevels.PrettyString(),
 			),
 		)
 	}
@@ -374,7 +377,7 @@ func (service *AllocationPlanDomService) validateHierarchyBranchesCompleteness(
 				service,
 				"Planned allocations contain hierarchy branches with missing child levels: \n%s\n for portfolio hierarchy: %s",
 				validationData.childlessHierarchyBranches.ArrowString(),
-				hierarchyLevels,
+				userFriendlyHierarchyLevels.PrettyString(),
 			),
 		)
 	}

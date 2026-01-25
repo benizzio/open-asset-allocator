@@ -17,7 +17,7 @@ type AllocationHierarchyLevel struct {
 
 type AllocationHierarchy []AllocationHierarchyLevel
 
-func (allocationHierarchy AllocationHierarchy) String() string {
+func (allocationHierarchy AllocationHierarchy) PrettyString() string {
 
 	var result = ""
 
