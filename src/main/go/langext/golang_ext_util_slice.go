@@ -113,20 +113,20 @@ func CleanNilPointersInSlice[T any](slice []*T) []*T {
 // DereferenceSliceContent transforms a slice of pointers to a slice of values.
 //
 // Each pointer in the input slice is dereferenced to obtain its underlying value.
-// Nil pointers are skipped and not included in the resulting slice.
+// Nil pointers are replaced with the zero value for the type.
 //
 // Parameters:
 //   - slice: A slice of pointers to type T
 //
 // Returns:
-//   - []T: A slice containing the dereferenced values (nil pointers excluded)
+//   - []T: A slice containing the dereferenced values (nil pointers replaced with zero values)
 //
 // Example:
 //
 //	a, b := 1, 2
 //	pointers := []*int{&a, nil, &b}
 //	values := DereferenceSliceContent(pointers)
-//	// values will be []int{1, 2}
+//	// values will be []int{1, 0, 2}
 //
 // Authored by: GitHub Copilot
 func DereferenceSliceContent[T any](slice []*T) []T {
