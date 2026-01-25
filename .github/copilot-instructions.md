@@ -45,6 +45,8 @@ lowest level that can be grouped by any criteria defined by the implemented mode
 - follow [SOLID principles](https://en.wikipedia.org/wiki/SOLID)
 - follow [Domain Driven Design](https://www.infoq.com/minibooks/domain-driven-design-quickly/) principles
     - when uncertain, check Context7 with "Evans DDD Sample" as prompt
+- when implementing tests, if the project uses a testing library that contains an assertion API, use it instead of raw
+  language constructs for assertions
 
 ### Code style standards beyond linters
 
@@ -61,6 +63,10 @@ lowest level that can be grouped by any criteria defined by the implemented mode
       also contain authoring documentation.
     - if the language has authoring documentation standards, it must be followed
     - Examples: check `EXAMPLE REF: CODE DOCS` in language specific instructions below
+- general non-AI-generated code docs guidelines
+    - following clean code principles, if the code is relatively simple and self-explanatory, minimal or no comments are
+      preferred
+    - before commenting complex code, an evaluation must be made if the code can be simplified or decomposed instead
 - when implementing tests:
     - follow standard names `expected` and `actual` for variables used in the appropriate context
 

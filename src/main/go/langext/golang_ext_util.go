@@ -2,16 +2,7 @@ package langext
 
 import (
 	"reflect"
-	"slices"
 )
-
-func ToPointerSlice[S any](slice []S) []*S {
-	result := make([]*S, len(slice))
-	for index, value := range slice {
-		result[index] = &value
-	}
-	return result
-}
 
 // IsZeroValue checks if a value equals its zero value.
 //
@@ -60,36 +51,4 @@ func DereferenceValue(value reflect.Value) (reflect.Value, bool) {
 	}
 
 	return value, false
-}
-
-// IsSlice checks if the provided value is a slice type.
-//
-// Uses reflection to determine if the parameter is a slice, which is required
-// for automatic conversion to pq.Array for PostgreSQL compatibility.
-//
-// Parameters:
-//   - value: The value to check
-//
-// Returns:
-//   - bool: true if the value is a slice, false otherwise
-//
-// Authored by: GitHub Copilot
-func IsSlice(value any) bool {
-
-	if value == nil {
-		return false
-	}
-
-	var valueType = UnwrapType(reflect.TypeOf(value))
-	return valueType.Kind() == reflect.Slice
-}
-
-func CleanNilPointersInSlice[T any](slice []*T) []*T {
-	var cleanSlice = slices.DeleteFunc(
-		slice,
-		func(item *T) bool {
-			return item == nil
-		},
-	)
-	return cleanSlice
 }

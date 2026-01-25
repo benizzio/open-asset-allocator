@@ -551,9 +551,12 @@ func TestPostAllocationPlanForUpdate_DeletesPlannedAllocationAndKeepsAsset(t *te
 		},
 	)
 
-	// Cleanup: reinsert the deleted planned allocation for ARCA:SPY and keep fixture stable
+	// Cleanup: reinsert the deleted planned allocation for ARCA:SPY, delete new EWZ, and keep fixture stable
 	t.Cleanup(
 		inttestutil.BuildCleanupFunctionBuilder().
+			AddCleanupQuery(
+				`DELETE FROM planned_allocation WHERE allocation_plan_id = 6 AND hierarchical_id = '{"ARCA:EWZ", "STOCKS"}'`,
+			).
 			AddCleanupQuery(
 				`INSERT INTO planned_allocation (id, allocation_plan_id, hierarchical_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
 				 VALUES (33, 6, '{"ARCA:SPY", "STOCKS"}', 7, FALSE, 0.5, NULL) ON CONFLICT (id) DO NOTHING`,
@@ -562,6 +565,7 @@ func TestPostAllocationPlanForUpdate_DeletesPlannedAllocationAndKeepsAsset(t *te
 	)
 
 	// 3) Update the plan omitting ARCA:SPY planned allocation to trigger deletion
+	// Adding a different asset (EWZ) under STOCKS to satisfy the childless validation
 	var updatePlanJSON = fmt.Sprintf(
 		`{
 			"id": %s,
@@ -569,7 +573,8 @@ func TestPostAllocationPlanForUpdate_DeletesPlannedAllocationAndKeepsAsset(t *te
 			"details":[
 				{ "id": %s, "hierarchicalId":[null,"BONDS"],  "sliceSizePercentage":"0.5" },
 				{ "id": %s, "hierarchicalId":[null,"STOCKS"], "sliceSizePercentage":"0.5" },
-				{ "id": %s, "hierarchicalId":["ARCA:BIL","BONDS"], "sliceSizePercentage":"1.0", "cashReserve":false }
+				{ "id": %s, "hierarchicalId":["ARCA:BIL","BONDS"], "sliceSizePercentage":"1.0", "cashReserve":false },
+				{ "hierarchicalId":["ARCA:EWZ","STOCKS"], "sliceSizePercentage":"1.0", "cashReserve":false, "asset":{"id":6} }
 			]
 		}`,
 		allocationPlanIdString, idBondsTop, idStocksTop, idBil,
@@ -599,6 +604,10 @@ func TestPostAllocationPlanForUpdate_DeletesPlannedAllocationAndKeepsAsset(t *te
 			{
 				"hierarchical_id": inttestutil.ToAssertableNullString("{ARCA:BIL,BONDS}"),
 				"asset_id":        inttestutil.ToAssertableNullString("1"),
+			},
+			{
+				"hierarchical_id": inttestutil.ToAssertableNullString("{ARCA:EWZ,STOCKS}"),
+				"asset_id":        inttestutil.ToAssertableNullString("6"),
 			},
 			{
 				"hierarchical_id": inttestutil.ToAssertableNullString("{NULL,BONDS}"),
@@ -938,6 +947,37 @@ func TestPostAllocationPlanValidation_MissingHierarchicalId(t *testing.T) {
 	assert.JSONEq(t, expected, string(body))
 }
 
+// Test validation: empty 'hierarchicalId' array (min length violation)
+// Expects 400 with message "Field 'details[0].hierarchicalId' failed validation: must be at least 1"
+//
+// Authored by: GitHub Copilot
+func TestPostAllocationPlanValidation_EmptyHierarchicalId(t *testing.T) {
+
+	var payload = `{
+		"name": "Plan with empty hierarchical id",
+		"details": [
+			{ "hierarchicalId": [], "sliceSizePercentage": "1.0" }
+		]
+	}`
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLPrefix+"/portfolio/1/allocation-plan",
+		"application/json",
+		strings.NewReader(payload),
+	)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+
+	var expected = `{
+		"errorMessage": "Validation failed",
+		"details": ["Field 'details[0].hierarchicalId' failed validation: must be at least 1"]
+	}`
+	assert.JSONEq(t, expected, string(body))
+}
+
 // Test validation (domain): duplicate hierarchical ids within the same plan should be rejected.
 // Currently NOT implemented, so this test is expected to FAIL (receives 204/500 instead of 400).
 // Establishes desired error response contract for future implementation: a non-field-specific message
@@ -963,7 +1003,7 @@ func TestPostAllocationPlanValidation_DuplicateHierarchicalIds(t *testing.T) {
 		}`
 
 	response, err := http.Post(
-		inttestinfra.TestAPIURLPrefix+"/portfolio/2/allocation-plan",
+		inttestinfra.TestAPIURLPrefix+"/portfolio/5/allocation-plan",
 		"application/json",
 		strings.NewReader(updatePlanJSON),
 	)
@@ -1201,5 +1241,169 @@ func TestPostAllocationPlanValidation_TypeExceedsMaxLength(t *testing.T) {
 		"errorMessage": "Validation failed",
 		"details": ["Field 'type' failed validation: must not exceed 50"]
 	}`
+	assert.JSONEq(t, expected, string(body))
+}
+
+// TestPostAllocationPlanValidation_InvalidSizeHierarchyBranches tests that posting an allocation plan
+// with a hierarchical id that has a different number of levels than the portfolio hierarchy
+// returns a validation error.
+//
+// Authored by: GitHub Copilot
+func TestPostAllocationPlanValidation_InvalidSizeHierarchyBranches(t *testing.T) {
+
+	// Portfolio 5 has a 2-level hierarchy: Classes -> Assets
+	// This test sends a hierarchical id with 3 levels (invalid size)
+	var updatePlanJSON = `
+		{
+            "id":6,
+            "name":"Update Allocation Plan Fixture",
+            "details":[
+                { "id": 30, "hierarchicalId":[null,"BONDS"],  "sliceSizePercentage":"0.5" },
+                { "id": 31, "hierarchicalId":[null,"STOCKS"], "sliceSizePercentage":"0.5" },
+                { "id": 32, "hierarchicalId":["ARCA:BIL","BONDS"], "sliceSizePercentage":"1.0", "cashReserve":false },
+                { "hierarchicalId":["ARCA:SPY","STOCKS"], "sliceSizePercentage":"1.0", "cashReserve":false },
+                { "hierarchicalId":["ARCA:EWZ","STOCKS", "EXTRA_LEVEL"], "sliceSizePercentage":"1.0", "cashReserve":false }
+            ]
+        }
+	`
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLPrefix+"/portfolio/5/allocation-plan",
+		"application/json",
+		strings.NewReader(updatePlanJSON),
+	)
+	assert.NoError(t, err)
+
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+
+	var expected = `{
+        "errorMessage": "Allocation plan validation failed",
+        "details": ["Planned allocations contain hierarchy branches with invalid size: \nEXTRA_LEVEL -> STOCKS -> ARCA:EWZ\n for portfolio hierarchy: Classes -> Assets"]
+    }`
+	assert.JSONEq(t, expected, string(body))
+}
+
+// TestPostAllocationPlanValidation_MissingParentHierarchyBranches tests that posting an allocation plan
+// with a hierarchical id that has a non-null child level but missing parent level (null at a higher level)
+// returns a validation error.
+//
+// Authored by: GitHub Copilot
+func TestPostAllocationPlanValidation_MissingParentHierarchyBranches(t *testing.T) {
+
+	// Portfolio 5 has a 2-level hierarchy: Classes -> Assets
+	// This test sends a hierarchical id with a specific asset but null class (missing parent)
+	// The orphan asset ARCA:SPY has no class (null) - this is invalid because an asset must belong to a class
+	// Note: slice sizes are crafted to sum to exactly 100% at the top level to isolate the validation
+	var updatePlanJSON = `
+		{
+            "id":6,
+            "name":"Update Allocation Plan Fixture",
+            "details":[
+                { "id": 30, "hierarchicalId":[null,"BONDS"],  "sliceSizePercentage":"1.0" },
+                { "id": 32, "hierarchicalId":["ARCA:BIL","BONDS"], "sliceSizePercentage":"1.0", "cashReserve":false },
+                { "hierarchicalId":["ARCA:SPY",null], "sliceSizePercentage":"0.0", "cashReserve":false }
+            ]
+        }
+	`
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLPrefix+"/portfolio/5/allocation-plan",
+		"application/json",
+		strings.NewReader(updatePlanJSON),
+	)
+	assert.NoError(t, err)
+
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+
+	var expected = `{
+        "errorMessage": "Allocation plan validation failed",
+        "details": ["Planned allocations contain hierarchy branches with missing parent levels: \n -> ARCA:SPY\n for portfolio hierarchy: Classes -> Assets"]
+    }`
+	assert.JSONEq(t, expected, string(body))
+}
+
+// TestPostAllocationPlanValidation_ChildlessHierarchyBranches tests that posting an allocation plan
+// with a parent level (class) that has no corresponding child planned allocations (assets)
+// returns a validation error.
+//
+// Authored by: GitHub Copilot
+func TestPostAllocationPlanValidation_ChildlessHierarchyBranches(t *testing.T) {
+
+	// Portfolio 5 has a 2-level hierarchy: Classes -> Assets
+	// This test sends only top-level planned allocations (class) without child asset allocations for STOCKS
+	var updatePlanJSON = `
+		{
+            "id":6,
+            "name":"Update Allocation Plan Fixture",
+            "details":[
+                { "id": 30, "hierarchicalId":[null,"BONDS"],  "sliceSizePercentage":"0.5" },
+                { "id": 31, "hierarchicalId":[null,"STOCKS"], "sliceSizePercentage":"0.5" },
+                { "id": 32, "hierarchicalId":["ARCA:BIL","BONDS"], "sliceSizePercentage":"1.0", "cashReserve":false }
+            ]
+        }
+	`
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLPrefix+"/portfolio/5/allocation-plan",
+		"application/json",
+		strings.NewReader(updatePlanJSON),
+	)
+	assert.NoError(t, err)
+
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+
+	var expected = `{
+        "errorMessage": "Allocation plan validation failed",
+        "details": ["Planned allocations contain hierarchy branches with missing child levels: \nSTOCKS\n for portfolio hierarchy: Classes -> Assets"]
+    }`
+	assert.JSONEq(t, expected, string(body))
+}
+
+// TestPostAllocationPlanValidation_MultipleChildlessHierarchyBranches tests that posting an allocation plan
+// with multiple parent levels (classes) that have no corresponding child planned allocations (assets)
+// returns a validation error listing all incomplete branches.
+//
+// Authored by: GitHub Copilot
+func TestPostAllocationPlanValidation_MultipleChildlessHierarchyBranches(t *testing.T) {
+
+	// Portfolio 5 has a 2-level hierarchy: Classes -> Assets
+	// This test sends only top-level planned allocations without any child asset allocations
+	var updatePlanJSON = `
+		{
+            "id":6,
+            "name":"Update Allocation Plan Fixture",
+            "details":[
+                { "id": 30, "hierarchicalId":[null,"BONDS"],  "sliceSizePercentage":"0.5" },
+                { "id": 31, "hierarchicalId":[null,"STOCKS"], "sliceSizePercentage":"0.5" }
+            ]
+        }
+	`
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLPrefix+"/portfolio/5/allocation-plan",
+		"application/json",
+		strings.NewReader(updatePlanJSON),
+	)
+	assert.NoError(t, err)
+
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+
+	// Both BONDS and STOCKS branches are childless (root node stripped from output)
+	var expected = `{
+        "errorMessage": "Allocation plan validation failed",
+        "details": ["Planned allocations contain hierarchy branches with missing child levels: \nBONDS\nSTOCKS\n for portfolio hierarchy: Classes -> Assets"]
+    }`
 	assert.JSONEq(t, expected, string(body))
 }

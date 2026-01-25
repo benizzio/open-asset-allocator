@@ -17,8 +17,18 @@ type AllocationHierarchyLevel struct {
 
 type AllocationHierarchy []AllocationHierarchyLevel
 
-func (hierarchy AllocationHierarchy) Size() int {
-	return len(hierarchy)
+func (allocationHierarchy AllocationHierarchy) PrettyString() string {
+
+	var result = ""
+
+	for index, level := range allocationHierarchy {
+		result += level.Name
+		if index < len(allocationHierarchy)-1 {
+			result += " -> "
+		}
+	}
+
+	return result
 }
 
 type AllocationStructure struct {

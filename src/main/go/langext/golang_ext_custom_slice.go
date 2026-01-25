@@ -40,6 +40,10 @@ func (slice CustomSlice[T]) PrettyString() string {
 	return joinAny(slice, ", ")
 }
 
+func (slice CustomSlice[T]) ArrowString() string {
+	return joinAny(slice, " -> ")
+}
+
 // joinAny joins any slice into a string using the given separator, rendering each
 // element via fmt.Sprint. It avoids multiple allocations by using strings.Builder.
 //
@@ -67,4 +71,46 @@ func joinAny[T any](elements []T, separator string) string {
 	}
 
 	return builder.String()
+}
+
+// CustomSliceTable is a named, generic slice of CustomSlice types that
+// provides convenience formatting helpers for tabular representations.
+//
+// It complements Go's default slice formatting by offering an ArrowString()
+// method that formats each row using the ArrowString() method of CustomSlice,
+// with rows separated by newlines.
+//
+// Usage:
+//
+//	// Using the type with its ArrowString() method
+//	var table = CustomSliceTable[int]{
+//	    {1, 2, 3},
+//	    {4, 5, 6},
+//	}
+//
+// Co-authored by: GitHub Copilot
+type CustomSliceTable[T any] []CustomSlice[T]
+
+// ArrowString returns a string representation of the table where each row is
+// represented using the ArrowString() method of CustomSlice, and rows are
+// separated by newlines.
+//
+// Example:
+//
+//	table := CustomSliceTable[int]{
+//	    {1, 2, 3},
+//	    {4, 5, 6},
+//	}
+//	result := table.ArrowString()
+//	// result will be:
+//	// "1 -> 2 -> 3
+//	//  4 -> 5 -> 6"
+//
+// Co-authored by: GitHub Copilot
+func (table CustomSliceTable[T]) ArrowString() string {
+	var rowStrings = make([]string, len(table))
+	for rowIndex, row := range table {
+		rowStrings[rowIndex] = row.ArrowString()
+	}
+	return strings.Join(rowStrings, "\n")
 }

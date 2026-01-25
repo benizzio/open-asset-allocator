@@ -185,7 +185,7 @@ func (service *PortfolioDivergenceAnalysisAppService) mapPotentialDivergenceFrom
 		allocationHierarchyIterator,
 	)
 
-	var potentialDivergencesInAllocationHierarchy = make([]*domain.PotentialDivergence, allocationHierarchy.Size())
+	var potentialDivergencesInAllocationHierarchy = make([]*domain.PotentialDivergence, len(allocationHierarchy))
 	var lowerLevelPotentialDivergenceCreated = false
 
 	for allocationHierarchyIterator.HasNext() {
@@ -430,7 +430,7 @@ func generatePotentialDivergencesFromAllocationPlanSetDifference(
 ) {
 
 	var analysisContextValue = getDivergenceAnalysisContextValue(analysisContext)
-	var hierarchySize = analysisContextValue.portfolio.AllocationStructure.Hierarchy.Size()
+	var hierarchySize = len(analysisContextValue.portfolio.AllocationStructure.Hierarchy)
 
 	var hierarchytopLevelIndex = hierarchySize - 1
 
@@ -457,7 +457,7 @@ func checkAndGeneratePotentialDivergencesOnHierarchy(
 
 	var analysisContextValue = getDivergenceAnalysisContextValue(analysisContext)
 	var potentialDivergenceMap = getPotentialDivergenceMapContextValue(analysisContext)
-	var hierarchySize = analysisContextValue.portfolio.AllocationStructure.Hierarchy.Size()
+	var hierarchySize = len(analysisContextValue.portfolio.AllocationStructure.Hierarchy)
 	var currentPlannedHierarchicalId = plannedAllocation.HierarchicalId
 
 	for i := hierarchytopLevelIndex; i >= 0; i-- {
