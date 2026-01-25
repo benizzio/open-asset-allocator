@@ -1,4 +1,10 @@
 # https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+#
+# NOTE: Dependabot does not have native support for ignoring pre-release versions
+# (alpha, beta, rc, etc.) across all ecosystems. See:
+# - https://github.com/dependabot/dependabot-core/discussions/10712
+# - For Docker: Pre-releases are only suggested if manifest is already on a pre-release
+# - For npm/gomod: Manual review of PRs is required to reject pre-release bumps
 
 version: 2
 updates:
@@ -6,34 +12,15 @@ updates:
     directory: "/src/main/go"
     schedule:
       interval: "weekly"
-    # Ignore pre-release versions (alpha, beta, rc, dev, snapshot, preview, etc.)
-    ignore:
-      - dependency-name: "*"
-        versions: ["*-alpha*", "*-beta*", "*-rc*", "*-RC*", "*-dev*", "*-snapshot*", "*-SNAPSHOT*", "*-preview*"]
-
   - package-ecosystem: "npm"
     directory: "/src/main/web-static"
     schedule:
       interval: "weekly"
-    # Ignore pre-release versions (alpha, beta, rc, dev, snapshot, preview, etc.)
-    ignore:
-      - dependency-name: "*"
-        versions: ["*-alpha*", "*-beta*", "*-rc*", "*-RC*", "*-dev*", "*-snapshot*", "*-SNAPSHOT*", "*-preview*"]
-
   - package-ecosystem: "docker"
     directory: "/src/main/docker/backend"
     schedule:
       interval: "weekly"
-    # Ignore pre-release versions (alpha, beta, rc, dev, snapshot, preview, etc.)
-    ignore:
-      - dependency-name: "*"
-        versions: ["*-alpha*", "*-beta*", "*-rc*", "*-RC*", "*-dev*", "*-snapshot*", "*-SNAPSHOT*", "*-preview*"]
-
   - package-ecosystem: "docker-compose"
     directory: "/src/main/docker"
     schedule:
       interval: "weekly"
-    # Ignore pre-release versions (alpha, beta, rc, dev, snapshot, preview, etc.)
-    ignore:
-      - dependency-name: "*"
-        versions: ["*-alpha*", "*-beta*", "*-rc*", "*-RC*", "*-dev*", "*-snapshot*", "*-SNAPSHOT*", "*-preview*"]
