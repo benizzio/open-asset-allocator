@@ -44,10 +44,6 @@ func (slice CustomSlice[T]) ArrowString() string {
 	return joinAny(slice, " -> ")
 }
 
-func (slice CustomSlice[T]) Size() int {
-	return len(slice)
-}
-
 // joinAny joins any slice into a string using the given separator, rendering each
 // element via fmt.Sprint. It avoids multiple allocations by using strings.Builder.
 //

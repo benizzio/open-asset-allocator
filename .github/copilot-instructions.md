@@ -61,6 +61,10 @@ lowest level that can be grouped by any criteria defined by the implemented mode
       also contain authoring documentation.
     - if the language has authoring documentation standards, it must be followed
     - Examples: check `EXAMPLE REF: CODE DOCS` in language specific instructions below
+- general non-AI-generated code docs guidelines
+    - following clean code principles, if the code is relatively simple and self-explanatory, minimal or no comments are
+      preferred
+    - before commenting complex code, an evaluation must be made if the code can be simplified or decomposed instead
 - when implementing tests:
     - follow standard names `expected` and `actual` for variables used in the appropriate context
 
