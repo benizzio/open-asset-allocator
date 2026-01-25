@@ -2,7 +2,9 @@ package service
 
 import (
 	"context"
+	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/domain/allocation"
@@ -251,9 +253,11 @@ func readPlannedAllocationChildlessHierarchyBranchesValidationData(
 	var hierarchySize = len(hierarchy)
 	var allBranches = validation.hierarchicalAllocationPlanTree.ExtractBranches()
 
-	sort.Slice(allBranches, func(i, j int) bool {
-		return strings.Join(allBranches[i], "|") < strings.Join(allBranches[j], "|")
-	})
+	sort.Slice(
+		allBranches, func(i, j int) bool {
+			return strings.Join(allBranches[i], "|") < strings.Join(allBranches[j], "|")
+		},
+	)
 
 	for _, branch := range allBranches {
 		// Branch length includes the root node, so a complete branch has hierarchySize + 1 elements
@@ -261,7 +265,6 @@ func readPlannedAllocationChildlessHierarchyBranchesValidationData(
 			validation.childlessHierarchyBranches = append(validation.childlessHierarchyBranches, branch)
 		}
 	}
-}
 }
 
 func (service *AllocationPlanDomService) validateHierarchicalIdUniqueness(

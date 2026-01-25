@@ -1,8 +1,5 @@
 package langext
 
-type TreeNode[T comparable] interface {
-}
-
 type MapTreeNode[T comparable] struct {
 	value    T
 	children map[T]*MapTreeNode[T]
