@@ -45,6 +45,8 @@ lowest level that can be grouped by any criteria defined by the implemented mode
 - follow [SOLID principles](https://en.wikipedia.org/wiki/SOLID)
 - follow [Domain Driven Design](https://www.infoq.com/minibooks/domain-driven-design-quickly/) principles
     - when uncertain, check Context7 with "Evans DDD Sample" as prompt
+- when implementing tests, if the project uses a testing library that contains an assertion API, use it instead of raw
+  language constructs for assertions
 
 ### Code style standards beyond linters
 
