@@ -1220,7 +1220,7 @@ func TestPostAllocationPlanValidation_TypeExceedsMaxLength(t *testing.T) {
 // Authored by: GitHub Copilot
 func TestPostAllocationPlanValidation_InvalidSizeHierarchyBranches(t *testing.T) {
 
-	// Portfolio 5 has a 2-level hierarchy: Assets -> Classes
+	// Portfolio 5 has a 2-level hierarchy: Classes -> Assets
 	// This test sends a hierarchical id with 3 levels (invalid size)
 	var updatePlanJSON = `
 		{
@@ -1262,7 +1262,7 @@ func TestPostAllocationPlanValidation_InvalidSizeHierarchyBranches(t *testing.T)
 // Authored by: GitHub Copilot
 func TestPostAllocationPlanValidation_MissingParentHierarchyBranches(t *testing.T) {
 
-	// Portfolio 5 has a 2-level hierarchy: Assets -> Classes
+	// Portfolio 5 has a 2-level hierarchy: Classes -> Assets
 	// This test sends a hierarchical id with a specific asset but null class (missing parent)
 	// The orphan asset ARCA:SPY has no class (null) - this is invalid because an asset must belong to a class
 	// Note: slice sizes are crafted to sum to exactly 100% at the top level to isolate the validation
@@ -1304,7 +1304,7 @@ func TestPostAllocationPlanValidation_MissingParentHierarchyBranches(t *testing.
 // Authored by: GitHub Copilot
 func TestPostAllocationPlanValidation_ChildlessHierarchyBranches(t *testing.T) {
 
-	// Portfolio 5 has a 2-level hierarchy: Assets -> Classes
+	// Portfolio 5 has a 2-level hierarchy: Classes -> Assets
 	// This test sends only top-level planned allocations (class) without child asset allocations for STOCKS
 	var updatePlanJSON = `
 		{
@@ -1344,7 +1344,7 @@ func TestPostAllocationPlanValidation_ChildlessHierarchyBranches(t *testing.T) {
 // Authored by: GitHub Copilot
 func TestPostAllocationPlanValidation_MultipleChildlessHierarchyBranches(t *testing.T) {
 
-	// Portfolio 5 has a 2-level hierarchy: Assets -> Classes
+	// Portfolio 5 has a 2-level hierarchy: Classes -> Assets
 	// This test sends only top-level planned allocations without any child asset allocations
 	var updatePlanJSON = `
 		{
