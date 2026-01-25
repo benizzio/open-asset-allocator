@@ -251,12 +251,17 @@ func readPlannedAllocationChildlessHierarchyBranchesValidationData(
 	var hierarchySize = len(hierarchy)
 	var allBranches = validation.hierarchicalAllocationPlanTree.ExtractBranches()
 
+	sort.Slice(allBranches, func(i, j int) bool {
+		return strings.Join(allBranches[i], "|") < strings.Join(allBranches[j], "|")
+	})
+
 	for _, branch := range allBranches {
 		// Branch length includes the root node, so a complete branch has hierarchySize + 1 elements
 		if len(branch) <= hierarchySize {
 			validation.childlessHierarchyBranches = append(validation.childlessHierarchyBranches, branch)
 		}
 	}
+}
 }
 
 func (service *AllocationPlanDomService) validateHierarchicalIdUniqueness(
