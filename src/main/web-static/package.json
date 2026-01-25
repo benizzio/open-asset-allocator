@@ -7,7 +7,7 @@
     "@types/bootstrap": "^5.2.10",
     "@types/chroma-js": "^3.1.2",
     "eslint": "^9.39.2",
-    "globals": "^17.0.0",
+    "globals": "^17.1.0",
     "http-proxy-middleware": "^3.0.5",
     "parcel": "^2.16.3",
     "rimraf": "^6.1.2",
