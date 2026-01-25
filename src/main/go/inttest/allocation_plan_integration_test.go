@@ -947,6 +947,37 @@ func TestPostAllocationPlanValidation_MissingHierarchicalId(t *testing.T) {
 	assert.JSONEq(t, expected, string(body))
 }
 
+// Test validation: empty 'hierarchicalId' array (min length violation)
+// Expects 400 with message "Field 'details[0].hierarchicalId' failed validation: must be at least 1"
+//
+// Authored by: GitHub Copilot
+func TestPostAllocationPlanValidation_EmptyHierarchicalId(t *testing.T) {
+
+	var payload = `{
+		"name": "Plan with empty hierarchical id",
+		"details": [
+			{ "hierarchicalId": [], "sliceSizePercentage": "1.0" }
+		]
+	}`
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLPrefix+"/portfolio/1/allocation-plan",
+		"application/json",
+		strings.NewReader(payload),
+	)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+
+	var expected = `{
+		"errorMessage": "Validation failed",
+		"details": ["Field 'details[0].hierarchicalId' failed validation: must be at least 1"]
+	}`
+	assert.JSONEq(t, expected, string(body))
+}
+
 // Test validation (domain): duplicate hierarchical ids within the same plan should be rejected.
 // Currently NOT implemented, so this test is expected to FAIL (receives 204/500 instead of 400).
 // Establishes desired error response contract for future implementation: a non-field-specific message

@@ -15,7 +15,7 @@ import (
 
 type PlannedAllocationDTS struct {
 	Id                  *langext.ParseableInt64 `json:"id,omitempty"`
-	HierarchicalId      []*string               `json:"hierarchicalId,omitempty" validate:"required"`
+	HierarchicalId      []*string               `json:"hierarchicalId,omitempty" validate:"required,min=1"`
 	CashReserve         bool                    `json:"cashReserve"`
 	SliceSizePercentage decimal.Decimal         `json:"sliceSizePercentage,omitempty"`
 	Asset               *AssetDTS               `json:"asset,omitempty"`
