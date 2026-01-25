@@ -201,7 +201,6 @@ func readPlannedAllocationForSliceSizeTotalsValidationData(
 	}
 }
 
-// TODO clean
 func readPlannedAllocationHierarchicalBranchValidationData(
 	hierarchy domain.AllocationHierarchy,
 	plannedAllocation *domain.PlannedAllocation,
@@ -211,15 +210,29 @@ func readPlannedAllocationHierarchicalBranchValidationData(
 	var hierarchySize = len(hierarchy)
 	var plannedAllocationBranchInverted = langext.DereferenceSliceContent(plannedAllocation.HierarchicalId)
 	var plannedAllocationBranch = langext.ReverseSlice(plannedAllocationBranchInverted)
-	var branchSize = len(plannedAllocationBranchInverted)
 
+	validateHierarchySize(validation, hierarchySize, plannedAllocationBranch)
+
+	validateOrphanBranch(validation, plannedAllocationBranch)
+}
+
+func validateHierarchySize(
+	validation *allocationPlanValidationData,
+	hierarchySize int,
+	plannedAllocationBranch []string,
+) {
+	var branchSize = len(plannedAllocationBranch)
 	if branchSize != hierarchySize {
 		validation.invalidSizeHierarchyBranches = append(
 			validation.invalidSizeHierarchyBranches,
 			plannedAllocationBranch,
 		)
 	}
+}
 
+func validateOrphanBranch(validation *allocationPlanValidationData, plannedAllocationBranch []string) {
+
+	var branchSize = len(plannedAllocationBranch)
 	var previousLevelWasZeroValue = langext.IsZeroValue(plannedAllocationBranch[0])
 
 	if previousLevelWasZeroValue {
