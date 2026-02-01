@@ -9,7 +9,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.1
 	github.com/go-playground/validator/v10 v10.30.1
 	github.com/golang/glog v1.2.5
-	github.com/lib/pq v1.10.9
+	github.com/lib/pq v1.11.1
 	github.com/okhomin/gohashcode v0.0.0-20240711234613-532ff59abfa6
 	github.com/shopspring/decimal v1.4.0
 	github.com/stretchr/testify v1.11.1
