@@ -115,8 +115,7 @@ Configuration can be done in [.env](src/main/docker/.env)
 
 #### Backlog - Not planned yet
 
-- Portfolio history
-    - [ ] Line chart with portfolio total market value over time
+- none
 
 #### Pre-alpha - Phase 1
 
@@ -130,14 +129,15 @@ assessing portfolio vs. plan situation through time, helping re-balancing decisi
     - [x] new portfolio - add form based data input (beginner-user-friendly - start with fixed base structure class->
       asset)
     - [x] edit portfolio - base fields (e.g. name) only
-    - [ ] add structure management (add/remove levels)
 - Portfolio history
-    - [ ] allow inclusion of external cash inflow via UI (as separate "input" class)
     - [x] add form based data input (beginner-user-friendly)
+        - [ ] show total market value for entire form
     - [ ] copy data from different obsevation timestamps
     - [ ] template data from plan
-    - [ ] ui to handle data ingestion from known sources
     - [ ] no content message
+    - [ ] market prices from external source (e.g. Yahoo Finance)
+    - [ ] improve chart navigation
+    - [ ] Line chart with portfolio total market value over time - history progress chart and performance
 - Allocation Plan
     - [x] add form based data input (beginner-user-friendly)
     - [ ] copy data from other plans
@@ -150,15 +150,9 @@ assessing portfolio vs. plan situation through time, helping re-balancing decisi
         - [x] show divergent value in percentage
         - [ ] show divergence mode used with informative text
         - [ ] add percentage divergence mode config ("aggressive" from level or "conservative" from asset)
-        - [ ] add divergence bar mode config (change proportion from 2:1)
 - [ ] UI improvements:
     - [ ] Color configuration per hierarchy level record for visual consistency (apply to charts and tables)
     - [ ] Change accordion header font to differentiate from content
-- [ ] Data ingestion improvements:
-    - [ ] equivalent tickers field for assets
-    - [ ] UI to call ingestion
-    - [ ] Ghostfolio ingestion:
-        - [ ] direct integration from API (holdings call)
 
 #### Alpha - Phase 2
 
@@ -180,6 +174,20 @@ assessing portfolio vs. plan situation through time, helping re-balancing decisi
           (no need to persist)
 
 #### Beta - Phase 3
+
+- Portfolio management:
+    - [ ] add structure management (add/remove hierarchy levels)
+- Portfolio history
+    - [ ] allow inclusion of external cash inflow via UI (as separate "input" class)
+    - [ ] ui to handle data ingestion from known sources
+- Allocation map:
+    - DIVERGENCE:
+    - [ ] add divergence bar mode config (change proportion from 2:1)
+- [ ] Data ingestion improvements:
+    - [ ] equivalent tickers field for assets
+    - [ ] UI to call ingestion
+    - [ ] Ghostfolio ingestion:
+        - [ ] direct integration from API (holdings call)
 
 **Asset allocation intelligence**: Expand management capabilities allowing users to understand how an asset allocation
 strategy can be created and modified for personal needs and expectations. Integrate indicators and data sources to
