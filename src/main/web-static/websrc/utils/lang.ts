@@ -583,3 +583,34 @@ export function coerceToBigNumber(value: unknown): BigNumber {
         return new BigNumber(0);
     }
 }
+
+/**
+ * Parses a string value as an integer, returning a default value if parsing fails.
+ *
+ * @param value - The string value to parse.
+ * @param defaultValue - The default value to return if parsing fails.
+ * @returns The parsed integer, or the default value.
+ *
+ * @example
+ * parseIntOrDefault("8", 2) // => 8
+ * parseIntOrDefault("", 2) // => 2
+ * parseIntOrDefault(null, 2) // => 2
+ * parseIntOrDefault("-5", 2) // => -5
+ * parseIntOrDefault("abc", 2) // => 2
+ *
+ * @author GitHub Copilot
+ */
+export function parseIntOrDefault(value: string | null | undefined, defaultValue: number): number {
+
+    if(!value) {
+        return defaultValue;
+    }
+
+    const parsed = parseInt(value, 10);
+
+    if(isNaN(parsed)) {
+        return defaultValue;
+    }
+
+    return parsed;
+}

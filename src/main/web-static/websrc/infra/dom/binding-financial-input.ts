@@ -1,5 +1,6 @@
 import { logger, LogLevel } from "../logging";
 import Format from "../format";
+import { parseIntOrDefault } from "../../utils/lang";
 
 // =============================================================================
 // FINANCIAL INPUT BINDING
@@ -12,6 +13,9 @@ const FINANCIAL_INPUT_ATTRIBUTE = "data-financial-input";
 const FINANCIAL_INPUT_BOUND_FLAG = "data-financial-input-bound";
 const FINANCIAL_INPUT_CONTAINER_ATTRIBUTE = "data-financial-input-container";
 const FINANCIAL_INPUT_NULL_IF_EMPTY_ATTRIBUTE = "data-null-if-empty";
+const FINANCIAL_INPUT_DECIMALS_ATTRIBUTE = "data-financial-input-decimals";
+const FINANCIAL_INPUT_CONTAINER_DECIMALS_ATTRIBUTE = "data-financial-input-container-decimals";
+const DEFAULT_DECIMAL_PLACES = 2;
 
 /**
  * Binds financial input elements in descendants by creating hidden raw value fields
@@ -79,6 +83,10 @@ function bindFinancialInput(financialInput: HTMLInputElement, fieldName: string)
     const container = document.createElement("div");
     container.setAttribute(FINANCIAL_INPUT_CONTAINER_ATTRIBUTE, fieldName);
 
+    // Read and store custom decimal places if specified
+    const decimalPlaces = getDecimalPlacesFromInput(financialInput);
+    container.setAttribute(FINANCIAL_INPUT_CONTAINER_DECIMALS_ATTRIBUTE, decimalPlaces.toString());
+
     // Wrap the financial input in the container
     financialInput.parentNode.insertBefore(container, financialInput);
     container.appendChild(financialInput);
@@ -90,7 +98,7 @@ function bindFinancialInput(financialInput: HTMLInputElement, fieldName: string)
     container.appendChild(hiddenRawInput);
 
     // Initialize display value from raw if present
-    initializeFinancialDisplay(financialInput, hiddenRawInput);
+    initializeFinancialDisplay(financialInput, hiddenRawInput, decimalPlaces);
 
     // Set up synchronization on blur (when user finishes editing)
     financialInput.addEventListener("blur", () => {
@@ -105,10 +113,42 @@ function bindFinancialInput(financialInput: HTMLInputElement, fieldName: string)
     });
 
     // Set up observer to detect programmatic changes in hidden raw field
-    setupRawValueObserver(hiddenRawInput, financialInput);
+    setupRawValueObserver(hiddenRawInput, financialInput, decimalPlaces);
 
     // Configure financial input attributes (removes oninput from visible input)
     configureFinancialInputAttributes(financialInput);
+}
+
+/**
+ * Gets the decimal places value from the input element's data attribute.
+ * Returns the default value if the attribute is not present or invalid.
+ *
+ * @param financialInput The financial input element
+ * @returns The number of decimal places to use
+ *
+ * @author GitHub Copilot
+ */
+function getDecimalPlacesFromInput(financialInput: HTMLInputElement): number {
+
+    const decimalsAttr = financialInput.getAttribute(FINANCIAL_INPUT_DECIMALS_ATTRIBUTE);
+
+    return parseIntOrDefault(decimalsAttr, DEFAULT_DECIMAL_PLACES);
+}
+
+/**
+ * Gets the decimal places value from the container element's data attribute.
+ * Returns the default value if the attribute is not present or invalid.
+ *
+ * @param container The container element
+ * @returns The number of decimal places to use
+ *
+ * @author GitHub Copilot
+ */
+function getDecimalPlacesFromContainer(container: HTMLElement): number {
+
+    const decimalsAttr = container.getAttribute(FINANCIAL_INPUT_CONTAINER_DECIMALS_ATTRIBUTE);
+
+    return parseIntOrDefault(decimalsAttr, DEFAULT_DECIMAL_PLACES);
 }
 
 /**
@@ -171,10 +211,15 @@ function configureFinancialInputAttributes(financialInput: HTMLInputElement): vo
  *
  * @param financialInput The visible financial input element
  * @param rawInput The hidden raw value input element
+ * @param decimalPlaces The number of decimal places to use for formatting
  *
  * @author GitHub Copilot
  */
-function initializeFinancialDisplay(financialInput: HTMLInputElement, rawInput: HTMLInputElement): void {
+function initializeFinancialDisplay(
+    financialInput: HTMLInputElement,
+    rawInput: HTMLInputElement,
+    decimalPlaces: number,
+): void {
 
     // Check if financial input already has a value (from template)
     const existingDisplayValue = financialInput.value;
@@ -186,7 +231,7 @@ function initializeFinancialDisplay(financialInput: HTMLInputElement, rawInput: 
         if(!isNaN(numericValue)) {
             // Value is a raw number, format it for display and store raw in hidden field
             rawInput.value = numericValue.toString();
-            financialInput.value = Format.formatFinancialNumber(numericValue);
+            financialInput.value = Format.formatFinancialNumber(numericValue, undefined, decimalPlaces);
             return;
         }
     }
@@ -205,7 +250,7 @@ function initializeFinancialDisplay(financialInput: HTMLInputElement, rawInput: 
     }
 
     // Format the raw value for display
-    financialInput.value = Format.formatFinancialNumber(numericRaw);
+    financialInput.value = Format.formatFinancialNumber(numericRaw, undefined, decimalPlaces);
 }
 
 /**
@@ -228,7 +273,8 @@ function syncDisplayToRawInContainer(container: HTMLElement, fieldName: string):
         return;
     }
 
-    syncDisplayToRaw(financialInput, rawInput);
+    const decimalPlaces = getDecimalPlacesFromContainer(container);
+    syncDisplayToRaw(financialInput, rawInput, decimalPlaces);
 }
 
 /**
@@ -261,10 +307,15 @@ function syncInputToRawInContainer(container: HTMLElement, fieldName: string): v
  *
  * @param financialInput The visible financial input element
  * @param rawInput The hidden raw value input element
+ * @param decimalPlaces The number of decimal places to use for formatting
  *
  * @author GitHub Copilot
  */
-function syncDisplayToRaw(financialInput: HTMLInputElement, rawInput: HTMLInputElement): void {
+function syncDisplayToRaw(
+    financialInput: HTMLInputElement,
+    rawInput: HTMLInputElement,
+    decimalPlaces: number,
+): void {
 
     const displayValue = financialInput.value;
 
@@ -286,7 +337,7 @@ function syncDisplayToRaw(financialInput: HTMLInputElement, rawInput: HTMLInputE
     const finalValue = Math.max(0, numericValue);
 
     // Reformat display (may round/truncate decimal places)
-    const formattedValue = Format.formatFinancialNumber(finalValue);
+    const formattedValue = Format.formatFinancialNumber(finalValue, undefined, decimalPlaces);
     financialInput.value = formattedValue;
 
     // Re-parse the formatted value to ensure raw value matches displayed value
@@ -356,10 +407,15 @@ function triggerInputEventOnHiddenField(container: HTMLElement): void {
  *
  * @param rawInput The hidden raw value input element
  * @param financialInput The visible financial input element to update
+ * @param decimalPlaces The number of decimal places to use for formatting
  *
  * @author GitHub Copilot
  */
-function setupRawValueObserver(rawInput: HTMLInputElement, financialInput: HTMLInputElement): void {
+function setupRawValueObserver(
+    rawInput: HTMLInputElement,
+    financialInput: HTMLInputElement,
+    decimalPlaces: number,
+): void {
 
     // Get the original value descriptor from HTMLInputElement prototype
     const originalDescriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value");
@@ -395,7 +451,7 @@ function setupRawValueObserver(rawInput: HTMLInputElement, financialInput: HTMLI
 
             // Sync the display value from the new raw value
             syncing = true;
-            syncRawToDisplay(rawInput, financialInput);
+            syncRawToDisplay(rawInput, financialInput, decimalPlaces);
             syncing = false;
         },
 
@@ -410,10 +466,15 @@ function setupRawValueObserver(rawInput: HTMLInputElement, financialInput: HTMLI
  *
  * @param rawInput The hidden raw value input element
  * @param financialInput The visible financial input element to update
+ * @param decimalPlaces The number of decimal places to use for formatting
  *
  * @author GitHub Copilot
  */
-function syncRawToDisplay(rawInput: HTMLInputElement, financialInput: HTMLInputElement): void {
+function syncRawToDisplay(
+    rawInput: HTMLInputElement,
+    financialInput: HTMLInputElement,
+    decimalPlaces: number,
+): void {
 
     const rawValue = rawInput.value;
 
@@ -430,5 +491,5 @@ function syncRawToDisplay(rawInput: HTMLInputElement, financialInput: HTMLInputE
     }
 
     // Format the raw value for display
-    financialInput.value = Format.formatFinancialNumber(numericValue);
+    financialInput.value = Format.formatFinancialNumber(numericValue, undefined, decimalPlaces);
 }
