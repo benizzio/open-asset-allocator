@@ -1,6 +1,6 @@
 import { logger, LogLevel } from "../logging";
 import Format from "../format";
-import { parseNonNegativeInt } from "../../utils/lang";
+import { parseIntOrDefault } from "../../utils/lang";
 
 // =============================================================================
 // FINANCIAL INPUT BINDING
@@ -132,7 +132,7 @@ function getDecimalPlacesFromInput(financialInput: HTMLInputElement): number {
 
     const decimalsAttr = financialInput.getAttribute(FINANCIAL_INPUT_DECIMALS_ATTRIBUTE);
 
-    return parseNonNegativeInt(decimalsAttr, DEFAULT_DECIMAL_PLACES);
+    return parseIntOrDefault(decimalsAttr, DEFAULT_DECIMAL_PLACES);
 }
 
 /**
@@ -148,7 +148,7 @@ function getDecimalPlacesFromContainer(container: HTMLElement): number {
 
     const decimalsAttr = container.getAttribute(FINANCIAL_INPUT_CONTAINER_DECIMALS_ATTRIBUTE);
 
-    return parseNonNegativeInt(decimalsAttr, DEFAULT_DECIMAL_PLACES);
+    return parseIntOrDefault(decimalsAttr, DEFAULT_DECIMAL_PLACES);
 }
 
 /**
