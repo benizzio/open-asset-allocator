@@ -12,13 +12,13 @@ select 'All Classes' as category, sum(pa.slice_size_percentage) as total_percent
 from planned_allocation pa
 where 1=1
   and pa.allocation_plan_id = 1
-  and pa.structural_id[1] IS NULL
-  and pa.structural_id[2] IS NOT NULL
+  and pa.hierarchical_id[1] IS NULL
+  and pa.hierarchical_id[2] IS NOT NULL
 union
-select pa.structural_id[2] as category, sum(pa.slice_size_percentage) as total_percentage
+select pa.hierarchical_id[2] as category, sum(pa.slice_size_percentage) as total_percentage
 from planned_allocation pa
 where 1=1
   and pa.allocation_plan_id = 1
-  and pa.structural_id[1] IS NOT NULL
-group by pa.structural_id[2]
+  and pa.hierarchical_id[1] IS NOT NULL
+group by pa.hierarchical_id[2]
 ;
