@@ -1,12 +1,21 @@
-# open-asset-allocator
+# Open Asset Allocator Project
 
-Open source tool to manage an asset portfolio using asset allocation strategies as a first-class citizen.
+An Open source project composed of:
+
+- An open, layman-summarized base of knowledge to learn about the subject and methodology Asset Allocation, known Asset
+  Allocation strategies and concepts tied to a framework around the concept
+  of [Antifragility](https://en.wikipedia.org/wiki/Antifragility)
+- An open source tool to apply the knowledge and manage and monitor a long term investment portfolio using asset
+  allocation strategies as a first-class citizen.
 
 > [!CAUTION]
-> This project is in pre-alpha stage and is not ready for production use. It can evolve to a cloud ready service in the
+> This project is in pre-alpha stage and its tool not ready for production use. It can evolve to a cloud ready service
+> in the
 > future, but is currently a work in progress without minimum security for anything but local usage.
 
-## What is an asset allocation strategy?
+## What is an asset allocation strategy, and how can I learn more?
+
+![asset allocation flow](/docs/images/asset-allocation-flow.png)
 
 > An asset allocation strategy is a plan for how to distribute your investments across different asset classes, such as
 > stocks, bonds, and cash. The goal of an asset allocation strategy is to balance risk and reward by diversifying your
@@ -14,8 +23,7 @@ Open source tool to manage an asset portfolio using asset allocation strategies 
 
 Yes, this is the AI generated, statistically predominant, by the book definition. Something similar can also be found in
 places like [Investopedia](https://www.investopedia.com/terms/a/assetallocation.asp)
-and [Wikipedia](https://en.wikipedia.org/wiki/Asset_allocation).
-It is bland and generally not very helpful.
+and [Wikipedia](https://en.wikipedia.org/wiki/Asset_allocation). It is bland and not very helpful.
 
 Some definitions I believe are a lot more useful:
 
@@ -23,10 +31,10 @@ Some definitions I believe are a lot more useful:
   deviations;
 - A technique to store cognitive energy in a plan that allows for intuitive, "automatic" behavior when moving assets,
   helping detach it from emotional influences and deviations;
-- A way to time the markets without targets, taking advantage of its cyclic nature (where appliable), and to buy "cheap"
-  and sell "expensive" without having to know about the price at the time of action;
-- A process that is used to manage large ammounts of assets, enjoying large accumulation zones and permanent time in the
-  market;
+- A way to time the markets without price and period targets, taking advantage of its cyclic nature (where appliable)
+  to buy "cheap" and sell "expensive";
+- A process that is historically used to manage large ammounts of assets, enjoying large accumulation zones and
+  permanent time in the market;
 - A method that allows for higher focus on some very important risk assessment
   and [convex payoff](https://youtu.be/ovEPIQR65hc) topics:
     - Maintaining diversification with
@@ -36,15 +44,15 @@ Some definitions I believe are a lot more useful:
       [barbell (bimodal) strategies](https://www.investopedia.com/articles/investing/013114/barbell-investment-strategy.asp);
     - Taking care of [hedging tail risks](https://youtu.be/o3Qno1rT-nw).
 
-![asset allocation flow](/docs/images/asset-allocation-flow.png)
+You can learn more about this and related topics in the
+project's [Personal Knowledge Management (PKM) docs](https://www.notion.so/Asset-Allocation-and-Market-Assessment-PKM-228acfc60ff08019ab03e7bc10dc7935).
 
-## What is this tool?
+## What is this opens source tool?
 
-It is an application that allows the continued management of the usage of asset allocation strategies for long term
-portfolios in a "fractal" structure. The allocation needs to follow this bottom-up, repeatable structure, composed of
-assets on the lowest level.
-Those assets can be grouped by any criteria defined by the implemented model, and that will form the top levels of the
-hierarchical structure.
+An application that allows the continued, long-term portfolio management with the usage of asset allocation strategies
+in a "fractal" structure. The allocation needs to follow this bottom-up, repeatable structure, composed of assets on the
+lowest level. Those assets can be grouped by any criteria defined by the implemented model, and that will form the top
+levels of the hierarchical structure.
 
 Example portfolio (concrete 60/40 classic portfolio) with 2 layers hierarchy (CLASSES and ASSETS, this portfolio is
 available as an example dataset in the project):
