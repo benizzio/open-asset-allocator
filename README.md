@@ -47,7 +47,7 @@ Some definitions I believe are a lot more useful:
 You can learn more about this and related topics in the
 project's [Personal Knowledge Management (PKM) docs](https://www.notion.so/Asset-Allocation-and-Market-Assessment-PKM-228acfc60ff08019ab03e7bc10dc7935).
 
-## What is this opens source tool?
+## What is this open source tool?
 
 An application that allows the continued, long-term portfolio management with the usage of asset allocation strategies
 in a "fractal" structure. The allocation needs to follow this bottom-up, repeatable structure, composed of assets on the
