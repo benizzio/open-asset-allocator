@@ -1,174 +1,244 @@
-INSERT INTO portfolio (id, "name", allocation_structure)
-VALUES (
-           1,
-           'My Portfolio Example',
-           '{"hierarchy": [{"name": "Assets", "field": "assetTicker"}, {"name": "Classes", "field": "class"}]}'::jsonb
-       )
-    ON CONFLICT (id) DO UPDATE SET "name" = EXCLUDED."name", allocation_structure = EXCLUDED.allocation_structure
-;
+-- Example portfolio data script.
+-- This script is idempotent and can be run multiple times without conflicts.
+-- If records with the same name already exist, a timestamp suffix is appended.
+--
+-- Author: Github Copilot
 
-SELECT setval('portfolio_id_seq', (SELECT max(id) FROM portfolio));
-
-INSERT INTO asset (id, ticker, "name") VALUES
-    (1, 'ARCA:BIL', 'SPDR Bloomberg 1-3 Month T-Bill ETF'),
-    (2, 'ARCA:STIP', 'iShares 0-5 Year TIPS Bond ETF'),
-    (3, 'NasdaqGM:IEF', 'iShares 7-10 Year Treasury Bond ETF'),
-    (4, 'NasdaqGM:TLT', 'iShares 20+ Year Treasury Bond ETF'),
-    (5, 'NasdaqGM:SHV', 'iShares Short Treasury Bond ETF'),
-    (6, 'ARCA:EWZ', 'iShares Msci Brazil ETF'),
-    (7, 'ARCA:SPY', 'SPDR S&P 500 ETF Trust')
-ON CONFLICT (id) DO
-    UPDATE SET
-        ticker = EXCLUDED.ticker,
-        "name" = EXCLUDED."name"
-;
-
-SELECT setval('asset_id_seq', (SELECT max(id) FROM asset));
-
-INSERT INTO public.portfolio_allocation_obs_time (id, observation_timestamp, observation_time_tag)
-VALUES(1, CURRENT_DATE, to_char(CURRENT_DATE, 'YYYYMM'))
-;
-
-SELECT setval('portfolio_allocation_obs_time_id_seq', (SELECT max(id) FROM portfolio_allocation_obs_time));
-
-DELETE FROM portfolio_allocation_fact WHERE portfolio_id = 1;
-
--- BONDS total market value = 27000
-INSERT INTO portfolio_allocation_fact (
-    asset_id,
-    "class",
-    cash_reserve,
-    asset_quantity,
-    asset_market_price,
-    total_market_value,
-    portfolio_id,
-    observation_time_id
-)
-VALUES (
-           1,
-           'BONDS',
-           FALSE,
-           100,
-           100,
-           10000,
-           1,
-           1
-       ),
-       (
-           2,
-           'BONDS',
-           FALSE,
-           80,
-           100,
-           8000,
-           1,
-           1
-       ),
-       (
-           3,
-           'BONDS',
-           FALSE,
-           60,
-           100,
-           6000,
-           1,
-           1
-       ),
-       (
-           4,
-           'BONDS',
-           FALSE,
-           30,
-           100,
-           3000,
-           1,
-           1
-       )
-;
-
--- STOCKS total market value = 18000
-INSERT INTO public.portfolio_allocation_fact (
-    asset_id,
-    "class",
-    cash_reserve,
-    asset_quantity,
-    asset_market_price,
-    total_market_value,
-    portfolio_id,
-    observation_time_id
-)
-VALUES (
-           5,
-           'STOCKS',
-           TRUE,
-           80,
-           100,
-           9000,
-           1,
-           1
-       ),
-       (
-           6,
-           'STOCKS',
-           FALSE,
-           10,
-           100,
-           1000,
-           1,
-           1
-       ),
-       (
-           7,
-           'STOCKS',
-           FALSE,
-           90,
-           100,
-           8000,
-           1,
-           1
-       )
-;
-
-INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, portfolio_id)
-VALUES (
-           1,
-           '60/40 Portfolio Classic - Example',
-           'ALLOCATION_PLAN',
-           NULL,
-           1
-       )
-    ON CONFLICT (id) DO
-UPDATE SET
-    "name" = EXCLUDED."name",
-    "type" = EXCLUDED."type",
-    planned_execution_date = EXCLUDED.planned_execution_date,
-    portfolio_id = EXCLUDED.portfolio_id
-;
-
-DELETE FROM planned_allocation WHERE allocation_plan_id = 1;
-
-INSERT INTO planned_allocation
-(allocation_plan_id, structural_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
+-- Assets (insert only if not present, comparison by ticker)
+INSERT INTO asset (ticker, "name")
 VALUES
-    (1, '{NULL, "STOCKS"}', NULL, false, 0.4, NULL),
-    (1, '{NULL, "BONDS"}', NULL, false, 0.6, NULL)
+    ('ARCA:BIL', 'SPDR Bloomberg 1-3 Month T-Bill ETF'),
+    ('ARCA:STIP', 'iShares 0-5 Year TIPS Bond ETF'),
+    ('NasdaqGM:IEF', 'iShares 7-10 Year Treasury Bond ETF'),
+    ('NasdaqGM:TLT', 'iShares 20+ Year Treasury Bond ETF'),
+    ('NasdaqGM:SHV', 'iShares Short Treasury Bond ETF'),
+    ('ARCA:EWZ', 'iShares Msci Brazil ETF'),
+    ('ARCA:SPY', 'SPDR S&P 500 ETF Trust')
+ON CONFLICT (ticker) DO NOTHING
 ;
 
-INSERT INTO planned_allocation
-(allocation_plan_id, structural_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
-VALUES
-    (1, '{"ARCA:BIL", "BONDS"}', 1, false, 0.4, NULL),
-    (1, '{"NasdaqGM:IEF", "BONDS"}', 3, false, 0.3, NULL),
-    (1, '{"NasdaqGM:TLT", "BONDS"}', 4, false, 0.2, NULL),
-    (1, '{"ARCA:STIP", "BONDS"}', 2, false, 0.1, NULL)
-;
+DO $$
+DECLARE
 
-INSERT INTO planned_allocation
-(allocation_plan_id, structural_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
-VALUES
-    (1, '{"NasdaqGM:SHV", "STOCKS"}', 5, true, 0.5, NULL),
-    (1, '{"ARCA:EWZ", "STOCKS"}', 6, false, 0.05, NULL),
-    (1, '{"ARCA:SPY", "STOCKS"}', 7, false, 0.45, NULL)
-;
+    v_portfolio_name TEXT;
+    v_portfolio_id INTEGER;
+    v_obs_time_id INTEGER;
+    v_plan_name TEXT;
+    v_plan_id INTEGER;
 
-SELECT setval('allocation_plan_id_seq', (SELECT max(id) FROM allocation_plan));
+BEGIN
+
+    -- Generate unique portfolio name (append timestamp if base name exists)
+    IF EXISTS (SELECT 1 FROM portfolio WHERE "name" = 'My Portfolio Example') THEN
+        v_portfolio_name := 'My Portfolio Example - ' || to_char(now(), 'YYYYMMDD-HH24MISS');
+    ELSE
+        v_portfolio_name := 'My Portfolio Example';
+    END IF;
+
+    -- Portfolio
+    INSERT INTO portfolio ("name", allocation_structure)
+    VALUES (
+        v_portfolio_name,
+        '{"hierarchy": [{"name": "Assets", "field": "assetTicker"}, {"name": "Classes", "field": "class"}]}'::jsonb
+    )
+    RETURNING id INTO v_portfolio_id;
+
+    -- Observation time
+    INSERT INTO portfolio_allocation_obs_time (observation_timestamp, observation_time_tag)
+    VALUES (CURRENT_DATE, to_char(CURRENT_DATE, 'YYYYMM'))
+    ON CONFLICT (observation_time_tag) DO UPDATE SET
+        observation_timestamp = EXCLUDED.observation_timestamp
+    RETURNING id INTO v_obs_time_id;
+
+    -- Portfolio allocation facts
+    INSERT INTO portfolio_allocation_fact (
+        asset_id,
+        "class",
+        cash_reserve,
+        asset_quantity,
+        asset_market_price,
+        total_market_value,
+        portfolio_id,
+        observation_time_id
+    )
+    VALUES
+        -- BONDS total market value = 27000
+        (
+            (SELECT id FROM asset WHERE ticker = 'ARCA:BIL'),
+            'BONDS',
+            FALSE,
+            100,
+            100,
+            10000,
+            v_portfolio_id,
+            v_obs_time_id
+        ),
+        (
+            (SELECT id FROM asset WHERE ticker = 'ARCA:STIP'),
+            'BONDS',
+            FALSE,
+            80,
+            100,
+            8000,
+            v_portfolio_id,
+            v_obs_time_id
+        ),
+        (
+            (SELECT id FROM asset WHERE ticker = 'NasdaqGM:IEF'),
+            'BONDS',
+            FALSE,
+            60,
+            100,
+            6000,
+            v_portfolio_id,
+            v_obs_time_id
+        ),
+        (
+            (SELECT id FROM asset WHERE ticker = 'NasdaqGM:TLT'),
+            'BONDS',
+            FALSE,
+            30,
+            100,
+            3000,
+            v_portfolio_id,
+            v_obs_time_id
+        ),
+        -- STOCKS total market value = 18000
+        (
+            (SELECT id FROM asset WHERE ticker = 'NasdaqGM:SHV'),
+            'STOCKS',
+            TRUE,
+            80,
+            100,
+            9000,
+            v_portfolio_id,
+            v_obs_time_id
+        ),
+        (
+            (SELECT id FROM asset WHERE ticker = 'ARCA:EWZ'),
+            'STOCKS',
+            FALSE,
+            10,
+            100,
+            1000,
+            v_portfolio_id,
+            v_obs_time_id
+        ),
+        (
+            (SELECT id FROM asset WHERE ticker = 'ARCA:SPY'),
+            'STOCKS',
+            FALSE,
+            90,
+            100,
+            8000,
+            v_portfolio_id,
+            v_obs_time_id
+        )
+    ;
+
+    -- Generate unique allocation plan name (append timestamp if base name exists)
+    IF EXISTS (SELECT 1 FROM allocation_plan WHERE "name" = '60/40 Portfolio Classic - Example') THEN
+        v_plan_name := '60/40 Portfolio Classic - Example - ' || to_char(now(), 'YYYYMMDD-HH24MISS');
+    ELSE
+        v_plan_name := '60/40 Portfolio Classic - Example';
+    END IF;
+
+    -- Allocation plan
+    INSERT INTO allocation_plan ("name", "type", planned_execution_date, portfolio_id)
+    VALUES (
+        v_plan_name,
+        'ALLOCATION_PLAN',
+        NULL,
+        v_portfolio_id
+    )
+    RETURNING id INTO v_plan_id;
+
+    -- Planned allocations
+    INSERT INTO planned_allocation (
+        allocation_plan_id,
+        hierarchical_id,
+        asset_id,
+        cash_reserve,
+        slice_size_percentage,
+        total_market_value
+    )
+    VALUES
+        -- Class level allocations
+        (
+            v_plan_id,
+            '{NULL, "STOCKS"}'::text[],
+            NULL,
+            FALSE,
+            0.4,
+            NULL
+        ),
+        (
+            v_plan_id,
+            '{NULL, "BONDS"}'::text[],
+            NULL,
+            FALSE,
+            0.6,
+            NULL
+        ),
+        -- BONDS asset allocations
+        (
+            v_plan_id,
+            '{"ARCA:BIL", "BONDS"}'::text[],
+            (SELECT id FROM asset WHERE ticker = 'ARCA:BIL'),
+            FALSE,
+            0.4,
+            NULL
+        ),
+        (
+            v_plan_id,
+            '{"NasdaqGM:IEF", "BONDS"}'::text[],
+            (SELECT id FROM asset WHERE ticker = 'NasdaqGM:IEF'),
+            FALSE,
+            0.3,
+            NULL
+        ),
+        (
+            v_plan_id,
+            '{"NasdaqGM:TLT", "BONDS"}'::text[],
+            (SELECT id FROM asset WHERE ticker = 'NasdaqGM:TLT'),
+            FALSE,
+            0.2,
+            NULL
+        ),
+        (
+            v_plan_id,
+            '{"ARCA:STIP", "BONDS"}'::text[],
+            (SELECT id FROM asset WHERE ticker = 'ARCA:STIP'),
+            FALSE,
+            0.1,
+            NULL
+        ),
+        -- STOCKS asset allocations
+        (
+            v_plan_id,
+            '{"NasdaqGM:SHV", "STOCKS"}'::text[],
+            (SELECT id FROM asset WHERE ticker = 'NasdaqGM:SHV'),
+            TRUE,
+            0.5,
+            NULL
+        ),
+        (
+            v_plan_id,
+            '{"ARCA:EWZ", "STOCKS"}'::text[],
+            (SELECT id FROM asset WHERE ticker = 'ARCA:EWZ'),
+            FALSE,
+            0.05,
+            NULL
+        ),
+        (
+            v_plan_id,
+            '{"ARCA:SPY", "STOCKS"}'::text[],
+            (SELECT id FROM asset WHERE ticker = 'ARCA:SPY'),
+            FALSE,
+            0.45,
+            NULL
+        )
+    ;
+
+END $$;
+

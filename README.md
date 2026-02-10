@@ -54,17 +54,14 @@ in a "fractal" structure. The allocation needs to follow this bottom-up, repeata
 lowest level. Those assets can be grouped by any criteria defined by the implemented model, and that will form the top
 levels of the hierarchical structure.
 
-Example portfolio (concrete 60/40 classic portfolio) with 2 layers hierarchy (CLASSES and ASSETS, this portfolio is
-available as an example dataset in the project):
-
 > [!CAUTION]
 > The examples shown in this document or any part of the project are for mere illustration purposes of the application
 > features with real data. They are not, at any point in time, to be considered investment advice. Asset values are also
 > fictional.
 
-![class level](/docs/images/example-portfolio-classes.png)
-![asset level bonds](/docs/images/example-portfolio-bonds.png)
-![asset level stocks](/docs/images/example-portfolio-stocks.png)
+![class level](/docs/images/portfolio-history.png)
+
+[Learn more](/docs/readme-features.md)
 
 ### Installing and running (pre-alpha)
 
@@ -83,41 +80,6 @@ Configuration can be done in [.env](src/main/docker/.env)
 > [!NOTE]
 > Current pre-alpha version requires data ingestion or manual data insertion on the PostgreSQL database.
 > To access the stored portfolio go to `http://localhost/portfolio/<portfolio id>`
-
-### Features
-
-- **Manage multiple portfolios**:
-    - Each portfolio has it own customizable hierarchical structure that must follow a "fractal" pattern
-      (the "hierarchy");
-    - Inside each portfolio, the assets are classified with data properties that can be chosen as levels (as many as
-      needed) of the hierarchy and group them;
-    - Each level of the hierarchy has their own set proportions, and can be monitored and balanced as such;
-    - In the lowest level of the hierarchy, the assets, there is a classifier for "cash" reserves (assets that can be
-      used for risk mitigation
-      and [optionality](https://medium.com/@hannes.rollin/antifragile-system-design-1-optionality-17b60fa0842d) if the
-      allocation phase demands it);
-- **Historical data and visualization**:
-    - At any planned (or unplanned) interval a snapshot of the portfolio can be stored to be visualized and used for
-      re-balacing (reallocation) analysis;
-
-![portfolio page](/docs/images/portfolio-page.png)
-
-- **Allocation planning**:
-    - Allocation plans following the portfolio structure can be created and used for re-balancing analysis;
-    - As time passes, monitoring intervals are reached or maret conditions change, new allocation plans can be created
-      and old plans are stored for
-      historical analysis;
-
-![allocation plan page](/docs/images/allocation-plan-page.png)
-
-- **Divergence analysis**:
-    - Any historical snapshot of the (allocation of the) portfolio can be conbined to any plan of the same portfolio to
-      create a Divergence analysis, illustrating how out of balance the portfolio is from the selected plan;
-
-![divergence analysis page](/docs/images/divergence-analysis-page.png)
-
-- **Convergence analysis and planning**:
-    - Planned as a future feature;
 
 ### Roadmap(ish)
 
