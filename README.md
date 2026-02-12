@@ -61,9 +61,9 @@ levels of the hierarchical structure.
 
 ![class level](/docs/images/portfolio-history.png)
 
-[Learn more](/docs/readme-features.md)
+[Learn more...](/docs/readme-features.md)
 
-### Installing and running (pre-alpha)
+## Installing and running (pre-alpha)
 
 > [!IMPORTANT]
 > The pre-alpha version requires higher technical knowledge about software to use.
@@ -81,7 +81,7 @@ Configuration can be done in [.env](src/main/docker/.env)
 > Current pre-alpha version requires data ingestion or manual data insertion on the PostgreSQL database.
 > To access the stored portfolio go to `http://localhost/portfolio/<portfolio id>`
 
-### Roadmap(ish)
+## Roadmap(ish)
 
 #### Backlog - Not planned yet
 
