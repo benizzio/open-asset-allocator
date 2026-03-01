@@ -30,7 +30,7 @@
     "patternomaly": "^1.3.2"
   },
   "scripts": {
-    "clean": "rimraf dist",
+    "clean": "rimraf dist .parcel-cache",
     "dev": "npm run clean && parcel ./root.html websrc/**/*.html --port 8000",
     "build": "npm run clean && parcel build ./root.html websrc/**/*.html"
   }
