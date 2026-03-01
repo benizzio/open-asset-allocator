@@ -1,9 +1,10 @@
 import * as handlebars from "handlebars";
 import Format from "../format";
 
-const hanldebarsFormatCurrency = (value: number, currency: unknown) => {
+const hanldebarsFormatCurrency = (value: number | string, currency: unknown) => {
     const localCurrency = typeof currency === "string" ? currency : undefined;
-    return Format.formatCurrency(value, localCurrency);
+    const numericValue = typeof value === "number" ? value : parseFloat(value);
+    return Format.formatCurrency(numericValue, localCurrency);
 };
 
 export function registerHandlebarsFormatHelper() {
