@@ -15,6 +15,8 @@ const HTMX_TRIGGER_ON_ROUTE_ATTRIBUTE = "data-hx-trigger-on-route";
 const HTMX_CLEAN_ON_EXIT_ROUTE_ATTRIBUTE = "data-hx-trigger-on-route-clean-on-exit";
 const HTMX_TRIGGER_ON_ROUTE_EVENT_SEPARATOR = "!";
 const HTMX_TRIGGER_ON_ROUTE_BOUND_FLAG = "data-hx-trigger-on-route-bound";
+const HTMX_TRIGGER_ON_ROUTE_WAIT_FOR_SETTLED_ATTRIBUTE = "data-hx-trigger-on-route-wait-for-settled";
+const HTMX_TRIGGER_ON_ROUTE_SETTLED_FLAG = "data-hx-trigger-on-route-settled";
 
 const ROUTE_HANDLER_MAP = new Map<HTMLElement, (match: Match) => void>();
 
@@ -83,6 +85,16 @@ function extractBindingData(element: HTMLElement) {
 function bindRouteToHTMXTriggerOnElement(element: HTMLElement, route: string, event: string) {
 
     const handler = ({ data }: Match) => {
+
+        if(isWaitingForSettled(element)) {
+            logger(
+                LogLevel.DEBUG,
+                `Route matched (${ route }), but waiting for settled element before triggering`,
+                element,
+            );
+            return;
+        }
+
         logger(LogLevel.DEBUG, `Route matched (${ route }), triggering HTMX event (${ event }) on element`, element);
         htmx.trigger(element, event, { routerPathData: data } as RequestConfigEventDetail);
     };
@@ -129,21 +141,135 @@ function addDisableRouteRemovalObserver(element: HTMLElement, route: string) {
 }
 
 /**
+ * Checks whether the element must wait for another element to settle before triggering.
+ *
+ * Reads the wait-for-settled attribute and checks whether the referenced element
+ * has already been marked as settled.
+ *
+ * @param element - The HTML element to check.
+ * @returns true if the element must wait (target exists and has not settled yet), false otherwise.
+ *
+ * @author GitHub Copilot
+ */
+function isWaitingForSettled(element: HTMLElement): boolean {
+
+    const waitForSelector = element.getAttribute(HTMX_TRIGGER_ON_ROUTE_WAIT_FOR_SETTLED_ATTRIBUTE);
+
+    if(!waitForSelector) {
+        return false;
+    }
+
+    const targetElement = document.querySelector(waitForSelector) as HTMLElement;
+
+    return !!targetElement && !targetElement.hasAttribute(HTMX_TRIGGER_ON_ROUTE_SETTLED_FLAG);
+}
+
+/**
+ * Defers the htmx trigger until the element referenced by waitForSelector has settled.
+ *
+ * Listens for the htmx:afterSettle event on the target element. When the event fires
+ * (and the event target matches the waited element), the settled flag is set on the target
+ * and the htmx event is triggered on the route element. If the target has already settled,
+ * the trigger fires immediately.
+ *
+ * @param waitForSelector - CSS selector for the element to wait for.
+ * @param element - The HTML element to trigger the event on.
+ * @param event - The event name to trigger.
+ * @param routerMatch - The matched route data from the router.
+ *
+ * @author GitHub Copilot
+ */
+function executeAfterElementSettled(
+    waitForSelector: string,
+    element: HTMLElement,
+    event: string,
+    routerMatch: Match,
+) {
+
+    const targetElement = document.querySelector(waitForSelector) as HTMLElement;
+
+    if(!targetElement) {
+        logger(LogLevel.WARN, "Wait-for-settled target element not found", waitForSelector);
+        return;
+    }
+
+    if(targetElement.hasAttribute(HTMX_TRIGGER_ON_ROUTE_SETTLED_FLAG)) {
+        htmx.trigger(element, event, { routerPathData: routerMatch.data } as RequestConfigEventDetail);
+        return;
+    }
+
+    const settleHandler = (settleEvent: Event) => {
+
+        if(settleEvent.target === targetElement) {
+            targetElement.removeEventListener("htmx:afterSettle", settleHandler);
+            targetElement.setAttribute(HTMX_TRIGGER_ON_ROUTE_SETTLED_FLAG, "true");
+            htmx.trigger(element, event, { routerPathData: routerMatch.data } as RequestConfigEventDetail);
+        }
+    };
+
+    targetElement.addEventListener("htmx:afterSettle", settleHandler);
+
+    addSettleListenerRemovalObserver(element, targetElement, settleHandler);
+}
+
+/**
+ * Observes the DOM for the removal of the waiting element and cleans up the settle listener
+ *
+ * on the target element to prevent event listener leaks.
+ *
+ * @param element - The waiting element to observe for removal.
+ * @param targetElement - The element the settle listener is attached to.
+ * @param settleHandler - The settle event handler to remove on cleanup.
+ *
+ * @author GitHub Copilot
+ */
+function addSettleListenerRemovalObserver(
+    element: HTMLElement,
+    targetElement: HTMLElement,
+    settleHandler: (settleEvent: Event) => void,
+) {
+
+    const observer = new MutationObserver((_, observer) => {
+
+        if(DomUtils.wasElementRemoved(element)) {
+            logger(LogLevel.INFO, "Waiting element removed, cleaning up settle listener", element);
+            observer.disconnect();
+            targetElement.removeEventListener("htmx:afterSettle", settleHandler);
+        }
+    });
+
+    observer.observe(document, { childList: true, subtree: true });
+}
+
+/**
  * Executes the htmx trigger immediately if the current route matches the provided route.
- * Uses setTimeout to defer the trigger, allowing htmx to fully process the element's trigger setup
- * before the event is dispatched.
+ *
+ * When the element has a wait-for-settled attribute, defers execution until the referenced
+ * element has settled its htmx request, preventing race conditions on dependent lazy-loaded components.
+ * Otherwise, uses setTimeout to defer the trigger, allowing htmx to fully process the element's trigger
+ * setup before the event is dispatched.
  *
  * @param route - The route pattern to match against the current location.
  * @param element - The HTML element to trigger the event on.
  * @param event - The event name to trigger.
+ *
+ * @author GitHub Copilot
  */
 function executeImmediatelyIfOnRoute(route: string, element: HTMLElement, event: string) {
 
     const routerMatch = navigoRouter.matchLocation(route);
 
     if(routerMatch) {
-        window.setTimeout(() => {
-            htmx.trigger(element, event, { routerPathData: routerMatch.data } as RequestConfigEventDetail);
-        }, 500);
+
+        const waitForSelector = element.getAttribute(HTMX_TRIGGER_ON_ROUTE_WAIT_FOR_SETTLED_ATTRIBUTE);
+
+        if(waitForSelector) {
+            executeAfterElementSettled(waitForSelector, element, event, routerMatch);
+        }
+        else {
+            window.setTimeout(() => {
+                htmx.trigger(element, event, { routerPathData: routerMatch.data } as RequestConfigEventDetail);
+            }, 500);
+        }
     }
 }
