@@ -208,6 +208,37 @@ function executeAfterElementSettled(
     };
 
     targetElement.addEventListener("htmx:afterSettle", settleHandler);
+
+    addSettleListenerRemovalObserver(element, targetElement, settleHandler);
+}
+
+/**
+ * Observes the DOM for the removal of the waiting element and cleans up the settle listener
+ *
+ * on the target element to prevent event listener leaks.
+ *
+ * @param element - The waiting element to observe for removal.
+ * @param targetElement - The element the settle listener is attached to.
+ * @param settleHandler - The settle event handler to remove on cleanup.
+ *
+ * @author GitHub Copilot
+ */
+function addSettleListenerRemovalObserver(
+    element: HTMLElement,
+    targetElement: HTMLElement,
+    settleHandler: (settleEvent: Event) => void,
+) {
+
+    const observer = new MutationObserver((_, observer) => {
+
+        if(DomUtils.wasElementRemoved(element)) {
+            logger(LogLevel.INFO, "Waiting element removed, cleaning up settle listener", element);
+            observer.disconnect();
+            targetElement.removeEventListener("htmx:afterSettle", settleHandler);
+        }
+    });
+
+    observer.observe(document, { childList: true, subtree: true });
 }
 
 /**
