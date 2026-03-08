@@ -10,9 +10,11 @@ export function mapToPortfolioSnapshot(
         ...dto,
         allocations: dto.allocations.map((allocationDTO) => {
 
-            const totalMarketValue = new BigNumber(allocationDTO.totalMarketValue);
+            let totalMarketValue: BigNumber;
 
-            if(totalMarketValue.isNaN()) {
+            try {
+                totalMarketValue = new BigNumber(allocationDTO.totalMarketValue);
+            } catch {
                 throw new Error(`Invalid totalMarketValue value: ${ allocationDTO.totalMarketValue }`);
             }
 
