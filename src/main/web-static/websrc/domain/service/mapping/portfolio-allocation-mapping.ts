@@ -14,8 +14,11 @@ export function mapToPortfolioSnapshot(
 
             try {
                 totalMarketValue = new BigNumber(allocationDTO.totalMarketValue);
-            } catch {
-                throw new Error(`Invalid totalMarketValue value: ${ allocationDTO.totalMarketValue }`);
+            } catch(error) {
+                throw new Error(
+                    `Invalid totalMarketValue value: ${ allocationDTO.totalMarketValue }`,
+                    { cause: error },
+                );
             }
 
             return {
