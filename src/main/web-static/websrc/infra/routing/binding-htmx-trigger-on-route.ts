@@ -17,6 +17,7 @@ const HTMX_TRIGGER_ON_ROUTE_EVENT_SEPARATOR = "!";
 const HTMX_TRIGGER_ON_ROUTE_BOUND_FLAG = "data-hx-trigger-on-route-bound";
 const HTMX_TRIGGER_ON_ROUTE_WAIT_FOR_SETTLED_ATTRIBUTE = "data-hx-trigger-on-route-wait-for-settled";
 const HTMX_TRIGGER_ON_ROUTE_SETTLED_FLAG = "data-hx-trigger-on-route-settled";
+const HTMX_TRIGGER_ON_ROUTE_SETTLED_RESET_BOUND_FLAG = "data-hx-trigger-on-route-settled-reset-bound";
 
 const ROUTE_HANDLER_MAP = new Map<HTMLElement, (match: Match) => void>();
 
@@ -193,15 +194,20 @@ function executeAfterElementSettled(
         return;
     }
 
+    registerSettledFlagResetOnNewRequest(targetElement);
+
     if(targetElement.hasAttribute(HTMX_TRIGGER_ON_ROUTE_SETTLED_FLAG)) {
         htmx.trigger(element, event, { routerPathData: routerMatch.data } as RequestConfigEventDetail);
         return;
     }
 
+    const settleCleanupRef: { observer?: MutationObserver } = {};
+
     const settleHandler = (settleEvent: Event) => {
 
         if(settleEvent.target === targetElement) {
             targetElement.removeEventListener("htmx:afterSettle", settleHandler);
+            settleCleanupRef.observer?.disconnect();
             targetElement.setAttribute(HTMX_TRIGGER_ON_ROUTE_SETTLED_FLAG, "true");
             htmx.trigger(element, event, { routerPathData: routerMatch.data } as RequestConfigEventDetail);
         }
@@ -209,7 +215,32 @@ function executeAfterElementSettled(
 
     targetElement.addEventListener("htmx:afterSettle", settleHandler);
 
-    addSettleListenerRemovalObserver(element, targetElement, settleHandler);
+    settleCleanupRef.observer = addSettleListenerRemovalObserver(element, targetElement, settleHandler);
+}
+
+/**
+ * Registers a listener to clear the settled flag when the target element starts a new HTMX request.
+ *
+ * Uses a data attribute to ensure only one reset listener is bound per target element.
+ *
+ * @param targetElement - The element to observe for new HTMX requests.
+ *
+ * @author GitHub Copilot
+ */
+function registerSettledFlagResetOnNewRequest(targetElement: HTMLElement) {
+
+    if(targetElement.hasAttribute(HTMX_TRIGGER_ON_ROUTE_SETTLED_RESET_BOUND_FLAG)) {
+        return;
+    }
+
+    targetElement.addEventListener("htmx:beforeRequest", (event: Event) => {
+
+        if(event.target === targetElement) {
+            targetElement.removeAttribute(HTMX_TRIGGER_ON_ROUTE_SETTLED_FLAG);
+        }
+    });
+
+    targetElement.setAttribute(HTMX_TRIGGER_ON_ROUTE_SETTLED_RESET_BOUND_FLAG, "true");
 }
 
 /**
@@ -220,6 +251,7 @@ function executeAfterElementSettled(
  * @param element - The waiting element to observe for removal.
  * @param targetElement - The element the settle listener is attached to.
  * @param settleHandler - The settle event handler to remove on cleanup.
+ * @returns The MutationObserver instance, so it can be disconnected externally when no longer needed.
  *
  * @author GitHub Copilot
  */
@@ -227,7 +259,7 @@ function addSettleListenerRemovalObserver(
     element: HTMLElement,
     targetElement: HTMLElement,
     settleHandler: (settleEvent: Event) => void,
-) {
+): MutationObserver {
 
     const observer = new MutationObserver((_, observer) => {
 
@@ -239,6 +271,8 @@ function addSettleListenerRemovalObserver(
     });
 
     observer.observe(document, { childList: true, subtree: true });
+
+    return observer;
 }
 
 /**
