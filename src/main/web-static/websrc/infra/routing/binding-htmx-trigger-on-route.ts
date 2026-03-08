@@ -19,6 +19,12 @@ const HTMX_TRIGGER_ON_ROUTE_WAIT_FOR_SETTLED_ATTRIBUTE = "data-hx-trigger-on-rou
 const HTMX_TRIGGER_ON_ROUTE_SETTLED_FLAG = "data-hx-trigger-on-route-settled";
 const HTMX_TRIGGER_ON_ROUTE_SETTLED_RESET_BOUND_FLAG = "data-hx-trigger-on-route-settled-reset-bound";
 
+const HTMX_TRIGGER_ON_ROUTE_WAIT_FOR_DEPENDENCIES_READY_ATTRIBUTE =
+    "data-hx-trigger-on-route-wait-for-dependencies-ready";
+
+const HTMX_TRIGGER_ON_ROUTE_DEPENDENCIES_READY_FLAG =
+    "data-hx-trigger-on-route-dependencies-ready";
+
 const ROUTE_HANDLER_MAP = new Map<HTMLElement, (match: Match) => void>();
 
 const CLEAN_ON_EXIT_HTMX_EVENT_HANDLERS = {
@@ -207,8 +213,13 @@ function executeAfterElementSettled(
 
         if(settleEvent.target === targetElement) {
             cleanupSettleWait(targetElement, settleHandler, settleCleanupRef.observer);
-            targetElement.setAttribute(HTMX_TRIGGER_ON_ROUTE_SETTLED_FLAG, "true");
-            htmx.trigger(element, event, { routerPathData: routerMatch.data } as RequestConfigEventDetail);
+
+            if(areDependenciesReady(element, targetElement)) {
+                markSettledAndTrigger(targetElement, element, event, routerMatch);
+            }
+            else {
+                waitForDependenciesReadyAndTrigger(element, targetElement, event, routerMatch);
+            }
         }
     };
 
@@ -259,6 +270,101 @@ function cleanupSettleWait(
 
     targetElement.removeEventListener("htmx:afterSettle", settleHandler);
     observer?.disconnect();
+}
+
+/**
+ * Sets the settled flag on the target element and triggers the htmx event on the waiting element.
+ *
+ * @param targetElement - The element to mark as settled.
+ * @param element - The waiting element to trigger the event on.
+ * @param event - The event name to trigger.
+ * @param routerMatch - The matched route data from the router.
+ *
+ * @author GitHub Copilot
+ */
+function markSettledAndTrigger(
+    targetElement: HTMLElement,
+    element: HTMLElement,
+    event: string,
+    routerMatch: Match,
+) {
+
+    targetElement.setAttribute(HTMX_TRIGGER_ON_ROUTE_SETTLED_FLAG, "true");
+    htmx.trigger(element, event, { routerPathData: routerMatch.data } as RequestConfigEventDetail);
+}
+
+/**
+ * Checks whether the target element's dependencies are ready.
+ *
+ * Returns true if the waiting element does not require dependencies, or if the target
+ * element has the dependencies-ready flag set.
+ *
+ * @param element - The waiting element that may require dependencies.
+ * @param targetElement - The target element to check for the dependencies-ready flag.
+ * @returns true if dependencies are satisfied, false otherwise.
+ *
+ * @author GitHub Copilot
+ */
+function areDependenciesReady(element: HTMLElement, targetElement: HTMLElement): boolean {
+
+    if(!element.hasAttribute(HTMX_TRIGGER_ON_ROUTE_WAIT_FOR_DEPENDENCIES_READY_ATTRIBUTE)) {
+        return true;
+    }
+
+    return targetElement.hasAttribute(HTMX_TRIGGER_ON_ROUTE_DEPENDENCIES_READY_FLAG);
+}
+
+/**
+ * Waits for the dependencies-ready flag on the target element, then marks it as settled and
+ * triggers the htmx event on the waiting element.
+ *
+ * Uses a MutationObserver on the target element's attributes and includes a removal observer
+ * for cleanup if the waiting element is removed during the wait.
+ *
+ * @param element - The waiting element to trigger the event on.
+ * @param targetElement - The target element to observe for the dependencies-ready flag.
+ * @param event - The event name to trigger.
+ * @param routerMatch - The matched route data from the router.
+ *
+ * @author GitHub Copilot
+ */
+function waitForDependenciesReadyAndTrigger(
+    element: HTMLElement,
+    targetElement: HTMLElement,
+    event: string,
+    routerMatch: Match,
+) {
+
+    logger(
+        LogLevel.DEBUG,
+        "Target element settled but dependencies not ready, waiting for dependencies",
+        element,
+    );
+
+    const dependenciesObserver = new MutationObserver(() => {
+
+        if(targetElement.hasAttribute(HTMX_TRIGGER_ON_ROUTE_DEPENDENCIES_READY_FLAG)) {
+            dependenciesObserver.disconnect();
+            removalObserver.disconnect();
+            markSettledAndTrigger(targetElement, element, event, routerMatch);
+        }
+    });
+
+    dependenciesObserver.observe(targetElement, {
+        attributes: true,
+        attributeFilter: [HTMX_TRIGGER_ON_ROUTE_DEPENDENCIES_READY_FLAG],
+    });
+
+    const removalObserver = new MutationObserver(() => {
+
+        if(DomUtils.wasElementRemoved(element)) {
+            logger(LogLevel.INFO, "Waiting element removed, cleaning up dependencies observer", element);
+            dependenciesObserver.disconnect();
+            removalObserver.disconnect();
+        }
+    });
+
+    removalObserver.observe(document, { childList: true, subtree: true });
 }
 
 /**

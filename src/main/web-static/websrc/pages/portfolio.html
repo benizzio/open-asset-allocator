@@ -73,6 +73,7 @@
             <div class="col"
                  data-hx-trigger-on-route="/portfolio/:portfolioId/history/*!load-portfolio"
                  data-hx-trigger-on-route-wait-for-settled="#portfolio-context"
+                 data-hx-trigger-on-route-wait-for-dependencies-ready
                  data-display-on-route="/portfolio/:portfolioId/history/*"
                  hx-get="/websrc/components/portfolio-history.html"
                  hx-trigger="load-portfolio once"
@@ -81,6 +82,7 @@
             <div class="col"
                  data-hx-trigger-on-route="/portfolio\/:portfolioId\/allocation($|\/.*$)!load-allocation"
                  data-hx-trigger-on-route-wait-for-settled="#portfolio-context"
+                 data-hx-trigger-on-route-wait-for-dependencies-ready
                  data-display-on-route="/portfolio\/:portfolioId\/allocation($|\/.*$)"
                  hx-get="/websrc/components/allocation-plan.html"
                  hx-trigger="load-allocation once"
@@ -89,6 +91,7 @@
             <div class="col"
                  data-hx-trigger-on-route="/portfolio/:portfolioId/allocation-map!load-allocation-map"
                  data-hx-trigger-on-route-wait-for-settled="#portfolio-context"
+                 data-hx-trigger-on-route-wait-for-dependencies-ready
                  data-display-on-route="/portfolio/:portfolioId/allocation-map"
                  hx-get="/websrc/components/allocation-map.html"
                  hx-trigger="load-allocation-map once"
@@ -278,5 +281,8 @@
         "datalist-container",
         "asset-composed-columns-input"
     );
+
+    document.getElementById("portfolio-context")
+        ?.setAttribute("data-hx-trigger-on-route-dependencies-ready", "true");
 
 </script>
