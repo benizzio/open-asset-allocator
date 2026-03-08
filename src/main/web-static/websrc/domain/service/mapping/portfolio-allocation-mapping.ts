@@ -8,18 +8,26 @@ export function mapToPortfolioSnapshot(
     return {
 
         ...dto,
-        allocations: dto.allocations.map((allocationDTO) => {
+        allocations: dto.allocations.map((allocationDTO, index) => {
 
-            const totalMarketValue = new BigNumber(allocationDTO.totalMarketValue);
+            try {
+                const totalMarketValue = new BigNumber(allocationDTO.totalMarketValue);
 
-            if(totalMarketValue.isNaN()) {
-                throw new Error(`Invalid totalMarketValue value: ${ allocationDTO.totalMarketValue }`);
+                if(totalMarketValue.isNaN()) {
+                    throw new Error("BigNumber resolved to NaN");
+                }
+
+                return {
+                    ...allocationDTO,
+                    totalMarketValue: totalMarketValue,
+                };
+            } catch(error) {
+                throw new Error(
+                    `Invalid totalMarketValue "${ allocationDTO.totalMarketValue }" for allocation` +
+                    ` [${ index }] (ticker: ${ allocationDTO.assetTicker })`,
+                    { cause: error },
+                );
             }
-
-            return {
-                ...allocationDTO,
-                totalMarketValue: totalMarketValue,
-            };
         }),
     };
 }
