@@ -194,7 +194,7 @@ function executeAfterElementSettled(
         return;
     }
 
-    registerSettledFlagResetOnNewRequest(targetElement);
+    bindSettledFlagCleanupOnNewRequest(targetElement);
 
     if(targetElement.hasAttribute(HTMX_TRIGGER_ON_ROUTE_SETTLED_FLAG)) {
         htmx.trigger(element, event, { routerPathData: routerMatch.data } as RequestConfigEventDetail);
@@ -206,8 +206,7 @@ function executeAfterElementSettled(
     const settleHandler = (settleEvent: Event) => {
 
         if(settleEvent.target === targetElement) {
-            targetElement.removeEventListener("htmx:afterSettle", settleHandler);
-            settleCleanupRef.observer?.disconnect();
+            cleanupSettleWait(targetElement, settleHandler, settleCleanupRef.observer);
             targetElement.setAttribute(HTMX_TRIGGER_ON_ROUTE_SETTLED_FLAG, "true");
             htmx.trigger(element, event, { routerPathData: routerMatch.data } as RequestConfigEventDetail);
         }
@@ -219,15 +218,15 @@ function executeAfterElementSettled(
 }
 
 /**
- * Registers a listener to clear the settled flag when the target element starts a new HTMX request.
+ * Binds a listener that clears the settled flag when the target element starts a new HTMX request.
  *
- * Uses a data attribute to ensure only one reset listener is bound per target element.
+ * Uses a data attribute to ensure only one cleanup listener is bound per target element.
  *
  * @param targetElement - The element to observe for new HTMX requests.
  *
  * @author GitHub Copilot
  */
-function registerSettledFlagResetOnNewRequest(targetElement: HTMLElement) {
+function bindSettledFlagCleanupOnNewRequest(targetElement: HTMLElement) {
 
     if(targetElement.hasAttribute(HTMX_TRIGGER_ON_ROUTE_SETTLED_RESET_BOUND_FLAG)) {
         return;
@@ -241,6 +240,25 @@ function registerSettledFlagResetOnNewRequest(targetElement: HTMLElement) {
     });
 
     targetElement.setAttribute(HTMX_TRIGGER_ON_ROUTE_SETTLED_RESET_BOUND_FLAG, "true");
+}
+
+/**
+ * Removes the settle event listener from the target element and disconnects the removal observer.
+ *
+ * @param targetElement - The element the settle listener is attached to.
+ * @param settleHandler - The settle event handler to remove.
+ * @param observer - The MutationObserver to disconnect, if present.
+ *
+ * @author GitHub Copilot
+ */
+function cleanupSettleWait(
+    targetElement: HTMLElement,
+    settleHandler: (settleEvent: Event) => void,
+    observer?: MutationObserver,
+) {
+
+    targetElement.removeEventListener("htmx:afterSettle", settleHandler);
+    observer?.disconnect();
 }
 
 /**
@@ -265,8 +283,7 @@ function addSettleListenerRemovalObserver(
 
         if(DomUtils.wasElementRemoved(element)) {
             logger(LogLevel.INFO, "Waiting element removed, cleaning up settle listener", element);
-            observer.disconnect();
-            targetElement.removeEventListener("htmx:afterSettle", settleHandler);
+            cleanupSettleWait(targetElement, settleHandler, observer);
         }
     });
 
