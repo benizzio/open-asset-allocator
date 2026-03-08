@@ -18,8 +18,6 @@ const HTMX_TRIGGER_ON_ROUTE_BOUND_FLAG = "data-hx-trigger-on-route-bound";
 
 const HTMX_TRIGGER_ON_ROUTE_WAIT_FOR_READY_ATTRIBUTE = "data-hx-trigger-on-route-wait-for-ready";
 const HTMX_TRIGGER_ON_ROUTE_READY_FLAG = "data-hx-trigger-on-route-ready";
-const HTMX_TRIGGER_ON_ROUTE_READY_RESET_BOUND_FLAG = "data-hx-trigger-on-route-ready-reset-bound";
-const HTMX_TRIGGER_ON_ROUTE_READY_SEPARATOR = "|";
 
 const ROUTE_HANDLER_MAP = new Map<HTMLElement, (match: Match) => void>();
 
@@ -144,10 +142,10 @@ function addDisableRouteRemovalObserver(element: HTMLElement, route: string) {
 }
 
 /**
- * Checks whether the element must wait for another element's conditions to be ready before triggering.
+ * Checks whether the element must wait for its conditions to be ready before triggering.
  *
- * Reads the wait-for-ready attribute, parses the selector and required conditions,
- * and checks whether all conditions are present on the target element's ready flag.
+ * Reads the wait-for-ready attribute for required conditions and checks whether
+ * all conditions are present on the element's own ready flag.
  *
  * @param element - The HTML element to check.
  * @returns true if the element must wait (conditions not yet met), false otherwise.
@@ -156,76 +154,61 @@ function addDisableRouteRemovalObserver(element: HTMLElement, route: string) {
  */
 function isWaitingForReady(element: HTMLElement): boolean {
 
-    const waitForReadyValue = element.getAttribute(HTMX_TRIGGER_ON_ROUTE_WAIT_FOR_READY_ATTRIBUTE);
+    const requiredConditions = parseWaitForReadyConditions(element);
 
-    if(!waitForReadyValue) {
+    if(requiredConditions.length === 0) {
         return false;
     }
 
-    const parsed = parseWaitForReady(waitForReadyValue);
-
-    if(!parsed) {
-        return false;
-    }
-
-    const targetElement = document.querySelector(parsed.selector) as HTMLElement;
-
-    return !!targetElement && !areAllConditionsReady(targetElement, parsed.conditions);
+    return !areAllConditionsReady(element, requiredConditions);
 }
 
 /**
- * Parses the wait-for-ready attribute value into a selector and conditions list.
+ * Parses the wait-for-ready attribute value into a list of required conditions.
  *
- * The expected format is "selector|condition1,condition2,...".
+ * The expected format is "condition1,condition2,...".
  *
- * @param attributeValue - The raw attribute value to parse.
- * @returns The parsed selector and conditions, or null if the format is invalid.
+ * @param element - The HTML element to read the attribute from.
+ * @returns The list of required conditions, or an empty array if the attribute is not set.
  *
  * @author GitHub Copilot
  */
-function parseWaitForReady(attributeValue: string): { selector: string; conditions: string[] } | null {
+function parseWaitForReadyConditions(element: HTMLElement): string[] {
 
-    const separatorIndex = attributeValue.indexOf(HTMX_TRIGGER_ON_ROUTE_READY_SEPARATOR);
+    const attributeValue = element.getAttribute(HTMX_TRIGGER_ON_ROUTE_WAIT_FOR_READY_ATTRIBUTE);
 
-    if(separatorIndex === -1) {
-        logger(LogLevel.WARN, "Invalid wait-for-ready format, missing separator", attributeValue);
-        return null;
+    if(!attributeValue) {
+        return [];
     }
 
-    const selector = attributeValue.substring(0, separatorIndex).trim();
-
-    const conditionsString = attributeValue.substring(separatorIndex + 1);
-    const conditions = conditionsString.split(",").map(c => c.trim()).filter(Boolean);
-
-    return { selector, conditions };
+    return attributeValue.split(",").map(c => c.trim()).filter(Boolean);
 }
 
 /**
- * Checks whether all required conditions are present in the target element's ready flag.
+ * Checks whether all required conditions are present in the element's ready flag.
  *
- * @param targetElement - The target element to check.
+ * @param element - The element to check.
  * @param requiredConditions - The conditions that must all be present.
  * @returns true if all conditions are met, false otherwise.
  *
  * @author GitHub Copilot
  */
-function areAllConditionsReady(targetElement: HTMLElement, requiredConditions: string[]): boolean {
+function areAllConditionsReady(element: HTMLElement, requiredConditions: string[]): boolean {
 
-    const readyValue = targetElement.getAttribute(HTMX_TRIGGER_ON_ROUTE_READY_FLAG) || "";
+    const readyValue = element.getAttribute(HTMX_TRIGGER_ON_ROUTE_READY_FLAG) || "";
     const fulfilledConditions = readyValue.split(",").map(c => c.trim()).filter(Boolean);
 
     return requiredConditions.every(condition => fulfilledConditions.includes(condition));
 }
 
 /**
- * Defers the htmx trigger until all required conditions are met on the target element.
+ * Defers the htmx trigger until all required conditions are met on the element itself.
  *
- * Parses the wait-for-ready attribute to find the target element and required conditions.
+ * Reads the wait-for-ready attribute to get the required conditions.
  * If all conditions are already met, triggers immediately. Otherwise, sets up a
- * MutationObserver on the target element's ready flag attribute and waits for all
+ * MutationObserver on the element's ready flag attribute and waits for all
  * conditions to be fulfilled before triggering.
  *
- * @param waitForReadyValue - The raw attribute value containing selector and conditions.
  * @param element - The HTML element to trigger the event on.
  * @param event - The event name to trigger.
  * @param routerMatch - The matched route data from the router.
@@ -233,49 +216,39 @@ function areAllConditionsReady(targetElement: HTMLElement, requiredConditions: s
  * @author GitHub Copilot
  */
 function executeAfterElementReady(
-    waitForReadyValue: string,
     element: HTMLElement,
     event: string,
     routerMatch: Match,
 ) {
 
-    const parsed = parseWaitForReady(waitForReadyValue);
+    const requiredConditions = parseWaitForReadyConditions(element);
 
-    if(!parsed) {
+    if(requiredConditions.length === 0) {
         return;
     }
 
-    const targetElement = document.querySelector(parsed.selector) as HTMLElement;
-
-    if(!targetElement) {
-        logger(LogLevel.WARN, "Wait-for-ready target element not found", parsed.selector);
-        return;
-    }
-
-    bindReadyFlagCleanupOnNewRequest(targetElement);
-
-    if(areAllConditionsReady(targetElement, parsed.conditions)) {
+    if(areAllConditionsReady(element, requiredConditions)) {
         htmx.trigger(element, event, { routerPathData: routerMatch.data } as RequestConfigEventDetail);
         return;
     }
 
     logger(
         LogLevel.DEBUG,
-        "Conditions not yet met, waiting for ready conditions on target",
+        "Conditions not yet met, waiting for ready conditions on element",
         element,
-        parsed.conditions,
+        requiredConditions,
     );
 
     const readyObserver = new MutationObserver(() => {
 
-        if(areAllConditionsReady(targetElement, parsed.conditions)) {
+        if(areAllConditionsReady(element, requiredConditions)) {
             readyObserver.disconnect();
             removalObserver.disconnect();
             htmx.trigger(element, event, { routerPathData: routerMatch.data } as RequestConfigEventDetail);
         }
     });
 
-    readyObserver.observe(targetElement, {
+    readyObserver.observe(element, {
         attributes: true,
         attributeFilter: [HTMX_TRIGGER_ON_ROUTE_READY_FLAG],
     });
@@ -293,71 +266,45 @@ function executeAfterElementReady(
 }
 
 /**
- * Binds a listener that clears the ready flag when the target element starts a new HTMX request.
+ * Adds a condition value to the ready flag of all elements matching the selector.
  *
- * Uses a data attribute to ensure only one cleanup listener is bound per target element.
- * This allows the wait mechanism to re-activate correctly on future request cycles.
- *
- * @param targetElement - The element to observe for new HTMX requests.
- *
- * @author GitHub Copilot
- */
-function bindReadyFlagCleanupOnNewRequest(targetElement: HTMLElement) {
-
-    if(targetElement.hasAttribute(HTMX_TRIGGER_ON_ROUTE_READY_RESET_BOUND_FLAG)) {
-        return;
-    }
-
-    targetElement.addEventListener("htmx:beforeRequest", (event: Event) => {
-
-        if(event.target === targetElement) {
-            targetElement.removeAttribute(HTMX_TRIGGER_ON_ROUTE_READY_FLAG);
-        }
-    });
-
-    targetElement.setAttribute(HTMX_TRIGGER_ON_ROUTE_READY_RESET_BOUND_FLAG, "true");
-}
-
-/**
- * Adds a condition value to the target element's ready flag attribute.
- *
- * Appends the condition to the comma-separated list if not already present.
+ * Appends the condition to the comma-separated ready flag list if not already present.
  * The MutationObserver on waiting elements will detect this change and check
  * whether all required conditions are now fulfilled.
  *
- * @param targetElement - The element to add the ready condition to.
+ * @param selector - CSS selector to find the elements to add the condition to.
  * @param condition - The condition value to add.
  *
  * @example
- * addRouteReadyCondition(document.getElementById("portfolio-context"), "settled");
- * addRouteReadyCondition(document.getElementById("portfolio-context"), "partials-registered");
+ * addRouteReadyCondition("[data-hx-trigger-on-route-wait-for-ready]", "settled");
+ * addRouteReadyCondition("[data-hx-trigger-on-route-wait-for-ready]", "partials-registered");
  *
  * @author GitHub Copilot
  */
-export function addRouteReadyCondition(targetElement: HTMLElement, condition: string) {
+export function addRouteReadyCondition(selector: string, condition: string) {
 
-    if(!targetElement) {
-        logger(LogLevel.WARN, "addRouteReadyCondition called with null target element for condition", condition);
-        return;
-    }
+    const elements = document.querySelectorAll<HTMLElement>(selector);
 
-    const currentValue = targetElement.getAttribute(HTMX_TRIGGER_ON_ROUTE_READY_FLAG) || "";
+    elements.forEach(element => {
 
-    const currentConditions = currentValue
-        ? currentValue.split(",").map(c => c.trim()).filter(Boolean)
-        : [];
+        const currentValue = element.getAttribute(HTMX_TRIGGER_ON_ROUTE_READY_FLAG) || "";
 
-    if(!currentConditions.includes(condition)) {
-        currentConditions.push(condition);
-        targetElement.setAttribute(HTMX_TRIGGER_ON_ROUTE_READY_FLAG, currentConditions.join(","));
-    }
+        const currentConditions = currentValue
+            ? currentValue.split(",").map(c => c.trim()).filter(Boolean)
+            : [];
+
+        if(!currentConditions.includes(condition)) {
+            currentConditions.push(condition);
+            element.setAttribute(HTMX_TRIGGER_ON_ROUTE_READY_FLAG, currentConditions.join(","));
+        }
+    });
 }
 
 /**
  * Executes the htmx trigger immediately if the current route matches the provided route.
  *
  * When the element has a wait-for-ready attribute, defers execution until all required
- * conditions are met on the target element. Otherwise, uses setTimeout to defer the trigger,
+ * conditions are met on the element itself. Otherwise, uses setTimeout to defer the trigger,
  * allowing htmx to fully process the element's trigger setup before the event is dispatched.
  *
  * @param route - The route pattern to match against the current location.
@@ -375,7 +322,7 @@ function executeImmediatelyIfOnRoute(route: string, element: HTMLElement, event:
         const waitForReadyValue = element.getAttribute(HTMX_TRIGGER_ON_ROUTE_WAIT_FOR_READY_ATTRIBUTE);
 
         if(waitForReadyValue) {
-            executeAfterElementReady(waitForReadyValue, element, event, routerMatch);
+            executeAfterElementReady(element, event, routerMatch);
         }
         else {
             window.setTimeout(() => {
