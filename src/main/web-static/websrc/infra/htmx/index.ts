@@ -1,5 +1,6 @@
 import { HtmxBeforeSwapDetails, HtmxRequestConfig, HtmxResponseInfo } from "htmx.org";
 import { bindHTMXTransformResponseInDescendants, htmxTransformResponse } from "./binding-htmx-transform-response";
+import { addReadyCondition, bindHTMXWaitForReadyInDescendants } from "./binding-htmx-wait-for-ready";
 import { CustomEventHandler } from "../infra-types";
 import InfraTypesUtils from "../infra-types-utils";
 import Router from "../routing";
@@ -155,6 +156,7 @@ function addEventListeners(
         domSettlingBehaviorEventHandler(event);
         const eventTarget = event.target as HTMLElement;
         bindHTMXTransformResponseInDescendants(eventTarget);
+        bindHTMXWaitForReadyInDescendants(eventTarget);
     };
 
     document.body.addEventListener("htmx:afterSettle", afterSettleCustomEventHandler);
@@ -186,4 +188,5 @@ export const HtmxInfra = {
 
     htmxTransformResponse,
     toErrorResponse,
+    addReadyCondition,
 };

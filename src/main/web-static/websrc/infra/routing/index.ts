@@ -1,4 +1,4 @@
-import { addRouteReadyCondition, bindHTMXTriggerOnRouteInDescendants } from "./binding-htmx-trigger-on-route";
+import { bindHTMXTriggerOnRouteInDescendants } from "./binding-htmx-trigger-on-route";
 import { bindNavigateToInDescendants } from "./binding-dom-navigate-to";
 import { bindDisplayOnRouteInDescendants } from "./binding-dom-display-on-route";
 import { bindAttributeOnRouteInDescendants } from "./binding-dom-attribute-on-route";
@@ -16,7 +16,6 @@ const Router = {
     init(browserGlobal: Window) {
         Router.bindDocumentToRouting();
         browserGlobal["navigateTo"] = this.navigateTo;
-        browserGlobal["addRouteReadyCondition"] = addRouteReadyCondition;
     },
 
     bindDescendants(element: HTMLElement) {

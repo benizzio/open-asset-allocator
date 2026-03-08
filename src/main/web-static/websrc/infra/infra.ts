@@ -105,6 +105,7 @@ export const Infra = {
         const onPageLoad = () => {
             Router.init(window);
             HtmxInfra.init(DOM_SETTLING_BEHAVIOR_EVENT_HANDLER, afterRequestErrorHandler);
+            window["addReadyCondition"] = HtmxInfra.addReadyCondition;
         };
         document.addEventListener("DOMContentLoaded", onPageLoad);
 
