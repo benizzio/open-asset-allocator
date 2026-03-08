@@ -10,21 +10,19 @@ export function mapToPortfolioSnapshot(
         ...dto,
         allocations: dto.allocations.map((allocationDTO) => {
 
-            let totalMarketValue: BigNumber;
-
             try {
-                totalMarketValue = new BigNumber(allocationDTO.totalMarketValue);
+                const totalMarketValue = new BigNumber(allocationDTO.totalMarketValue);
+
+                return {
+                    ...allocationDTO,
+                    totalMarketValue: totalMarketValue,
+                };
             } catch(error) {
                 throw new Error(
                     `Invalid totalMarketValue value: ${ allocationDTO.totalMarketValue }`,
                     { cause: error },
                 );
             }
-
-            return {
-                ...allocationDTO,
-                totalMarketValue: totalMarketValue,
-            };
         }),
     };
 }
