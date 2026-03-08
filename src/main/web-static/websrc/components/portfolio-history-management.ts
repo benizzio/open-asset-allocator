@@ -1,5 +1,5 @@
 import htmx from "htmx.org";
-import BigNumber from "bignumber.js";
+import { BigNumber } from "bignumber.js";
 import { AfterRequestEventDetail, HtmxInfra } from "../infra/htmx";
 import { ObservationTimestamp } from "../domain/portfolio-allocation";
 import Router from "../infra/routing";

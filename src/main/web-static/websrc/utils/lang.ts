@@ -1,4 +1,4 @@
-import BigNumber from "bignumber.js";
+import { BigNumber } from "bignumber.js";
 
 /**
  * Generic language utilities for internal use across the websrc codebase.
@@ -574,7 +574,7 @@ export function coerceToBigNumber(value: unknown): BigNumber {
 
         const bn = new BigNumber(coercedValue);
 
-        if (bn.isNaN()) {
+        if(bn.isNaN()) {
             return new BigNumber(0);
         }
 

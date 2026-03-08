@@ -1,4 +1,4 @@
-import BigNumber from "bignumber.js";
+import { BigNumber } from "bignumber.js";
 import { PortfolioSnapshot, PortfolioSnapshotDTO } from "../../portfolio-allocation";
 
 export function mapToPortfolioSnapshot(
