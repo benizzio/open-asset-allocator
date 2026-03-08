@@ -336,6 +336,11 @@ function bindReadyFlagCleanupOnNewRequest(targetElement: HTMLElement) {
  */
 export function addRouteReadyCondition(targetElement: HTMLElement, condition: string) {
 
+    if(!targetElement) {
+        logger(LogLevel.WARN, "addRouteReadyCondition called with null target element for condition", condition);
+        return;
+    }
+
     const currentValue = targetElement.getAttribute(HTMX_TRIGGER_ON_ROUTE_READY_FLAG) || "";
 
     const currentConditions = currentValue
