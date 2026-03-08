@@ -15,15 +15,11 @@ const HTMX_TRIGGER_ON_ROUTE_ATTRIBUTE = "data-hx-trigger-on-route";
 const HTMX_CLEAN_ON_EXIT_ROUTE_ATTRIBUTE = "data-hx-trigger-on-route-clean-on-exit";
 const HTMX_TRIGGER_ON_ROUTE_EVENT_SEPARATOR = "!";
 const HTMX_TRIGGER_ON_ROUTE_BOUND_FLAG = "data-hx-trigger-on-route-bound";
-const HTMX_TRIGGER_ON_ROUTE_WAIT_FOR_SETTLED_ATTRIBUTE = "data-hx-trigger-on-route-wait-for-settled";
-const HTMX_TRIGGER_ON_ROUTE_SETTLED_FLAG = "data-hx-trigger-on-route-settled";
-const HTMX_TRIGGER_ON_ROUTE_SETTLED_RESET_BOUND_FLAG = "data-hx-trigger-on-route-settled-reset-bound";
 
-const HTMX_TRIGGER_ON_ROUTE_WAIT_FOR_DEPENDENCIES_READY_ATTRIBUTE =
-    "data-hx-trigger-on-route-wait-for-dependencies-ready";
-
-const HTMX_TRIGGER_ON_ROUTE_DEPENDENCIES_READY_FLAG =
-    "data-hx-trigger-on-route-dependencies-ready";
+const HTMX_TRIGGER_ON_ROUTE_WAIT_FOR_READY_ATTRIBUTE = "data-hx-trigger-on-route-wait-for-ready";
+const HTMX_TRIGGER_ON_ROUTE_READY_FLAG = "data-hx-trigger-on-route-ready";
+const HTMX_TRIGGER_ON_ROUTE_READY_RESET_BOUND_FLAG = "data-hx-trigger-on-route-ready-reset-bound";
+const HTMX_TRIGGER_ON_ROUTE_READY_SEPARATOR = "|";
 
 const ROUTE_HANDLER_MAP = new Map<HTMLElement, (match: Match) => void>();
 
@@ -93,10 +89,10 @@ function bindRouteToHTMXTriggerOnElement(element: HTMLElement, route: string, ev
 
     const handler = ({ data }: Match) => {
 
-        if(isWaitingForSettled(element)) {
+        if(isWaitingForReady(element)) {
             logger(
                 LogLevel.DEBUG,
-                `Route matched (${ route }), but waiting for settled element before triggering`,
+                `Route matched (${ route }), but waiting for ready conditions before triggering`,
                 element,
             );
             return;
@@ -148,218 +144,147 @@ function addDisableRouteRemovalObserver(element: HTMLElement, route: string) {
 }
 
 /**
- * Checks whether the element must wait for another element to settle before triggering.
+ * Checks whether the element must wait for another element's conditions to be ready before triggering.
  *
- * Reads the wait-for-settled attribute and checks whether the referenced element
- * has already been marked as settled.
+ * Reads the wait-for-ready attribute, parses the selector and required conditions,
+ * and checks whether all conditions are present on the target element's ready flag.
  *
  * @param element - The HTML element to check.
- * @returns true if the element must wait (target exists and has not settled yet), false otherwise.
+ * @returns true if the element must wait (conditions not yet met), false otherwise.
  *
  * @author GitHub Copilot
  */
-function isWaitingForSettled(element: HTMLElement): boolean {
+function isWaitingForReady(element: HTMLElement): boolean {
 
-    const waitForSelector = element.getAttribute(HTMX_TRIGGER_ON_ROUTE_WAIT_FOR_SETTLED_ATTRIBUTE);
+    const waitForReadyValue = element.getAttribute(HTMX_TRIGGER_ON_ROUTE_WAIT_FOR_READY_ATTRIBUTE);
 
-    if(!waitForSelector) {
+    if(!waitForReadyValue) {
         return false;
     }
 
-    const targetElement = document.querySelector(waitForSelector) as HTMLElement;
+    const parsed = parseWaitForReady(waitForReadyValue);
 
-    return !!targetElement && !targetElement.hasAttribute(HTMX_TRIGGER_ON_ROUTE_SETTLED_FLAG);
+    if(!parsed) {
+        return false;
+    }
+
+    const targetElement = document.querySelector(parsed.selector) as HTMLElement;
+
+    return !!targetElement && !areAllConditionsReady(targetElement, parsed.conditions);
 }
 
 /**
- * Defers the htmx trigger until the element referenced by waitForSelector has settled.
+ * Parses the wait-for-ready attribute value into a selector and conditions list.
  *
- * Listens for the htmx:afterSettle event on the target element. When the event fires
- * (and the event target matches the waited element), the settled flag is set on the target
- * and the htmx event is triggered on the route element. If the target has already settled,
- * the trigger fires immediately.
+ * The expected format is "selector|condition1,condition2,...".
  *
- * @param waitForSelector - CSS selector for the element to wait for.
+ * @param attributeValue - The raw attribute value to parse.
+ * @returns The parsed selector and conditions, or null if the format is invalid.
+ *
+ * @author GitHub Copilot
+ */
+function parseWaitForReady(attributeValue: string): { selector: string; conditions: string[] } | null {
+
+    const separatorIndex = attributeValue.indexOf(HTMX_TRIGGER_ON_ROUTE_READY_SEPARATOR);
+
+    if(separatorIndex === -1) {
+        logger(LogLevel.WARN, "Invalid wait-for-ready format, missing separator", attributeValue);
+        return null;
+    }
+
+    const selector = attributeValue.substring(0, separatorIndex).trim();
+
+    const conditionsString = attributeValue.substring(separatorIndex + 1);
+    const conditions = conditionsString.split(",").map(c => c.trim()).filter(Boolean);
+
+    return { selector, conditions };
+}
+
+/**
+ * Checks whether all required conditions are present in the target element's ready flag.
+ *
+ * @param targetElement - The target element to check.
+ * @param requiredConditions - The conditions that must all be present.
+ * @returns true if all conditions are met, false otherwise.
+ *
+ * @author GitHub Copilot
+ */
+function areAllConditionsReady(targetElement: HTMLElement, requiredConditions: string[]): boolean {
+
+    const readyValue = targetElement.getAttribute(HTMX_TRIGGER_ON_ROUTE_READY_FLAG) || "";
+    const fulfilledConditions = readyValue.split(",").map(c => c.trim()).filter(Boolean);
+
+    return requiredConditions.every(condition => fulfilledConditions.includes(condition));
+}
+
+/**
+ * Defers the htmx trigger until all required conditions are met on the target element.
+ *
+ * Parses the wait-for-ready attribute to find the target element and required conditions.
+ * If all conditions are already met, triggers immediately. Otherwise, sets up a
+ * MutationObserver on the target element's ready flag attribute and waits for all
+ * conditions to be fulfilled before triggering.
+ *
+ * @param waitForReadyValue - The raw attribute value containing selector and conditions.
  * @param element - The HTML element to trigger the event on.
  * @param event - The event name to trigger.
  * @param routerMatch - The matched route data from the router.
  *
  * @author GitHub Copilot
  */
-function executeAfterElementSettled(
-    waitForSelector: string,
+function executeAfterElementReady(
+    waitForReadyValue: string,
     element: HTMLElement,
     event: string,
     routerMatch: Match,
 ) {
 
-    const targetElement = document.querySelector(waitForSelector) as HTMLElement;
+    const parsed = parseWaitForReady(waitForReadyValue);
 
-    if(!targetElement) {
-        logger(LogLevel.WARN, "Wait-for-settled target element not found", waitForSelector);
+    if(!parsed) {
         return;
     }
 
-    bindSettledFlagCleanupOnNewRequest(targetElement);
+    const targetElement = document.querySelector(parsed.selector) as HTMLElement;
 
-    if(targetElement.hasAttribute(HTMX_TRIGGER_ON_ROUTE_SETTLED_FLAG)) {
+    if(!targetElement) {
+        logger(LogLevel.WARN, "Wait-for-ready target element not found", parsed.selector);
+        return;
+    }
+
+    bindReadyFlagCleanupOnNewRequest(targetElement);
+
+    if(areAllConditionsReady(targetElement, parsed.conditions)) {
         htmx.trigger(element, event, { routerPathData: routerMatch.data } as RequestConfigEventDetail);
         return;
     }
 
-    const settleCleanupRef: { observer?: MutationObserver } = {};
-
-    const settleHandler = (settleEvent: Event) => {
-
-        if(settleEvent.target === targetElement) {
-            cleanupSettleWait(targetElement, settleHandler, settleCleanupRef.observer);
-
-            if(areDependenciesReady(element, targetElement)) {
-                markSettledAndTrigger(targetElement, element, event, routerMatch);
-            }
-            else {
-                waitForDependenciesReadyAndTrigger(element, targetElement, event, routerMatch);
-            }
-        }
-    };
-
-    targetElement.addEventListener("htmx:afterSettle", settleHandler);
-
-    settleCleanupRef.observer = addSettleListenerRemovalObserver(element, targetElement, settleHandler);
-}
-
-/**
- * Binds a listener that clears the settled flag when the target element starts a new HTMX request.
- *
- * Uses a data attribute to ensure only one cleanup listener is bound per target element.
- *
- * @param targetElement - The element to observe for new HTMX requests.
- *
- * @author GitHub Copilot
- */
-function bindSettledFlagCleanupOnNewRequest(targetElement: HTMLElement) {
-
-    if(targetElement.hasAttribute(HTMX_TRIGGER_ON_ROUTE_SETTLED_RESET_BOUND_FLAG)) {
-        return;
-    }
-
-    targetElement.addEventListener("htmx:beforeRequest", (event: Event) => {
-
-        if(event.target === targetElement) {
-            targetElement.removeAttribute(HTMX_TRIGGER_ON_ROUTE_SETTLED_FLAG);
-        }
-    });
-
-    targetElement.setAttribute(HTMX_TRIGGER_ON_ROUTE_SETTLED_RESET_BOUND_FLAG, "true");
-}
-
-/**
- * Removes the settle event listener from the target element and disconnects the removal observer.
- *
- * @param targetElement - The element the settle listener is attached to.
- * @param settleHandler - The settle event handler to remove.
- * @param observer - The MutationObserver to disconnect, if present.
- *
- * @author GitHub Copilot
- */
-function cleanupSettleWait(
-    targetElement: HTMLElement,
-    settleHandler: (settleEvent: Event) => void,
-    observer?: MutationObserver,
-) {
-
-    targetElement.removeEventListener("htmx:afterSettle", settleHandler);
-    observer?.disconnect();
-}
-
-/**
- * Sets the settled flag on the target element and triggers the htmx event on the waiting element.
- *
- * @param targetElement - The element to mark as settled.
- * @param element - The waiting element to trigger the event on.
- * @param event - The event name to trigger.
- * @param routerMatch - The matched route data from the router.
- *
- * @author GitHub Copilot
- */
-function markSettledAndTrigger(
-    targetElement: HTMLElement,
-    element: HTMLElement,
-    event: string,
-    routerMatch: Match,
-) {
-
-    targetElement.setAttribute(HTMX_TRIGGER_ON_ROUTE_SETTLED_FLAG, "true");
-    htmx.trigger(element, event, { routerPathData: routerMatch.data } as RequestConfigEventDetail);
-}
-
-/**
- * Checks whether the target element's dependencies are ready.
- *
- * Returns true if the waiting element does not require dependencies, or if the target
- * element has the dependencies-ready flag set.
- *
- * @param element - The waiting element that may require dependencies.
- * @param targetElement - The target element to check for the dependencies-ready flag.
- * @returns true if dependencies are satisfied, false otherwise.
- *
- * @author GitHub Copilot
- */
-function areDependenciesReady(element: HTMLElement, targetElement: HTMLElement): boolean {
-
-    if(!element.hasAttribute(HTMX_TRIGGER_ON_ROUTE_WAIT_FOR_DEPENDENCIES_READY_ATTRIBUTE)) {
-        return true;
-    }
-
-    return targetElement.hasAttribute(HTMX_TRIGGER_ON_ROUTE_DEPENDENCIES_READY_FLAG);
-}
-
-/**
- * Waits for the dependencies-ready flag on the target element, then marks it as settled and
- * triggers the htmx event on the waiting element.
- *
- * Uses a MutationObserver on the target element's attributes and includes a removal observer
- * for cleanup if the waiting element is removed during the wait.
- *
- * @param element - The waiting element to trigger the event on.
- * @param targetElement - The target element to observe for the dependencies-ready flag.
- * @param event - The event name to trigger.
- * @param routerMatch - The matched route data from the router.
- *
- * @author GitHub Copilot
- */
-function waitForDependenciesReadyAndTrigger(
-    element: HTMLElement,
-    targetElement: HTMLElement,
-    event: string,
-    routerMatch: Match,
-) {
-
     logger(
         LogLevel.DEBUG,
-        "Target element settled but dependencies not ready, waiting for dependencies",
+        "Conditions not yet met, waiting for ready conditions on target",
         element,
+        parsed.conditions,
     );
 
-    const dependenciesObserver = new MutationObserver(() => {
+    const readyObserver = new MutationObserver(() => {
 
-        if(targetElement.hasAttribute(HTMX_TRIGGER_ON_ROUTE_DEPENDENCIES_READY_FLAG)) {
-            dependenciesObserver.disconnect();
+        if(areAllConditionsReady(targetElement, parsed.conditions)) {
+            readyObserver.disconnect();
             removalObserver.disconnect();
-            markSettledAndTrigger(targetElement, element, event, routerMatch);
+            htmx.trigger(element, event, { routerPathData: routerMatch.data } as RequestConfigEventDetail);
         }
     });
 
-    dependenciesObserver.observe(targetElement, {
+    readyObserver.observe(targetElement, {
         attributes: true,
-        attributeFilter: [HTMX_TRIGGER_ON_ROUTE_DEPENDENCIES_READY_FLAG],
+        attributeFilter: [HTMX_TRIGGER_ON_ROUTE_READY_FLAG],
     });
 
     const removalObserver = new MutationObserver(() => {
 
         if(DomUtils.wasElementRemoved(element)) {
-            logger(LogLevel.INFO, "Waiting element removed, cleaning up dependencies observer", element);
-            dependenciesObserver.disconnect();
+            logger(LogLevel.INFO, "Waiting element removed, cleaning up ready observer", element);
+            readyObserver.disconnect();
             removalObserver.disconnect();
         }
     });
@@ -368,43 +293,67 @@ function waitForDependenciesReadyAndTrigger(
 }
 
 /**
- * Observes the DOM for the removal of the waiting element and cleans up the settle listener
+ * Binds a listener that clears the ready flag when the target element starts a new HTMX request.
  *
- * on the target element to prevent event listener leaks.
+ * Uses a data attribute to ensure only one cleanup listener is bound per target element.
+ * This allows the wait mechanism to re-activate correctly on future request cycles.
  *
- * @param element - The waiting element to observe for removal.
- * @param targetElement - The element the settle listener is attached to.
- * @param settleHandler - The settle event handler to remove on cleanup.
- * @returns The MutationObserver instance, so it can be disconnected externally when no longer needed.
+ * @param targetElement - The element to observe for new HTMX requests.
  *
  * @author GitHub Copilot
  */
-function addSettleListenerRemovalObserver(
-    element: HTMLElement,
-    targetElement: HTMLElement,
-    settleHandler: (settleEvent: Event) => void,
-): MutationObserver {
+function bindReadyFlagCleanupOnNewRequest(targetElement: HTMLElement) {
 
-    const observer = new MutationObserver((_, observer) => {
+    if(targetElement.hasAttribute(HTMX_TRIGGER_ON_ROUTE_READY_RESET_BOUND_FLAG)) {
+        return;
+    }
 
-        if(DomUtils.wasElementRemoved(element)) {
-            logger(LogLevel.INFO, "Waiting element removed, cleaning up settle listener", element);
-            cleanupSettleWait(targetElement, settleHandler, observer);
+    targetElement.addEventListener("htmx:beforeRequest", (event: Event) => {
+
+        if(event.target === targetElement) {
+            targetElement.removeAttribute(HTMX_TRIGGER_ON_ROUTE_READY_FLAG);
         }
     });
 
-    observer.observe(document, { childList: true, subtree: true });
+    targetElement.setAttribute(HTMX_TRIGGER_ON_ROUTE_READY_RESET_BOUND_FLAG, "true");
+}
 
-    return observer;
+/**
+ * Adds a condition value to the target element's ready flag attribute.
+ *
+ * Appends the condition to the comma-separated list if not already present.
+ * The MutationObserver on waiting elements will detect this change and check
+ * whether all required conditions are now fulfilled.
+ *
+ * @param targetElement - The element to add the ready condition to.
+ * @param condition - The condition value to add.
+ *
+ * @example
+ * addRouteReadyCondition(document.getElementById("portfolio-context"), "settled");
+ * addRouteReadyCondition(document.getElementById("portfolio-context"), "partials-registered");
+ *
+ * @author GitHub Copilot
+ */
+export function addRouteReadyCondition(targetElement: HTMLElement, condition: string) {
+
+    const currentValue = targetElement.getAttribute(HTMX_TRIGGER_ON_ROUTE_READY_FLAG) || "";
+
+    const currentConditions = currentValue
+        ? currentValue.split(",").map(c => c.trim()).filter(Boolean)
+        : [];
+
+    if(!currentConditions.includes(condition)) {
+        currentConditions.push(condition);
+        targetElement.setAttribute(HTMX_TRIGGER_ON_ROUTE_READY_FLAG, currentConditions.join(","));
+    }
 }
 
 /**
  * Executes the htmx trigger immediately if the current route matches the provided route.
  *
- * When the element has a wait-for-settled attribute, defers execution until the referenced
- * element has settled its htmx request, preventing race conditions on dependent lazy-loaded components.
- * Otherwise, uses setTimeout to defer the trigger, allowing htmx to fully process the element's trigger
- * setup before the event is dispatched.
+ * When the element has a wait-for-ready attribute, defers execution until all required
+ * conditions are met on the target element. Otherwise, uses setTimeout to defer the trigger,
+ * allowing htmx to fully process the element's trigger setup before the event is dispatched.
  *
  * @param route - The route pattern to match against the current location.
  * @param element - The HTML element to trigger the event on.
@@ -418,10 +367,10 @@ function executeImmediatelyIfOnRoute(route: string, element: HTMLElement, event:
 
     if(routerMatch) {
 
-        const waitForSelector = element.getAttribute(HTMX_TRIGGER_ON_ROUTE_WAIT_FOR_SETTLED_ATTRIBUTE);
+        const waitForReadyValue = element.getAttribute(HTMX_TRIGGER_ON_ROUTE_WAIT_FOR_READY_ATTRIBUTE);
 
-        if(waitForSelector) {
-            executeAfterElementSettled(waitForSelector, element, event, routerMatch);
+        if(waitForReadyValue) {
+            executeAfterElementReady(waitForReadyValue, element, event, routerMatch);
         }
         else {
             window.setTimeout(() => {
