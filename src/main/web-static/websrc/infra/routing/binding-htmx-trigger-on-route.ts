@@ -285,6 +285,11 @@ export function addRouteReadyCondition(selector: string, condition: string) {
 
     const elements = document.querySelectorAll<HTMLElement>(selector);
 
+    if(elements.length === 0) {
+        logger(LogLevel.WARN, "addRouteReadyCondition found no elements for selector", selector, condition);
+        return;
+    }
+
     elements.forEach(element => {
 
         const currentValue = element.getAttribute(HTMX_TRIGGER_ON_ROUTE_READY_FLAG) || "";
