@@ -4,7 +4,7 @@ import { AfterRequestEventDetail, HtmxInfra } from "../infra/htmx";
 import { ObservationTimestamp } from "../domain/portfolio-allocation";
 import Router from "../infra/routing";
 import AssetComposedColumnsInput from "./asset-composed-columns-input";
-import { coerceToBigNumber, toInt } from "../utils/lang";
+import { toInt } from "../utils/lang";
 import type { TemplateDelegate } from "handlebars";
 import notifications from "./notifications";
 import { NotificationType } from "../infra/infra-types";
@@ -31,14 +31,18 @@ class FormRowValueElements {
 
     handleInputQuantityOrMarketPrice() {
 
-        const quantity = this.quantityInput.value || 0;
-        const marketPrice = this.marketPriceInput.value || 0;
+        const quantity = this.quantityInput.value;
+        const marketPrice = this.marketPriceInput.value;
 
         if(quantity && marketPrice) {
-            const totalMarketValue = coerceToBigNumber(quantity)
-                .times(coerceToBigNumber(marketPrice))
-                .decimalPlaces(0, BigNumber.ROUND_HALF_UP);
-            this.totalMarketValueInput.value = totalMarketValue.toString();
+            try {
+                const totalMarketValue = new BigNumber(quantity)
+                    .times(new BigNumber(marketPrice))
+                    .decimalPlaces(0, BigNumber.ROUND_HALF_UP);
+                this.totalMarketValueInput.value = totalMarketValue.toString();
+            } catch {
+                this.totalMarketValueInput.value = "";
+            }
         }
     }
 

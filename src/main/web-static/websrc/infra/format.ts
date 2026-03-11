@@ -64,10 +64,10 @@ const Format = {
         const decimalSeparator = parts.find(part => part.type === "decimal")?.value || ".";
 
         // Remove grouping separators and replace decimal separator with standard "."
-        let sanitized = formattedValue.replaceAll(new RegExp(`\\${groupSeparator}`, "g"), "");
+        let sanitized = formattedValue.replace(new RegExp(`\\${groupSeparator}`, "g"), "");
 
         if(decimalSeparator !== ".") {
-            sanitized = sanitized.replaceAll(new RegExp(`\\${decimalSeparator}`, "g"), ".");
+            sanitized = sanitized.replace(new RegExp(`\\${decimalSeparator}`, "g"), ".");
         }
 
         return Number.parseFloat(sanitized);

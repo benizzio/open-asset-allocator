@@ -572,13 +572,13 @@ export function coerceToBigNumber(value: unknown): BigNumber {
             ? value as BigNumber.Value
             : 0;
 
-        const bn = new BigNumber(coercedValue);
+        const coercedBigNumber = new BigNumber(coercedValue);
 
-        if(bn.isNaN()) {
+        if(coercedBigNumber.isNaN()) {
             return new BigNumber(0);
         }
 
-        return bn;
+        return coercedBigNumber;
     } catch {
         return new BigNumber(0);
     }
