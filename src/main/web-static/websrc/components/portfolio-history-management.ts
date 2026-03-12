@@ -1,5 +1,5 @@
 import htmx from "htmx.org";
-import BigNumber from "bignumber.js";
+import { BigNumber } from "bignumber.js";
 import { AfterRequestEventDetail, HtmxInfra } from "../infra/htmx";
 import { ObservationTimestamp } from "../domain/portfolio-allocation";
 import Router from "../infra/routing";
@@ -31,14 +31,18 @@ class FormRowValueElements {
 
     handleInputQuantityOrMarketPrice() {
 
-        const quantity = this.quantityInput.value || 0;
-        const marketPrice = this.marketPriceInput.value || 0;
+        const quantity = this.quantityInput.value;
+        const marketPrice = this.marketPriceInput.value;
 
         if(quantity && marketPrice) {
-            const totalMarketValue = new BigNumber(quantity)
-                .times(marketPrice)
-                .decimalPlaces(0, BigNumber.ROUND_HALF_UP);
-            this.totalMarketValueInput.value = totalMarketValue.toString();
+            try {
+                const totalMarketValue = new BigNumber(quantity)
+                    .times(new BigNumber(marketPrice))
+                    .decimalPlaces(0, BigNumber.ROUND_HALF_UP);
+                this.totalMarketValueInput.value = totalMarketValue.toString();
+            } catch {
+                this.totalMarketValueInput.value = "";
+            }
         }
     }
 

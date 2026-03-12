@@ -1,5 +1,5 @@
 import { logger, LogLevel } from "../logging";
-import BigNumber from "bignumber.js";
+import { BigNumber } from "bignumber.js";
 
 // =============================================================================
 // PERCENTAGE INPUT BINDING

@@ -1,6 +1,6 @@
 import * as handlebars from "handlebars";
 import { HelperOptions } from "handlebars";
-import BigNumber from "bignumber.js";
+import { BigNumber } from "bignumber.js";
 import { logger, LogLevel } from "../logging";
 import {
     assignValueAtPath,

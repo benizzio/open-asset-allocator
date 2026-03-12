@@ -1,4 +1,4 @@
-import BigNumber from "bignumber.js";
+import { BigNumber } from "bignumber.js";
 import { AllocationHierarchyLevel, AllocationPlanType } from "./allocation";
 import { Portfolio } from "./portfolio";
 import { Asset } from "./asset";

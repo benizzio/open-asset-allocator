@@ -8,7 +8,7 @@ import { DomainService } from "../domain/service";
 import { Asset } from "../domain/asset";
 import { AfterRequestEventDetail, HtmxInfra } from "../infra/htmx";
 import DomInfra from "../infra/dom";
-import BigNumber from "bignumber.js";
+import { BigNumber } from "bignumber.js";
 import * as handlebars from "handlebars";
 import { isNullish, toInt } from "../utils/lang";
 import { Portfolio } from "../domain/portfolio";
@@ -49,7 +49,7 @@ function mapForAllocationPlanManagement(originalServerResponseJSON: string): str
 
     const portfolio = DomainService.mapping.mapToPortfolio(portfolioDTO);
     const hierarchy = portfolio.allocationStructure.hierarchy;
-    const topHierarchyLevel = hierarchy[hierarchy.length - 1];
+    const topHierarchyLevel = hierarchy.at(-1);
 
     const planZero: SerializableCompleteAllocationPlan = {
         allocationPlan: {
@@ -219,7 +219,7 @@ function copyAssetTickersToHierarchicalIdFields(form: HTMLFormElement) {
             const assetTickerValue = assetTickerInput.value;
 
             const parentTr = assetTickerInput.closest("tr");
-            const allocationIndexString = parentTr.getAttribute("data-allocation-index");
+            const allocationIndexString = parentTr.dataset.allocationIndex;
 
             const assetIdInput = form.elements.namedItem(
                 `details[${ allocationIndexString }][hierarchicalId][0]`,
