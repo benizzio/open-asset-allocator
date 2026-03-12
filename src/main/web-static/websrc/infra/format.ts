@@ -1,4 +1,4 @@
-import BigNumber from "bignumber.js";
+import { BigNumber } from "bignumber.js";
 
 const DEFAULT_LOCALE: Intl.LocalesArgument = "en-US";
 const DEFAULT_CURRENCY = "USD";
@@ -55,7 +55,7 @@ const Format = {
     parseFinancialNumber(formattedValue: string, locale = DEFAULT_LOCALE): number {
 
         if(!formattedValue || formattedValue.trim() === "") {
-            return NaN;
+            return Number.NaN;
         }
 
         // Get locale-specific separators
@@ -70,7 +70,7 @@ const Format = {
             sanitized = sanitized.replace(new RegExp(`\\${decimalSeparator}`, "g"), ".");
         }
 
-        return parseFloat(sanitized);
+        return Number.parseFloat(sanitized);
     },
 };
 
