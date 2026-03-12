@@ -153,10 +153,14 @@ function addEventListeners(
 
     // Add settling behaviour needed for HTMX own bindings
     const afterSettleCustomEventHandler = (event: CustomEvent) => {
-        domSettlingBehaviorEventHandler(event);
+
         const eventTarget = event.target as HTMLElement;
-        bindHTMXTransformResponseInDescendants(eventTarget);
+
+        // Wait-for-ready gates must be bound before any other binding that may trigger HTMX requests
         bindHTMXWaitForReadyInDescendants(eventTarget);
+
+        domSettlingBehaviorEventHandler(event);
+        bindHTMXTransformResponseInDescendants(eventTarget);
     };
 
     document.body.addEventListener("htmx:afterSettle", afterSettleCustomEventHandler);
