@@ -1,10 +1,9 @@
 import htmx from "htmx.org";
 import DomUtils from "../dom/dom-utils";
 import { logger, LogLevel } from "../logging";
-import { HookCleanupFunction, navigoRouter } from "./routing-navigo";
+import { bootNavigoRouter, HookCleanupFunction, navigoRouter } from "./routing-navigo";
 import { RequestConfigEventDetail } from "../htmx";
 import { Match } from "navigo";
-import Router from "./index";
 
 // =============================================================================
 // HTMX TRIGGER EVENT ON ROUTE
@@ -147,5 +146,5 @@ function executeImmediatelyIfOnRoute(route: string, element: HTMLElement, event:
         htmx.trigger(element, event, { routerPathData: routerMatch.data } as RequestConfigEventDetail);
     }
 
-    Router.boot();
+    bootNavigoRouter();
 }

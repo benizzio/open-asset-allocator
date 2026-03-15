@@ -12,7 +12,7 @@ import { logger, LogLevel } from "./logging";
 type GeneralErrorHandler = (error: Error) => void;
 
 const ROUTER_BOOT_DELAY_MS = 500;
-let routerBootTimeoutId: NodeJS.Timeout | undefined;
+let routerBootTimeoutId: ReturnType<typeof globalThis.setTimeout> | undefined;
 
 function bootRouterDebouncing() {
 
