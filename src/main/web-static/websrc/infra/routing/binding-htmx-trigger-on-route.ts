@@ -4,6 +4,7 @@ import { logger, LogLevel } from "../logging";
 import { HookCleanupFunction, navigoRouter } from "./routing-navigo";
 import { RequestConfigEventDetail } from "../htmx";
 import { Match } from "navigo";
+import Router from "./index";
 
 // =============================================================================
 // HTMX TRIGGER EVENT ON ROUTE
@@ -131,13 +132,11 @@ function addDisableRouteRemovalObserver(element: HTMLElement, route: string) {
 /**
  * Executes the htmx trigger immediately if the current route matches the provided route.
  *
- * Uses setTimeout to defer the trigger, allowing htmx to fully process
- * the element's trigger setup before the event is dispatched.
- *
  * @param route - The route pattern to match against the current location.
  * @param element - The HTML element to trigger the event on.
  * @param event - The event name to trigger.
  *
+ * @author benizzio
  * @author GitHub Copilot
  */
 function executeImmediatelyIfOnRoute(route: string, element: HTMLElement, event: string) {
@@ -145,8 +144,8 @@ function executeImmediatelyIfOnRoute(route: string, element: HTMLElement, event:
     const routerMatch = navigoRouter.matchLocation(route);
 
     if(routerMatch) {
-        window.setTimeout(() => {
-            htmx.trigger(element, event, { routerPathData: routerMatch.data } as RequestConfigEventDetail);
-        }, 500);
+        htmx.trigger(element, event, { routerPathData: routerMatch.data } as RequestConfigEventDetail);
     }
+
+    Router.boot();
 }
