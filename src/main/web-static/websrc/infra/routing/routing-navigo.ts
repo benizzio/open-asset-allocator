@@ -51,12 +51,12 @@ let routerBooted = false;
  */
 export function navigateToRoute(path: string) {
     navigoRouter.navigate(path);
+    routerBooted = true;
 }
 
 export function bootNavigoRouter() {
     if(!routerBooted) {
         const currentLocation = navigoRouter.getCurrentLocation().url;
         navigateToRoute(currentLocation);
-        routerBooted = true;
     }
 }
