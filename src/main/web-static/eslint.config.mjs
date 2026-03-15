@@ -31,6 +31,7 @@ export default [
             "@stylistic/comma-dangle": ["warn", "always-multiline"],
             "@stylistic/comma-spacing": ["warn", { before: false, after: true }],
             "@stylistic/key-spacing": ["warn", { beforeColon: false, afterColon: true }],
+            "@stylistic/no-trailing-spaces": ["error"],
             "@stylistic/keyword-spacing": [
                 "warn",
                 { overrides: { if: { after: false }, for: { after: false }, switch: { after: false } } },

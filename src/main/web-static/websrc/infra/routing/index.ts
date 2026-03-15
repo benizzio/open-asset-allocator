@@ -6,16 +6,16 @@ import {
     bootNavigoRouter,
     buildParameterizedDestinationPathFromCurrentLocationContext,
     NAVIGO_PATH_PARAM_PREFIX,
-    navigoRouter,
+    navigateToRoute,
 } from "./routing-navigo";
 
 const Router = {
 
     NAVIGO_PATH_PARAM_PREFIX,
 
-    init(browserGlobal: Window) {
+    init() {
         Router.bindDocumentToRouting();
-        browserGlobal["navigateTo"] = this.navigateTo;
+        globalThis["navigateTo"] = this.navigateTo;
     },
 
     bindDescendants(element: HTMLElement) {
@@ -34,7 +34,7 @@ const Router = {
     },
 
     navigateTo(destinationPath: string) {
-        navigoRouter.navigate(destinationPath);
+        navigateToRoute(destinationPath);
     },
 
     buildParameterizedDestinationPathFromCurrentLocationContext,

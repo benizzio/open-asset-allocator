@@ -41,10 +41,33 @@ export function buildParameterizedDestinationPathFromCurrentLocationContext(dest
 
 let routerBooted = false;
 
+/**
+ * Returns whether the Navigo router has been booted (i.e., at least one navigation has occurred).
+ *
+ * @returns true if the router has been booted, false otherwise.
+ *
+ * @author GitHub Copilot
+ */
+export function isRouterBooted() {
+    return routerBooted;
+}
+
+/**
+ * Navigates to the given route path using the Navigo router. All navigation calls should go through this function.
+ *
+ * @param path - The destination route path to navigate to.
+ *
+ * @author benizzio
+ * @author GitHub Copilot
+ */
+export function navigateToRoute(path: string) {
+    navigoRouter.navigate(path);
+    routerBooted = true;
+}
+
 export function bootNavigoRouter() {
     if(!routerBooted) {
         const currentLocation = navigoRouter.getCurrentLocation().url;
-        navigoRouter.navigate(currentLocation);
-        routerBooted = true;
+        navigateToRoute(currentLocation);
     }
 }
