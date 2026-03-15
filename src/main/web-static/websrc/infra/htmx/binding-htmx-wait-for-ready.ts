@@ -5,7 +5,7 @@ import { logger, LogLevel } from "../logging";
 // HTMX WAIT FOR READY
 // prevents HTMX triggers from firing until all required conditions are met
 // attribute value format is "condition1,condition2,..."
-// conditions are fulfilled externally via addReadyCondition(selector, condition)
+// conditions are fulfilled externally via addReadyConditionToWaitingElement(selector, condition)
 // =============================================================================
 
 const HTMX_WAIT_FOR_READY_ATTRIBUTE = "data-hx-wait-for-ready";
@@ -42,19 +42,31 @@ function bindWaitForReadyOnElements(elements: NodeListOf<HTMLElement>) {
 }
 
 /**
- * Parses the wait-for-ready attribute value into a list of required conditions.
+ * Parses a comma-separated string value into a set of trimmed, non-empty values.
  *
  * @author GitHub Copilot
  */
-function parseRequiredConditions(element: HTMLElement): string[] {
+function parseCommaSeparatedSet(value: string): Set<string> {
+
+    return new Set(
+        value.split(",").map(c => c.trim()).filter(Boolean),
+    );
+}
+
+/**
+ * Parses the wait-for-ready attribute value into a set of required conditions.
+ *
+ * @author GitHub Copilot
+ */
+function parseRequiredConditions(element: HTMLElement): Set<string> {
 
     const attributeValue = element.getAttribute(HTMX_WAIT_FOR_READY_ATTRIBUTE);
 
     if(!attributeValue) {
-        return [];
+        return new Set();
     }
 
-    return attributeValue.split(",").map(c => c.trim()).filter(Boolean);
+    return parseCommaSeparatedSet(attributeValue);
 }
 
 /**
@@ -62,12 +74,12 @@ function parseRequiredConditions(element: HTMLElement): string[] {
  *
  * @author GitHub Copilot
  */
-function areAllConditionsReady(element: HTMLElement, requiredConditions: string[]): boolean {
+function areAllConditionsReady(element: HTMLElement, requiredConditions: Set<string>): boolean {
 
     const readyValue = element.getAttribute(HTMX_WAIT_FOR_READY_FLAG) || "";
-    const fulfilledConditions = readyValue.split(",").map(c => c.trim()).filter(Boolean);
+    const fulfilledConditions = parseCommaSeparatedSet(readyValue);
 
-    return requiredConditions.every(condition => fulfilledConditions.includes(condition));
+    return [...requiredConditions].every(condition => fulfilledConditions.has(condition));
 }
 
 /**
@@ -92,7 +104,7 @@ function bindConfirmGateOnElement(element: HTMLElement) {
 
         const requiredConditions = parseRequiredConditions(element);
 
-        if(requiredConditions.length === 0) {
+        if(requiredConditions.size === 0) {
             return;
         }
 
@@ -141,8 +153,10 @@ function addReadyFlagObserverOnElement(element: HTMLElement, onReady: () => void
     const readyObserver = new MutationObserver(() => {
 
         const requiredConditions = parseRequiredConditions(element);
+        const hasConditions = requiredConditions.size > 0;
+        const allReady = hasConditions && areAllConditionsReady(element, requiredConditions);
 
-        if(requiredConditions.length > 0 && areAllConditionsReady(element, requiredConditions)) {
+        if(allReady) {
             readyObserver.disconnect();
             removalObserver.disconnect();
             onReady();
@@ -177,31 +191,28 @@ function addReadyFlagObserverOnElement(element: HTMLElement, onReady: () => void
  * @param condition - The condition value to add.
  *
  * @example
- * addReadyCondition("[data-hx-wait-for-ready]", "settled");
- * addReadyCondition("[data-hx-wait-for-ready]", "partials-registered");
+ * addReadyConditionToWaitingElement("[data-hx-wait-for-ready]", "settled");
+ * addReadyConditionToWaitingElement("[data-hx-wait-for-ready]", "partials-registered");
  *
  * @author GitHub Copilot
  */
-export function addReadyCondition(selector: string, condition: string) {
+export function addReadyConditionToWaitingElement(selector: string, condition: string) {
 
     const elements = document.querySelectorAll<HTMLElement>(selector);
 
     if(elements.length === 0) {
-        logger(LogLevel.WARN, "addReadyCondition found no elements for selector", selector, condition);
+        logger(LogLevel.WARN, "addReadyConditionToWaitingElement found no elements for selector", selector, condition);
         return;
     }
 
     elements.forEach(element => {
 
         const currentValue = element.getAttribute(HTMX_WAIT_FOR_READY_FLAG) || "";
+        const currentConditions = parseCommaSeparatedSet(currentValue);
 
-        const currentConditions = currentValue
-            ? currentValue.split(",").map(c => c.trim()).filter(Boolean)
-            : [];
-
-        if(!currentConditions.includes(condition)) {
-            currentConditions.push(condition);
-            element.setAttribute(HTMX_WAIT_FOR_READY_FLAG, currentConditions.join(","));
+        if(!currentConditions.has(condition)) {
+            currentConditions.add(condition);
+            element.setAttribute(HTMX_WAIT_FOR_READY_FLAG, [...currentConditions].join(","));
         }
     });
 }
