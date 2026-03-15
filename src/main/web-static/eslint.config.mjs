@@ -31,6 +31,10 @@ export default [
             "@stylistic/comma-dangle": ["warn", "always-multiline"],
             "@stylistic/comma-spacing": ["warn", { before: false, after: true }],
             "@stylistic/key-spacing": ["warn", { beforeColon: false, afterColon: true }],
+            "@stylistic/keyword-spacing": [
+                "warn",
+                { overrides: { if: { after: false }, for: { after: false }, switch: { after: false } } },
+            ],
             "@stylistic/padding-line-between-statements": [
                 "warn",
                 { blankLine: "always", prev: "import", next: "*" },

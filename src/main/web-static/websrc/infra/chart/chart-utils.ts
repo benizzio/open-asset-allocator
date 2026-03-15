@@ -1,7 +1,7 @@
 import { Chart, ChartDataset, ChartType, TooltipItem } from "chart.js";
 import { ChartContent, MeasuramentUnit, MultiChartDataSource, UNIDIMENSIONAL_DATASET_SUM_FIELD } from "./chart-types";
 import Format from "../format";
-import BigNumber from "bignumber.js";
+import { BigNumber } from "bignumber.js";
 import { Context } from "chartjs-plugin-datalabels/types/context";
 import { PAUL_TOL_PALETTE } from "../color";
 import chroma from "chroma-js";

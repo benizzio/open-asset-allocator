@@ -1,6 +1,6 @@
 import * as handlebars from "handlebars";
 import { PotentialDivergence } from "../domain/portfolio-analysis";
-import BigNumber from "bignumber.js";
+import { BigNumber } from "bignumber.js";
 import Format from "../infra/format";
 
 export function registerPortfolioAnalysisHandlebarsHelpers() {

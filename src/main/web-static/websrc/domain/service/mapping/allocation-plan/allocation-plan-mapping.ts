@@ -1,4 +1,4 @@
-import BigNumber from "bignumber.js";
+import { BigNumber } from "bignumber.js";
 import { AllocationPlan, AllocationPlanDTO, PlannedAllocation } from "../../../allocation-plan";
 
 export function mapToAllocationPlan(
