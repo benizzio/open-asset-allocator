@@ -1,4 +1,4 @@
-import { buildParameterizedDestinationPathFromCurrentLocationContext, navigoRouter } from "./routing-navigo";
+import { buildParameterizedDestinationPathFromCurrentLocationContext, navigateToRoute } from "./routing-navigo";
 import { logger, LogLevel } from "../logging";
 
 // =============================================================================
@@ -25,7 +25,7 @@ function bindCLickNavigation(element: HTMLElement) {
 
 function navigate(element: HTMLElement) {
     const destinationPath = buildDestinationPath(element);
-    navigoRouter.navigate(destinationPath);
+    navigateToRoute(destinationPath);
 }
 
 function buildDestinationPath(element: HTMLElement) {

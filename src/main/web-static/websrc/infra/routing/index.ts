@@ -6,7 +6,7 @@ import {
     bootNavigoRouter,
     buildParameterizedDestinationPathFromCurrentLocationContext,
     NAVIGO_PATH_PARAM_PREFIX,
-    navigoRouter,
+    navigateToRoute,
 } from "./routing-navigo";
 
 const Router = {
@@ -34,7 +34,7 @@ const Router = {
     },
 
     navigateTo(destinationPath: string) {
-        navigoRouter.navigate(destinationPath);
+        navigateToRoute(destinationPath);
     },
 
     buildParameterizedDestinationPathFromCurrentLocationContext,
