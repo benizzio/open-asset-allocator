@@ -41,6 +41,10 @@ export function buildParameterizedDestinationPathFromCurrentLocationContext(dest
 
 let routerBooted = false;
 
+export function isRouterBooted() {
+    return routerBooted;
+}
+
 /**
  * Navigates to the given route path using the Navigo router. All navigation calls should go through this function.
  *
