@@ -79,7 +79,7 @@ function areAllConditionsReady(element: HTMLElement, requiredConditions: Set<str
     const readyValue = element.getAttribute(HTMX_WAIT_FOR_READY_FLAG) || "";
     const fulfilledConditions = parseCommaSeparatedSet(readyValue);
 
-    return [...requiredConditions].every(condition => fulfilledConditions.has(condition));
+    return requiredConditions.difference(fulfilledConditions).size === 0;
 }
 
 /**
