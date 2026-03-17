@@ -1,7 +1,7 @@
 import htmx from "htmx.org";
 import DomUtils from "../dom/dom-utils";
 import { logger, LogLevel } from "../logging";
-import { bootNavigoRouter, HookCleanupFunction, isRouterBooted, navigoRouter } from "./routing-navigo";
+import { bootNavigoRouter, currentLocationMatches, HookCleanupFunction, navigoRouter } from "./routing-navigo";
 import { RequestConfigEventDetail } from "../htmx";
 import { Match } from "navigo";
 
@@ -140,17 +140,13 @@ function addDisableRouteRemovalObserver(element: HTMLElement, route: string) {
  */
 function executeImmediatelyIfOnRoute(route: string, element: HTMLElement, event: string) {
 
-    const wasAlreadyBooted = isRouterBooted();
-
-    bootNavigoRouter();
+    const wasAlreadyBooted = bootNavigoRouter();
 
     if(!wasAlreadyBooted) {
         return;
     }
 
-    const routerMatch = navigoRouter.matchLocation(route);
-
-    if(routerMatch) {
-        htmx.trigger(element, event, { routerPathData: routerMatch.data } as RequestConfigEventDetail);
+    if(currentLocationMatches(route)) {
+        htmx.trigger(element, event);
     }
 }
