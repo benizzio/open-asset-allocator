@@ -75,4 +75,5 @@ specific AGENTS.md, the structure is:
     - `src/main/go`: go code for the back-end. The backend HTTP server also currently serves the frontend code as static
       files in production
     - `src/main/web-static`: front-end code for the web SPA
+- `target`: any file generated, compiled or moved during the build processes
 - `Makefile`: makefile with commands for building, running and testing any module of the application
