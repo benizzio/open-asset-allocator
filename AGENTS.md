@@ -55,9 +55,16 @@ portfolios in a "fractal" structure.
   C. Martin
 - **all AI generated code**:
     - must contain proper minimal code comment documentation according to the language standards, including authoring
-      information
+      information, following the language specific standards
+        - If the language does not specify a standard for authoring on code comments, just add the following line at the
+          end of the block:
+          ```plaintext
+          Authored by: <agent name>
+          or
+          Co-authored by: <agent name> and <git human user name>
+          ```
     - if the code was already present and is being modified by the AI, the authoring must include the agent and current
-      git user
+      git human user
     - public API code (as in usable in other packages or modules) must contain very detailed usage instructions
     - if the language has authoring documentation standards, it must be followed
 
