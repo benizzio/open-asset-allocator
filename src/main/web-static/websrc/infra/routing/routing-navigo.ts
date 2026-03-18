@@ -1,4 +1,4 @@
-import Navigo from "navigo";
+import Navigo, { Match } from "navigo";
 import { logger, LogLevel } from "../logging";
 
 export type HookCleanupFunction = (success?: boolean) => void;
@@ -78,10 +78,10 @@ export function bootNavigoRouter(): boolean {
  * Checks whether the current browser location matches the given route pattern.
  *
  * @param route - The route pattern to match against.
- * @returns true if the current location matches the route, false otherwise.
+ * @returns The navigo Match data if the current location matches the route, false otherwise.
  *
  * @author GitHub Copilot
  */
-export function currentLocationMatches(route: string): boolean {
-    return !!navigoRouter.matchLocation(route);
+export function currentLocationMatches(route: string): false | Match {
+    return navigoRouter.matchLocation(route);
 }

@@ -146,7 +146,9 @@ function executeImmediatelyIfOnRoute(route: string, element: HTMLElement, event:
         return;
     }
 
-    if(currentLocationMatches(route)) {
-        htmx.trigger(element, event);
+    const match = currentLocationMatches(route);
+
+    if(match) {
+        htmx.trigger(element, event, { routerPathData: match.data } as RequestConfigEventDetail);
     }
 }
