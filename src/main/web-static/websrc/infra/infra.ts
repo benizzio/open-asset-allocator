@@ -12,7 +12,7 @@ import { logger, LogLevel } from "./logging";
 type GeneralErrorHandler = (error: Error) => void;
 
 const ROUTER_BOOT_DELAY_MS = 500;
-let routerBootTimeoutId: number | undefined;
+let routerBootTimeoutId: ReturnType<typeof globalThis.setTimeout> | undefined;
 
 function bootRouterDebouncing() {
 
@@ -21,7 +21,7 @@ function bootRouterDebouncing() {
         clearTimeout(routerBootTimeoutId);
     }
 
-    routerBootTimeoutId = window.setTimeout(() => {
+    routerBootTimeoutId = globalThis.setTimeout(() => {
         routerBootTimeoutId = undefined;
         Router.boot();
     }, ROUTER_BOOT_DELAY_MS);
@@ -73,13 +73,13 @@ function handleError(
  */
 function setupGlobalErrorHandler(uncaughtErrorHandler: GeneralErrorHandler): void {
 
-    window.onerror = (message, source, lineno, colno, error) => {
+    globalThis.onerror = (message, source, lineno, colno, error) => {
         const errorMessage = `Uncaught error: ${ message } at ${ source }:${ lineno }:${ colno }`;
         handleError(errorMessage, error, uncaughtErrorHandler, message);
         return true;
     };
 
-    window.addEventListener("unhandledrejection", (event: PromiseRejectionEvent) => {
+    globalThis.addEventListener("unhandledrejection", (event: PromiseRejectionEvent) => {
         const reason = event.reason;
         const errorMessage = "Unhandled promise rejection:";
         handleError(errorMessage, reason instanceof Error ? reason : null, uncaughtErrorHandler, event);
@@ -96,15 +96,16 @@ export const Infra = {
 
         Chart.register(...registerables, ChartDataLabels);
 
-        window.Handlebars = handlebarsInfra.register();
-        window["HandlebarsUtils"] = handlebarsInfra.utils;
+        globalThis.Handlebars = handlebarsInfra.register();
+        globalThis["HandlebarsUtils"] = handlebarsInfra.utils;
 
         DomInfra.bindGlobalFunctions();
         setupGlobalErrorHandler(generalUncaughtErrorHandler);
 
         const onPageLoad = () => {
-            Router.init(window);
             HtmxInfra.init(DOM_SETTLING_BEHAVIOR_EVENT_HANDLER, afterRequestErrorHandler);
+            Router.init();
+            globalThis["HtmxInfra"] = HtmxInfra;
         };
         document.addEventListener("DOMContentLoaded", onPageLoad);
 

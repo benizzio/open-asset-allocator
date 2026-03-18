@@ -1,5 +1,6 @@
 import { HtmxBeforeSwapDetails, HtmxRequestConfig, HtmxResponseInfo } from "htmx.org";
 import { bindHTMXTransformResponseInDescendants, htmxTransformResponse } from "./binding-htmx-transform-response";
+import { addReadyConditionToWaitingElement, bindHTMXWaitForReadyInDescendants } from "./binding-htmx-wait-for-ready";
 import { CustomEventHandler } from "../infra-types";
 import InfraTypesUtils from "../infra-types-utils";
 import Router from "../routing";
@@ -152,8 +153,13 @@ function addEventListeners(
 
     // Add settling behaviour needed for HTMX own bindings
     const afterSettleCustomEventHandler = (event: CustomEvent) => {
-        domSettlingBehaviorEventHandler(event);
+
         const eventTarget = event.target as HTMLElement;
+
+        // Wait-for-ready gates must be bound before any other binding that may trigger HTMX requests
+        bindHTMXWaitForReadyInDescendants(eventTarget);
+
+        domSettlingBehaviorEventHandler(event);
         bindHTMXTransformResponseInDescendants(eventTarget);
     };
 
@@ -186,4 +192,5 @@ export const HtmxInfra = {
 
     htmxTransformResponse,
     toErrorResponse,
+    addReadyConditionToWaitingElement,
 };

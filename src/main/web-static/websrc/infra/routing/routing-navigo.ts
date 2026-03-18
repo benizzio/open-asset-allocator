@@ -1,4 +1,4 @@
-import Navigo from "navigo";
+import Navigo, { Match } from "navigo";
 import { logger, LogLevel } from "../logging";
 
 export type HookCleanupFunction = (success?: boolean) => void;
@@ -41,10 +41,64 @@ export function buildParameterizedDestinationPathFromCurrentLocationContext(dest
 
 let routerBooted = false;
 
-export function bootNavigoRouter() {
+/**
+ * Navigates to the given route path using the Navigo router. All navigation calls should go through this function.
+ *
+ * @param path - The destination route path to navigate to.
+ * @returns void
+ *
+ * @example
+ * navigateToRoute('/home');
+ *
+ * @author benizzio
+ * @author GitHub Copilot
+ */
+export function navigateToRoute(path: string) {
+    navigoRouter.navigate(path);
+    routerBooted = true;
+}
+
+/**
+ * Boots the Navigo router by navigating to the current location if it has not been booted yet.
+ *
+ * @returns true if the router was already booted before this call, false if it was just booted.
+ *
+ * @example
+ * const wasAlreadyBooted = bootNavigoRouter();
+ * if(!wasAlreadyBooted) {
+ *     // Router was just booted — Navigo handlers will fire automatically
+ *     return;
+ * }
+ *
+ * @author benizzio
+ * @author GitHub Copilot
+ */
+export function bootNavigoRouter(): boolean {
+
+    const wasAlreadyBooted = routerBooted;
+
     if(!routerBooted) {
         const currentLocation = navigoRouter.getCurrentLocation().url;
-        navigoRouter.navigate(currentLocation);
-        routerBooted = true;
+        navigateToRoute(currentLocation);
     }
+
+    return wasAlreadyBooted;
+}
+
+/**
+ * Checks whether the current browser location matches the given route pattern.
+ *
+ * @param route - The route pattern to match against.
+ * @returns The navigo Match data if the current location matches the route, false otherwise.
+ *
+ * @example
+ * const match = currentLocationMatches('/portfolios/:id');
+ * if(match) {
+ *     const routeData = match.data; // { id: "42" }
+ * }
+ *
+ * @author GitHub Copilot
+ */
+export function currentLocationMatches(route: string): false | Match {
+    return navigoRouter.matchLocation(route);
 }

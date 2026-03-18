@@ -3,7 +3,7 @@
      hx-get="/api/portfolio/:portfolioId"
      hx-trigger="load once, reload-portfolio"
      handlebars-template="portfolio-data"
-     hx-on-htmx-after-settle="portfolioPage.preFillEditPortfolioForm()"
+     hx-on-htmx-after-settle="if(event.target === this) { HtmxInfra.addReadyConditionToWaitingElement('[data-portfolio-route-component]', 'settled') }; portfolioPage.preFillEditPortfolioForm()"
 >
     <div class="row justify-content-center align-items-center row-cols-auto my-5">
             <span class="h2 placeholder-glow">
@@ -72,6 +72,8 @@
         >
             <div class="col"
                  data-hx-trigger-on-route="/portfolio/:portfolioId/history/*!load-portfolio"
+                 data-hx-wait-for-ready="settled,partials-registered"
+                 data-portfolio-route-component
                  data-display-on-route="/portfolio/:portfolioId/history/*"
                  hx-get="/websrc/components/portfolio-history.html"
                  hx-trigger="load-portfolio once"
@@ -79,6 +81,8 @@
             ></div>
             <div class="col"
                  data-hx-trigger-on-route="/portfolio\/:portfolioId\/allocation($|\/.*$)!load-allocation"
+                 data-hx-wait-for-ready="settled,partials-registered"
+                 data-portfolio-route-component
                  data-display-on-route="/portfolio\/:portfolioId\/allocation($|\/.*$)"
                  hx-get="/websrc/components/allocation-plan.html"
                  hx-trigger="load-allocation once"
@@ -86,6 +90,8 @@
             ></div>
             <div class="col"
                  data-hx-trigger-on-route="/portfolio/:portfolioId/allocation-map!load-allocation-map"
+                 data-hx-wait-for-ready="settled,partials-registered"
+                 data-portfolio-route-component
                  data-display-on-route="/portfolio/:portfolioId/allocation-map"
                  hx-get="/websrc/components/allocation-map.html"
                  hx-trigger="load-allocation-map once"
@@ -274,6 +280,11 @@
     HandlebarsUtils.registerPartialToContainer(
         "datalist-container",
         "asset-composed-columns-input"
+    );
+
+    HtmxInfra.addReadyConditionToWaitingElement(
+        "[data-portfolio-route-component]",
+        "partials-registered"
     );
 
 </script>
