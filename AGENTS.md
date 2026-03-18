@@ -48,3 +48,31 @@ portfolios in a "fractal" structure.
     - Following SOLID principles
     - Decomposing code into smaller functions
     - Avoiding code duplication (DRY principle)
+    - Be consistent
+- Ignore rules that establish specific numbers of lines of code for functions, files, etc.
+- Follow the general principles of "Domain-Driven Design: Tackling Complexity in the Heart of Software" by Eric Evans
+- Follow the general principles of "Clean Architecture: A Craftsman's Guide to Software Structure and Design" by Robert
+  C. Martin
+- **all AI generated code**:
+    - must contain proper minimal code comment documentation according to the language standards, including authoring
+      information
+    - if the code was already present and is being modified by the AI, the authoring must include the agent and current
+      git user
+    - public API code (as in usable in other packages or modules) must contain very detailed usage instructions
+    - if the language has authoring documentation standards, it must be followed
+
+### Project/repo structure and extended agent instructions
+
+This project has a monorepo structure with multiple modules. To follow the specific sctructures with their possible
+specific AGENTS.md, the structure is:
+
+- `src/ext`: contains auxiliary code that is not necessary for the project to run in production
+- `src/main`: production code
+    - `src/main/docker`: docker related files for images and compose configuration of the development environment
+    - `src/main/duckdb`: duckdb code, currently used for external data ingestion
+    - `src/main/flyway`: flyway related files, for database migrations
+    - `src/main/postgres`: postgres related code, currently used for database initialization
+    - `src/main/go`: go code for the back-end. The backend HTTP server also currently serves the frontend code as static
+      files in production
+    - `src/main/web-static`: front-end code for the web SPA
+- `Makefile`: makefile with commands for building, running and testing any module of the application
