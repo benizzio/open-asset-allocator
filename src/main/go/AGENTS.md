@@ -1,4 +1,6 @@
-# Specific agent instructions for the backend and Go language
+# Specific agent instructions for the back-end and Go language
+
+Refer to the general instructions in the root `../../../AGENTS.md` for broader instructions.
 
 ## Go language standards
 
