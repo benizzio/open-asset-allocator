@@ -18,9 +18,8 @@ Refer to the general instructions in the root `../../../AGENTS.md` for broader i
         - `src/main/web-static/websrc/infra`: infrastructure code that allows the usage of the front end stack
           components and libraries (browser APIs, HTMX, Handlebars, etc.) with their own APIs and HTML element
           bindings
-        - `src/main/web-static/websrc/utils`: generic utility code that can be used accross the other modules, including
+        - `src/main/web-static/websrc/utils`: generic utility code that can be used across the other modules, including
           the infra modules. Base JavaScript helper functions and API wrappers should be implemented here
         - `src/main/web-static/websrc/stylesheet`: SCSS code for the application stylesheets
 - except for generic utilities in `src/main/web-static/websrc/utils`, modules should only expose their APIs through the
-  `index.ts`, and direct access should be blocked. This should be enforced by
-  `src/main/web-static/websrc/infra/eslint.config.mjs`.
+  `index.ts`, and direct access should be blocked. This should be enforced by `src/main/web-static/eslint.config.mjs`
