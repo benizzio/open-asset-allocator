@@ -70,7 +70,7 @@ portfolios in a "fractal" structure.
 
 ### Project/repo structure and extended agent instructions
 
-This project has a monorepo structure with multiple modules. To follow the specific sctructures with their possible
+This project has a monorepo structure with multiple modules. To follow the specific modules with their possible
 specific AGENTS.md, the structure is:
 
 - `src/ext`: contains auxiliary code that is not necessary for the project to run in production
