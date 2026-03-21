@@ -82,7 +82,7 @@ func (controller *AssetRESTController) putAsset(context *gin.Context) {
 		return
 	}
 
-	if assetDTS.Id == nil || langext.IsZeroValue(assetDTS.Id) {
+	if assetDTS.Id == nil || langext.IsZeroValue(*assetDTS.Id) {
 
 		var validationErrors = validation.BuildCustomValidationErrorsBuilder().
 			CustomValidationError(
