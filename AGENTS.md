@@ -57,7 +57,7 @@ portfolios in a "fractal" structure.
 - **all AI generated code**:
     - must contain proper minimal code comment documentation according to the language standards, including authoring
       information, following the language specific standards
-        - new code crated by an agent or existing code authored by only an agent must include the agent as the author
+        - new code created by an agent or existing code authored by only an agent must include the agent as the author
         - existing code unauthored (can be considered as authored by a human user) or already co-authored by a human
           user, when modified by an agent, must include the current agent as a co-author
         - if the language does not specify a standard for authoring on code comments, just add the following line at the
