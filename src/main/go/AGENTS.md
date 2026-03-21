@@ -27,8 +27,8 @@ Refer to the general instructions in the root `../../../AGENTS.md` for broader i
 - the project should always prioritize integration tests over unit tests. Unit tests should be written only for
   components where higher complexity justifies the need, or when specifically prompted for them
 - integration tests should **ALWAYS**:
-    - use JSON stings for input and output data assertion, to test parsing and improve readability
-    - be written in a black-box style; exceptions if stryctly necessary, should be explicitly confirmed with a new
+    - use JSON strings for input and output data assertion, to test parsing and improve readability
+    - be written in a black-box style; exceptions if strictly necessary, should be explicitly confirmed with a new
       prompt
     - have no side effects, i.e. if the default state of any persistence is modified, it should be reverted to original
       in a cleanup step that runs regardless of the test result
