@@ -21,3 +21,23 @@ Refer to the general instructions in the root `../../../AGENTS.md` for broader i
           includes a lot of stack and utility code;
     - `src/main/go/langext`: includes implementations that extend the Go language and are not available in the standard
       implementations at the time of writing.
+
+### Testing standards
+
+- the project should always prioritize integration tests over unit tests. Unit tests should be written only for
+  components where higher complexity justifies the need, or when specifically prompted for them
+- integration tests should **ALWAYS**:
+    - use JSON stings for input and output data assertion, to test parsing and improve readability
+    - be written in a black-box style; exceptions if stryctly necessary, should be explicitly confirmed with a new
+      prompt
+    - have no side effects, i.e. if the default state of any persistence is modifyed, it should be reverted to original
+      in a cleanup step that runs regardless of the test result
+    - be atomic, i.e. should never rely on the result of another test
+    - try to rely on initial persistence data. If the existing initial data is not sufficient, then it should
+      create its own, following the no side effects rule
+
+#### Integration test structure
+
+- `src/main/go/inttest`: base integration test package
+- `src/main/go/inttest/infra`: infrastructure needed for running integration tests, including initial db state
+- `src/main/go/inttest/util`: general utilities for all integration tests
