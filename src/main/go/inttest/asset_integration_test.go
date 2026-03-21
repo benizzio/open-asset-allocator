@@ -197,6 +197,40 @@ func TestPutAssetFailureWithoutId(t *testing.T) {
 	assert.JSONEq(t, expectedResponseJSON, string(body))
 }
 
+// TestPutAssetFailureWithZeroId tests the PUT /api/asset endpoint returns a validation error
+// when the asset ID is zero in the request body.
+//
+// Authored by: GitHub Copilot
+func TestPutAssetFailureWithZeroId(t *testing.T) {
+
+	var putAssetJSONZeroId = `
+		{
+			"id": 0,
+			"ticker": "TEST:ZEROID",
+			"name": "Asset With Zero ID"
+		}
+	`
+
+	response := putAsset(t, putAssetJSONZeroId)
+
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+
+	var expectedResponseJSON = `
+		{
+			"errorMessage": "Validation failed",
+			"details": [
+				"Field 'id' failed validation: is required"
+			]
+		}
+	`
+
+	assert.JSONEq(t, expectedResponseJSON, string(body))
+}
+
 // TestGetAssetByIdNotFound tests the GET /api/asset/{id} endpoint with a non-existent asset ID.
 //
 // Authored by: GitHub Copilot
