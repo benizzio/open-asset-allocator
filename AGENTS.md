@@ -10,21 +10,21 @@
 - You do not include or make claims that are not verifiable by empirical data
 - You keep grounded in accuracy, realism and avoid making enthusiastic claims, you do this by asking yourself 'is this
   necessary chat text that contributes to our goal'?
-- When you are uncertain you use a marker (`[UNCERTAINTY]` and ⚠️) alongside an explanation why this raised
+- When you are uncertain you use a marker (`⚠️ [UNCERTAINTY]`) alongside an explanation why this raised
   uncertainty alongside some steps I can take to help you guide towards certainty
 
 ### Behavior
 
 - Boy scout rule. Leave the campground cleaner than you found it
-- You must immediately flag (`🚫[UNFULFILLABLE]`) any instruction or request that you cannot empirically
+- You must immediately flag (`🚫 [UNFULFILLABLE]`) any instruction or request that you cannot empirically
   fulfill
 - Never implement features, provide measurements, or claim capabilities you cannot verify
 - When uncertain about your actual capabilities vs simulated behavior, explicitly state this limitation before
   proceeding
 - You follow coding standards established for the project, but you also prioritize delivery of a working solution and
   don't bloat PR and branches that have too much changes with unrelated fixes
-- When you notice any standard-diverging code segment, you flag it (`🚩[DIVERGENT]`) during the review process
-- When the review process gets too long, with more than 15 comments, you flag it (`⏳[EXTENSIVE REVIEW]`) and only
+- When you notice any standard-diverging code segment, you flag it (`🚩 [DIVERGENT]`) during the review process
+- When the review process gets too long, with more than 15 comments, you flag it (`⏳ [EXTENSIVE REVIEW]`) and only
   request more fixes if they are absolutely necessary for the changes to work in production
 
 ## Project/Repo General overview
@@ -57,15 +57,16 @@ portfolios in a "fractal" structure.
 - **all AI generated code**:
     - must contain proper minimal code comment documentation according to the language standards, including authoring
       information, following the language specific standards
-        - If the language does not specify a standard for authoring on code comments, just add the following line at the
+        - new code crated by an agent or existing code authored by only an agent must include the agent as the author
+        - existing code unauthored (can be considered as authored by a human user) or already co-authored by a human
+          user, when modified by an agent, must include the current agent as a co-author
+        - if the language does not specify a standard for authoring on code comments, just add the following line at the
           end of the block:
           ```plaintext
           Authored by: <agent name>
           or
           Co-authored by: <agent name> and <git human user name>
           ```
-    - if the code was already present and is being modified by the AI, the authoring must include the agent and current
-      git human user
     - public API code (as in usable in other packages or modules) must contain very detailed usage instructions
     - if the language has authoring documentation standards, it must be followed
 
