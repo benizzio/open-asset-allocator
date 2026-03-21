@@ -7,6 +7,8 @@ import (
 	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/infra"
 	gininfra "github.com/benizzio/open-asset-allocator/infra/gin"
+	"github.com/benizzio/open-asset-allocator/infra/validation"
+	"github.com/benizzio/open-asset-allocator/langext"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,6 +27,11 @@ func (controller *AssetRESTController) BuildRoutes() []infra.RESTRoute {
 			Method:   http.MethodGet,
 			Path:     "/api/asset/:" + assetIdOrTickerParam,
 			Handlers: gin.HandlersChain{controller.getAssetById},
+		},
+		{
+			Method:   http.MethodPut,
+			Path:     "/api/asset",
+			Handlers: gin.HandlersChain{controller.putAsset},
 		},
 	}
 }
@@ -57,6 +64,49 @@ func (controller *AssetRESTController) getAssetById(context *gin.Context) {
 
 	var assetDTS = model.MapToAssetDTS(asset)
 	context.JSON(http.StatusOK, assetDTS)
+}
+
+// putAsset handles PUT requests to update an existing asset's ticker and name fields.
+// Validates that the asset ID is present and non-zero before delegating to the domain service.
+//
+// Authored by: GitHub Copilot
+func (controller *AssetRESTController) putAsset(context *gin.Context) {
+
+	var assetDTS model.AssetDTS
+	valid, err := gininfra.BindAndValidateJSONWithInvalidResponse(context, &assetDTS)
+	if err != nil {
+		HandleAPIError(context, bindAssetErrorMessage, err)
+		return
+	}
+	if !valid {
+		return
+	}
+
+	if assetDTS.Id == nil || langext.IsZeroValue(assetDTS.Id) {
+
+		var validationErrors = validation.BuildCustomValidationErrorsBuilder().
+			CustomValidationError(
+				assetDTS,
+				"Id",
+				"required",
+				"Asset ID is required for update",
+				nil,
+			).
+			Build()
+
+		gininfra.RespondWithCustomValidationErrors(context, validationErrors, assetDTS)
+
+		return
+	}
+
+	var asset = model.MapToAsset(&assetDTS)
+	updatedAsset, err := controller.assetDomService.UpdateAsset(asset)
+	if HandleAPIError(context, "Error updating asset", err) {
+		return
+	}
+
+	var responseBody = model.MapToAssetDTS(updatedAsset)
+	context.JSON(http.StatusOK, responseBody)
 }
 
 func BuildAssetRESTController(assetDomService *service.AssetDomService) *AssetRESTController {
