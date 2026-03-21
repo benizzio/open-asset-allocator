@@ -3,6 +3,7 @@ package inttest
 import (
 	"io"
 	"net/http"
+	"strconv"
 	"testing"
 
 	"github.com/benizzio/open-asset-allocator/inttest/infra"
@@ -119,6 +120,81 @@ func TestGetAssetByIdOrTicker(t *testing.T) {
 			assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
 		},
 	)
+}
+
+// TestPutAsset tests the PUT /api/asset endpoint to update an existing asset's ticker and name.
+//
+// Authored by: GitHub Copilot
+func TestPutAsset(t *testing.T) {
+
+	var testTickerBefore = "TEST:BEFORE"
+	var testNameBefore = "Test Asset Before Update"
+	var testTickerAfter = "TEST:AFTER"
+	var testNameAfter = "Test Asset After Update"
+
+	var testAsset = insertTestAsset(t, testTickerBefore, testNameBefore)
+	var testAssetIdString = strconv.FormatInt(testAsset.Id, 10)
+
+	var putAssetJSON = `
+		{
+			"id":` + testAssetIdString + `,
+			"ticker":"` + testTickerAfter + `",
+			"name":"` + testNameAfter + `"
+		}
+	`
+
+	response := putAsset(t, putAssetJSON)
+
+	assert.Equal(t, http.StatusOK, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+
+	var expectedResponseJSON = `
+		{
+			"id":` + testAssetIdString + `,
+			"ticker":"` + testTickerAfter + `",
+			"name":"` + testNameAfter + `"
+		}
+	`
+
+	assert.JSONEq(t, expectedResponseJSON, string(body))
+
+	assertPersistedAsset(t, testAsset.Id, testTickerAfter, testNameAfter)
+}
+
+// TestPutAssetFailureWithoutId tests the PUT /api/asset endpoint returns a validation error
+// when the asset ID is missing from the request body.
+//
+// Authored by: GitHub Copilot
+func TestPutAssetFailureWithoutId(t *testing.T) {
+
+	var putAssetJSONNoId = `
+		{
+			"ticker": "TEST:NOID",
+			"name": "Asset Without ID"
+		}
+	`
+
+	response := putAsset(t, putAssetJSONNoId)
+
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+
+	var expectedResponseJSON = `
+		{
+			"errorMessage": "Validation failed",
+			"details": [
+				"Field 'id' failed validation: is required"
+			]
+		}
+	`
+
+	assert.JSONEq(t, expectedResponseJSON, string(body))
 }
 
 // TestGetAssetByIdNotFound tests the GET /api/asset/{id} endpoint with a non-existent asset ID.

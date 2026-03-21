@@ -30,7 +30,7 @@ Refer to the general instructions in the root `../../../AGENTS.md` for broader i
     - use JSON stings for input and output data assertion, to test parsing and improve readability
     - be written in a black-box style; exceptions if stryctly necessary, should be explicitly confirmed with a new
       prompt
-    - have no side effects, i.e. if the default state of any persistence is modifyed, it should be reverted to original
+    - have no side effects, i.e. if the default state of any persistence is modified, it should be reverted to original
       in a cleanup step that runs regardless of the test result
     - be atomic, i.e. should never rely on the result of another test
     - try to rely on initial persistence data. If the existing initial data is not sufficient, then it should
