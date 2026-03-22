@@ -623,10 +623,10 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 	if response == nil {
 		return
 	}
+	defer response.Body.Close()
 
 	body, err := io.ReadAll(response.Body)
 	assert.NoError(t, err)
-	defer response.Body.Close()
 	assert.Empty(t, string(body))
 
 	var portfolioIdString = strconv.Itoa(1)
