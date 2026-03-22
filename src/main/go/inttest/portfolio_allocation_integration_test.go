@@ -306,12 +306,12 @@ func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 				WHERE observation_time_id IN (
 					SELECT id FROM portfolio_allocation_obs_time WHERE observation_time_tag = '202505'
 				)`,
+				nil,
 			).
-			AddCleanupQuery("DELETE FROM asset WHERE ticker = 'Test:NEW'").
-			AddCleanupQuery("DELETE FROM portfolio_allocation_obs_time WHERE observation_time_tag = '202505'").
-			Build(),
+			AddCleanupQuery("DELETE FROM asset WHERE ticker = 'Test:NEW'", nil).
+			AddCleanupQuery("DELETE FROM portfolio_allocation_obs_time WHERE observation_time_tag = '202505'", nil).
+			Build(t),
 	)
-
 	// Verify that the response body is empty as expected for 204 No Content
 	body, err := io.ReadAll(response.Body)
 	assert.NoError(t, err)
@@ -426,12 +426,13 @@ func TestPostPortfolioAllocationHistoryInsertEmptyZeroTimestamp(t *testing.T) {
 				`
 				DELETE FROM portfolio_allocation_fact 
 				WHERE observation_time_id IN (
-					SELECT id FROM portfolio_allocation_obs_time WHERE observation_time_tag LIKE '%%T%%'
+					SELECT id FROM portfolio_allocation_obs_time WHERE observation_time_tag LIKE '%T%'
 				)`,
+				nil,
 			).
-			AddCleanupQuery("DELETE FROM asset WHERE ticker = 'Test:NEW'").
-			AddCleanupQuery("DELETE FROM portfolio_allocation_obs_time WHERE observation_time_tag LIKE '%%T%%'").
-			Build(),
+			AddCleanupQuery("DELETE FROM asset WHERE ticker = 'Test:NEW'", nil).
+			AddCleanupQuery("DELETE FROM portfolio_allocation_obs_time WHERE observation_time_tag LIKE '%T%'", nil).
+			Build(t),
 	)
 
 	assert.NoError(t, err)
@@ -539,7 +540,7 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 		;
 	`
 
-	err := inttestinfra.ExecuteDBQuery(insertAllocationHistorySQL)
+	err := inttestinfra.ExecuteDBQuery(insertAllocationHistorySQL, nil)
 	assert.NoError(t, err)
 
 	t.Cleanup(
@@ -550,9 +551,10 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 				WHERE observation_time_id IN (
 					SELECT id FROM portfolio_allocation_obs_time WHERE id = 3
 				)`,
+				nil,
 			).
-			AddCleanupQuery("DELETE FROM asset WHERE ticker = 'Test:NEW'").
-			Build(),
+			AddCleanupQuery("DELETE FROM asset WHERE ticker = 'Test:NEW'", nil).
+			Build(t),
 	)
 
 	var postPortfolioSnapshotJSON = `
@@ -1116,7 +1118,7 @@ func TestGetPortfolioAllocationHistoryWithMultiplePortfoliosAndManyObservations(
 		;
 	`
 
-	err := inttestinfra.ExecuteDBQuery(setupSQL)
+	err := inttestinfra.ExecuteDBQuery(setupSQL, nil)
 	assert.NoError(t, err)
 
 	t.Cleanup(
@@ -1126,9 +1128,10 @@ func TestGetPortfolioAllocationHistoryWithMultiplePortfoliosAndManyObservations(
 				WHERE observation_time_id IN (
 					SELECT id FROM portfolio_allocation_obs_time WHERE observation_time_tag ~ '^test_obs_'
 				)`,
+				nil,
 			).
-			AddCleanupQuery(`DELETE FROM portfolio_allocation_obs_time WHERE observation_time_tag ~ '^test_obs_'`).
-			Build(),
+			AddCleanupQuery(`DELETE FROM portfolio_allocation_obs_time WHERE observation_time_tag ~ '^test_obs_'`, nil).
+			Build(t),
 	)
 
 	// Act: Get portfolio history for portfolio 2 with the default limit of 10 observations

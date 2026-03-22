@@ -1,7 +1,6 @@
 package inttest
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -23,16 +22,16 @@ func insertTestAsset(t *testing.T, ticker string, name string) domain.Asset {
 
 	var insertAssetSQL = `
 		INSERT INTO asset (ticker, name)
-		VALUES ('%s', '%s')
+		VALUES ({:ticker}, {:name})
 	`
-	var formattedInsertAssetSQL = fmt.Sprintf(insertAssetSQL, ticker, name)
 
-	err := inttestinfra.ExecuteDBQuery(formattedInsertAssetSQL)
+	err := inttestinfra.ExecuteDBQuery(insertAssetSQL, dbx.Params{"ticker": ticker, "name": name})
 	assert.NoError(t, err)
 
 	var testAsset domain.Asset
 	err = inttestinfra.FetchWithDBQuery(
-		fmt.Sprintf("SELECT * FROM asset WHERE ticker = '%s'", ticker),
+		"SELECT * FROM asset WHERE ticker = {:ticker}",
+		dbx.Params{"ticker": ticker},
 		func(rows *dbx.Rows) error {
 			return rows.ScanStruct(&testAsset)
 		},
@@ -41,8 +40,9 @@ func insertTestAsset(t *testing.T, ticker string, name string) domain.Asset {
 
 	t.Cleanup(
 		inttestutil.CreateDBCleanupFunction(
-			"DELETE FROM asset WHERE id='%d'",
-			testAsset.Id,
+			t,
+			"DELETE FROM asset WHERE id={:id}",
+			dbx.Params{"id": testAsset.Id},
 		),
 	)
 

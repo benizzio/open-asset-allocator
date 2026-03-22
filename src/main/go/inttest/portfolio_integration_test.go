@@ -12,6 +12,7 @@ import (
 	restmodel "github.com/benizzio/open-asset-allocator/api/rest/model"
 	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
 	inttestutil "github.com/benizzio/open-asset-allocator/inttest/util"
+	dbx "github.com/go-ozzo/ozzo-dbx"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -163,8 +164,9 @@ func TestPostPortfolio(t *testing.T) {
 
 	t.Cleanup(
 		inttestutil.CreateDBCleanupFunction(
-			"DELETE FROM portfolio WHERE name='%s'",
-			testPortfolioName,
+			t,
+			"DELETE FROM portfolio WHERE name={:name}",
+			dbx.Params{"name": testPortfolioName},
 		),
 	)
 
@@ -240,8 +242,9 @@ func TestPostPortfolioWithAllocationStructure(t *testing.T) {
 
 	t.Cleanup(
 		inttestutil.CreateDBCleanupFunction(
-			"DELETE FROM portfolio WHERE name='%s'",
-			testPortfolioName,
+			t,
+			"DELETE FROM portfolio WHERE name={:name}",
+			dbx.Params{"name": testPortfolioName},
 		),
 	)
 
@@ -650,8 +653,9 @@ func TestPostPortfolioSuccessWithNameAtMaxLength(t *testing.T) {
 
 	t.Cleanup(
 		inttestutil.CreateDBCleanupFunction(
-			"DELETE FROM portfolio WHERE name='%s'",
-			maxLengthName,
+			t,
+			"DELETE FROM portfolio WHERE name={:name}",
+			dbx.Params{"name": maxLengthName},
 		),
 	)
 

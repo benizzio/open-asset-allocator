@@ -542,5 +542,5 @@ const initialStateSQL = `
 `
 
 func InitializeDBState() error {
-	return ExecuteDBQuery(initialStateSQL)
+	return ExecuteDBQuery(initialStateSQL, nil)
 }

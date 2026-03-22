@@ -1,7 +1,6 @@
 package inttest
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -21,18 +20,18 @@ func insertTestPortfolio(t *testing.T, testPortfolioNameBefore string) domain.Po
 	var insertPortfolioSQL = `
 		INSERT INTO portfolio (name, allocation_structure)
 		VALUES (
-			'%s',
+			{:name},
 		    '{"hierarchy": [{"name": "Assets", "field": "assetTicker"}, {"name": "Classes", "field": "class"}]}'
 		)
 	`
-	var formattedInsertPortfolioSQL = fmt.Sprintf(insertPortfolioSQL, testPortfolioNameBefore)
 
-	err := inttestinfra.ExecuteDBQuery(formattedInsertPortfolioSQL)
+	err := inttestinfra.ExecuteDBQuery(insertPortfolioSQL, dbx.Params{"name": testPortfolioNameBefore})
 	assert.NoError(t, err)
 
 	var testPortFolio domain.Portfolio
 	err = inttestinfra.FetchWithDBQuery(
-		fmt.Sprintf("SELECT * FROM portfolio WHERE name = '%s'", testPortfolioNameBefore),
+		"SELECT * FROM portfolio WHERE name = {:name}",
+		dbx.Params{"name": testPortfolioNameBefore},
 		func(rows *dbx.Rows) error {
 			return rows.ScanStruct(&testPortFolio)
 		},
@@ -41,8 +40,9 @@ func insertTestPortfolio(t *testing.T, testPortfolioNameBefore string) domain.Po
 
 	t.Cleanup(
 		inttestutil.CreateDBCleanupFunction(
-			"DELETE FROM portfolio WHERE id='%d'",
-			testPortFolio.Id,
+			t,
+			"DELETE FROM portfolio WHERE id={:id}",
+			dbx.Params{"id": testPortFolio.Id},
 		),
 	)
 
