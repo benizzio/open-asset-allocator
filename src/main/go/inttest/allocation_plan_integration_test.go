@@ -565,7 +565,14 @@ func TestPostAllocationPlanForUpdate_DeletesPlannedAllocationAndKeepsAsset(t *te
 			).
 			AddCleanupQuery(
 				`INSERT INTO planned_allocation (id, allocation_plan_id, hierarchical_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
-				 VALUES (33, 6, '{"ARCA:SPY", "STOCKS"}', 7, FALSE, 0.5, NULL) ON CONFLICT (id) DO NOTHING`,
+				 VALUES (33, 6, '{"ARCA:SPY", "STOCKS"}', 7, FALSE, 0.5, NULL)
+				 ON CONFLICT (id) DO UPDATE SET
+				 	allocation_plan_id = EXCLUDED.allocation_plan_id,
+				 	hierarchical_id = EXCLUDED.hierarchical_id,
+				 	asset_id = EXCLUDED.asset_id,
+				 	cash_reserve = EXCLUDED.cash_reserve,
+				 	slice_size_percentage = EXCLUDED.slice_size_percentage,
+				 	total_market_value = EXCLUDED.total_market_value`,
 				nil,
 			).
 			Build(t),
