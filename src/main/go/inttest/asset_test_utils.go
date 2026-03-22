@@ -1,7 +1,6 @@
 package inttest
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -23,11 +22,10 @@ func insertTestAsset(t *testing.T, ticker string, name string) domain.Asset {
 
 	var insertAssetSQL = `
 		INSERT INTO asset (ticker, name)
-		VALUES ('%s', '%s')
+		VALUES ({:ticker}, {:name})
 	`
-	var formattedInsertAssetSQL = fmt.Sprintf(insertAssetSQL, ticker, name)
 
-	err := inttestinfra.ExecuteDBQuery(formattedInsertAssetSQL)
+	err := inttestinfra.ExecuteDBQuery(insertAssetSQL, dbx.Params{"ticker": ticker, "name": name})
 	assert.NoError(t, err)
 
 	var testAsset domain.Asset

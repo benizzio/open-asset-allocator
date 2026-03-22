@@ -44,7 +44,7 @@ func createDBCleanupFunctionMulti(cleanupQueries []*testFormattableSQLPair) func
 	return func() {
 		for _, query := range cleanupQueries {
 			glog.Infof("Executing test cleanup query: %s", query.formattableSQL)
-			err := inttestinfra.ExecuteDBQuery(fmt.Sprintf(query.formattableSQL, query.params...))
+			err := inttestinfra.ExecuteDBQuery(fmt.Sprintf(query.formattableSQL, query.params...), nil)
 			if err != nil {
 				glog.Errorf("Error executing cleanup query: %s", err)
 			}

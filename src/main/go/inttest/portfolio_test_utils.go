@@ -1,7 +1,6 @@
 package inttest
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -21,13 +20,12 @@ func insertTestPortfolio(t *testing.T, testPortfolioNameBefore string) domain.Po
 	var insertPortfolioSQL = `
 		INSERT INTO portfolio (name, allocation_structure)
 		VALUES (
-			'%s',
+			{:name},
 		    '{"hierarchy": [{"name": "Assets", "field": "assetTicker"}, {"name": "Classes", "field": "class"}]}'
 		)
 	`
-	var formattedInsertPortfolioSQL = fmt.Sprintf(insertPortfolioSQL, testPortfolioNameBefore)
 
-	err := inttestinfra.ExecuteDBQuery(formattedInsertPortfolioSQL)
+	err := inttestinfra.ExecuteDBQuery(insertPortfolioSQL, dbx.Params{"name": testPortfolioNameBefore})
 	assert.NoError(t, err)
 
 	var testPortFolio domain.Portfolio

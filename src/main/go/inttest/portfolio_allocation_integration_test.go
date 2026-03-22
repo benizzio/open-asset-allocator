@@ -533,7 +533,7 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 		;
 	`
 
-	err := inttestinfra.ExecuteDBQuery(insertAllocationHistorySQL)
+	err := inttestinfra.ExecuteDBQuery(insertAllocationHistorySQL, nil)
 	assert.NoError(t, err)
 
 	t.Cleanup(
@@ -1108,7 +1108,7 @@ func TestGetPortfolioAllocationHistoryWithMultiplePortfoliosAndManyObservations(
 		;
 	`
 
-	err := inttestinfra.ExecuteDBQuery(setupSQL)
+	err := inttestinfra.ExecuteDBQuery(setupSQL, nil)
 	assert.NoError(t, err)
 
 	t.Cleanup(

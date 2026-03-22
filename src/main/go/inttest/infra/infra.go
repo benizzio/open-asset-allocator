@@ -191,9 +191,17 @@ func BuildAndStartApplication() root.App {
 	return app
 }
 
-func ExecuteDBQuery(sql string) error {
+// ExecuteDBQuery executes a parameterized SQL statement (INSERT, UPDATE, DELETE, etc.).
+// Uses ozzo-dbx named parameter binding ({:paramName} placeholders) to safely bind query parameters,
+// eliminating the need for raw string interpolation.
+//
+// Co-authored by: GitHub Copilot
+func ExecuteDBQuery(sql string, params dbx.Params) error {
 
 	var query = DatabaseConnection.NewQuery(sql)
+	if len(params) > 0 {
+		query.Bind(params)
+	}
 	_, err := query.Execute()
 	if err != nil {
 		glog.Errorf("Error executing query: %s", err)
