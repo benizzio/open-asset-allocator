@@ -17,6 +17,7 @@ func TestGetKnownAssets(t *testing.T) {
 
 	response, err := http.Get(infra.TestAPIURLPrefix + "/asset")
 	assert.NoError(t, err)
+	defer response.Body.Close()
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 
@@ -76,6 +77,7 @@ func TestGetAssetByIdOrTicker(t *testing.T) {
 			// Test retrieving a valid asset
 			response, err := http.Get(infra.TestAPIURLPrefix + "/asset/1")
 			assert.NoError(t, err)
+			defer response.Body.Close()
 
 			assert.Equal(t, http.StatusOK, response.StatusCode)
 
@@ -102,6 +104,7 @@ func TestGetAssetByIdOrTicker(t *testing.T) {
 			// Test retrieving a valid asset
 			response, err := http.Get(infra.TestAPIURLPrefix + "/asset/ARCA:BIL")
 			assert.NoError(t, err)
+			defer response.Body.Close()
 
 			assert.Equal(t, http.StatusOK, response.StatusCode)
 
@@ -144,6 +147,7 @@ func TestPutAsset(t *testing.T) {
 	`
 
 	response := putAsset(t, putAssetJSON)
+	defer response.Body.Close()
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 
@@ -178,6 +182,7 @@ func TestPutAssetFailureWithoutId(t *testing.T) {
 	`
 
 	response := putAsset(t, putAssetJSONNoId)
+	defer response.Body.Close()
 
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
 
@@ -212,6 +217,7 @@ func TestPutAssetFailureWithZeroId(t *testing.T) {
 	`
 
 	response := putAsset(t, putAssetJSONZeroId)
+	defer response.Body.Close()
 
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
 
@@ -249,6 +255,7 @@ func TestPutAssetFailureWithoutRequiredFields(t *testing.T) {
 			`
 
 			response := putAsset(t, putAssetJSON)
+			defer response.Body.Close()
 
 			assert.Equal(t, http.StatusBadRequest, response.StatusCode)
 
@@ -281,6 +288,7 @@ func TestPutAssetFailureWithoutRequiredFields(t *testing.T) {
 			`
 
 			response := putAsset(t, putAssetJSON)
+			defer response.Body.Close()
 
 			assert.Equal(t, http.StatusBadRequest, response.StatusCode)
 
@@ -312,6 +320,7 @@ func TestPutAssetFailureWithoutRequiredFields(t *testing.T) {
 			`
 
 			response := putAsset(t, putAssetJSON)
+			defer response.Body.Close()
 
 			assert.Equal(t, http.StatusBadRequest, response.StatusCode)
 
@@ -342,6 +351,7 @@ func TestGetAssetByIdNotFound(t *testing.T) {
 	// Test with a non-existent asset ID
 	response, err := http.Get(infra.TestAPIURLPrefix + "/asset/999")
 	assert.NoError(t, err)
+	defer response.Body.Close()
 
 	assert.Equal(t, http.StatusNotFound, response.StatusCode)
 
@@ -373,6 +383,7 @@ func TestGetAssetByIdInvalidId(t *testing.T) {
 
 			response, err := http.Get(infra.TestAPIURLPrefix + "/asset/")
 			assert.NoError(t, err)
+			defer response.Body.Close()
 
 			// Gin redirects /api/asset/ to /api/asset and returns all assets
 			assert.Equal(t, http.StatusOK, response.StatusCode)
