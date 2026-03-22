@@ -16,6 +16,7 @@ func TestGetAllocationPlans(t *testing.T) {
 
 	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/allocation-plan")
 	assert.NoError(t, err)
+	defer response.Body.Close()
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 
@@ -150,6 +151,7 @@ func TestPostAllocationPlanForInsertion(t *testing.T) {
 		strings.NewReader(newAllocationPlanJSON),
 	)
 	assert.NoError(t, err)
+	defer response.Body.Close()
 	assert.Equal(t, http.StatusNoContent, response.StatusCode)
 
 	t.Cleanup(
@@ -401,6 +403,7 @@ func TestPostAllocationPlanForUpdate_DoesNotOverwriteExistingAssetName(t *testin
 		strings.NewReader(updatePlanJSON),
 	)
 	assert.NoError(t, err)
+	defer response.Body.Close()
 	assert.Equal(t, http.StatusNoContent, response.StatusCode)
 
 	// 4) Assert asset with id=1 kept its original name
@@ -586,6 +589,7 @@ func TestPostAllocationPlanForUpdate_DeletesPlannedAllocationAndKeepsAsset(t *te
 		strings.NewReader(updatePlanJSON),
 	)
 	assert.NoError(t, err)
+	defer response.Body.Close()
 	assert.Equal(t, http.StatusNoContent, response.StatusCode)
 
 	// 4) Assert planned allocations no longer contain ARCA:SPY row and
@@ -736,6 +740,7 @@ func TestPostAllocationPlanForUpdate_ChangesHierarchicalId(t *testing.T) {
 		strings.NewReader(updatePlanJSON),
 	)
 	assert.NoError(t, err)
+	defer response.Body.Close()
 	assert.Equal(t, http.StatusNoContent, response.StatusCode)
 
 	// 2) Assert asset with id=1 kept its original name
@@ -847,6 +852,7 @@ func TestPostAllocationPlanValidation_MissingName(t *testing.T) {
 		strings.NewReader(payload),
 	)
 	assert.NoError(t, err)
+	defer response.Body.Close()
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
 
 	body, err := io.ReadAll(response.Body)
@@ -875,6 +881,7 @@ func TestPostAllocationPlanValidation_MissingDetails(t *testing.T) {
 		strings.NewReader(payload),
 	)
 	assert.NoError(t, err)
+	defer response.Body.Close()
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
 
 	body, err := io.ReadAll(response.Body)
@@ -904,6 +911,7 @@ func TestPostAllocationPlanValidation_EmptyDetails(t *testing.T) {
 		strings.NewReader(payload),
 	)
 	assert.NoError(t, err)
+	defer response.Body.Close()
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
 
 	body, err := io.ReadAll(response.Body)
@@ -935,6 +943,7 @@ func TestPostAllocationPlanValidation_MissingHierarchicalId(t *testing.T) {
 		strings.NewReader(payload),
 	)
 	assert.NoError(t, err)
+	defer response.Body.Close()
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
 
 	body, err := io.ReadAll(response.Body)
@@ -966,6 +975,7 @@ func TestPostAllocationPlanValidation_EmptyHierarchicalId(t *testing.T) {
 		strings.NewReader(payload),
 	)
 	assert.NoError(t, err)
+	defer response.Body.Close()
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
 
 	body, err := io.ReadAll(response.Body)
@@ -1008,6 +1018,7 @@ func TestPostAllocationPlanValidation_DuplicateHierarchicalIds(t *testing.T) {
 		strings.NewReader(updatePlanJSON),
 	)
 	assert.NoError(t, err)
+	defer response.Body.Close()
 
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
 
@@ -1051,6 +1062,7 @@ func TestPostAllocationPlanValidation_PercentageSumExceedsParentLimit(t *testing
 		strings.NewReader(updatePlanJSON),
 	)
 	assert.NoError(t, err)
+	defer response.Body.Close()
 
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
 
@@ -1091,6 +1103,7 @@ func TestPostAllocationPlanValidation_PercentageSumBelowParentLimit(t *testing.T
 		strings.NewReader(updatePlanJSON),
 	)
 	assert.NoError(t, err)
+	defer response.Body.Close()
 
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
 
@@ -1129,6 +1142,7 @@ func TestPostAllocationPlanValidation_TopLevelPercentageSumExceedsLimit(t *testi
 		strings.NewReader(updatePlanJSON),
 	)
 	assert.NoError(t, err)
+	defer response.Body.Close()
 
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
 
@@ -1164,6 +1178,7 @@ func TestPostAllocationPlanValidation_TopLevelPercentageSumBelowLimit(t *testing
 		strings.NewReader(updatePlanJSON),
 	)
 	assert.NoError(t, err)
+	defer response.Body.Close()
 
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
 
@@ -1198,6 +1213,7 @@ func TestPostAllocationPlanValidation_NameExceedsMaxLength(t *testing.T) {
 		strings.NewReader(payload),
 	)
 	assert.NoError(t, err)
+	defer response.Body.Close()
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
 
 	body, err := io.ReadAll(response.Body)
@@ -1232,6 +1248,7 @@ func TestPostAllocationPlanValidation_TypeExceedsMaxLength(t *testing.T) {
 		strings.NewReader(payload),
 	)
 	assert.NoError(t, err)
+	defer response.Body.Close()
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
 
 	body, err := io.ReadAll(response.Body)
@@ -1273,6 +1290,7 @@ func TestPostAllocationPlanValidation_InvalidSizeHierarchyBranches(t *testing.T)
 		strings.NewReader(updatePlanJSON),
 	)
 	assert.NoError(t, err)
+	defer response.Body.Close()
 
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
 
@@ -1315,6 +1333,7 @@ func TestPostAllocationPlanValidation_MissingParentHierarchyBranches(t *testing.
 		strings.NewReader(updatePlanJSON),
 	)
 	assert.NoError(t, err)
+	defer response.Body.Close()
 
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
 
@@ -1355,6 +1374,7 @@ func TestPostAllocationPlanValidation_ChildlessHierarchyBranches(t *testing.T) {
 		strings.NewReader(updatePlanJSON),
 	)
 	assert.NoError(t, err)
+	defer response.Body.Close()
 
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
 
@@ -1394,6 +1414,7 @@ func TestPostAllocationPlanValidation_MultipleChildlessHierarchyBranches(t *test
 		strings.NewReader(updatePlanJSON),
 	)
 	assert.NoError(t, err)
+	defer response.Body.Close()
 
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
 
