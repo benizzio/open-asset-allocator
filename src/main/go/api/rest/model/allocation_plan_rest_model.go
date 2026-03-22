@@ -13,12 +13,22 @@ import (
 // TYPES
 // ================================================
 
+// AllocationPlanAssetDTS is the asset data transfer struct used within allocation plan endpoints.
+// Name and Ticker are optional here, unlike AssetDTS used in the asset CRUD endpoints.
+//
+// Authored by: GitHub Copilot
+type AllocationPlanAssetDTS struct {
+	Id     *langext.ParseableInt64 `json:"id"`
+	Name   string                  `json:"name" validate:"max=100"`
+	Ticker string                  `json:"ticker" validate:"max=40"`
+}
+
 type PlannedAllocationDTS struct {
 	Id                  *langext.ParseableInt64 `json:"id,omitempty"`
 	HierarchicalId      []*string               `json:"hierarchicalId,omitempty" validate:"required,min=1"`
 	CashReserve         bool                    `json:"cashReserve"`
 	SliceSizePercentage decimal.Decimal         `json:"sliceSizePercentage,omitempty"`
-	Asset               *AssetDTS               `json:"asset,omitempty"`
+	Asset               *AllocationPlanAssetDTS `json:"asset,omitempty"`
 }
 
 type AllocationPlanDTS struct {
@@ -68,10 +78,9 @@ func mapToPlannedAllocationDTSs(allocationPlan *domain.AllocationPlan) []*Planne
 }
 
 func mapToPlannedAllocationDTS(allocation *domain.PlannedAllocation) *PlannedAllocationDTS {
-	var assetDTS = MapToAssetDTS(allocation.Asset)
-	var plannedAllocationId = langext.ParseableInt64(allocation.Id)
+	var assetDTS = mapToAllocationPlanAssetDTS(allocation.Asset)
 	return &PlannedAllocationDTS{
-		Id:                  &plannedAllocationId,
+		Id:                  new(langext.ParseableInt64(allocation.Id)),
 		HierarchicalId:      allocation.HierarchicalId,
 		CashReserve:         allocation.CashReserve,
 		SliceSizePercentage: allocation.SliceSizePercentage,
@@ -128,7 +137,7 @@ func mapToPlannedAllocation(allocationDTS *PlannedAllocationDTS) *domain.Planned
 		return nil
 	}
 
-	var asset = MapToAsset(allocationDTS.Asset)
+	var asset = mapToAssetFromAllocationPlan(allocationDTS.Asset)
 
 	var plannedAllocationId int64
 	if allocationDTS.Id != nil {
@@ -140,5 +149,41 @@ func mapToPlannedAllocation(allocationDTS *PlannedAllocationDTS) *domain.Planned
 		CashReserve:         allocationDTS.CashReserve,
 		SliceSizePercentage: allocationDTS.SliceSizePercentage,
 		Asset:               asset,
+	}
+}
+
+// mapToAllocationPlanAssetDTS maps a domain Asset to an AllocationPlanAssetDTS.
+//
+// Authored by: GitHub Copilot
+func mapToAllocationPlanAssetDTS(asset *domain.Asset) *AllocationPlanAssetDTS {
+
+	if asset == nil {
+		return nil
+	}
+
+	return &AllocationPlanAssetDTS{
+		Id:     new(langext.ParseableInt64(asset.Id)),
+		Name:   asset.Name,
+		Ticker: asset.Ticker,
+	}
+}
+
+// mapToAssetFromAllocationPlan maps an AllocationPlanAssetDTS to a domain Asset.
+//
+// Authored by: GitHub Copilot
+func mapToAssetFromAllocationPlan(assetDTS *AllocationPlanAssetDTS) *domain.Asset {
+
+	if assetDTS == nil {
+		return nil
+	}
+
+	var assetId int64
+	if assetDTS.Id != nil {
+		assetId = int64(*assetDTS.Id)
+	}
+	return &domain.Asset{
+		Id:     assetId,
+		Name:   assetDTS.Name,
+		Ticker: assetDTS.Ticker,
 	}
 }

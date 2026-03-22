@@ -231,6 +231,109 @@ func TestPutAssetFailureWithZeroId(t *testing.T) {
 	assert.JSONEq(t, expectedResponseJSON, string(body))
 }
 
+// TestPutAssetFailureWithoutRequiredFields tests the PUT /api/asset endpoint returns validation
+// errors when required fields (name, ticker) are missing from the request body.
+//
+// Authored by: GitHub Copilot
+func TestPutAssetFailureWithoutRequiredFields(t *testing.T) {
+
+	t.Run(
+		"WithoutName",
+		func(t *testing.T) {
+
+			var putAssetJSON = `
+				{
+					"id": 1,
+					"ticker": "TEST:NONAME"
+				}
+			`
+
+			response := putAsset(t, putAssetJSON)
+
+			assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+			body, err := io.ReadAll(response.Body)
+			assert.NoError(t, err)
+			assert.NotEmpty(t, body)
+
+			var expectedResponseJSON = `
+				{
+					"errorMessage": "Validation failed",
+					"details": [
+						"Field 'name' failed validation: is required"
+					]
+				}
+			`
+
+			assert.JSONEq(t, expectedResponseJSON, string(body))
+		},
+	)
+
+	t.Run(
+		"WithoutTicker",
+		func(t *testing.T) {
+
+			var putAssetJSON = `
+				{
+					"id": 1,
+					"name": "Asset Without Ticker"
+				}
+			`
+
+			response := putAsset(t, putAssetJSON)
+
+			assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+			body, err := io.ReadAll(response.Body)
+			assert.NoError(t, err)
+			assert.NotEmpty(t, body)
+
+			var expectedResponseJSON = `
+				{
+					"errorMessage": "Validation failed",
+					"details": [
+						"Field 'ticker' failed validation: is required"
+					]
+				}
+			`
+
+			assert.JSONEq(t, expectedResponseJSON, string(body))
+		},
+	)
+
+	t.Run(
+		"WithoutNameAndTicker",
+		func(t *testing.T) {
+
+			var putAssetJSON = `
+				{
+					"id": 1
+				}
+			`
+
+			response := putAsset(t, putAssetJSON)
+
+			assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+			body, err := io.ReadAll(response.Body)
+			assert.NoError(t, err)
+			assert.NotEmpty(t, body)
+
+			var expectedResponseJSON = `
+				{
+					"errorMessage": "Validation failed",
+					"details": [
+						"Field 'name' failed validation: is required",
+						"Field 'ticker' failed validation: is required"
+					]
+				}
+			`
+
+			assert.JSONEq(t, expectedResponseJSON, string(body))
+		},
+	)
+}
+
 // TestGetAssetByIdNotFound tests the GET /api/asset/{id} endpoint with a non-existent asset ID.
 //
 // Authored by: GitHub Copilot
