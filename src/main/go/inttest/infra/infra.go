@@ -234,6 +234,11 @@ func FetchWithDBQuery(sql string, params dbx.Params, rowMappingFunction func(row
 		}
 	}
 
+	if err := rows.Err(); err != nil {
+		glog.Errorf("Error iterating rows: %s", err)
+		return err
+	}
+
 	return nil
 }
 
