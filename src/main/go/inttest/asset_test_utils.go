@@ -32,7 +32,8 @@ func insertTestAsset(t *testing.T, ticker string, name string) domain.Asset {
 
 	var testAsset domain.Asset
 	err = inttestinfra.FetchWithDBQuery(
-		fmt.Sprintf("SELECT * FROM asset WHERE ticker = '%s'", ticker),
+		"SELECT * FROM asset WHERE ticker = {:ticker}",
+		dbx.Params{"ticker": ticker},
 		func(rows *dbx.Rows) error {
 			return rows.ScanStruct(&testAsset)
 		},

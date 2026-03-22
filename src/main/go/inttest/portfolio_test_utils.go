@@ -32,7 +32,8 @@ func insertTestPortfolio(t *testing.T, testPortfolioNameBefore string) domain.Po
 
 	var testPortFolio domain.Portfolio
 	err = inttestinfra.FetchWithDBQuery(
-		fmt.Sprintf("SELECT * FROM portfolio WHERE name = '%s'", testPortfolioNameBefore),
+		"SELECT * FROM portfolio WHERE name = {:name}",
+		dbx.Params{"name": testPortfolioNameBefore},
 		func(rows *dbx.Rows) error {
 			return rows.ScanStruct(&testPortFolio)
 		},
