@@ -1,6 +1,8 @@
 package util
 
 import (
+	"testing"
+
 	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
 	dbx "github.com/go-ozzo/ozzo-dbx"
 	"github.com/golang/glog"
@@ -33,8 +35,12 @@ func (builder *CleanupFunctionBuilder) AddCleanupQuery(sql string, params dbx.Pa
 	return builder
 }
 
-func (builder *CleanupFunctionBuilder) Build() func() {
-	return createDBCleanupFunctionMulti(builder.cleanupQueries)
+// Build produces a cleanup function that executes all accumulated queries in order.
+// Cleanup errors are reported via t.Errorf so the test fails but remaining queries still run.
+//
+// Co-authored by: GitHub Copilot
+func (builder *CleanupFunctionBuilder) Build(t *testing.T) func() {
+	return createDBCleanupFunctionMulti(t, builder.cleanupQueries)
 }
 
 func BuildCleanupFunctionBuilder() *CleanupFunctionBuilder {
@@ -44,20 +50,21 @@ func BuildCleanupFunctionBuilder() *CleanupFunctionBuilder {
 }
 
 // CreateDBCleanupFunction creates a cleanup function for a single parameterized SQL query.
+// Cleanup errors are reported via t.Errorf so the test fails but remaining queries still run.
 // Uses ozzo-dbx named parameter binding ({:paramName} placeholders).
 //
 // Co-authored by: GitHub Copilot
-func CreateDBCleanupFunction(sql string, params dbx.Params) func() {
-	return createDBCleanupFunctionMulti([]*testSQLParamsPair{{sql, params}})
+func CreateDBCleanupFunction(t *testing.T, sql string, params dbx.Params) func() {
+	return createDBCleanupFunctionMulti(t, []*testSQLParamsPair{{sql, params}})
 }
 
-func createDBCleanupFunctionMulti(cleanupQueries []*testSQLParamsPair) func() {
+func createDBCleanupFunctionMulti(t *testing.T, cleanupQueries []*testSQLParamsPair) func() {
 	return func() {
 		for _, query := range cleanupQueries {
 			glog.Infof("Executing test cleanup query: %s", query.sql)
 			err := inttestinfra.ExecuteDBQuery(query.sql, query.params)
 			if err != nil {
-				glog.Errorf("Error executing cleanup query: %s", err)
+				t.Errorf("Error executing cleanup query: %s", err)
 			}
 		}
 	}

@@ -40,6 +40,7 @@ func insertTestPortfolio(t *testing.T, testPortfolioNameBefore string) domain.Po
 
 	t.Cleanup(
 		inttestutil.CreateDBCleanupFunction(
+			t,
 			"DELETE FROM portfolio WHERE id={:id}",
 			dbx.Params{"id": testPortFolio.Id},
 		),

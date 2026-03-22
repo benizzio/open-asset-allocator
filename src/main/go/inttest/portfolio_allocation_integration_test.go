@@ -310,7 +310,7 @@ func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 			).
 			AddCleanupQuery("DELETE FROM asset WHERE ticker = 'Test:NEW'", nil).
 			AddCleanupQuery("DELETE FROM portfolio_allocation_obs_time WHERE observation_time_tag = '202505'", nil).
-			Build(),
+			Build(t),
 	)
 	// Verify that the response body is empty as expected for 204 No Content
 	body, err := io.ReadAll(response.Body)
@@ -432,7 +432,7 @@ func TestPostPortfolioAllocationHistoryInsertEmptyZeroTimestamp(t *testing.T) {
 			).
 			AddCleanupQuery("DELETE FROM asset WHERE ticker = 'Test:NEW'", nil).
 			AddCleanupQuery("DELETE FROM portfolio_allocation_obs_time WHERE observation_time_tag LIKE '%T%'", nil).
-			Build(),
+			Build(t),
 	)
 
 	assert.NoError(t, err)
@@ -554,7 +554,7 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 				nil,
 			).
 			AddCleanupQuery("DELETE FROM asset WHERE ticker = 'Test:NEW'", nil).
-			Build(),
+			Build(t),
 	)
 
 	var postPortfolioSnapshotJSON = `
@@ -1131,7 +1131,7 @@ func TestGetPortfolioAllocationHistoryWithMultiplePortfoliosAndManyObservations(
 				nil,
 			).
 			AddCleanupQuery(`DELETE FROM portfolio_allocation_obs_time WHERE observation_time_tag ~ '^test_obs_'`, nil).
-			Build(),
+			Build(t),
 	)
 
 	// Act: Get portfolio history for portfolio 2 with the default limit of 10 observations

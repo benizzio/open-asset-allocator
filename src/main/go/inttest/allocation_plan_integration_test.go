@@ -166,7 +166,7 @@ func TestPostAllocationPlanForInsertion(t *testing.T) {
 			).
 			AddCleanupQuery(`DELETE FROM allocation_plan WHERE name LIKE '%DELETE'`, nil).
 			AddCleanupQuery(`DELETE FROM asset WHERE name LIKE '%DELETE'`, nil).
-			Build(),
+			Build(t),
 	)
 
 	body, err := io.ReadAll(response.Body)
@@ -361,7 +361,7 @@ func TestPostAllocationPlanForUpdate_DoesNotOverwriteExistingAssetName(t *testin
 				dbx.Params{"id": allocationPlanIdString},
 			).
 			AddCleanupQuery(`DELETE FROM asset WHERE name LIKE '%DELETE'`, nil).
-			Build(),
+			Build(t),
 	)
 
 	// 3) Update the plan: change some slices, send a different name for existing asset id=1,
@@ -568,7 +568,7 @@ func TestPostAllocationPlanForUpdate_DeletesPlannedAllocationAndKeepsAsset(t *te
 				 VALUES (33, 6, '{"ARCA:SPY", "STOCKS"}', 7, FALSE, 0.5, NULL) ON CONFLICT (id) DO NOTHING`,
 				nil,
 			).
-			Build(),
+			Build(t),
 	)
 
 	// 3) Update the plan omitting ARCA:SPY planned allocation to trigger deletion
@@ -700,7 +700,7 @@ func TestPostAllocationPlanForUpdate_ChangesHierarchicalId(t *testing.T) {
 				dbx.Params{"id": allocationPlanIdString},
 			).
 			AddCleanupQuery(`DELETE FROM asset WHERE name LIKE '%DELETE'`, nil).
-			Build(),
+			Build(t),
 	)
 
 	// 1) Update the plan: change some slices, send a different name for existing asset id=1,

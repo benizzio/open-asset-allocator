@@ -164,6 +164,7 @@ func TestPostPortfolio(t *testing.T) {
 
 	t.Cleanup(
 		inttestutil.CreateDBCleanupFunction(
+			t,
 			"DELETE FROM portfolio WHERE name={:name}",
 			dbx.Params{"name": testPortfolioName},
 		),
@@ -241,6 +242,7 @@ func TestPostPortfolioWithAllocationStructure(t *testing.T) {
 
 	t.Cleanup(
 		inttestutil.CreateDBCleanupFunction(
+			t,
 			"DELETE FROM portfolio WHERE name={:name}",
 			dbx.Params{"name": testPortfolioName},
 		),
@@ -651,6 +653,7 @@ func TestPostPortfolioSuccessWithNameAtMaxLength(t *testing.T) {
 
 	t.Cleanup(
 		inttestutil.CreateDBCleanupFunction(
+			t,
 			"DELETE FROM portfolio WHERE name={:name}",
 			dbx.Params{"name": maxLengthName},
 		),
