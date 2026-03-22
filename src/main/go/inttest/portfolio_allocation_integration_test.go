@@ -306,12 +306,12 @@ func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 				WHERE observation_time_id IN (
 					SELECT id FROM portfolio_allocation_obs_time WHERE observation_time_tag = '202505'
 				)`,
+				nil,
 			).
-			AddCleanupQuery("DELETE FROM asset WHERE ticker = 'Test:NEW'").
-			AddCleanupQuery("DELETE FROM portfolio_allocation_obs_time WHERE observation_time_tag = '202505'").
+			AddCleanupQuery("DELETE FROM asset WHERE ticker = 'Test:NEW'", nil).
+			AddCleanupQuery("DELETE FROM portfolio_allocation_obs_time WHERE observation_time_tag = '202505'", nil).
 			Build(),
 	)
-
 	// Verify that the response body is empty as expected for 204 No Content
 	body, err := io.ReadAll(response.Body)
 	assert.NoError(t, err)
@@ -426,11 +426,12 @@ func TestPostPortfolioAllocationHistoryInsertEmptyZeroTimestamp(t *testing.T) {
 				`
 				DELETE FROM portfolio_allocation_fact 
 				WHERE observation_time_id IN (
-					SELECT id FROM portfolio_allocation_obs_time WHERE observation_time_tag LIKE '%%T%%'
+					SELECT id FROM portfolio_allocation_obs_time WHERE observation_time_tag LIKE '%T%'
 				)`,
+				nil,
 			).
-			AddCleanupQuery("DELETE FROM asset WHERE ticker = 'Test:NEW'").
-			AddCleanupQuery("DELETE FROM portfolio_allocation_obs_time WHERE observation_time_tag LIKE '%%T%%'").
+			AddCleanupQuery("DELETE FROM asset WHERE ticker = 'Test:NEW'", nil).
+			AddCleanupQuery("DELETE FROM portfolio_allocation_obs_time WHERE observation_time_tag LIKE '%T%'", nil).
 			Build(),
 	)
 
@@ -550,8 +551,9 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 				WHERE observation_time_id IN (
 					SELECT id FROM portfolio_allocation_obs_time WHERE id = 3
 				)`,
+				nil,
 			).
-			AddCleanupQuery("DELETE FROM asset WHERE ticker = 'Test:NEW'").
+			AddCleanupQuery("DELETE FROM asset WHERE ticker = 'Test:NEW'", nil).
 			Build(),
 	)
 
@@ -1126,8 +1128,9 @@ func TestGetPortfolioAllocationHistoryWithMultiplePortfoliosAndManyObservations(
 				WHERE observation_time_id IN (
 					SELECT id FROM portfolio_allocation_obs_time WHERE observation_time_tag ~ '^test_obs_'
 				)`,
+				nil,
 			).
-			AddCleanupQuery(`DELETE FROM portfolio_allocation_obs_time WHERE observation_time_tag ~ '^test_obs_'`).
+			AddCleanupQuery(`DELETE FROM portfolio_allocation_obs_time WHERE observation_time_tag ~ '^test_obs_'`, nil).
 			Build(),
 	)
 

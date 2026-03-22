@@ -9,6 +9,7 @@ import (
 
 	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
 	inttestutil "github.com/benizzio/open-asset-allocator/inttest/util"
+	dbx "github.com/go-ozzo/ozzo-dbx"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -159,11 +160,12 @@ func TestPostAllocationPlanForInsertion(t *testing.T) {
 			AddCleanupQuery(
 				`
 				DELETE FROM planned_allocation 
-				WHERE allocation_plan_id IN (SELECT id FROM allocation_plan WHERE name LIKE '%%DELETE')
+				WHERE allocation_plan_id IN (SELECT id FROM allocation_plan WHERE name LIKE '%DELETE')
 				`,
+				nil,
 			).
-			AddCleanupQuery(`DELETE FROM allocation_plan WHERE name LIKE '%%DELETE'`).
-			AddCleanupQuery(`DELETE FROM asset WHERE name LIKE '%%DELETE'`).
+			AddCleanupQuery(`DELETE FROM allocation_plan WHERE name LIKE '%DELETE'`, nil).
+			AddCleanupQuery(`DELETE FROM asset WHERE name LIKE '%DELETE'`, nil).
 			Build(),
 	)
 
@@ -347,18 +349,18 @@ func TestPostAllocationPlanForUpdate_DoesNotOverwriteExistingAssetName(t *testin
 	t.Cleanup(
 		inttestutil.BuildCleanupFunctionBuilder().
 			AddCleanupQuery(
-				`DELETE FROM planned_allocation WHERE allocation_plan_id = %s AND hierarchical_id = '{TEST:ALTBOND,BONDS}'`,
-				allocationPlanIdString,
+				`DELETE FROM planned_allocation WHERE allocation_plan_id = {:allocationPlanId} AND hierarchical_id = '{TEST:ALTBOND,BONDS}'`,
+				dbx.Params{"allocationPlanId": allocationPlanIdString},
 			).
-			AddCleanupQuery(`UPDATE planned_allocation SET slice_size_percentage = 0.5 WHERE id = %s`, idBil).
-			AddCleanupQuery(`UPDATE planned_allocation SET slice_size_percentage = 0.5 WHERE id = %s`, idSpy).
-			AddCleanupQuery(`UPDATE planned_allocation SET slice_size_percentage = 0.5 WHERE id = %s`, idBondsTop).
-			AddCleanupQuery(`UPDATE planned_allocation SET slice_size_percentage = 0.5 WHERE id = %s`, idStocksTop).
+			AddCleanupQuery(`UPDATE planned_allocation SET slice_size_percentage = 0.5 WHERE id = {:id}`, dbx.Params{"id": idBil}).
+			AddCleanupQuery(`UPDATE planned_allocation SET slice_size_percentage = 0.5 WHERE id = {:id}`, dbx.Params{"id": idSpy}).
+			AddCleanupQuery(`UPDATE planned_allocation SET slice_size_percentage = 0.5 WHERE id = {:id}`, dbx.Params{"id": idBondsTop}).
+			AddCleanupQuery(`UPDATE planned_allocation SET slice_size_percentage = 0.5 WHERE id = {:id}`, dbx.Params{"id": idStocksTop}).
 			AddCleanupQuery(
-				`UPDATE allocation_plan SET name = 'Update Allocation Plan Fixture' WHERE id = %s`,
-				allocationPlanIdString,
+				`UPDATE allocation_plan SET name = 'Update Allocation Plan Fixture' WHERE id = {:id}`,
+				dbx.Params{"id": allocationPlanIdString},
 			).
-			AddCleanupQuery(`DELETE FROM asset WHERE name LIKE '%%DELETE'`).
+			AddCleanupQuery(`DELETE FROM asset WHERE name LIKE '%DELETE'`, nil).
 			Build(),
 	)
 
@@ -559,10 +561,12 @@ func TestPostAllocationPlanForUpdate_DeletesPlannedAllocationAndKeepsAsset(t *te
 		inttestutil.BuildCleanupFunctionBuilder().
 			AddCleanupQuery(
 				`DELETE FROM planned_allocation WHERE allocation_plan_id = 6 AND hierarchical_id = '{"ARCA:EWZ", "STOCKS"}'`,
+				nil,
 			).
 			AddCleanupQuery(
 				`INSERT INTO planned_allocation (id, allocation_plan_id, hierarchical_id, asset_id, cash_reserve, slice_size_percentage, total_market_value)
 				 VALUES (33, 6, '{"ARCA:SPY", "STOCKS"}', 7, FALSE, 0.5, NULL) ON CONFLICT (id) DO NOTHING`,
+				nil,
 			).
 			Build(),
 	)
@@ -655,47 +659,47 @@ func TestPostAllocationPlanForUpdate_ChangesHierarchicalId(t *testing.T) {
 			AddCleanupQuery(
 				`
 					DELETE FROM planned_allocation 
-					WHERE allocation_plan_id = %s AND hierarchical_id = '{TEST:ALTBOND,BONDS2}'
+					WHERE allocation_plan_id = {:allocationPlanId} AND hierarchical_id = '{TEST:ALTBOND,BONDS2}'
 				`,
-				allocationPlanIdString,
+				dbx.Params{"allocationPlanId": allocationPlanIdString},
 			).
 			AddCleanupQuery(
 				`
 					UPDATE planned_allocation 
 					SET slice_size_percentage = 0.5, hierarchical_id = '{"ARCA:BIL", "BONDS"}' 
-					WHERE id = %s
+					WHERE id = {:id}
 				`,
-				idBil,
+				dbx.Params{"id": idBil},
 			).
 			AddCleanupQuery(
 				`
 					UPDATE planned_allocation 
 					SET slice_size_percentage = 0.5, hierarchical_id = '{"ARCA:SPY", "STOCKS"}'
-					WHERE id = %s
+					WHERE id = {:id}
 				`,
-				idSpy,
+				dbx.Params{"id": idSpy},
 			).
 			AddCleanupQuery(
 				`
 					UPDATE planned_allocation 
 					SET slice_size_percentage = 0.5, hierarchical_id = '{NULL, "BONDS"}' 
-					WHERE id = %s
+					WHERE id = {:id}
 				`,
-				idBondsTop,
+				dbx.Params{"id": idBondsTop},
 			).
 			AddCleanupQuery(
 				`
 					UPDATE planned_allocation 
 					SET slice_size_percentage = 0.5, hierarchical_id = '{NULL, "STOCKS"}' 
-					WHERE id = %s
+					WHERE id = {:id}
 				`,
-				idStocksTop,
+				dbx.Params{"id": idStocksTop},
 			).
 			AddCleanupQuery(
-				`UPDATE allocation_plan SET name = 'Update Allocation Plan Fixture' WHERE id = %s`,
-				allocationPlanIdString,
+				`UPDATE allocation_plan SET name = 'Update Allocation Plan Fixture' WHERE id = {:id}`,
+				dbx.Params{"id": allocationPlanIdString},
 			).
-			AddCleanupQuery(`DELETE FROM asset WHERE name LIKE '%%DELETE'`).
+			AddCleanupQuery(`DELETE FROM asset WHERE name LIKE '%DELETE'`, nil).
 			Build(),
 	)
 

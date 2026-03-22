@@ -1,26 +1,33 @@
 package util
 
 import (
-	"fmt"
-
 	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
+	dbx "github.com/go-ozzo/ozzo-dbx"
 	"github.com/golang/glog"
 )
 
-type testFormattableSQLPair struct {
-	formattableSQL string
-	params         []any
+type testSQLParamsPair struct {
+	sql    string
+	params dbx.Params
 }
 
+// CleanupFunctionBuilder accumulates parameterized SQL cleanup queries
+// and produces a single cleanup function that executes them in order.
+//
+// Co-authored by: GitHub Copilot
 type CleanupFunctionBuilder struct {
-	cleanupQueries []*testFormattableSQLPair
+	cleanupQueries []*testSQLParamsPair
 }
 
-func (builder *CleanupFunctionBuilder) AddCleanupQuery(formattableSQL string, params ...any) *CleanupFunctionBuilder {
+// AddCleanupQuery appends a parameterized SQL cleanup query to the builder.
+// Uses ozzo-dbx named parameter binding ({:paramName} placeholders).
+//
+// Co-authored by: GitHub Copilot
+func (builder *CleanupFunctionBuilder) AddCleanupQuery(sql string, params dbx.Params) *CleanupFunctionBuilder {
 	builder.cleanupQueries = append(
-		builder.cleanupQueries, &testFormattableSQLPair{
-			formattableSQL: formattableSQL,
-			params:         params,
+		builder.cleanupQueries, &testSQLParamsPair{
+			sql:    sql,
+			params: params,
 		},
 	)
 	return builder
@@ -32,19 +39,23 @@ func (builder *CleanupFunctionBuilder) Build() func() {
 
 func BuildCleanupFunctionBuilder() *CleanupFunctionBuilder {
 	return &CleanupFunctionBuilder{
-		cleanupQueries: make([]*testFormattableSQLPair, 0),
+		cleanupQueries: make([]*testSQLParamsPair, 0),
 	}
 }
 
-func CreateDBCleanupFunction(formattableSQL string, params ...any) func() {
-	return createDBCleanupFunctionMulti([]*testFormattableSQLPair{{formattableSQL, params}})
+// CreateDBCleanupFunction creates a cleanup function for a single parameterized SQL query.
+// Uses ozzo-dbx named parameter binding ({:paramName} placeholders).
+//
+// Co-authored by: GitHub Copilot
+func CreateDBCleanupFunction(sql string, params dbx.Params) func() {
+	return createDBCleanupFunctionMulti([]*testSQLParamsPair{{sql, params}})
 }
 
-func createDBCleanupFunctionMulti(cleanupQueries []*testFormattableSQLPair) func() {
+func createDBCleanupFunctionMulti(cleanupQueries []*testSQLParamsPair) func() {
 	return func() {
 		for _, query := range cleanupQueries {
-			glog.Infof("Executing test cleanup query: %s", query.formattableSQL)
-			err := inttestinfra.ExecuteDBQuery(fmt.Sprintf(query.formattableSQL, query.params...), nil)
+			glog.Infof("Executing test cleanup query: %s", query.sql)
+			err := inttestinfra.ExecuteDBQuery(query.sql, query.params)
 			if err != nil {
 				glog.Errorf("Error executing cleanup query: %s", err)
 			}

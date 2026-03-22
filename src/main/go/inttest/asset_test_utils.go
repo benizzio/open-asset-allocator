@@ -40,8 +40,8 @@ func insertTestAsset(t *testing.T, ticker string, name string) domain.Asset {
 
 	t.Cleanup(
 		inttestutil.CreateDBCleanupFunction(
-			"DELETE FROM asset WHERE id='%d'",
-			testAsset.Id,
+			"DELETE FROM asset WHERE id={:id}",
+			dbx.Params{"id": testAsset.Id},
 		),
 	)
 
