@@ -73,6 +73,26 @@ func (repository *AssetRDBMSRepository) FindAssetByUniqueIdentifier(uniqueIdenti
 	)
 }
 
+// UpdateAsset updates the ticker and name fields of an existing asset identified by its ID.
+// Returns the freshly-read updated asset from the database.
+//
+// Authored by: GitHub Copilot
+func (repository *AssetRDBMSRepository) UpdateAsset(asset *domain.Asset) (*domain.Asset, error) {
+
+	err := repository.dbAdapter.UpdateListedFields(new(*asset), "Ticker", "Name")
+	if err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "Error updating asset", repository)
+	}
+
+	var updatedAsset domain.Asset
+	err = repository.dbAdapter.Read(&updatedAsset, asset.Id)
+	return &updatedAsset, infra.PropagateAsAppErrorWithNewMessage(
+		err,
+		"Error retrieving updated asset",
+		repository,
+	)
+}
+
 func (repository *AssetRDBMSRepository) InsertAssetsInTransaction(
 	transContext context.Context,
 	assets []*domain.Asset,

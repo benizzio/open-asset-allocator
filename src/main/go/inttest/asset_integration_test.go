@@ -3,6 +3,7 @@ package inttest
 import (
 	"io"
 	"net/http"
+	"strconv"
 	"testing"
 
 	"github.com/benizzio/open-asset-allocator/inttest/infra"
@@ -117,6 +118,218 @@ func TestGetAssetByIdOrTicker(t *testing.T) {
 				}
 			`
 			assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
+		},
+	)
+}
+
+// TestPutAsset tests the PUT /api/asset endpoint to update an existing asset's ticker and name.
+//
+// Authored by: GitHub Copilot
+func TestPutAsset(t *testing.T) {
+
+	var testTickerBefore = "TEST:BEFORE"
+	var testNameBefore = "Test Asset Before Update"
+	var testTickerAfter = "TEST:AFTER"
+	var testNameAfter = "Test Asset After Update"
+
+	var testAsset = insertTestAsset(t, testTickerBefore, testNameBefore)
+	var testAssetIdString = strconv.FormatInt(testAsset.Id, 10)
+
+	var putAssetJSON = `
+		{
+			"id":` + testAssetIdString + `,
+			"ticker":"` + testTickerAfter + `",
+			"name":"` + testNameAfter + `"
+		}
+	`
+
+	response := putAsset(t, putAssetJSON)
+
+	assert.Equal(t, http.StatusOK, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+
+	var expectedResponseJSON = `
+		{
+			"id":` + testAssetIdString + `,
+			"ticker":"` + testTickerAfter + `",
+			"name":"` + testNameAfter + `"
+		}
+	`
+
+	assert.JSONEq(t, expectedResponseJSON, string(body))
+
+	assertPersistedAsset(t, testAsset.Id, testTickerAfter, testNameAfter)
+}
+
+// TestPutAssetFailureWithoutId tests the PUT /api/asset endpoint returns a validation error
+// when the asset ID is missing from the request body.
+//
+// Authored by: GitHub Copilot
+func TestPutAssetFailureWithoutId(t *testing.T) {
+
+	var putAssetJSONNoId = `
+		{
+			"ticker": "TEST:NOID",
+			"name": "Asset Without ID"
+		}
+	`
+
+	response := putAsset(t, putAssetJSONNoId)
+
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+
+	var expectedResponseJSON = `
+		{
+			"errorMessage": "Validation failed",
+			"details": [
+				"Field 'id' failed validation: is required"
+			]
+		}
+	`
+
+	assert.JSONEq(t, expectedResponseJSON, string(body))
+}
+
+// TestPutAssetFailureWithZeroId tests the PUT /api/asset endpoint returns a validation error
+// when the asset ID is zero in the request body.
+//
+// Authored by: GitHub Copilot
+func TestPutAssetFailureWithZeroId(t *testing.T) {
+
+	var putAssetJSONZeroId = `
+		{
+			"id": 0,
+			"ticker": "TEST:ZEROID",
+			"name": "Asset With Zero ID"
+		}
+	`
+
+	response := putAsset(t, putAssetJSONZeroId)
+
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+
+	var expectedResponseJSON = `
+		{
+			"errorMessage": "Validation failed",
+			"details": [
+				"Field 'id' failed validation: is required"
+			]
+		}
+	`
+
+	assert.JSONEq(t, expectedResponseJSON, string(body))
+}
+
+// TestPutAssetFailureWithoutRequiredFields tests the PUT /api/asset endpoint returns validation
+// errors when required fields (name, ticker) are missing from the request body.
+//
+// Authored by: GitHub Copilot
+func TestPutAssetFailureWithoutRequiredFields(t *testing.T) {
+
+	t.Run(
+		"WithoutName",
+		func(t *testing.T) {
+
+			var putAssetJSON = `
+				{
+					"id": 1,
+					"ticker": "TEST:NONAME"
+				}
+			`
+
+			response := putAsset(t, putAssetJSON)
+
+			assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+			body, err := io.ReadAll(response.Body)
+			assert.NoError(t, err)
+			assert.NotEmpty(t, body)
+
+			var expectedResponseJSON = `
+				{
+					"errorMessage": "Validation failed",
+					"details": [
+						"Field 'name' failed validation: is required"
+					]
+				}
+			`
+
+			assert.JSONEq(t, expectedResponseJSON, string(body))
+		},
+	)
+
+	t.Run(
+		"WithoutTicker",
+		func(t *testing.T) {
+
+			var putAssetJSON = `
+				{
+					"id": 1,
+					"name": "Asset Without Ticker"
+				}
+			`
+
+			response := putAsset(t, putAssetJSON)
+
+			assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+			body, err := io.ReadAll(response.Body)
+			assert.NoError(t, err)
+			assert.NotEmpty(t, body)
+
+			var expectedResponseJSON = `
+				{
+					"errorMessage": "Validation failed",
+					"details": [
+						"Field 'ticker' failed validation: is required"
+					]
+				}
+			`
+
+			assert.JSONEq(t, expectedResponseJSON, string(body))
+		},
+	)
+
+	t.Run(
+		"WithoutNameAndTicker",
+		func(t *testing.T) {
+
+			var putAssetJSON = `
+				{
+					"id": 1
+				}
+			`
+
+			response := putAsset(t, putAssetJSON)
+
+			assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+			body, err := io.ReadAll(response.Body)
+			assert.NoError(t, err)
+			assert.NotEmpty(t, body)
+
+			var expectedResponseJSON = `
+				{
+					"errorMessage": "Validation failed",
+					"details": [
+						"Field 'name' failed validation: is required",
+						"Field 'ticker' failed validation: is required"
+					]
+				}
+			`
+
+			assert.JSONEq(t, expectedResponseJSON, string(body))
 		},
 	)
 }
