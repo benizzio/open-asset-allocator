@@ -219,6 +219,7 @@
                        hx-validate="true"
                        hx-on::validation:validate="{{assetTickerFieldHTMXOnValidate}}"
                        oninput="maskTickerInput(this)"
+                       onkeydown="AssetComposedColumnsInput.handleAssetTickerKeydown(event)"
                        maxlength="40"
                 />
                 <button data-asset-action-button
