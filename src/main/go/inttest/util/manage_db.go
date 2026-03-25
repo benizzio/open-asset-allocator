@@ -49,15 +49,6 @@ func BuildCleanupFunctionBuilder() *CleanupFunctionBuilder {
 	}
 }
 
-// CreateDBCleanupFunction creates a cleanup function for a single parameterized SQL query.
-// Cleanup errors are reported via t.Errorf so the test fails but remaining queries still run.
-// Uses ozzo-dbx named parameter binding ({:paramName} placeholders).
-//
-// Co-authored by: GitHub Copilot
-func CreateDBCleanupFunction(t *testing.T, sql string, params dbx.Params) func() {
-	return createDBCleanupFunctionMulti(t, []*testSQLParamsPair{{sql, params}})
-}
-
 func createDBCleanupFunctionMulti(t *testing.T, cleanupQueries []*testSQLParamsPair) func() {
 	return func() {
 		for _, query := range cleanupQueries {

@@ -39,11 +39,9 @@ func insertTestAsset(t *testing.T, ticker string, name string) domain.Asset {
 	assert.NoError(t, err)
 
 	t.Cleanup(
-		inttestutil.CreateDBCleanupFunction(
-			t,
-			"DELETE FROM asset WHERE id={:id}",
-			dbx.Params{"id": testAsset.Id},
-		),
+		inttestutil.BuildCleanupFunctionBuilder().
+			AddCleanupQuery("DELETE FROM asset WHERE id={:id}", dbx.Params{"id": testAsset.Id}).
+			Build(t),
 	)
 
 	assert.NotZero(t, testAsset)
