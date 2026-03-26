@@ -185,6 +185,34 @@ function loadAssetsDatalist() {
 
 const AssetComposedColumnsInput = {
 
+    /**
+     * Handles keydown on the asset ticker input field. When Enter is pressed and the asset
+     * action button is in search mode, triggers the search by clicking the action button.
+     * Does not trigger reset/cancel mode on Enter — only the button handles that.
+     *
+     * @param event - The keyboard event from the asset ticker input
+     *
+     * @example onkeydown="AssetComposedColumnsInput.handleAssetTickerKeydown(event)"
+     *
+     * Authored by: GitHub Copilot
+     */
+    handleAssetTickerKeydown(event: KeyboardEvent) {
+
+        if(event.key === "Enter") {
+
+            const inputElement = event.target as HTMLElement;
+
+            const actionButton = inputElement
+                .closest(".input-group")
+                ?.querySelector<HTMLButtonElement>("[data-asset-action-button]");
+
+            if(actionButton?.className === ASSET_ACTION_BUTTON_IDENTITIES.search.classes) {
+                event.preventDefault();
+                actionButton.click();
+            }
+        }
+    },
+
     assetActionButtonClickHandler(
         containerId: string,
         assetIdHiddenFieldName: string,
