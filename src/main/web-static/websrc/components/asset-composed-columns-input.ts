@@ -199,15 +199,15 @@ const AssetComposedColumnsInput = {
     handleAssetTickerKeydown(event: KeyboardEvent) {
 
         if(event.key === "Enter") {
-            event.preventDefault();
 
             const inputElement = event.target as HTMLElement;
 
             const actionButton = inputElement
                 .closest(".input-group")
-                ?.querySelector("[data-asset-action-button]") as HTMLButtonElement;
+                ?.querySelector<HTMLButtonElement>("[data-asset-action-button]");
 
             if(actionButton?.className === ASSET_ACTION_BUTTON_IDENTITIES.search.classes) {
+                event.preventDefault();
                 actionButton.click();
             }
         }
