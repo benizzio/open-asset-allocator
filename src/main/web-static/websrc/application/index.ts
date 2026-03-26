@@ -13,11 +13,11 @@ const Application = {
 
     init() {
         registerPortfolioAnalysisHandlebarsHelpers();
-        window["portfolioHistoryManagement"] = portfolioHistoryManagement;
-        window["allocationPlanManagement"] = allocationPlanManagement;
-        window["portfolioPage"] = PortfolioPage;
-        window["notifications"] = notifications;
-        window["AssetComposedColumnsInput"] = AssetComposedColumnsInput;
+        globalThis["portfolioHistoryManagement"] = portfolioHistoryManagement;
+        globalThis["allocationPlanManagement"] = allocationPlanManagement;
+        globalThis["portfolioPage"] = PortfolioPage;
+        globalThis["notifications"] = notifications;
+        globalThis["AssetComposedColumnsInput"] = AssetComposedColumnsInput;
     },
 
     chartContents: { toChartContent },
