@@ -58,9 +58,10 @@ func assertPersistedAsset(t *testing.T, assetId int64, expectedTicker string, ex
 
 	var assetIdString = strconv.FormatInt(assetId, 10)
 	var assetNullStringMap = dbx.NullStringMap{
-		"id":     util.StringToNullString(assetIdString),
-		"ticker": util.StringToNullString(expectedTicker),
-		"name":   util.StringToNullString(expectedName),
+		"id":            util.StringToNullString(assetIdString),
+		"ticker":        util.StringToNullString(expectedTicker),
+		"name":          util.StringToNullString(expectedName),
+		"external_data": util.StringPointerToNullString(nil),
 	}
 
 	inttestutil.AssertDBWithQuery(

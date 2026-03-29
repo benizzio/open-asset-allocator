@@ -13,7 +13,7 @@ import (
 
 const (
 	assetsSQL = `
-		SELECT * FROM asset
+		SELECT id, ticker, name FROM asset
 	` + rdbms.WhereClausePlaceholder
 )
 
