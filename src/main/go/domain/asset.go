@@ -1,21 +1,30 @@
 package domain
 
 import (
-	"context"
+	"database/sql/driver"
 	"fmt"
 
 	"github.com/benizzio/open-asset-allocator/infra"
+	"github.com/benizzio/open-asset-allocator/infra/rdbms/sqlext"
 )
 
 type Asset struct {
-	Id     int64
-	Name   string
-	Ticker string
+	Id           int64
+	Name         string
+	Ticker       string
+	ExternalData *ExternalData
 }
 
-// TODO json marshalling for DB (Scan and Value)
 type ExternalData struct {
 	Data []ExternalAssetData `json:"data"`
+}
+
+func (externalData *ExternalData) Scan(value interface{}) error {
+	return sqlext.ScanJsonColumn(value, externalData)
+}
+
+func (externalData ExternalData) Value() (driver.Value, error) {
+	return sqlext.ValueJsonColumn(externalData)
 }
 
 type ExternalAssetData struct {
@@ -38,11 +47,3 @@ func (externalSource AssetExternalSource) Validate() error {
 }
 
 type AssetsPerTicker map[string]*Asset
-
-type AssetRepository interface {
-	GetKnownAssets() ([]*Asset, error)
-	FindAssetByUniqueIdentifier(uniqueIdentifier string) (*Asset, error)
-	UpdateAsset(asset *Asset) (*Asset, error)
-	InsertAssetsInTransaction(transContext context.Context, assets []*Asset) ([]*Asset, error)
-	FindAssetsByTickersInTransaction(transContext context.Context, tickers []string) ([]*Asset, error)
-}
