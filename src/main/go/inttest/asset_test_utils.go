@@ -53,7 +53,7 @@ func insertTestAsset(t *testing.T, ticker string, name string) domain.Asset {
 // assertPersistedAsset asserts that the asset with the given ID has the expected ticker and name
 // in the database.
 //
-// Authored by: GitHub Copilot
+// Co-authored by: GitHub Copilot and benizzio
 func assertPersistedAsset(t *testing.T, assetId int64, expectedTicker string, expectedName string) {
 
 	var assetIdString = strconv.FormatInt(assetId, 10)
