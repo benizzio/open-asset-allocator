@@ -111,7 +111,7 @@ specific AGENTS.md, the structure is:
           Co-authored by: <agent name> and <git human user name>
           ```
     - public API code (as in usable in other packages or modules) must contain very detailed usage instructions
-    - code docs HAVE TO FOLLOW the standards of the language
+    - code docs, when added, HAVE TO FOLLOW the standards of the language
 
 </CustomCodeDocs>
 
