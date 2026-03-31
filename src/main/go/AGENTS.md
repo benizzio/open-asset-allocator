@@ -13,6 +13,7 @@ Refer to the general instructions in the root `../../../AGENTS.md` for broader i
         result, err := doSomethingElse()
         ```
 - do not follow Godoc convention of adding a comment for every function, type, variable, etc. Clean code has priority
+    - exception: AI generated code according to general instructions
 - most of the project's generic, reusable code can be found in the following listed packages. New code should be, in
   general, attentive to those packages to be DRY.
     - `src/main/go/infra`: represents the DDD infrastructure layer, and includes a lot of stack and utility code;
