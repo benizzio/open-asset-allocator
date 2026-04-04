@@ -10,29 +10,7 @@ import (
 
 const yahooFinanceSearchURL = "https://query2.finance.yahoo.com/v1/finance/search"
 const yahooFinanceSearchQuotesCount = "5"
-
-// ================================================
-// TYPES
-// ================================================
-
-// YahooFinanceSearchQuoteDTS represents a single quote result from the Yahoo Finance search API.
-// Fields map to the JSON response keys returned by the /v1/finance/search endpoint.
-//
-// Authored by: GitHub Copilot (claude-opus-4.6)
-type YahooFinanceSearchQuoteDTS struct {
-	Symbol   string `json:"symbol"`
-	Exchange string `json:"exchange"`
-	LongName string `json:"longname"`
-	ExchDisp string `json:"exchDisp"`
-}
-
-// YahooFinanceSearchResponseDTS represents the top-level response from the Yahoo Finance search API.
-// Contains the list of quote results matching the search query.
-//
-// Authored by: GitHub Copilot (claude-opus-4.6)
-type YahooFinanceSearchResponseDTS struct {
-	Quotes []YahooFinanceSearchQuoteDTS `json:"quotes"`
-}
+const yahooFinanceChartURL = "https://query2.finance.yahoo.com/v8/finance/chart/"
 
 // YahooFinanceAssetIntegrationClient is an HTTP client for the Yahoo Finance API.
 // Provides methods to query Yahoo Finance endpoints and return their responses as typed DTSs.
@@ -40,10 +18,6 @@ type YahooFinanceSearchResponseDTS struct {
 // Authored by: GitHub Copilot (claude-opus-4.6)
 type YahooFinanceAssetIntegrationClient struct {
 }
-
-// ================================================
-// CLIENT FUNCTIONS
-// ================================================
 
 // SearchAssets queries the Yahoo Finance search API for assets matching the given query value.
 // Builds the request URL with hardcoded default parameters, executes the GET request,
@@ -77,15 +51,9 @@ func (client *YahooFinanceAssetIntegrationClient) SearchAssets(
 		return nil, infra.PropagateAsAppError(err, client)
 	}
 
-	resp, err := httpclient.ExecuteGet(requestURL)
-	if err != nil {
-		return nil, infra.PropagateAsAppError(err, client)
-	}
-	defer httpclient.CloseResponseBody(resp)
-
-	var searchResponse, decodeErr = httpclient.DecodeJSONResponse[YahooFinanceSearchResponseDTS](resp)
-	if decodeErr != nil {
-		return nil, infra.PropagateAsAppError(decodeErr, client)
+	var searchResponse, getErr = httpclient.ExecuteGetJSON[YahooFinanceSearchResponseDTS](requestURL)
+	if getErr != nil {
+		return nil, infra.PropagateAsAppError(getErr, client)
 	}
 
 	return searchResponse, nil
@@ -112,6 +80,65 @@ func buildSearchAssetsURL(queryValue string) (string, error) {
 	queryParams.Set("enableResearchReports", "false")
 	queryParams.Set("enableCulturalAssets", "false")
 	queryParams.Set("enableCb", "false")
+
+	parsedURL.RawQuery = queryParams.Encode()
+
+	return parsedURL.String(), nil
+}
+
+// QuoteAssetLastClosePrice queries the Yahoo Finance chart API for the last close price data
+// of the asset identified by the given ticker. Returns the full chart response DTS containing
+// metadata, timestamps, and indicator data.
+//
+// Parameters:
+//   - ticker: the asset ticker symbol (e.g., "AAPL")
+//
+// Returns:
+//   - *YahooFinanceChartResponseDTS: the decoded chart response
+//   - error: an AppError if the request fails, returns a non-200 status, or decoding fails
+//
+// Example:
+//
+//	var client = &YahooFinanceAssetIntegrationClient{}
+//	response, err := client.QuoteAssetLastClosePrice("AAPL")
+//	if err != nil {
+//	    // handle error
+//	}
+//	var result = response.Chart.Result[0]
+//	fmt.Println(result.Meta.Symbol, result.Meta.Currency)
+//
+// Authored by: GitHub Copilot (claude-opus-4.6)
+func (client *YahooFinanceAssetIntegrationClient) QuoteAssetLastClosePrice(
+	ticker string,
+) (*YahooFinanceChartResponseDTS, error) {
+
+	var requestURL, err = buildQuoteAssetLastClosePriceURL(ticker)
+	if err != nil {
+		return nil, infra.PropagateAsAppError(err, client)
+	}
+
+	var chartResponse, getErr = httpclient.ExecuteGetJSON[YahooFinanceChartResponseDTS](requestURL)
+	if getErr != nil {
+		return nil, infra.PropagateAsAppError(getErr, client)
+	}
+
+	return chartResponse, nil
+}
+
+// buildQuoteAssetLastClosePriceURL constructs the full Yahoo Finance chart URL for the given ticker
+// with hardcoded default parameters.
+//
+// Authored by: GitHub Copilot (claude-opus-4.6)
+func buildQuoteAssetLastClosePriceURL(ticker string) (string, error) {
+
+	var parsedURL, err = url.Parse(yahooFinanceChartURL + ticker)
+	if err != nil {
+		return "", fmt.Errorf("error parsing Yahoo Finance chart URL: %w", err)
+	}
+
+	var queryParams = parsedURL.Query()
+	queryParams.Set("interval", "1d")
+	queryParams.Set("events", "history")
 
 	parsedURL.RawQuery = queryParams.Encode()
 

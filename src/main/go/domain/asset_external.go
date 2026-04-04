@@ -49,6 +49,6 @@ type ExternalAssetQuote struct {
 	Ticker         string
 	ExchangeId     string
 	Currency       currency.Unit
-	lastCloseQuote decimal.Decimal
-	lastClodeDate  time.Time
+	LastCloseQuote decimal.Decimal
+	LastCloseDate  time.Time
 }

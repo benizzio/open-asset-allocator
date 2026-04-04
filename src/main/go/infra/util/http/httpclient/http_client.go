@@ -43,6 +43,41 @@ func ExecuteGet(requestURL string) (*http.Response, error) {
 	return resp, nil
 }
 
+// ExecuteGetJSON performs an HTTP GET request to the given URL, validates the response,
+// decodes the JSON body into the target type T, and closes the response body.
+// This is a convenience function that combines ExecuteGet, DecodeJSONResponse, and
+// CloseResponseBody into a single call.
+//
+// Parameters:
+//   - requestURL: the fully constructed URL to send the GET request to
+//
+// Returns:
+//   - *T: a pointer to the decoded JSON response value
+//   - error: if the request fails, returns a non-200 status, or JSON decoding fails
+//
+// Example:
+//
+//	type SearchResponse struct {
+//	    Results []string `json:"results"`
+//	}
+//	response, err := httpclient.ExecuteGetJSON[SearchResponse]("https://api.example.com/search?q=test")
+//	if err != nil {
+//	    // handle error
+//	}
+//	fmt.Println(response.Results)
+//
+// Authored by: GitHub Copilot (claude-opus-4.6)
+func ExecuteGetJSON[T any](requestURL string) (*T, error) {
+
+	var resp, err = ExecuteGet(requestURL)
+	if err != nil {
+		return nil, err
+	}
+	defer CloseResponseBody(resp)
+
+	return DecodeJSONResponse[T](resp)
+}
+
 // DecodeJSONResponse decodes the body of an HTTP response into the target type T.
 // Uses json.NewDecoder for stream-based decoding.
 //
