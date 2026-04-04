@@ -29,6 +29,8 @@ Refer to the general instructions in the root `../../../AGENTS.md` for broader i
     - `src/main/go/inttest`: integration tests
         - `src/main/go/inttest/infra`: represents the DDD infrastructure layer specific for integration tests, and
           includes a lot of stack and utility code;
+    - `src/main/go/extinttest`: external integration tests that hit live external APIs, gated behind the `extinttest`
+      build tag
     - `src/main/go/langext`: includes implementations that extend the Go language and are not available in the standard
       implementations at the time of writing.
 
@@ -55,5 +57,15 @@ Refer to the general instructions in the root `../../../AGENTS.md` for broader i
 - `src/main/go/inttest`: base integration test package
 - `src/main/go/inttest/infra`: infrastructure needed for running integration tests, including initial db state
 - `src/main/go/inttest/util`: general utilities for all integration tests
+
+</CodeStructure>
+
+#### External integration test structure
+
+<CodeStructure>
+
+- `src/main/go/extinttest`: external integration tests that verify connectivity and contract compliance with live
+  external services. Gated behind the `extinttest` build tag to prevent execution during standard test runs.
+  Run with: `go test -count=1 -tags=extinttest ./extinttest/...` or `make test-ext`
 
 </CodeStructure>
