@@ -10,6 +10,8 @@ import (
 
 	"github.com/benizzio/open-asset-allocator/api/rest"
 	"github.com/benizzio/open-asset-allocator/application"
+	"github.com/benizzio/open-asset-allocator/domain/infra/anticorruption"
+	"github.com/benizzio/open-asset-allocator/domain/infra/integration"
 	"github.com/benizzio/open-asset-allocator/domain/infra/repository"
 	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/infra"
@@ -65,6 +67,14 @@ func (app *App) buildAppComponents() {
 	var allocationPlanDomService = service.BuildAllocationPlanDomService(allocationPlanRepository)
 	var allocationDomService = service.BuildAllocationDomService(allocationRepository)
 	var assetDomService = service.BuildAssetDomService(assetRepository)
+
+	// =====================================================
+	// Domain - Integration
+	// =====================================================
+	var yahooFinanceIntegrationClient = &integration.YahooFinanceAssetIntegrationClient{}
+	_ = &anticorruption.YahooFinanceAssetIntegrationService{
+		Client: yahooFinanceIntegrationClient,
+	}
 
 	// =====================================================
 	// Application

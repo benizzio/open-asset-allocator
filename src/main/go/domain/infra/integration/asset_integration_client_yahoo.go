@@ -11,6 +11,16 @@ import (
 const yahooFinanceSearchURL = "https://query2.finance.yahoo.com/v1/finance/search"
 const yahooFinanceSearchQuotesCount = "5"
 const yahooFinanceChartURL = "https://query2.finance.yahoo.com/v8/finance/chart/"
+const yahooFinanceUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+
+// yahooFinanceDefaultOptions is the default set of RequestOption functions applied to all
+// Yahoo Finance API requests. Currently sets the User-Agent header to a browser-like value,
+// as Yahoo Finance's CDN blocks requests with non-browser user-agents.
+//
+// Authored by: GitHub Copilot (claude-opus-4.6)
+var yahooFinanceDefaultOptions = []httpclient.RequestOption{
+	httpclient.WithHeader("User-Agent", yahooFinanceUserAgent),
+}
 
 // YahooFinanceAssetIntegrationClient is an HTTP client for the Yahoo Finance API.
 // Provides methods to query Yahoo Finance endpoints and return their responses as typed DTSs.
@@ -51,7 +61,7 @@ func (client *YahooFinanceAssetIntegrationClient) SearchAssets(
 		return nil, infra.PropagateAsAppError(err, client)
 	}
 
-	var searchResponse, getErr = httpclient.ExecuteGetJSON[YahooFinanceSearchResponseDTS](requestURL)
+	var searchResponse, getErr = httpclient.ExecuteGetJSON[YahooFinanceSearchResponseDTS](requestURL, yahooFinanceDefaultOptions...)
 	if getErr != nil {
 		return nil, infra.PropagateAsAppError(getErr, client)
 	}
@@ -117,7 +127,7 @@ func (client *YahooFinanceAssetIntegrationClient) QuoteAssetLastClosePrice(
 		return nil, infra.PropagateAsAppError(err, client)
 	}
 
-	var chartResponse, getErr = httpclient.ExecuteGetJSON[YahooFinanceChartResponseDTS](requestURL)
+	var chartResponse, getErr = httpclient.ExecuteGetJSON[YahooFinanceChartResponseDTS](requestURL, yahooFinanceDefaultOptions...)
 	if getErr != nil {
 		return nil, infra.PropagateAsAppError(getErr, client)
 	}
