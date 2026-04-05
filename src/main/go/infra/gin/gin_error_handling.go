@@ -50,6 +50,8 @@ func HandleAPIError(context *gin.Context, message string, cause error) bool {
 }
 
 // handleDomainError checks if the error matches a known domain error type and sends the corresponding HTTP response.
+//
+// Co-authored by: GitHub Copilot
 func handleDomainError(context *gin.Context, cause error) bool {
 
 	if domValidationError, ok := errors.AsType[*infra.DomainValidationError](cause); ok {
@@ -84,15 +86,6 @@ func sendValidationErrorResponse(context *gin.Context, errorMessages []string) {
 }
 
 // SendDataNotFoundResponse sends a standardized HTTP 404 response for a missing resource.
-//
-// Example:
-//
-//	if asset == nil {
-//		gininfra.SendDataNotFoundResponse(context, "Asset", assetId)
-//		return
-//	}
-//
-// Co-authored by: GitHub Copilot
 func SendDataNotFoundResponse(context *gin.Context, dataType string, id string) {
 	context.JSON(
 		http.StatusNotFound,
