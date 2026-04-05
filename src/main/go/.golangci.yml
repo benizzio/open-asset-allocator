@@ -36,11 +36,6 @@ linters:
       - common-false-positives
       - std-error-handling
     rules:
-      # Allow unchecked error returns on Close() in defer statements.
-      # This is a common and accepted Go pattern.
-      - linters:
-          - errcheck
-        source: "defer .*\\.Close\\(\\)"
       # Relax line length for test files and test infrastructure, which often
       # contain long JSON strings and SQL statements
       - linters:
