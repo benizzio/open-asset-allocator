@@ -39,7 +39,7 @@ func (controller *AssetRESTController) BuildRoutes() []infra.RESTRoute {
 func (controller *AssetRESTController) getKnownAssets(context *gin.Context) {
 
 	assets, err := controller.assetDomService.GetKnownAssets()
-	if HandleAPIError(context, "Error getting known assets", err) {
+	if gininfra.HandleAPIError(context, "Error getting known assets", err) {
 		return
 	}
 
@@ -53,7 +53,7 @@ func (controller *AssetRESTController) getAssetById(context *gin.Context) {
 	var assetIdOrTickerParamValue = context.Param(assetIdOrTickerParam)
 
 	asset, err := controller.assetDomService.FindAssetByUniqueIdentifier(assetIdOrTickerParamValue)
-	if HandleAPIError(context, "Error getting asset by Id or Ticker", err) {
+	if gininfra.HandleAPIError(context, "Error getting asset by Id or Ticker", err) {
 		return
 	}
 
@@ -75,7 +75,7 @@ func (controller *AssetRESTController) putAsset(context *gin.Context) {
 	var assetDTS model.AssetDTS
 	valid, err := gininfra.BindAndValidateJSONWithInvalidResponse(context, &assetDTS)
 	if err != nil {
-		HandleAPIError(context, bindAssetErrorMessage, err)
+		gininfra.HandleAPIError(context, bindAssetErrorMessage, err)
 		return
 	}
 	if !valid {
@@ -101,7 +101,7 @@ func (controller *AssetRESTController) putAsset(context *gin.Context) {
 
 	var asset = model.MapToAsset(&assetDTS)
 	updatedAsset, err := controller.assetDomService.UpdateAsset(asset)
-	if HandleAPIError(context, "Error updating asset", err) {
+	if gininfra.HandleAPIError(context, "Error updating asset", err) {
 		return
 	}
 
