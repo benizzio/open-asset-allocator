@@ -33,6 +33,11 @@ func (controller *AssetRESTController) BuildRoutes() []infra.RESTRoute {
 			Path:     "/api/asset",
 			Handlers: gin.HandlersChain{controller.putAsset},
 		},
+		{
+			Method:   http.MethodGet,
+			Path:     "/api/external-asset",
+			Handlers: gin.HandlersChain{controller.getExternalAssets},
+		},
 	}
 }
 
@@ -113,4 +118,17 @@ func BuildAssetRESTController(assetDomService *service.AssetDomService) *AssetRE
 	return &AssetRESTController{
 		assetDomService: assetDomService,
 	}
+}
+
+func (controller *AssetRESTController) getExternalAssets(context *gin.Context) {
+
+	var externalAssetQueryParamValue = context.Query(externalAssetQueryParam)
+
+	if langext.IsZeroValue(externalAssetQueryParamValue) {
+		var queryMissingError = infra.BuildAppErrorFormatted(controller, "Parameter %s is required to search external assets", externalAssetQueryParamValue)
+		HandleAPIError(context, "Error searching external assets", queryMissingError)
+		return
+	}
+
+	// TODO
 }
