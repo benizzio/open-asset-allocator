@@ -6,8 +6,11 @@ import (
 	"github.com/benizzio/open-asset-allocator/domain"
 )
 
+type AssetIntegrationServicesPerSource map[domain.AssetExternalSource]domain.AssetIntegrationService
+
 type AssetDomService struct {
-	assetRepository domain.AssetRepository
+	assetRepository                   domain.AssetRepository
+	assetIntegrationServicesPerSource AssetIntegrationServicesPerSource
 }
 
 func (service *AssetDomService) GetKnownAssets() ([]*domain.Asset, error) {
@@ -55,8 +58,25 @@ func (service *AssetDomService) InsertMappedAssetsInTransaction(
 	return persistedAssetsPerTicker, nil
 }
 
-func BuildAssetDomService(assetRepository domain.AssetRepository) *AssetDomService {
+func (service *AssetDomService) SearchExternalAssets(query string) ([]*domain.ExternalAsset, error) {
+
+	var assets = make([]*domain.ExternalAsset, 0)
+
+	for _, assetIntegrationService := range service.assetIntegrationServicesPerSource {
+		//TODO search in parallel goroutines and aggregate results
+		externalAssets, err := assetIntegrationService.SearchAssets(query)
+		if err != nil {
+			return nil, err
+		}
+		assets = append(assets, externalAssets...)
+	}
+
+	return assets, nil
+}
+
+func BuildAssetDomService(assetRepository domain.AssetRepository, integrationServices AssetIntegrationServicesPerSource) *AssetDomService {
 	return &AssetDomService{
-		assetRepository: assetRepository,
+		assetRepository:                   assetRepository,
+		assetIntegrationServicesPerSource: integrationServices,
 	}
 }
