@@ -6,6 +6,7 @@ import (
 	"github.com/benizzio/open-asset-allocator/api/rest/model"
 	"github.com/benizzio/open-asset-allocator/application"
 	"github.com/benizzio/open-asset-allocator/infra"
+	gininfra "github.com/benizzio/open-asset-allocator/infra/gin"
 	"github.com/benizzio/open-asset-allocator/langext"
 	"github.com/gin-gonic/gin"
 )
@@ -34,12 +35,12 @@ func (controller *DivergenceAnalysisRESTController) getDivergenceAnalysisOptions
 
 	portfolioIdParam := context.Param(portfolioIdParam)
 	portfolioId, err := langext.ParseInt64(portfolioIdParam)
-	if HandleAPIError(context, getPortfolioIdErrorMessage, err) {
+	if gininfra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
 		return
 	}
 
 	analysisOptions, err := controller.portfolioAnalysisConfigService.GetDivergenceAnalysisOptions(portfolioId)
-	if HandleAPIError(context, "Error getting divergence analysis options", err) {
+	if gininfra.HandleAPIError(context, "Error getting divergence analysis options", err) {
 		return
 	}
 
@@ -52,19 +53,19 @@ func (controller *DivergenceAnalysisRESTController) GetDivergenceAnalysis(contex
 
 	portfolioIdParamValue := context.Param(portfolioIdParam)
 	portfolioId, err := langext.ParseInt64(portfolioIdParamValue)
-	if HandleAPIError(context, getPortfolioIdErrorMessage, err) {
+	if gininfra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
 		return
 	}
 
 	var observationTimestampIdParamValue = context.Param(observationTimestampIdParam)
 	observationTimestampId, err := langext.ParseInt64(observationTimestampIdParamValue)
-	if HandleAPIError(context, getObservationTimestampIdErrorMessage, err) {
+	if gininfra.HandleAPIError(context, getObservationTimestampIdErrorMessage, err) {
 		return
 	}
 
 	planIdParamValue := context.Param(planIdParam)
 	planId, err := langext.ParseInt64(planIdParamValue)
-	if HandleAPIError(context, getPlanIdErrorMessage, err) {
+	if gininfra.HandleAPIError(context, getPlanIdErrorMessage, err) {
 		return
 	}
 
@@ -73,7 +74,7 @@ func (controller *DivergenceAnalysisRESTController) GetDivergenceAnalysis(contex
 		observationTimestampId,
 		planId,
 	)
-	if HandleAPIError(context, "Error generating portfolio divergence analysis", err) {
+	if gininfra.HandleAPIError(context, "Error generating portfolio divergence analysis", err) {
 		return
 	}
 
