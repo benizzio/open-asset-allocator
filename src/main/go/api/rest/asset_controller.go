@@ -135,7 +135,6 @@ func (controller *AssetRESTController) getExternalAssets(context *gin.Context) {
 		return
 	}
 
-	// TODO implement mapping to DTSs and responses
-	//var externalAssetDTSs = model.MapToExternalAssetDTSs(externalAssets)
-	//context.JSON(http.StatusOK, externalAssetDTSs)
+	var externalAssetDTSs = model.MapToExternalAssetDTSs(externalAssets)
+	context.JSON(http.StatusOK, externalAssetDTSs)
 }

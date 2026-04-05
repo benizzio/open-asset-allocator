@@ -28,7 +28,7 @@ const iauExpectedCurrency = "USD"
 // Authored by: GitHub Copilot (claude-opus-4.6)
 func TestSearchAssets_IAU(t *testing.T) {
 
-	var client = &integration.YahooFinanceAssetIntegrationClient{}
+	var client = integration.BuildYahooFinanceAssetIntegrationClient()
 
 	var searchResponse, err = client.SearchAssets(iauTicker)
 
@@ -56,7 +56,7 @@ func TestSearchAssets_IAU(t *testing.T) {
 // Authored by: GitHub Copilot (claude-opus-4.6)
 func TestQuoteAssetLastClosePrice_IAU(t *testing.T) {
 
-	var client = &integration.YahooFinanceAssetIntegrationClient{}
+	var client = integration.BuildYahooFinanceAssetIntegrationClient()
 
 	var chartResponse, err = client.QuoteAssetLastClosePrice(iauTicker)
 

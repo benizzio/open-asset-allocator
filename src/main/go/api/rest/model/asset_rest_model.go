@@ -15,6 +15,20 @@ type AssetDTS struct {
 	Ticker string                  `json:"ticker" validate:"required,max=40"`
 }
 
+// ExternalAssetDTS is the REST data transfer structure for external asset search results.
+// Maps all fields from the domain ExternalAsset, including Name and ExchangeName which are
+// excluded from the domain type's JSON serialization (used for persistence) but required in
+// API responses.
+//
+// Authored by: GitHub Copilot (claude-opus-4.6)
+type ExternalAssetDTS struct {
+	Source       string `json:"source"`
+	Ticker       string `json:"ticker"`
+	ExchangeId   string `json:"exchangeId"`
+	Name         string `json:"name"`
+	ExchangeName string `json:"exchangeName"`
+}
+
 // ================================================
 // MAPPING FUNCTIONS
 // ================================================
@@ -64,4 +78,50 @@ func MapToAssets(assetsDTS []*AssetDTS) []*domain.Asset {
 		assets[i] = MapToAsset(assetDTS)
 	}
 	return assets
+}
+
+// MapToExternalAssetDTS maps a domain ExternalAsset to its REST DTS representation.
+//
+// Parameters:
+//   - externalAsset: the domain ExternalAsset to map
+//
+// Returns:
+//   - *ExternalAssetDTS: the mapped REST DTS, or nil if the input is nil
+//
+// Example:
+//
+//	var dts = model.MapToExternalAssetDTS(externalAsset)
+//
+// Authored by: GitHub Copilot (claude-opus-4.6)
+func MapToExternalAssetDTS(externalAsset *domain.ExternalAsset) *ExternalAssetDTS {
+
+	if externalAsset == nil {
+		return nil
+	}
+
+	return &ExternalAssetDTS{
+		Source:       string(externalAsset.Source),
+		Ticker:       externalAsset.Ticker,
+		ExchangeId:   externalAsset.ExchangeId,
+		Name:         externalAsset.Name,
+		ExchangeName: externalAsset.ExchangeName,
+	}
+}
+
+// MapToExternalAssetDTSs maps a slice of domain ExternalAsset pointers to their REST DTS
+// representations.
+//
+// Parameters:
+//   - externalAssets: the slice of domain ExternalAsset pointers to map
+//
+// Returns:
+//   - []*ExternalAssetDTS: the mapped slice of REST DTSs
+//
+// Authored by: GitHub Copilot (claude-opus-4.6)
+func MapToExternalAssetDTSs(externalAssets []*domain.ExternalAsset) []*ExternalAssetDTS {
+	var externalAssetDTSs = make([]*ExternalAssetDTS, len(externalAssets))
+	for i, externalAsset := range externalAssets {
+		externalAssetDTSs[i] = MapToExternalAssetDTS(externalAsset)
+	}
+	return externalAssetDTSs
 }

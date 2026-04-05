@@ -35,9 +35,8 @@ type YahooFinanceAssetIntegrationService struct {
 //
 // Example:
 //
-//	var service = &YahooFinanceAssetIntegrationService{
-//	    Client: &integration.YahooFinanceAssetIntegrationClient{},
-//	}
+//	var client = integration.BuildYahooFinanceAssetIntegrationClient()
+//	var service = BuildYahooFinanceAssetIntegrationService(client)
 //	assets, err := service.SearchAssets("AAPL")
 //	if err != nil {
 //	    // handle error
@@ -101,9 +100,8 @@ func mapToExternalAsset(quote *integration.YahooFinanceSearchQuoteDTS) *domain.E
 //
 // Example:
 //
-//	var service = &YahooFinanceAssetIntegrationService{
-//	    Client: &integration.YahooFinanceAssetIntegrationClient{},
-//	}
+//	var client = integration.BuildYahooFinanceAssetIntegrationClient()
+//	var service = BuildYahooFinanceAssetIntegrationService(client)
 //	var asset = &domain.ExternalAsset{Source: domain.YahooFinanceSource, Ticker: "AAPL", ExchangeId: "NMS"}
 //	quote, err := service.QuoteAssetLastClosePrice(asset)
 //	if err != nil {
@@ -192,4 +190,28 @@ func extractLastClose(
 	var lastCloseDate = time.Unix(result.Timestamps[len(result.Timestamps)-1], 0)
 
 	return lastCloseQuote, lastCloseDate, nil
+}
+
+// BuildYahooFinanceAssetIntegrationService creates a new YahooFinanceAssetIntegrationService
+// with the given integration client.
+//
+// Parameters:
+//   - client: the Yahoo Finance HTTP integration client to delegate API calls to
+//
+// Returns:
+//   - *YahooFinanceAssetIntegrationService: the new service instance
+//
+// Example:
+//
+//	var client = integration.BuildYahooFinanceAssetIntegrationClient()
+//	var service = anticorruption.BuildYahooFinanceAssetIntegrationService(client)
+//	assets, err := service.SearchAssets("AAPL")
+//
+// Authored by: GitHub Copilot (claude-opus-4.6)
+func BuildYahooFinanceAssetIntegrationService(
+	client *integration.YahooFinanceAssetIntegrationClient,
+) *YahooFinanceAssetIntegrationService {
+	return &YahooFinanceAssetIntegrationService{
+		Client: client,
+	}
 }

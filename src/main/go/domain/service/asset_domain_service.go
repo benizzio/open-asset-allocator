@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/benizzio/open-asset-allocator/domain"
+	"github.com/benizzio/open-asset-allocator/langext"
 )
 
 type AssetIntegrationServicesPerSource map[domain.AssetExternalSource]domain.AssetIntegrationService
@@ -58,20 +59,38 @@ func (service *AssetDomService) InsertMappedAssetsInTransaction(
 	return persistedAssetsPerTicker, nil
 }
 
+// collectIntegrationServices extracts the integration service values from the source-keyed map
+// into a slice suitable for concurrent processing.
+//
+// Authored by: GitHub Copilot (claude-opus-4.6)
+func collectIntegrationServices(servicesPerSource AssetIntegrationServicesPerSource) []domain.AssetIntegrationService {
+	var services = make([]domain.AssetIntegrationService, 0, len(servicesPerSource))
+	for _, integrationService := range servicesPerSource {
+		services = append(services, integrationService)
+	}
+	return services
+}
+
+// SearchExternalAssets queries all configured external asset integration services concurrently
+// for assets matching the given query, and returns the aggregated results.
+//
+// Parameters:
+//   - query: the search term to query across all configured external sources
+//
+// Returns:
+//   - []*domain.ExternalAsset: the aggregated external assets from all sources
+//   - error: the first error encountered from any source, or nil if all succeeded
+//
+// Co-authored by: GitHub Copilot (claude-opus-4.6) and benizzio
 func (service *AssetDomService) SearchExternalAssets(query string) ([]*domain.ExternalAsset, error) {
 
-	var assets = make([]*domain.ExternalAsset, 0)
+	var integrationServices = collectIntegrationServices(service.assetIntegrationServicesPerSource)
 
-	for _, assetIntegrationService := range service.assetIntegrationServicesPerSource {
-		//TODO search in parallel goroutines and aggregate results
-		externalAssets, err := assetIntegrationService.SearchAssets(query)
-		if err != nil {
-			return nil, err
-		}
-		assets = append(assets, externalAssets...)
+	var searchAssetsOnService = func(integrationService domain.AssetIntegrationService) ([]*domain.ExternalAsset, error) {
+		return integrationService.SearchAssets(query)
 	}
 
-	return assets, nil
+	return langext.FlatMapConcurrently(integrationServices, searchAssetsOnService)
 }
 
 func BuildAssetDomService(assetRepository domain.AssetRepository, integrationServices AssetIntegrationServicesPerSource) *AssetDomService {

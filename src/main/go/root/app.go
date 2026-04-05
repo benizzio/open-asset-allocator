@@ -10,6 +10,7 @@ import (
 
 	"github.com/benizzio/open-asset-allocator/api/rest"
 	"github.com/benizzio/open-asset-allocator/application"
+	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/domain/infra/anticorruption"
 	"github.com/benizzio/open-asset-allocator/domain/infra/integration"
 	"github.com/benizzio/open-asset-allocator/domain/infra/repository"
@@ -62,19 +63,18 @@ func (app *App) buildAppComponents() {
 	var allocationRepository = repository.BuildAllocationRepository(app.databaseAdapter)
 	var assetRepository = repository.BuildAssetRDBMSRepository(app.databaseAdapter)
 
+	var yahooFinanceIntegrationClient = integration.BuildYahooFinanceAssetIntegrationClient()
+	var yahooFinanceIntegrationService = anticorruption.BuildYahooFinanceAssetIntegrationService(yahooFinanceIntegrationClient)
+
+	var assetIntegrationServices = service.AssetIntegrationServicesPerSource{
+		domain.YahooFinanceSource: yahooFinanceIntegrationService,
+	}
+
 	var portfolioDomService = service.BuildPortfolioDomService(portfolioRepository)
 	var portfolioAllocationDomService = service.BuildPortfolioAllocationDomService(portfolioAllocationRepository)
 	var allocationPlanDomService = service.BuildAllocationPlanDomService(allocationPlanRepository)
 	var allocationDomService = service.BuildAllocationDomService(allocationRepository)
-	var assetDomService = service.BuildAssetDomService(assetRepository)
-
-	// =====================================================
-	// Domain - Integration
-	// =====================================================
-	var yahooFinanceIntegrationClient = &integration.YahooFinanceAssetIntegrationClient{}
-	_ = &anticorruption.YahooFinanceAssetIntegrationService{
-		Client: yahooFinanceIntegrationClient,
-	}
+	var assetDomService = service.BuildAssetDomService(assetRepository, assetIntegrationServices)
 
 	// =====================================================
 	// Application

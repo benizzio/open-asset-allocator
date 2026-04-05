@@ -42,7 +42,7 @@ type YahooFinanceAssetIntegrationClient struct {
 //
 // Example:
 //
-//	var client = &YahooFinanceAssetIntegrationClient{}
+//	var client = BuildYahooFinanceAssetIntegrationClient()
 //	response, err := client.SearchAssets("AAPL")
 //	if err != nil {
 //	    // handle error
@@ -109,7 +109,7 @@ func buildSearchAssetsURL(queryValue string) (string, error) {
 //
 // Example:
 //
-//	var client = &YahooFinanceAssetIntegrationClient{}
+//	var client = BuildYahooFinanceAssetIntegrationClient()
 //	response, err := client.QuoteAssetLastClosePrice("AAPL")
 //	if err != nil {
 //	    // handle error
@@ -153,4 +153,19 @@ func buildQuoteAssetLastClosePriceURL(ticker string) (string, error) {
 	parsedURL.RawQuery = queryParams.Encode()
 
 	return parsedURL.String(), nil
+}
+
+// BuildYahooFinanceAssetIntegrationClient creates a new YahooFinanceAssetIntegrationClient instance.
+//
+// Returns:
+//   - *YahooFinanceAssetIntegrationClient: the new client instance
+//
+// Example:
+//
+//	var client = integration.BuildYahooFinanceAssetIntegrationClient()
+//	response, err := client.SearchAssets("AAPL")
+//
+// Authored by: GitHub Copilot (claude-opus-4.6)
+func BuildYahooFinanceAssetIntegrationClient() *YahooFinanceAssetIntegrationClient {
+	return &YahooFinanceAssetIntegrationClient{}
 }
