@@ -72,7 +72,7 @@ specific AGENTS.md, the structure is:
 
 <CodingStandards>
 
-<LiteratureAnIndustryReferences>
+<LiteratureAndIndustryReferences>
 
 - Follow the general principles of "Clean code: A handbook of agile software craftsmanship" by Robert C. Martin
     - Give special importance to:
@@ -86,7 +86,7 @@ specific AGENTS.md, the structure is:
 - Follow the general principles of "Clean Architecture: A Craftsman's Guide to Software Structure and Design" by Robert
   C. Martin
 
-</LiteratureAnIndustryReferences>
+</LiteratureAndIndustryReferences>
 
 <CustomCodeDocs>
 
