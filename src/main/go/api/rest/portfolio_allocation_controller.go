@@ -45,7 +45,7 @@ func (controller *PortfolioAllocationRESTController) getPortfolioAllocationHisto
 
 	var portfolioIdParamValue = context.Param(portfolioIdParam)
 	portfolioId, err := langext.ParseInt64(portfolioIdParamValue)
-	if HandleAPIError(context, getPortfolioIdErrorMessage, err) {
+	if gininfra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
 		return
 	}
 
@@ -53,7 +53,7 @@ func (controller *PortfolioAllocationRESTController) getPortfolioAllocationHisto
 	var observationTimestampId int64
 	if !langext.IsZeroValue(observationTimestampIdParamValue) {
 		observationTimestampId, err = langext.ParseInt64(observationTimestampIdParamValue)
-		if HandleAPIError(context, getObservationTimestampIdErrorMessage, err) {
+		if gininfra.HandleAPIError(context, getObservationTimestampIdErrorMessage, err) {
 			return
 		}
 	}
@@ -67,7 +67,7 @@ func (controller *PortfolioAllocationRESTController) getPortfolioAllocationHisto
 		if !langext.IsZeroValue(observationTimestampId) {
 			errorDetail = fmt.Sprintf(" for observation id %d", observationTimestampId)
 		}
-		HandleAPIError(
+		gininfra.HandleAPIError(
 			context,
 			fmt.Sprintf("Error getting portfolio history %s", errorDetail),
 			err,
@@ -104,7 +104,7 @@ func (controller *PortfolioAllocationRESTController) getAvailableHistoryObservat
 
 	var portfolioIdParamValue = context.Param(portfolioIdParam)
 	portfolioId, err := langext.ParseInt64(portfolioIdParamValue)
-	if HandleAPIError(context, getPortfolioIdErrorMessage, err) {
+	if gininfra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
 		return
 	}
 
@@ -112,7 +112,7 @@ func (controller *PortfolioAllocationRESTController) getAvailableHistoryObservat
 		portfolioId,
 		10,
 	)
-	if HandleAPIError(context, "Error getting available observation timestamps", err) {
+	if gininfra.HandleAPIError(context, "Error getting available observation timestamps", err) {
 		return
 	}
 
@@ -130,12 +130,12 @@ func (controller *PortfolioAllocationRESTController) getAvailablePortfolioAlloca
 
 	portfolioIdParamValue := context.Param(portfolioIdParam)
 	portfolioId, err := langext.ParseInt64(portfolioIdParamValue)
-	if HandleAPIError(context, getPortfolioIdErrorMessage, err) {
+	if gininfra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
 		return
 	}
 
 	availableClasses, err := controller.portfolioAllocationDomService.FindAvailablePortfolioAllocationClasses(portfolioId)
-	if HandleAPIError(context, "Error getting available portfolio allocation classes", err) {
+	if gininfra.HandleAPIError(context, "Error getting available portfolio allocation classes", err) {
 		return
 	}
 
@@ -146,13 +146,13 @@ func (controller *PortfolioAllocationRESTController) postPortfolioAllocationHist
 
 	var portfolioIdParamValue = context.Param(portfolioIdParam)
 	portfolioId, err := langext.ParseInt64(portfolioIdParamValue)
-	if HandleAPIError(context, getPortfolioIdErrorMessage, err) {
+	if gininfra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
 		return
 	}
 
 	var portfolioSnapshotDTS model.PortfolioSnapshotDTS
 	valid, err := gininfra.BindAndValidateJSONWithInvalidResponse(context, &portfolioSnapshotDTS)
-	if HandleAPIError(context, bindPortfolioSnapshotErrorMessage, err) || !valid {
+	if gininfra.HandleAPIError(context, bindPortfolioSnapshotErrorMessage, err) || !valid {
 		return
 	}
 
@@ -173,7 +173,7 @@ func (controller *PortfolioAllocationRESTController) postPortfolioAllocationHist
 		portfolioAllocations,
 	)
 
-	if HandleAPIError(context, "Error merging portfolio allocations", err) {
+	if gininfra.HandleAPIError(context, "Error merging portfolio allocations", err) {
 		return
 	}
 

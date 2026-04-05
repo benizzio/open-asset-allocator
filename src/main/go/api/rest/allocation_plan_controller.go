@@ -43,7 +43,7 @@ func (controller *AllocationPlanRESTController) getAllocationPlans(context *gin.
 		portfolioId,
 		&planType,
 	)
-	if HandleAPIError(context, "Error getting allocation plans", err) {
+	if gininfra.HandleAPIError(context, "Error getting allocation plans", err) {
 		return
 	}
 
@@ -56,13 +56,13 @@ func (controller *AllocationPlanRESTController) postAssetAllocationPlan(context 
 
 	var portfolioIdParamValue = context.Param(portfolioIdParam)
 	portfolioId, err := langext.ParseInt64(portfolioIdParamValue)
-	if HandleAPIError(context, getPortfolioIdErrorMessage, err) {
+	if gininfra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
 		return
 	}
 
 	var allocationPlanDTS model.AllocationPlanDTS
 	valid, err := gininfra.BindAndValidateJSONWithInvalidResponse(context, &allocationPlanDTS)
-	if HandleAPIError(context, "Error binding allocation plan", err) || !valid {
+	if gininfra.HandleAPIError(context, "Error binding allocation plan", err) || !valid {
 		return
 	}
 
@@ -70,12 +70,12 @@ func (controller *AllocationPlanRESTController) postAssetAllocationPlan(context 
 	allocationPlanDTS.Details = cleanedPlannedAllocations
 
 	allocationPlan, err := model.MapToAllocationPlan(&allocationPlanDTS, portfolioId, allocation.AssetAllocationPlan)
-	if HandleAPIError(context, "Error mapping allocation plan", err) {
+	if gininfra.HandleAPIError(context, "Error mapping allocation plan", err) {
 		return
 	}
 
 	err = controller.allocationPlanManagementAppService.PersistAllocationPlan(allocationPlan)
-	if HandleAPIError(context, "Error persisting allocation plan", err) {
+	if gininfra.HandleAPIError(context, "Error persisting allocation plan", err) {
 		return
 	}
 
