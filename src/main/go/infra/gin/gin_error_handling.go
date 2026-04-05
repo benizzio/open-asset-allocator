@@ -40,8 +40,7 @@ func HandleAPIError(context *gin.Context, message string, cause error) bool {
 
 func handleDomainError(context *gin.Context, cause error) bool {
 
-	var domValidationError *infra.DomainValidationError
-	if errors.As(cause, &domValidationError) {
+	if domValidationError, ok := errors.AsType[*infra.DomainValidationError](cause); ok {
 
 		var validationMessages = make([]string, len(domValidationError.Causes))
 		for i, validationError := range domValidationError.Causes {
