@@ -14,7 +14,18 @@ import (
 )
 
 // HandleAPIError handles an error from the API layer by logging it and sending an appropriate HTTP response.
+// It first attempts to match the error to a known domain error type (e.g. DomainValidationError) and sends
+// a specific response. If no domain match is found, it falls back to a generic 500 Internal Server Error.
 // Returns true if an error was present and handled, false otherwise.
+//
+// Example:
+//
+//	assets, err := service.GetAssets()
+//	if gininfra.HandleAPIError(context, "Error getting assets", err) {
+//		return
+//	}
+//
+// Co-authored by: GitHub Copilot
 func HandleAPIError(context *gin.Context, message string, cause error) bool {
 
 	var handle = cause != nil
@@ -38,6 +49,7 @@ func HandleAPIError(context *gin.Context, message string, cause error) bool {
 	return handle
 }
 
+// handleDomainError checks if the error matches a known domain error type and sends the corresponding HTTP response.
 func handleDomainError(context *gin.Context, cause error) bool {
 
 	if domValidationError, ok := errors.AsType[*infra.DomainValidationError](cause); ok {
@@ -72,6 +84,15 @@ func sendValidationErrorResponse(context *gin.Context, errorMessages []string) {
 }
 
 // SendDataNotFoundResponse sends a standardized HTTP 404 response for a missing resource.
+//
+// Example:
+//
+//	if asset == nil {
+//		gininfra.SendDataNotFoundResponse(context, "Asset", assetId)
+//		return
+//	}
+//
+// Co-authored by: GitHub Copilot
 func SendDataNotFoundResponse(context *gin.Context, dataType string, id string) {
 	context.JSON(
 		http.StatusNotFound,
