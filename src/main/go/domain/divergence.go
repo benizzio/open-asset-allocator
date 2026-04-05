@@ -14,10 +14,12 @@ type PotentialDivergence struct {
 	HierarchicalId string
 
 	// TotalMarketValue informs allocated value in the portfolio for the point of comparison.
-	// For upper levels within the hierarchy (containing lower levels), it is a sum of all lower levels' points of comparison.
+	// For upper levels within the hierarchy (containing lower levels), it is a sum
+	// of all lower levels' points of comparison.
 	TotalMarketValue int64
 
-	// TotalMarketValueDivergence informs the difference between the allocated value and the planned value at the point of comparison.
+	// TotalMarketValueDivergence informs the difference between the allocated value and
+	// the planned value at the point of comparison.
 	TotalMarketValueDivergence int64
 
 	// InternalDivergences references to points of comparison in the lower levels of the hierarchy, when they exist.

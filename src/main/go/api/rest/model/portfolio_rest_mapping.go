@@ -78,7 +78,9 @@ func AggregateAndMapToPortfolioHistoryDTSs(portfolioHistory []*domain.PortfolioA
 	return aggregatedPortfolioHistory
 }
 
-func aggregateHistoryAsDTSMap(portfolioHistory []*domain.PortfolioAllocation) portfolioAllocationsPerObservationTimestamp {
+func aggregateHistoryAsDTSMap(
+	portfolioHistory []*domain.PortfolioAllocation,
+) portfolioAllocationsPerObservationTimestamp {
 
 	var portfolioAllocationsPerTimestamp = make(portfolioAllocationsPerObservationTimestamp)
 	for _, portfolioAllocation := range portfolioHistory {
@@ -111,7 +113,8 @@ func buildHistoryDTS(
 
 	var aggregatedPortfoliohistory = make([]*PortfolioSnapshotDTS, 0)
 	for observationTimestamp, allocations := range portfolioAllocationsPerObservationTimestamp {
-		var totalMarketValue = portfolioAllocationsPerObservationTimestamp.getAggregatedMarketValue(observationTimestamp)
+		var totalMarketValue = portfolioAllocationsPerObservationTimestamp.
+			getAggregatedMarketValue(observationTimestamp)
 		obs := observationTimestamp
 		portfolioSnapshot := buildSnapshotDTS(&obs, allocations, totalMarketValue)
 		aggregatedPortfoliohistory = append(aggregatedPortfoliohistory, portfolioSnapshot)
@@ -152,7 +155,9 @@ func MapToPortfolioObservationTimestampDTSs(
 	return observationTimestampsDTS
 }
 
-func mapToObservationTimestampDTS(observationTimestamp *domain.PortfolioObservationTimestamp) *PortfolioObservationTimestampDTS {
+func mapToObservationTimestampDTS(
+	observationTimestamp *domain.PortfolioObservationTimestamp,
+) *PortfolioObservationTimestampDTS {
 	var observationTimestampDTS = &PortfolioObservationTimestampDTS{
 		Id:        langext.ParseableInt64(observationTimestamp.Id),
 		TimeTag:   observationTimestamp.TimeTag,

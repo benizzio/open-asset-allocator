@@ -169,7 +169,8 @@ func readPlannedAllocationForRepeatedValidationData(
 	}
 }
 
-// readPlannedAllocationForSliceSizeTotalsValidationData aggregates slice size percentages per hierarchy level for validations
+// readPlannedAllocationForSliceSizeTotalsValidationData aggregates slice size percentages
+// per hierarchy level for validations
 func readPlannedAllocationForSliceSizeTotalsValidationData(
 	plannedAllocation *domain.PlannedAllocation,
 	validation *allocationPlanValidationData,
@@ -384,7 +385,9 @@ func (service *AllocationPlanDomService) validateHierarchyBranchesCompleteness(
 			errors,
 			infra.BuildAppErrorFormattedUnconverted(
 				service,
-				"Planned allocations contain hierarchy branches with missing parent levels: \n%s\n for portfolio hierarchy: %s",
+				"Planned allocations contain hierarchy branches "+
+					"with missing parent levels: \n%s\n "+
+					"for portfolio hierarchy: %s",
 				validationData.noParentHierarchyBranches.ArrowString(),
 				userFriendlyHierarchyLevels.PrettyString(),
 			),
@@ -399,7 +402,9 @@ func (service *AllocationPlanDomService) validateHierarchyBranchesCompleteness(
 			errors,
 			infra.BuildAppErrorFormattedUnconverted(
 				service,
-				"Planned allocations contain hierarchy branches with missing child levels: \n%s\n for portfolio hierarchy: %s",
+				"Planned allocations contain hierarchy branches "+
+					"with missing child levels: \n%s\n "+
+					"for portfolio hierarchy: %s",
 				userFriendlyChildlessBranches.ArrowString(),
 				userFriendlyHierarchyLevels.PrettyString(),
 			),

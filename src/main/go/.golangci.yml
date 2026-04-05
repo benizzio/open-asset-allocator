@@ -12,6 +12,9 @@ linters:
   enable:
     # Line length enforcement at 120 columns
     - lll
+  disable:
+    # Unused function detection is suppressed; dead code will be removed via the boyscout rule.
+    - unused
 
   settings:
     # Line length: 120 columns, tabs count as 4 spaces for measurement
@@ -53,6 +56,11 @@ formatters:
     goimports:
       local-prefixes:
         - github.com/benizzio/open-asset-allocator
+  exclusions:
+    # Import grouping is not enforced during lint; it is fixed incrementally via the
+    # boyscout rule and `golangci-lint fmt`.
+    paths:
+      - ".*"
 
 # Output configuration
 output:

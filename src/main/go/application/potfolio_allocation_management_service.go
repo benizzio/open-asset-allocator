@@ -62,7 +62,8 @@ func (service *PortfolioAllocationManagementAppService) manageObservationTimesta
 
 	if langext.IsZeroValue(observationTimestamp.Id) {
 
-		managedObservationTimestamp, err = service.portfolioAllocationDomService.InsertObservationTimestampInTransaction(
+		managedObservationTimestamp, err = service.portfolioAllocationDomService.
+			InsertObservationTimestampInTransaction(
 			transContext,
 			observationTimestamp,
 		)
