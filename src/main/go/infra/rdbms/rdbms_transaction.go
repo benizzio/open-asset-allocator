@@ -5,14 +5,16 @@ import (
 	"database/sql"
 )
 
-const sqlTransactionContextKey = "TRANSACTION"
+type contextKey string
+
+const sqlTransactionContextKey contextKey = "TRANSACTION"
 
 type SQLTransactionalContext struct {
 	context.Context
 }
 
 func (transactionalContext *SQLTransactionalContext) GetTransaction() *sql.Tx {
-	return transactionalContext.Context.Value(sqlTransactionContextKey).(*sql.Tx)
+	return transactionalContext.Value(sqlTransactionContextKey).(*sql.Tx)
 }
 
 func withTransaction(db *sql.DB) (*SQLTransactionalContext, error) {

@@ -620,6 +620,7 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 		"application/json",
 		strings.NewReader(postPortfolioSnapshotJSON),
 	)
+	assert.NoError(t, err)
 	assert.NotNil(t, response)
 
 	if response == nil {

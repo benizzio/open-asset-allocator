@@ -222,7 +222,7 @@ func (repository *AllocationPlanRDBMSRepository) mergePlannedAllocationsInTransa
 		return err
 	}
 
-	return repository.mergePlannedAllocations(err, transactionalContext, allocationPlanId)
+	return repository.mergePlannedAllocations(transactionalContext, allocationPlanId)
 }
 
 func (repository *AllocationPlanRDBMSRepository) insertPlannedAllocationsInTempTable(
@@ -291,11 +291,10 @@ func (repository *AllocationPlanRDBMSRepository) preparePlannedAllocationTempIns
 }
 
 func (repository *AllocationPlanRDBMSRepository) mergePlannedAllocations(
-	err error,
 	transactionalContext *rdbms.SQLTransactionalContext,
 	allocationPlanId int64,
 ) error {
-	_, err = repository.dbAdapter.ExecuteInTransaction(
+	_, err := repository.dbAdapter.ExecuteInTransaction(
 		transactionalContext,
 		plannedAllocationMergeSQL,
 		allocationPlanId,

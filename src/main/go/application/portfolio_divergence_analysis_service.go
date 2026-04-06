@@ -505,7 +505,7 @@ func getParentTotalMarketValue(
 	parentPotentialDivergence *domain.PotentialDivergence,
 	isTopHierarchyLevel bool,
 ) int64 {
-	var parentTotalMarketValue int64 = 0
+	var parentTotalMarketValue int64
 	if isTopHierarchyLevel {
 		parentTotalMarketValue = analysisContextValue.divergenceAnalysis.PortfolioTotalMarketValue
 	} else {
