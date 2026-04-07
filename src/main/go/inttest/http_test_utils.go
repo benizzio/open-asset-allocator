@@ -17,6 +17,9 @@ import (
 //
 // Co-authored by: GitHub Copilot
 func deferCloseResponseBody(response *http.Response) {
+	if response == nil || response.Body == nil {
+		return
+	}
 	err := response.Body.Close()
 	if err != nil {
 		glog.Errorf("Error closing response body: %v", err)
