@@ -11,7 +11,7 @@ jobs:
     continue-on-error: false
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set Go version from go.mod
         id: go-version
@@ -20,7 +20,7 @@ jobs:
           echo "GO_VERSION=$GO_VERSION" >> $GITHUB_OUTPUT
 
       - name: Setup Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v6
         with:
           go-version: ${{ steps.go-version.outputs.GO_VERSION }}
 
@@ -29,3 +29,4 @@ jobs:
         with:
           version: v2.11
           working-directory: src/main/go
+          args: --new-from-merge-base=origin/main
