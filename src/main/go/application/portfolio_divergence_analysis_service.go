@@ -3,11 +3,12 @@ package application
 import (
 	"context"
 
+	"github.com/golang/glog"
+	"github.com/shopspring/decimal"
+
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/langext"
-	"github.com/golang/glog"
-	"github.com/shopspring/decimal"
 )
 
 type PortfolioDivergenceAnalysisAppService struct {
