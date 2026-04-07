@@ -1,10 +1,11 @@
 package repository
 
 import (
-	"github.com/benizzio/open-asset-allocator/infra"
-	"github.com/benizzio/open-asset-allocator/infra/rdbms"
 	dbx "github.com/go-ozzo/ozzo-dbx"
 	"github.com/golang/glog"
+
+	"github.com/benizzio/open-asset-allocator/infra"
+	"github.com/benizzio/open-asset-allocator/infra/rdbms"
 )
 
 const (
