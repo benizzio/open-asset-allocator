@@ -25,7 +25,9 @@ func (controller *DivergenceAnalysisRESTController) BuildRoutes() []infra.RESTRo
 		},
 		{
 			Method:   http.MethodGet,
-			Path:     "/api/v2/portfolio/:" + portfolioIdParam + "/divergence/:" + observationTimestampIdParam + "/allocation-plan/:" + planIdParam,
+			Path: "/api/v2/portfolio/:" + portfolioIdParam +
+				"/divergence/:" + observationTimestampIdParam +
+				"/allocation-plan/:" + planIdParam,
 			Handlers: gin.HandlersChain{controller.GetDivergenceAnalysis},
 		},
 	}

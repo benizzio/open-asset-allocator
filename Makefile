@@ -1,6 +1,14 @@
 .DEFAULT_GOAL := build
 
 
+# Runs golangci-lint on the Go source
+lint:
+	cd src/main/go && golangci-lint run ./...
+
+# Runs golangci-lint formatter (goimports) on the Go source
+lint-fmt:
+	cd src/main/go && golangci-lint fmt ./...
+
 # Runs the tests for the application
 test:
 	./test.sh

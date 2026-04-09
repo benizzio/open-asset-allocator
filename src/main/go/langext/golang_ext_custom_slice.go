@@ -67,7 +67,7 @@ func joinAny[T any](elements []T, separator string) string {
 		if index > 0 {
 			_, _ = builder.WriteString(separator)
 		}
-		_, _ = builder.WriteString(fmt.Sprint(value))
+		_, _ = fmt.Fprint(&builder, value)
 	}
 
 	return builder.String()

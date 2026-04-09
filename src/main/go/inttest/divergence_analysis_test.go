@@ -13,7 +13,7 @@ func TestGetDivergenceAnalysisOptions(t *testing.T) {
 
 	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/divergence/options")
 	assert.NoError(t, err)
-	defer response.Body.Close()
+	defer deferCloseResponseBody(response)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 
@@ -44,7 +44,7 @@ func TestGetDivergenceAnalysisV2(t *testing.T) {
 
 	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/v2/portfolio/1/divergence/1/allocation-plan/1")
 	assert.NoError(t, err)
-	defer response.Body.Close()
+	defer deferCloseResponseBody(response)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 
@@ -142,7 +142,7 @@ func TestGetDivergenceAnalysisV2WhenPlanLowestLevelHasDifferentRanges(t *testing
 
 	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/v2/portfolio/3/divergence/2/allocation-plan/2")
 	assert.NoError(t, err)
-	defer response.Body.Close()
+	defer deferCloseResponseBody(response)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 
@@ -219,7 +219,7 @@ func TestGetDivergenceAnalysisV2WhenPlanHighestLevelHasExtraAllocation(t *testin
 
 	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/v2/portfolio/3/divergence/3/allocation-plan/3")
 	assert.NoError(t, err)
-	defer response.Body.Close()
+	defer deferCloseResponseBody(response)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 
@@ -282,7 +282,7 @@ func TestGetDivergenceAnalysisV2WhenHistoryHighestLevelHasExtraAllocation(t *tes
 
 	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/v2/portfolio/3/divergence/4/allocation-plan/4")
 	assert.NoError(t, err)
-	defer response.Body.Close()
+	defer deferCloseResponseBody(response)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 
@@ -345,7 +345,7 @@ func TestGetDivergenceAnalysisV2FullDivergence(t *testing.T) {
 
 	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/v2/portfolio/3/divergence/5/allocation-plan/5")
 	assert.NoError(t, err)
-	defer response.Body.Close()
+	defer deferCloseResponseBody(response)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 

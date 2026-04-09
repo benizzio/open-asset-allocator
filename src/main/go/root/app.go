@@ -190,6 +190,5 @@ func buildStopContext() (context.Context, context.CancelFunc) {
 func buildStopChannel() chan os.Signal {
 	var stopChannel = make(chan os.Signal, 1)
 	signal.Notify(stopChannel, syscall.SIGINT, syscall.SIGTERM)
-	signal.Notify(stopChannel, os.Interrupt, os.Kill)
 	return stopChannel
 }

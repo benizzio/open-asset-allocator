@@ -7,11 +7,13 @@ import (
 	"github.com/benizzio/open-asset-allocator/langext"
 )
 
+type contextKey string
+
 const (
-	allocationIterationContextKey    = "allocationIteration"
-	hierarchySubIterationContextKey  = "hierarchySubIteration"
-	divergenceAnalysisContextKey     = "divergenceAnalysis"
-	potentialDivergenceMapContextKey = "potentialDivergenceMap"
+	allocationIterationContextKey    contextKey = "allocationIteration"
+	hierarchySubIterationContextKey  contextKey = "hierarchySubIteration"
+	divergenceAnalysisContextKey     contextKey = "divergenceAnalysis"
+	potentialDivergenceMapContextKey contextKey = "potentialDivergenceMap"
 )
 
 type divergenceAnalysisContextValue struct {

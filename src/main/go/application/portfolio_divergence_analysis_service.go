@@ -3,11 +3,12 @@ package application
 import (
 	"context"
 
+	"github.com/golang/glog"
+	"github.com/shopspring/decimal"
+
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/langext"
-	"github.com/golang/glog"
-	"github.com/shopspring/decimal"
 )
 
 type PortfolioDivergenceAnalysisAppService struct {
@@ -44,7 +45,9 @@ func (service *PortfolioDivergenceAnalysisAppService) GeneratePortfolioDivergenc
 	var analysisContextValue = getDivergenceAnalysisContextValue(analysisContext)
 	// TODO verification for debug logging, this should be logged only in debug mode
 	glog.Infof(
-		"Contextual data for divergence analysis obtained: portfolio \"%s\" at observation \"%s\" will be compared to allocation plan %d",
+		"Contextual data for divergence analysis obtained: "+
+			"portfolio \"%s\" at observation \"%s\" "+
+			"will be compared to allocation plan %d",
 		analysisContextValue.portfolio.Name,
 		analysisContextValue.divergenceAnalysis.ObservationTimestamp.TimeTag,
 		allocationPlanId,
@@ -66,8 +69,8 @@ func (service *PortfolioDivergenceAnalysisAppService) GeneratePortfolioDivergenc
 	return divergenceAnalysis, nil
 }
 
-// initializeAnalysisContextForObservationTimestamp initializes the all the basic structures needed to create a divergence analysis
-// and add them to a context.Context.
+// initializeAnalysisContextForObservationTimestamp initializes the all the basic structures
+// needed to create a divergence analysis and add them to a context.Context.
 func (service *PortfolioDivergenceAnalysisAppService) initializeAnalysisContextForObservationTimestamp(
 	portfolioId int64,
 	observationTimestampId int64,
@@ -140,8 +143,9 @@ func (service *PortfolioDivergenceAnalysisAppService) generateDivergenceAnalysis
 	return potentialDivergenceMap, nil
 }
 
-// complementAnalysisWithAllocationPlanSetDifference finalizes the divergence analysis by calculating the divergence values
-// compared to the planned values of each PotentialDivergence node, while also generating PotentialDivergences for the difference
+// complementAnalysisWithAllocationPlanSetDifference finalizes the divergence analysis by
+// calculating the divergence values compared to the planned values of each
+// PotentialDivergence node, while also generating PotentialDivergences for the difference
 // between portfolio allocations and planned allocations datasets, adding PotentialDivergences
 // for the planned allocations that are not allocated in the portfolio.
 func (service *PortfolioDivergenceAnalysisAppService) complementAnalysisWithAllocationPlanSetDifference(
@@ -152,7 +156,8 @@ func (service *PortfolioDivergenceAnalysisAppService) complementAnalysisWithAllo
 	var analysisContextValue = getDivergenceAnalysisContextValue(analysisContext)
 	var divergenceAnalysis = analysisContextValue.divergenceAnalysis
 
-	plannedAllocationMap, err := service.allocationPlanDomService.GetPlannedAllocationsPerHyerarchicalIdMap(allocationPlanId)
+	plannedAllocationMap, err := service.allocationPlanDomService.
+		GetPlannedAllocationsPerHyerarchicalIdMap(allocationPlanId)
 	if err != nil {
 		return err
 	}
@@ -414,7 +419,8 @@ func calculateDivergenceValue(
 
 	// TODO verification for debug logging, this should be logged only in debug mode
 	glog.Infof(
-		"Calculated divergence value for %s: planned %s%% of level total %d, so planned value %d, current value %d, divergence %d",
+		"Calculated divergence value for %s: planned %s%% of level total %d, "+
+			"so planned value %d, current value %d, divergence %d",
 		potentialDivergence.HierarchicalId,
 		plannedPercentage,
 		levelTotalMarketValue,
@@ -500,7 +506,7 @@ func getParentTotalMarketValue(
 	parentPotentialDivergence *domain.PotentialDivergence,
 	isTopHierarchyLevel bool,
 ) int64 {
-	var parentTotalMarketValue int64 = 0
+	var parentTotalMarketValue int64
 	if isTopHierarchyLevel {
 		parentTotalMarketValue = analysisContextValue.divergenceAnalysis.PortfolioTotalMarketValue
 	} else {
