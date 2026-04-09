@@ -203,7 +203,7 @@ func (repository *PortfolioAllocationRDBMSRepository) FindAvailablePortfolioAllo
 		return nil, err
 	}
 
-	return repository.scanAvailablePortfolioAllocationClassesRows(rows, err)
+	return repository.scanAvailablePortfolioAllocationClassesRows(rows)
 }
 
 func (repository *PortfolioAllocationRDBMSRepository) findAvailablePortfolioAllocationClassesRows(
@@ -224,14 +224,13 @@ func (repository *PortfolioAllocationRDBMSRepository) findAvailablePortfolioAllo
 
 func (repository *PortfolioAllocationRDBMSRepository) scanAvailablePortfolioAllocationClassesRows(
 	rows *dbx.Rows,
-	err error,
 ) ([]string, error) {
 
 	var queryResult = make([]string, 0)
 	for rows.Next() {
 
 		var class string
-		err = rows.Scan(&class)
+		err := rows.Scan(&class)
 		if err != nil {
 			return nil, infra.PropagateAsAppErrorWithNewMessage(
 				err,

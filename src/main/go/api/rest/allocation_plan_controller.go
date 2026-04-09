@@ -37,6 +37,9 @@ func (controller *AllocationPlanRESTController) getAllocationPlans(context *gin.
 
 	var portfolioIdParamValue = context.Param(portfolioIdParam)
 	portfolioId, err := langext.ParseInt64(portfolioIdParamValue)
+	if gininfra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
+		return
+	}
 
 	var planType = allocation.AssetAllocationPlan
 	allocationPlans, err := controller.allocationPlanService.GetAllocationPlans(

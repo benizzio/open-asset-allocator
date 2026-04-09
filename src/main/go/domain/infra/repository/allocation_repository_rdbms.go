@@ -1,9 +1,11 @@
 package repository
 
 import (
+	dbx "github.com/go-ozzo/ozzo-dbx"
+	"github.com/golang/glog"
+
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/benizzio/open-asset-allocator/infra/rdbms"
-	dbx "github.com/go-ozzo/ozzo-dbx"
 )
 
 const (
@@ -63,7 +65,11 @@ func (repository *AllocationRDBMSRepository) FindAvailableAllocationClassesFromA
 			repository,
 		)
 	}
-	defer rows.Close()
+	defer func() {
+		if closeErr := rows.Close(); closeErr != nil {
+			glog.Errorf("Error closing rows: %v", closeErr)
+		}
+	}()
 
 	return repository.scanAllocationClassesRows(rows)
 }

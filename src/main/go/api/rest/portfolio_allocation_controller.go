@@ -134,7 +134,8 @@ func (controller *PortfolioAllocationRESTController) getAvailablePortfolioAlloca
 		return
 	}
 
-	availableClasses, err := controller.portfolioAllocationDomService.FindAvailablePortfolioAllocationClasses(portfolioId)
+	availableClasses, err := controller.portfolioAllocationDomService.
+		FindAvailablePortfolioAllocationClasses(portfolioId)
 	if gininfra.HandleAPIError(context, "Error getting available portfolio allocation classes", err) {
 		return
 	}

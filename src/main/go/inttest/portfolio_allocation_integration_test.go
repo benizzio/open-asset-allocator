@@ -19,7 +19,7 @@ func TestGetPortfolioAllocationHistory(t *testing.T) {
 
 	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/history")
 	assert.NoError(t, err)
-	defer response.Body.Close()
+	defer deferCloseResponseBody(response)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 
@@ -140,7 +140,7 @@ func TestGetPortfolioAllocationHistoryForObservationTimestamp(t *testing.T) {
 
 	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/history?observationTimestampId=2")
 	assert.NoError(t, err)
-	defer response.Body.Close()
+	defer deferCloseResponseBody(response)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 
@@ -181,7 +181,7 @@ func TestGetPortfolioAllocationHistoryForObservationTimestampNoneFound(t *testin
 
 	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/2/history?observationTimestampId=2")
 	assert.NoError(t, err)
-	defer response.Body.Close()
+	defer deferCloseResponseBody(response)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 
@@ -208,7 +208,7 @@ func TestGetAvailableHistoryObservations(t *testing.T) {
 	// Call the API endpoint to get available history observations
 	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/history/observation")
 	assert.NoError(t, err)
-	defer response.Body.Close()
+	defer deferCloseResponseBody(response)
 
 	// Verify successful response status code
 	assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -295,7 +295,7 @@ func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 		strings.NewReader(postPortfolioSnapshotJSON),
 	)
 	assert.NoError(t, err)
-	defer response.Body.Close()
+	defer deferCloseResponseBody(response)
 	assert.Equal(t, http.StatusNoContent, response.StatusCode)
 
 	t.Cleanup(
@@ -436,7 +436,7 @@ func TestPostPortfolioAllocationHistoryInsertEmptyZeroTimestamp(t *testing.T) {
 	)
 
 	assert.NoError(t, err)
-	defer response.Body.Close()
+	defer deferCloseResponseBody(response)
 	assert.Equal(t, http.StatusNoContent, response.StatusCode)
 
 	// Verify that the response body is empty as expected for 204 No Content
@@ -620,12 +620,13 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 		"application/json",
 		strings.NewReader(postPortfolioSnapshotJSON),
 	)
+	assert.NoError(t, err)
 	assert.NotNil(t, response)
 
 	if response == nil {
 		return
 	}
-	defer response.Body.Close()
+	defer deferCloseResponseBody(response)
 
 	body, err := io.ReadAll(response.Body)
 	assert.NoError(t, err)
@@ -1064,7 +1065,7 @@ func postPortfolioAllocationForValidationFailure(t *testing.T, postPortfolioJSON
 		strings.NewReader(postPortfolioJSON),
 	)
 	assert.NoError(t, err)
-	defer response.Body.Close()
+	defer deferCloseResponseBody(response)
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
 
 	body, err := io.ReadAll(response.Body)
@@ -1137,7 +1138,7 @@ func TestGetPortfolioAllocationHistoryWithMultiplePortfoliosAndManyObservations(
 	// Act: Get portfolio history for portfolio 2 with the default limit of 10 observations
 	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/2/history")
 	assert.NoError(t, err)
-	defer response.Body.Close()
+	defer deferCloseResponseBody(response)
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 
 	body, err := io.ReadAll(response.Body)
@@ -1173,7 +1174,7 @@ func TestGetPortfolioAllocationHistoryWithMultiplePortfoliosAndManyObservations(
 	// and hasn't been affected by the changes
 	response1, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/history")
 	assert.NoError(t, err)
-	defer response1.Body.Close()
+	defer deferCloseResponseBody(response1)
 	assert.Equal(t, http.StatusOK, response1.StatusCode)
 
 	body1, err := io.ReadAll(response1.Body)
@@ -1215,7 +1216,7 @@ func TestPostPortfolioAllocationHistoryValidation_ClassExceedsMaxLength(t *testi
 		strings.NewReader(payload),
 	)
 	assert.NoError(t, err)
-	defer response.Body.Close()
+	defer deferCloseResponseBody(response)
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
 
 	body, err := io.ReadAll(response.Body)
@@ -1257,7 +1258,7 @@ func TestPostPortfolioAllocationHistoryValidation_AssetTickerExceedsMaxLength(t 
 		strings.NewReader(payload),
 	)
 	assert.NoError(t, err)
-	defer response.Body.Close()
+	defer deferCloseResponseBody(response)
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
 
 	body, err := io.ReadAll(response.Body)
@@ -1299,7 +1300,7 @@ func TestPostPortfolioAllocationHistoryValidation_AssetNameExceedsMaxLength(t *t
 		strings.NewReader(payload),
 	)
 	assert.NoError(t, err)
-	defer response.Body.Close()
+	defer deferCloseResponseBody(response)
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
 
 	body, err := io.ReadAll(response.Body)

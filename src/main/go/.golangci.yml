@@ -1,0 +1,64 @@
+version: "2"
+
+# Run configuration
+run:
+  timeout: 5m
+  tests: true
+
+# Linters configuration
+linters:
+  # Start from the standard set of linters (errcheck, govet, ineffassign, staticcheck, unused)
+  default: standard
+  enable:
+    # Line length enforcement at 120 columns
+    - lll
+  disable:
+    # Unused function detection is suppressed; dead code will be removed via the boyscout rule.
+    - unused
+
+  settings:
+    # Line length: 120 columns, tabs count as 4 spaces for measurement
+    lll:
+      line-length: 120
+      tab-width: 4
+
+    # Revive: general purpose linter with fine-grained rule control
+    revive:
+      enable-default-rules: true
+      rules:
+        # Disable the requirement for comments on all exported symbols.
+        # This project follows clean code principles and uses godoc selectively, as
+        # documented in AGENTS.md and src/main/go/AGENTS.md.
+        - name: exported
+          disabled: true
+
+  exclusions:
+    # Built-in presets to suppress common false positives
+    presets:
+      - comments
+      - common-false-positives
+      - std-error-handling
+    rules:
+      # Relax line length for test files and test infrastructure, which often
+      # contain long JSON strings and SQL statements
+      - linters:
+          - lll
+        path: "_test\\.go"
+      - linters:
+          - lll
+        path: "inttest/"
+
+# Formatters configuration (used by `golangci-lint fmt`)
+formatters:
+  enable:
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/benizzio/open-asset-allocator
+
+# Output configuration
+output:
+  formats:
+    text:
+      print-linter-name: true

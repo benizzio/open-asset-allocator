@@ -18,7 +18,8 @@ func (service *PortfolioAllocationDomService) GetPortfolioAllocationHistory(port
 	[]*domain.PortfolioAllocation,
 	error,
 ) {
-	return service.portfolioAllocationRepository.FindAllPortfolioAllocationsWithinObservationTimestampsLimit(portfolioId, 10)
+	return service.portfolioAllocationRepository.
+		FindAllPortfolioAllocationsWithinObservationTimestampsLimit(portfolioId, 10)
 }
 
 func (service *PortfolioAllocationDomService) FindPortfolioAllocationsByObservationTimestamp(
@@ -130,7 +131,9 @@ func (service *PortfolioAllocationDomService) InsertObservationTimestampInTransa
 	)
 }
 
-func BuildPortfolioAllocationDomService(portfolioAllocationRepository domain.PortfolioAllocationRepository) *PortfolioAllocationDomService {
+func BuildPortfolioAllocationDomService(
+	portfolioAllocationRepository domain.PortfolioAllocationRepository,
+) *PortfolioAllocationDomService {
 	return &PortfolioAllocationDomService{
 		allocationHierarchyFieldExtractorMap: map[string]func(*domain.PortfolioAllocation) string{
 			"assetTicker": func(allocation *domain.PortfolioAllocation) string {

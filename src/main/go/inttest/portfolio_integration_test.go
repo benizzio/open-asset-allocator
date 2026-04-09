@@ -20,7 +20,7 @@ func TestGetPortfolio(t *testing.T) {
 
 	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1")
 	assert.NoError(t, err)
-	defer response.Body.Close()
+	defer deferCloseResponseBody(response)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 
@@ -54,7 +54,7 @@ func TestGetPortfolios(t *testing.T) {
 
 	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio")
 	assert.NoError(t, err)
-	defer response.Body.Close()
+	defer deferCloseResponseBody(response)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 
@@ -169,7 +169,7 @@ func TestPostPortfolio(t *testing.T) {
 	)
 
 	assert.NoError(t, err)
-	defer response.Body.Close()
+	defer deferCloseResponseBody(response)
 
 	assert.Equal(t, http.StatusCreated, response.StatusCode)
 
@@ -245,7 +245,7 @@ func TestPostPortfolioWithAllocationStructure(t *testing.T) {
 	)
 
 	assert.NoError(t, err)
-	defer response.Body.Close()
+	defer deferCloseResponseBody(response)
 
 	assert.Equal(t, http.StatusCreated, response.StatusCode)
 
@@ -311,7 +311,7 @@ func postPortfolioForValidationFailure(t *testing.T, postPortfolioJSON string) [
 		strings.NewReader(postPortfolioJSON),
 	)
 	assert.NoError(t, err)
-	defer response.Body.Close()
+	defer deferCloseResponseBody(response)
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
 
 	body, err := io.ReadAll(response.Body)
@@ -336,7 +336,7 @@ func TestPutPortfolio(t *testing.T) {
 	`
 
 	response := putPortfolio(t, putPortfolioJSON)
-	defer response.Body.Close()
+	defer deferCloseResponseBody(response)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 
@@ -494,7 +494,7 @@ func TestPutPortfolioWithAllocationStructure(t *testing.T) {
 	`
 
 	response := putPortfolio(t, putPortfolioJSON)
-	defer response.Body.Close()
+	defer deferCloseResponseBody(response)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 
@@ -537,7 +537,7 @@ func TestPutPortfolioWithAllocationStructure(t *testing.T) {
 func putForValidationFailure(t *testing.T, putPortfolioJSON string) []byte {
 
 	response := putPortfolio(t, putPortfolioJSON)
-	defer response.Body.Close()
+	defer deferCloseResponseBody(response)
 
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
 
@@ -560,7 +560,7 @@ func TestGetAvailablePortfolioAllocationClasses(t *testing.T) {
 
 	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/4/allocation-classes")
 	assert.NoError(t, err)
-	defer response.Body.Close()
+	defer deferCloseResponseBody(response)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 
@@ -584,7 +584,7 @@ func TestGetAvailablePortfolioAllocationClassesNoneFound(t *testing.T) {
 
 	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/2/allocation-classes")
 	assert.NoError(t, err)
-	defer response.Body.Close()
+	defer deferCloseResponseBody(response)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 
@@ -654,7 +654,7 @@ func TestPostPortfolioSuccessWithNameAtMaxLength(t *testing.T) {
 	)
 
 	assert.NoError(t, err)
-	defer response.Body.Close()
+	defer deferCloseResponseBody(response)
 	assert.Equal(t, http.StatusCreated, response.StatusCode)
 
 	body, err := io.ReadAll(response.Body)

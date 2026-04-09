@@ -20,8 +20,10 @@ type PortfolioAllocationDTS struct {
 	Class            string                  `json:"class" validate:"required,max=100"`
 	CashReserve      bool                    `json:"cashReserve"`
 	TotalMarketValue *decimal.Decimal        `json:"totalMarketValue" validate:"required"`
-	AssetQuantity    decimal.Decimal         `json:"assetQuantity"`    // TODO this should be a pointer downstream but we get errors
-	AssetMarketPrice decimal.Decimal         `json:"assetMarketPrice"` // TODO this should be a pointer downstream but we get errors
+	// TODO AssetQuantity should be a pointer downstream but we get errors
+	AssetQuantity decimal.Decimal `json:"assetQuantity"`
+	// TODO AssetMarketPrice should be a pointer downstream but we get errors
+	AssetMarketPrice decimal.Decimal `json:"assetMarketPrice"`
 }
 
 type PortfolioSnapshotDTS struct {

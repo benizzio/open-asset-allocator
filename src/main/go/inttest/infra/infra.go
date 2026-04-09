@@ -17,6 +17,8 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
+type contextKey string
+
 const (
 	DBDriverName           = "postgres"
 	PostgresqlImage        = "postgres:17.5-bullseye"
@@ -29,8 +31,9 @@ const (
 	PostgresqlConnectionStringParameters = "sslmode=disable"
 	FlywayImage                          = "flyway/flyway:10"
 	TestAPIURLPrefix                     = "http://localhost:8081/api"
-	DeferRegistryKey                     = "deferRegistry"
 )
+
+const DeferRegistryKey contextKey = "deferRegistry"
 
 var (
 	PostgresqlConnectionString string

@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/benizzio/open-asset-allocator/infra"
@@ -219,10 +221,22 @@ func (adapter *Adapter) InsertBulkInTransaction(
 }
 
 func createBulkInsertPreparedStatement(tableName string, columns []string, transaction *sql.Tx) (*sql.Stmt, error) {
-	var copyInSQL = pq.CopyIn(tableName, columns...)
+	var copyInSQL = fmt.Sprintf(
+		"COPY %s (%s) FROM STDIN",
+		pq.QuoteIdentifier(tableName),
+		strings.Join(quoteIdentifiers(columns), ", "),
+	)
 	// TODO verification for debug logging, this should be logged only in debug mode
 	glog.Infof("Preparing statement in transaction %s", copyInSQL)
 	return transaction.Prepare(copyInSQL)
+}
+
+func quoteIdentifiers(identifiers []string) []string {
+	quoted := make([]string, len(identifiers))
+	for i, id := range identifiers {
+		quoted[i] = pq.QuoteIdentifier(id)
+	}
+	return quoted
 }
 
 func executeBulkInsertPreparedStatement(copyStatement *sql.Stmt, values [][]any) error {
