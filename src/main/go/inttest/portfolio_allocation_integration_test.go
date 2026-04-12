@@ -10,9 +10,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+
 	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
 	inttestutil "github.com/benizzio/open-asset-allocator/inttest/util"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestGetPortfolioAllocationHistory(t *testing.T) {

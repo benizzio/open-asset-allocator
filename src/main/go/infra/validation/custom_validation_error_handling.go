@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/go-playground/validator/v10"
+
 	"github.com/benizzio/open-asset-allocator/infra/json"
 	"github.com/benizzio/open-asset-allocator/langext"
-	"github.com/go-playground/validator/v10"
 )
 
 // MapValidationErrorsToMessages maps validation errors from the validator library to human-readable messages.

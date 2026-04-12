@@ -8,10 +8,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/benizzio/open-asset-allocator/infra"
 	dbx "github.com/go-ozzo/ozzo-dbx"
 	"github.com/golang/glog"
 	"github.com/lib/pq"
+
+	"github.com/benizzio/open-asset-allocator/infra"
 )
 
 // =================================================

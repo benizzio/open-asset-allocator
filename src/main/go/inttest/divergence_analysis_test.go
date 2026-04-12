@@ -5,8 +5,9 @@ import (
 	"net/http"
 	"testing"
 
-	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
 	"github.com/stretchr/testify/assert"
+
+	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
 )
 
 func TestGetDivergenceAnalysisOptions(t *testing.T) {

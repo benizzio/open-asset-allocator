@@ -1,8 +1,9 @@
 package langext
 
 import (
-	"github.com/okhomin/gohashcode"
 	"reflect"
+
+	"github.com/okhomin/gohashcode"
 )
 
 // UnifyStructPointers processes a slice of any struct type and ensures that all pointers

@@ -3,9 +3,10 @@ package util
 import (
 	"testing"
 
-	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
 	dbx "github.com/go-ozzo/ozzo-dbx"
 	"github.com/golang/glog"
+
+	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
 )
 
 type testSQLParamsPair struct {

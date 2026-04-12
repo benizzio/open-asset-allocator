@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/benizzio/open-asset-allocator/langext"
 	"github.com/go-playground/validator/v10"
+
+	"github.com/benizzio/open-asset-allocator/langext"
 )
 
 // DeepValidate performs deep validation by navigating through nested structures and slices

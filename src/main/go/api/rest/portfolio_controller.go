@@ -3,13 +3,14 @@ package rest
 import (
 	"net/http"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/benizzio/open-asset-allocator/api/rest/model"
 	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/infra"
 	gininfra "github.com/benizzio/open-asset-allocator/infra/gin"
 	"github.com/benizzio/open-asset-allocator/infra/validation"
 	"github.com/benizzio/open-asset-allocator/langext"
-	"github.com/gin-gonic/gin"
 )
 
 type PortfolioRESTController struct {

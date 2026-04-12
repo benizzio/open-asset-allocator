@@ -6,12 +6,13 @@ import (
 	"strings"
 	"testing"
 
+	dbx "github.com/go-ozzo/ozzo-dbx"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra/util"
 	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
 	inttestutil "github.com/benizzio/open-asset-allocator/inttest/util"
-	dbx "github.com/go-ozzo/ozzo-dbx"
-	"github.com/stretchr/testify/assert"
 )
 
 // insertTestAsset inserts a test asset into the database and registers a cleanup function.

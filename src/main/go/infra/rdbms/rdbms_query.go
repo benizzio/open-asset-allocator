@@ -4,10 +4,11 @@ import (
 	"database/sql"
 	"strings"
 
-	"github.com/benizzio/open-asset-allocator/langext"
 	dbx "github.com/go-ozzo/ozzo-dbx"
 	"github.com/golang/glog"
 	"github.com/lib/pq"
+
+	"github.com/benizzio/open-asset-allocator/langext"
 )
 
 const (
