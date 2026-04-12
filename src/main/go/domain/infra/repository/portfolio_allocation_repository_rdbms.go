@@ -3,11 +3,12 @@ package repository
 import (
 	"context"
 
+	dbx "github.com/go-ozzo/ozzo-dbx"
+
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/benizzio/open-asset-allocator/infra/rdbms"
 	"github.com/benizzio/open-asset-allocator/langext"
-	dbx "github.com/go-ozzo/ozzo-dbx"
 )
 
 const (

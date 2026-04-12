@@ -7,10 +7,11 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/benizzio/open-asset-allocator/api/rest/model"
-	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/glog"
+
+	"github.com/benizzio/open-asset-allocator/api/rest/model"
+	"github.com/benizzio/open-asset-allocator/infra"
 )
 
 // HandleAPIError handles an error from the API layer by logging it and sending an appropriate HTTP response.

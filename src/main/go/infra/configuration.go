@@ -1,8 +1,9 @@
 package infra
 
 import (
-	"github.com/benizzio/open-asset-allocator/langext"
 	"os"
+
+	"github.com/benizzio/open-asset-allocator/langext"
 )
 
 type GinServerConfiguration struct {

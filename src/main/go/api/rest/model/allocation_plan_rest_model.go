@@ -3,10 +3,11 @@ package model
 import (
 	"time"
 
+	"github.com/shopspring/decimal"
+
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/domain/allocation"
 	"github.com/benizzio/open-asset-allocator/langext"
-	"github.com/shopspring/decimal"
 )
 
 // ================================================

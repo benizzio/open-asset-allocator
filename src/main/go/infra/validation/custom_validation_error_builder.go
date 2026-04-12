@@ -1,8 +1,9 @@
 package validation
 
 import (
-	"github.com/benizzio/open-asset-allocator/langext"
 	"github.com/go-playground/validator/v10"
+
+	"github.com/benizzio/open-asset-allocator/langext"
 )
 
 // CustomValidationErrorsBuilder provides a fluent API for building custom validation validationErrors.

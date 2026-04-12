@@ -1,9 +1,10 @@
 package gin
 
 import (
-	"github.com/benizzio/open-asset-allocator/infra/validation"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+
+	"github.com/benizzio/open-asset-allocator/infra/validation"
 )
 
 // BindAndValidateJSONWithInvalidResponse binds the request body to the provided struct and validates it.

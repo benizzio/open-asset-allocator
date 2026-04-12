@@ -6,8 +6,9 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/benizzio/open-asset-allocator/inttest/infra"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/benizzio/open-asset-allocator/inttest/infra"
 )
 
 // TestGetKnownAssets tests the GET /api/asset endpoint to retrieve all known assets.

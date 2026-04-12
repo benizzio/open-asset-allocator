@@ -9,11 +9,12 @@ import (
 	"strings"
 	"testing"
 
+	dbx "github.com/go-ozzo/ozzo-dbx"
+	"github.com/stretchr/testify/assert"
+
 	restmodel "github.com/benizzio/open-asset-allocator/api/rest/model"
 	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
 	inttestutil "github.com/benizzio/open-asset-allocator/inttest/util"
-	dbx "github.com/go-ozzo/ozzo-dbx"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestGetPortfolio(t *testing.T) {
