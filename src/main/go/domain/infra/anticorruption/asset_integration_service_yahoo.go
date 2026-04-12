@@ -36,7 +36,8 @@ type YahooFinanceAssetIntegrationService struct {
 //
 // Example:
 //
-//	var client = integration.BuildYahooFinanceAssetIntegrationClient()
+//	var yahooFinanceConfig = infra.ReadConfig().IntegrationConfig.YahooFinanceConfig
+//	var client = integration.BuildYahooFinanceAssetIntegrationClient(yahooFinanceConfig)
 //	var service = BuildYahooFinanceAssetIntegrationService(client)
 //	assets, err := service.SearchAssets("AAPL")
 //	if err != nil {
@@ -101,7 +102,8 @@ func mapToExternalAsset(quote *integration.YahooFinanceSearchQuoteDTS) *domain.E
 //
 // Example:
 //
-//	var client = integration.BuildYahooFinanceAssetIntegrationClient()
+//	var yahooFinanceConfig = infra.ReadConfig().IntegrationConfig.YahooFinanceConfig
+//	var client = integration.BuildYahooFinanceAssetIntegrationClient(yahooFinanceConfig)
 //	var service = BuildYahooFinanceAssetIntegrationService(client)
 //	var asset = &domain.ExternalAsset{Source: domain.YahooFinanceSource, Ticker: "AAPL", ExchangeId: "NMS"}
 //	quote, err := service.QuoteAssetLastClosePrice(asset)
@@ -215,7 +217,8 @@ func extractLastClose(
 //
 // Example:
 //
-//	var client = integration.BuildYahooFinanceAssetIntegrationClient()
+//	var yahooFinanceConfig = infra.ReadConfig().IntegrationConfig.YahooFinanceConfig
+//	var client = integration.BuildYahooFinanceAssetIntegrationClient(yahooFinanceConfig)
 //	var service = anticorruption.BuildYahooFinanceAssetIntegrationService(client)
 //	assets, err := service.SearchAssets("AAPL")
 //

@@ -1,6 +1,7 @@
 package inttest
 
 import (
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -91,4 +92,28 @@ func putAsset(t *testing.T, putAssetJSON string) *http.Response {
 	assert.NoError(t, err)
 
 	return response
+}
+
+// getExternalAssets sends a GET request to the /api/external-asset endpoint with the given raw
+// query string and returns both the response and response body.
+//
+// Co-authored by: GitHub Copilot and benizzio
+func getExternalAssets(t *testing.T, rawQuery string) (*http.Response, string) {
+	t.Helper()
+
+	var requestURL = inttestinfra.TestAPIURLPrefix + "/external-asset"
+	if rawQuery != "" {
+		requestURL += "?" + rawQuery
+	}
+
+	var response, err = http.Get(requestURL)
+	assert.NoError(t, err)
+
+	var responseBodyBytes, readErr = io.ReadAll(response.Body)
+	assert.NoError(t, readErr)
+
+	err = response.Body.Close()
+	assert.NoError(t, err)
+
+	return response, string(responseBodyBytes)
 }

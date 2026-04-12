@@ -8,9 +8,7 @@ import (
 	"github.com/benizzio/open-asset-allocator/infra/util/http/httpclient"
 )
 
-const yahooFinanceSearchURL = "https://query2.finance.yahoo.com/v1/finance/search"
 const yahooFinanceSearchQuotesCount = "5"
-const yahooFinanceChartURL = "https://query2.finance.yahoo.com/v8/finance/chart/"
 const yahooFinanceUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
 	"AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
@@ -28,6 +26,7 @@ var yahooFinanceDefaultOptions = []httpclient.RequestOption{
 //
 // Authored by: GitHub Copilot (claude-opus-4.6)
 type YahooFinanceAssetIntegrationClient struct {
+	config infra.YahooFinanceConfiguration
 }
 
 // SearchAssets queries the Yahoo Finance search API for assets matching the given query value.
@@ -43,7 +42,10 @@ type YahooFinanceAssetIntegrationClient struct {
 //
 // Example:
 //
-//	var client = BuildYahooFinanceAssetIntegrationClient()
+//	var client = BuildYahooFinanceAssetIntegrationClient(infra.YahooFinanceConfiguration{
+//	    SearchURL: "https://query2.finance.yahoo.com/v1/finance/search",
+//	    ChartURL:  "https://query2.finance.yahoo.com/v8/finance/chart/",
+//	})
 //	response, err := client.SearchAssets("AAPL")
 //	if err != nil {
 //	    // handle error
@@ -57,7 +59,7 @@ func (client *YahooFinanceAssetIntegrationClient) SearchAssets(
 	queryValue string,
 ) (*YahooFinanceSearchResponseDTS, error) {
 
-	var requestURL, err = buildSearchAssetsURL(queryValue)
+	var requestURL, err = buildSearchAssetsURL(client.config.SearchURL, queryValue)
 	if err != nil {
 		return nil, infra.PropagateAsAppError(err, client)
 	}
@@ -77,11 +79,11 @@ func (client *YahooFinanceAssetIntegrationClient) SearchAssets(
 // and hardcoded default parameters.
 //
 // Authored by: GitHub Copilot (claude-opus-4.6)
-func buildSearchAssetsURL(queryValue string) (string, error) {
+func buildSearchAssetsURL(searchURL string, queryValue string) (string, error) {
 
-	var parsedURL, err = url.Parse(yahooFinanceSearchURL)
+	var parsedURL, err = url.Parse(searchURL)
 	if err != nil {
-		return "", fmt.Errorf("error parsing Yahoo Finance search URL: %w", err)
+		return "", fmt.Errorf("error parsing Yahoo Finance search URL %s: %w", searchURL, err)
 	}
 
 	var queryParams = parsedURL.Query()
@@ -113,7 +115,10 @@ func buildSearchAssetsURL(queryValue string) (string, error) {
 //
 // Example:
 //
-//	var client = BuildYahooFinanceAssetIntegrationClient()
+//	var client = BuildYahooFinanceAssetIntegrationClient(infra.YahooFinanceConfiguration{
+//	    SearchURL: "https://query2.finance.yahoo.com/v1/finance/search",
+//	    ChartURL:  "https://query2.finance.yahoo.com/v8/finance/chart/",
+//	})
 //	response, err := client.QuoteAssetLastClosePrice("AAPL")
 //	if err != nil {
 //	    // handle error
@@ -126,7 +131,7 @@ func (client *YahooFinanceAssetIntegrationClient) QuoteAssetLastClosePrice(
 	ticker string,
 ) (*YahooFinanceChartResponseDTS, error) {
 
-	var requestURL, err = buildQuoteAssetLastClosePriceURL(ticker)
+	var requestURL, err = buildQuoteAssetLastClosePriceURL(client.config.ChartURL, ticker)
 	if err != nil {
 		return nil, infra.PropagateAsAppError(err, client)
 	}
@@ -146,11 +151,11 @@ func (client *YahooFinanceAssetIntegrationClient) QuoteAssetLastClosePrice(
 // with hardcoded default parameters.
 //
 // Authored by: GitHub Copilot (claude-opus-4.6)
-func buildQuoteAssetLastClosePriceURL(ticker string) (string, error) {
+func buildQuoteAssetLastClosePriceURL(chartURL string, ticker string) (string, error) {
 
-	var parsedURL, err = url.Parse(yahooFinanceChartURL + ticker)
+	var parsedURL, err = url.Parse(chartURL + ticker)
 	if err != nil {
-		return "", fmt.Errorf("error parsing Yahoo Finance chart URL: %w", err)
+		return "", fmt.Errorf("error parsing Yahoo Finance chart URL %s: %w", chartURL, err)
 	}
 
 	var queryParams = parsedURL.Query()
@@ -164,15 +169,23 @@ func buildQuoteAssetLastClosePriceURL(ticker string) (string, error) {
 
 // BuildYahooFinanceAssetIntegrationClient creates a new YahooFinanceAssetIntegrationClient instance.
 //
+// Parameters:
+//   - config: the Yahoo Finance endpoint configuration used by the client
+//
 // Returns:
 //   - *YahooFinanceAssetIntegrationClient: the new client instance
 //
 // Example:
 //
-//	var client = integration.BuildYahooFinanceAssetIntegrationClient()
+//	var client = integration.BuildYahooFinanceAssetIntegrationClient(infra.YahooFinanceConfiguration{
+//	    SearchURL: "https://query2.finance.yahoo.com/v1/finance/search",
+//	    ChartURL:  "https://query2.finance.yahoo.com/v8/finance/chart/",
+//	})
 //	response, err := client.SearchAssets("AAPL")
 //
 // Authored by: GitHub Copilot (claude-opus-4.6)
-func BuildYahooFinanceAssetIntegrationClient() *YahooFinanceAssetIntegrationClient {
-	return &YahooFinanceAssetIntegrationClient{}
+func BuildYahooFinanceAssetIntegrationClient(
+	config infra.YahooFinanceConfiguration,
+) *YahooFinanceAssetIntegrationClient {
+	return &YahooFinanceAssetIntegrationClient{config: config}
 }

@@ -13,9 +13,11 @@ package extinttest
 import (
 	"testing"
 
-	"github.com/benizzio/open-asset-allocator/domain/infra/integration"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/benizzio/open-asset-allocator/domain/infra/integration"
+	"github.com/benizzio/open-asset-allocator/infra"
 )
 
 const iauTicker = "IAU"
@@ -28,7 +30,9 @@ const iauExpectedCurrency = "USD"
 // Authored by: GitHub Copilot (claude-opus-4.6)
 func TestSearchAssets_IAU(t *testing.T) {
 
-	var client = integration.BuildYahooFinanceAssetIntegrationClient()
+	var client = integration.BuildYahooFinanceAssetIntegrationClient(
+		infra.ReadConfig().IntegrationConfig.YahooFinanceConfig,
+	)
 
 	var searchResponse, err = client.SearchAssets(iauTicker)
 
@@ -56,7 +60,9 @@ func TestSearchAssets_IAU(t *testing.T) {
 // Authored by: GitHub Copilot (claude-opus-4.6)
 func TestQuoteAssetLastClosePrice_IAU(t *testing.T) {
 
-	var client = integration.BuildYahooFinanceAssetIntegrationClient()
+	var client = integration.BuildYahooFinanceAssetIntegrationClient(
+		infra.ReadConfig().IntegrationConfig.YahooFinanceConfig,
+	)
 
 	var chartResponse, err = client.QuoteAssetLastClosePrice(iauTicker)
 

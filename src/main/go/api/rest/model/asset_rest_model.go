@@ -29,6 +29,14 @@ type ExternalAssetDTS struct {
 	ExchangeName string `json:"exchangeName"`
 }
 
+// ExternalAssetSearchQueryDTS is the request data transfer structure for external asset
+// search query parameters.
+//
+// Authored by: GitHub Copilot
+type ExternalAssetSearchQueryDTS struct {
+	Query string `form:"query" json:"query" validate:"required,max=100"`
+}
+
 // ================================================
 // MAPPING FUNCTIONS
 // ================================================

@@ -29,6 +29,12 @@ func setupAndRunTests(ctx context.Context, m *testing.M) int {
 		return exitVal
 	}
 
+	var yahooFinanceMockServer = inttestinfra.BuildAndStartYahooFinanceMockServer()
+	defer func() {
+		yahooFinanceMockServer.Close()
+	}()
+	inttestinfra.SetYahooFinanceMockServer(yahooFinanceMockServer)
+
 	var app = inttestinfra.BuildAndStartApplication()
 	defer func() {
 		app.Stop()

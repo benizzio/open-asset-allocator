@@ -123,19 +123,17 @@ func BuildAssetRESTController(assetDomService *service.AssetDomService) *AssetRE
 
 func (controller *AssetRESTController) getExternalAssets(context *gin.Context) {
 
-	var externalAssetQueryParamValue = context.Query(externalAssetQueryParam)
-
-	if langext.IsZeroValue(externalAssetQueryParamValue) {
-		var queryMissingError = infra.BuildAppErrorFormatted(
-			controller,
-			"Parameter %s is required to search external assets",
-			externalAssetQueryParamValue,
-		)
-		gininfra.HandleAPIError(context, "Error searching external assets", queryMissingError)
+	var externalAssetSearchQueryDTS model.ExternalAssetSearchQueryDTS
+	valid, err := gininfra.BindAndValidateQueryWithInvalidResponse(context, &externalAssetSearchQueryDTS)
+	if err != nil {
+		gininfra.HandleAPIError(context, "Error binding external asset search query", err)
+		return
+	}
+	if !valid {
 		return
 	}
 
-	externalAssets, err := controller.assetDomService.SearchExternalAssets(externalAssetQueryParamValue)
+	externalAssets, err := controller.assetDomService.SearchExternalAssets(externalAssetSearchQueryDTS.Query)
 	if gininfra.HandleAPIError(context, "Error searching external assets", err) {
 		return
 	}
