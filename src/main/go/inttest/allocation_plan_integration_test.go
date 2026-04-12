@@ -7,10 +7,11 @@ import (
 	"strings"
 	"testing"
 
-	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
-	inttestutil "github.com/benizzio/open-asset-allocator/inttest/util"
 	dbx "github.com/go-ozzo/ozzo-dbx"
 	"github.com/stretchr/testify/assert"
+
+	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
+	inttestutil "github.com/benizzio/open-asset-allocator/inttest/util"
 )
 
 func TestGetAllocationPlans(t *testing.T) {

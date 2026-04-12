@@ -4,8 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/benizzio/open-asset-allocator/domain/allocation"
 	"github.com/shopspring/decimal"
+
+	"github.com/benizzio/open-asset-allocator/domain/allocation"
 )
 
 type PlannedAllocationsPerHierarchicalId map[string]*PlannedAllocation

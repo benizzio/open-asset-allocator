@@ -3,8 +3,9 @@ package model
 import (
 	"time"
 
-	"github.com/benizzio/open-asset-allocator/langext"
 	"github.com/shopspring/decimal"
+
+	"github.com/benizzio/open-asset-allocator/langext"
 )
 
 type PortfolioDTS struct {

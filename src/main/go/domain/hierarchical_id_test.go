@@ -4,8 +4,9 @@ import (
 	"database/sql"
 	"testing"
 
-	"github.com/benizzio/open-asset-allocator/infra/util"
 	"github.com/lib/pq"
+
+	"github.com/benizzio/open-asset-allocator/infra/util"
 )
 
 func TestHierarchicalIdValue_AllNonNil(t *testing.T) {

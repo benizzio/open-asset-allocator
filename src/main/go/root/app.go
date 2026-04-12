@@ -8,6 +8,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/golang/glog"
+
 	"github.com/benizzio/open-asset-allocator/api/rest"
 	"github.com/benizzio/open-asset-allocator/application"
 	"github.com/benizzio/open-asset-allocator/domain"
@@ -18,7 +20,6 @@ import (
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/benizzio/open-asset-allocator/infra/rdbms"
 	"github.com/benizzio/open-asset-allocator/langext"
-	"github.com/golang/glog"
 )
 
 type App struct {

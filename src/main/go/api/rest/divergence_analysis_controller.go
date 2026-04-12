@@ -3,12 +3,13 @@ package rest
 import (
 	"net/http"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/benizzio/open-asset-allocator/api/rest/model"
 	"github.com/benizzio/open-asset-allocator/application"
 	"github.com/benizzio/open-asset-allocator/infra"
 	gininfra "github.com/benizzio/open-asset-allocator/infra/gin"
 	"github.com/benizzio/open-asset-allocator/langext"
-	"github.com/gin-gonic/gin"
 )
 
 type DivergenceAnalysisRESTController struct {
@@ -24,7 +25,7 @@ func (controller *DivergenceAnalysisRESTController) BuildRoutes() []infra.RESTRo
 			Handlers: gin.HandlersChain{controller.getDivergenceAnalysisOptions},
 		},
 		{
-			Method:   http.MethodGet,
+			Method: http.MethodGet,
 			Path: "/api/v2/portfolio/:" + portfolioIdParam +
 				"/divergence/:" + observationTimestampIdParam +
 				"/allocation-plan/:" + planIdParam,

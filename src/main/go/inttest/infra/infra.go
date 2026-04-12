@@ -8,13 +8,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/benizzio/open-asset-allocator/infra"
-	"github.com/benizzio/open-asset-allocator/root"
 	"github.com/docker/docker/api/types/container"
 	dbx "github.com/go-ozzo/ozzo-dbx"
 	"github.com/golang/glog"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
+
+	"github.com/benizzio/open-asset-allocator/infra"
+	"github.com/benizzio/open-asset-allocator/root"
 )
 
 type contextKey string
