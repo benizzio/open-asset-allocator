@@ -65,7 +65,9 @@ func (app *App) buildAppComponents() {
 	var assetRepository = repository.BuildAssetRDBMSRepository(app.databaseAdapter)
 
 	var yahooFinanceIntegrationClient = integration.BuildYahooFinanceAssetIntegrationClient()
-	var yahooFinanceIntegrationService = anticorruption.BuildYahooFinanceAssetIntegrationService(yahooFinanceIntegrationClient)
+	var yahooFinanceIntegrationService = anticorruption.BuildYahooFinanceAssetIntegrationService(
+		yahooFinanceIntegrationClient,
+	)
 
 	var assetIntegrationServices = service.AssetIntegrationServicesPerSource{
 		domain.YahooFinanceSource: yahooFinanceIntegrationService,

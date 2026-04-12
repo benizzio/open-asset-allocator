@@ -86,14 +86,19 @@ func (service *AssetDomService) SearchExternalAssets(query string) ([]*domain.Ex
 
 	var integrationServices = collectIntegrationServices(service.assetIntegrationServicesPerSource)
 
-	var searchAssetsOnService = func(integrationService domain.AssetIntegrationService) ([]*domain.ExternalAsset, error) {
+	var searchAssetsOnService = func(
+		integrationService domain.AssetIntegrationService,
+	) ([]*domain.ExternalAsset, error) {
 		return integrationService.SearchAssets(query)
 	}
 
 	return langext.FlatMapConcurrently(integrationServices, searchAssetsOnService)
 }
 
-func BuildAssetDomService(assetRepository domain.AssetRepository, integrationServices AssetIntegrationServicesPerSource) *AssetDomService {
+func BuildAssetDomService(
+	assetRepository domain.AssetRepository,
+	integrationServices AssetIntegrationServicesPerSource,
+) *AssetDomService {
 	return &AssetDomService{
 		assetRepository:                   assetRepository,
 		assetIntegrationServicesPerSource: integrationServices,

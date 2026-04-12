@@ -126,7 +126,11 @@ func (controller *AssetRESTController) getExternalAssets(context *gin.Context) {
 	var externalAssetQueryParamValue = context.Query(externalAssetQueryParam)
 
 	if langext.IsZeroValue(externalAssetQueryParamValue) {
-		var queryMissingError = infra.BuildAppErrorFormatted(controller, "Parameter %s is required to search external assets", externalAssetQueryParamValue)
+		var queryMissingError = infra.BuildAppErrorFormatted(
+			controller,
+			"Parameter %s is required to search external assets",
+			externalAssetQueryParamValue,
+		)
 		gininfra.HandleAPIError(context, "Error searching external assets", queryMissingError)
 		return
 	}

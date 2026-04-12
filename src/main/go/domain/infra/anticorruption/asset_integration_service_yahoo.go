@@ -3,11 +3,12 @@ package anticorruption
 import (
 	"time"
 
+	"github.com/shopspring/decimal"
+	"golang.org/x/text/currency"
+
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/domain/infra/integration"
 	"github.com/benizzio/open-asset-allocator/infra"
-	"github.com/shopspring/decimal"
-	"golang.org/x/text/currency"
 )
 
 // serviceOrigin is a zero-value pointer used as the origin type reference
@@ -152,7 +153,12 @@ func mapToExternalAssetQuote(
 
 	var currencyUnit, currencyErr = currency.ParseISO(result.Meta.Currency)
 	if currencyErr != nil {
-		return nil, infra.BuildAppErrorFormatted(serviceOrigin, "error parsing currency %s: %v", result.Meta.Currency, currencyErr)
+		return nil, infra.BuildAppErrorFormatted(
+			serviceOrigin,
+			"error parsing currency %s: %v",
+			result.Meta.Currency,
+			currencyErr,
+		)
 	}
 
 	lastCloseQuote, lastCloseDate, err := extractLastClose(&result)
@@ -178,11 +184,17 @@ func extractLastClose(
 ) (decimal.Decimal, time.Time, error) {
 
 	if len(result.Indicators.Quote) == 0 || len(result.Indicators.Quote[0].Close) == 0 {
-		return decimal.Decimal{}, time.Time{}, infra.BuildAppError("Yahoo Finance chart response contains no quote indicators", serviceOrigin)
+		return decimal.Decimal{}, time.Time{}, infra.BuildAppError(
+			"Yahoo Finance chart response contains no quote indicators",
+			serviceOrigin,
+		)
 	}
 
 	if len(result.Timestamps) == 0 {
-		return decimal.Decimal{}, time.Time{}, infra.BuildAppError("Yahoo Finance chart response contains no timestamps", serviceOrigin)
+		return decimal.Decimal{}, time.Time{}, infra.BuildAppError(
+			"Yahoo Finance chart response contains no timestamps",
+			serviceOrigin,
+		)
 	}
 
 	var closePrices = result.Indicators.Quote[0].Close

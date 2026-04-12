@@ -45,7 +45,11 @@ func FlatMapConcurrently[I any, R any](inputs []I, sliceFromItem SliceFromItem[I
 // to the channel.
 //
 // Authored by: GitHub Copilot (claude-opus-4.6)
-func executeSliceFromItemConcurrently[I any, R any](input I, sliceFromItem SliceFromItem[I, R], resultChannel chan<- concurrentSliceResult[R]) {
+func executeSliceFromItemConcurrently[I any, R any](
+	input I,
+	sliceFromItem SliceFromItem[I, R],
+	resultChannel chan<- concurrentSliceResult[R],
+) {
 	var results, err = sliceFromItem(input)
 	resultChannel <- concurrentSliceResult[R]{results: results, err: err}
 }

@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/benizzio/open-asset-allocator/infra"
-	"github.com/benizzio/open-asset-allocator/infra/rdbms/sqlext"
 	"github.com/shopspring/decimal"
 	"golang.org/x/text/currency"
+
+	"github.com/benizzio/open-asset-allocator/infra"
+	"github.com/benizzio/open-asset-allocator/infra/rdbms/sqlext"
 )
 
 type AssetExternalSource string
