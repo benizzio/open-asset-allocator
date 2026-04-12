@@ -26,7 +26,7 @@ Refer to the general instructions in the root `../../../AGENTS.md` for broader i
 - most of the project's generic, reusable code can be found in the following listed packages. New code should be, in
   general, attentive to those packages to be DRY.
     - `src/main/go/infra`: represents the DDD infrastructure layer, and includes a lot of stack and utility code;
-    - `src/main/go/inttest`: integration tests
+    - `src/main/go/inttest`: integration tests (should never access external APIs, only mock servers)
         - `src/main/go/inttest/infra`: represents the DDD infrastructure layer specific for integration tests, and
           includes a lot of stack and utility code;
     - `src/main/go/extinttest`: external integration tests that hit live external APIs, gated behind the `extinttest`
