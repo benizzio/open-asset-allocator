@@ -1,8 +1,10 @@
 package integration
 
 import (
+	"context"
 	"fmt"
 	"net/url"
+	"strings"
 
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/benizzio/open-asset-allocator/infra/util/http/httpclient"
@@ -46,7 +48,7 @@ type YahooFinanceAssetIntegrationClient struct {
 //	    SearchURL: "https://query2.finance.yahoo.com/v1/finance/search",
 //	    ChartURL:  "https://query2.finance.yahoo.com/v8/finance/chart/",
 //	})
-//	response, err := client.SearchAssets("AAPL")
+//	response, err := client.SearchAssets(context.Background(), "AAPL")
 //	if err != nil {
 //	    // handle error
 //	}
@@ -54,8 +56,9 @@ type YahooFinanceAssetIntegrationClient struct {
 //	    fmt.Println(quote.Symbol, quote.Exchange)
 //	}
 //
-// Authored by: GitHub Copilot (claude-opus-4.6)
+// Co-authored by: OpenCode and benizzio
 func (client *YahooFinanceAssetIntegrationClient) SearchAssets(
+	searchContext context.Context,
 	queryValue string,
 ) (*YahooFinanceSearchResponseDTS, error) {
 
@@ -65,6 +68,7 @@ func (client *YahooFinanceAssetIntegrationClient) SearchAssets(
 	}
 
 	var searchResponse, getErr = httpclient.ExecuteGetJSON[YahooFinanceSearchResponseDTS](
+		searchContext,
 		requestURL,
 		yahooFinanceDefaultOptions...,
 	)
@@ -137,6 +141,7 @@ func (client *YahooFinanceAssetIntegrationClient) QuoteAssetLastClosePrice(
 	}
 
 	var chartResponse, getErr = httpclient.ExecuteGetJSON[YahooFinanceChartResponseDTS](
+		context.Background(),
 		requestURL,
 		yahooFinanceDefaultOptions...,
 	)
@@ -150,13 +155,15 @@ func (client *YahooFinanceAssetIntegrationClient) QuoteAssetLastClosePrice(
 // buildQuoteAssetLastClosePriceURL constructs the full Yahoo Finance chart URL for the given ticker
 // with hardcoded default parameters.
 //
-// Authored by: GitHub Copilot (claude-opus-4.6)
+// Co-authored by: OpenCode and benizzio
 func buildQuoteAssetLastClosePriceURL(chartURL string, ticker string) (string, error) {
 
-	var parsedURL, err = url.Parse(chartURL + ticker)
+	var parsedURL, err = url.Parse(chartURL)
 	if err != nil {
 		return "", fmt.Errorf("error parsing Yahoo Finance chart URL %s: %w", chartURL, err)
 	}
+
+	parsedURL.Path = strings.TrimRight(parsedURL.Path, "/") + "/" + url.PathEscape(ticker)
 
 	var queryParams = parsedURL.Query()
 	queryParams.Set("interval", "1d")
@@ -181,7 +188,7 @@ func buildQuoteAssetLastClosePriceURL(chartURL string, ticker string) (string, e
 //	    SearchURL: "https://query2.finance.yahoo.com/v1/finance/search",
 //	    ChartURL:  "https://query2.finance.yahoo.com/v8/finance/chart/",
 //	})
-//	response, err := client.SearchAssets("AAPL")
+//	response, err := client.SearchAssets(context.Background(), "AAPL")
 //
 // Authored by: GitHub Copilot (claude-opus-4.6)
 func BuildYahooFinanceAssetIntegrationClient(

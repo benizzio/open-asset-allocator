@@ -57,8 +57,8 @@ func MapToAssetDTS(asset *domain.Asset) *AssetDTS {
 
 func MapToAssetDTSs(assets []*domain.Asset) []*AssetDTS {
 	var assetsDTS = make([]*AssetDTS, len(assets))
-	for i, asset := range assets {
-		assetsDTS[i] = MapToAssetDTS(asset)
+	for index, asset := range assets {
+		assetsDTS[index] = MapToAssetDTS(asset)
 	}
 	return assetsDTS
 }
@@ -82,8 +82,8 @@ func MapToAsset(assetDTS *AssetDTS) *domain.Asset {
 
 func MapToAssets(assetsDTS []*AssetDTS) []*domain.Asset {
 	var assets = make([]*domain.Asset, len(assetsDTS))
-	for i, assetDTS := range assetsDTS {
-		assets[i] = MapToAsset(assetDTS)
+	for index, assetDTS := range assetsDTS {
+		assets[index] = MapToAsset(assetDTS)
 	}
 	return assets
 }
@@ -128,8 +128,8 @@ func MapToExternalAssetDTS(externalAsset *domain.ExternalAsset) *ExternalAssetDT
 // Authored by: GitHub Copilot (claude-opus-4.6)
 func MapToExternalAssetDTSs(externalAssets []*domain.ExternalAsset) []*ExternalAssetDTS {
 	var externalAssetDTSs = make([]*ExternalAssetDTS, len(externalAssets))
-	for i, externalAsset := range externalAssets {
-		externalAssetDTSs[i] = MapToExternalAssetDTS(externalAsset)
+	for index, externalAsset := range externalAssets {
+		externalAssetDTSs[index] = MapToExternalAssetDTS(externalAsset)
 	}
 	return externalAssetDTSs
 }

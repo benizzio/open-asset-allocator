@@ -1,6 +1,7 @@
 package anticorruption
 
 import (
+	"context"
 	"time"
 
 	"github.com/shopspring/decimal"
@@ -39,7 +40,7 @@ type YahooFinanceAssetIntegrationService struct {
 //	var yahooFinanceConfig = infra.ReadConfig().IntegrationConfig.YahooFinanceConfig
 //	var client = integration.BuildYahooFinanceAssetIntegrationClient(yahooFinanceConfig)
 //	var service = BuildYahooFinanceAssetIntegrationService(client)
-//	assets, err := service.SearchAssets("AAPL")
+//	assets, err := service.SearchAssets(context.Background(), "AAPL")
 //	if err != nil {
 //	    // handle error
 //	}
@@ -47,12 +48,13 @@ type YahooFinanceAssetIntegrationService struct {
 //	    fmt.Println(asset.Ticker, asset.ExchangeId)
 //	}
 //
-// Co-authored by: GitHub Copilot (claude-opus-4.6) and benizzio
+// Co-authored by: OpenCode and benizzio
 func (service *YahooFinanceAssetIntegrationService) SearchAssets(
+	searchContext context.Context,
 	queryValue string,
 ) ([]*domain.ExternalAsset, error) {
 
-	var searchResponse, err = service.Client.SearchAssets(queryValue)
+	var searchResponse, err = service.Client.SearchAssets(searchContext, queryValue)
 	if err != nil {
 		return nil, err
 	}
@@ -200,10 +202,21 @@ func extractLastClose(
 	}
 
 	var closePrices = result.Indicators.Quote[0].Close
-	var lastCloseQuote = decimal.NewFromFloat(closePrices[len(closePrices)-1])
-	var lastCloseDate = time.Unix(result.Timestamps[len(result.Timestamps)-1], 0)
+	for index := len(closePrices) - 1; index >= 0; index-- {
+		if closePrices[index] == nil || index >= len(result.Timestamps) {
+			continue
+		}
 
-	return lastCloseQuote, lastCloseDate, nil
+		var lastCloseQuote = decimal.NewFromFloat(*closePrices[index])
+		var lastCloseDate = time.Unix(result.Timestamps[index], 0)
+
+		return lastCloseQuote, lastCloseDate, nil
+	}
+
+	return decimal.Decimal{}, time.Time{}, infra.BuildAppError(
+		"Yahoo Finance chart response contains no close price with matching timestamp",
+		serviceOrigin,
+	)
 }
 
 // BuildYahooFinanceAssetIntegrationService creates a new YahooFinanceAssetIntegrationService
@@ -220,7 +233,7 @@ func extractLastClose(
 //	var yahooFinanceConfig = infra.ReadConfig().IntegrationConfig.YahooFinanceConfig
 //	var client = integration.BuildYahooFinanceAssetIntegrationClient(yahooFinanceConfig)
 //	var service = anticorruption.BuildYahooFinanceAssetIntegrationService(client)
-//	assets, err := service.SearchAssets("AAPL")
+//	assets, err := service.SearchAssets(context.Background(), "AAPL")
 //
 // Authored by: GitHub Copilot (claude-opus-4.6)
 func BuildYahooFinanceAssetIntegrationService(

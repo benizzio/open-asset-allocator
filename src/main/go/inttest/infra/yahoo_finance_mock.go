@@ -1,3 +1,7 @@
+// Package infra provides shared infrastructure for integration tests, including the Yahoo
+// Finance mock server used by API tests to isolate external asset lookups from live services.
+//
+// Co-authored by: OpenCode and benizzio
 package infra
 
 import (
@@ -42,6 +46,10 @@ func SetupYahooFinanceMockTest(t *testing.T) *httpmock.Server {
 	t.Helper()
 
 	var mockServer = GetYahooFinanceMockServer()
+	if mockServer == nil {
+		t.Fatalf("Yahoo Finance mock server is not initialized; configure it in test bootstrap")
+	}
+
 	mockServer.WithTest(t)
 	resetYahooFinanceMockServer(mockServer)
 

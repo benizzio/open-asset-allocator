@@ -8,8 +8,9 @@ import (
 type NullTime sql.NullTime
 
 func (nullTime *NullTime) ToTimeReference() *time.Time {
-	if nullTime.Valid {
-		return &nullTime.Time
+	if nullTime == nil || !nullTime.Valid {
+		return nil
 	}
-	return nil
+
+	return new(nullTime.Time)
 }

@@ -37,9 +37,9 @@ func TestGetExternalAssetsSuccess(t *testing.T) {
 				}
 			`)
 
-		var response, responseBody = getExternalAssets(t, "query=IAU")
+		var statusCode, responseBody = getExternalAssets(t, "query=IAU")
 
-		assert.Equal(t, http.StatusOK, response.StatusCode)
+		assert.Equal(t, http.StatusOK, statusCode)
 		assert.JSONEq(t, `
 			[
 				{
@@ -60,9 +60,9 @@ func TestGetExternalAssetsSuccess(t *testing.T) {
 			WithHeader("User-Agent", yahooFinanceExpectedUserAgent).
 			Return(`{"quotes": []}`)
 
-		var response, responseBody = getExternalAssets(t, "query=IAU")
+		var statusCode, responseBody = getExternalAssets(t, "query=IAU")
 
-		assert.Equal(t, http.StatusOK, response.StatusCode)
+		assert.Equal(t, http.StatusOK, statusCode)
 		assert.JSONEq(t, `[]`, responseBody)
 	})
 }
@@ -81,9 +81,9 @@ func TestGetExternalAssetsFailure(t *testing.T) {
 			ReturnCode(http.StatusTooManyRequests).
 			Return(`{"error":"rate limited"}`)
 
-		var response, responseBody = getExternalAssets(t, "query=IAU")
+		var statusCode, responseBody = getExternalAssets(t, "query=IAU")
 
-		assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
+		assert.Equal(t, http.StatusInternalServerError, statusCode)
 		assert.JSONEq(t, `
 			{
 				"errorMessage": "Internal server error"
@@ -98,9 +98,9 @@ func TestGetExternalAssetsFailure(t *testing.T) {
 			WithHeader("User-Agent", yahooFinanceExpectedUserAgent).
 			Return(`{"quotes": [`)
 
-		var response, responseBody = getExternalAssets(t, "query=IAU")
+		var statusCode, responseBody = getExternalAssets(t, "query=IAU")
 
-		assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
+		assert.Equal(t, http.StatusInternalServerError, statusCode)
 		assert.JSONEq(t, `
 			{
 				"errorMessage": "Internal server error"
@@ -111,9 +111,9 @@ func TestGetExternalAssetsFailure(t *testing.T) {
 	t.Run("ValidationFailsWhenQueryIsMissing", func(t *testing.T) {
 		_ = inttestinfra.SetupYahooFinanceMockTest(t)
 
-		var response, responseBody = getExternalAssets(t, "")
+		var statusCode, responseBody = getExternalAssets(t, "")
 
-		assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+		assert.Equal(t, http.StatusBadRequest, statusCode)
 		assert.JSONEq(t, `
 			{
 				"errorMessage": "Validation failed",
@@ -127,9 +127,9 @@ func TestGetExternalAssetsFailure(t *testing.T) {
 	t.Run("ValidationFailsWhenQueryIsEmpty", func(t *testing.T) {
 		_ = inttestinfra.SetupYahooFinanceMockTest(t)
 
-		var response, responseBody = getExternalAssets(t, "query=")
+		var statusCode, responseBody = getExternalAssets(t, "query=")
 
-		assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+		assert.Equal(t, http.StatusBadRequest, statusCode)
 		assert.JSONEq(t, `
 			{
 				"errorMessage": "Validation failed",
@@ -144,9 +144,9 @@ func TestGetExternalAssetsFailure(t *testing.T) {
 		_ = inttestinfra.SetupYahooFinanceMockTest(t)
 
 		var oversizedQuery = strings.Repeat("A", 101)
-		var response, responseBody = getExternalAssets(t, "query="+oversizedQuery)
+		var statusCode, responseBody = getExternalAssets(t, "query="+oversizedQuery)
 
-		assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+		assert.Equal(t, http.StatusBadRequest, statusCode)
 		assert.JSONEq(t, `
 			{
 				"errorMessage": "Validation failed",

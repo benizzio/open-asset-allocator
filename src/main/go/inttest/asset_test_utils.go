@@ -9,6 +9,7 @@ import (
 
 	dbx "github.com/go-ozzo/ozzo-dbx"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra/util"
@@ -95,10 +96,10 @@ func putAsset(t *testing.T, putAssetJSON string) *http.Response {
 }
 
 // getExternalAssets sends a GET request to the /api/external-asset endpoint with the given raw
-// query string and returns both the response and response body.
+// query string and returns the response status code and body.
 //
-// Co-authored by: GitHub Copilot and benizzio
-func getExternalAssets(t *testing.T, rawQuery string) (*http.Response, string) {
+// Co-authored by: OpenCode and benizzio
+func getExternalAssets(t *testing.T, rawQuery string) (int, string) {
 	t.Helper()
 
 	var requestURL = inttestinfra.TestAPIURLPrefix + "/external-asset"
@@ -107,13 +108,13 @@ func getExternalAssets(t *testing.T, rawQuery string) (*http.Response, string) {
 	}
 
 	var response, err = http.Get(requestURL)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	var responseBodyBytes, readErr = io.ReadAll(response.Body)
-	assert.NoError(t, readErr)
+	require.NoError(t, readErr)
 
 	err = response.Body.Close()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	return response, string(responseBodyBytes)
+	return response.StatusCode, string(responseBodyBytes)
 }

@@ -121,6 +121,9 @@ func BuildAssetRESTController(assetDomService *service.AssetDomService) *AssetRE
 	}
 }
 
+// getExternalAssets handles GET requests that search external asset providers by query string.
+//
+// Co-authored by: OpenCode and benizzio
 func (controller *AssetRESTController) getExternalAssets(context *gin.Context) {
 
 	var externalAssetSearchQueryDTS model.ExternalAssetSearchQueryDTS
@@ -133,7 +136,10 @@ func (controller *AssetRESTController) getExternalAssets(context *gin.Context) {
 		return
 	}
 
-	externalAssets, err := controller.assetDomService.SearchExternalAssets(externalAssetSearchQueryDTS.Query)
+	externalAssets, err := controller.assetDomService.SearchExternalAssets(
+		context.Request.Context(),
+		externalAssetSearchQueryDTS.Query,
+	)
 	if gininfra.HandleAPIError(context, "Error searching external assets", err) {
 		return
 	}

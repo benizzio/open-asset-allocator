@@ -4,11 +4,15 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
+
+	"github.com/benizzio/open-asset-allocator/langext"
 )
 
 func ScanJsonColumn[T any](value interface{}, target *T) error {
 
 	if value == nil {
+		var zeroValue T
+		*target = zeroValue
 		return nil
 	}
 
@@ -21,6 +25,13 @@ func ScanJsonColumn[T any](value interface{}, target *T) error {
 }
 
 func ValueJsonColumn(value any) (driver.Value, error) {
+	if value == nil {
+		return nil, nil
+	}
+
+	if langext.IsNilPointer(value) {
+		return nil, nil
+	}
 
 	bytes, err := json.Marshal(value)
 	if err != nil {

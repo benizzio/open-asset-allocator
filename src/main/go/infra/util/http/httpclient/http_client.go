@@ -1,12 +1,16 @@
 package httpclient
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/golang/glog"
 )
+
+const defaultTimeout = 10 * time.Second
 
 // RequestOption is a functional option that configures an HTTP request before execution.
 // Used with ExecuteGet and ExecuteGetJSON to customize request headers, parameters, or
@@ -14,7 +18,11 @@ import (
 //
 // Example:
 //
-//	response, err := httpclient.ExecuteGet(url, httpclient.WithHeader("User-Agent", "MyApp/1.0"))
+//	response, err := httpclient.ExecuteGet(
+//		context.Background(),
+//		url,
+//		httpclient.WithHeader("User-Agent", "MyApp/1.0"),
+//	)
 //
 // Authored by: GitHub Copilot (claude-opus-4.6)
 type RequestOption func(*http.Request)
@@ -31,7 +39,7 @@ type RequestOption func(*http.Request)
 //
 // Example:
 //
-//	response, err := httpclient.ExecuteGet(url,
+//	response, err := httpclient.ExecuteGet(context.Background(), url,
 //	    httpclient.WithHeader("User-Agent", "Mozilla/5.0"),
 //	    httpclient.WithHeader("Accept", "application/json"),
 //	)
@@ -58,7 +66,7 @@ func WithHeader(key string, value string) RequestOption {
 //
 // Example:
 //
-//	response, err := httpclient.ExecuteGet("https://api.example.com/data?q=test",
+//	response, err := httpclient.ExecuteGet(context.Background(), "https://api.example.com/data?q=test",
 //	    httpclient.WithHeader("User-Agent", "MyApp/1.0"),
 //	)
 //	if err != nil {
@@ -66,10 +74,10 @@ func WithHeader(key string, value string) RequestOption {
 //	}
 //	defer httpclient.CloseResponseBody(response)
 //
-// Authored by: GitHub Copilot (claude-opus-4.6)
-func ExecuteGet(requestURL string, options ...RequestOption) (*http.Response, error) {
+// Co-authored by: OpenCode and benizzio
+func ExecuteGet(requestContext context.Context, requestURL string, options ...RequestOption) (*http.Response, error) {
 
-	var request, err = http.NewRequest(http.MethodGet, requestURL, nil)
+	var request, err = http.NewRequestWithContext(requestContext, http.MethodGet, requestURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error creating HTTP GET request for %s: %w", requestURL, err)
 	}
@@ -78,7 +86,7 @@ func ExecuteGet(requestURL string, options ...RequestOption) (*http.Response, er
 		option(request)
 	}
 
-	var client = &http.Client{}
+	var client = &http.Client{Timeout: defaultTimeout}
 	response, err := client.Do(request)
 	if err != nil {
 		return nil, err
@@ -112,6 +120,7 @@ func ExecuteGet(requestURL string, options ...RequestOption) (*http.Response, er
 //	    Results []string `json:"results"`
 //	}
 //	response, err := httpclient.ExecuteGetJSON[SearchResponse](
+//	    context.Background(),
 //	    "https://api.example.com/search?q=test",
 //	    httpclient.WithHeader("User-Agent", "MyApp/1.0"),
 //	)
@@ -120,10 +129,10 @@ func ExecuteGet(requestURL string, options ...RequestOption) (*http.Response, er
 //	}
 //	fmt.Println(response.Results)
 //
-// Authored by: GitHub Copilot (claude-opus-4.6)
-func ExecuteGetJSON[T any](requestURL string, options ...RequestOption) (*T, error) {
+// Co-authored by: OpenCode and benizzio
+func ExecuteGetJSON[T any](requestContext context.Context, requestURL string, options ...RequestOption) (*T, error) {
 
-	var response, err = ExecuteGet(requestURL, options...)
+	var response, err = ExecuteGet(requestContext, requestURL, options...)
 	if err != nil {
 		return nil, err
 	}
@@ -147,7 +156,7 @@ func ExecuteGetJSON[T any](requestURL string, options ...RequestOption) (*T, err
 //	type MyResponse struct {
 //	    Name string `json:"name"`
 //	}
-//	response, err := httpclient.ExecuteGet("https://api.example.com/data")
+//	response, err := httpclient.ExecuteGet(context.Background(), "https://api.example.com/data")
 //	if err != nil {
 //	    // handle error
 //	}
@@ -174,7 +183,7 @@ func DecodeJSONResponse[T any](response *http.Response) (*T, error) {
 //
 // Example:
 //
-//	response, err := httpclient.ExecuteGet("https://api.example.com/data")
+//	response, err := httpclient.ExecuteGet(context.Background(), "https://api.example.com/data")
 //	if err != nil {
 //	    // handle error
 //	}

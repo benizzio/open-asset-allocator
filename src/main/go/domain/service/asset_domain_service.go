@@ -81,18 +81,22 @@ func collectIntegrationServices(servicesPerSource AssetIntegrationServicesPerSou
 //   - []*domain.ExternalAsset: the aggregated external assets from all sources
 //   - error: the first error encountered from any source, or nil if all succeeded
 //
-// Co-authored by: GitHub Copilot (claude-opus-4.6) and benizzio
-func (service *AssetDomService) SearchExternalAssets(query string) ([]*domain.ExternalAsset, error) {
+// Co-authored by: OpenCode and benizzio
+func (service *AssetDomService) SearchExternalAssets(
+	requestContext context.Context,
+	query string,
+) ([]*domain.ExternalAsset, error) {
 
 	var integrationServices = collectIntegrationServices(service.assetIntegrationServicesPerSource)
 
 	var searchAssetsOnService = func(
+		searchContext context.Context,
 		integrationService domain.AssetIntegrationService,
 	) ([]*domain.ExternalAsset, error) {
-		return integrationService.SearchAssets(query)
+		return integrationService.SearchAssets(searchContext, query)
 	}
 
-	return langext.FlatMapConcurrently(integrationServices, searchAssetsOnService)
+	return langext.FlatMapConcurrentlyCtx(requestContext, integrationServices, searchAssetsOnService)
 }
 
 func BuildAssetDomService(

@@ -18,11 +18,11 @@ func BindAndValidateQueryWithInvalidResponse(context *gin.Context, bindingTarget
 	if bindingErr != nil {
 
 		var validationErrors = validation.MapValidationErrorsToMessages(bindingErr, bindingTarget)
-		if validationErrors == nil {
-			return false, bindingErr
+		if len(validationErrors) == 0 {
+			allErrorMessages = append(allErrorMessages, "malformed or invalid query parameters")
+		} else {
+			allErrorMessages = append(allErrorMessages, validationErrors...)
 		}
-
-		allErrorMessages = append(allErrorMessages, validationErrors...)
 	}
 
 	var deepValidationErrors = validation.DeepValidate(bindingTarget)

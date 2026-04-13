@@ -2,6 +2,7 @@ package domain
 
 import (
 	"database/sql/driver"
+	"strings"
 
 	"github.com/benizzio/open-asset-allocator/infra/rdbms/sqlext"
 )
@@ -11,16 +12,16 @@ type HierarchicalId []*string
 // String returns the hierarchical identifier as a single string using
 // HierarchicalIdLevelSeparator between non-nil levels.
 func (hierarchicalId HierarchicalId) String() string {
-	var result = ""
+	var result strings.Builder
 	for index, level := range hierarchicalId {
 		if level != nil {
-			result += *level
+			result.WriteString(*level)
 			if index < len(hierarchicalId)-1 {
-				result += HierarchicalIdLevelSeparator
+				result.WriteString(HierarchicalIdLevelSeparator)
 			}
 		}
 	}
-	return result
+	return result.String()
 }
 
 // Value implements driver.Valuer so HierarchicalId can be used directly as a
@@ -60,7 +61,7 @@ func (hierarchicalId HierarchicalId) ParentLevelId() HierarchicalId {
 		return nil
 	}
 
-	levelIndex := hierarchicalId.GetLevelIndex()
+	var levelIndex = hierarchicalId.GetLevelIndex()
 	return hierarchicalId[levelIndex+1:]
 }
 

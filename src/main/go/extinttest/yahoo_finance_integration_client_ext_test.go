@@ -11,6 +11,7 @@
 package extinttest
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -34,7 +35,7 @@ func TestSearchAssets_IAU(t *testing.T) {
 		infra.ReadConfig().IntegrationConfig.YahooFinanceConfig,
 	)
 
-	var searchResponse, err = client.SearchAssets(iauTicker)
+	var searchResponse, err = client.SearchAssets(context.Background(), iauTicker)
 
 	require.NoError(t, err, "SearchAssets should not return an error")
 	require.NotNil(t, searchResponse, "SearchAssets response should not be nil")
@@ -84,6 +85,15 @@ func TestQuoteAssetLastClosePrice_IAU(t *testing.T) {
 	require.NotEmpty(t, result.Indicators.Quote, "Chart result should contain at least one quote indicator")
 	require.NotEmpty(t, result.Indicators.Quote[0].Close, "Quote indicator should contain at least one close price")
 
-	var lastClosePrice = result.Indicators.Quote[0].Close[len(result.Indicators.Quote[0].Close)-1]
-	assert.Greater(t, lastClosePrice, float64(0), "Last close price should be greater than zero")
+	var closePrices = result.Indicators.Quote[0].Close
+	var lastClosePrice *float64
+	for index := len(closePrices) - 1; index >= 0; index-- {
+		if closePrices[index] != nil {
+			lastClosePrice = closePrices[index]
+			break
+		}
+	}
+
+	require.NotNil(t, lastClosePrice, "Quote indicator should contain at least one non-null close price")
+	assert.Greater(t, *lastClosePrice, float64(0), "Last close price should be greater than zero")
 }

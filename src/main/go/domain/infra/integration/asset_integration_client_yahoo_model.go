@@ -30,7 +30,7 @@ type YahooFinanceSearchResponseDTS struct {
 //
 // Authored by: GitHub Copilot (claude-opus-4.6)
 type YahooFinanceChartQuoteIndicatorDTS struct {
-	Close []float64 `json:"close"`
+	Close []*float64 `json:"close"`
 }
 
 // YahooFinanceChartIndicatorsDTS represents the indicators section
