@@ -60,7 +60,7 @@ func FlatMapConcurrentlyCtx[I any, R any](
 	var workContext, cancel = context.WithCancel(ctx)
 	defer cancel()
 
-	var inputChannel = buildConcurrentInputChannel(ctx, inputs)
+	var inputChannel = buildConcurrentInputChannel(workContext, inputs)
 	var resultChannel = make(chan concurrentSliceResult[R], len(inputs))
 	var firstErrChannel = startFlatMapWorkers(
 		workContext,

@@ -60,3 +60,20 @@ func TestHierarchicalIdValue_WithNilLevels(t *testing.T) {
 		t.Fatalf("mismatch with nils\n actual: %q\nwant: %q", util.ValueToString(actual), util.ValueToString(expected))
 	}
 }
+
+func TestHierarchicalIdIsTopLevel_Empty(t *testing.T) {
+	var hierarchicalId = HierarchicalId{}
+
+	if hierarchicalId.IsTopLevel() {
+		t.Fatal("Expected empty hierarchical id to not be top level")
+	}
+}
+
+func TestHierarchicalIdParentLevelId_Empty(t *testing.T) {
+	var hierarchicalId = HierarchicalId{}
+
+	var parentLevelId = hierarchicalId.ParentLevelId()
+	if len(parentLevelId) != 0 {
+		t.Fatalf("Expected empty parent hierarchical id, got %#v", parentLevelId)
+	}
+}

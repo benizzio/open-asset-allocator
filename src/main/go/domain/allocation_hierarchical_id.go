@@ -37,6 +37,10 @@ func (hierarchicalId HierarchicalId) Value() (driver.Value, error) {
 func (hierarchicalId HierarchicalId) IsTopLevel() bool {
 
 	var length = len(hierarchicalId)
+	if length == 0 {
+		return false
+	}
+
 	var lastIndex = length - 1
 
 	if lastIndex == 0 {

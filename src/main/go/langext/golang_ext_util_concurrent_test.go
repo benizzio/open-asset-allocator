@@ -3,6 +3,7 @@ package langext
 import (
 	"context"
 	"errors"
+	"runtime"
 	"slices"
 	"testing"
 	"time"
@@ -71,4 +72,52 @@ func TestFlatMapConcurrentlyCtx_ReturnsFirstError(t *testing.T) {
 	if results != nil {
 		t.Fatalf("Expected nil results on error, got %#v", results)
 	}
+}
+
+// TestFlatMapConcurrently_DoesNotLeakProducerOnWorkerError verifies that the producer goroutine
+// observes worker cancellation on the FlatMapConcurrently path as well.
+//
+// Authored by: OpenCode
+func TestFlatMapConcurrently_DoesNotLeakProducerOnWorkerError(t *testing.T) {
+	var expectedErr = errors.New("boom")
+
+	var inputs = make([]int, 256)
+	for index := range inputs {
+		inputs[index] = index
+	}
+
+	var baselineGoroutineCount = runtime.NumGoroutine()
+
+	for range 20 {
+		_, err := FlatMapConcurrently(inputs, func(input int) ([]int, error) {
+			if input == 0 {
+				return nil, expectedErr
+			}
+
+			time.Sleep(10 * time.Millisecond)
+			return []int{input}, nil
+		})
+
+		if !errors.Is(err, expectedErr) {
+			t.Fatalf("Expected error %v, got %v", expectedErr, err)
+		}
+	}
+
+	var currentGoroutineCount = baselineGoroutineCount
+	var deadline = time.Now().Add(500 * time.Millisecond)
+	for time.Now().Before(deadline) {
+		runtime.GC()
+		currentGoroutineCount = runtime.NumGoroutine()
+		if currentGoroutineCount <= baselineGoroutineCount+4 {
+			return
+		}
+
+		time.Sleep(10 * time.Millisecond)
+	}
+
+	t.Fatalf(
+		"Expected no leaked producer goroutines, baseline=%d current=%d",
+		baselineGoroutineCount,
+		currentGoroutineCount,
+	)
 }
