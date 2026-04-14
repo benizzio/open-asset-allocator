@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	gingonic "github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/benizzio/open-asset-allocator/api/rest/model"
 )
@@ -32,30 +34,14 @@ func TestBindAndValidateQueryWithInvalidResponse_MalformedQuery(t *testing.T) {
 	var bindingTarget malformedQueryBindingTarget
 	var valid, err = BindAndValidateQueryWithInvalidResponse(context, &bindingTarget)
 
-	if err != nil {
-		t.Fatalf("Expected nil error, got %v", err)
-	}
-	if valid {
-		t.Fatal("Expected query binding to be invalid")
-	}
-	if recorder.Code != http.StatusBadRequest {
-		t.Fatalf("Expected status %d, got %d", http.StatusBadRequest, recorder.Code)
-	}
+	require.NoError(t, err)
+	assert.False(t, valid)
+	assert.Equal(t, http.StatusBadRequest, recorder.Code)
 
 	var errorResponse model.ErrorResponse
-	if decodeErr := json.Unmarshal(recorder.Body.Bytes(), &errorResponse); decodeErr != nil {
-		t.Fatalf("Expected valid JSON response, got %v", decodeErr)
-	}
-	if errorResponse.ErrorMessage != "Validation failed" {
-		t.Fatalf("Expected validation error message, got %q", errorResponse.ErrorMessage)
-	}
-	if len(errorResponse.Details) != 2 {
-		t.Fatalf("Expected two validation details, got %#v", errorResponse.Details)
-	}
-	if errorResponse.Details[0] != "malformed or invalid query parameters" {
-		t.Fatalf("Expected malformed query fallback detail first, got %#v", errorResponse.Details)
-	}
-	if errorResponse.Details[1] != "Field 'Limit' failed validation: is required" {
-		t.Fatalf("Expected required validation detail second, got %#v", errorResponse.Details)
-	}
+	require.NoError(t, json.Unmarshal(recorder.Body.Bytes(), &errorResponse))
+	assert.Equal(t, "Validation failed", errorResponse.ErrorMessage)
+	require.Len(t, errorResponse.Details, 2)
+	assert.Equal(t, "malformed or invalid query parameters", errorResponse.Details[0])
+	assert.Equal(t, "Field 'Limit' failed validation: is required", errorResponse.Details[1])
 }

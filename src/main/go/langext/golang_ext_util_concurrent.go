@@ -8,7 +8,7 @@ import (
 
 // concurrentSliceResult holds the output of a single concurrent slice-producing operation.
 //
-// Co-authored by: OpenCode and benizzio
+// Authored by: OpenCode
 type concurrentSliceResult[R any] struct {
 	results []R
 }
@@ -23,7 +23,7 @@ type concurrentSliceResult[R any] struct {
 //		return fetchFromAPI(url)
 //	})
 //
-// Co-authored by: OpenCode and benizzio
+// Authored by: OpenCode
 func FlatMapConcurrently[I any, R any](inputs []I, sliceFromItem SliceFromItem[I, R]) ([]R, error) {
 	var sliceFromItemWithContext SliceFromItemWithContext[I, R] = func(_ context.Context, input I) ([]R, error) {
 		return sliceFromItem(input)
@@ -46,7 +46,7 @@ func FlatMapConcurrently[I any, R any](inputs []I, sliceFromItem SliceFromItem[I
 //		},
 //	)
 //
-// Co-authored by: OpenCode and benizzio
+// Authored by: OpenCode
 func FlatMapConcurrentlyCtx[I any, R any](
 	ctx context.Context,
 	inputs []I,
@@ -119,7 +119,7 @@ func startFlatMapWorkers[I any, R any](
 
 // buildFlatMapWorkerCount returns the bounded worker count used by FlatMapConcurrentlyCtx.
 //
-// Co-authored by: OpenCode and benizzio
+// Authored by: OpenCode
 func buildFlatMapWorkerCount(inputCount int) int {
 	if inputCount == 0 {
 		return 0
@@ -242,7 +242,7 @@ func closeConcurrentResultChannels[R any](
 // executeSliceFromItemConcurrently runs a single context-aware slice-producing operation and
 // sends the successful result to the channel.
 //
-// Co-authored by: OpenCode and benizzio
+// Authored by: OpenCode
 func executeSliceFromItemConcurrently[I any, R any](
 	ctx context.Context,
 	input I,
@@ -275,7 +275,7 @@ func readConcurrentError(firstErrChannel <-chan error) error {
 
 // collectConcurrentResults drains the result channel and aggregates the collected result slices.
 //
-// Co-authored by: OpenCode and benizzio
+// Authored by: OpenCode
 func collectConcurrentResults[R any](resultChannel <-chan concurrentSliceResult[R]) []R {
 	var aggregated = make([]R, 0)
 

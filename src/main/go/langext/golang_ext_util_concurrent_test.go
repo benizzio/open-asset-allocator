@@ -7,6 +7,9 @@ import (
 	"slices"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // TestFlatMapConcurrently_EmptyInput verifies that FlatMapConcurrently returns an empty slice
@@ -18,12 +21,8 @@ func TestFlatMapConcurrently_EmptyInput(t *testing.T) {
 		return []string{string(rune(input))}, nil
 	})
 
-	if err != nil {
-		t.Fatalf("Expected nil error, got %v", err)
-	}
-	if len(results) != 0 {
-		t.Fatalf("Expected empty result slice, got %#v", results)
-	}
+	require.NoError(t, err)
+	assert.Empty(t, results)
 }
 
 // TestFlatMapConcurrently_AggregatesResults verifies that FlatMapConcurrently collects and
@@ -35,15 +34,11 @@ func TestFlatMapConcurrently_AggregatesResults(t *testing.T) {
 		return []int{input, input * 10}, nil
 	})
 
-	if err != nil {
-		t.Fatalf("Expected nil error, got %v", err)
-	}
+	require.NoError(t, err)
 
 	slices.Sort(results)
 	var expected = []int{1, 2, 3, 10, 20, 30}
-	if !slices.Equal(results, expected) {
-		t.Fatalf("Expected %#v, got %#v", expected, results)
-	}
+	assert.True(t, slices.Equal(results, expected), "expected %#v, got %#v", expected, results)
 }
 
 // TestFlatMapConcurrentlyCtx_ReturnsFirstError verifies that FlatMapConcurrentlyCtx returns the
@@ -66,12 +61,8 @@ func TestFlatMapConcurrentlyCtx_ReturnsFirstError(t *testing.T) {
 		}
 	})
 
-	if !errors.Is(err, expectedErr) {
-		t.Fatalf("Expected error %v, got %v", expectedErr, err)
-	}
-	if results != nil {
-		t.Fatalf("Expected nil results on error, got %#v", results)
-	}
+	require.ErrorIs(t, err, expectedErr)
+	assert.Nil(t, results)
 }
 
 // TestFlatMapConcurrently_DoesNotLeakProducerOnWorkerError verifies that the producer goroutine
@@ -98,9 +89,7 @@ func TestFlatMapConcurrently_DoesNotLeakProducerOnWorkerError(t *testing.T) {
 			return []int{input}, nil
 		})
 
-		if !errors.Is(err, expectedErr) {
-			t.Fatalf("Expected error %v, got %v", expectedErr, err)
-		}
+		require.ErrorIs(t, err, expectedErr)
 	}
 
 	var currentGoroutineCount = baselineGoroutineCount
@@ -109,6 +98,7 @@ func TestFlatMapConcurrently_DoesNotLeakProducerOnWorkerError(t *testing.T) {
 		runtime.GC()
 		currentGoroutineCount = runtime.NumGoroutine()
 		if currentGoroutineCount <= baselineGoroutineCount+4 {
+			assert.LessOrEqual(t, currentGoroutineCount, baselineGoroutineCount+4)
 			return
 		}
 

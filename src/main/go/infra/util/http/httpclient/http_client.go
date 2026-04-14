@@ -16,14 +16,6 @@ const defaultTimeout = 10 * time.Second
 // Used with ExecuteGet and ExecuteGetJSON to customize request headers, parameters, or
 // other properties without modifying the function signatures for each new requirement.
 //
-// Example:
-//
-//	response, err := httpclient.ExecuteGet(
-//		context.Background(),
-//		url,
-//		httpclient.WithHeader("User-Agent", "MyApp/1.0"),
-//	)
-//
 // Authored by: GitHub Copilot (claude-opus-4.6)
 type RequestOption func(*http.Request)
 

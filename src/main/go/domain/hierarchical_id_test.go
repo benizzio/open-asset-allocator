@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	"github.com/lib/pq"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/benizzio/open-asset-allocator/infra/util"
 )
@@ -16,9 +18,7 @@ func TestHierarchicalIdValue_AllNonNil(t *testing.T) {
 
 	var id = HierarchicalId{&a, &b, &c}
 	actual, err := id.Value()
-	if err != nil {
-		t.Fatalf("Value() returned error: %v", err)
-	}
+	require.NoError(t, err)
 
 	// Expected representation using pq.Array on []sql.NullString
 	expectedArray := []sql.NullString{
@@ -27,13 +27,9 @@ func TestHierarchicalIdValue_AllNonNil(t *testing.T) {
 		{String: "c", Valid: true},
 	}
 	expected, err := pq.Array(expectedArray).Value()
-	if err != nil {
-		t.Fatalf("pq.Array.Value() returned error: %v", err)
-	}
+	require.NoError(t, err)
 
-	if util.ValueToString(actual) != util.ValueToString(expected) {
-		t.Fatalf("mismatch\n actual: %q\nwant: %q", util.ValueToString(actual), util.ValueToString(expected))
-	}
+	assert.Equal(t, util.ValueToString(expected), util.ValueToString(actual))
 }
 
 func TestHierarchicalIdValue_WithNilLevels(t *testing.T) {
@@ -42,9 +38,7 @@ func TestHierarchicalIdValue_WithNilLevels(t *testing.T) {
 
 	var id = HierarchicalId{&a, nil, &c}
 	actual, err := id.Value()
-	if err != nil {
-		t.Fatalf("Value() returned error: %v", err)
-	}
+	require.NoError(t, err)
 
 	expectedArray := []sql.NullString{
 		{String: "a", Valid: true},
@@ -52,28 +46,20 @@ func TestHierarchicalIdValue_WithNilLevels(t *testing.T) {
 		{String: "c", Valid: true},
 	}
 	expected, err := pq.Array(expectedArray).Value()
-	if err != nil {
-		t.Fatalf("pq.Array.Value() returned error: %v", err)
-	}
+	require.NoError(t, err)
 
-	if util.ValueToString(actual) != util.ValueToString(expected) {
-		t.Fatalf("mismatch with nils\n actual: %q\nwant: %q", util.ValueToString(actual), util.ValueToString(expected))
-	}
+	assert.Equal(t, util.ValueToString(expected), util.ValueToString(actual))
 }
 
 func TestHierarchicalIdIsTopLevel_Empty(t *testing.T) {
 	var hierarchicalId = HierarchicalId{}
 
-	if hierarchicalId.IsTopLevel() {
-		t.Fatal("Expected empty hierarchical id to not be top level")
-	}
+	assert.False(t, hierarchicalId.IsTopLevel())
 }
 
 func TestHierarchicalIdParentLevelId_Empty(t *testing.T) {
 	var hierarchicalId = HierarchicalId{}
 
 	var parentLevelId = hierarchicalId.ParentLevelId()
-	if len(parentLevelId) != 0 {
-		t.Fatalf("Expected empty parent hierarchical id, got %#v", parentLevelId)
-	}
+	assert.Empty(t, parentLevelId)
 }
