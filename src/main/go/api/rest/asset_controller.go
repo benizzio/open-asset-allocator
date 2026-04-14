@@ -34,6 +34,11 @@ func (controller *AssetRESTController) BuildRoutes() []infra.RESTRoute {
 			Path:     "/api/asset",
 			Handlers: gin.HandlersChain{controller.putAsset},
 		},
+		{
+			Method:   http.MethodGet,
+			Path:     "/api/external-asset",
+			Handlers: gin.HandlersChain{controller.getExternalAssets},
+		},
 	}
 }
 
@@ -114,4 +119,31 @@ func BuildAssetRESTController(assetDomService *service.AssetDomService) *AssetRE
 	return &AssetRESTController{
 		assetDomService: assetDomService,
 	}
+}
+
+// getExternalAssets handles GET requests that search external asset providers by query string.
+//
+// Co-authored by: OpenCode and benizzio
+func (controller *AssetRESTController) getExternalAssets(context *gin.Context) {
+
+	var externalAssetSearchQueryDTS model.ExternalAssetSearchQueryDTS
+	valid, err := gininfra.BindAndValidateQueryWithInvalidResponse(context, &externalAssetSearchQueryDTS)
+	if err != nil {
+		gininfra.HandleAPIError(context, "Error binding external asset search query", err)
+		return
+	}
+	if !valid {
+		return
+	}
+
+	externalAssets, err := controller.assetDomService.SearchExternalAssets(
+		context.Request.Context(),
+		externalAssetSearchQueryDTS.Query,
+	)
+	if gininfra.HandleAPIError(context, "Error searching external assets", err) {
+		return
+	}
+
+	var externalAssetDTSs = model.MapToExternalAssetDTSs(externalAssets)
+	context.JSON(http.StatusOK, externalAssetDTSs)
 }

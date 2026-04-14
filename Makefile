@@ -13,6 +13,10 @@ lint-fmt:
 test:
 	./test.sh
 
+# Runs the external integration tests (requires network access to external APIs)
+test-ext:
+	cd src/main/go && go test -count=1 -tags=extinttest ./extinttest/...
+
 # Builds the application for development mode
 dev-build:
 	./build-dev.sh

@@ -3,7 +3,6 @@ package sqlext
 import (
 	"database/sql"
 	"database/sql/driver"
-	"time"
 
 	"github.com/lib/pq"
 )
@@ -55,13 +54,4 @@ func BuildNullStringSlice(values []*string) NullStringSlice {
 		}
 	}
 	return arr
-}
-
-type NullTime sql.NullTime
-
-func (nullTime *NullTime) ToTimeReference() *time.Time {
-	if nullTime.Valid {
-		return &nullTime.Time
-	}
-	return nil
 }

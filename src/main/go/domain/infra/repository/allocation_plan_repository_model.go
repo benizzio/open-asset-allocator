@@ -5,7 +5,7 @@ import (
 
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/domain/allocation"
-	"github.com/benizzio/open-asset-allocator/infra/sqlext"
+	"github.com/benizzio/open-asset-allocator/infra/rdbms/sqlext"
 	"github.com/benizzio/open-asset-allocator/langext"
 )
 

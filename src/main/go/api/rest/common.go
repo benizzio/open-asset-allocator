@@ -5,6 +5,8 @@ const (
 	observationTimestampIdParam           = "observationTimestampId"
 	planIdParam                           = "planId"
 	assetIdOrTickerParam                  = "assetIdOrTicker"
+	externalAssetQueryParam               = "query"
+	externalAssetSourceParam              = "externalAssetSource"
 	getPortfolioIdErrorMessage            = "Error getting portfolioId url parameter"
 	getObservationTimestampIdErrorMessage = "Error getting observationTimestampId url parameter"
 	getPlanIdErrorMessage                 = "Error getting planId url parameter"

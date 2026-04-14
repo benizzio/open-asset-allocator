@@ -4,10 +4,14 @@ import (
 	"context"
 
 	"github.com/benizzio/open-asset-allocator/domain"
+	"github.com/benizzio/open-asset-allocator/langext"
 )
 
+type AssetIntegrationServicesPerSource map[domain.AssetExternalSource]domain.AssetIntegrationService
+
 type AssetDomService struct {
-	assetRepository domain.AssetRepository
+	assetRepository                   domain.AssetRepository
+	assetIntegrationServicesPerSource AssetIntegrationServicesPerSource
 }
 
 func (service *AssetDomService) GetKnownAssets() ([]*domain.Asset, error) {
@@ -55,8 +59,52 @@ func (service *AssetDomService) InsertMappedAssetsInTransaction(
 	return persistedAssetsPerTicker, nil
 }
 
-func BuildAssetDomService(assetRepository domain.AssetRepository) *AssetDomService {
+// collectIntegrationServices extracts the integration service values from the source-keyed map
+// into a slice suitable for concurrent processing.
+//
+// Authored by: GitHub Copilot (claude-opus-4.6)
+func collectIntegrationServices(servicesPerSource AssetIntegrationServicesPerSource) []domain.AssetIntegrationService {
+	var services = make([]domain.AssetIntegrationService, 0, len(servicesPerSource))
+	for _, integrationService := range servicesPerSource {
+		services = append(services, integrationService)
+	}
+	return services
+}
+
+// SearchExternalAssets queries all configured external asset integration services concurrently
+// for assets matching the given query, and returns the aggregated results.
+//
+// Parameters:
+//   - query: the search term to query across all configured external sources
+//
+// Returns:
+//   - []*domain.ExternalAsset: the aggregated external assets from all sources
+//   - error: the first error encountered from any source, or nil if all succeeded
+//
+// Co-authored by: OpenCode and benizzio
+func (service *AssetDomService) SearchExternalAssets(
+	requestContext context.Context,
+	query string,
+) ([]*domain.ExternalAsset, error) {
+
+	var integrationServices = collectIntegrationServices(service.assetIntegrationServicesPerSource)
+
+	var searchAssetsOnService = func(
+		searchContext context.Context,
+		integrationService domain.AssetIntegrationService,
+	) ([]*domain.ExternalAsset, error) {
+		return integrationService.SearchAssets(searchContext, query)
+	}
+
+	return langext.FlatMapConcurrentlyCtx(requestContext, integrationServices, searchAssetsOnService)
+}
+
+func BuildAssetDomService(
+	assetRepository domain.AssetRepository,
+	integrationServices AssetIntegrationServicesPerSource,
+) *AssetDomService {
 	return &AssetDomService{
-		assetRepository: assetRepository,
+		assetRepository:                   assetRepository,
+		assetIntegrationServicesPerSource: integrationServices,
 	}
 }

@@ -15,6 +15,28 @@ type AssetDTS struct {
 	Ticker string                  `json:"ticker" validate:"required,max=40"`
 }
 
+// ExternalAssetDTS is the REST data transfer structure for external asset search results.
+// Maps all fields from the domain ExternalAsset, including Name and ExchangeName which are
+// excluded from the domain type's JSON serialization (used for persistence) but required in
+// API responses.
+//
+// Authored by: GitHub Copilot (claude-opus-4.6)
+type ExternalAssetDTS struct {
+	Source       string `json:"source"`
+	Ticker       string `json:"ticker"`
+	ExchangeId   string `json:"exchangeId"`
+	Name         string `json:"name"`
+	ExchangeName string `json:"exchangeName"`
+}
+
+// ExternalAssetSearchQueryDTS is the request data transfer structure for external asset
+// search query parameters.
+//
+// Authored by: GitHub Copilot
+type ExternalAssetSearchQueryDTS struct {
+	Query string `form:"query" json:"query" validate:"required,max=100"`
+}
+
 // ================================================
 // MAPPING FUNCTIONS
 // ================================================
@@ -35,8 +57,8 @@ func MapToAssetDTS(asset *domain.Asset) *AssetDTS {
 
 func MapToAssetDTSs(assets []*domain.Asset) []*AssetDTS {
 	var assetsDTS = make([]*AssetDTS, len(assets))
-	for i, asset := range assets {
-		assetsDTS[i] = MapToAssetDTS(asset)
+	for index, asset := range assets {
+		assetsDTS[index] = MapToAssetDTS(asset)
 	}
 	return assetsDTS
 }
@@ -60,8 +82,54 @@ func MapToAsset(assetDTS *AssetDTS) *domain.Asset {
 
 func MapToAssets(assetsDTS []*AssetDTS) []*domain.Asset {
 	var assets = make([]*domain.Asset, len(assetsDTS))
-	for i, assetDTS := range assetsDTS {
-		assets[i] = MapToAsset(assetDTS)
+	for index, assetDTS := range assetsDTS {
+		assets[index] = MapToAsset(assetDTS)
 	}
 	return assets
+}
+
+// MapToExternalAssetDTS maps a domain ExternalAsset to its REST DTS representation.
+//
+// Parameters:
+//   - externalAsset: the domain ExternalAsset to map
+//
+// Returns:
+//   - *ExternalAssetDTS: the mapped REST DTS, or nil if the input is nil
+//
+// Example:
+//
+//	var dts = model.MapToExternalAssetDTS(externalAsset)
+//
+// Authored by: GitHub Copilot (claude-opus-4.6)
+func MapToExternalAssetDTS(externalAsset *domain.ExternalAsset) *ExternalAssetDTS {
+
+	if externalAsset == nil {
+		return nil
+	}
+
+	return &ExternalAssetDTS{
+		Source:       string(externalAsset.Source),
+		Ticker:       externalAsset.Ticker,
+		ExchangeId:   externalAsset.ExchangeId,
+		Name:         externalAsset.Name,
+		ExchangeName: externalAsset.ExchangeName,
+	}
+}
+
+// MapToExternalAssetDTSs maps a slice of domain ExternalAsset pointers to their REST DTS
+// representations.
+//
+// Parameters:
+//   - externalAssets: the slice of domain ExternalAsset pointers to map
+//
+// Returns:
+//   - []*ExternalAssetDTS: the mapped slice of REST DTSs
+//
+// Authored by: GitHub Copilot (claude-opus-4.6)
+func MapToExternalAssetDTSs(externalAssets []*domain.ExternalAsset) []*ExternalAssetDTS {
+	var externalAssetDTSs = make([]*ExternalAssetDTS, len(externalAssets))
+	for index, externalAsset := range externalAssets {
+		externalAssetDTSs[index] = MapToExternalAssetDTS(externalAsset)
+	}
+	return externalAssetDTSs
 }

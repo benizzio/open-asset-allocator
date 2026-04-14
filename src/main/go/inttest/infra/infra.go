@@ -183,10 +183,17 @@ func BuildAndStartApplication() root.App {
 		DriverName: DBDriverName,
 		RdbmsURL:   appConnectionString,
 	}
+	var yahooFinanceConfig = infra.YahooFinanceConfiguration{
+		SearchURL: GetYahooFinanceMockServer().URL() + "/v1/finance/search",
+		ChartURL:  GetYahooFinanceMockServer().URL() + "/v8/finance/chart/",
+	}
 
 	var testConfig = infra.Configuration{
 		GinServerConfig: ginServerConfig,
 		RdbmsConfig:     dbConfig,
+		IntegrationConfig: infra.IntegrationConfiguration{
+			YahooFinanceConfig: yahooFinanceConfig,
+		},
 	}
 
 	var app = root.App{}

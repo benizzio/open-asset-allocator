@@ -1,6 +1,7 @@
 package inttest
 
 import (
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -8,6 +9,7 @@ import (
 
 	dbx "github.com/go-ozzo/ozzo-dbx"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra/util"
@@ -54,14 +56,15 @@ func insertTestAsset(t *testing.T, ticker string, name string) domain.Asset {
 // assertPersistedAsset asserts that the asset with the given ID has the expected ticker and name
 // in the database.
 //
-// Authored by: GitHub Copilot
+// Co-authored by: GitHub Copilot and benizzio
 func assertPersistedAsset(t *testing.T, assetId int64, expectedTicker string, expectedName string) {
 
 	var assetIdString = strconv.FormatInt(assetId, 10)
 	var assetNullStringMap = dbx.NullStringMap{
-		"id":     util.StringToNullString(assetIdString),
-		"ticker": util.StringToNullString(expectedTicker),
-		"name":   util.StringToNullString(expectedName),
+		"id":            util.StringToNullString(assetIdString),
+		"ticker":        util.StringToNullString(expectedTicker),
+		"name":          util.StringToNullString(expectedName),
+		"external_data": util.StringPointerToNullString(nil),
 	}
 
 	inttestutil.AssertDBWithQuery(
@@ -90,4 +93,28 @@ func putAsset(t *testing.T, putAssetJSON string) *http.Response {
 	assert.NoError(t, err)
 
 	return response
+}
+
+// getExternalAssets sends a GET request to the /api/external-asset endpoint with the given raw
+// query string and returns the response status code and body.
+//
+// Co-authored by: OpenCode and benizzio
+func getExternalAssets(t *testing.T, rawQuery string) (int, string) {
+	t.Helper()
+
+	var requestURL = inttestinfra.TestAPIURLPrefix + "/external-asset"
+	if rawQuery != "" {
+		requestURL += "?" + rawQuery
+	}
+
+	var response, err = http.Get(requestURL)
+	require.NoError(t, err)
+
+	var responseBodyBytes, readErr = io.ReadAll(response.Body)
+	require.NoError(t, readErr)
+
+	err = response.Body.Close()
+	require.NoError(t, err)
+
+	return response.StatusCode, string(responseBodyBytes)
 }

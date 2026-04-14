@@ -11,6 +11,18 @@ func IsZeroValue[T any](value T) bool {
 	return reflect.ValueOf(value).IsZero()
 }
 
+// IsNilPointer checks if a value is a typed nil pointer.
+//
+// Authored by: OpenCode
+func IsNilPointer(value any) bool {
+	if value == nil {
+		return false
+	}
+
+	var valueRef = reflect.ValueOf(value)
+	return valueRef.Kind() == reflect.Ptr && valueRef.IsNil()
+}
+
 // UnwrapType removes pointer indirection if present.
 //
 // Authored by: GitHub Copilot
