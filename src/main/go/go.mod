@@ -3,13 +3,13 @@ module github.com/benizzio/open-asset-allocator
 go 1.26.1
 
 require (
-	github.com/docker/docker v28.5.2+incompatible
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-ozzo/ozzo-dbx v1.5.0
 	github.com/go-playground/universal-translator v0.18.1
 	github.com/go-playground/validator/v10 v10.30.1
 	github.com/golang/glog v1.2.5
 	github.com/lib/pq v1.12.0
+	github.com/moby/moby/api v1.54.1
 	github.com/nhatthm/httpmock v0.8.0
 	github.com/okhomin/gohashcode v0.0.0-20240711234613-532ff59abfa6
 	github.com/shopspring/decimal v1.4.0
@@ -60,7 +60,6 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
 	github.com/moby/go-archive v0.2.0 // indirect
-	github.com/moby/moby/api v1.54.1 // indirect
 	github.com/moby/moby/client v0.4.0 // indirect
 	github.com/moby/patternmatcher v0.6.1 // indirect
 	github.com/moby/sys/sequential v0.6.0 // indirect
