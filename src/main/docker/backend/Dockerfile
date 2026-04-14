@@ -2,7 +2,7 @@ FROM cosmtrek/air:latest AS dev
 
 RUN go install github.com/go-delve/delve/cmd/dlv@latest
 
-FROM golang:1.26.1
+FROM golang:1.26.2
 LABEL authors="benizzio"
 
 WORKDIR /backend
