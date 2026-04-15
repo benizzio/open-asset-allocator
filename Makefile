@@ -1,5 +1,7 @@
 .DEFAULT_GOAL := build
 
+.PHONY: frontend-install
+
 
 # Runs golangci-lint on the Go source
 lint:
@@ -8,6 +10,10 @@ lint:
 # Runs golangci-lint formatter (goimports) on the Go source
 lint-fmt:
 	cd src/main/go && golangci-lint fmt ./...
+
+# Installs the front-end npm dependencies
+frontend-install:
+	cd src/main/web-static && npm install
 
 # Runs the tests for the application
 test:
