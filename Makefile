@@ -1,5 +1,7 @@
 .DEFAULT_GOAL := build
 
+.PHONY: frontend-install
+
 
 # Runs golangci-lint on the Go source
 lint:
