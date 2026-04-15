@@ -9,6 +9,10 @@ lint:
 lint-fmt:
 	cd src/main/go && golangci-lint fmt ./...
 
+# Installs the front-end npm dependencies
+frontend-install:
+	cd src/main/web-static && npm install
+
 # Runs the tests for the application
 test:
 	./test.sh
