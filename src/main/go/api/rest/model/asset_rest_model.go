@@ -22,10 +22,10 @@ type AssetDTS struct {
 //
 // Authored by: GitHub Copilot (claude-opus-4.6)
 type ExternalAssetDTS struct {
-	Source       string `json:"source"`
-	Ticker       string `json:"ticker"`
-	ExchangeId   string `json:"exchangeId"`
-	Name         string `json:"name"`
+	Source       string `json:"source" validate:"required"`
+	Ticker       string `json:"ticker" validate:"required"`
+	ExchangeId   string `json:"exchangeId" validate:"required"`
+	Name         string `json:"name" validate:"required"`
 	ExchangeName string `json:"exchangeName"`
 }
 
