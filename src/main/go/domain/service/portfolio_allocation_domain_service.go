@@ -92,12 +92,6 @@ func (service *PortfolioAllocationDomService) getHierarchyLevelFieldValue(
 	return extractorFunction(allocation), nil
 }
 
-func (service *PortfolioAllocationDomService) FindAvailablePortfolioAllocationClasses(
-	portfolioId int64,
-) ([]string, error) {
-	return service.portfolioAllocationRepository.FindAvailablePortfolioAllocationClasses(portfolioId)
-}
-
 func (service *PortfolioAllocationDomService) MergePortfolioAllocationsInTransaction(
 	transContext context.Context,
 	portfolioId int64,

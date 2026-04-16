@@ -36,7 +36,6 @@ type PortfolioAllocationRepository interface {
 		portfolioId int64,
 		observationTimestampsLimit int,
 	) ([]*PortfolioObservationTimestamp, error)
-	FindAvailablePortfolioAllocationClasses(portfolioId int64) ([]string, error)
 	MergePortfolioAllocationsInTransaction(
 		transContext context.Context,
 		portfolioId int64,

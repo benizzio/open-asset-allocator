@@ -122,28 +122,6 @@ func (controller *PortfolioAllocationRESTController) getAvailableHistoryObservat
 	context.JSON(http.StatusOK, availableTimestampsDTS)
 }
 
-// Deprecated: Use PortfolioRESTController.getAvailablePortfolioAllocationClasses instead.
-// This endpoint only returns classes from portfolio_allocation_fact table.
-// The new endpoint returns classes from both portfolio_allocation_fact and planned_allocation tables.
-//
-// TODO remove this deprecated implementation once all clients have migrated to the new endpoint
-func (controller *PortfolioAllocationRESTController) getAvailablePortfolioAllocationClasses(context *gin.Context) {
-
-	portfolioIdParamValue := context.Param(portfolioIdParam)
-	portfolioId, err := langext.ParseInt64(portfolioIdParamValue)
-	if gininfra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
-		return
-	}
-
-	availableClasses, err := controller.portfolioAllocationDomService.
-		FindAvailablePortfolioAllocationClasses(portfolioId)
-	if gininfra.HandleAPIError(context, "Error getting available portfolio allocation classes", err) {
-		return
-	}
-
-	context.JSON(http.StatusOK, availableClasses)
-}
-
 func (controller *PortfolioAllocationRESTController) postPortfolioAllocationHistory(context *gin.Context) {
 
 	var portfolioIdParamValue = context.Param(portfolioIdParam)
