@@ -3,8 +3,6 @@ package repository
 import (
 	"context"
 
-	dbx "github.com/go-ozzo/ozzo-dbx"
-
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/benizzio/open-asset-allocator/infra/rdbms"
@@ -44,11 +42,6 @@ const (
 		JOIN portfolio_allocation_obs_time paot ON pa.observation_time_id = paot.id 
 		` + rdbms.WhereClausePlaceholder + `
 		ORDER BY paot.observation_timestamp DESC, pa.class ASC, pa.cash_reserve DESC, pa.total_market_value DESC
-	`
-	portfolioAllocationClassesSQL = `
-		SELECT DISTINCT pa.class 
-		FROM portfolio_allocation_fact pa ` + rdbms.WhereClausePlaceholder + `
-		ORDER BY pa.class ASC
 	`
 	portfolioAllocationsTempTableName   = `portfolio_allocation_fact_merge_temp`
 	portfolioAllocationsTempTableDDLSQL = `
@@ -190,59 +183,6 @@ func (repository *PortfolioAllocationRDBMSRepository) FindAvailableObservationTi
 	var result = langext.ToPointerSlice(queryResult)
 
 	return result, nil
-}
-
-func (repository *PortfolioAllocationRDBMSRepository) FindAvailablePortfolioAllocationClasses(portfolioId int64) (
-	[]string,
-	error,
-) {
-
-	var query = portfolioAllocationClassesSQL
-
-	rows, err := repository.findAvailablePortfolioAllocationClassesRows(portfolioId, query)
-	if err != nil {
-		return nil, err
-	}
-
-	return repository.scanAvailablePortfolioAllocationClassesRows(rows)
-}
-
-func (repository *PortfolioAllocationRDBMSRepository) findAvailablePortfolioAllocationClassesRows(
-	portfolioId int64,
-	query string,
-) (*dbx.Rows, error) {
-
-	rows, err := repository.dbAdapter.BuildQuery(query).
-		AddWhereClauseAndParam(portfolioIdWhereClause, "portfolioId", portfolioId).
-		Build().GetRows()
-
-	return rows, infra.PropagateAsAppErrorWithNewMessage(
-		err,
-		"Error querying portfolio allocation classes",
-		repository,
-	)
-}
-
-func (repository *PortfolioAllocationRDBMSRepository) scanAvailablePortfolioAllocationClassesRows(
-	rows *dbx.Rows,
-) ([]string, error) {
-
-	var queryResult = make([]string, 0)
-	for rows.Next() {
-
-		var class string
-		err := rows.Scan(&class)
-		if err != nil {
-			return nil, infra.PropagateAsAppErrorWithNewMessage(
-				err,
-				"Error scanning portfolio allocation class",
-				repository,
-			)
-		}
-
-		queryResult = append(queryResult, class)
-	}
-	return queryResult, nil
 }
 
 func (repository *PortfolioAllocationRDBMSRepository) MergePortfolioAllocationsInTransaction(
