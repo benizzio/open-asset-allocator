@@ -93,6 +93,10 @@ func aggregateHistoryAsDTSMap(
 	return portfolioAllocationsPerTimestamp
 }
 
+// mapToPortfolioAllocationDTS converts the domain portfolio allocation into the REST allocation
+// representation, including the selected external asset projected by the repository read model.
+//
+// Co-authored by: OpenCode and Igor Benicio de Mesquita
 func mapToPortfolioAllocationDTS(portfolioAllocation *domain.PortfolioAllocation) *PortfolioAllocationDTS {
 	var assetId = langext.ParseableInt64(portfolioAllocation.Asset.Id)
 	var totalMarketValue = decimal.NewFromInt(portfolioAllocation.TotalMarketValue)
@@ -100,6 +104,7 @@ func mapToPortfolioAllocationDTS(portfolioAllocation *domain.PortfolioAllocation
 		AssetId:          &assetId,
 		AssetName:        portfolioAllocation.Asset.Name,
 		AssetTicker:      portfolioAllocation.Asset.Ticker,
+		ExternalAssetDTS: MapToExternalAssetDTS(portfolioAllocation.SelectedExternalAsset),
 		Class:            portfolioAllocation.Class,
 		CashReserve:      portfolioAllocation.CashReserve,
 		TotalMarketValue: &totalMarketValue,
@@ -189,6 +194,15 @@ func MapToPortfolioAllocations(
 	return portfolioAllocations
 }
 
+// MapToPortfolioAllocation converts the REST allocation payload into the domain allocation model
+// used by the write flow, carrying the optional external asset as persisted asset external data
+// for new asset creation.
+//
+// Example:
+//
+//	allocation := MapToPortfolioAllocation(allocationDTS, 3)
+//
+// Co-authored by: OpenCode and Igor Benicio de Mesquita
 func MapToPortfolioAllocation(
 	portfolioAllocationDTS *PortfolioAllocationDTS,
 	observationTimestampId int64,
@@ -207,9 +221,10 @@ func MapToPortfolioAllocation(
 
 	return &domain.PortfolioAllocation{
 		Asset: domain.Asset{
-			Id:     assetId,
-			Name:   portfolioAllocationDTS.AssetName,
-			Ticker: portfolioAllocationDTS.AssetTicker,
+			Id:           assetId,
+			Name:         portfolioAllocationDTS.AssetName,
+			Ticker:       portfolioAllocationDTS.AssetTicker,
+			ExternalData: mapToExternalAssetData(portfolioAllocationDTS.ExternalAssetDTS),
 		},
 		Class:            portfolioAllocationDTS.Class,
 		CashReserve:      portfolioAllocationDTS.CashReserve,
@@ -219,6 +234,37 @@ func MapToPortfolioAllocation(
 		ObservationTimestamp: &domain.PortfolioObservationTimestamp{
 			Id: observationTimestampId,
 		},
+	}
+}
+
+// mapToExternalAssetData converts the request external asset payload into the persisted asset
+// external data shape used only when creating new assets.
+//
+// Authored by: OpenCode
+func mapToExternalAssetData(externalAssetDTS *ExternalAssetDTS) *domain.ExternalAssetData {
+	var externalAsset = mapToExternalAsset(externalAssetDTS)
+	if externalAsset == nil {
+		return nil
+	}
+
+	return &domain.ExternalAssetData{
+		Data: []domain.ExternalAsset{*externalAsset},
+	}
+}
+
+// mapToExternalAsset converts the REST external asset payload into the persisted domain shape,
+// keeping transient display fields out of the stored representation.
+//
+// Authored by: OpenCode
+func mapToExternalAsset(externalAssetDTS *ExternalAssetDTS) *domain.ExternalAsset {
+	if externalAssetDTS == nil {
+		return nil
+	}
+
+	return &domain.ExternalAsset{
+		Source:     domain.AssetExternalSource(externalAssetDTS.Source),
+		Ticker:     externalAssetDTS.Ticker,
+		ExchangeId: externalAssetDTS.ExchangeId,
 	}
 }
 
