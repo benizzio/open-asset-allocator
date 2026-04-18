@@ -100,9 +100,10 @@ specific AGENTS.md, the structure is:
               usage
             - for components/modules/packages, a detailed description of the purpose
             - for classes/entities/components, a detailed description of the purpose
-        - new code created by an agent or existing code authored by only an agent must include the agent as the author
-        - existing code unauthored (can be considered as authored by a human user) or already co-authored by a human
-          user, when modified by an agent, must include the current agent as a co-author
+        - all agent touched code must contain authoring information
+            - new code created by an agent must include only the agent as the author
+            - existing code unauthored can be considered as authored by a human user
+            - agents must add themselves as co-authors ONLY when they touch the code
         - if the language does not specify a standard for authoring on code comments, just add the following line at the
           end of the block:
           ```plaintext
