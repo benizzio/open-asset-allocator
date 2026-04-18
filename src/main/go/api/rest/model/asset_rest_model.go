@@ -25,8 +25,8 @@ type ExternalAssetDTS struct {
 	Source       string `json:"source" validate:"required"`
 	Ticker       string `json:"ticker" validate:"required"`
 	ExchangeId   string `json:"exchangeId" validate:"required"`
-	Name         string `json:"name" validate:"required"`
-	ExchangeName string `json:"exchangeName"`
+	Name         string `json:"name,omitempty"`
+	ExchangeName string `json:"exchangeName,omitempty"`
 }
 
 // ExternalAssetSearchQueryDTS is the request data transfer structure for external asset
