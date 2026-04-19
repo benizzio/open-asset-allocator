@@ -1,6 +1,6 @@
 // Package main validates that multiline Go calls and function declarations keep one parameter per line.
 //
-// Authored by: OpenAI Codex
+// Authored by: GitHub Copilot
 package main
 
 import (
@@ -17,7 +17,7 @@ import (
 
 // violation describes a single chopped-parameter formatting failure.
 //
-// Authored by: OpenAI Codex
+// Authored by: GitHub Copilot
 type violation struct {
 	file    string
 	line    int
@@ -27,7 +27,7 @@ type violation struct {
 
 // main runs the chopped-parameter validator for the provided files and directories.
 //
-// Authored by: OpenAI Codex
+// Authored by: GitHub Copilot
 func main() {
 	err := run(os.Args[1:])
 	if err == nil {
@@ -40,7 +40,7 @@ func main() {
 
 // run executes the chopped-parameter validation workflow.
 //
-// Authored by: OpenAI Codex
+// Authored by: GitHub Copilot
 func run(paths []string) error {
 	files, err := collectGoFiles(paths)
 	if err != nil {
@@ -72,7 +72,7 @@ func run(paths []string) error {
 
 // collectGoFiles expands the provided file and directory arguments into Go source files.
 //
-// Authored by: OpenAI Codex
+// Authored by: GitHub Copilot
 func collectGoFiles(paths []string) ([]string, error) {
 	if len(paths) == 0 {
 		return nil, errors.New("no Go files or directories provided")
@@ -117,7 +117,7 @@ func collectGoFiles(paths []string) ([]string, error) {
 
 // shouldSkipDirectory filters directories that should not be linted recursively.
 //
-// Authored by: OpenAI Codex
+// Authored by: GitHub Copilot
 func shouldSkipDirectory(path string, name string) bool {
 	if path == "." {
 		return false
@@ -128,7 +128,7 @@ func shouldSkipDirectory(path string, name string) bool {
 
 // collectViolations parses the provided Go files and gathers formatting violations.
 //
-// Authored by: OpenAI Codex
+// Authored by: GitHub Copilot
 func collectViolations(files []string) ([]violation, error) {
 	var fileSet = token.NewFileSet()
 	var violations []violation
@@ -148,7 +148,7 @@ func collectViolations(files []string) ([]violation, error) {
 
 // validateGoFile scans a single Go source file for chopped-parameter violations.
 //
-// Authored by: OpenAI Codex
+// Authored by: GitHub Copilot
 func validateGoFile(fileSet *token.FileSet, filePath string) ([]violation, error) {
 	fileNode, err := parser.ParseFile(fileSet, filePath, nil, 0)
 	if err != nil {
@@ -173,7 +173,7 @@ func validateGoFile(fileSet *token.FileSet, filePath string) ([]violation, error
 
 // validateCallArguments checks that multiline call arguments stay one per line.
 //
-// Authored by: OpenAI Codex
+// Authored by: GitHub Copilot
 func validateCallArguments(fileSet *token.FileSet, filePath string, callExpression *ast.CallExpr) []violation {
 	if len(callExpression.Args) < 2 || !spansMultipleLines(fileSet, callExpression.Lparen, callExpression.Rparen) {
 		return nil
@@ -220,7 +220,7 @@ func validateCallArguments(fileSet *token.FileSet, filePath string, callExpressi
 
 // validateFunctionParameters checks that multiline function parameters stay one per line.
 //
-// Authored by: OpenAI Codex
+// Authored by: GitHub Copilot
 func validateFunctionParameters(fileSet *token.FileSet, filePath string, parameters *ast.FieldList) []violation {
 	if parameters == nil || parameterCount(parameters) < 2 {
 		return nil
@@ -285,7 +285,7 @@ func validateFunctionParameters(fileSet *token.FileSet, filePath string, paramet
 
 // parameterCount counts the logical number of declared function parameters.
 //
-// Authored by: OpenAI Codex
+// Authored by: GitHub Copilot
 func parameterCount(parameters *ast.FieldList) int {
 	var total = 0
 
@@ -303,7 +303,7 @@ func parameterCount(parameters *ast.FieldList) int {
 
 // fieldPosition returns the most specific position available for a field declaration.
 //
-// Authored by: OpenAI Codex
+// Authored by: GitHub Copilot
 func fieldPosition(field *ast.Field) token.Pos {
 	if len(field.Names) > 0 {
 		return field.Names[0].Pos()
@@ -314,7 +314,7 @@ func fieldPosition(field *ast.Field) token.Pos {
 
 // spansMultipleLines reports whether a token range crosses more than one source line.
 //
-// Authored by: OpenAI Codex
+// Authored by: GitHub Copilot
 func spansMultipleLines(fileSet *token.FileSet, opening token.Pos, closing token.Pos) bool {
 	if !opening.IsValid() || !closing.IsValid() {
 		return false
@@ -325,7 +325,7 @@ func spansMultipleLines(fileSet *token.FileSet, opening token.Pos, closing token
 
 // buildViolation creates a violation from a token position and message.
 //
-// Authored by: OpenAI Codex
+// Authored by: GitHub Copilot
 func buildViolation(fileSet *token.FileSet, filePath string, position token.Pos, message string) violation {
 	var sourcePosition = fileSet.Position(position)
 
@@ -339,7 +339,7 @@ func buildViolation(fileSet *token.FileSet, filePath string, position token.Pos,
 
 // compareViolations keeps violation output stable across runs.
 //
-// Authored by: OpenAI Codex
+// Authored by: GitHub Copilot
 func compareViolations(left violation, right violation) int {
 	if left.file != right.file {
 		return compareStrings(left.file, right.file)
@@ -358,7 +358,7 @@ func compareViolations(left violation, right violation) int {
 
 // compareStrings compares two strings for sorting.
 //
-// Authored by: OpenAI Codex
+// Authored by: GitHub Copilot
 func compareStrings(left string, right string) int {
 	if left < right {
 		return -1

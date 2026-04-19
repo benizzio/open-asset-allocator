@@ -1,6 +1,6 @@
 // Package main tests the chopped-parameter validator behavior.
 //
-// Authored by: OpenAI Codex
+// Authored by: GitHub Copilot
 package main
 
 import (
@@ -13,7 +13,7 @@ import (
 
 // TestValidateGoFileAllowsSingleLineAndChoppedMultilineCode verifies accepted formatting cases.
 //
-// Authored by: OpenAI Codex
+// Authored by: GitHub Copilot
 func TestValidateGoFileAllowsSingleLineAndChoppedMultilineCode(t *testing.T) {
 	t.Parallel()
 
@@ -49,7 +49,7 @@ func allowedMultiline(
 
 // TestValidateGoFileRejectsMultilineCallsWithoutChoppedArguments verifies multiline call enforcement.
 //
-// Authored by: OpenAI Codex
+// Authored by: GitHub Copilot
 func TestValidateGoFileRejectsMultilineCallsWithoutChoppedArguments(t *testing.T) {
 	t.Parallel()
 
@@ -83,7 +83,7 @@ func broken() {
 
 // TestValidateGoFileRejectsMultilineFunctionsWithoutChoppedParameters verifies multiline declaration enforcement.
 //
-// Authored by: OpenAI Codex
+// Authored by: GitHub Copilot
 func TestValidateGoFileRejectsMultilineFunctionsWithoutChoppedParameters(t *testing.T) {
 	t.Parallel()
 
@@ -116,7 +116,7 @@ func broken(
 
 // writeTestFile creates a temporary Go file for validation tests.
 //
-// Authored by: OpenAI Codex
+// Authored by: GitHub Copilot
 func writeTestFile(t *testing.T, fileName string, content string) string {
 	t.Helper()
 
@@ -132,7 +132,7 @@ func writeTestFile(t *testing.T, fileName string, content string) string {
 
 // containsMessage checks whether the violation list contains the expected message fragment.
 //
-// Authored by: OpenAI Codex
+// Authored by: GitHub Copilot
 func containsMessage(violations []violation, message string) bool {
 	for _, violation := range violations {
 		if strings.Contains(violation.message, message) {
