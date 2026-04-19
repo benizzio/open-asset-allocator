@@ -33,6 +33,10 @@ func buildJSONFieldPath(namespace string, structType reflect.Type) string {
 	}
 
 	var currentType = langext.UnwrapType(structType)
+	if currentType == nil {
+		return ""
+	}
+
 	if namespaceParts[0] == currentType.Name() {
 		namespaceParts = namespaceParts[1:]
 	}

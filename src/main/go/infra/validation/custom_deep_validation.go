@@ -3,6 +3,7 @@ package validation
 import (
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 
@@ -106,7 +107,16 @@ func validateStructWithValidator(structValue reflect.Value, fieldPath string, er
 //
 // Authored by: OpenCode
 func isDirectValidationErrorForStruct(validationError validator.FieldError, structType reflect.Type) bool {
-	_, found := structType.FieldByName(validationError.Field())
+	var namespaceParts = strings.Split(validationError.StructNamespace(), ".")
+	if len(namespaceParts) != 2 {
+		return false
+	}
+
+	if namespaceParts[0] != structType.Name() {
+		return false
+	}
+
+	_, found := structType.FieldByName(namespaceParts[1])
 	return found
 }
 
