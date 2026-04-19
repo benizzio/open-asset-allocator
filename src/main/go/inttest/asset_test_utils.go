@@ -1,6 +1,7 @@
 package inttest
 
 import (
+	"database/sql"
 	"io"
 	"net/http"
 	"strconv"
@@ -12,10 +13,11 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/benizzio/open-asset-allocator/domain"
-	"github.com/benizzio/open-asset-allocator/infra/util"
 	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
 	inttestutil "github.com/benizzio/open-asset-allocator/inttest/util"
 )
+
+const testExternalAssetDataJSON = `{"data":[{"source":"YAHOO_FINANCE","ticker":"IAU","exchangeId":"PCX"}]}`
 
 // insertTestAsset inserts a test asset into the database and registers a cleanup function.
 // Returns the persisted asset with its generated ID.
@@ -56,21 +58,46 @@ func insertTestAsset(t *testing.T, ticker string, name string) domain.Asset {
 // assertPersistedAsset asserts that the asset with the given ID has the expected ticker and name
 // in the database.
 //
-// Co-authored by: GitHub Copilot and benizzio
+// Co-authored by: OpenCode, GitHub Copilot and benizzio
 func assertPersistedAsset(t *testing.T, assetId int64, expectedTicker string, expectedName string) {
+	assertPersistedAssetWithExternalData(t, assetId, expectedTicker, expectedName, nil)
+}
+
+// assertPersistedAssetWithExternalData asserts that the asset with the given ID has the expected
+// ticker, name, and optional external data payload in the database.
+//
+// Authored by: OpenCode
+func assertPersistedAssetWithExternalData(
+	t *testing.T,
+	assetId int64,
+	expectedTicker string,
+	expectedName string,
+	expectedExternalData *string,
+) {
 
 	var assetIdString = strconv.FormatInt(assetId, 10)
-	var assetNullStringMap = dbx.NullStringMap{
-		"id":            util.StringToNullString(assetIdString),
-		"ticker":        util.StringToNullString(expectedTicker),
-		"name":          util.StringToNullString(expectedName),
-		"external_data": util.StringPointerToNullString(nil),
+	var expectedExternalDataAssertion = inttestutil.NullAssertableNullString()
+	if expectedExternalData != nil {
+		expectedExternalDataJSON := *expectedExternalData
+		expectedExternalDataAssertion = inttestutil.ToAssertableNullStringWithAssertion(
+			func(t *testing.T, actual sql.NullString) {
+				assert.True(t, actual.Valid)
+				assert.JSONEq(t, expectedExternalDataJSON, actual.String)
+			},
+		)
 	}
 
-	inttestutil.AssertDBWithQuery(
+	inttestutil.AssertDBWithQueryMultipleRows(
 		t,
 		"SELECT * FROM asset WHERE id="+assetIdString,
-		assetNullStringMap,
+		[]inttestutil.AssertableNullStringMap{
+			{
+				"id":            inttestutil.ToAssertableNullString(assetIdString),
+				"ticker":        inttestutil.ToAssertableNullString(expectedTicker),
+				"name":          inttestutil.ToAssertableNullString(expectedName),
+				"external_data": expectedExternalDataAssertion,
+			},
+		},
 	)
 }
 

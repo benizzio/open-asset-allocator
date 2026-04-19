@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	dbx "github.com/go-ozzo/ozzo-dbx"
 	"github.com/stretchr/testify/assert"
 
 	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
@@ -198,6 +199,92 @@ func TestGetPortfolioAllocationHistoryForObservationTimestampNoneFound(t *testin
 	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
 }
 
+// TestGetPortfolioAllocationHistoryWithProjectedExternalAsset verifies that the
+// history endpoint exposes the first persisted external asset entry for each
+// allocation.
+//
+// Authored by: OpenCode
+func TestGetPortfolioAllocationHistoryWithProjectedExternalAsset(t *testing.T) {
+
+	err := inttestinfra.ExecuteDBQuery(
+		`UPDATE asset SET external_data = '{"data":[{"source":"YAHOO_FINANCE","ticker":"BIL","exchangeId":"PCX"},{"source":"YAHOO_FINANCE","ticker":"BIL-SECOND","exchangeId":"SECOND"}]}'::jsonb WHERE id = 1`,
+		nil,
+	)
+	assert.NoError(t, err)
+
+	t.Cleanup(
+		inttestutil.BuildCleanupFunctionBuilder().
+			AddCleanupQuery("UPDATE asset SET external_data = NULL WHERE id = 1", nil).
+			Build(t),
+	)
+
+	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/history?observationTimestampId=2")
+	assert.NoError(t, err)
+	defer deferCloseResponseBody(response)
+
+	assert.Equal(t, http.StatusOK, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+
+	var actualResponseJSON = string(body)
+	var expectedResponseJSON = `
+		[
+			{
+				"observationTimestamp" : {
+					"id": 2,
+					"timeTag": "202503",
+					"timestamp": "2025-03-01T00:00:00Z"
+				},
+				"allocations":[
+					{
+						"assetId": 1,
+						"assetName":"SPDR Bloomberg 1-3 Month T-Bill ETF",
+						"assetTicker":"ARCA:BIL",
+						"externalAsset": {
+							"source": "YAHOO_FINANCE",
+							"ticker": "BIL",
+							"exchangeId": "PCX"
+						},
+						"class":"BONDS",
+						"cashReserve":false,
+						"assetMarketPrice":"100",
+						"assetQuantity":"100.00009",
+						"totalMarketValue":"10000"
+					}
+				],
+				"totalMarketValue":"10000"
+			}
+		]
+	`
+
+	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
+}
+
+// TestGetPortfolioAllocationHistoryOmitsExternalAssetWhenNull verifies that the
+// history endpoint omits the external asset block when no persisted external
+// data exists for the asset.
+//
+// Authored by: OpenCode
+func TestGetPortfolioAllocationHistoryOmitsExternalAssetWhenNull(t *testing.T) {
+
+	err := inttestinfra.ExecuteDBQuery(`UPDATE asset SET external_data = NULL WHERE id = 1`, nil)
+	assert.NoError(t, err)
+
+	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/history?observationTimestampId=2")
+	assert.NoError(t, err)
+	defer deferCloseResponseBody(response)
+
+	assert.Equal(t, http.StatusOK, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+
+	assert.NotContains(t, string(body), "externalAsset")
+}
+
 // TestGetAvailableHistoryObservations tests the retrieval of available history observations for a portfolio.
 //
 // This test verifies that the API correctly returns the list of available observation timestamps
@@ -246,7 +333,7 @@ func TestGetAvailableHistoryObservations(t *testing.T) {
 // and returns HTTP 204 No Content as expected, without any response body.
 // It also verifies that the data is correctly persisted in the portfolio_allocation_fact table.
 //
-// Co-authored by: GitHub Copilot
+// Co-authored by: GitHub Copilot and OpenCode
 func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 
 	var postPortfolioSnapshotJSON = `
@@ -333,6 +420,7 @@ func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 			    p.total_market_value, 
 			    a.ticker,
 			    a.name,
+			    a.external_data,
 			    p.observation_time_id,
 			    o.observation_time_tag,
 				o.observation_timestamp
@@ -357,6 +445,7 @@ func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 			"total_market_value":    inttestutil.ToAssertableNullString("15000"),
 			"name":                  inttestutil.ToAssertableNullString("SPDR Bloomberg 1-3 Month T-Bill ETF"),
 			"ticker":                inttestutil.ToAssertableNullString("ARCA:BIL"),
+			"external_data":         inttestutil.NullAssertableNullString(),
 			"observation_time_id":   inttestutil.NotNullAssertableNullString(),
 			"observation_time_tag":  inttestutil.ToAssertableNullString("202505"),
 			"observation_timestamp": inttestutil.ToAssertableNullString("2025-05-01T00:00:00Z"),
@@ -368,8 +457,10 @@ func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 			"cash_reserve":          inttestutil.ToAssertableNullString("false"),
 			"asset_quantity":        inttestutil.ToAssertableNullString("100.00000000"),
 			"asset_market_price":    inttestutil.ToAssertableNullString("100.00000000"),
+			"total_market_value":    inttestutil.ToAssertableNullString("10000"),
 			"name":                  inttestutil.ToAssertableNullString("iShares 0-5 Year TIPS Bond ETF"),
 			"ticker":                inttestutil.ToAssertableNullString("ARCA:STIP"),
+			"external_data":         inttestutil.NullAssertableNullString(),
 			"observation_time_id":   inttestutil.NotNullAssertableNullString(),
 			"observation_time_tag":  inttestutil.ToAssertableNullString("202505"),
 			"observation_timestamp": inttestutil.ToAssertableNullString("2025-05-01T00:00:00Z"),
@@ -384,6 +475,7 @@ func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 			"total_market_value":    inttestutil.ToAssertableNullString("2000"),
 			"name":                  inttestutil.ToAssertableNullString("New Asset"),
 			"ticker":                inttestutil.ToAssertableNullString("Test:NEW"),
+			"external_data":         inttestutil.NullAssertableNullString(),
 			"observation_time_id":   inttestutil.NotNullAssertableNullString(),
 			"observation_time_tag":  inttestutil.ToAssertableNullString("202505"),
 			"observation_timestamp": inttestutil.ToAssertableNullString("2025-05-01T00:00:00Z"),
@@ -393,6 +485,11 @@ func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 	inttestutil.AssertDBWithQueryMultipleRows(t, allocationHistoryQuery, expectedRecords)
 }
 
+// TestPostPortfolioAllocationHistoryInsertEmptyZeroTimestamp verifies that a
+// zero observation timestamp id creates a new observation timestamp and
+// persists the posted allocation snapshot.
+//
+// Co-authored by: OpenCode and Igor Benicio de Mesquita
 func TestPostPortfolioAllocationHistoryInsertEmptyZeroTimestamp(t *testing.T) {
 
 	var postPortfolioSnapshotJSON = `
@@ -460,6 +557,7 @@ func TestPostPortfolioAllocationHistoryInsertEmptyZeroTimestamp(t *testing.T) {
 			"total_market_value":  inttestutil.ToAssertableNullString("2000"),
 			"name":                inttestutil.ToAssertableNullString("New Asset"),
 			"ticker":              inttestutil.ToAssertableNullString("Test:NEW"),
+			"external_data":       inttestutil.NullAssertableNullString(),
 			"observation_time_id": inttestutil.NotNullAssertableNullString(),
 			"observation_time_tag": inttestutil.ToAssertableNullStringWithAssertion(
 				func(t *testing.T, actual sql.NullString) {
@@ -490,6 +588,7 @@ func TestPostPortfolioAllocationHistoryInsertEmptyZeroTimestamp(t *testing.T) {
 			    p.total_market_value, 
 			    a.ticker,
 			    a.name,
+			    a.external_data,
 			    p.observation_time_id,
 			    o.observation_time_tag,
 				o.observation_timestamp
@@ -505,6 +604,11 @@ func TestPostPortfolioAllocationHistoryInsertEmptyZeroTimestamp(t *testing.T) {
 	inttestutil.AssertDBWithQueryMultipleRows(t, allocationHistoryQuery, expectedRecords)
 }
 
+// TestPostPortfolioAllocationHistoryFullMerge verifies that posting a complete
+// snapshot merges the target observation while leaving data from other
+// observations unchanged.
+//
+// Co-authored by: OpenCode and Igor Benicio de Mesquita
 func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 
 	var insertAllocationHistorySQL = `
@@ -646,6 +750,7 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 			"total_market_value":    inttestutil.ToAssertableNullString("1500"),
 			"name":                  inttestutil.ToAssertableNullString("SPDR Bloomberg 1-3 Month T-Bill ETF"),
 			"ticker":                inttestutil.ToAssertableNullString("ARCA:BIL"),
+			"external_data":         inttestutil.NullAssertableNullString(),
 			"observation_time_id":   inttestutil.ToAssertableNullString("3"),
 			"observation_time_tag":  inttestutil.ToAssertableNullString("202504"),
 			"observation_timestamp": inttestutil.ToAssertableNullString("2025-04-01T00:00:00Z"),
@@ -660,6 +765,7 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 			"total_market_value":    inttestutil.ToAssertableNullString("4"),
 			"name":                  inttestutil.ToAssertableNullString("SPDR Bloomberg 1-3 Month T-Bill ETF"),
 			"ticker":                inttestutil.ToAssertableNullString("ARCA:BIL"),
+			"external_data":         inttestutil.NullAssertableNullString(),
 			"observation_time_id":   inttestutil.ToAssertableNullString("3"),
 			"observation_time_tag":  inttestutil.ToAssertableNullString("202504"),
 			"observation_timestamp": inttestutil.ToAssertableNullString("2025-04-01T00:00:00Z"),
@@ -674,6 +780,7 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 			"total_market_value":    inttestutil.ToAssertableNullString("2000"),
 			"name":                  inttestutil.ToAssertableNullString("iShares Msci Brazil ETF"),
 			"ticker":                inttestutil.ToAssertableNullString("ARCA:EWZ"),
+			"external_data":         inttestutil.NullAssertableNullString(),
 			"observation_time_id":   inttestutil.ToAssertableNullString("3"),
 			"observation_time_tag":  inttestutil.ToAssertableNullString("202504"),
 			"observation_timestamp": inttestutil.ToAssertableNullString("2025-04-01T00:00:00Z"),
@@ -688,6 +795,7 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 			"total_market_value":    inttestutil.ToAssertableNullString("2000"),
 			"name":                  inttestutil.ToAssertableNullString("New Asset Repeat 2"),
 			"ticker":                inttestutil.ToAssertableNullString("Test:NEW"),
+			"external_data":         inttestutil.NullAssertableNullString(),
 			"observation_time_id":   inttestutil.ToAssertableNullString("3"),
 			"observation_time_tag":  inttestutil.ToAssertableNullString("202504"),
 			"observation_timestamp": inttestutil.ToAssertableNullString("2025-04-01T00:00:00Z"),
@@ -702,6 +810,7 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 			"total_market_value":    inttestutil.ToAssertableNullString("3000"),
 			"name":                  inttestutil.ToAssertableNullString("New Asset Repeat 2"),
 			"ticker":                inttestutil.ToAssertableNullString("Test:NEW"),
+			"external_data":         inttestutil.NullAssertableNullString(),
 			"observation_time_id":   inttestutil.ToAssertableNullString("3"),
 			"observation_time_tag":  inttestutil.ToAssertableNullString("202504"),
 			"observation_timestamp": inttestutil.ToAssertableNullString("2025-04-01T00:00:00Z"),
@@ -720,6 +829,7 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 			    p.total_market_value, 
 			    a.ticker,
 			    a.name,
+			    a.external_data,
 			    p.observation_time_id,
 			    o.observation_time_tag,
 				o.observation_timestamp
@@ -1312,4 +1422,242 @@ func TestPostPortfolioAllocationHistoryValidation_AssetNameExceedsMaxLength(t *t
 		"details": ["Field 'allocations[0].assetName' failed validation: must not exceed 100"]
 	}`
 	assert.JSONEq(t, expected, string(body))
+}
+
+// TestPostPortfolioAllocationHistoryInsertOnlyWithExternalAsset verifies that a
+// new asset persists its external asset payload and that the history endpoint
+// projects that persisted value back in the response.
+//
+// Authored by: OpenCode
+func TestPostPortfolioAllocationHistoryInsertOnlyWithExternalAsset(t *testing.T) {
+
+	var postPortfolioSnapshotJSON = `
+		{
+			"observationTimestamp": {
+				"timeTag": "202509",
+				"timestamp": "2025-09-01T00:00:00Z"
+			},
+			"allocations": [
+				{
+					"assetName": "External Asset",
+					"assetTicker": "Test:EXT",
+					"externalAsset": {
+						"source": "YAHOO_FINANCE",
+						"ticker": "IAU",
+						"exchangeId": "PCX",
+						"name": "Ignored Name",
+						"exchangeName": "Ignored Exchange"
+					},
+					"class": "STOCKS",
+					"cashReserve": false,
+					"assetQuantity": "20",
+					"assetMarketPrice": "100",
+					"totalMarketValue": "2000"
+				}
+			]
+		}
+	`
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLPrefix+"/portfolio/2/history",
+		"application/json",
+		strings.NewReader(postPortfolioSnapshotJSON),
+	)
+	assert.NoError(t, err)
+	defer deferCloseResponseBody(response)
+	assert.Equal(t, http.StatusNoContent, response.StatusCode)
+
+	t.Cleanup(
+		inttestutil.BuildCleanupFunctionBuilder().
+			AddCleanupQuery(
+				`DELETE FROM portfolio_allocation_fact WHERE portfolio_id = 2 AND observation_time_id IN (SELECT id FROM portfolio_allocation_obs_time WHERE observation_time_tag = '202509')`,
+				nil,
+			).
+			AddCleanupQuery("DELETE FROM asset WHERE ticker = 'Test:EXT'", nil).
+			AddCleanupQuery("DELETE FROM portfolio_allocation_obs_time WHERE observation_time_tag = '202509'", nil).
+			Build(t),
+	)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.Empty(t, string(body))
+
+	var persistedAssetId string
+	inttestutil.AssertDBWithQueryMultipleRows(
+		t,
+		"SELECT id, ticker, name, external_data FROM asset WHERE ticker = 'Test:EXT'",
+		[]inttestutil.AssertableNullStringMap{
+			{
+				"id":     inttestutil.NotNullValueCapturingAssertableNullString(&persistedAssetId),
+				"ticker": inttestutil.ToAssertableNullString("Test:EXT"),
+				"name":   inttestutil.ToAssertableNullString("External Asset"),
+				"external_data": inttestutil.ToAssertableNullStringWithAssertion(
+					func(t *testing.T, actual sql.NullString) {
+						assert.True(t, actual.Valid)
+						assert.JSONEq(t, testExternalAssetDataJSON, actual.String)
+					},
+				),
+			},
+		},
+	)
+
+	var historyQuery = dbx.Params{"ticker": "Test:EXT", "timeTag": "202509"}
+	var persistedObservationTimestampId string
+	err = inttestinfra.FetchWithDBQuery(
+		`SELECT o.id FROM portfolio_allocation_fact p JOIN asset a ON a.id = p.asset_id JOIN portfolio_allocation_obs_time o ON o.id = p.observation_time_id WHERE p.portfolio_id = 2 AND a.ticker = {:ticker} AND o.observation_time_tag = {:timeTag}`,
+		historyQuery,
+		func(rows *dbx.Rows) error {
+			return rows.Scan(&persistedObservationTimestampId)
+		},
+	)
+	assert.NoError(t, err)
+
+	response, err = http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/2/history?observationTimestampId=" + persistedObservationTimestampId)
+	assert.NoError(t, err)
+	defer deferCloseResponseBody(response)
+	assert.Equal(t, http.StatusOK, response.StatusCode)
+
+	body, err = io.ReadAll(response.Body)
+	assert.NoError(t, err)
+
+	var expectedResponseJSON = `
+		[
+			{
+				"observationTimestamp" : {
+					"id": ` + persistedObservationTimestampId + `,
+					"timeTag": "202509",
+					"timestamp": "2025-09-01T00:00:00Z"
+				},
+				"allocations":[
+					{
+						"assetId": ` + persistedAssetId + `,
+						"assetName":"External Asset",
+						"assetTicker":"Test:EXT",
+						"externalAsset": {
+							"source": "YAHOO_FINANCE",
+							"ticker": "IAU",
+							"exchangeId": "PCX"
+						},
+						"class":"STOCKS",
+						"cashReserve":false,
+						"assetMarketPrice":"100",
+						"assetQuantity":"20",
+						"totalMarketValue":"2000"
+					}
+				],
+				"totalMarketValue":"2000"
+			}
+		]
+	`
+
+	assert.JSONEq(t, expectedResponseJSON, string(body))
+}
+
+// TestPostPortfolioAllocationHistoryDoesNotOverwriteExistingAssetExternalData
+// verifies that posting a portfolio allocation for an existing asset preserves
+// the asset's already persisted external data.
+//
+// Authored by: OpenCode
+func TestPostPortfolioAllocationHistoryDoesNotOverwriteExistingAssetExternalData(t *testing.T) {
+
+	err := inttestinfra.ExecuteDBQuery(
+		`UPDATE asset SET external_data = '{"data":[{"source":"YAHOO_FINANCE","ticker":"IAU","exchangeId":"PCX"}]}'::jsonb WHERE id = 1`,
+		nil,
+	)
+	assert.NoError(t, err)
+
+	t.Cleanup(
+		inttestutil.BuildCleanupFunctionBuilder().
+			AddCleanupQuery(
+				"DELETE FROM portfolio_allocation_fact WHERE portfolio_id = 2 AND observation_time_id = 3 AND asset_id = 1",
+				nil,
+			).
+			AddCleanupQuery("UPDATE asset SET external_data = NULL WHERE id = 1", nil).
+			Build(t),
+	)
+
+	var postPortfolioSnapshotJSON = `
+		{
+			"observationTimestamp": {
+				"id": "3"
+			},
+			"allocations": [
+				{
+					"assetId": "1",
+					"assetName": "Ignored",
+					"assetTicker": "Ignored",
+					"externalAsset": {
+						"source": "YAHOO_FINANCE",
+						"ticker": "SHOULD_NOT_PERSIST",
+						"exchangeId": "SHOULD_NOT_PERSIST"
+					},
+					"class": "BONDS",
+					"cashReserve": false,
+					"assetQuantity": "1",
+					"assetMarketPrice": "100",
+					"totalMarketValue": "100"
+				}
+			]
+		}
+	`
+
+	response, err := http.Post(
+		inttestinfra.TestAPIURLPrefix+"/portfolio/2/history",
+		"application/json",
+		strings.NewReader(postPortfolioSnapshotJSON),
+	)
+	assert.NoError(t, err)
+	defer deferCloseResponseBody(response)
+	assert.Equal(t, http.StatusNoContent, response.StatusCode)
+
+	assertPersistedAssetWithExternalData(
+		t,
+		1,
+		"ARCA:BIL",
+		"SPDR Bloomberg 1-3 Month T-Bill ETF",
+		new(testExternalAssetDataJSON),
+	)
+}
+
+// TestPostPortfolioAllocationHistoryValidation_InvalidExternalAssetFields
+// verifies that incomplete external asset payloads are rejected with the
+// current validation error structure.
+//
+// Authored by: OpenCode
+func TestPostPortfolioAllocationHistoryValidation_InvalidExternalAssetFields(t *testing.T) {
+
+	var postPortfolioSnapshotJSON = `
+		{
+			"observationTimestamp": {
+				"id": "3"
+			},
+			"allocations": [
+				{
+					"assetName": "External Asset",
+					"assetTicker": "Test:VALIDATION",
+					"externalAsset": {
+						"ticker": "IAU"
+					},
+					"class": "STOCKS",
+					"totalMarketValue": "1000"
+				}
+			]
+		}
+	`
+
+	actualResponseJSON := string(postPortfolioAllocationForValidationFailure(t, postPortfolioSnapshotJSON))
+
+	var expectedResponseJSON = `
+		{
+			"errorMessage": "Validation failed",
+			"details": [
+				"Field 'allocations[0].Source' failed validation: is required",
+				"Field 'allocations[0].ExchangeId' failed validation: is required",
+				"Field 'allocations[0].externalAsset.source' failed validation: is required",
+				"Field 'allocations[0].externalAsset.exchangeId' failed validation: is required"
+			]
+		}
+	`
+
+	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
 }

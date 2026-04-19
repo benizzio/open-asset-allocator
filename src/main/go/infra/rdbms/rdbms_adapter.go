@@ -3,6 +3,7 @@ package rdbms
 import (
 	"context"
 	"database/sql"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"strings"
@@ -240,6 +241,11 @@ func quoteIdentifiers(identifiers []string) []string {
 	return quoted
 }
 
+// executeBulkInsertPreparedStatement executes a prepared COPY statement after
+// normalizing each row through driver.Valuer so bulk inserts reuse the same
+// serialized values as regular SQL execution.
+//
+// Co-authored by: OpenCode and Igor Benicio de Mesquita
 func executeBulkInsertPreparedStatement(copyStatement *sql.Stmt, values [][]any) error {
 
 	// TODO verification for debug logging, this should be logged only in debug mode
@@ -247,7 +253,12 @@ func executeBulkInsertPreparedStatement(copyStatement *sql.Stmt, values [][]any)
 
 	var err error
 	for _, value := range values {
-		_, err = copyStatement.Exec(value...)
+		var preparedRowValues, preparedRowErr = prepareBulkInsertValues(value)
+		if preparedRowErr != nil {
+			return preparedRowErr
+		}
+
+		_, err = copyStatement.Exec(preparedRowValues...)
 		if err != nil {
 			return err
 		}
@@ -255,6 +266,32 @@ func executeBulkInsertPreparedStatement(copyStatement *sql.Stmt, values [][]any)
 
 	_, err = copyStatement.Exec()
 	return err
+}
+
+// prepareBulkInsertValues resolves driver.Valuer implementations before COPY
+// execution so custom database values are serialized consistently with
+// non-bulk operations.
+//
+// Authored by: OpenCode
+func prepareBulkInsertValues(rowValues []any) ([]any, error) {
+
+	var preparedValues = make([]any, len(rowValues))
+
+	for index, rowValue := range rowValues {
+		valuer, ok := rowValue.(driver.Valuer)
+		if !ok || valuer == nil {
+			preparedValues[index] = rowValue
+			continue
+		}
+
+		resolvedValue, err := valuer.Value()
+		if err != nil {
+			return nil, err
+		}
+		preparedValues[index] = resolvedValue
+	}
+
+	return preparedValues, nil
 }
 
 // =================================================
