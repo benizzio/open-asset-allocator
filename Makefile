@@ -13,18 +13,22 @@ lint:
 # Runs the chopped multiline parameter lint on changed Go files
 lint-chopped-params:
 	@set -eu; \
-	changed_files="$$( \
+	if [ "$(DIFF_RANGE)" = "HEAD" ]; then \
+		changed_files="$$( \
 			{ \
-				git diff --name-only --diff-filter=ACMR $(DIFF_RANGE) -- src/main/go || true; \
-				if [ "$(DIFF_RANGE)" = "HEAD" ]; then \
-					git ls-files --others --exclude-standard src/main/go || true; \
-				fi; \
+				git diff --name-only --diff-filter=ACMR HEAD -- src/main/go; \
+				git ls-files --others --exclude-standard src/main/go; \
 			} | grep '\.go$$' || true \
 		)"; \
+	else \
+		changed_files="$$(git diff --name-only --diff-filter=ACMR $(DIFF_RANGE) -- src/main/go)"; \
+		changed_files="$$(printf '%s\n' "$$changed_files" | grep '\.go$$' || true)"; \
+	fi; \
 	if [ -z "$$changed_files" ]; then \
 		exit 0; \
 	fi; \
-	cd src/main/go && printf '%s\n' "$$changed_files" | sed 's#^src/main/go/##' | xargs go run ./tools/choppedparams
+	changed_files_relative="$$(printf '%s\n' "$$changed_files" | sed 's#^src/main/go/##')"; \
+	cd src/main/go && printf '%s\n' "$$changed_files_relative" | xargs go run ./tools/choppedparams
 
 # Runs golangci-lint formatter (goimports) on the Go source
 lint-fmt:

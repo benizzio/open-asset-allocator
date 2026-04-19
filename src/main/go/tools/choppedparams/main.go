@@ -75,7 +75,7 @@ func run(paths []string) error {
 // Authored by: GitHub Copilot
 func collectGoFiles(paths []string) ([]string, error) {
 	if len(paths) == 0 {
-		return nil, errors.New("no Go files or directories provided")
+		return nil, errors.New("no paths provided")
 	}
 
 	var fileSet = map[string]struct{}{}
