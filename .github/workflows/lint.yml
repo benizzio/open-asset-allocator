@@ -32,3 +32,6 @@ jobs:
           version: v2.11
           working-directory: src/main/go
           args: --new-from-merge-base=origin/main
+
+      - name: Run chopped multiline parameter lint
+        run: make lint-chopped-params DIFF_RANGE=origin/main...HEAD

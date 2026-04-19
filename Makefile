@@ -1,11 +1,30 @@
 .DEFAULT_GOAL := build
 
-.PHONY: frontend-install
+.PHONY: frontend-install lint-chopped-params
+
+DIFF_RANGE ?= HEAD
 
 
 # Runs golangci-lint on the Go source
 lint:
 	cd src/main/go && golangci-lint run ./...
+	$(MAKE) lint-chopped-params
+
+# Runs the chopped multiline parameter lint on changed Go files
+lint-chopped-params:
+	@set -eu; \
+	changed_files="$$( \
+			{ \
+				git diff --name-only --diff-filter=ACMR $(DIFF_RANGE) -- src/main/go || true; \
+				if [ "$(DIFF_RANGE)" = "HEAD" ]; then \
+					git ls-files --others --exclude-standard src/main/go || true; \
+				fi; \
+			} | grep '\.go$$' || true \
+		)"; \
+	if [ -z "$$changed_files" ]; then \
+		exit 0; \
+	fi; \
+	cd src/main/go && printf '%s\n' "$$changed_files" | sed 's#^src/main/go/##' | xargs go run ./tools/choppedparams
 
 # Runs golangci-lint formatter (goimports) on the Go source
 lint-fmt:
