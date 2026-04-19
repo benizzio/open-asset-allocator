@@ -102,13 +102,12 @@ func buildPingContext() (context.Context, context.CancelFunc) {
 // USAGE FUNCTIONS
 // ------------------------------------------------
 
-func (adapter *Adapter) BuildQuery(sql string) *QueryBuilder {
-	return &QueryBuilder{
-		dbx:          adapter.dbx,
-		querySQL:     sql,
-		params:       dbx.Params{},
-		whereClauses: make([]string, 0),
-	}
+// GetDBX exposes the underlying ozzo-dbx database instance for use with the generic
+// BuildQuery function.
+//
+// Authored by: GitHub Copilot
+func (adapter *Adapter) GetDBX() *dbx.DB {
+	return adapter.dbx
 }
 
 func (adapter *Adapter) RunInTransaction(
@@ -302,6 +301,26 @@ func BuildDatabaseAdapter(config *infra.Configuration) *Adapter {
 	return &Adapter{config: config.RdbmsConfig}
 }
 
+// BuildQuery creates a new generic QueryBuilder for building and executing typed queries.
+//
+// Example:
+//
+//	queryExecutor := rdbms.BuildQuery[domain.Portfolio](adapter.GetDBX(), portfolioSQL).
+//		AddParam("id", 42).
+//		Build()
+//	var result domain.Portfolio
+//	err := queryExecutor.GetInto(&result)
+//
+// Authored by: GitHub Copilot
+func BuildQuery[T any](db *dbx.DB, querySQL string) *QueryBuilder[T] {
+	return &QueryBuilder[T]{
+		dbx:          db,
+		querySQL:     querySQL,
+		params:       dbx.Params{},
+		whereClauses: make([]string, 0),
+	}
+}
+
 func BuildQueryInTransaction[T any](
 	transContext *SQLTransactionalContext,
 	sql string,
@@ -319,7 +338,7 @@ func BuildQueryInTransaction[T any](
 // =================================================
 
 type RepositoryRDBMSAdapter interface {
-	BuildQuery(sql string) *QueryBuilder
+	GetDBX() *dbx.DB
 	Insert(model interface{}) error
 	UpdateListedFields(model interface{}, fields ...string) error
 	Read(model interface{}, id any) error

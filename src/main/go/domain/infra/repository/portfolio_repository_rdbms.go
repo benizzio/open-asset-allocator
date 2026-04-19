@@ -26,7 +26,7 @@ type PortfolioRDBMSRepository struct {
 func (repository *PortfolioRDBMSRepository) GetAllPortfolios() ([]*domain.Portfolio, error) {
 
 	var result []domain.Portfolio
-	err := repository.dbAdapter.BuildQuery(portfolioSQL).Build().FindInto(&result)
+	err := rdbms.BuildQuery[domain.Portfolio](repository.dbAdapter.GetDBX(), portfolioSQL).Build().FindInto(&result)
 
 	return langext.ToPointerSlice(result), infra.PropagateAsAppErrorWithNewMessage(
 		err,
@@ -42,7 +42,7 @@ func (repository *PortfolioRDBMSRepository) FindPortfolio(id int64) (*domain.Por
 	`
 
 	var result domain.Portfolio
-	err := repository.dbAdapter.BuildQuery(query).AddParam("id", id).Build().GetInto(&result)
+	err := rdbms.BuildQuery[domain.Portfolio](repository.dbAdapter.GetDBX(), query).AddParam("id", id).Build().GetInto(&result)
 
 	return &result, infra.PropagateAsAppErrorWithNewMessage(err, queryPortfolioError, repository)
 }

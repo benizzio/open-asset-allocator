@@ -134,7 +134,7 @@ func (repository *PortfolioAllocationRDBMSRepository) FindAllPortfolioAllocation
 	var query = availableObservationTimestampsComplement + portfolioAllocationsSQL
 
 	var queryResult []portfolioAllocationJoinedRowDTS
-	err := repository.dbAdapter.BuildQuery(query).
+	err := rdbms.BuildQuery[portfolioAllocationJoinedRowDTS](repository.dbAdapter.GetDBX(), query).
 		AddParam("observationTimestampLimit", observationTimestampsLimit).
 		AddWhereClause("AND pa.observation_time_id IN (SELECT id FROM observation_timestamps)").
 		AddWhereClauseAndParam(portfolioIdWhereClause, "portfolioId", id).
@@ -162,7 +162,7 @@ func (repository *PortfolioAllocationRDBMSRepository) FindPortfolioAllocationsBy
 ) ([]*domain.PortfolioAllocation, error) {
 
 	var queryResult []portfolioAllocationJoinedRowDTS
-	err := repository.dbAdapter.BuildQuery(portfolioAllocationsSQL).
+	err := rdbms.BuildQuery[portfolioAllocationJoinedRowDTS](repository.dbAdapter.GetDBX(), portfolioAllocationsSQL).
 		AddWhereClauseAndParam(portfolioIdWhereClause, "portfolioId", id).
 		AddWhereClauseAndParam(
 			"AND pa.observation_time_id = {:observationTimestampId}",
@@ -186,7 +186,7 @@ func (repository *PortfolioAllocationRDBMSRepository) FindAvailableObservationTi
 	var query = availableObservationTimestampsSQL
 
 	var queryResult []domain.PortfolioObservationTimestamp
-	err := repository.dbAdapter.BuildQuery(query).
+	err := rdbms.BuildQuery[domain.PortfolioObservationTimestamp](repository.dbAdapter.GetDBX(), query).
 		AddWhereClauseAndParam(portfolioIdWhereClause, "portfolioId", portfolioId).
 		AddParam("observationTimestampLimit", observationTimestampsLimit).
 		Build().FindInto(&queryResult)
