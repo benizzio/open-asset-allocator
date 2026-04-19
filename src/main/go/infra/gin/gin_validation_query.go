@@ -27,6 +27,7 @@ func BindAndValidateQueryWithInvalidResponse(context *gin.Context, bindingTarget
 
 	var deepValidationErrors = validation.DeepValidate(bindingTarget)
 	allErrorMessages = append(allErrorMessages, deepValidationErrors...)
+	allErrorMessages = deduplicateValidationMessages(allErrorMessages)
 
 	if len(allErrorMessages) > 0 {
 		sendValidationErrorResponse(context, allErrorMessages)

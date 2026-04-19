@@ -122,7 +122,7 @@ func (repository *AssetRDBMSRepository) FindAssetByUniqueIdentifier(uniqueIdenti
 //
 //	updatedAsset, err := assetRepository.UpdateAsset(asset)
 //
-// Co-authored by: OpenCode and Igor Benicio de Mesquita
+// Co-authored by: OpenCode and GitHub Copilot
 func (repository *AssetRDBMSRepository) UpdateAsset(asset *domain.Asset) (*domain.Asset, error) {
 
 	err := repository.dbAdapter.UpdateListedFields(asset, "Ticker", "Name")
@@ -170,7 +170,7 @@ func (repository *AssetRDBMSRepository) InsertAssetsInTransaction(
 
 	var columns = []string{"ticker", "name", "external_data"}
 
-	values, tickers, err := buildAssetInsertValuesAndTickers(assets)
+	values, tickers, err := buildAssetInsertValues(assets)
 	if err != nil {
 		return nil, infra.PropagateAsAppErrorWithNewMessage(
 			err,
@@ -191,11 +191,11 @@ func (repository *AssetRDBMSRepository) InsertAssetsInTransaction(
 	return repository.FindAssetsByTickersInTransaction(transactionalContext, tickers)
 }
 
-// buildAssetInsertValuesAndTickers prepares the bulk insert values and ticker lookup list for a
-// batch of assets.
+// buildAssetInsertValues prepares the bulk insert values and ticker lookup list for a batch of
+// assets.
 //
 // Authored by: OpenCode
-func buildAssetInsertValuesAndTickers(assets []*domain.Asset) ([][]interface{}, []string, error) {
+func buildAssetInsertValues(assets []*domain.Asset) ([][]interface{}, []string, error) {
 	var values = make([][]interface{}, len(assets))
 	var tickers = make([]string, len(assets))
 

@@ -202,7 +202,7 @@ func FindWithRowScanner[T any](executor *QueryExecutor, rowScanner RowScanner[T]
 	for rows.Next() {
 		rowValue, scanErr := rowScanner(rows.Rows)
 		if scanErr != nil {
-			glog.Errorf("Error scanning row: %v", index)
+			glog.Errorf("Error scanning row %d: %v", index, scanErr)
 			return nil, scanErr
 		}
 

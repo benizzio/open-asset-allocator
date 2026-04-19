@@ -12,7 +12,7 @@ import (
 // This implementation performs shallow validation via Gin binding and then deep validation
 // of nested structures and arrays using custom reflection-based navigation.
 //
-// Co-authored by: GitHub Copilot
+// Co-authored by: GitHub Copilot and OpenCode
 func BindAndValidateJSONWithInvalidResponse(context *gin.Context, bindingTarget interface{}) (bool, error) {
 
 	var allErrorMessages []string
@@ -34,6 +34,7 @@ func BindAndValidateJSONWithInvalidResponse(context *gin.Context, bindingTarget 
 	// Phase 2: Perform deep validation by navigating through the bound structure
 	deepValidationErrors := validation.DeepValidate(bindingTarget)
 	allErrorMessages = append(allErrorMessages, deepValidationErrors...)
+	allErrorMessages = deduplicateValidationMessages(allErrorMessages)
 
 	// If any validation errors were found, send combined response
 	if len(allErrorMessages) > 0 {
@@ -42,6 +43,25 @@ func BindAndValidateJSONWithInvalidResponse(context *gin.Context, bindingTarget 
 	}
 
 	return true, nil
+}
+
+// deduplicateValidationMessages preserves the original message order while removing duplicate
+// validation messages emitted by the shallow and deep validation passes.
+//
+// Authored by: OpenCode
+func deduplicateValidationMessages(messages []string) []string {
+	var uniqueMessages = make([]string, 0, len(messages))
+	var seenMessages = make(map[string]struct{}, len(messages))
+	for _, message := range messages {
+		if _, alreadySeen := seenMessages[message]; alreadySeen {
+			continue
+		}
+
+		seenMessages[message] = struct{}{}
+		uniqueMessages = append(uniqueMessages, message)
+	}
+
+	return uniqueMessages
 }
 
 // RespondWithCustomValidationErrors takes custom validation errors and sends a standardized

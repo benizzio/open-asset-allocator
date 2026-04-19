@@ -205,6 +205,7 @@ func TestGetPortfolioAllocationHistoryForObservationTimestampNoneFound(t *testin
 //
 // Authored by: OpenCode
 func TestGetPortfolioAllocationHistoryWithProjectedExternalAsset(t *testing.T) {
+	var originalExternalData = capturePersistedAssetExternalData(t, 1)
 
 	err := inttestinfra.ExecuteDBQuery(
 		`UPDATE asset SET external_data = '{"data":[{"source":"YAHOO_FINANCE","ticker":"BIL","exchangeId":"PCX"},{"source":"YAHOO_FINANCE","ticker":"BIL-SECOND","exchangeId":"SECOND"}]}'::jsonb WHERE id = 1`,
@@ -213,9 +214,11 @@ func TestGetPortfolioAllocationHistoryWithProjectedExternalAsset(t *testing.T) {
 	assert.NoError(t, err)
 
 	t.Cleanup(
-		inttestutil.BuildCleanupFunctionBuilder().
-			AddCleanupQuery("UPDATE asset SET external_data = NULL WHERE id = 1", nil).
-			Build(t),
+		addAssetExternalDataRestoreCleanup(
+			inttestutil.BuildCleanupFunctionBuilder(),
+			1,
+			originalExternalData,
+		).Build(t),
 	)
 
 	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/history?observationTimestampId=2")
@@ -268,9 +271,18 @@ func TestGetPortfolioAllocationHistoryWithProjectedExternalAsset(t *testing.T) {
 //
 // Authored by: OpenCode
 func TestGetPortfolioAllocationHistoryOmitsExternalAssetWhenNull(t *testing.T) {
+	var originalExternalData = capturePersistedAssetExternalData(t, 1)
 
 	err := inttestinfra.ExecuteDBQuery(`UPDATE asset SET external_data = NULL WHERE id = 1`, nil)
 	assert.NoError(t, err)
+
+	t.Cleanup(
+		addAssetExternalDataRestoreCleanup(
+			inttestutil.BuildCleanupFunctionBuilder(),
+			1,
+			originalExternalData,
+		).Build(t),
+	)
 
 	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/history?observationTimestampId=2")
 	assert.NoError(t, err)
@@ -282,7 +294,33 @@ func TestGetPortfolioAllocationHistoryOmitsExternalAssetWhenNull(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotEmpty(t, body)
 
-	assert.NotContains(t, string(body), "externalAsset")
+	var actualResponseJSON = string(body)
+	var expectedResponseJSON = `
+		[
+			{
+				"observationTimestamp" : {
+					"id": 2,
+					"timeTag": "202503",
+					"timestamp": "2025-03-01T00:00:00Z"
+				},
+				"allocations":[
+					{
+						"assetId": 1,
+						"assetName":"SPDR Bloomberg 1-3 Month T-Bill ETF",
+						"assetTicker":"ARCA:BIL",
+						"class":"BONDS",
+						"cashReserve":false,
+						"assetMarketPrice":"100",
+						"assetQuantity":"100.00009",
+						"totalMarketValue":"10000"
+					}
+				],
+				"totalMarketValue":"10000"
+			}
+		]
+	`
+
+	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
 }
 
 // TestGetAvailableHistoryObservations tests the retrieval of available history observations for a portfolio.
@@ -1559,6 +1597,7 @@ func TestPostPortfolioAllocationHistoryInsertOnlyWithExternalAsset(t *testing.T)
 //
 // Authored by: OpenCode
 func TestPostPortfolioAllocationHistoryDoesNotOverwriteExistingAssetExternalData(t *testing.T) {
+	var originalExternalData = capturePersistedAssetExternalData(t, 1)
 
 	err := inttestinfra.ExecuteDBQuery(
 		`UPDATE asset SET external_data = '{"data":[{"source":"YAHOO_FINANCE","ticker":"IAU","exchangeId":"PCX"}]}'::jsonb WHERE id = 1`,
@@ -1567,13 +1606,15 @@ func TestPostPortfolioAllocationHistoryDoesNotOverwriteExistingAssetExternalData
 	assert.NoError(t, err)
 
 	t.Cleanup(
-		inttestutil.BuildCleanupFunctionBuilder().
-			AddCleanupQuery(
-				"DELETE FROM portfolio_allocation_fact WHERE portfolio_id = 2 AND observation_time_id = 3 AND asset_id = 1",
-				nil,
-			).
-			AddCleanupQuery("UPDATE asset SET external_data = NULL WHERE id = 1", nil).
-			Build(t),
+		addAssetExternalDataRestoreCleanup(
+			inttestutil.BuildCleanupFunctionBuilder().
+				AddCleanupQuery(
+					"DELETE FROM portfolio_allocation_fact WHERE portfolio_id = 2 AND observation_time_id = 3 AND asset_id = 1",
+					nil,
+				),
+			1,
+			originalExternalData,
+		).Build(t),
 	)
 
 	var postPortfolioSnapshotJSON = `
@@ -1651,8 +1692,6 @@ func TestPostPortfolioAllocationHistoryValidation_InvalidExternalAssetFields(t *
 		{
 			"errorMessage": "Validation failed",
 			"details": [
-				"Field 'allocations[0].Source' failed validation: is required",
-				"Field 'allocations[0].ExchangeId' failed validation: is required",
 				"Field 'allocations[0].externalAsset.source' failed validation: is required",
 				"Field 'allocations[0].externalAsset.exchangeId' failed validation: is required"
 			]

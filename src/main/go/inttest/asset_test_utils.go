@@ -19,6 +19,54 @@ import (
 
 const testExternalAssetDataJSON = `{"data":[{"source":"YAHOO_FINANCE","ticker":"IAU","exchangeId":"PCX"}]}`
 
+// capturePersistedAssetExternalData retrieves the current external_data JSON payload for the
+// given asset so tests can restore the original database state in cleanup.
+//
+// Authored by: OpenCode
+func capturePersistedAssetExternalData(t *testing.T, assetId int64) sql.NullString {
+	t.Helper()
+
+	var externalData sql.NullString
+	var found bool
+	err := inttestinfra.FetchWithDBQuery(
+		"SELECT external_data FROM asset WHERE id = {:id}",
+		dbx.Params{"id": assetId},
+		func(rows *dbx.Rows) error {
+			found = true
+			return rows.Scan(&externalData)
+		},
+	)
+	require.NoError(t, err)
+	require.True(t, found)
+
+	return externalData
+}
+
+// addAssetExternalDataRestoreCleanup appends the cleanup query needed to restore an asset's
+// original external_data payload after a test mutates it.
+//
+// Authored by: OpenCode
+func addAssetExternalDataRestoreCleanup(
+	builder *inttestutil.CleanupFunctionBuilder,
+	assetId int64,
+	originalExternalData sql.NullString,
+) *inttestutil.CleanupFunctionBuilder {
+
+	var params = dbx.Params{"id": assetId}
+	if !originalExternalData.Valid {
+		return builder.AddCleanupQuery(
+			"UPDATE asset SET external_data = NULL WHERE id = {:id}",
+			params,
+		)
+	}
+
+	params["externalData"] = originalExternalData.String
+	return builder.AddCleanupQuery(
+		"UPDATE asset SET external_data = {:externalData}::jsonb WHERE id = {:id}",
+		params,
+	)
+}
+
 // insertTestAsset inserts a test asset into the database and registers a cleanup function.
 // Returns the persisted asset with its generated ID.
 //

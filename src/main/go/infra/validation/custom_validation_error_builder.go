@@ -148,7 +148,7 @@ func BuildCustomValidationErrorsBuilder() *CustomValidationErrorsBuilder {
 // Returns:
 //   - validator.FieldError that can be used with validation error handling functions
 //
-// Co-authored by: GitHub Copilot
+// Co-authored by: GitHub Copilot and OpenCode
 func buildCustomValidationError(
 	targetStruct interface{},
 	fieldNamespace,
@@ -165,11 +165,8 @@ func buildCustomValidationError(
 		namespace = fieldNamespace
 		fieldName = fieldNamespace
 	} else {
-		// Get struct name using reflection
-		structName := langext.GetStructName(targetStruct)
-
 		// Parse the field namespace to get the full namespace and field name
-		namespace, fieldName = langext.GetStructNamespaceDescription(structName, fieldNamespace)
+		namespace, fieldName = langext.GetStructNamespaceDescription(targetStruct, fieldNamespace)
 	}
 
 	// Create and return the custom validation error
