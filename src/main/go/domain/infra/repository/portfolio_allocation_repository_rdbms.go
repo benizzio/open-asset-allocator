@@ -34,6 +34,9 @@ const (
 		    ass.id AS "asset.id", 
 		    ass.ticker AS "asset.ticker", 
 		    coalesce(ass.name, '') AS "asset.name", 
+		    coalesce(ass.external_data #>> '{data,0,source}', '') AS selected_external_asset_source,
+		    coalesce(ass.external_data #>> '{data,0,ticker}', '') AS selected_external_asset_ticker,
+		    coalesce(ass.external_data #>> '{data,0,exchangeId}', '') AS selected_external_asset_exchange_id,
 		    paot.id AS "observation_timestamp.id",
 		    coalesce(paot.observation_time_tag, '') AS "observation_timestamp.time_tag",
 		    paot.observation_timestamp AS "observation_timestamp.timestamp"
@@ -114,6 +117,15 @@ type PortfolioAllocationRDBMSRepository struct {
 	dbAdapter rdbms.RepositoryRDBMSAdapter
 }
 
+// FindAllPortfolioAllocationsWithinObservationTimestampsLimit retrieves portfolio allocations for
+// the most recent observation timestamps up to the provided limit, projecting the first persisted
+// external asset reference into the returned allocation read model.
+//
+// Example:
+//
+//	allocations, err := repository.FindAllPortfolioAllocationsWithinObservationTimestampsLimit(1, 12)
+//
+// Co-authored by: OpenCode and Igor Benicio de Mesquita
 func (repository *PortfolioAllocationRDBMSRepository) FindAllPortfolioAllocationsWithinObservationTimestampsLimit(
 	id int64,
 	observationTimestampsLimit int,
@@ -121,7 +133,7 @@ func (repository *PortfolioAllocationRDBMSRepository) FindAllPortfolioAllocation
 
 	var query = availableObservationTimestampsComplement + portfolioAllocationsSQL
 
-	var queryResult []domain.PortfolioAllocation
+	var queryResult []portfolioAllocationJoinedRowDTS
 	err := repository.dbAdapter.BuildQuery(query).
 		AddParam("observationTimestampLimit", observationTimestampsLimit).
 		AddWhereClause("AND pa.observation_time_id IN (SELECT id FROM observation_timestamps)").
@@ -132,18 +144,24 @@ func (repository *PortfolioAllocationRDBMSRepository) FindAllPortfolioAllocation
 		return nil, infra.PropagateAsAppErrorWithNewMessage(err, queryAllocationsError, repository)
 	}
 
-	langext.UnifyStructPointers(queryResult)
-	var result = langext.ToPointerSlice(queryResult)
-
-	return result, nil
+	return mapPortfolioAllocationRows(queryResult), nil
 }
 
+// FindPortfolioAllocationsByObservationTimestamp retrieves portfolio allocations for a single
+// observation timestamp, projecting the first persisted external asset reference into the returned
+// allocation read model.
+//
+// Example:
+//
+//	allocations, err := repository.FindPortfolioAllocationsByObservationTimestamp(1, 3)
+//
+// Co-authored by: OpenCode and Igor Benicio de Mesquita
 func (repository *PortfolioAllocationRDBMSRepository) FindPortfolioAllocationsByObservationTimestamp(
 	id int64,
 	observationTimestampId int64,
 ) ([]*domain.PortfolioAllocation, error) {
 
-	var queryResult []domain.PortfolioAllocation
+	var queryResult []portfolioAllocationJoinedRowDTS
 	err := repository.dbAdapter.BuildQuery(portfolioAllocationsSQL).
 		AddWhereClauseAndParam(portfolioIdWhereClause, "portfolioId", id).
 		AddWhereClauseAndParam(
@@ -157,10 +175,7 @@ func (repository *PortfolioAllocationRDBMSRepository) FindPortfolioAllocationsBy
 		return nil, infra.PropagateAsAppErrorWithNewMessage(err, queryAllocationsError, repository)
 	}
 
-	langext.UnifyStructPointers(queryResult)
-	var result = langext.ToPointerSlice(queryResult)
-
-	return result, nil
+	return mapPortfolioAllocationRows(queryResult), nil
 }
 
 func (repository *PortfolioAllocationRDBMSRepository) FindAvailableObservationTimestamps(

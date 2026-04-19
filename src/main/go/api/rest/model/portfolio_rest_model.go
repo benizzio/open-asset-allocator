@@ -18,6 +18,7 @@ type PortfolioAllocationDTS struct {
 	AssetId          *langext.ParseableInt64 `json:"assetId"`
 	AssetName        string                  `json:"assetName" validate:"max=100"`
 	AssetTicker      string                  `json:"assetTicker" validate:"max=40"`
+	ExternalAssetDTS *ExternalAssetDTS       `json:"externalAsset,omitempty"`
 	Class            string                  `json:"class" validate:"required,max=100"`
 	CashReserve      bool                    `json:"cashReserve"`
 	TotalMarketValue *decimal.Decimal        `json:"totalMarketValue" validate:"required"`

@@ -24,6 +24,11 @@ func ScanJsonColumn[T any](value interface{}, target *T) error {
 	return json.Unmarshal(bytes, target)
 }
 
+// ValueJsonColumn serializes JSON-backed values as textual JSON so database/sql
+// and pq.CopyIn use the same representation without coercing arbitrary binary
+// payloads.
+//
+// Co-authored by: OpenCode and Igor Benicio de Mesquita
 func ValueJsonColumn(value any) (driver.Value, error) {
 	if value == nil {
 		return nil, nil
@@ -38,5 +43,5 @@ func ValueJsonColumn(value any) (driver.Value, error) {
 		return nil, fmt.Errorf("failed to marshal %#v: %v", value, err)
 	}
 
-	return bytes, nil
+	return string(bytes), nil
 }

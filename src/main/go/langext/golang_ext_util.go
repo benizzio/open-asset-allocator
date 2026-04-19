@@ -23,13 +23,14 @@ func IsNilPointer(value any) bool {
 	return valueRef.Kind() == reflect.Ptr && valueRef.IsNil()
 }
 
-// UnwrapType removes pointer indirection if present.
+// UnwrapType removes all pointer indirection layers from a reflect.Type.
 //
-// Authored by: GitHub Copilot
+// Co-authored by: OpenCode and GitHub Copilot
 func UnwrapType(fieldType reflect.Type) reflect.Type {
-	if fieldType.Kind() == reflect.Ptr {
-		return fieldType.Elem()
+	for fieldType != nil && fieldType.Kind() == reflect.Ptr {
+		fieldType = fieldType.Elem()
 	}
+
 	return fieldType
 }
 

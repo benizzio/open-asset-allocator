@@ -7,14 +7,20 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+// PortfolioAllocation represents the observed allocation of a single asset in a portfolio
+// snapshot. SelectedExternalAsset stores the first persisted external reference projected for
+// read operations, keeping it separate from the full persisted asset external data.
+//
+// Co-authored by: OpenCode and Igor Benicio de Mesquita
 type PortfolioAllocation struct {
-	Asset                Asset
-	Class                string
-	CashReserve          bool
-	ObservationTimestamp *PortfolioObservationTimestamp
-	TotalMarketValue     int64
-	AssetQuantity        decimal.Decimal
-	AssetMarketPrice     decimal.Decimal
+	Asset                 Asset
+	SelectedExternalAsset *ExternalAsset
+	Class                 string
+	CashReserve           bool
+	ObservationTimestamp  *PortfolioObservationTimestamp
+	TotalMarketValue      int64
+	AssetQuantity         decimal.Decimal
+	AssetMarketPrice      decimal.Decimal
 }
 
 type PortfolioObservationTimestamp struct {

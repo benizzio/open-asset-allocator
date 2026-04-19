@@ -9,172 +9,109 @@ import (
 
 // TODO verify if this functionality already exists in some library
 
-// GetJSONFieldName returns the field name from the JSON tag of the struct field.
+// GetJSONFieldName converts a validator namespace into the equivalent JSON field path.
+// It falls back to the provided fieldName when the namespace cannot be fully resolved.
 //
-// Authored by: GitHub Copilot
+// Co-authored by: OpenCode and GitHub Copilot
 func GetJSONFieldName(namespace string, fieldName string, structType reflect.Type) string {
-	// Get the struct field
-	field := findFieldByNamespace(namespace, structType)
-	if field == nil {
-		// Fall back to the provided field name
+	var jsonFieldPath = buildJSONFieldPath(namespace, structType)
+	if jsonFieldPath == "" {
 		return fieldName
 	}
 
-	// Get the json tag and parse it
-	jsonTag := field.Tag.Get("json")
-	if jsonTag == "" {
-		// No json tag found, return original field name
-		return fieldName
-	}
-
-	// The json tag might have options like ",omitempty", so we need to split it
-	jsonName := strings.Split(jsonTag, ",")[0]
-	if jsonName == "-" || jsonName == "" {
-		// Field is ignored in JSON or empty tag, return original field name
-		return fieldName
-	}
-
-	return jsonName
+	return jsonFieldPath
 }
 
-// findFieldByNamespace navigates through a struct to find a field using the namespace.
+// buildJSONFieldPath resolves each namespace segment to its JSON field name while preserving
+// collection indexes so validation messages match the external API contract.
 //
-// Authored by: GitHub Copilot
-func findFieldByNamespace(namespace string, structType reflect.Type) *reflect.StructField {
-	namespaceParts := parseNamespace(namespace)
+// Authored by: OpenCode
+func buildJSONFieldPath(namespace string, structType reflect.Type) string {
+	var namespaceParts = parseNamespace(namespace)
+	if len(namespaceParts) == 0 {
+		return ""
+	}
+
+	var currentType = langext.UnwrapType(structType)
+	if currentType == nil {
+		return ""
+	}
+
+	if namespaceParts[0] == currentType.Name() {
+		namespaceParts = namespaceParts[1:]
+	}
+	if len(namespaceParts) == 0 {
+		return ""
+	}
+
+	var jsonParts = make([]string, 0, len(namespaceParts))
+	for _, namespacePart := range namespaceParts {
+		var jsonPart string
+		var nextType reflect.Type
+		if strings.Contains(namespacePart, "[") {
+			jsonPart, nextType = mapIndexedNamespacePart(namespacePart, currentType)
+		} else {
+			jsonPart, nextType = mapNamespacePart(namespacePart, currentType)
+		}
+		if jsonPart == "" {
+			return ""
+		}
+
+		jsonParts = append(jsonParts, jsonPart)
+		currentType = nextType
+	}
+
+	return strings.Join(jsonParts, ".")
+}
+
+// mapNamespacePart resolves a single non-indexed validator namespace segment to its JSON name.
+//
+// Authored by: OpenCode
+func mapNamespacePart(namespacePart string, currentType reflect.Type) (string, reflect.Type) {
+	var structField, found = langext.FindStructFieldByNameOrJSONName(currentType, namespacePart)
+	if !found {
+		return "", nil
+	}
+
+	return langext.ExtractJSONFieldName(structField), langext.UnwrapType(structField.Type)
+}
+
+// mapIndexedNamespacePart resolves an indexed validator namespace segment like Allocations[0] to
+// the corresponding JSON field path segment while preserving the original index.
+//
+// Authored by: OpenCode
+func mapIndexedNamespacePart(namespacePart string, currentType reflect.Type) (string, reflect.Type) {
+	var bracketIndex = strings.Index(namespacePart, "[")
+	if bracketIndex == -1 {
+		return "", nil
+	}
+
+	var fieldName = namespacePart[:bracketIndex]
+	var structField, found = langext.FindStructFieldByNameOrJSONName(currentType, fieldName)
+	if !found {
+		return "", nil
+	}
+
+	var collectionType = langext.UnwrapType(structField.Type)
+	if collectionType.Kind() != reflect.Array &&
+		collectionType.Kind() != reflect.Slice &&
+		collectionType.Kind() != reflect.Map {
+		return "", nil
+	}
+
+	var jsonFieldName = langext.ExtractJSONFieldName(structField)
+	var pathSuffix = namespacePart[bracketIndex:]
+	return jsonFieldName + pathSuffix, langext.UnwrapType(collectionType.Elem())
+}
+
+// parseNamespace splits a namespace string into path segments.
+//
+// Co-authored by: OpenCode and GitHub Copilot
+func parseNamespace(namespace string) []string {
+	namespaceParts := strings.Split(namespace, ".")
 	if len(namespaceParts) == 0 {
 		return nil
 	}
 
-	return navigateToField(namespaceParts, structType)
-}
-
-// parseNamespace splits a namespace string into parts, skipping the struct name.
-//
-// Authored by: GitHub Copilot
-func parseNamespace(namespace string) []string {
-	namespaceParts := strings.Split(namespace, ".")
-	if len(namespaceParts) < 2 {
-		return nil // Invalid namespace format
-	}
-
-	// Skip the first part which is the struct name
-	return namespaceParts[1:]
-}
-
-// navigateToField follows the path through a struct to find a specific field.
-//
-// Authored by: GitHub Copilot
-func navigateToField(fieldPath []string, startType reflect.Type) *reflect.StructField {
-	// Return early if path is empty
-	if len(fieldPath) == 0 {
-		return nil
-	}
-
-	// Process recursively starting from the first field
-	return findNestedField(fieldPath, 0, startType)
-}
-
-// findNestedField recursively processes a field path to find the target field.
-//
-// Authored by: GitHub Copilot
-func findNestedField(fieldPath []string, pathIndex int, currentType reflect.Type) *reflect.StructField {
-	// We've reached the end of the path
-	if pathIndex >= len(fieldPath) {
-		return nil
-	}
-
-	currentFieldName := fieldPath[pathIndex]
-	isLastField := pathIndex == len(fieldPath)-1
-
-	// Process the current field based on its type
-	if strings.Contains(currentFieldName, "[") {
-		return processArrayField(currentFieldName, fieldPath, pathIndex, isLastField, currentType)
-	}
-
-	return processRegularField(currentFieldName, fieldPath, pathIndex, isLastField, currentType)
-}
-
-// processArrayField handles array/slice fields in the path.
-//
-// Authored by: GitHub Copilot
-func processArrayField(
-	fieldPathComponent string,
-	fieldPath []string,
-	pathIndex int,
-	isLastField bool,
-	currentType reflect.Type,
-) *reflect.StructField {
-	structField, elementType := handleArrayField(fieldPathComponent, currentType)
-	if structField == nil {
-		return nil
-	}
-
-	// If this is the last part, return the field
-	if isLastField {
-		return structField
-	}
-
-	// Otherwise, continue navigating with the element type
-	return findNestedField(fieldPath, pathIndex+1, elementType)
-}
-
-// processRegularField handles regular struct fields in the path.
-//
-// Authored by: GitHub Copilot
-func processRegularField(
-	fieldPathComponent string,
-	fieldPath []string,
-	pathIndex int,
-	isLastField bool,
-	currentType reflect.Type,
-) *reflect.StructField {
-	structField, found := currentType.FieldByName(fieldPathComponent)
-	if !found {
-		return nil
-	}
-
-	// If this is the last part, return the field
-	if isLastField {
-		return &structField
-	}
-
-	// Otherwise, continue navigating with the field's type
-	nextType := langext.UnwrapType(structField.Type)
-	return findNestedField(fieldPath, pathIndex+1, nextType)
-}
-
-// handleArrayField processes array/slice field references and returns the field and element type.
-// Returns nil values when the field can't be found or is not an array/slice.
-//
-// Authored by: GitHub Copilot
-func handleArrayField(fieldPathComponent string, currentType reflect.Type) (*reflect.StructField, reflect.Type) {
-	// Extract the field name before the array index
-	bracketIndex := strings.Index(fieldPathComponent, "[")
-	if bracketIndex == -1 {
-		return nil, nil
-	}
-
-	arrayFieldName := fieldPathComponent[:bracketIndex]
-
-	structField, found := currentType.FieldByName(arrayFieldName)
-	if !found {
-		return nil, nil
-	}
-
-	// Get the element type for arrays/slices/maps
-	fieldType := langext.UnwrapType(structField.Type)
-	var elementType reflect.Type
-
-	switch fieldType.Kind() {
-	case reflect.Array, reflect.Slice:
-		elementType = fieldType.Elem()
-	case reflect.Map:
-		elementType = fieldType.Elem()
-	default:
-		// Not an indexable type
-		return nil, nil
-	}
-
-	return &structField, elementType
+	return namespaceParts
 }

@@ -152,3 +152,30 @@ func ExtractJSONFieldName(field reflect.StructField) string {
 
 	return field.Name
 }
+
+// FindStructFieldByNameOrJSONName resolves a struct field from either its Go field name or its
+// exported JSON tag name.
+//
+// Authored by: OpenCode
+func FindStructFieldByNameOrJSONName(currentType reflect.Type, fieldName string) (reflect.StructField, bool) {
+	var structType = UnwrapType(currentType)
+	if structType == nil || structType.Kind() != reflect.Struct {
+		return reflect.StructField{}, false
+	}
+
+	if structField, found := structType.FieldByName(fieldName); found {
+		return structField, true
+	}
+
+	for i := 0; i < structType.NumField(); i++ {
+		var structField = structType.Field(i)
+		if !structField.IsExported() {
+			continue
+		}
+		if ExtractJSONFieldName(structField) == fieldName {
+			return structField, true
+		}
+	}
+
+	return reflect.StructField{}, false
+}

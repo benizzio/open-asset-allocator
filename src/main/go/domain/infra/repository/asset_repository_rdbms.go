@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"strconv"
 
 	"github.com/benizzio/open-asset-allocator/domain"
@@ -13,17 +14,38 @@ import (
 
 const (
 	assetsSQL = `
-		SELECT id, ticker, name FROM asset
+		SELECT id, ticker, name, external_data FROM asset
 	` + rdbms.WhereClausePlaceholder
 )
 
+// assetRowScanner reads a persisted asset row, including its optional external data payload,
+// into the domain model.
+//
+// Co-authored by: OpenCode and Igor Benicio de Mesquita
 func assetRowScanner(rows *sql.Rows) (domain.Asset, error) {
+
 	var asset domain.Asset
+	var externalData domain.ExternalAssetData
+	var externalDataValue interface{}
+
 	scanErr := rows.Scan(
 		&asset.Id,
 		&asset.Ticker,
 		&asset.Name,
+		&externalDataValue,
 	)
+	if scanErr != nil {
+		return asset, scanErr
+	}
+
+	if externalDataValue != nil {
+		scanErr = externalData.Scan(externalDataValue)
+		if scanErr != nil {
+			return asset, scanErr
+		}
+		asset.ExternalData = &externalData
+	}
+
 	return asset, scanErr
 }
 
@@ -31,17 +53,35 @@ type AssetRDBMSRepository struct {
 	dbAdapter rdbms.RepositoryRDBMSAdapter
 }
 
+// GetKnownAssets retrieves all persisted assets, including optional external data.
+//
+// Example:
+//
+//	assets, err := assetRepository.GetKnownAssets()
+//
+// Co-authored by: OpenCode and Igor Benicio de Mesquita
 func (repository *AssetRDBMSRepository) GetKnownAssets() ([]*domain.Asset, error) {
-	var queryBuilder = repository.dbAdapter.BuildQuery(assetsSQL)
-	var result []domain.Asset
-	err := queryBuilder.Build().FindInto(&result)
-	return langext.ToPointerSlice(result), infra.PropagateAsAppErrorWithNewMessage(
-		err,
-		"Error getting known assets",
-		repository,
-	)
+	var queryExecutor = repository.dbAdapter.BuildQuery(assetsSQL).Build()
+	result, err := rdbms.FindWithRowScanner(queryExecutor, assetRowScanner)
+	if err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(
+			err,
+			"Error getting known assets",
+			repository,
+		)
+	}
+
+	return langext.ToPointerSlice(result), nil
 }
 
+// FindAssetByUniqueIdentifier retrieves a single asset by numeric id or ticker. Numeric input is
+// matched against both columns to preserve the existing lookup behavior.
+//
+// Example:
+//
+//	asset, err := assetRepository.FindAssetByUniqueIdentifier("ARCA:BIL")
+//
+// Co-authored by: OpenCode and Igor Benicio de Mesquita
 func (repository *AssetRDBMSRepository) FindAssetByUniqueIdentifier(uniqueIdentifier string) (*domain.Asset, error) {
 
 	var queryBuilder = repository.dbAdapter.BuildQuery(assetsSQL)
@@ -59,27 +99,33 @@ func (repository *AssetRDBMSRepository) FindAssetByUniqueIdentifier(uniqueIdenti
 		uniqueIdentifier,
 	)
 
-	var result domain.Asset
-	err := queryBuilder.Build().GetInto(&result)
-
-	if err != nil && err.Error() == sql.ErrNoRows.Error() {
-		return nil, nil
+	var queryExecutor = queryBuilder.Build()
+	result, err := rdbms.GetWithRowScanner(queryExecutor, assetRowScanner)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, infra.PropagateAsAppErrorWithNewMessage(
+			err,
+			"Error getting asset by id",
+			repository,
+		)
 	}
 
-	return &result, infra.PropagateAsAppErrorWithNewMessage(
-		err,
-		"Error getting asset by id",
-		repository,
-	)
+	return &result, nil
 }
 
 // UpdateAsset updates the ticker and name fields of an existing asset identified by its ID.
 // Returns the freshly-read updated asset from the database.
 //
-// Authored by: GitHub Copilot
+// Example:
+//
+//	updatedAsset, err := assetRepository.UpdateAsset(asset)
+//
+// Co-authored by: OpenCode and GitHub Copilot
 func (repository *AssetRDBMSRepository) UpdateAsset(asset *domain.Asset) (*domain.Asset, error) {
 
-	err := repository.dbAdapter.UpdateListedFields(new(*asset), "Ticker", "Name")
+	err := repository.dbAdapter.UpdateListedFields(asset, "Ticker", "Name")
 	if err != nil {
 		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "Error updating asset", repository)
 	}
@@ -93,6 +139,18 @@ func (repository *AssetRDBMSRepository) UpdateAsset(asset *domain.Asset) (*domai
 	)
 }
 
+// InsertAssetsInTransaction bulk-inserts new assets within an existing SQL transaction,
+// including persisted external data when present, and returns the persisted records.
+//
+// Example:
+//
+//	err := adapter.RunInTransaction(func(transContext *rdbms.SQLTransactionalContext) error {
+//		persistedAssets, err := assetRepository.InsertAssetsInTransaction(transContext, assets)
+//		_ = persistedAssets
+//		return err
+//	})
+//
+// Co-authored by: OpenCode and Igor Benicio de Mesquita
 func (repository *AssetRDBMSRepository) InsertAssetsInTransaction(
 	transContext context.Context,
 	assets []*domain.Asset,
@@ -110,19 +168,18 @@ func (repository *AssetRDBMSRepository) InsertAssetsInTransaction(
 		return assets, nil
 	}
 
-	var columns = []string{"ticker", "name"}
+	var columns = []string{"ticker", "name", "external_data"}
 
-	var values = make([][]interface{}, len(assets))
-	var tickers = make([]string, len(assets))
-	for i, asset := range assets {
-		values[i] = []interface{}{
-			asset.Ticker,
-			asset.Name,
-		}
-		tickers[i] = asset.Ticker
+	values, tickers, err := buildAssetInsertValues(assets)
+	if err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(
+			err,
+			"Error inserting assets",
+			repository,
+		)
 	}
 
-	err := repository.dbAdapter.InsertBulkInTransaction(transactionalContext, "asset", columns, values)
+	err = repository.dbAdapter.InsertBulkInTransaction(transactionalContext, "asset", columns, values)
 	if err != nil {
 		return nil, infra.PropagateAsAppErrorWithNewMessage(
 			err,
@@ -132,6 +189,48 @@ func (repository *AssetRDBMSRepository) InsertAssetsInTransaction(
 	}
 
 	return repository.FindAssetsByTickersInTransaction(transactionalContext, tickers)
+}
+
+// buildAssetInsertValues prepares the bulk insert values and ticker lookup list for a batch of
+// assets.
+//
+// Authored by: OpenCode
+func buildAssetInsertValues(assets []*domain.Asset) ([][]interface{}, []string, error) {
+	var values = make([][]interface{}, len(assets))
+	var tickers = make([]string, len(assets))
+
+	for i, persistedAsset := range assets {
+		assetInsertValue, err := buildAssetInsertValue(persistedAsset)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		values[i] = assetInsertValue
+		tickers[i] = persistedAsset.Ticker
+	}
+
+	return values, tickers, nil
+}
+
+// buildAssetInsertValue prepares a single asset bulk insert row, including the optional external
+// data payload.
+//
+// Authored by: OpenCode
+func buildAssetInsertValue(asset *domain.Asset) ([]interface{}, error) {
+	var externalDataValue interface{}
+	var err error
+	if asset.ExternalData != nil {
+		externalDataValue, err = asset.ExternalData.Value()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return []interface{}{
+		asset.Ticker,
+		asset.Name,
+		externalDataValue,
+	}, nil
 }
 
 func (repository *AssetRDBMSRepository) FindAssetsByTickersInTransaction(

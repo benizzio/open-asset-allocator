@@ -176,6 +176,83 @@ func (executor *QueryExecutor) GetRows() (*dbx.Rows, error) {
 	return executor.query.Rows()
 }
 
+// FindWithRowScanner executes a built query and maps each result row with the provided scanner.
+//
+// Example:
+//
+//	queryExecutor := adapter.BuildQuery("SELECT id, ticker FROM asset").Build()
+//	assets, err := rdbms.FindWithRowScanner(queryExecutor, assetRowScanner)
+//
+// Authored by: OpenCode
+// TODO refactor together with QueryExecutor to make it generic and with fluent API
+func FindWithRowScanner[T any](executor *QueryExecutor, rowScanner RowScanner[T]) ([]T, error) {
+	rows, err := executor.GetRows()
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		if closeErr := rows.Close(); closeErr != nil {
+			glog.Errorf("Error closing rows: %v", closeErr)
+		}
+	}()
+
+	var result = make([]T, 0)
+	var index = 0
+	for rows.Next() {
+		rowValue, scanErr := rowScanner(rows.Rows)
+		if scanErr != nil {
+			glog.Errorf("Error scanning row %d: %v", index, scanErr)
+			return nil, scanErr
+		}
+
+		result = append(result, rowValue)
+		index++
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+// GetWithRowScanner executes a built query and maps the first result row with the provided
+// scanner. When the query returns no rows, sql.ErrNoRows is returned.
+//
+// Example:
+//
+//	queryExecutor := adapter.BuildQuery("SELECT id, ticker FROM asset WHERE id = {:id}").
+//		AddParam("id", 1).
+//		Build()
+//	asset, err := rdbms.GetWithRowScanner(queryExecutor, assetRowScanner)
+//
+// Authored by: OpenCode
+// TODO refactor together with QueryExecutor to make it generic and with fluent API
+func GetWithRowScanner[T any](executor *QueryExecutor, rowScanner RowScanner[T]) (T, error) {
+	var zero T
+
+	rows, err := executor.GetRows()
+	if err != nil {
+		return zero, err
+	}
+
+	defer func() {
+		if closeErr := rows.Close(); closeErr != nil {
+			glog.Errorf("Error closing rows: %v", closeErr)
+		}
+	}()
+
+	if !rows.Next() {
+		if err = rows.Err(); err != nil {
+			return zero, err
+		}
+		return zero, sql.ErrNoRows
+	}
+
+	return rowScanner(rows.Rows)
+}
+
 // ================================================
 // ROW SCANNER
 // ================================================

@@ -3,6 +3,7 @@ package validation
 import (
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 
@@ -71,7 +72,7 @@ func validateStructDeep(structValue reflect.Value, fieldPath string, errorMessag
 // validateStructWithValidator uses the validator library to validate struct fields
 // and formats errors consistently with the rest of the validation system
 //
-// Authored by: GitHub Copilot
+// Authored by: GitHub Copilot and OpenCode
 func validateStructWithValidator(structValue reflect.Value, fieldPath string, errorMessages *[]string) {
 
 	// Create validator instance
@@ -84,6 +85,10 @@ func validateStructWithValidator(structValue reflect.Value, fieldPath string, er
 			structType := structValue.Type()
 
 			for _, validationError := range validationErrors {
+				if !isDirectValidationErrorForStruct(validationError, structType) {
+					continue
+				}
+
 				// Build the field path using JSON property names
 				errorFieldPath := buildValidationErrorPathWithJSON(fieldPath, validationError, structType)
 				errorMessage := fmt.Sprintf(
@@ -95,6 +100,24 @@ func validateStructWithValidator(structValue reflect.Value, fieldPath string, er
 			}
 		}
 	}
+}
+
+// isDirectValidationErrorForStruct keeps only validation errors that belong to the current struct
+// level so nested structs are reported once, when their own recursive validation runs.
+//
+// Authored by: OpenCode
+func isDirectValidationErrorForStruct(validationError validator.FieldError, structType reflect.Type) bool {
+	var namespaceParts = strings.Split(validationError.StructNamespace(), ".")
+	if len(namespaceParts) != 2 {
+		return false
+	}
+
+	if namespaceParts[0] != structType.Name() {
+		return false
+	}
+
+	_, found := structType.FieldByName(namespaceParts[1])
+	return found
 }
 
 // buildValidationErrorPathWithJSON constructs the field path for validation errors from nested structs
