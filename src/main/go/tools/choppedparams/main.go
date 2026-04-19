@@ -222,7 +222,11 @@ func validateCallArguments(fileSet *token.FileSet, filePath string, callExpressi
 //
 // Authored by: OpenAI Codex
 func validateFunctionParameters(fileSet *token.FileSet, filePath string, parameters *ast.FieldList) []violation {
-	if parameters == nil || parameterCount(parameters) < 2 || !spansMultipleLines(fileSet, parameters.Opening, parameters.Closing) {
+	if parameters == nil || parameterCount(parameters) < 2 {
+		return nil
+	}
+
+	if !spansMultipleLines(fileSet, parameters.Opening, parameters.Closing) {
 		return nil
 	}
 
