@@ -316,7 +316,7 @@ func BuildDatabaseAdapter(config *infra.Configuration) *Adapter {
 // Co-authored by: GitHub Copilot and Igor Benicio de Mesquita
 func BuildQuery[T any](adapter RepositoryRDBMSAdapter, querySQL string) *QueryBuilder[T] {
 	return &QueryBuilder[T]{
-		dbx:          adapter.(*Adapter).getDBX(),
+		dbx:          adapter.getDBX(),
 		querySQL:     querySQL,
 		params:       dbx.Params{},
 		whereClauses: make([]string, 0),
@@ -340,6 +340,7 @@ func BuildQueryInTransaction[T any](
 // =================================================
 
 type RepositoryRDBMSAdapter interface {
+	getDBX() *dbx.DB
 	Insert(model interface{}) error
 	UpdateListedFields(model interface{}, fields ...string) error
 	Read(model interface{}, id any) error

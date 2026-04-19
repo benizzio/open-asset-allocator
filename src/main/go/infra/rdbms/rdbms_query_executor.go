@@ -87,19 +87,19 @@ func withParams[T any](query *dbx.Query, params dbx.Params) *QueryExecutor[T] {
 
 func (executor *QueryExecutor[T]) FindInto(target *[]T) error {
 	// TODO verification for debug logging, this should be logged only in debug mode
-	glog.Infof("Executing query %s \n with params %s", executor.query.SQL(), executor.query.Params())
+	glog.Infof("Executing query %s \n with params %v", executor.query.SQL(), executor.query.Params())
 	return executor.query.All(target)
 }
 
 func (executor *QueryExecutor[T]) GetInto(target *T) error {
 	// TODO verification for debug logging, this should be logged only in debug mode
-	glog.Infof("Executing query %s \n with params %s", executor.query.SQL(), executor.query.Params())
+	glog.Infof("Executing query %s \n with params %v", executor.query.SQL(), executor.query.Params())
 	return executor.query.One(target)
 }
 
 func (executor *QueryExecutor[T]) GetRows() (*dbx.Rows, error) {
 	// TODO verification for debug logging, this should be logged only in debug mode
-	glog.Infof("Executing query %s \n with params %s", executor.query.SQL(), executor.query.Params())
+	glog.Infof("Executing query %s \n with params %v", executor.query.SQL(), executor.query.Params())
 	return executor.query.Rows()
 }
 

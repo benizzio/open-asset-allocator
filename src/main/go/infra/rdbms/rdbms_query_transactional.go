@@ -79,7 +79,7 @@ func (executor *SQLTransactionalQueryExecutor[T]) Find(rowScanner RowScanner[T])
 	var builder = executor.queryBuilder
 
 	// TODO verification for debug logging, this should be logged only in debug mode
-	glog.Infof("Executing transactional query %s \n with params %s", builder.querySQL, builder.params)
+	glog.Infof("Executing transactional query %s \n with params %v", builder.querySQL, builder.params)
 	rows, err := builder.transaction.Query(builder.querySQL, builder.params...)
 	if err != nil {
 		return nil, err
@@ -97,7 +97,7 @@ func (executor *SQLTransactionalQueryExecutor[T]) Find(rowScanner RowScanner[T])
 
 		rowValue, scanErr := rowScanner(rows)
 		if scanErr != nil {
-			glog.Errorf("Error scanning row: %v", index)
+			glog.Errorf("Error scanning row %d: %v", index, scanErr)
 			return nil, scanErr
 		}
 
@@ -117,7 +117,7 @@ func (executor *SQLTransactionalQueryExecutor[T]) Get(rowScanner SingleRowScanne
 	var builder = executor.queryBuilder
 
 	// TODO verification for debug logging, this should be logged only in debug mode
-	glog.Infof("Executing transactional query %s \n with params %s", builder.querySQL, builder.params)
+	glog.Infof("Executing transactional query %s \n with params %v", builder.querySQL, builder.params)
 	var row = builder.transaction.QueryRow(builder.querySQL, builder.params...)
 	return rowScanner(row)
 }
