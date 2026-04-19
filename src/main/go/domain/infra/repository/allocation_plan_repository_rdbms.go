@@ -83,7 +83,7 @@ func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlans(
 	planType *allocation.PlanType,
 ) ([]*domain.AllocationPlan, error) {
 
-	var queryBuilder = rdbms.BuildQuery[plannedAllocationJoinedRowDTS](repository.dbAdapter.GetDBX(), allocationPlanSQL)
+	var queryBuilder = rdbms.BuildQuery[plannedAllocationJoinedRowDTS](repository.dbAdapter, allocationPlanSQL)
 
 	queryBuilder.AddWhereClauseAndParam("AND ap.portfolio_id = {:portfolioId}", "portfolioId", portfolioId)
 
@@ -102,7 +102,7 @@ func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlans(
 
 func (repository *AllocationPlanRDBMSRepository) GetAllocationPlan(id int64) (*domain.AllocationPlan, error) {
 
-	var queryBuilder = rdbms.BuildQuery[plannedAllocationJoinedRowDTS](repository.dbAdapter.GetDBX(), allocationPlanSQL)
+	var queryBuilder = rdbms.BuildQuery[plannedAllocationJoinedRowDTS](repository.dbAdapter, allocationPlanSQL)
 	queryBuilder.AddWhereClauseAndParam("AND ap.id = {:id}", "id", id)
 
 	var queryResult []plannedAllocationJoinedRowDTS
@@ -129,7 +129,7 @@ func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlanIdentifiers
 ) ([]*domain.AllocationPlanIdentifier, error) {
 
 	var queryBuilder = rdbms.BuildQuery[domain.AllocationPlanIdentifier](
-		repository.dbAdapter.GetDBX(), allocationPlanIdentifierSQL,
+		repository.dbAdapter, allocationPlanIdentifierSQL,
 	)
 
 	queryBuilder.AddWhereClauseAndParam("AND ap.portfolio_id = {:portfolioId}", "portfolioId", portfolioId)
