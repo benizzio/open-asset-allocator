@@ -61,8 +61,8 @@ type AssetRDBMSRepository struct {
 //
 // Co-authored by: OpenCode and Igor Benicio de Mesquita
 func (repository *AssetRDBMSRepository) GetKnownAssets() ([]*domain.Asset, error) {
-	var queryExecutor = repository.dbAdapter.BuildQuery(assetsSQL).Build()
-	result, err := rdbms.FindWithRowScanner(queryExecutor, assetRowScanner)
+	var queryExecutor = rdbms.BuildQuery[domain.Asset](repository.dbAdapter, assetsSQL).Build()
+	result, err := queryExecutor.FindWithRowScanner(assetRowScanner)
 	if err != nil {
 		return nil, infra.PropagateAsAppErrorWithNewMessage(
 			err,
@@ -84,7 +84,7 @@ func (repository *AssetRDBMSRepository) GetKnownAssets() ([]*domain.Asset, error
 // Co-authored by: OpenCode and Igor Benicio de Mesquita
 func (repository *AssetRDBMSRepository) FindAssetByUniqueIdentifier(uniqueIdentifier string) (*domain.Asset, error) {
 
-	var queryBuilder = repository.dbAdapter.BuildQuery(assetsSQL)
+	var queryBuilder = rdbms.BuildQuery[domain.Asset](repository.dbAdapter, assetsSQL)
 
 	var whereClause string
 	if _, err := strconv.Atoi(uniqueIdentifier); err == nil {
@@ -100,7 +100,7 @@ func (repository *AssetRDBMSRepository) FindAssetByUniqueIdentifier(uniqueIdenti
 	)
 
 	var queryExecutor = queryBuilder.Build()
-	result, err := rdbms.GetWithRowScanner(queryExecutor, assetRowScanner)
+	result, err := queryExecutor.GetWithRowScanner(assetRowScanner)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil

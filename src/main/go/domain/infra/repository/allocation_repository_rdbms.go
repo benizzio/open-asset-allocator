@@ -54,7 +54,7 @@ func (repository *AllocationRDBMSRepository) FindAvailableAllocationClassesFromA
 	portfolioId int64,
 ) ([]string, error) {
 
-	rows, err := repository.dbAdapter.BuildQuery(allocationClassesFromAllSourcesSQL).
+	rows, err := rdbms.BuildQuery[any](repository.dbAdapter, allocationClassesFromAllSourcesSQL).
 		AddParam("portfolioId", portfolioId).
 		Build().GetRows()
 
