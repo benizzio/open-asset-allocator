@@ -128,7 +128,9 @@ func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlanIdentifiers
 	planType *allocation.PlanType,
 ) ([]*domain.AllocationPlanIdentifier, error) {
 
-	var queryBuilder = rdbms.BuildQuery[domain.AllocationPlanIdentifier](repository.dbAdapter.GetDBX(), allocationPlanIdentifierSQL)
+	var queryBuilder = rdbms.BuildQuery[domain.AllocationPlanIdentifier](
+		repository.dbAdapter.GetDBX(), allocationPlanIdentifierSQL,
+	)
 
 	queryBuilder.AddWhereClauseAndParam("AND ap.portfolio_id = {:portfolioId}", "portfolioId", portfolioId)
 

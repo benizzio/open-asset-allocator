@@ -246,7 +246,9 @@ func (executor *QueryExecutor[T]) FindWithRowScanner(rowScanner RowScanner[T]) (
 //
 // Example:
 //
-//	queryExecutor := rdbms.BuildQuery[domain.Asset](adapter.GetDBX(), "SELECT id, ticker FROM asset WHERE id = {:id}").
+//	queryExecutor := rdbms.BuildQuery[domain.Asset](
+//		adapter.GetDBX(), "SELECT id, ticker FROM asset WHERE id = {:id}",
+//	).
 //		AddParam("id", 1).
 //		Build()
 //	asset, err := queryExecutor.GetWithRowScanner(assetRowScanner)

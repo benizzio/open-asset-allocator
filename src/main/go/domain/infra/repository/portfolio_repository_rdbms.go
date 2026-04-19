@@ -42,7 +42,8 @@ func (repository *PortfolioRDBMSRepository) FindPortfolio(id int64) (*domain.Por
 	`
 
 	var result domain.Portfolio
-	err := rdbms.BuildQuery[domain.Portfolio](repository.dbAdapter.GetDBX(), query).AddParam("id", id).Build().GetInto(&result)
+	err := rdbms.BuildQuery[domain.Portfolio](repository.dbAdapter.GetDBX(), query).
+		AddParam("id", id).Build().GetInto(&result)
 
 	return &result, infra.PropagateAsAppErrorWithNewMessage(err, queryPortfolioError, repository)
 }
