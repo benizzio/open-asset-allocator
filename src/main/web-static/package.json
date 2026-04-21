@@ -18,7 +18,7 @@
     "bignumber.js": "bignumber.js/dist/bignumber.mjs"
   },
   "dependencies": {
-    "bignumber.js": "^10.0.2",
+    "bignumber.js": "^11.0.0",
     "bootstrap": "^5.2.10",
     "bootstrap-icons": "^1.13.1",
     "bootswatch": "^5.2.10",
