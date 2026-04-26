@@ -11,7 +11,7 @@
             </span>
     </div>
     <div class="row justify-content-center align-items-center row-cols-auto my-5">
-        <div class="btn-group placeholder-glow" role="group">
+        <div class="btn-group placeholder-glow">
             <span class="btn btn-outline-primary placeholder col-4">placeholder</span>
             <span class="btn btn-outline-primary placeholder col-4">placeholder</span>
             <span class="btn btn-outline-primary placeholder col-4">placeholder</span>
@@ -34,8 +34,8 @@
     <button type="button" class="btn btn-outline-primary mb-1" data-navigate-to="/portfolio/:portfolioId/edit">
         <span class="bi bi-pen h5"></span>
     </button>
-    <input type="hidden" name="portfolioId" value="{{id}}" autocomplete="portfolioId" />
-    <input type="hidden" name="portfolioName" value="{{name}}" autocomplete="portfolioName" />
+    <input type="hidden" name="portfolioId" value="{{id}}" autocomplete="portfolioId"/>
+    <input type="hidden" name="portfolioName" value="{{name}}" autocomplete="portfolioName"/>
     {{{ domJSON "portfolio" this }}}
 </script>
 
@@ -72,7 +72,7 @@
         >
             <div class="col"
                  data-hx-trigger-on-route="/portfolio/:portfolioId/history/*!load-portfolio"
-                 data-hx-wait-for-ready="settled,partials-registered"
+                 data-hx-wait-for-ready="settled,partials-registered,asset-columns-input-initialized"
                  data-portfolio-route-component
                  data-display-on-route="/portfolio/:portfolioId/history/*"
                  hx-get="/websrc/components/portfolio-history.html"
@@ -81,7 +81,7 @@
             ></div>
             <div class="col"
                  data-hx-trigger-on-route="/portfolio\/:portfolioId\/allocation($|\/.*$)!load-allocation"
-                 data-hx-wait-for-ready="settled,partials-registered"
+                 data-hx-wait-for-ready="settled,partials-registered,asset-columns-input-initialized"
                  data-portfolio-route-component
                  data-display-on-route="/portfolio\/:portfolioId\/allocation($|\/.*$)"
                  hx-get="/websrc/components/allocation-plan.html"
@@ -130,7 +130,7 @@
                 >
                     <div class="card-body">
 
-                        <input type="hidden" name="id" />
+                        <input type="hidden" name="id"/>
 
                         <input type="text"
                                name="name"
@@ -192,100 +192,22 @@
 
 </script>
 
-<script id="asset-composed-columns-input" type="text/x-handlebars-template">
-
-    <td class="text-wrap-break-word">
-
-        <input type="hidden"
-               name="{{assetIdHiddenFieldName}}"
-               value="{{assetId}}"
-               data-null-if-empty
-        />
-
-        {{#if assetId}}
-            {{assetTicker}}
-        {{else}}
-
-            <div class="input-group">
-
-                <input type="text"
-                       name="{{assetTickerFieldName}}"
-                       placeholder="Asset ticker"
-                       aria-label="Asset ticker"
-                       autocomplete="off"
-                       class="form-control"
-                       value="{{assetTicker}}"
-                       list="datalist-assets"
-                       hx-validate="true"
-                       hx-on::validation:validate="{{assetTickerFieldHTMXOnValidate}}"
-                       oninput="maskTickerInput(this)"
-                       onkeydown="AssetComposedColumnsInput.handleAssetTickerKeydown(event)"
-                       maxlength="40"
-                />
-                <button data-asset-action-button
-                        type="button"
-                        class="btn btn-primary btn-xs"
-                        onclick="{{assetActionButtonOnClick}}"
-                >
-                    <span class="bi bi-search"></span>
-                </button>
-
-            </div>
-
-            <div data-new-asset-ticker-message
-                 class="form-text"
-                 style="display: none"
-            >
-                * Creating new asset
-            </div>
-
-            <div data-asset-ticker-extra-error-message="{{assetTickerFieldName}}" class="invalid-feedback"></div>
-
-        {{/if}}
-
-    </td>
-
-    <td class="text-wrap-break-word">
-
-        {{#if assetName}}
-            {{assetName}}
-        {{else}}
-            <input type="text"
-                   name="{{assetNameFieldName}}"
-                   placeholder="Asset name"
-                   aria-label="Asset name"
-                   autocomplete="off"
-                   class="form-control"
-                   value="{{assetName}}"
-                   style="display: none"
-                   maxlength="100"
-            />
-        {{/if}}
-
-    </td>
-
-</script>
+<div hx-get="/websrc/components/asset-composed-columns-input.html" hx-trigger="load"></div>
 
 <script type="text/javascript">
 
     HandlebarsUtils.registerPartialToContainer(
-        "datalist-container",
-        "template-monovalue-datalist"
+            "datalist-container",
+            "template-monovalue-datalist"
     );
 
     HandlebarsUtils.registerPartialToContainer(
-        "datalist-container",
-        "template-asset-datalist"
-    );
-
-    HandlebarsUtils.registerPartialToContainer(
-        "datalist-container",
-        "asset-composed-columns-input"
+            "datalist-container",
+            "template-asset-datalist"
     );
 
     HtmxInfra.addReadyConditionToWaitingElement(
-        "[data-portfolio-route-component]",
-        "partials-registered"
+            "[data-portfolio-route-component]",
+            "partials-registered"
     );
-
 </script>
