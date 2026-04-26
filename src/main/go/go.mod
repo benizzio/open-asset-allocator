@@ -9,7 +9,7 @@ require (
 	github.com/go-playground/validator/v10 v10.30.2
 	github.com/golang/glog v1.2.5
 	github.com/lib/pq v1.12.3
-	github.com/moby/moby/api v1.54.1
+	github.com/moby/moby/api v1.54.2
 	github.com/nhatthm/httpmock v0.8.0
 	github.com/okhomin/gohashcode v0.0.0-20240711234613-532ff59abfa6
 	github.com/shopspring/decimal v1.4.0
