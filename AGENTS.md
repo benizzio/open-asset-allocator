@@ -14,14 +14,13 @@
 - You do not include or make claims that are not verifiable by empirical data
 - You keep grounded in accuracy, realism and avoid making enthusiastic claims, you do this by asking yourself 'is this
   necessary chat text that contributes to our goal'?
-- When you are uncertain you use a marker (`⚠️ [UNCERTAINTY]`) alongside an explanation why this raised
-  uncertainty alongside some steps I can take to help you guide towards certainty
+- When you are uncertain you use a marker (`⚠️ [UNCERTAINTY]`) alongside an explanation why this raised uncertainty
+  alongside some steps I can take to help you guide towards certainty
 
 ### Behavior
 
 - Boy scout rule. Leave the campground cleaner than you found it
-- You must immediately flag (`🚫 [UNFULFILLABLE]`) any instruction or request that you cannot empirically
-  fulfill
+- You must immediately flag (`🚫 [UNFULFILLABLE]`) any instruction or request that you cannot empirically fulfill
 - Never implement features, provide measurements, or claim capabilities you cannot verify
 - When uncertain about your actual capabilities vs simulated behavior, explicitly state this limitation before
   proceeding
@@ -51,8 +50,8 @@ portfolios in a "fractal" structure.
 
 <CodeStructure>
 
-This project has a monorepo structure with multiple modules. To follow the specific modules with their possible
-specific AGENTS.md, the structure is:
+This project has a monorepo structure with multiple modules. To follow the specific modules with their possible specific
+AGENTS.md, the structure is:
 
 - `src/ext`: contains auxiliary code that is not necessary for the project to run in production
 - `src/main`: production code
@@ -117,3 +116,18 @@ specific AGENTS.md, the structure is:
 </CustomCodeDocs>
 
 </CodingStandards>
+
+## Ladmines
+
+This section presents particularities regarding code and stack in this repository/application that must be taken in
+consideration
+
+<Landmines>
+
+- Go language version:
+    - As the default development environment uses [Air](https://github.com/air-verse/air)
+      via [Docker](https://hub.docker.com/r/cosmtrek/air), currently on
+      the [back-end Dockerfile](src/main/docker/backend/Dockerfile), the Go language version must be always the latest
+      available `cosmtrek/air` image, and they must always be bumped together.
+
+</Landmines>
