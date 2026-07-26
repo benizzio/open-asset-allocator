@@ -1,6 +1,6 @@
 FROM cosmtrek/air:v1.67.3 AS dev
 
-RUN go install github.com/go-delve/delve/cmd/dlv@latest
+RUN go install github.com/go-delve/delve/cmd/dlv@v1.27.0
 
 FROM golang:1.26.5
 LABEL authors="benizzio, OpenCode"
