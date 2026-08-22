@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# Configures automated CodeRabbit reviews for this repository.
+# Co-authored by: OpenCode and Igor Benicio de Mesquita
+language: "en-US"
+
+reviews:
+  profile: assertive
+  high_level_summary: true
+  auto_review:
+    enabled: true
+    drafts: false
