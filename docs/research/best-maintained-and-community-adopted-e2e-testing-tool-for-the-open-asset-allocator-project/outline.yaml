@@ -1,0 +1,51 @@
+# Defines the candidates and execution settings for the E2E framework research.
+# Authored by: OpenCode
+topic: Best maintained and community-adopted E2E testing tool for the Open Asset Allocator project
+topic_dir: best-maintained-and-community-adopted-e2e-testing-tool-for-the-open-asset-allocator-project
+items:
+  - name: Playwright Test
+    scope: complete_e2e_framework
+    description: TypeScript and JavaScript framework with an integrated runner, managed browsers, automatic waiting, API requests, parallel execution, and diagnostic artifacts.
+  - name: Cypress
+    scope: complete_e2e_framework
+    description: TypeScript and JavaScript browser testing framework with an interactive runner, automatic retries, network controls, and an established ecosystem.
+  - name: WebdriverIO
+    scope: complete_e2e_framework
+    description: Node.js framework built around WebDriver and WebDriver BiDi, with configurable runners, services, reporters, and broad browser infrastructure support.
+  - name: Selenium WebDriver with a JavaScript test runner
+    scope: standards_based_stack
+    description: Standards-based browser automation combined with Mocha, Jest, or another JavaScript runner, included as the established cross-language baseline.
+  - name: Nightwatch.js
+    scope: complete_e2e_framework
+    description: Node.js E2E framework based on WebDriver with an integrated runner and browser automation tooling.
+  - name: TestCafe
+    scope: complete_e2e_framework
+    description: Node.js browser E2E framework with a self-contained runner, included to verify its current maintenance and community trajectory.
+  - name: Puppeteer with Vitest or Jest
+    scope: browser_automation_stack
+    description: Lower-level browser automation assembled into an E2E harness to assess whether simplicity outweighs missing integrated lifecycle features.
+  - name: Rod with Go testing
+    scope: browser_automation_stack
+    description: Go-native browser automation that could align with the existing integration-test infrastructure but requires more custom harness code.
+  - name: chromedp with Go testing
+    scope: browser_automation_stack
+    description: Chrome DevTools Protocol automation in Go, included to evaluate Go ecosystem alignment against browser coverage and harness overhead.
+  - name: CodeceptJS
+    scope: meta_framework
+    description: Node.js E2E meta-framework supporting Playwright, WebDriver, and Puppeteer through a scenario-oriented API.
+  - name: Testplane
+    scope: complete_e2e_framework
+    description: TypeScript and JavaScript WebDriver framework with automatic waiting, retries, sharding, debugging, and visual-regression support.
+  - name: Cucumber.js with Playwright or Playwright-BDD
+    scope: bdd_composition
+    description: Gherkin-based BDD composition included to evaluate stakeholder-readable specifications against additional lifecycle and step-definition complexity.
+  - name: Robot Framework Browser
+    scope: keyword_driven_framework
+    description: Playwright-backed keyword-driven framework that introduces Python and Robot Framework alongside the repository's existing runtimes.
+  - name: Grafana k6 Browser
+    scope: performance_first_framework
+    description: Chromium browser automation integrated with Web Vitals and performance measurements, included as a performance-first boundary candidate.
+execution:
+  batch_size: 5
+  items_per_agent: 1
+  output_dir: ./results

@@ -1,0 +1,237 @@
+{
+  "implementation_language": "The browser client is the selenium-webdriver JavaScript package running on Node.js; tests can be authored in JavaScript or TypeScript and use native promises with async/await. The broader Selenium monorepo is cross-language, Selenium Manager is implemented in Rust, browser drivers are vendor executables, and the selected runner baseline is Mocha on Node.js.",
+  "node_and_typescript_compatibility": "selenium-webdriver 4.47.0 declares Node.js >=22.0.0, and Mocha 11.8.0 declares ^18.18.0, ^20.9.0, or >=21.1.0, so Node 24 is directly supported. Mocha supports native ESM and Node's stable TypeScript type stripping; the repository currently has no package type declaration and can keep E2E tests separate from Parcel. [uncertain] Selenium's npm metadata does not declare bundled TypeScript types, the current DefinitelyTyped package is @types/selenium-webdriver 4.35.6 while Selenium is 4.47.0, and no primary source explicitly certifies this pairing against TypeScript 6.0.3. A small tsc and runtime spike is required for typed tests; plain JavaScript tests avoid this typing risk.",
+  "operating_system_support": "Supported locally on Windows, macOS, and Linux. The default x64 GitHub-hosted Ubuntu runner is suitable for Chrome/Chromium, Firefox, and Edge sessions. Selenium Manager ships Windows, Linux, and macOS binaries, but its official Linux ARM64 binary/browser management remains limited; official docker-selenium images support amd64 broadly and ARM64 for Chromium and Firefox, not Google Chrome or Edge. Native Safari requires macOS and cannot run on Ubuntu.",
+  "license_and_governance": "Selenium and selenium-webdriver use Apache-2.0; Mocha uses MIT. Both permit private and open-source repository use without a paid service. Selenium is a community project under the Software Freedom Conservancy with published Project Leadership and Technical Leadership committees, committer roles, public governance, sponsors, and open contribution processes. Commercial browser-cloud vendors sponsor or integrate with Selenium but do not control access to the local core stack.",
+  "installation_model": "A minimal local stack is npm install --save-dev selenium-webdriver mocha, plus an assertion library if Node's assert is not used and likely @types/selenium-webdriver for TypeScript. Selenium Manager is bundled and resolves, downloads, and caches compatible drivers when they are absent; it can also manage requested browser versions. Browsers and their Linux system libraries must still be installed or downloaded. An optional remote setup uses a pinned official selenium/standalone-chrome, standalone-firefox, or Grid image from Docker Hub or GHCR; Grid adds Java and container resources but is not required for local execution.",
+  "candidate_scope_and_layer": "A standards-based composed stack: Selenium WebDriver is a browser automation client and Grid is optional remote infrastructure, while Mocha supplies test discovery, hooks, retries, parallel workers, and reporting. It is not an integrated E2E framework and requires a project-owned harness for lifecycle, fixtures, assertions, artifacts, and configuration.",
+  "authoring_and_async_model": "Tests use ordinary JavaScript or TypeScript, native async/await, WebDriver objects, locators, and Mocha describe/it plus before/after hooks. There is no command queue or required DSL. Every asynchronous WebDriver operation must be awaited, and project helpers or page objects are advisable to centralize waits, reacquisition, browser options, and diagnostics.",
+  "build_pipeline_coupling": "Black-box Selenium sessions navigate to an HTTP URL and do not transform or instrument frontend source. They can test the Parcel development server through its existing proxy or the production Gin server serving the built Parcel output. E2E code can be a separate Node test package or dev-dependency set, so no Vite migration, Parcel plugin, or alternate frontend build is required.",
+  "testability_instrumentation_required": "No production script injection, relaxed content-security policy, framework-specific build hook, or special browser runtime is required. Stable unique IDs or data-test attributes would materially improve locator durability but are not mandatory. API fixture/reset endpoints, deterministic test data, and an external-market-data stub may be needed for reliable application tests; these are application testability facilities rather than Selenium requirements and should be disabled or protected outside test environments.",
+  "latest_stable_release": "selenium-webdriver 4.47.0, released 2026-08-10. The selected runner baseline observed was Mocha 11.8.0.",
+  "release_cadence": "Selenium JavaScript releases were frequent and regular: 4.40.0 on 2026-01-18, 4.41.0 on 2026-02-20, 4.42.0 on 2026-04-09, 4.43.0 on 2026-04-10, 4.44.0 on 2026-05-12, 4.45.0 on 2026-06-16, 4.46.0 on 2026-07-11, and 4.47.0 on 2026-08-10. Releases include browser/protocol compatibility, Selenium Manager, Grid, and language-binding work rather than only documentation changes.",
+  "repository_activity": "SeleniumHQ/selenium was pushed on 2026-08-22. The ten most recent commits inspected were dated 2026-08-21 or 2026-08-22 and covered build/release reliability, BiDi schemas, browser extensions, Ruby, Python, and flake recording. Multiple pull requests were integrated on those dates. This is high current activity in the shared monorepo, although not every commit affects the JavaScript binding.",
+  "issue_health": "The 2026-08-22 GitHub snapshot returned 99 open issues and 186 combined open issues/pull requests; recently updated issues showed maintainer comments and active work on Grid, Selenium Manager, language bindings, and architecture. [uncertain] This point-in-time sample does not establish open-issue trend, median first-response time, or median resolution time, and the shared tracker is much broader than selenium-webdriver.",
+  "roadmap_and_deprecation_risk": "The project is actively moving functionality from WebDriver Classic and temporary CDP access toward the W3C WebDriver BiDi standard while attempting backward compatibility. Selenium 4.47 published a Selenium 5 release charter and a BiDi implementation-boundary ADR. Browser-vendor protocol transitions can introduce binding changes, and CDP APIs are explicitly temporary and version-sensitive. The standards-based WebDriver surface lowers long-term lock-in, but advanced BiDi APIs are still expanding and need upgrade testing.",
+  "dependency_currency": "selenium-webdriver 4.47.0 was published using Node 24.14.1, requires Node >=22, and has four direct npm dependencies. It follows current Node LTS/Current support policy and released ten days before observation. Selenium Manager tracks browser and driver compatibility, while official Grid images publish pinned browser/driver combinations. TypeScript declarations are maintained separately on DefinitelyTyped, which is the main currency concern for typed authoring.",
+  "wrapper_upstream_lag": "The JavaScript binding is released from the Selenium monorepo, so there is no third-party Selenium wrapper lag. Selenium Manager resolves vendor drivers independently and can match installed/requested browsers. CDP support is limited to recent Chrome versions and can require Selenium updates; WebDriver BiDi is intended to remove that vendor-version coupling. A measurable wrapper gap exists for TypeScript declarations: @types/selenium-webdriver was 4.35.6 while the runtime was 4.47.0 at observation.",
+  "maintainer_concentration": "The npm package lists six maintainers and Selenium publishes multi-committee governance, committer, triager, funding, and succession structures. Recent commits inspected involved Titus Fortner and Diego Molina, with Titus dominating the small snapshot. [uncertain] The number and review distribution of currently active JavaScript-binding maintainers was not measured, so a binding-specific bus factor cannot be stated; organizational resilience is stronger than the sampled commit concentration suggests.",
+  "npm_downloads": "The official npm downloads API reported 1,820,837 direct downloads of selenium-webdriver for 2026-08-14 through 2026-08-20.",
+  "github_metrics": "On 2026-08-22, SeleniumHQ/selenium had 34,385 stars, 8,716 forks, and 186 combined open issues/pull requests; the issue query separately reported 99 open issues. npm reported approximately 1,164 dependent packages for selenium-webdriver. [uncertain] A current contributor count and GitHub dependency-graph dependent count were not captured, and repository metrics aggregate all Selenium languages, Grid, and shared infrastructure rather than JavaScript E2E usage alone.",
+  "ecosystem_usage": "Selenium is the established cross-language WebDriver baseline with official bindings, Grid, docker-selenium, browser-vendor driver support, hosted-grid integrations, page-object guidance, and extensive third-party reporters and utilities. Maintained integrations include official Selenium Docker images and Deque's @axe-core/webdriverjs. Its broad use spans functional testing and automation, so ecosystem size is strong even though a minimal JavaScript stack must select and maintain its own companion packages.",
+  "community_support": "Official documentation covers WebDriver, JavaScript APIs, Selenium Manager, Grid, BiDi, browser options, troubleshooting, and test practices. Support channels include GitHub issues, Selenium Chat/community channels, conferences, and a large body of Stack Overflow and vendor material. Documentation quality varies by language tab, and current advanced examples are not always equally complete for JavaScript.",
+  "adoption_trend": "Current adoption is high: 1.82 million weekly npm downloads, more than 34,000 repository stars, frequent 2026 releases, and active official Docker work. [uncertain] No normalized historical time series was collected, so the evidence supports sustained large adoption but not a quantified growing, flat, or declining trend.",
+  "adoption_metric_normalization": "The download metric is for the direct npm package selenium-webdriver over the exact seven-day window 2026-08-14 through 2026-08-20. It includes E2E tests, libraries, transitive installs, bots, CI, and non-test browser automation and does not identify Mocha usage. GitHub metrics are for the SeleniumHQ/selenium monorepo across Java, JavaScript, Python, Ruby, .NET, Grid, Manager, and shared code; npm dependents are package-level and are not equivalent to production repositories or users.",
+  "browser_engines": "Selenium drives installed Google Chrome and Microsoft Edge (Chromium), Mozilla Firefox (Gecko), and native Apple Safari through their vendor drivers; it also supports Chromium variants through browser-specific options. There is no bundled generic WebKit engine. Linux/GitHub Ubuntu can cover Chrome/Chromium, Edge, and Firefox; genuine Safari coverage requires a macOS machine or remote macOS service. Legacy Internet Explorer support exists but is irrelevant to this project.",
+  "browser_protocol": "Core automation uses the W3C WebDriver protocol through vendor drivers, locally or through Grid. WebDriver BiDi adds a standards-based WebSocket channel for console, script, browsing-context, and network events. Selenium also exposes temporary Chrome DevTools Protocol access for Chromium-specific gaps, but CDP is explicitly version-sensitive and not cross-browser. Advanced capabilities must be tested against each target browser's current BiDi implementation.",
+  "headless_and_headed_modes": "Chrome/Edge and Firefox support both normal headed sessions for local debugging and vendor headless modes for CI, configured through browser arguments such as --headless=new for Chrome. Safari execution is headed/native and platform constrained. The same tests can select mode through project configuration; Selenium itself does not provide an interactive runner UI.",
+  "browser_version_management": "Selenium Manager discovers installed browsers, obtains compatible drivers, downloads requested browser versions where supported, and caches artifacts. Browser versions can be requested through options, while official Docker image tags pin browser, driver, Grid, Java, and OS combinations. Reproducibility requires pinning selenium-webdriver and image/browser versions; relying on preinstalled or auto-updated host browsers allows environmental drift. Linux ARM64 has reduced browser availability.",
+  "parallel_browser_support": "Each WebDriver object represents one browser session. Mocha can run test files in a worker-process pool with --parallel and --jobs, GitHub Actions can provide a browser matrix, and Selenium Grid can schedule concurrent sessions across browser/version/platform nodes. Browser projects, sharding policy, database-safe grouping, and result merging are custom configuration rather than first-class Selenium JavaScript concepts.",
+  "mobile_emulation": "Chromium options can set device metrics, viewport, touch, and user agent for responsive/mobile emulation, and generic window sizing covers viewport tests. Coverage is browser-specific and does not equal a real mobile browser or device. Real Android/iOS testing normally adds Appium or a device cloud, which is outside this candidate's core stack.",
+  "real_browser_fidelity": "Selenium's principal strength is controlling installed vendor browsers through their native drivers rather than a framework-bundled approximation. Chrome, Edge, Firefox, and Safari results therefore reflect those actual products, subject to automation flags and headless differences. Native Safari on macOS is materially different from a WebKit build on Linux; Selenium correctly requires the former instead of claiming Linux WebKit as Safari coverage.",
+  "environment_determinism_controls": "Window size, device metrics, user agent, language arguments/preferences, browser profiles, certificates, page-load strategy, and timeouts can be configured. Permissions, geolocation, locale, timezone, and network behavior are available to varying degrees through browser options, CDP, or expanding BiDi APIs, but support is not uniform across JavaScript/browser combinations. There is no integrated cross-browser clock, randomness, animation, or reduced-motion fixture; tests must use browser preferences, application APIs, executeScript, CSS injection, environment variables, or server-side controls and document browser-specific gaps.",
+  "dynamic_dom_synchronization": "Selenium waits for configured document readiness on direct navigation and performs basic interactability checks during element actions, but it does not automatically retry every locator/action/assertion until an HTMX swap settles. HTMX requests, lazy partials, and asynchronous Handlebars rendering require explicit conditions such as elementLocated, elementIsVisible, text/url predicates, or custom waits. Stored element references become stale when HTMX replaces nodes and must be reacquired, making locator-returning helpers important.",
+  "routing_support": "WebDriver can navigate directly to deep links, read URLs, wait for URL/title/DOM conditions, use back/forward/refresh, and inspect window history through script execution. Navigo pushState/popstate flows are normal browser behavior. Reliability depends on a custom route-ready condition after client navigation and cleanup that opens a fresh session or resets route/storage between tests; Selenium has no Navigo-specific integration.",
+  "locator_model": "Built-in strategies include ID, name, CSS, XPath, link text, tag name, and relative locators. Stable unique IDs and compact CSS selectors are officially encouraged. Unlike modern integrated runners, core Selenium has no first-class strict getByRole, getByLabel, or resilient visible-text locator API; accessible locators require CSS/XPath conventions or helper libraries, duplicate matches are not rejected by default, and HTMX-replaced elements must be located again.",
+  "form_interaction": "WebDriver click, clear, sendKeys, active-element switching, and the W3C Actions API exercise browser input, focus, keyboard, pointer, wheel, and touch-like behavior. Blur can be produced with Tab or a real click, and native validation state/properties can be asserted. Hidden inputs are intentionally not user-interactable; their synchronized values can be read as DOM properties, while executeScript should be reserved for inspection because setting values by script bypasses user fidelity. Dynamic rows require explicit waits and fresh locators.",
+  "canvas_and_download_support": "Chart.js canvas can be validated through application-visible labels/data, DOM/ARIA summaries, Chart.js state exposed to executeScript, and targeted screenshots; Selenium only supplies screenshots, not semantic Chart.js or pixel-diff assertions. Downloads can be triggered, configured to a directory, and handled through Grid's downloadable-files capability, but official guidance notes that core WebDriver exposes no progress wait and recommends using an HTTP client with session cookies for file-content verification. Robust completion checks, checksums, cleanup, and visual baselines are custom.",
+  "network_and_api_access": "Tests can seed and reset REST fixtures with Node fetch or another HTTP library alongside browser steps. WebDriver BiDi can observe requests and console events and provides growing request/response interception and authentication handling; CDP remains a Chromium-only fallback. A controlled Yahoo Finance response can be supplied by an application-side stub/proxy or BiDi interception where target browsers support it. There is no integrated APIRequest fixture, route registry, HAR mocking layer, or guaranteed identical interception behavior across all browsers.",
+  "same_origin_support": "Because Selenium operates outside the page and navigates to a configured URL, it can test the consolidated Gin production origin or Parcel's development origin/proxy without injecting code or changing CORS. Tests should use the externally visible origin consistently. Remote browser containers must address the application by a reachable host/service name rather than localhost inside the browser container.",
+  "test_isolation": "Selenium recommends a new WebDriver session per test; vendor drivers normally create a clean browser profile, providing cookies/storage isolation at the cost of startup time. It has no lightweight browser-context primitive, so sharing a session is faster but risks leakage. Disposable PostgreSQL state, unique fixture identifiers, transaction/reset APIs, and worker-to-database allocation must be implemented by the project; Mocha parallel workers do not coordinate database access.",
+  "external_server_model": "The driver naturally targets an independently started application through any HTTP base URL. A BASE_URL environment variable and helper are sufficient for local, production-build, Docker Compose, or remote deployments. Selenium and Mocha do not include a built-in webServer process manager, port allocator, readiness probe, or baseURL fixture.",
+  "application_lifecycle": "Mocha global fixtures/hooks or repository scripts can run the build, invoke Docker Compose, wait for Flyway/backend readiness, and tear services down. The repository's Compose base already gates the backend on a healthy PostgreSQL service and successful migration service, which helps. HTTP readiness polling, per-worker database disposal, signal handling, log capture, and guaranteed docker compose down --volumes in CI remain custom harness/workflow code.",
+  "visual_regression_workflow": "Core Selenium captures page and element screenshots but has no baseline store, update/review command, masking, tolerance engine, per-browser snapshot convention, or HTML diff viewer. An open-source image-diff library or a separate tool such as BackstopJS can be composed; commercial services such as Applitools are optional. The project must stabilize fonts, viewport, device scale, animations, data, and Chart.js rendering and maintain OS/browser-specific baselines.",
+  "accessibility_audit_integration": "Deque's maintained open-source @axe-core/webdriverjs accepts a Selenium WebDriver instance and can audit documents and frames, so axe violations can be asserted and emitted as JSON. This is a strong community integration, not Selenium core. Accessibility-tree/ARIA snapshot assertions and polished open-source report formatting require additional libraries or custom output, and automated axe checks do not replace manual accessibility testing.",
+  "waiting_model": "Direct navigation waits for a selected document.readyState strategy, element actions perform limited interactability checks, implicit waits affect element lookup, and explicit driver.wait conditions can poll visibility, presence, staleness, text, title, URL, alerts, or custom predicates. The default implicit wait is zero. Selenium explicitly warns not to mix implicit and explicit waits. There is no locator-wide auto-wait plus retrying assertion layer, so project helpers must encode HTMX request/swap and application-ready conditions.",
+  "flake_controls": "Mocha provides suite/test timeouts, retries, serial-by-default execution, grep filters, and repeated invocation through scripts. Selenium provides explicit synchronization primitives, page/script/implicit timeouts, fresh-session guidance, and Grid/browser logs. There is no built-in trace replay, automatic action/assertion retry, deterministic clock, retry classification, or repeat-each option; fixed sleeps should be prohibited and flaky reproduction loops must be scripted.",
+  "isolation_model": "The safest model is a fresh browser session and profile per test, paired with unique or reset database state. Serial suites can intentionally share domain state, but browser cookies, localStorage, IndexedDB, windows, and input state must then be cleared explicitly. Mocha hooks can enforce quit in finally/afterEach, while database serial groups should run outside Mocha parallel mode or use an explicit lock/allocation strategy.",
+  "resource_usage": "A local session requires Node, one vendor driver process, and one real browser; fresh sessions and multi-browser parallelism multiply CPU and memory. selenium-webdriver itself unpacks to about 18.5 MB, while browsers dominate disk. Official standalone Docker images are multi-gigabyte and video recording adds about one CPU and one video container per browser according to docker-selenium guidance. [uncertain] No Open Asset Allocator execution-time, CPU, or peak-memory benchmark was run, so comparative resource cost cannot be quantified.",
+  "parallelism_controls": "Mocha is serial by default and offers --parallel plus a --jobs limit at test-file granularity; this makes jobs=1 a simple database-safe default. Browser/version matrices and future sharding can be implemented in GitHub Actions or Grid, with unique database/schema allocation per job. Parallel mode has reporter and .only limitations and shares process-level state between files reused by a worker, so safe grouping and cleanup are project responsibilities.",
+  "flake_observability": "Mocha can expose currentRetry and reporter events, allowing first-attempt failures and eventual passes to be recorded, and Selenium artifacts can be captured on each failed attempt. However, neither core package supplies retry classification, quarantine metadata, historical trend storage, or a local flake dashboard. Repeat runs, JSON/JUnit enrichment, first-failure artifact preservation, and trend aggregation must be added to the harness or CI.",
+  "failure_artifacts": "Core WebDriver provides screenshots, element screenshots, page source/script inspection, driver logs, and BiDi console/JavaScript/network events where supported. Official docker-selenium can add session video, but it requires a separate FFmpeg container, substantial resources, and does not support headless video recording. Automatic per-failure collection, HAR generation, trace timelines, artifact naming, retention, and attachment to a test result are not integrated and must be implemented.",
+  "debugging_tools": "Headed mode, browser developer tools, breakpoints through Node's inspector, Mocha inspect, longer/pause waits, and VNC/noVNC for official browser containers are available. A developer can run a single test and inspect the live browser. There is no Selenium-native step inspector, time-travel replay, trace viewer, or automatic pause-on-failure experience comparable to an integrated E2E runner.",
+  "test_generation": "Selenium WebDriver core has no recorder. The separate Selenium IDE browser extension can record browser interactions and export code, but generated locators, waits, fixtures, and page objects require review and refactoring before production use.",
+  "reporters": "Mocha includes console and machine-readable reporters such as spec, dot, TAP, JSON, JSON stream, and XUnit-style output and supports custom reporters. Common community additions include mocha-junit-reporter for JUnit and Mochawesome for HTML. GitHub annotations, merged shard reports, screenshots, logs, and retry metadata require reporter selection or custom integration; some third-party reporters are incompatible with Mocha parallel mode.",
+  "documentation_quality": "Selenium has extensive maintained documentation, generated JavaScript API references, troubleshooting pages, examples, release notes, and architectural guidance; Mocha documents hooks, TypeScript, ESM, retries, parallel mode, and CLI behavior. The main weakness is fragmentation across language tabs, WebDriver Classic, CDP, BiDi, Grid, Docker, and runner-specific material, with some advanced capabilities better documented in languages other than JavaScript.",
+  "local_workflow": "Developers can run one file with npx mocha path/to/test, filter with --grep, select a browser through project config or SELENIUM_BROWSER, run headed by default, enable headless arguments for CI, and debug with mocha inspect or Node --inspect-brk. Mocha watch mode exists but has native ESM limitations. Repeating only failures and preserving a failed browser require scripts/hooks; there is no interactive test list or dedicated UI.",
+  "failure_log_correlation": "BiDi can stream browser console, JavaScript, and network events with test-controlled timestamps, while Mocha hooks can attach the current test ID. Backend, Flyway, PostgreSQL, and Docker Compose logs can be captured with timestamps in an always-running post step. Selenium does not correlate these sources automatically; the harness must define a run/test correlation ID, clock basis, log boundaries, file naming, and collection after startup or test failure.",
+  "artifact_data_exposure": "Screenshots, page source, video, network bodies/headers, console logs, downloadable files, browser profiles, and serialized storage can expose portfolio data, API responses, cookies, authorization headers, and credentials. Selenium offers selective event handling but no universal artifact redaction pipeline. CI must avoid persisting profiles/storage state, redact headers and bodies before writing logs, mask sensitive UI regions where possible, use synthetic data, limit retention/access, and never upload unreviewed HAR or full traces by default.",
+  "official_ci_support": "Selenium documents Grid as suitable for CI/CD, maintains official Selenium Manager binaries and official Docker/Grid images on Docker Hub and GHCR, and supplies headless browser examples. There is no required or comprehensive Selenium-specific GitHub Action; a normal workflow uses setup-node, npm ci, app startup/readiness, and npm test, optionally with a pinned Grid service/container. GitHub-hosted Ubuntu x64 is a supported practical target.",
+  "browser_caching": "npm's cache can cover JavaScript packages, Selenium Manager caches drivers and managed browsers under its cache, and pinned Docker images benefit from runner/container-layer caches where available. The project must choose cache keys that include OS, architecture, Selenium version, browser channel/version, and lockfile. Blindly restoring stale drivers risks browser mismatch; downloading through Selenium Manager on a cold runner is simpler but adds network time and egress dependency.",
+  "artifact_integration": "Screenshots, JSON/JUnit/HTML reports, page source, BiDi logs, and Compose logs can be written to a known artifacts directory and uploaded with actions/upload-artifact under an if: always() condition. Docker video volumes can be uploaded similarly. Selenium does not generate or index the bundle automatically, so per-test naming, retention, compression, secret review, and report links require workflow and harness code.",
+  "sharding_and_matrix_support": "GitHub Actions can matrix over Chrome/Firefox/Edge and a project-defined shard index; Mocha can divide work by files through parallel workers but has no deterministic cross-job sharding or native report merger. Selenium Grid distributes browser sessions but not test ownership. The project must generate shard manifests, prevent duplicate retry execution, assign isolated databases, and merge JUnit/JSON/HTML output with custom or community tooling.",
+  "container_compatibility": "Official Selenium standalone/Grid containers can run alongside the repository's Docker Compose application on GitHub-hosted Linux. The easiest baseline is a host-run Node test process controlling a host browser against the published application port. With a remote browser container, localhost refers to that container, so it must join a shared network or use a reachable host/service address; shm_size, image pinning, health checks, and Compose-project naming also require configuration.",
+  "failure_cleanup": "Tests must always await driver.quit in finally or afterEach, close BiDi subscriptions, and remove temporary downloads/profiles. GitHub Actions should place docker compose down --volumes --remove-orphans and log collection in if: always() steps. Mocha hooks may not run after a hard cancellation or killed process, so CI-level cleanup is still necessary. Selenium provides session deletion but no application/database cleanup coordinator.",
+  "open_source_completeness": "Browser automation, local/remote execution, Grid, Selenium Manager, Mocha, screenshots, BiDi logging/network access, Docker images, JUnit/JSON reporting, image comparison libraries, and axe-core integration are available under open-source licenses. A paid cloud is not required, although the project must assemble several packages and custom facilities to reach an integrated E2E experience.",
+  "optional_cloud_dependency": "BrowserStack, Sauce Labs, TestMu/LambdaTest, Applitools, and other hosted products can provide remote browsers, native Safari/device coverage, visual review, analytics, and dashboards. They are optional. Local browsers/Grid, open-source screenshot diffing, local reports, and axe-core cover the mandatory baseline, but native Safari in Linux CI requires macOS capacity or a remote service rather than Selenium alone.",
+  "migration_cost": "WebDriver concepts and the W3C protocol are portable across languages, vendors, Grid providers, and many frameworks, which limits infrastructure lock-in. Test code still binds directly to Selenium's asynchronous API, explicit waits, page objects, Mocha hooks, and a project-specific fixture/artifact harness. Migrating to an integrated runner would require rewriting locators, waits, fixtures, and diagnostics but can preserve scenario intent and backend fixture APIs.",
+  "security_and_supply_chain": "selenium-webdriver 4.47.0 has four direct npm dependencies, registry signatures, and an npm provenance attestation; version 4.47 also reports a generated Selenium Manager SBOM and NOTICE. Mocha 11.8.0 likewise has registry signatures/provenance but a larger dependency tree. Cold setup may download browser/driver binaries from external vendor endpoints, and optional Docker images greatly expand the image footprint. Pin lockfiles and image digests/tags, verify npm integrity/provenance, scan images and dependencies, control Selenium Manager egress/cache/telemetry settings, and update promptly for browser security releases.",
+  "custom_harness_burden": "High. The project must own browser factories, typed configuration, base URL and readiness, explicit HTMX/Navigo waits, page objects, REST fixtures, Yahoo Finance replacement, PostgreSQL reset/allocation, Compose lifecycle, retries, screenshot/log capture, report attachments, visual comparison, secret redaction, matrices/shards, and cancellation-safe cleanup. Selenium and Mocha provide flexible primitives but deliberately do not integrate these concerns.",
+  "capability_delivery_tier": {
+    "core": "W3C browser control, real input, navigation/history, DOM locators, explicit waits, screenshots, JavaScript execution, browser options, local/remote sessions, Grid, Selenium Manager, and expanding BiDi events/interception.",
+    "runner": "Mocha test discovery, async hooks, serial execution, timeouts, retries, grep, parallel workers, and basic reporters.",
+    "official_adjacent": "Official docker-selenium images, Grid observability, VNC/noVNC, and optional FFmpeg video containers.",
+    "maintained_third_party": "@axe-core/webdriverjs, JUnit/HTML reporters, assertion libraries, and image-diff tools.",
+    "custom_code": "Application lifecycle/readiness, API/database fixtures, HTMX synchronization helpers, route mocks, download completion/content checks, artifact correlation/redaction, visual workflow, deterministic sharding, and flake trends.",
+    "optional_paid_cloud": "Hosted browser/device/Safari capacity, visual review, and analytics dashboards."
+  },
+  "ai_execution_boundary": "No AI or LLM is required to author, execute, debug, or report Selenium/Mocha tests. Optional AI assistance can be limited to offline authoring or code review; committed deterministic tests remain the CI source of truth. CI therefore needs no model egress, model credentials, nondeterministic runtime decisions, or per-test AI cost.",
+  "sources": [
+    {
+      "title": "selenium-webdriver npm metadata 4.47.0",
+      "url": "https://registry.npmjs.org/selenium-webdriver/latest",
+      "evidence": "Version, Node >=22 engine, license, four direct dependencies, npm maintainers, publish runtime, package size, signatures, provenance, and SBOM-related release context."
+    },
+    {
+      "title": "npm downloads API for selenium-webdriver",
+      "url": "https://api.npmjs.org/downloads/point/last-week/selenium-webdriver",
+      "evidence": "1,820,837 downloads for 2026-08-14 through 2026-08-20."
+    },
+    {
+      "title": "Selenium 4.47 release",
+      "url": "https://www.selenium.dev/blog/2026/selenium-4-47-released/",
+      "evidence": "Release date, cross-language release scope, BiDi work, Selenium 5 charter, Manager SBOM/NOTICE, and build updates."
+    },
+    {
+      "title": "Selenium downloads",
+      "url": "https://www.selenium.dev/downloads/",
+      "evidence": "Current stable Selenium release."
+    },
+    {
+      "title": "Selenium WebDriver JavaScript API",
+      "url": "https://www.selenium.dev/selenium/docs/api/javascript/",
+      "evidence": "Node support policy, Builder configuration, Selenium Manager integration, and remote-server support."
+    },
+    {
+      "title": "Selenium Manager documentation",
+      "url": "https://www.selenium.dev/documentation/selenium_manager/",
+      "evidence": "Bundled automated driver/browser management, caching, platforms, configuration, and Linux ARM64 limitation."
+    },
+    {
+      "title": "Selenium waiting strategies",
+      "url": "https://www.selenium.dev/documentation/webdriver/waits/",
+      "evidence": "Navigation readiness, implicit and explicit waits, JavaScript expected conditions, and warning against mixed waits."
+    },
+    {
+      "title": "Selenium common errors",
+      "url": "https://www.selenium.dev/documentation/webdriver/troubleshooting/errors/",
+      "evidence": "Stale element behavior and the need to relocate references after dynamic DOM replacement."
+    },
+    {
+      "title": "Selenium WebDriver BiDi",
+      "url": "https://www.selenium.dev/documentation/webdriver/bidi/",
+      "evidence": "Standards-based bidirectional protocol, console/network/script events, migration direction, and evolving implementation."
+    },
+    {
+      "title": "Selenium BiDi network",
+      "url": "https://www.selenium.dev/documentation/webdriver/bidi/w3c/network/",
+      "evidence": "Current JavaScript network interception and authentication examples."
+    },
+    {
+      "title": "Selenium browser options and sessions",
+      "url": "https://www.selenium.dev/documentation/webdriver/drivers/options/",
+      "evidence": "Browser/version capabilities, page-load strategies, and browser-specific configuration."
+    },
+    {
+      "title": "Selenium file downloads guidance",
+      "url": "https://www.selenium.dev/documentation/test_practices/discouraged/file_downloads/",
+      "evidence": "No download-progress API and recommendation to use an HTTP client for content verification."
+    },
+    {
+      "title": "Selenium remote WebDriver",
+      "url": "https://www.selenium.dev/documentation/webdriver/drivers/remote_webdriver/",
+      "evidence": "Remote file upload/download handling and Grid downloads capability."
+    },
+    {
+      "title": "Selenium project structure and governance",
+      "url": "https://www.selenium.dev/project/",
+      "evidence": "Community governance, leadership committees, roles, sponsors, and open contribution model."
+    },
+    {
+      "title": "SeleniumHQ/selenium GitHub repository",
+      "url": "https://github.com/SeleniumHQ/selenium",
+      "evidence": "34,385 stars, 8,716 forks, 186 open issue/PR count, Apache-2.0, current commits, pull requests, and issue activity observed through GitHub APIs on 2026-08-22."
+    },
+    {
+      "title": "Official docker-selenium repository",
+      "url": "https://github.com/SeleniumHQ/docker-selenium",
+      "evidence": "Official images, Grid topology, amd64/ARM64 browser limitations, resource sizing, VNC, and video behavior."
+    },
+    {
+      "title": "Official Grid images on GHCR",
+      "url": "https://www.selenium.dev/blog/2026/selenium-grid-docker-images-are-now-mirrored-to-ghcr/",
+      "evidence": "Official GHCR mirror and pinned-image usage for CI."
+    },
+    {
+      "title": "Mocha npm metadata 11.8.0",
+      "url": "https://registry.npmjs.org/mocha/latest",
+      "evidence": "Version, Node engine, MIT license, dependency and provenance metadata."
+    },
+    {
+      "title": "Mocha TypeScript, CLI, and parallel-mode documentation",
+      "url": "https://mochajs.org/explainers/typescript/",
+      "evidence": "Native TypeScript stripping, ESM, async hooks, retries, timeouts, reporters, filters, parallel workers, and limitations; related pages are https://mochajs.org/running/cli/ and https://mochajs.org/features/parallel-mode/."
+    },
+    {
+      "title": "@types/selenium-webdriver npm package",
+      "url": "https://www.npmjs.com/package/@types/selenium-webdriver",
+      "evidence": "Separate TypeScript declarations at 4.35.6, last updated 2026-05-28."
+    },
+    {
+      "title": "Deque axe-core WebDriverJS integration",
+      "url": "https://www.npmjs.com/package/@axe-core/webdriverjs",
+      "evidence": "Maintained Selenium WebDriverJS accessibility integration and frame-aware audit API."
+    },
+    {
+      "title": "Open Asset Allocator frontend package",
+      "url": "src/main/web-static/package.json",
+      "evidence": "TypeScript 6.0.3, Parcel 2.16.4, HTMX 2.0.10, Navigo 8.11.1, Handlebars 4.7.9, Chart.js 4.5.1, and current npm module setup."
+    },
+    {
+      "title": "Open Asset Allocator build and Compose lifecycle",
+      "url": "src/main/docker/docker-compose-base.yml",
+      "evidence": "PostgreSQL health check, Flyway completion dependency, backend dependency ordering, and external ports; also build.sh, start.sh, destroy.sh, and Makefile."
+    }
+  ],
+  "observed_at": "2026-08-22",
+  "confidence": {
+    "high": "Release/version, Node engine, license, weekly npm downloads, repository stars/forks, browser/protocol model, installation model, explicit-wait behavior, Docker availability, and absence of integrated runner/lifecycle/artifact facilities are supported by primary sources.",
+    "moderate": "Project-specific fit, BiDi cross-browser practicality, adoption direction, issue health, typed authoring, diagnostics assembly effort, and weighted score combine current documentation with engineering analysis and need a repository spike.",
+    "low": "Open Asset Allocator runtime resource use and the complete empirical spike result were not measured."
+  },
+  "hard_gate_result": {
+    "overall": "PASS for inclusion as the standards-based baseline, with substantial custom-harness conditions.",
+    "node_24": "PASS: selenium-webdriver requires Node >=22 and Mocha supports Node 24.",
+    "typescript_6": "PASS WITH RISK: JavaScript execution is compatible; typed tests need a tsc spike because declarations are separately versioned.",
+    "linux_and_github_ubuntu": "PASS on x64 for Chrome/Chromium, Firefox, and Edge; native Safari is unavailable.",
+    "parcel_black_box_build": "PASS: testing is URL-based and requires no frontend transform or instrumentation.",
+    "htmx_handlebars_dynamic_dom": "PASS WITH CUSTOM WAITS: explicit conditions and stale-element reacquisition are required.",
+    "navigo_deep_links_and_history": "PASS WITH CUSTOM READY CONDITIONS.",
+    "forms_blur_focus_and_validation": "PASS through WebDriver interactions and Actions API.",
+    "chartjs_canvas": "PASS WITH CUSTOM SEMANTIC OR SCREENSHOT ASSERTIONS.",
+    "downloads": "PASS WITH CUSTOM COMPLETION AND CONTENT VERIFICATION; core has no progress event.",
+    "api_fixtures_and_yahoo_replacement": "PASS WITH NODE HTTP HELPERS, APP STUB/PROXY, OR BIDI WHERE SUPPORTED.",
+    "postgresql_isolation": "PASS WITH PROJECT-OWNED RESET/ALLOCATION AND SERIALIZATION.",
+    "external_server_and_docker_compose": "PASS WITH CUSTOM STARTUP, READINESS, NETWORKING, AND TEARDOWN.",
+    "failure_diagnostics": "PASS AT MINIMUM FOR SCREENSHOTS/LOGS, BUT TRACES, CORRELATION, AND AUTOMATIC BUNDLING ARE CUSTOM.",
+    "open_source_local_ci": "PASS without a paid cloud."
+  },
+  "deal_breakers": "No absolute incompatibility prevents use as a baseline. Material reasons not to select it as the primary integrated E2E solution are the absence of locator/action/assertion auto-waiting, no lightweight browser contexts, no built-in application lifecycle or API fixture client, no integrated trace/video/HTML artifact workflow, no first-class visual regression, no Linux Safari/WebKit target, separate and lagging TypeScript declarations, and high custom-harness burden. Native Safari additionally needs macOS or optional remote capacity.",
+  "project_fit_score": {
+    "score": "74.25/100 [uncertain]",
+    "formula": "Application fit 6.5/10 x 30 = 19.50; maintenance 9.0/10 x 20 = 18.00; reliability 6.0/10 x 15 = 9.00; adoption 9.5/10 x 15 = 14.25; CI experience 7.0/10 x 10 = 7.00; diagnostics 5.5/10 x 5 = 2.75; cost and risk 7.5/10 x 5 = 3.75; total 74.25.",
+    "interpretation": "Strong maintenance, adoption, standards alignment, real-browser fidelity, and open-source completeness are offset by manual synchronization and the amount of lifecycle, fixture, isolation, visual, and diagnostic infrastructure the repository must own. The score is provisional because no empirical project spike or resource benchmark was run."
+  },
+  "recommendation": "Viable alternative, and retain it as the established cross-language standards baseline rather than the leading recommendation for this repository. It can cover the required user journeys on real Chrome/Edge/Firefox and native Safari infrastructure, works against the existing Parcel/Gin build without instrumentation, and is exceptionally mature and adopted. Choose it primarily when W3C portability, existing Grid/cloud infrastructure, or cross-language consistency outweigh integrated JavaScript E2E ergonomics; otherwise the high harness and diagnostics burden is a significant disadvantage.",
+  "empirical_project_spike_result": "[uncertain] No repository proof was executed. Required proof remains: HTMX node replacement with stale-reference recovery; Navigo direct deep link and back/forward cleanup; form focus, blur, hidden-value synchronization, and native validation; semantic Chart.js assertion plus stable screenshot; local and remote download completion/content checks; REST seed/reset and Yahoo Finance replacement; disposable PostgreSQL reset under serial and parallel settings; and a forced failure that captures screenshot, browser console/network events, backend/Flyway/Compose logs, retry identity, and secret-safe artifacts.",
+  "uncertain": [
+    "node_and_typescript_compatibility",
+    "issue_health",
+    "maintainer_concentration",
+    "github_metrics",
+    "adoption_trend",
+    "resource_usage",
+    "project_fit_score",
+    "empirical_project_spike_result"
+  ]
+}
