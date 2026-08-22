@@ -1,0 +1,278 @@
+# Defines the evidence and evaluation fields for the E2E framework research.
+# Authored by: OpenCode
+topic: Best maintained and community-adopted E2E testing tool for the Open Asset Allocator project
+field_categories:
+  - category: project_and_compatibility
+    description: Basic candidate properties and compatibility with the repository's languages, build, and execution environment.
+    fields:
+      - name: implementation_language
+        description: Languages used to implement the framework and author tests, including required runtimes.
+        detail_level: brief
+      - name: node_and_typescript_compatibility
+        description: Verified compatibility with Node 24, TypeScript 6, npm, and the repository's frontend module setup.
+        detail_level: detailed
+      - name: operating_system_support
+        description: Support for local Linux environments and GitHub-hosted Ubuntu runners, including architecture limitations.
+        detail_level: moderate
+      - name: license_and_governance
+        description: License, owner, governance model, commercial stewardship, and constraints on repository use.
+        detail_level: moderate
+      - name: installation_model
+        description: Required packages, browser binaries, system libraries, Docker images, and installation commands.
+        detail_level: moderate
+      - name: candidate_scope_and_layer
+        description: Classification as a complete E2E framework, browser driver, composed stack, abstraction layer, keyword framework, or performance-first tool.
+        detail_level: brief
+      - name: authoring_and_async_model
+        description: Test authoring model such as native async and await, command queues, Gherkin steps, keyword syntax, or a framework-specific DSL.
+        detail_level: moderate
+      - name: build_pipeline_coupling
+        description: Whether black-box tests can use the built Parcel application or require source transforms, Vite, instrumentation, or an alternate frontend pipeline.
+        detail_level: detailed
+      - name: testability_instrumentation_required
+        description: Production changes required for reliable testing, including test IDs, special routes, injected scripts, build hooks, or relaxed security policies.
+        detail_level: detailed
+
+  - category: maintenance_health
+    description: Evidence that the candidate is actively maintained and likely to remain compatible with current browsers and runtimes.
+    fields:
+      - name: latest_stable_release
+        description: Latest stable version and release date observed during research.
+        detail_level: brief
+      - name: release_cadence
+        description: Frequency, consistency, and significance of releases during the research period.
+        detail_level: moderate
+      - name: repository_activity
+        description: Recent commits, merged pull requests, active branches, and contributor activity.
+        detail_level: moderate
+      - name: issue_health
+        description: Open issue trend, response times, resolution activity, and maintainer participation.
+        detail_level: moderate
+      - name: roadmap_and_deprecation_risk
+        description: Published roadmap, major architectural transitions, compatibility warnings, deprecations, or evidence of reduced maintenance.
+        detail_level: detailed
+      - name: dependency_currency
+        description: Support for current Node.js, Go, TypeScript, browser, WebDriver, and CI environment releases as applicable.
+        detail_level: detailed
+      - name: wrapper_upstream_lag
+        description: Delay before wrappers adopt new upstream browser drivers, Playwright, WebdriverIO, Node.js, and TypeScript releases.
+        detail_level: moderate
+      - name: maintainer_concentration
+        description: Active human maintainers, organizational backing, review distribution, funding, succession planning, and bus-factor risk.
+        detail_level: detailed
+
+  - category: community_adoption
+    description: Comparable evidence of current usage, ecosystem depth, and availability of community knowledge.
+    fields:
+      - name: npm_downloads
+        description: Package-specific npm download count for an explicitly recorded and consistent recent period.
+        detail_level: brief
+      - name: github_metrics
+        description: Repository stars, forks, contributors, dependents, and recent activity observed on a stated date.
+        detail_level: brief
+      - name: ecosystem_usage
+        description: Evidence of production adoption, maintained integrations, plugins, examples, and organizational usage.
+        detail_level: moderate
+      - name: community_support
+        description: Availability and activity of documentation, discussions, issue help, Stack Overflow answers, and troubleshooting material.
+        detail_level: moderate
+      - name: adoption_trend
+        description: Evidence that adoption and community interest are growing, stable, or declining, with vanity metrics treated cautiously.
+        detail_level: detailed
+      - name: adoption_metric_normalization
+        description: Exact package, registry, measurement window, direct or transitive usage limitations, and whether metrics cover the E2E capability or a broader project.
+        detail_level: detailed
+
+  - category: browser_and_runtime_coverage
+    description: Browsers, protocols, execution modes, and deterministic environment controls supported by the candidate.
+    fields:
+      - name: browser_engines
+        description: Supported Chromium, Firefox, WebKit, Chrome, Edge, and Safari variants with relevant limitations.
+        detail_level: detailed
+      - name: browser_protocol
+        description: Use of Chrome DevTools Protocol, WebDriver, WebDriver BiDi, or framework-specific transports and the resulting constraints.
+        detail_level: moderate
+      - name: headless_and_headed_modes
+        description: Support for CI headless execution and local headed debugging.
+        detail_level: moderate
+      - name: browser_version_management
+        description: Browser installation, version pinning, updates, system dependencies, and caching behavior.
+        detail_level: moderate
+      - name: parallel_browser_support
+        description: Browser projects, matrices, sharding, workers, and controls for running selected browser combinations.
+        detail_level: moderate
+      - name: mobile_emulation
+        description: Device, viewport, touch, user-agent, and other mobile emulation capabilities relevant to responsive testing.
+        detail_level: moderate
+      - name: real_browser_fidelity
+        description: Distinction between bundled engines and installed browsers, including why WebKit execution is not equivalent to native Safari testing.
+        detail_level: detailed
+      - name: environment_determinism_controls
+        description: Control over clock, timezone, locale, viewport, device scale, permissions, geolocation, randomness, animations, and reduced motion.
+        detail_level: detailed
+
+  - category: application_fit
+    description: Ability to exercise this repository's complete HTMX, Navigo, Handlebars, Chart.js, Gin, and PostgreSQL application reliably.
+    fields:
+      - name: dynamic_dom_synchronization
+        description: Automatic waiting and locator resilience across HTMX requests, DOM swaps, lazy partial loading, and asynchronous Handlebars rendering.
+        detail_level: detailed
+      - name: routing_support
+        description: Reliability with Navigo client-side routing, browser history changes, route cleanup, and direct SPA deep links.
+        detail_level: detailed
+      - name: locator_model
+        description: Support for accessible labels, visible text, stable IDs, strict matching, and reacquisition after elements are replaced.
+        detail_level: detailed
+      - name: form_interaction
+        description: Realistic input, keyboard, blur, focus, hidden-value synchronization, dynamic rows, and native validation behavior.
+        detail_level: detailed
+      - name: canvas_and_download_support
+        description: Approaches for validating Chart.js canvas output and browser-side downloads without depending only on pixel assertions.
+        detail_level: detailed
+      - name: network_and_api_access
+        description: REST fixture seeding, request observation, interception, response mocking, and controlled Yahoo Finance replacement.
+        detail_level: detailed
+      - name: same_origin_support
+        description: Operation against the consolidated production server and Parcel's development proxy without requiring CORS changes.
+        detail_level: moderate
+      - name: test_isolation
+        description: Browser contexts, storage isolation, unique test data, and compatibility with a disposable PostgreSQL database per suite or worker.
+        detail_level: detailed
+      - name: external_server_model
+        description: Ability to run tests against an independently started application through a configurable base URL and ports.
+        detail_level: moderate
+      - name: application_lifecycle
+        description: Built-in or conventional support for build commands, Docker Compose startup, Flyway completion, API readiness polling, and teardown.
+        detail_level: detailed
+      - name: visual_regression_workflow
+        description: Baseline creation and review, masking, tolerances, font and animation stabilization, per-browser baselines, CI diffs, and Chart.js suitability.
+        detail_level: detailed
+      - name: accessibility_audit_integration
+        description: Compatibility with axe-core or equivalent audits, accessibility-tree assertions, ARIA snapshots, and open-source reporting.
+        detail_level: moderate
+
+  - category: reliability
+    description: Controls for deterministic execution, failure reduction, isolation, and safe use of parallel workers.
+    fields:
+      - name: waiting_model
+        description: Automatic actionability checks, assertion polling, navigation waits, network waits, and available explicit synchronization primitives.
+        detail_level: detailed
+      - name: flake_controls
+        description: Retries, timeout scopes, deterministic waits, repeat execution, and mechanisms for reproducing intermittent failures.
+        detail_level: detailed
+      - name: isolation_model
+        description: Per-test browser state and support for serial scenarios that depend on database state without leaking browser data.
+        detail_level: detailed
+      - name: resource_usage
+        description: Browser, CPU, memory, disk, installation-size, and execution-time overhead for local and CI use.
+        detail_level: moderate
+      - name: parallelism_controls
+        description: Ability to prevent unsafe database concurrency while retaining suite-level parallelism and future CI sharding.
+        detail_level: detailed
+      - name: flake_observability
+        description: First-attempt failure tracking, retry classification, quarantine, repeat runs, and trend reporting available without a hosted dashboard.
+        detail_level: detailed
+
+  - category: diagnostics_and_developer_experience
+    description: Failure evidence, debugging tools, reporting, documentation, and everyday local test workflows.
+    fields:
+      - name: failure_artifacts
+        description: Screenshots, videos, execution traces, network logs, browser console output, and retention controls.
+        detail_level: detailed
+      - name: debugging_tools
+        description: Inspector, headed mode, pause support, time travel, step debugging, and IDE integration.
+        detail_level: moderate
+      - name: test_generation
+        description: Recorder, code generation, locator generation, and generated-code maintainability.
+        detail_level: brief
+      - name: reporters
+        description: Console, HTML, JUnit, JSON, and GitHub-compatible reporters with customization support.
+        detail_level: moderate
+      - name: documentation_quality
+        description: Accuracy, completeness, conceptual guidance, examples, troubleshooting, and upgrade documentation.
+        detail_level: moderate
+      - name: local_workflow
+        description: Ease of running one test, one browser, an interactive session, headed debugging, and repeated failing tests.
+        detail_level: detailed
+      - name: failure_log_correlation
+        description: Collection and timestamp correlation for browser errors, failed requests, backend logs, Flyway output, and Docker Compose service logs.
+        detail_level: detailed
+      - name: artifact_data_exposure
+        description: Risk that traces, videos, screenshots, HAR files, storage state, or reports expose credentials or portfolio data, including redaction options.
+        detail_level: detailed
+
+  - category: github_actions_fit
+    description: Effort and reliability of running the framework in this repository's GitHub Actions pipelines.
+    fields:
+      - name: official_ci_support
+        description: Maintained GitHub Actions, container images, and official guidance for GitHub-hosted Linux runners.
+        detail_level: moderate
+      - name: browser_caching
+        description: Supported and recommended caching strategy for browser binaries and framework dependencies.
+        detail_level: moderate
+      - name: artifact_integration
+        description: Effort required to upload HTML reports, traces, screenshots, videos, logs, and other failure evidence.
+        detail_level: moderate
+      - name: sharding_and_matrix_support
+        description: Distribution across jobs, browsers, and shards, including report merging and retry behavior.
+        detail_level: detailed
+      - name: container_compatibility
+        description: Operation alongside Docker Compose on GitHub-hosted runners, including networking and container-image options.
+        detail_level: detailed
+      - name: failure_cleanup
+        description: Reliable browser, application, database, and Docker Compose cleanup after cancellation or failed tests.
+        detail_level: detailed
+
+  - category: cost_and_risk
+    description: Open-source availability, service dependencies, lock-in, security posture, and repository-specific maintenance burden.
+    fields:
+      - name: open_source_completeness
+        description: Whether all required local and CI capabilities are available under an open-source license.
+        detail_level: moderate
+      - name: optional_cloud_dependency
+        description: Features restricted to paid dashboards or cloud services and whether equivalent local alternatives exist.
+        detail_level: detailed
+      - name: migration_cost
+        description: Lock-in from framework-specific syntax, APIs, abstractions, hosted services, and generated artifacts.
+        detail_level: moderate
+      - name: security_and_supply_chain
+        description: Release provenance, dependency footprint, vulnerability response, update process, and runtime network requirements.
+        detail_level: detailed
+      - name: custom_harness_burden
+        description: Repository code required for fixtures, readiness, Docker Compose lifecycle, database disposal, service mocking, logging, and artifacts.
+        detail_level: detailed
+      - name: capability_delivery_tier
+        description: Whether each required capability is core, an official plugin, a community plugin, custom code, or a paid-cloud feature.
+        detail_level: detailed
+      - name: ai_execution_boundary
+        description: Separation of optional AI-assisted authoring from LLM-dependent CI behavior, including determinism, egress, credentials, cost, and non-AI fallback.
+        detail_level: moderate
+
+  - category: evidence_and_decision
+    description: Source quality, uncertainty handling, project-specific validation, scoring, and final recommendation.
+    fields:
+      - name: sources
+        description: Official documentation, releases, repositories, package registries, independent studies, and other evidence used for each conclusion.
+        detail_level: detailed
+      - name: observed_at
+        description: Date on which volatile maintenance, release, and adoption evidence was collected.
+        detail_level: brief
+      - name: confidence
+        description: Confidence level for each significant conclusion based on source quality and agreement.
+        detail_level: moderate
+      - name: hard_gate_result
+        description: Pass or fail result for every mandatory project requirement with supporting evidence.
+        detail_level: detailed
+      - name: deal_breakers
+        description: Concrete incompatibilities or risks that justify excluding the candidate.
+        detail_level: detailed
+      - name: project_fit_score
+        description: Weighted score using application fit at 30 percent, maintenance at 20 percent, reliability at 15 percent, adoption at 15 percent, CI experience at 10 percent, diagnostics at 5 percent, and cost and risk at 5 percent.
+        detail_level: detailed
+      - name: recommendation
+        description: Classification as recommended, viable alternative, or excluded, with concise evidence-based reasoning.
+        detail_level: detailed
+      - name: empirical_project_spike_result
+        description: Result of a proof covering HTMX replacement, Navigo deep links, form blur and validation, Chart.js, downloads, API fixtures, Yahoo Finance replacement, PostgreSQL reset, and forced-failure diagnostics.
+        detail_level: detailed
+uncertain: []
