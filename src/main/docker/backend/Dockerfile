@@ -1,4 +1,4 @@
-FROM cosmtrek/air:v1.67.3 AS dev
+FROM cosmtrek/air:v1.67.4 AS dev
 
 RUN go install github.com/go-delve/delve/cmd/dlv@v1.27.0
 
