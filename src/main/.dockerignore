@@ -1,0 +1,7 @@
+# Excludes host-generated development state from the monolith build context.
+# Authored by: OpenCode
+web-static/node_modules
+web-static/.parcel-cache
+web-static/dist
+go/tmp
+go/vendor

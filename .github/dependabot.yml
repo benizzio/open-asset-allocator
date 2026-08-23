@@ -16,10 +16,18 @@ updates:
     directory: "/src/main/web-static"
     schedule:
       interval: "weekly"
+  # Groups shared Go and Node base-image updates so related build stages stay aligned.
+  # Co-authored by: OpenCode and Igor Benicio de Mesquita
   - package-ecosystem: "docker"
-    directory: "/src/main/docker/backend"
+    directories:
+      - "/src/main/docker/backend"
+      - "/src/main/docker/frontend"
+      - "/src/main/docker/monolith"
     schedule:
       interval: "weekly"
+    groups:
+      shared-base-images:
+        group-by: "dependency-name"
   - package-ecosystem: "docker-compose"
     directory: "/src/main/docker"
     schedule:

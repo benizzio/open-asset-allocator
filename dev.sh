@@ -1,4 +1,6 @@
 #!/bin/zsh
+# Starts the development stack and keeps Parcel logs in the foreground.
+# Co-authored by: OpenCode and Igor Benicio de Mesquita
 
 script_dir=$(dirname "$0")
 project_root=$(realpath "$script_dir")
@@ -8,10 +10,7 @@ dev_db_dir="$project_root"/target/postgres-dev-data
 export POSTGRES_DEV_DATA_DIR="$dev_db_dir"
 
 cd "$project_root"/src/main/docker || exit
-if ! docker compose -f docker-compose-dev.yml up -d; then
-  echo "Failed to start docker compose for backend"
+if ! docker compose -f docker-compose-dev.yml up --attach frontend; then
+  echo "Failed to start development Docker Compose stack"
   exit 1
 fi
-
-cd "$project_root"/src/main/web-static || exit
-npm run dev

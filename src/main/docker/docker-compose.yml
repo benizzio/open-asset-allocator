@@ -1,11 +1,13 @@
 name: open-asset-allocator
 
 services:
-  backend:
+  # Runs the immutable frontend distribution and API in one production process.
+  # Co-authored by: OpenCode and Igor Benicio de Mesquita
+  monolith:
     extends:
       file: docker-compose-base.yml
-      service: backend
-    image: open-asset-allocator:latest
+      service: application
+    image: open-asset-allocator-monolith:latest
     ports:
       - "80:8080"
 

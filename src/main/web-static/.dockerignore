@@ -1,0 +1,5 @@
+# Excludes host-generated Parcel state from the frontend development build context.
+# Authored by: OpenCode
+node_modules
+.parcel-cache
+dist
