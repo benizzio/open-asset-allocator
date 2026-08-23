@@ -38,7 +38,7 @@ dev-logs:
 # Tails Parcel logs from the development frontend container.
 # Co-authored by: OpenCode and Igor Benicio de Mesquita
 dev-frontend-logs:
-	@docker logs -f open-asset-allocator-dev-frontend-1
+	@POSTGRES_DEV_DATA_DIR="$(CURDIR)/target/postgres-dev-data" docker compose -f src/main/docker/docker-compose-dev.yml logs -f frontend
 
 # Prints the logs for the development migration engine
 dev-migration-logs:
@@ -51,7 +51,7 @@ dev-db-logs:
 # Tails the logs for the production monolith.
 # Co-authored by: OpenCode and Igor Benicio de Mesquita
 logs:
-	@docker logs -f open-asset-allocator-monolith-1
+	@POSTGRES_DATA_DIR="$(HOME)/.open-asset-allocator/postgres-data" docker compose -f src/main/docker/docker-compose.yml logs -f monolith
 
 migration-logs:
 	@docker logs open-asset-allocator-migration-engine-1
