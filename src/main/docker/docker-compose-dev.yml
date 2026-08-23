@@ -1,6 +1,58 @@
 name: open-asset-allocator-dev
 
+# Configures the split local development environment with container-local Parcel state.
+# Co-authored by: OpenCode and Igor Benicio de Mesquita
 services:
+  frontend:
+    build:
+      context: ../web-static
+      dockerfile: ../docker/frontend/Dockerfile
+      target: dev
+    environment:
+      API_PROXY_TARGET: http://backend:8080/
+    depends_on:
+      backend:
+        condition: service_started
+    ports:
+      - "8000:8000"
+    volumes:
+      - type: bind
+        source: ../web-static/package.json
+        target: /frontend/package.json
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ../web-static/.parcelrc
+        target: /frontend/.parcelrc
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ../web-static/.proxyrc.js
+        target: /frontend/.proxyrc.js
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ../web-static/root.html
+        target: /frontend/root.html
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ../web-static/tsconfig.json
+        target: /frontend/tsconfig.json
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ../web-static/websrc
+        target: /frontend/websrc
+        read_only: true
+        bind:
+          create_host_path: false
+
   backend:
     extends:
       file: docker-compose-base.yml
@@ -11,6 +63,8 @@ services:
         target: dev
     # working_dir value has to be the same of mapped volume
     working_dir: /project-package
+    environment:
+      API_ONLY: "true"
     ports:
       - "8080:8080"
       - "2345:2345"
