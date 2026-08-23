@@ -35,6 +35,11 @@ dev:
 dev-logs:
 	@docker logs -f open-asset-allocator-dev-backend-1
 
+# Tails Parcel logs from the development frontend container.
+# Co-authored by: OpenCode and Igor Benicio de Mesquita
+dev-frontend-logs:
+	@docker logs -f open-asset-allocator-dev-frontend-1
+
 # Prints the logs for the development migration engine
 dev-migration-logs:
 	@docker logs open-asset-allocator-dev-migration-engine-1
@@ -43,9 +48,10 @@ dev-migration-logs:
 dev-db-logs:
 	@docker logs -f open-asset-allocator-dev-db-1
 
-# Tails the logs for the backend
+# Tails the logs for the production monolith.
+# Co-authored by: OpenCode and Igor Benicio de Mesquita
 logs:
-	@docker logs -f open-asset-allocator-backend-1
+	@docker logs -f open-asset-allocator-monolith-1
 
 migration-logs:
 	@docker logs open-asset-allocator-migration-engine-1

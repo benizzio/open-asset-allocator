@@ -56,11 +56,11 @@ services:
   backend:
     extends:
       file: docker-compose-base.yml
-      service: backend
+      service: application
     build:
-        context: .
-        dockerfile: ./backend/Dockerfile
-        target: dev
+      context: ../go
+      dockerfile: ../docker/backend/Dockerfile
+      target: dev
     # working_dir value has to be the same of mapped volume
     working_dir: /project-package
     environment:

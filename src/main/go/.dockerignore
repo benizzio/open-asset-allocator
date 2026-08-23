@@ -1,0 +1,4 @@
+# Excludes generated backend directories from the standalone build context.
+# Authored by: OpenCode
+tmp
+vendor

@@ -1,12 +1,12 @@
 name: open-asset-allocator-base
 
 services:
-  backend:
+  # Shares application dependencies for API-only development and the production monolith.
+  # Co-authored by: OpenCode and Igor Benicio de Mesquita
+  application:
     env_file: .env
     environment:
       - PORT=8080
-      - WEB_STATIC_SOURCE_REL_PATH=/websrc
-      - ROOT_HTML_FILENAME=root.html
     depends_on:
       db:
         condition: service_healthy
