@@ -20,6 +20,17 @@ updates:
     directory: "/src/main/docker/backend"
     schedule:
       interval: "weekly"
+  # Groups shared base-image updates so both Node build stages stay aligned.
+  # Co-authored by: OpenCode and Igor Benicio de Mesquita
+  - package-ecosystem: "docker"
+    directories:
+      - "/src/main/docker/frontend"
+      - "/src/main/docker/monolith"
+    schedule:
+      interval: "weekly"
+    groups:
+      shared-base-images:
+        group-by: "dependency-name"
   - package-ecosystem: "docker-compose"
     directory: "/src/main/docker"
     schedule:
