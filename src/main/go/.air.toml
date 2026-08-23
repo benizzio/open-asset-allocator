@@ -1,3 +1,5 @@
+# Configures Air and Delve for backend hot reload debugging.
+# Co-authored by: OpenCode and Igor Benicio de Mesquita
 root = "."
 testdata_dir = "testdata"
 tmp_dir = "tmp"
@@ -16,7 +18,7 @@ tmp_dir = "tmp"
   include_dir = []
   include_ext = ["go", "tpl", "tmpl", "html"]
   include_file = []
-  kill_delay = "0s"
+  kill_delay = "2s"
   log = "build-errors.log"
   poll = false
   poll_interval = 0
@@ -24,7 +26,7 @@ tmp_dir = "tmp"
   pre_cmd = []
   rerun = false
   rerun_delay = 500
-  send_interrupt = false
+  send_interrupt = true
   stop_on_error = true
 
 [color]
