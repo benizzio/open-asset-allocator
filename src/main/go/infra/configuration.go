@@ -43,8 +43,33 @@ func (config *Configuration) String() string {
 	return langext.StructString(config)
 }
 
-// ReadConfig reads process environment settings into the application configuration.
-// For example, API_ONLY=true configures Gin without static-content routes.
+// ReadConfig reads the supported process environment settings into a new application
+// configuration each time it is called. Callers must set environment variables before
+// invoking ReadConfig.
+//
+// The supported environment settings and defaults are:
+//   - PORT defaults to an empty string.
+//   - WEB_STATIC_CONTENT_PATH defaults to an empty string.
+//   - WEB_STATIC_SOURCE_REL_PATH defaults to an empty string.
+//   - ROOT_HTML_FILENAME defaults to an empty string.
+//   - RDBMS_DRIVER_NAME defaults to an empty string.
+//   - RDBMS_URL defaults to an empty string.
+//   - API_ONLY defaults to false and is true only when its value is exactly the
+//     lowercase, case-sensitive string "true"; every other value is false.
+//   - YAHOO_FINANCE_SEARCH_URL defaults to
+//     https://query2.finance.yahoo.com/v1/finance/search when empty.
+//   - YAHOO_FINANCE_CHART_URL defaults to
+//     https://query2.finance.yahoo.com/v8/finance/chart/ when empty.
+//
+// The web static source path is derived by concatenating WEB_STATIC_CONTENT_PATH and
+// WEB_STATIC_SOURCE_REL_PATH. The API root path is fixed at /api and is not configurable.
+// For example, with PORT=8080 and API_ONLY=true set in the process environment before
+// the call:
+//
+//	config := ReadConfig()
+//	fmt.Printf("%s %t\n", config.GinServerConfig.Port, config.GinServerConfig.ApiOnly)
+//	// Output: 8080 true
+//
 // Co-authored by: OpenCode and Igor Benicio de Mesquita
 func ReadConfig() *Configuration {
 

@@ -12,7 +12,7 @@ import (
 // when it is set to true. For example, API_ONLY=true omits static-content routes.
 // Authored by: OpenCode
 func TestReadConfigAPIOnly(t *testing.T) {
-	testCases := []struct {
+	var testCases = []struct {
 		name    string
 		value   string
 		expects bool
