@@ -105,7 +105,7 @@ frontend state; `make destroy` removes the container and clears that state. Deve
 
 > [!NOTE]
 > Current pre-alpha version requires data ingestion or manual data insertion on the PostgreSQL database.
-> To access the stored portfolio go to `http://localhost/portfolio/<portfolio id>`.
+> To access the stored portfolio go to `http://localhost:8000/portfolio/<portfolio id>`.
 
 ## Roadmap(ish)
 
