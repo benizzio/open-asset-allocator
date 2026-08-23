@@ -43,6 +43,9 @@ func (config *Configuration) String() string {
 	return langext.StructString(config)
 }
 
+// ReadConfig reads process environment settings into the application configuration.
+// For example, API_ONLY=true configures Gin without static-content routes.
+// Co-authored by: OpenCode and Igor Benicio de Mesquita
 func ReadConfig() *Configuration {
 
 	var tempWebStaticContentPath = os.Getenv("WEB_STATIC_CONTENT_PATH")
@@ -66,7 +69,7 @@ func ReadConfig() *Configuration {
 			rootHTMLFilename:       os.Getenv("ROOT_HTML_FILENAME"),
 			webStaticSourcePath:    tempWebStaticContentPath + tempWebStaticSourceRelPath,
 			apiRootPath:            "/api",
-			ApiOnly:                false,
+			ApiOnly:                os.Getenv("API_ONLY") == "true",
 		},
 		RdbmsConfig: RDBMSConfiguration{
 			DriverName: os.Getenv("RDBMS_DRIVER_NAME"),

@@ -11,9 +11,6 @@ COPY src-go ./src
 WORKDIR /backend/src
 RUN go mod download && CGO_ENABLED=0 GOOS=linux go build -o ../bin/open-asset-allocator
 
-WORKDIR /frontend
-COPY dist-web-static ./dist
-
-ENV WEB_STATIC_CONTENT_PATH=/frontend/dist
+ENV API_ONLY=true
 
 CMD ["/backend/bin/open-asset-allocator"]
