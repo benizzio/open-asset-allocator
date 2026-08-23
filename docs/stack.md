@@ -12,4 +12,4 @@
         - decimals for finance: https://github.com/shopspring/decimal
 - Frontend:
     - Routing
-      - [navigo](https://github.com/krasimir/navigo) 
+      - [navigo](https://github.com/krasimir/navigo)

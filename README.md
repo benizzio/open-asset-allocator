@@ -65,21 +65,47 @@ levels of the hierarchical structure.
 
 ## Installing and running (pre-alpha)
 
+<!-- Co-authored by: OpenCode and Igor Benicio de Mesquita -->
+
 > [!IMPORTANT]
 > The pre-alpha version requires higher technical knowledge about software to use.
-> Pre-requisites: `git`, `docker`, `docker-compose`, `npm (version in .nvmrc)`, `make`.
+> The application workflows require `git`, Docker Engine, Docker Compose, and `make`.
 > Verify if there is a provisioning script for your OS in the `provisioning` folder. If not, I welcome PRs to add them.
 
-1. Clone the repository: `git clone https://github.com/benizzio/open-asset-allocator.git`
-2. build the application: `make`
-3. start the services: `make start`
-4. application will be available at in [localhost](http://localhost)
+### Production workflow
 
-Configuration can be done in [.env](src/main/docker/.env)
+Production uses one `open-asset-allocator-monolith:latest` application image. The image contains the Go backend and an
+immutable Parcel distribution, which Gin serves with the API from the same process and origin.
+
+1. Clone the repository: `git clone https://github.com/benizzio/open-asset-allocator.git`.
+2. Build the monolith image: `make` or `make build`.
+3. Start the monolith, PostgreSQL, and Flyway services: `make start`.
+4. Open [http://localhost](http://localhost).
+
+Run `make stop` to retain stopped containers or `make destroy` to remove application containers and networks. Production
+PostgreSQL data remains under `~/.open-asset-allocator/postgres-data`. Application configuration is read from
+[src/main/docker/.env](src/main/docker/.env).
+
+### Development workflow
+
+Development runs Parcel and the backend in separate containers while retaining PostgreSQL and Flyway:
+
+1. Build the frontend and backend development images: `make dev-build`.
+2. Start the development stack with Parcel logs attached: `make dev`.
+3. Open [http://localhost:8000](http://localhost:8000).
+
+Parcel proxies `/api` requests to the API-only backend container. Backend HTTP and Delve remain available at
+`http://localhost:8080` and `localhost:2345`. Edits under `src/main/web-static/websrc` are visible to Parcel without an
+image rebuild or Compose restart.
+
+Frontend `node_modules`, `.parcel-cache`, and `dist` directories exist only in the frontend container writable layer.
+They are not host bind mounts or persistent Docker volumes. `make stop` retains the stopped container and its temporary
+frontend state; `make destroy` removes the container and clears that state. Development PostgreSQL data remains under
+`target/postgres-dev-data`.
 
 > [!NOTE]
 > Current pre-alpha version requires data ingestion or manual data insertion on the PostgreSQL database.
-> To access the stored portfolio go to `http://localhost/portfolio/<portfolio id>`
+> To access the stored portfolio go to `http://localhost/portfolio/<portfolio id>`.
 
 ## Roadmap(ish)
 
