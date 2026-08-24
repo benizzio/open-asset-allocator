@@ -33,6 +33,11 @@ updates:
     groups:
       shared-base-images:
         group-by: "dependency-name"
+  - package-ecosystem: "docker"
+    directory: "/src/main/docker/e2e"
+    schedule:
+      interval: "weekly"
+    # Authored by: OpenCode
   - package-ecosystem: "docker-compose"
     directory: "/src/main/docker"
     schedule:

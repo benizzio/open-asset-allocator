@@ -8,7 +8,8 @@
     "test:chromium": "playwright test --project=chromium",
     "test:firefox": "playwright test --project=firefox",
     "test:list": "playwright test --list",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "validate:playwright": "node scripts/validate-playwright-version.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.62.1",

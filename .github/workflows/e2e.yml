@@ -1,0 +1,61 @@
+# Validates E2E Playwright images before the full E2E workflow is added.
+# Authored by: OpenCode
+name: E2E Image Validation
+permissions:
+  contents: read
+on:
+  pull_request:
+    paths:
+      - ".github/dependabot.yml"
+      - ".github/workflows/e2e.yml"
+      - "src/main/docker/e2e/**"
+      - "src/test/e2e/**"
+
+jobs:
+  validate-images:
+    name: Playwright Runner Images
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Create E2E artifact directory
+        run: mkdir -p target/e2e-results
+
+      - name: Build runner image
+        run: docker build --target runner --file src/main/docker/e2e/Dockerfile --tag open-asset-allocator-e2e-runner:validation src/test/e2e
+
+      - name: Validate runner package and image versions
+        run: >-
+          docker run --rm --init --user "$(id -u):$(id -g)"
+          --volume "$GITHUB_WORKSPACE/src/main/docker/e2e/Dockerfile:/tmp/Dockerfile:ro"
+          open-asset-allocator-e2e-runner:validation
+          npm run validate:playwright -- --dockerfile=/tmp/Dockerfile
+
+      - name: Type-check and list tests as the invoking user
+        run: >-
+          docker run --rm --init --user "$(id -u):$(id -g)"
+          --volume "$GITHUB_WORKSPACE/target/e2e-results:/workspace/target/e2e-results"
+          open-asset-allocator-e2e-runner:validation
+          sh -c 'npm run typecheck && npm run test:list && touch /workspace/target/e2e-results/runner-owned && test "$(stat -c %u /workspace/target/e2e-results/runner-owned)" = "$(id -u)"'
+
+      - name: Build debug image
+        run: docker build --target debug --file src/main/docker/e2e/Dockerfile --tag open-asset-allocator-e2e-debug:validation src/test/e2e
+
+      - name: Verify debug noVNC service
+        run: |
+          docker run --detach --init --name e2e-debug-validation --publish 127.0.0.1::7900 open-asset-allocator-e2e-debug:validation sh -c 'sleep 30'
+          port="$(docker port e2e-debug-validation 7900/tcp | cut -d: -f2)"
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent "http://127.0.0.1:${port}/vnc.html" >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs e2e-debug-validation
+          exit 1
+
+      - name: Remove debug container
+        if: always()
+        run: docker rm --force e2e-debug-validation 2>/dev/null || true
