@@ -16,6 +16,11 @@ updates:
     directory: "/src/main/web-static"
     schedule:
       interval: "weekly"
+  - package-ecosystem: "npm"
+    directory: "/src/test/e2e"
+    schedule:
+      interval: "weekly"
+    # Authored by: OpenCode
   # Groups shared Go and Node base-image updates so related build stages stay aligned.
   # Co-authored by: OpenCode and Igor Benicio de Mesquita
   - package-ecosystem: "docker"
