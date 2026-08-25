@@ -12,10 +12,20 @@ ENV HOME=/workspace/.home \
 COPY package.json package-lock.json ./
 RUN npm ci
 
-COPY . ./
+COPY scripts/validate-playwright-version.mjs ./scripts/
 RUN npm run validate:playwright -- --image-version=1.62.1 && \
     mkdir -p /workspace/.home /workspace/.npm /workspace/.tmp /workspace/target/e2e-results && \
     chmod -R 0777 /workspace/.home /workspace/.npm /workspace/.tmp /workspace/target
+
+# Provides the immutable non-root image used by headless local and CI runs.
+FROM dependencies AS runner
+
+COPY playwright.config.ts tsconfig.json ./
+COPY support ./support
+COPY tests ./tests
+
+USER pwuser
+CMD ["npm", "test"]
 
 # Adds a virtual display and noVNC only for local headed browser inspection.
 FROM dependencies AS debug
@@ -25,12 +35,12 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends novnc x11vnc xvfb && \
     rm -rf /var/lib/apt/lists/*
 
+COPY playwright.config.ts tsconfig.json ./
+COPY support ./support
+COPY tests ./tests
+COPY scripts/start-debug.sh ./scripts/
+
 EXPOSE 7900
 USER pwuser
 ENTRYPOINT ["./scripts/start-debug.sh"]
 CMD ["npm", "test", "--", "--headed"]
-
-# Provides the minimal non-root image used by headless local and CI runs.
-FROM dependencies AS runner
-USER pwuser
-CMD ["npm", "test"]

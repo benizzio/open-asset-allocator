@@ -7,11 +7,12 @@ RUN go install github.com/go-delve/delve/cmd/dlv@v1.27.0
 FROM golang:1.26.5
 LABEL authors="benizzio, OpenCode"
 
-WORKDIR /backend
-COPY . ./src
-
 WORKDIR /backend/src
-RUN go mod download && CGO_ENABLED=0 GOOS=linux go build -o ../bin/open-asset-allocator
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . ./
+RUN CGO_ENABLED=0 GOOS=linux go build -o ../bin/open-asset-allocator
 
 ENV API_ONLY=true
 
