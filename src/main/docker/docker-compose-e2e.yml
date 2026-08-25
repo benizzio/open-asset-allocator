@@ -1,0 +1,56 @@
+# Defines shared disposable infrastructure for containerized Playwright E2E tests.
+# Authored by: OpenCode
+name: open-asset-allocator-e2e
+
+services:
+  db:
+    extends:
+      file: docker-compose-base.yml
+      service: db
+    restart: "no"
+    networks:
+      - e2e
+    volumes:
+      - e2e_postgres_data:/var/lib/postgresql/data
+
+  migration-engine:
+    extends:
+      file: docker-compose-base.yml
+      service: migration-engine
+    restart: "no"
+    networks:
+      - e2e
+
+  e2e-runner:
+    build:
+      context: ../../test/e2e
+      dockerfile: ../../main/docker/e2e/Dockerfile
+      target: runner
+    image: open-asset-allocator-e2e-runner:e2e
+    init: true
+    restart: "no"
+    user: "${E2E_UID:-1000}:${E2E_GID:-1000}"
+    environment:
+      E2E_ARTIFACTS_DIR: /workspace/target/e2e-results
+      PGDATABASE: postgres
+      PGHOST: db
+      PGPASSWORD: ${POSTGRES_PASSWORD:-localadmin}
+      PGPORT: "5432"
+      PGUSER: ${POSTGRES_USER:-postgres}
+    depends_on:
+      db:
+        condition: service_healthy
+      migration-engine:
+        condition: service_completed_successfully
+    networks:
+      - e2e
+    volumes:
+      - type: bind
+        source: ../../../target/e2e-results
+        target: /workspace/target/e2e-results
+
+networks:
+  e2e:
+
+volumes:
+  e2e_postgres_data:

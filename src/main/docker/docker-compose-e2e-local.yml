@@ -1,0 +1,150 @@
+# Adds the local split application and interactive endpoints to the shared E2E stack.
+# Authored by: OpenCode
+x-e2e-runner-local: &e2e-runner-local
+  environment:
+    BASE_URL: http://frontend:8000
+  depends_on:
+    frontend:
+      condition: service_started
+  ports:
+    - target: 9323
+      host_ip: "${E2E_HOST_IP:-127.0.0.1}"
+      published: "${E2E_REPORT_PORT:-9323}"
+      protocol: tcp
+    - target: 9324
+      host_ip: "${E2E_HOST_IP:-127.0.0.1}"
+      published: "${E2E_UI_PORT:-9324}"
+      protocol: tcp
+  volumes:
+    # Keep image-installed node_modules available while supporting rapid test edits.
+    - type: bind
+      source: ../../test/e2e/playwright.config.ts
+      target: /workspace/src/test/e2e/playwright.config.ts
+      read_only: true
+      bind:
+        create_host_path: false
+    - type: bind
+      source: ../../test/e2e/tsconfig.json
+      target: /workspace/src/test/e2e/tsconfig.json
+      read_only: true
+      bind:
+        create_host_path: false
+    - type: bind
+      source: ../../test/e2e/support
+      target: /workspace/src/test/e2e/support
+      read_only: true
+      bind:
+        create_host_path: false
+    - type: bind
+      source: ../../test/e2e/tests
+      target: /workspace/src/test/e2e/tests
+      read_only: true
+      bind:
+        create_host_path: false
+
+services:
+  backend:
+    extends:
+      file: docker-compose-base.yml
+      service: application
+    build:
+      context: ../go
+      dockerfile: ../docker/backend/Dockerfile
+    image: open-asset-allocator-backend:e2e
+    restart: "no"
+    environment:
+      API_ONLY: "true"
+    networks:
+      - e2e
+    ports:
+      - target: 8080
+        host_ip: "${E2E_HOST_IP:-127.0.0.1}"
+        published: "${E2E_BACKEND_PORT:-8083}"
+        protocol: tcp
+
+  frontend:
+    build:
+      context: ../web-static
+      dockerfile: ../docker/frontend/Dockerfile
+      target: dev
+    image: open-asset-allocator-frontend:e2e
+    restart: "no"
+    environment:
+      API_PROXY_TARGET: http://backend:8080/
+    depends_on:
+      backend:
+        condition: service_started
+    networks:
+      - e2e
+    ports:
+      - target: 8000
+        host_ip: "${E2E_HOST_IP:-127.0.0.1}"
+        published: "${E2E_FRONTEND_PORT:-8082}"
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: ../web-static/package.json
+        target: /frontend/package.json
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ../web-static/.parcelrc
+        target: /frontend/.parcelrc
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ../web-static/.proxyrc.js
+        target: /frontend/.proxyrc.js
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ../web-static/root.html
+        target: /frontend/root.html
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ../web-static/tsconfig.json
+        target: /frontend/tsconfig.json
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ../web-static/websrc
+        target: /frontend/websrc
+        read_only: true
+        bind:
+          create_host_path: false
+
+  db:
+    ports:
+      - target: 5432
+        host_ip: "${E2E_HOST_IP:-127.0.0.1}"
+        published: "${E2E_POSTGRES_PORT:-5434}"
+        protocol: tcp
+
+  e2e-runner:
+    <<: *e2e-runner-local
+
+  e2e-debug:
+    extends:
+      file: docker-compose-e2e.yml
+      service: e2e-runner
+    <<: *e2e-runner-local
+    build:
+      target: debug
+    image: open-asset-allocator-e2e-debug:e2e
+    profiles:
+      - debug
+    ports:
+      - target: 7900
+        host_ip: "${E2E_HOST_IP:-127.0.0.1}"
+        published: "${E2E_NOVNC_PORT:-7900}"
+        protocol: tcp
+
+networks:
+  e2e:
+    name: ${COMPOSE_PROJECT_NAME:-open-asset-allocator-e2e}_e2e
