@@ -9,15 +9,19 @@ import (
 
 	dbx "github.com/go-ozzo/ozzo-dbx"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
 	inttestutil "github.com/benizzio/open-asset-allocator/inttest/util"
 )
 
+// TestGetAllocationPlans verifies that the allocation-plan API returns the initialized portfolio plan.
+// Usage: go test -count=1 -run '^TestGetAllocationPlans$' ./inttest
+// Co-authored by: OpenCode and Igor Benicio de Mesquita
 func TestGetAllocationPlans(t *testing.T) {
 
 	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/allocation-plan")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer deferCloseResponseBody(response)
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
