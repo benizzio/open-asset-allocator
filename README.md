@@ -103,6 +103,36 @@ They are not host bind mounts or persistent Docker volumes. `make stop` retains 
 frontend state; `make destroy` removes the container and clears that state. Development PostgreSQL data remains under
 `target/postgres-dev-data`.
 
+#### End-to-end testing workflow
+
+The Playwright E2E workflow requires Docker Engine, Docker Compose, and `make`. It does not install Node.js, Go, ZSH,
+Playwright browsers, or npm dependencies on the host. Host Node.js tooling is optional for editor integration; the
+containerized commands are the supported test environment.
+
+| Command | Purpose |
+|---|---|
+| `make e2e` | Run Chromium and Firefox against the source-mounted frontend and standalone backend. |
+| `make e2e-ci` | Run Chromium and Firefox against the immutable production monolith used in CI. |
+| `make e2e-chromium` | Run the local topology with Chromium only. |
+| `make e2e-firefox` | Run the local topology with Firefox only. |
+| `make e2e-ui` | Start Playwright UI Mode at [http://localhost:9324](http://localhost:9324). |
+| `make e2e-headed` | Start a headed browser through noVNC at [http://localhost:7900](http://localhost:7900). |
+| `make e2e-report` | Serve the latest HTML report at [http://localhost:9323](http://localhost:9323). |
+| `make e2e-logs` | Follow logs for an active E2E stack. |
+| `make e2e-clean` | Recover resources left by an interrupted E2E command while preserving artifacts. |
+
+Pass Playwright file, title, or project filters through `E2E_ARGS`. For example:
+
+```shell
+make e2e-chromium E2E_ARGS="tests/portfolio.e2e.spec.ts"
+make e2e E2E_ARGS="--grep='creates a portfolio'"
+```
+
+Non-interactive suites capture reports and Compose logs under `target/e2e-results` before removing their disposable
+PostgreSQL volume. Reserved project names and ports allow production, development, Go integration tests, and one E2E
+stack to run concurrently. See the [E2E testing guide](src/test/e2e/README.md) for topology, port overrides, database
+isolation, artifacts, dependency updates, and troubleshooting.
+
 > [!NOTE]
 > Current pre-alpha version requires data ingestion or manual data insertion on the PostgreSQL database.
 > To access the stored portfolio go to `http://localhost:8000/portfolio/<portfolio id>`.
