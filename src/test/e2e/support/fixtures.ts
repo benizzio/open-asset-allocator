@@ -22,7 +22,30 @@ type WorkerFixtures = {
 /**
  * Runs E2E tests with worker readiness and test-attempt database isolation.
  *
- * Example: test('creates a portfolio', async ({ page, database }) => { ... }).
+ * Import this fixture instead of `test` from `@playwright/test`. `BASE_URL`
+ * selects the application endpoint and defaults to `http://frontend:8000`.
+ * PostgreSQL access requires `PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, and
+ * `PGPASSWORD`.
+ *
+ * Name `database` in a test callback to inject the worker-scoped database
+ * fixture. Before the worker serves tests, it waits for the application, API,
+ * and PostgreSQL to become ready. Its connection pool closes at worker teardown.
+ * The automatic reset fixture resets the disposable database before every test
+ * attempt. After each attempt, including a failed attempt, it resets the database
+ * in a `finally` block and verifies that no portfolios remain.
+ *
+ * @example
+ * ```ts
+ * import { expect, test } from '../support/fixtures';
+ *
+ * test('creates a portfolio', async ({ page, database }) => {
+ *   await page.goto('/');
+ *   const portfolios = await database.query('SELECT * FROM public.portfolio');
+ *   expect(portfolios).toHaveLength(0);
+ * });
+ * ```
+ *
+ * Authored by: OpenCode
  */
 export const test = base.extend<TestFixtures, WorkerFixtures>({
   database: [async ({}, use) => {
@@ -48,4 +71,21 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
   }, { auto: true }],
 });
 
+/**
+ * Exposes Playwright's standard assertion API for E2E tests and fixture cleanup
+ * assertions. Import it with `test` from this module rather than directly from
+ * `@playwright/test` so each test uses the database-isolated fixture API.
+ *
+ * @example
+ * ```ts
+ * import { expect, test } from '../support/fixtures';
+ *
+ * test('shows the portfolio page', async ({ page }) => {
+ *   await page.goto('/');
+ *   await expect(page).toHaveURL(/portfolio/);
+ * });
+ * ```
+ *
+ * Authored by: OpenCode
+ */
 export { expect };
