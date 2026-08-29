@@ -1,4 +1,6 @@
 # Excludes generated backend directories from the standalone build context.
 # Authored by: OpenCode
+# Exclude metadata that Compose rewrites for an out-of-context Dockerfile.
+.dockerignore
 tmp
 vendor

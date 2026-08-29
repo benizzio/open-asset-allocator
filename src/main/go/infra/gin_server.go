@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"path/filepath"
 	"reflect"
@@ -115,6 +116,8 @@ func (server *GinServer) configControllerRoutes(controllers []GinServerRESTContr
 	}
 }
 
+// start binds the configured TCP address before serving requests in the background.
+// Co-authored by: OpenCode and Igor Benicio de Mesquita
 func (server *GinServer) start() {
 
 	server.httpServer = &http.Server{
@@ -122,10 +125,16 @@ func (server *GinServer) start() {
 		Handler: server.router,
 	}
 
+	var listener, err = net.Listen("tcp", server.httpServer.Addr)
+	if err != nil {
+		glog.Fatalf("listen: %s\n", err)
+	}
+
 	go func() {
 		glog.Infof("Starting server on %s", server.httpServer.Addr)
-		if err := server.httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			glog.Fatalf("listen: %s\n", err)
+		var err = server.httpServer.Serve(listener)
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			glog.Fatalf("serve: %s\n", err)
 		}
 	}()
 }

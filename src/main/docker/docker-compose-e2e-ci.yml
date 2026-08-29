@@ -1,0 +1,27 @@
+# Adds the immutable production monolith to the shared E2E stack for CI parity.
+# Authored by: OpenCode
+services:
+  monolith:
+    extends:
+      file: docker-compose-base.yml
+      service: application
+    build:
+      context: ..
+      dockerfile: docker/monolith/Dockerfile
+      target: runtime
+    image: open-asset-allocator-monolith:e2e
+    restart: "no"
+    networks:
+      - e2e
+
+  e2e-runner:
+    environment:
+      BASE_URL: http://monolith:8080
+      CI: "true"
+    depends_on:
+      monolith:
+        condition: service_started
+
+networks:
+  e2e:
+    name: ${COMPOSE_PROJECT_NAME:-open-asset-allocator-e2e}_e2e

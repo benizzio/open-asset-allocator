@@ -1,0 +1,21 @@
+{
+  "name": "open-asset-allocator-e2e",
+  "author": "OpenCode",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "test:chromium": "playwright test --project=chromium",
+    "test:firefox": "playwright test --project=firefox",
+    "test:list": "playwright test --list",
+    "typecheck": "tsc --noEmit",
+    "validate:playwright": "node scripts/validate-playwright-version.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1",
+    "@types/node": "24.13.3",
+    "@types/pg": "8.23.1",
+    "pg": "8.23.0",
+    "typescript": "6.0.3"
+  }
+}

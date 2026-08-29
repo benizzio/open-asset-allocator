@@ -1,6 +1,8 @@
 .DEFAULT_GOAL := build
 
-.PHONY: frontend-install
+.PHONY: frontend-install e2e e2e-ci e2e-chromium e2e-firefox e2e-ui e2e-headed e2e-report e2e-logs e2e-clean
+
+E2E_ARGS ?=
 
 
 # Runs golangci-lint on the Go source
@@ -71,3 +73,48 @@ start:
 # Stops the application in production mode
 stop:
 	@./stop.sh
+
+# Runs local split-application E2E tests in Chromium and Firefox.
+# Authored by: OpenCode
+e2e:
+	@./e2e.sh local $(E2E_ARGS)
+
+# Runs production-monolith E2E tests for CI parity.
+# Authored by: OpenCode
+e2e-ci:
+	@./e2e.sh ci $(E2E_ARGS)
+
+# Runs local E2E tests using only Chromium.
+# Authored by: OpenCode
+e2e-chromium:
+	@./e2e.sh local --project=chromium $(E2E_ARGS)
+
+# Runs local E2E tests using only Firefox.
+# Authored by: OpenCode
+e2e-firefox:
+	@./e2e.sh local --project=firefox $(E2E_ARGS)
+
+# Starts local split services and Playwright UI Mode.
+# Authored by: OpenCode
+e2e-ui:
+	@./e2e.sh ui $(E2E_ARGS)
+
+# Starts local split services and a headed browser available through noVNC.
+# Authored by: OpenCode
+e2e-headed:
+	@./e2e.sh headed $(E2E_ARGS)
+
+# Serves the latest Playwright HTML report.
+# Authored by: OpenCode
+e2e-report:
+	@./e2e.sh report
+
+# Follows logs for active E2E services.
+# Authored by: OpenCode
+e2e-logs:
+	@./e2e.sh logs
+
+# Recovers resources left by interrupted E2E commands while preserving artifacts.
+# Authored by: OpenCode
+e2e-clean:
+	@./e2e.sh clean

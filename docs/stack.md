@@ -1,5 +1,7 @@
 # Stack prospection
 
+<!-- Co-authored by: OpenCode and Igor Benicio de Mesquita -->
+
 - OLAP DB: [Duck DB](https://duckdb.org/)
     - [duckdb-prql](https://github.com/ywelsch/duckdb-prql)
     - [Scrooge McDuck](https://github.com/pdet/Scrooge-McDuck)
@@ -13,3 +15,7 @@
 - Frontend:
     - Routing
       - [navigo](https://github.com/krasimir/navigo)
+- Automated testing:
+    - Browser end-to-end testing: [Playwright Test](https://playwright.dev/docs/test-intro)
+        - Managed Chromium and Firefox projects
+        - Containerized local and GitHub Actions execution
