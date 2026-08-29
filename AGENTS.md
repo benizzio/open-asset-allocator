@@ -115,6 +115,17 @@ AGENTS.md, the structure is:
 
 </CustomCodeDocs>
 
+<Approaches>
+
+- When implementing e2e tests:
+    - tests must be atomic, using and validating only what is inside their defined scope
+    - if persisted data is necessary for a test, it must be always created directly on the DB via the tests script, and
+      never using other APIs
+    - if a scenario modifies persisted data, all assertions must be done on the persitence layer directly
+    - do not add test related code to production code source, unless COMPLETELY UNAVOIDABLE.
+
+</Approaches>
+
 </CodingStandards>
 
 ## Ladmines
