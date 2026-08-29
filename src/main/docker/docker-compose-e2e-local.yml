@@ -16,7 +16,7 @@ x-e2e-runner-local: &e2e-runner-local
       published: "${E2E_UI_PORT:-9324}"
       protocol: tcp
   volumes:
-    # Keep image-installed node_modules available while supporting rapid test edits.
+    # Keep image-installed node_modules available while supporting rapid test changes as Playwright UI mode runs.
     - type: bind
       source: ../../test/e2e/playwright.config.ts
       target: /workspace/src/test/e2e/playwright.config.ts
@@ -82,6 +82,7 @@ services:
         published: "${E2E_FRONTEND_PORT:-8082}"
         protocol: tcp
     volumes:
+      # Expose dynamic frontend source and config changes while Playwright UI mode runs without rebuilding the image.
       - type: bind
         source: ../web-static/package.json
         target: /frontend/package.json
