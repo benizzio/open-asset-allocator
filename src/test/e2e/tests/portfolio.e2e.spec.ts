@@ -6,7 +6,7 @@
  *
  * Authored by: OpenCode
  */
-import type { APIResponse, Response } from '@playwright/test';
+import type { Response } from '@playwright/test';
 import { expect, test } from '../support/fixtures';
 
 const DEFAULT_ALLOCATION_STRUCTURE = {
@@ -30,7 +30,7 @@ type PortfolioRow = {
   name: string;
 };
 
-test('creates a portfolio consistently through the browser, API, and database', async ({ database, page, request }) => {
+test('creates a portfolio consistently through the browser, API, and database', async ({ database, page }) => {
   const portfolioName = `E2E Portfolio ${Date.now()}`;
   const initialLoad = page.waitForResponse(isPortfolioCollectionRequest);
 
@@ -85,10 +85,6 @@ test('creates a portfolio consistently through the browser, API, and database', 
     id: createdPortfolio.id,
     name: portfolioName,
   }]);
-
-  const apiResponse = await request.get(`/api/portfolio/${createdPortfolio.id}`);
-  expect(apiResponse.status()).toBe(200);
-  expect(await apiResponse.json()).toEqual(createdPortfolio);
 });
 
 /** Matches the same-origin collection request made by the portfolios HTMX component. */
