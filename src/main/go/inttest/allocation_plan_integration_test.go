@@ -20,7 +20,7 @@ import (
 // Co-authored by: OpenCode and Igor Benicio de Mesquita
 func TestGetAllocationPlans(t *testing.T) {
 
-	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/allocation-plan")
+	var response, err = http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/allocation-plan")
 	require.NoError(t, err)
 	defer deferCloseResponseBody(response)
 

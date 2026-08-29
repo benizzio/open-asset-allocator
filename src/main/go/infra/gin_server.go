@@ -132,7 +132,8 @@ func (server *GinServer) start() {
 
 	go func() {
 		glog.Infof("Starting server on %s", server.httpServer.Addr)
-		if err := server.httpServer.Serve(listener); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		var err = server.httpServer.Serve(listener)
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			glog.Fatalf("serve: %s\n", err)
 		}
 	}()
