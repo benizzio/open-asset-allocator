@@ -205,6 +205,7 @@ async function expectPortfolioHistory(page: Page, portfolio: SeededPortfolio): P
   );
   await expect(managementButton).toBeVisible();
   await expect(managementButton.locator('.bi-database-gear')).toBeVisible();
+  await expect(page.locator('#accordion-portfolio-history > *')).toHaveCount(1);
 }
 
 /** Asserts the empty allocation-plan view and its management control. */
@@ -216,12 +217,14 @@ async function expectAllocationPlan(page: Page, portfolio: SeededPortfolio): Pro
   );
   await expect(managementButton).toBeVisible();
   await expect(managementButton.locator('.bi-database-gear')).toBeVisible();
+  await expect(page.locator('#accordion-allocation-plan > *')).toHaveCount(1);
 }
 
 /** Asserts the empty allocation-map partial and its selected submenu state. */
 async function expectAllocationMap(page: Page, portfolio: SeededPortfolio): Promise<void> {
   await expectPortfolioShell(page, portfolio, 'Allocation Map');
   await expect(page.locator('#accordion-allocation-map')).toBeAttached();
+  await expect(page.locator('#accordion-allocation-map > *')).toHaveCount(0);
 }
 
 /** Asserts submenu labels, radio selection, and outlined or filled button styling. */
