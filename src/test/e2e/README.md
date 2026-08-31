@@ -40,7 +40,7 @@ Stopping `make e2e-logs` with Ctrl-C only stops following logs; it leaves the ac
 `E2E_ARGS` forwards arguments to Playwright without changing the container lifecycle. Examples:
 
 ```shell
-make e2e-chromium E2E_ARGS="tests/portfolio.e2e.spec.ts"
+make e2e-chromium E2E_ARGS="tests/portfolio-creation.e2e.spec.ts"
 make e2e E2E_ARGS="--grep='creates a portfolio'"
 make e2e-ci E2E_ARGS="--project=firefox"
 ```
