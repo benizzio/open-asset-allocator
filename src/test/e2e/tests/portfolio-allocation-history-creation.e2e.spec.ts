@@ -11,6 +11,15 @@
 import type { Locator, Page } from '@playwright/test';
 import { expect, test } from '../support/fixtures';
 import type { E2eDatabase } from '../support/database';
+import {
+  clickCanvasPoint,
+  expectChartTooltip,
+  expectLatestCanvasTextContains,
+  expectLatestCanvasTextSet,
+  getDoughnutCenterPoint,
+  getDoughnutSlicePoint,
+  installCanvasTextRecorder,
+} from '../support/doughnut-chart';
 
 const DEFAULT_ALLOCATION_STRUCTURE = {
   hierarchy: [
@@ -65,16 +74,6 @@ type PersistedAllocation = {
   observation_time_id: number;
   ticker: string;
   total_market_value: string;
-};
-
-type CanvasPoint = {
-  x: number;
-  y: number;
-};
-
-type CanvasTextRecorder = {
-  generation: number;
-  texts: string[];
 };
 
 test.describe('portfolio allocation history creation', () => {
@@ -766,12 +765,12 @@ async function exercisePortfolioHistoryChart(page: Page, observationId: number):
   const levelLabel = page.locator(`#hierarchy-level-portfolio-chart-${observationId}`);
 
   await expectLatestCanvasTextSet(page, canvas, ['BONDS', 'STOCKS', '40%', '60%']);
-  await expectChartTooltip(page, canvas, 0, 4_000, 10_000, 'BONDS', '$4,000.00');
+  await expectChartTooltip(page, canvas, 0, 4_000, 10_000, ['BONDS', '$4,000.00']);
 
   await clickCanvasPoint(page, canvas, () => getDoughnutSlicePoint(canvas, 0, 4_000, 10_000));
   await expect(levelLabel).toHaveText('Assets for BONDS');
-  await expectLatestCanvasTextSet(page, canvas, ['BOND-B', 'BOND-A', '75%', '25%']);
-  await expectChartTooltip(page, canvas, 0, 3_000, 4_000, 'BOND-B', '$3,000.00');
+  await expectLatestCanvasTextContains(page, canvas, ['BOND-B', 'BOND-A', '75%', '25%']);
+  await expectChartTooltip(page, canvas, 0, 3_000, 4_000, ['BOND-B', '$3,000.00']);
 
   await clickCanvasPoint(page, canvas, () => getDoughnutSlicePoint(canvas, 0, 3_000, 4_000));
   await expect(levelLabel).toHaveText('Assets for BONDS');
@@ -779,7 +778,7 @@ async function exercisePortfolioHistoryChart(page: Page, observationId: number):
 
   await clickCanvasPoint(page, canvas, () => getDoughnutCenterPoint(canvas));
   await expect(levelLabel).toHaveText('Classes');
-  await expectLatestCanvasTextSet(page, canvas, ['BONDS', 'STOCKS', '40%', '60%']);
+  await expectLatestCanvasTextContains(page, canvas, ['BONDS', 'STOCKS', '40%', '60%']);
 
   await clickCanvasPoint(page, canvas, () => getDoughnutCenterPoint(canvas));
   await expect(levelLabel).toHaveText('Classes');
@@ -789,7 +788,7 @@ async function exercisePortfolioHistoryChart(page: Page, observationId: number):
   await expect(levelLabel).toHaveText('Assets for STOCKS');
   await page.mouse.move(0, 0);
   await expectLatestCanvasTextContains(page, canvas, ['STOCK-B', 'STOCK-A', '66.67%', '33.33%']);
-  await expectChartTooltip(page, canvas, 0, 4_000, 6_000, 'STOCK-B', '$4,000.00');
+  await expectChartTooltip(page, canvas, 0, 4_000, 6_000, ['STOCK-B', '$4,000.00']);
 
   await clickCanvasPoint(page, canvas, () => getDoughnutCenterPoint(canvas));
   await expect(levelLabel).toHaveText('Classes');
@@ -810,266 +809,6 @@ async function expectRenderedPortfolioHistoryChart(page: Page, observationId: nu
     const bounds = element.getBoundingClientRect();
     return bounds.width > 0 && bounds.height > 0;
   })).toBe(true);
-}
-
-/** Installs a browser-only recorder for text drawn by the rendered portfolio chart canvas. */
-async function installCanvasTextRecorder(page: Page): Promise<void> {
-  await page.addInitScript(() => {
-    const recorderKey = '__e2eCanvasTextRecorder';
-    const originalClearRect = CanvasRenderingContext2D.prototype.clearRect;
-    const originalFillText = CanvasRenderingContext2D.prototype.fillText;
-    const getRecorder = (): Record<string, CanvasTextRecorder> => {
-      const windowWithRecorder = window as Window & {
-        __e2eCanvasTextRecorder?: Record<string, CanvasTextRecorder>;
-      };
-      windowWithRecorder.__e2eCanvasTextRecorder ??= {};
-      return windowWithRecorder.__e2eCanvasTextRecorder;
-    };
-    const isPortfolioCanvas = (context: CanvasRenderingContext2D): boolean => {
-      return context.canvas.id.startsWith('portfolio-chart-');
-    };
-
-    CanvasRenderingContext2D.prototype.clearRect = function(x, y, width, height) {
-      if (isPortfolioCanvas(this)) {
-        const recorder = getRecorder();
-        const current = recorder[this.canvas.id];
-        recorder[this.canvas.id] = {
-          generation: (current?.generation ?? 0) + 1,
-          texts: [],
-        };
-      }
-      return originalClearRect.call(this, x, y, width, height);
-    };
-
-    CanvasRenderingContext2D.prototype.fillText = function(text, x, y, maxWidth) {
-      if (isPortfolioCanvas(this)) {
-        const recorder = getRecorder();
-        const current = recorder[this.canvas.id] ?? { generation: 0, texts: [] };
-        current.texts.push(String(text));
-        recorder[this.canvas.id] = current;
-      }
-      return originalFillText.call(this, text, x, y, maxWidth);
-    };
-
-    void recorderKey;
-  });
-}
-
-/** Returns the latest set of non-empty text values recorded for a chart canvas. */
-async function getLatestCanvasTexts(page: Page, canvas: Locator): Promise<readonly string[]> {
-  return canvas.evaluate((element) => {
-    const recorder = (window as Window & {
-      __e2eCanvasTextRecorder?: Record<string, CanvasTextRecorder>;
-    }).__e2eCanvasTextRecorder;
-    return [...new Set((recorder?.[element.id]?.texts ?? []).filter((text) => text.length > 0))];
-  });
-}
-
-/** Asserts that the latest chart render contains exactly the expected labels and percentages. */
-async function expectLatestCanvasTextSet(
-  page: Page,
-  canvas: Locator,
-  expectedTexts: readonly string[],
-): Promise<void> {
-  await expect.poll(async () => {
-    const actualTexts = await getLatestCanvasTexts(page, canvas);
-    return actualTexts.length === expectedTexts.length
-      && expectedTexts.every((text) => actualTexts.includes(text));
-  }).toBe(true);
-}
-
-/** Asserts that the latest chart render contains the expected text values. */
-async function expectLatestCanvasTextContains(
-  page: Page,
-  canvas: Locator,
-  expectedTexts: readonly string[],
-): Promise<void> {
-  await expect.poll(async () => {
-    const actualTexts = await getLatestCanvasTexts(page, canvas);
-    return expectedTexts.every((text) => actualTexts.includes(text));
-  }).toBe(true);
-}
-
-/** Hovers a chart slice and verifies its rendered tooltip label and currency value. */
-async function expectChartTooltip(
-  page: Page,
-  canvas: Locator,
-  precedingValue: number,
-  value: number,
-  total: number,
-  label: string,
-  currency: string,
-): Promise<void> {
-  await canvas.scrollIntoViewIfNeeded();
-  const point = await getDoughnutSlicePoint(canvas, precedingValue, value, total);
-  const bounds = await canvas.boundingBox();
-  if (!bounds) {
-    throw new Error('Portfolio chart canvas has no bounding box');
-  }
-  await page.mouse.move(bounds.x + point.x, bounds.y + point.y);
-  await expect.poll(async () => getLatestCanvasTexts(page, canvas)).toEqual(
-    expect.arrayContaining([label, currency]),
-  );
-}
-
-/** Scrolls a canvas into a stable viewport position and clicks a point calculated from its current pixels. */
-async function clickCanvasPoint(
-  page: Page,
-  canvas: Locator,
-  getPoint: () => Promise<CanvasPoint>,
-): Promise<void> {
-  await canvas.scrollIntoViewIfNeeded();
-  const point = await getPoint();
-  const bounds = await canvas.boundingBox();
-  if (!bounds) {
-    throw new Error('Portfolio chart canvas has no bounding box');
-  }
-  await page.mouse.click(bounds.x + point.x, bounds.y + point.y);
-}
-
-/** Finds the doughnut center from the rendered chart pixels, excluding its right-side legend. */
-async function getDoughnutCenterPoint(canvas: Locator): Promise<CanvasPoint> {
-  return canvas.evaluate((element) => {
-    const canvasElement = element as HTMLCanvasElement;
-    const context = canvasElement.getContext('2d');
-    if (!context) {
-      throw new Error('Portfolio chart canvas has no 2D context');
-    }
-
-    const pixels = context.getImageData(0, 0, canvasElement.width, canvasElement.height);
-    const width = canvasElement.width;
-    const height = canvasElement.height;
-    const isChartPixel = (pixelIndex: number): boolean => {
-      const red = pixels.data[pixelIndex];
-      const green = pixels.data[pixelIndex + 1];
-      const blue = pixels.data[pixelIndex + 2];
-      const brightness = (red + green + blue) / 3;
-      const backgroundDistance = Math.abs(red - 33) + Math.abs(green - 37) + Math.abs(blue - 41);
-      return pixels.data[pixelIndex + 3] > 100 && brightness > 80 && backgroundDistance > 60;
-    };
-    const visited = new Uint8Array(width * height);
-    const components: Array<{ size: number; minX: number; maxX: number; minY: number; maxY: number }> = [];
-
-    for (let start = 0; start < width * height; start++) {
-      if (visited[start] || !isChartPixel(start * 4)) {
-        continue;
-      }
-
-      const queue = [start];
-      visited[start] = 1;
-      let queueIndex = 0;
-      let minX = width;
-      let maxX = 0;
-      let minY = height;
-      let maxY = 0;
-
-      while (queueIndex < queue.length) {
-        const current = queue[queueIndex++];
-        const x = current % width;
-        const y = Math.floor(current / width);
-        minX = Math.min(minX, x);
-        maxX = Math.max(maxX, x);
-        minY = Math.min(minY, y);
-        maxY = Math.max(maxY, y);
-
-        const neighbours = [current - 1, current + 1, current - width, current + width];
-        for (const neighbour of neighbours) {
-          if (neighbour < 0 || neighbour >= width * height || visited[neighbour]) {
-            continue;
-          }
-          const neighbourX = neighbour % width;
-          if (Math.abs(neighbourX - x) > 1 || !isChartPixel(neighbour * 4)) {
-            continue;
-          }
-          visited[neighbour] = 1;
-          queue.push(neighbour);
-        }
-      }
-
-      if (queue.length > 1_000) {
-        components.push({ size: queue.length, minX, maxX, minY, maxY });
-      }
-    }
-
-    components.sort((left, right) => right.size - left.size);
-    if (components.length === 0) {
-      throw new Error('Could not locate the rendered doughnut components');
-    }
-
-    const chartComponents = components.slice(0, 4);
-    const minX = Math.min(...chartComponents.map(({ minX: componentMinX }) => componentMinX));
-    const maxX = Math.max(...chartComponents.map(({ maxX: componentMaxX }) => componentMaxX));
-    const minY = Math.min(...chartComponents.map(({ minY: componentMinY }) => componentMinY));
-    const maxY = Math.max(...chartComponents.map(({ maxY: componentMaxY }) => componentMaxY));
-    const centerX = (minX + maxX) / 2;
-    const centerY = (minY + maxY) / 2;
-    const bounds = canvasElement.getBoundingClientRect();
-    return {
-      x: centerX * bounds.width / width,
-      y: centerY * bounds.height / height,
-    };
-  });
-}
-
-/** Finds a point halfway through one doughnut slice using its rendered annulus. */
-async function getDoughnutSlicePoint(
-  canvas: Locator,
-  precedingValue: number,
-  value: number,
-  total: number,
-): Promise<CanvasPoint> {
-  const centerPoint = await getDoughnutCenterPoint(canvas);
-  return canvas.evaluate((element, data) => {
-    const canvasElement = element as HTMLCanvasElement;
-    const context = canvasElement.getContext('2d');
-    if (!context) {
-      throw new Error('Portfolio chart canvas has no 2D context');
-    }
-
-    const pixels = context.getImageData(0, 0, canvasElement.width, canvasElement.height);
-    const width = canvasElement.width;
-    const height = canvasElement.height;
-    const bounds = canvasElement.getBoundingClientRect();
-    const center = {
-      x: data.centerX * width / bounds.width,
-      y: data.centerY * height / bounds.height,
-    };
-    const angle = -Math.PI / 2 + 2 * Math.PI * (data.precedingValue + data.value / 2) / data.total;
-    const directionX = Math.cos(angle);
-    const directionY = Math.sin(angle);
-    let firstPaintedRadius = -1;
-    let lastPaintedRadius = -1;
-
-    for (let radius = 0; radius < Math.max(width, height); radius++) {
-      const x = Math.round(center.x + directionX * radius);
-      const y = Math.round(center.y + directionY * radius);
-      if (x < 0 || y < 0 || x >= width || y >= height) {
-        break;
-      }
-      const alpha = pixels.data[(y * width + x) * 4 + 3];
-      if (alpha > 20) {
-        firstPaintedRadius = firstPaintedRadius < 0 ? radius : firstPaintedRadius;
-        lastPaintedRadius = radius;
-      } else if (firstPaintedRadius >= 0 && radius > firstPaintedRadius + 5) {
-        break;
-      }
-    }
-
-    if (firstPaintedRadius < 0 || lastPaintedRadius < 0) {
-      throw new Error(`Could not locate a rendered doughnut slice: ${JSON.stringify({
-        center,
-        canvas: { width, height },
-        bounds,
-        angle,
-      })}`);
-    }
-
-    const radius = (firstPaintedRadius + lastPaintedRadius) / 2;
-    return {
-      x: (center.x + directionX * radius) * bounds.width / width,
-      y: (center.y + directionY * radius) * bounds.height / height,
-    };
-  }, { centerX: centerPoint.x, centerY: centerPoint.y, precedingValue, total, value });
 }
 
 /** Returns the visible label used to click a portfolio submenu option. */
