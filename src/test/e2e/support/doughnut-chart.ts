@@ -142,7 +142,10 @@ export async function expectLatestCanvasTextContains(
 ): Promise<void> {
   await expect.poll(async () => {
     const actualTexts = await getLatestCanvasTexts(canvas);
-    return expectedTexts.every((text) => actualTexts.includes(text));
+    if (expectedTexts.every((text) => actualTexts.includes(text))) {
+      return true;
+    }
+    throw new Error(`Unexpected canvas text: ${JSON.stringify(actualTexts)}`);
   }).toBe(true);
 }
 
@@ -178,14 +181,66 @@ export async function expectChartTooltip(
   total: number,
   expectedTexts: readonly string[],
 ): Promise<void> {
+  await page.mouse.move(0, 0);
+  await page.waitForTimeout(50);
   await canvas.scrollIntoViewIfNeeded();
+  const center = await getDoughnutCenterPoint(canvas);
   const point = await getDoughnutSlicePoint(canvas, precedingValue, value, total);
   const bounds = await canvas.boundingBox();
   if (!bounds) {
     throw new Error('Portfolio chart canvas has no bounding box');
   }
   await page.mouse.move(bounds.x + point.x, bounds.y + point.y);
-  await expectLatestCanvasTextContains(page, canvas, expectedTexts);
+  await page.waitForTimeout(50);
+  await expect.poll(async () => {
+    const actualTexts = await getLatestCanvasTexts(canvas);
+    if (expectedTexts.every((text) => actualTexts.includes(text))) {
+      return true;
+    }
+    throw new Error(`Unexpected canvas text at ${JSON.stringify({ center, point })}: ${JSON.stringify(actualTexts)}`);
+  }).toBe(true);
+}
+
+/**
+ * Finds a doughnut slice by hovering sampled points until its tooltip contains the expected text.
+ *
+ * This is useful when a chart's rendered arc order differs from the data order assumed by a
+ * caller. For example, `findDoughnutSlicePointByTooltip(page, canvas, ['STOCKS', '$3,000.00'])`
+ * returns a point that Chart.js identifies as the STOCKS slice.
+ */
+export async function findDoughnutSlicePointByTooltip(
+  page: Page,
+  canvas: Locator,
+  expectedTexts: readonly string[],
+): Promise<CanvasPoint> {
+  await page.mouse.move(0, 0);
+  await page.waitForTimeout(50);
+  await canvas.scrollIntoViewIfNeeded();
+
+  const center = await getDoughnutCenterPoint(canvas);
+  const referencePoint = await getDoughnutSlicePoint(canvas, 0, 1, 1);
+  const radius = Math.hypot(referencePoint.x - center.x, referencePoint.y - center.y);
+  const bounds = await canvas.boundingBox();
+  if (!bounds) {
+    throw new Error('Portfolio chart canvas has no bounding box');
+  }
+
+  let lastCanvasTexts: readonly string[] = [];
+  for (let sample = 0; sample < 72; sample++) {
+    const angle = -Math.PI / 2 + 2 * Math.PI * sample / 72;
+    const point = {
+      x: center.x + Math.cos(angle) * radius,
+      y: center.y + Math.sin(angle) * radius,
+    };
+    await page.mouse.move(bounds.x + point.x, bounds.y + point.y);
+    await page.waitForTimeout(25);
+    lastCanvasTexts = await getLatestCanvasTexts(canvas);
+    if (expectedTexts.every((text) => lastCanvasTexts.includes(text))) {
+      return point;
+    }
+  }
+
+  throw new Error(`Could not find doughnut tooltip ${JSON.stringify(expectedTexts)}; latest canvas text: ${JSON.stringify(lastCanvasTexts)}; geometry: ${JSON.stringify({ center, referencePoint, radius, bounds })}`);
 }
 
 /**
@@ -202,6 +257,8 @@ export async function clickCanvasPoint(
   getPoint: () => Promise<CanvasPoint>,
 ): Promise<void> {
   await page.mouse.move(0, 0);
+  // Firefox needs the Chart.js redraw to finish before the next point is calculated.
+  await page.waitForTimeout(1_100);
   await canvas.scrollIntoViewIfNeeded();
   const point = await getPoint();
   const bounds = await canvas.boundingBox();
@@ -209,6 +266,8 @@ export async function clickCanvasPoint(
     throw new Error('Portfolio chart canvas has no bounding box');
   }
   await page.mouse.click(bounds.x + point.x, bounds.y + point.y);
+  await page.mouse.move(0, 0);
+  await page.waitForTimeout(1_100);
 }
 
 /**
@@ -275,7 +334,7 @@ export async function getDoughnutCenterPoint(canvas: Locator): Promise<CanvasPoi
         }
       }
 
-      if (queue.length > 1_000) {
+      if (queue.length > width * height * 0.01) {
         components.push({ size: queue.length, minX, maxX, minY, maxY });
       }
     }
