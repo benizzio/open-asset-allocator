@@ -3,7 +3,7 @@
 # Authored by: OpenCode
 
 # Builds the immutable production frontend from lockfile-managed dependencies.
-FROM node:24.12.0-bookworm-slim AS frontend-build
+FROM node:26.8.1-bookworm-slim AS frontend-build
 
 WORKDIR /frontend
 
