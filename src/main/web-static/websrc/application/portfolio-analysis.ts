@@ -3,6 +3,14 @@ import { PotentialDivergence } from "../domain/portfolio-analysis";
 import { BigNumber } from "bignumber.js";
 import Format from "../infra/format";
 
+/**
+ * Registers the Handlebars helpers used to render portfolio divergence analysis values and bars.
+ *
+ * Example: call `registerPortfolioAnalysisHandlebarsHelpers()` during frontend infrastructure
+ * initialization before compiling `template-divergence-analysis`.
+ *
+ * Co-authored by: OpenCode and Benizzio
+ */
 export function registerPortfolioAnalysisHandlebarsHelpers() {
 
     handlebars.registerHelper(
@@ -28,8 +36,10 @@ export function registerPortfolioAnalysisHandlebarsHelpers() {
 
                 case "divergenceBar": {
 
-                    const divergenceOnTotal =
-                        new BigNumber(localDivergence).div(totalMarketValue).times(200).toNumber();
+                    // A zero-valued parent has no meaningful percentage scale, so its zero bar stays empty.
+                    const divergenceOnTotal = totalMarketValue === 0
+                        ? 0
+                        : new BigNumber(localDivergence).div(totalMarketValue).times(200).toNumber();
                     const barStyle = divergenceOnTotal > 0 ? "bg-danger" : "bg-success";
 
                     return `<div class="progress"

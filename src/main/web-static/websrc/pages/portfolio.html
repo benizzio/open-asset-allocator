@@ -174,10 +174,14 @@
 
 <script id="template-monovalue-datalist" type="text/x-handlebars-template">
 
+    {{!-- Hash parameters extend the partial context, so property mode only emits resolved values.
+           Co-authored by: OpenCode and Benizzio --}}
     {{#each .}}
 
-        {{#if (getProperty this ../propertyKey) }}
-            <option value="{{getProperty this ../propertyKey}}">{{getProperty this ../propertyKey}}</option>
+        {{#if ../propertyKey}}
+            {{#if (getProperty this ../propertyKey) }}
+                <option value="{{getProperty this ../propertyKey}}">{{getProperty this ../propertyKey}}</option>
+            {{/if}}
         {{else}}
             <option value="{{this}}">{{this}}</option>
         {{/if}}

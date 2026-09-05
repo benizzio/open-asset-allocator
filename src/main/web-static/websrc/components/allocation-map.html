@@ -73,6 +73,8 @@
 
 <script id="template-divergence-analysis" type="text/x-handlebars-template">
 
+    {{!-- Prefix collapse targets with the generated comparison identity so observations remain independent.
+          Co-authored by: OpenCode and Benizzio --}}
     <table class="table align-middle caption-top">
         <caption>Total market value: {{formatCurrency portfolioTotalMarketValue}}</caption>
         <thead>
@@ -85,7 +87,10 @@
         </thead>
         <tbody class="table-group-divider">
         {{#each root}}
-            {{> template-divergence-analysis-table-row upperMarketValue=../portfolioTotalMarketValue}}
+            {{> template-divergence-analysis-table-row
+                upperMarketValue=../portfolioTotalMarketValue
+                collapseIdPrefix=(concat "divergence-analysis-" ../observationTimestamp.id "-" ../allocationPlanId "-")
+            }}
         {{/each}}
         </tbody>
     </table>
@@ -94,13 +99,17 @@
 
 <script id="template-divergence-analysis-table-row" type="text/x-handlebars-template">
 
-    <tr {{#if upperLevelKey}} class="collapse" id="{{upperLevelKey}}-internal-divergences" {{/if}}>
+    <tr {{#if upperLevelKey}}
+        class="collapse"
+        id="{{collapseIdPrefix}}{{upperLevelKey}}-internal-divergences"
+        data-divergence-parent="{{upperLevelKey}}"
+    {{/if}}>
         <td>
             {{{repeater "&nbsp;&nbsp;&nbsp;&nbsp;" depth "" ""}}}
             {{#if internalDivergences}}
                 <span class="badge text-bg-primary"
                       data-bs-toggle="collapse"
-                      data-bs-target="#{{hierarchyLevelKey}}-internal-divergences"
+                      data-bs-target="#{{collapseIdPrefix}}{{hierarchyLevelKey}}-internal-divergences"
                 ><span class="bi bi-arrow-90deg-down"></span>
             </span>
             {{else}}
@@ -127,7 +136,11 @@
 
     {{#if internalDivergences}}
         {{#each internalDivergences}}
-            {{> template-divergence-analysis-table-row upperMarketValue=../totalMarketValue upperLevelKey=../hierarchyLevelKey}}
+            {{> template-divergence-analysis-table-row
+                upperMarketValue=../totalMarketValue
+                upperLevelKey=../hierarchyLevelKey
+                collapseIdPrefix=../collapseIdPrefix
+            }}
         {{/each}}
     {{/if}}
 

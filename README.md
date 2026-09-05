@@ -124,7 +124,7 @@ containerized commands are the supported test environment.
 Pass Playwright file, title, or project filters through `E2E_ARGS`. For example:
 
 ```shell
-make e2e-chromium E2E_ARGS="tests/portfolio.e2e.spec.ts"
+make e2e-chromium E2E_ARGS="tests/portfolio-creation.e2e.spec.ts"
 make e2e E2E_ARGS="--grep='creates a portfolio'"
 ```
 

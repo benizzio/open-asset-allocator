@@ -1,5 +1,5 @@
 /**
- * Covers portfolio creation through the browser, API, and PostgreSQL boundaries.
+ * Covers scenario 0, portfolio creation through the browser, API, and PostgreSQL boundaries.
  *
  * Run through the containerized E2E runner after its Compose environment supplies
  * BASE_URL and PostgreSQL administrator PG* variables.
@@ -30,7 +30,7 @@ type PortfolioRow = {
   name: string;
 };
 
-test('creates a portfolio consistently through the browser, API, and database', async ({ database, page }) => {
+test('scenario 0: creates a portfolio consistently through the browser, API, and database', async ({ database, page }) => {
   const portfolioName = `E2E Portfolio ${Date.now()}`;
   const initialLoad = page.waitForResponse(isPortfolioCollectionRequest);
 
