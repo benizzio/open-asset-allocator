@@ -140,5 +140,12 @@ consideration
       via [Docker](https://hub.docker.com/r/cosmtrek/air), currently on
       the [back-end Dockerfile](src/main/docker/backend/Dockerfile), the Go language version must be always the latest
       available `cosmtrek/air` image, and they must always be bumped together.
+- Node.js application runtime version:
+    - [`.nvmrc`](.nvmrc), the [frontend Dockerfile](src/main/docker/frontend/Dockerfile), and the frontend build stage in
+      the [monolith Dockerfile](src/main/docker/monolith/Dockerfile) must use the same exact LTS Node.js version.
+    - Renovate exclusively manages these runtime references. Dependabot must continue to ignore the `node` Docker
+      dependency so the versions cannot be updated independently.
+    - The Playwright image supplies a separate Node.js runtime. Its major version must match the `@types/node` major in
+      the E2E package rather than the application runtime.
 
 </Landmines>

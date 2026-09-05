@@ -19,6 +19,9 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Validate Node.js runtime versions
+        run: make validate-node-version
+
       - name: Run immutable-monolith E2E tests
         run: make e2e-ci
 

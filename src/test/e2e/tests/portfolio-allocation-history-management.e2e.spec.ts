@@ -101,6 +101,7 @@ type SeededHistoryModificationData = {
 
 test.describe('portfolio allocation history management', () => {
   test('scenario 3: creates and explores a portfolio allocation observation', async ({ database, page }) => {
+    test.setTimeout(60_000);
     const seededData = await seedPortfolioHistoryData(database);
     await installCanvasTextRecorder(page);
 

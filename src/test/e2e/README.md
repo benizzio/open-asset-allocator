@@ -18,6 +18,9 @@ The E2E commands do not require host installations of Node.js, npm dependencies,
 Node.js installation may be useful for editor integration, but the container image and lockfile define the supported
 runtime.
 
+The Playwright image supplies an E2E-specific Node.js runtime independently of the application build runtime. The
+`@types/node` major must match the Node.js major installed in that image; the E2E image build validates this invariant.
+
 ## Commands
 
 | Command | Topology and behavior |

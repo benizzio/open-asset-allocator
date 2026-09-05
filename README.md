@@ -103,6 +103,14 @@ They are not host bind mounts or persistent Docker volumes. `make stop` retains 
 frontend state; `make destroy` removes the container and clears that state. Development PostgreSQL data remains under
 `target/postgres-dev-data`.
 
+Host Node.js is optional for the containerized workflow. When it is needed for editor integration or direct frontend
+commands, run `nvm install` and `nvm use` from the repository. The exact version in `.nvmrc` is also used by the frontend
+development and monolith build images. Run `make validate-node-version` to verify those runtime references.
+
+Renovate owns Node.js runtime, Node.js type, and NVM installer updates. Application runtime updates are restricted to
+LTS releases and update `.nvmrc` and both Node.js Docker images together. Dependabot continues to manage every other
+configured dependency ecosystem.
+
 #### End-to-end testing workflow
 
 The Playwright E2E workflow requires Docker Engine, Docker Compose, and `make`. It does not install Node.js, Go, ZSH,
