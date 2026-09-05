@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := build
 
-.PHONY: frontend-install e2e e2e-ci e2e-chromium e2e-firefox e2e-ui e2e-headed e2e-report e2e-logs e2e-clean
+.PHONY: frontend-install validate-node-version e2e e2e-ci e2e-chromium e2e-firefox e2e-ui e2e-headed e2e-report e2e-logs e2e-clean
 
 E2E_ARGS ?=
 
@@ -17,6 +17,11 @@ lint-fmt:
 frontend-install:
 	cd src/main/web-static && npm install
 
+# Verifies that every application Node.js runtime reference is synchronized.
+# Co-authored by: OpenCode and Igor Benicio de Mesquita
+validate-node-version:
+	@./validate-node-version.sh
+
 # Runs the tests for the application
 test:
 	./test.sh
@@ -25,8 +30,9 @@ test:
 test-ext:
 	cd src/main/go && go test -count=1 -tags=extinttest ./extinttest/...
 
-# Builds the application for development mode
-dev-build:
+# Builds the application for development mode with a synchronized Node.js runtime.
+# Co-authored by: OpenCode and Igor Benicio de Mesquita
+dev-build: validate-node-version
 	./build-dev.sh
 
 # Runs the entire application in development mode
@@ -62,8 +68,9 @@ migration-logs:
 destroy:
 	@./destroy.sh
 
-# Builds the application for production usage
-build:
+# Builds the application for production usage with a synchronized Node.js runtime.
+# Co-authored by: OpenCode and Igor Benicio de Mesquita
+build: validate-node-version
 	./build.sh
 
 # Starts the application in production mode
@@ -76,32 +83,32 @@ stop:
 
 # Runs local split-application E2E tests in Chromium and Firefox.
 # Authored by: OpenCode
-e2e:
+e2e: validate-node-version
 	@./e2e.sh local $(E2E_ARGS)
 
 # Runs production-monolith E2E tests for CI parity.
 # Authored by: OpenCode
-e2e-ci:
+e2e-ci: validate-node-version
 	@./e2e.sh ci $(E2E_ARGS)
 
 # Runs local E2E tests using only Chromium.
 # Authored by: OpenCode
-e2e-chromium:
+e2e-chromium: validate-node-version
 	@./e2e.sh local --project=chromium $(E2E_ARGS)
 
 # Runs local E2E tests using only Firefox.
 # Authored by: OpenCode
-e2e-firefox:
+e2e-firefox: validate-node-version
 	@./e2e.sh local --project=firefox $(E2E_ARGS)
 
 # Starts local split services and Playwright UI Mode.
 # Authored by: OpenCode
-e2e-ui:
+e2e-ui: validate-node-version
 	@./e2e.sh ui $(E2E_ARGS)
 
 # Starts local split services and a headed browser available through noVNC.
 # Authored by: OpenCode
-e2e-headed:
+e2e-headed: validate-node-version
 	@./e2e.sh headed $(E2E_ARGS)
 
 # Serves the latest Playwright HTML report.

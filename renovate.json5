@@ -1,0 +1,80 @@
+// Keeps every repository-owned Node.js version under one selective updater.
+// Authored by: OpenCode
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "enabledManagers": ["custom.regex", "dockerfile", "npm", "nvm"],
+  // The E2E package is production test infrastructure, not an ignorable fixture.
+  "ignorePresets": [":ignoreModulesAndTests"],
+  "ignorePaths": ["**/node_modules/**", "**/bower_components/**"],
+  "vulnerabilityAlerts": {
+    // Dependabot remains responsible for alert-driven non-Node package updates.
+    "enabled": false,
+  },
+  "osvVulnerabilityAlerts": false,
+  "packageRules": [
+    {
+      "description": "Leave non-Node Docker and npm dependencies to Dependabot",
+      "matchManagers": ["dockerfile", "npm"],
+      "enabled": false,
+    },
+    {
+      "description": "Keep the application Node.js runtime exact, grouped, and LTS-only",
+      "matchManagers": ["dockerfile", "nvm"],
+      "matchPackageNames": ["node"],
+      "enabled": true,
+      "groupName": "Node.js application runtime",
+      "groupSlug": "nodejs-application-runtime",
+      "minimumGroupSize": 3,
+      "ignoreUnstable": true,
+      "rangeStrategy": "pin",
+      "versioning": "node",
+    },
+    {
+      "description": "Preserve the Node Docker variant and track immutable image revisions",
+      "matchManagers": ["dockerfile"],
+      "matchPackageNames": ["node"],
+      "enabled": true,
+      "pinDigests": true,
+      "versionCompatibility": "^(?<version>[^-]+)(?<compatibility>-.*)?$",
+    },
+    {
+      "description": "Update both application Node.js image digests together",
+      "matchManagers": ["dockerfile"],
+      "matchPackageNames": ["node"],
+      "matchUpdateTypes": ["digest"],
+      "groupName": "Node.js application runtime image digests",
+      "groupSlug": "nodejs-application-runtime-image-digests",
+      "minimumGroupSize": 2,
+    },
+    {
+      "description": "Keep E2E Node.js types compatible with the Node 24 Playwright runtime",
+      "matchManagers": ["npm"],
+      "matchPackageNames": ["@types/node"],
+      "enabled": true,
+      "allowedVersions": ">=24 <25",
+      "groupName": "Playwright Node.js compatibility",
+      "groupSlug": "playwright-nodejs-compatibility",
+    },
+    {
+      "description": "Update the NVM installer references together",
+      "matchManagers": ["custom.regex"],
+      "matchPackageNames": ["nvm-sh/nvm"],
+      "groupName": "NVM installer",
+      "groupSlug": "nvm-installer",
+    },
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Track NVM installer versions in workstation provisioning scripts",
+      "managerFilePatterns": ["/provisioning/.*-provisioning\\.sh$/"],
+      "matchStrings": [
+        "raw\\.githubusercontent\\.com/nvm-sh/nvm/v(?<currentValue>\\d+\\.\\d+\\.\\d+)/install\\.sh",
+      ],
+      "depNameTemplate": "nvm-sh/nvm",
+      "datasourceTemplate": "github-tags",
+      "versioningTemplate": "semver",
+    },
+  ],
+}

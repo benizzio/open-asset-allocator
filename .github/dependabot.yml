@@ -20,8 +20,12 @@ updates:
     directory: "/src/test/e2e"
     schedule:
       interval: "weekly"
+    # Renovate keeps these types aligned with the Node.js major in the Playwright image.
+    # Co-authored by: OpenCode and Igor Benicio de Mesquita
+    ignore:
+      - dependency-name: "@types/node"
     # Authored by: OpenCode
-  # Groups shared Go and Node base-image updates so related build stages stay aligned.
+  # Groups shared base-image updates so repeated non-Node build stages stay aligned.
   # Co-authored by: OpenCode and Igor Benicio de Mesquita
   - package-ecosystem: "docker"
     directories:
@@ -33,6 +37,9 @@ updates:
     groups:
       shared-base-images:
         group-by: "dependency-name"
+    # Renovate updates the Node.js image together with the workstation version.
+    ignore:
+      - dependency-name: "node"
   - package-ecosystem: "docker"
     directory: "/src/main/docker/e2e"
     schedule:

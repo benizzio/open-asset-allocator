@@ -1,5 +1,5 @@
 /**
- * Validates that the project Playwright packages and runner image use one version.
+ * Validates that Playwright packages, its runner image, and Node.js types are compatible.
  *
  * Run `npm run validate:playwright` from the E2E package, or pass
  * `--dockerfile=/path/to/Dockerfile` to validate a source Dockerfile explicitly.
@@ -28,6 +28,21 @@ const packageJson = await readJson(resolve(packageDirectory, "package.json"));
 const packageLock = await readJson(
   resolve(packageDirectory, "package-lock.json"),
 );
+const nodeTypeVersions = new Set([
+  packageJson.devDependencies?.["@types/node"],
+  packageLock.packages?.[""]?.devDependencies?.["@types/node"],
+  packageLock.packages?.["node_modules/@types/node"]?.version,
+]);
+if (nodeTypeVersions.has(undefined) || nodeTypeVersions.size !== 1) {
+  fail(
+    `Node.js type versions must match exactly; found: ${[...nodeTypeVersions].join(", ")}`,
+  );
+}
+const [nodeTypeVersion] = nodeTypeVersions;
+if (!/^\d+\.\d+\.\d+$/.test(nodeTypeVersion)) {
+  fail(`Node.js type version must be exact; found: ${nodeTypeVersion}`);
+}
+
 const versions = new Set([
   packageJson.devDependencies?.["@playwright/test"],
   packageLock.packages?.[""]?.devDependencies?.["@playwright/test"],
@@ -75,6 +90,9 @@ if (expectedImageVersion !== undefined) {
 }
 
 const dockerInfoPath = "/ms-playwright/.docker-info";
+if (expectedImageVersion !== undefined && !existsSync(dockerInfoPath)) {
+  fail(`Playwright image metadata is missing at ${dockerInfoPath}.`);
+}
 if (existsSync(dockerInfoPath)) {
   const dockerInfo = await readJson(dockerInfoPath);
   assertEqual(
@@ -82,6 +100,8 @@ if (existsSync(dockerInfoPath)) {
     dockerInfo.driverVersion,
     "installed Docker image version",
   );
+
+  assertNodeMajor(nodeTypeVersion, process.versions.node);
 }
 
 console.log(`Playwright package and image versions match: ${projectVersion}`);
@@ -119,7 +139,18 @@ function assertEqual(expected, actual, source) {
   }
 }
 
+/** Ensures the type declarations cannot expose APIs absent from the E2E runtime. */
+function assertNodeMajor(nodeTypeVersion, runtimeVersion) {
+  const nodeTypeMajor = nodeTypeVersion.split(".", 1)[0];
+  const runtimeMajor = runtimeVersion.split(".", 1)[0];
+  if (nodeTypeMajor !== runtimeMajor) {
+    fail(
+      `Node.js types ${nodeTypeVersion} do not match Playwright runtime ${runtimeVersion}.`,
+    );
+  }
+}
+
 /** Terminates validation with a machine-readable error message. */
 function fail(message) {
-  throw new Error(`Playwright version validation failed: ${message}`);
+  throw new Error(`E2E toolchain validation failed: ${message}`);
 }

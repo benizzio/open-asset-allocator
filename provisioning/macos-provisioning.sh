@@ -1,9 +1,10 @@
 #!/bin/zsh
 # This script prepares the environment for the open-asset-allocator project on Mac,
 # in an equivalent way to the original provisioning script for Linux (which used pacman).
+# Co-authored by: OpenCode and Igor Benicio de Mesquita
 # Features:
 #  - Checks if Docker Desktop is installed; if not, guides the user to install it.
-#  - Checks if Node.js is installed; if not, installs Node.js LTS using NVM.
+#  - Installs and activates the project-pinned Node.js version using NVM.
 #  - Ensures that npm (Node package manager) is working properly.
 #  - Installs necessary global npm packages (e.g., rimraf) if they're not already installed.
 # Clear messages inform the user about each step being executed.
@@ -17,6 +18,10 @@
 #  - It's also not necessary to configure user groups for Docker. On Linux distributions, the user is typically added to the "docker" group
 #    to allow Docker usage without sudo; on macOS, Docker Desktop doesn't require this adjustment because it runs in user mode transparently.
 #
+
+script_directory=${0:A:h}
+project_root=${script_directory:h}
+node_version_file="$project_root/.nvmrc"
 
 # Safety check: ensure it's running on macOS (Darwin)
 if [[ "$(uname)" != "Darwin" ]]; then
@@ -44,60 +49,46 @@ else
 fi
 echo
 
-# 2. Check Node.js (and install via NVM if necessary)
-echo "Checking if Node.js is installed..."
-if command -v node &> /dev/null; then
-    NODE_VERSION=$(node -v)
-    echo "Node.js is already installed (version $NODE_VERSION)."
-    echo "Skipping Node.js installation."
-else
-    echo "Node.js not found. The LTS version of Node.js will be installed using NVM..."
-    # Install NVM (Node Version Manager) if not present
-    # Check the NVM environment variable or the default installation folder
-    if [[ -z "${NVM_DIR}" ]]; then
-        # If $NVM_DIR is not defined, we assume NVM is not loaded in the current shell
-        if [[ ! -d "$HOME/.nvm" ]]; then
-            # If the ~/.nvm folder doesn't exist, NVM was not previously installed
-            echo "NVM is not installed. Starting installation of NVM (Node Version Manager)..."
-            # Run the official NVM installation script from the GitHub repository
-            if command -v curl &> /dev/null; then
-                curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh | bash
-            elif command -v wget &> /dev/null; then
-                wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh | bash
-            else
-                echo "Error: curl or wget not found to download NVM. Install one of these utilities and run the script again."
-                exit 1
-            fi
-        fi
-        # Load NVM in the current shell to make the `nvm` command available
-        export NVM_DIR="$HOME/.nvm"
-        # shellcheck source=/dev/null
-        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-        # shellcheck source=/dev/null
-        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+# 2. Install and select the project Node.js version through NVM
+echo "Installing the project Node.js version using NVM..."
+export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+if [[ ! -s "$NVM_DIR/nvm.sh" ]]; then
+    echo "NVM is not installed. Starting installation of NVM (Node Version Manager)..."
+    if command -v curl &> /dev/null; then
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh | bash
+    elif command -v wget &> /dev/null; then
+        wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh | bash
     else
-        # If NVM was already installed and $NVM_DIR configured, we just load it to ensure access to the `nvm` command
-        # shellcheck source=/dev/null
-        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-    fi
-
-    # Install the latest LTS (Long Term Support) version of Node.js using NVM
-    echo "Installing the latest LTS version of Node.js via NVM..."
-    nvm install --lts
-    # Set the installed LTS version as default for new sessions (future shells)
-    nvm alias default 'lts/*'
-    # Use the installed LTS version in the current script session
-    nvm use --lts
-
-    # Check if the Node.js installation was successful
-    if command -v node &> /dev/null; then
-        NODE_VERSION=$(node -v)
-        echo "Node.js $NODE_VERSION successfully installed (via NVM)."
-    else
-        echo "Error: Failed to install Node.js via NVM."
+        echo "Error: curl or wget not found to download NVM. Install one of these utilities and run the script again."
         exit 1
     fi
 fi
+
+if [[ ! -s "$NVM_DIR/nvm.sh" ]]; then
+    echo "Error: Failed to install NVM."
+    exit 1
+fi
+
+# shellcheck source=/dev/null
+\. "$NVM_DIR/nvm.sh"
+# shellcheck source=/dev/null
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+if [[ ! -f "$node_version_file" ]]; then
+    echo "Error: Node.js version file not found: $node_version_file"
+    exit 1
+fi
+
+PROJECT_NODE_VERSION=$(tr -d '[:space:]' < "$node_version_file")
+nvm install "$PROJECT_NODE_VERSION"
+nvm alias default "$PROJECT_NODE_VERSION"
+nvm use "$PROJECT_NODE_VERSION"
+
+if [[ "$(node -v)" != "v$PROJECT_NODE_VERSION" ]]; then
+    echo "Error: Failed to activate Node.js $PROJECT_NODE_VERSION."
+    exit 1
+fi
+echo "Node.js $PROJECT_NODE_VERSION successfully installed and activated via NVM."
 echo
 
 # 3. Check if npm is functional
@@ -125,6 +116,8 @@ mkdir -p "$NPM_GLOBAL_DIR"
 npm config set prefix "$NPM_GLOBAL_DIR"
 
 # Ensure the directory is in the user's PATH
+# Keep shell variables literal in the generated Zsh configuration.
+# shellcheck disable=SC2016
 if ! grep -q 'export PATH="$HOME/.npm-global/bin:$PATH"' "$HOME/.zshrc"; then
     echo 'export PATH="$HOME/.npm-global/bin:$PATH"' >> "$HOME/.zshrc"
     echo "Line added to ~/.zshrc to include the global npm packages directory in PATH."
