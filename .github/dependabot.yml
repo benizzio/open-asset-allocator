@@ -20,9 +20,10 @@ updates:
     directory: "/src/test/e2e"
     schedule:
       interval: "weekly"
-    # Renovate keeps these types aligned with the Node.js major in the Playwright image.
+    # Renovate keeps Playwright synchronized with its image and Node.js types with the image runtime.
     # Co-authored by: OpenCode and Igor Benicio de Mesquita
     ignore:
+      - dependency-name: "@playwright/test"
       - dependency-name: "@types/node"
     # Authored by: OpenCode
   # Groups shared base-image updates so repeated non-Node build stages stay aligned.
@@ -44,6 +45,9 @@ updates:
     directory: "/src/main/docker/e2e"
     schedule:
       interval: "weekly"
+    # Renovate updates the Playwright image together with its npm package.
+    ignore:
+      - dependency-name: "playwright"
     # Authored by: OpenCode
   - package-ecosystem: "docker-compose"
     directory: "/src/main/docker"

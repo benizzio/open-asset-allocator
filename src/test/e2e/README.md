@@ -157,15 +157,16 @@ and retains the workflow artifact for 14 days.
 
 ## Dependency updates
 
-Dependabot checks npm dependencies under `/src/test/e2e` and the Playwright Docker image under
-`/src/main/docker/e2e` weekly. Playwright updates must keep these sources on one exact version:
+Renovate groups `@playwright/test` under `/src/test/e2e` and the Playwright Docker image under
+`/src/main/docker/e2e` in one update. Dependabot checks the remaining E2E npm and Docker dependencies weekly and ignores
+these coordinated Playwright sources. Playwright updates must keep these sources on one exact version:
 
 - `@playwright/test` in `package.json`;
 - Playwright packages in `package-lock.json`;
 - `mcr.microsoft.com/playwright` in `src/main/docker/e2e/Dockerfile`.
 
-The runner build executes `npm run validate:playwright` and fails if package, lockfile, Dockerfile, expected image, or
-installed image versions differ. A dependency update is not complete until all Playwright version sources agree.
+The runner build executes `npm run validate:playwright` and fails if package, lockfile, Dockerfile, or installed image
+versions differ. A dependency update is not complete until all Playwright version sources agree.
 
 ## Troubleshooting
 

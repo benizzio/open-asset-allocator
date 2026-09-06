@@ -1,6 +1,6 @@
 # Provides isolated Playwright runner and headed-debug images for E2E tests.
 # Authored by: OpenCode
-FROM mcr.microsoft.com/playwright:v1.62.1-noble AS dependencies
+FROM mcr.microsoft.com/playwright:v1.63.0-noble AS dependencies
 LABEL authors="OpenCode"
 
 WORKDIR /workspace/src/test/e2e
@@ -13,7 +13,7 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY scripts/validate-playwright-version.mjs ./scripts/
-RUN npm run validate:playwright -- --image-version=1.62.1 && \
+RUN npm run validate:playwright -- --require-image-metadata && \
     mkdir -p /workspace/.home /workspace/.npm /workspace/.tmp /workspace/target/e2e-results && \
     chmod -R 0777 /workspace/.home /workspace/.npm /workspace/.tmp /workspace/target
 
