@@ -35,7 +35,7 @@ sudo systemctl start docker.socket
 # Install NVM when absent, then load it in this process before installing Node.js.
 export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
 if [[ ! -s "$NVM_DIR/nvm.sh" ]]; then
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh | bash
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.7/install.sh | bash
 fi
 
 if [[ ! -s "$NVM_DIR/nvm.sh" ]]; then
