@@ -55,9 +55,9 @@ export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
 if [[ ! -s "$NVM_DIR/nvm.sh" ]]; then
     echo "NVM is not installed. Starting installation of NVM (Node Version Manager)..."
     if command -v curl &> /dev/null; then
-        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh | bash
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.7/install.sh | bash
     elif command -v wget &> /dev/null; then
-        wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh | bash
+        wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.7/install.sh | bash
     else
         echo "Error: curl or wget not found to download NVM. Install one of these utilities and run the script again."
         exit 1
