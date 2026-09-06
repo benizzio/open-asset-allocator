@@ -16,7 +16,7 @@ COPY web-static/websrc ./websrc
 RUN npm run build -- --no-source-maps
 
 # Builds the statically linked Linux backend from locked Go modules.
-FROM golang:1.27.0 AS backend-build
+FROM golang:1.27.1 AS backend-build
 
 WORKDIR /backend/src
 
