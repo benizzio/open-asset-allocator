@@ -78,6 +78,7 @@ require (
 	github.com/sirupsen/logrus v1.9.4 // indirect
 	github.com/swaggest/assertjson v1.7.0 // indirect
 	github.com/tklauser/go-sysconf v0.4.0 // indirect
+	github.com/tklauser/numcpus v0.12.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.3.1 // indirect
 	github.com/yudai/gojsondiff v1.0.0 // indirect
