@@ -107,9 +107,10 @@ Host Node.js is optional for the containerized workflow. When it is needed for e
 commands, run `nvm install` and `nvm use` from the repository. The exact version in `.nvmrc` is also used by the frontend
 development and monolith build images. Run `make validate-node-version` to verify those runtime references.
 
-Renovate owns Node.js runtime, Node.js type, and NVM installer updates. Application runtime updates are restricted to
-LTS releases and update `.nvmrc` and both Node.js Docker images together. Dependabot continues to manage every other
-configured dependency ecosystem.
+Renovate owns coordinated Node.js runtime, Playwright toolchain, Node.js type, and NVM installer updates. Application
+runtime updates are restricted to LTS releases and update `.nvmrc` and both Node.js Docker images together. Playwright
+updates synchronize the E2E npm package and runner image. Dependabot continues to manage every other configured
+dependency ecosystem.
 
 #### End-to-end testing workflow
 

@@ -13,7 +13,7 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY scripts/validate-playwright-version.mjs ./scripts/
-RUN npm run validate:playwright -- --image-version=1.62.1 && \
+RUN npm run validate:playwright -- --require-image-metadata && \
     mkdir -p /workspace/.home /workspace/.npm /workspace/.tmp /workspace/target/e2e-results && \
     chmod -R 0777 /workspace/.home /workspace/.npm /workspace/.tmp /workspace/target
 

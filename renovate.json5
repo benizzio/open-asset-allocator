@@ -19,6 +19,24 @@
       "enabled": false,
     },
     {
+      "description": "Update the E2E Playwright package and runner image together",
+      "matchManagers": ["dockerfile", "npm"],
+      "matchFileNames": [
+        "src/main/docker/e2e/Dockerfile",
+        "src/test/e2e/package.json",
+      ],
+      "matchPackageNames": [
+        "@playwright/test",
+        "mcr.microsoft.com/playwright",
+      ],
+      "enabled": true,
+      "groupName": "Playwright E2E toolchain",
+      "groupSlug": "playwright-e2e-toolchain",
+      "minimumGroupSize": 2,
+      "ignoreUnstable": true,
+      "rangeStrategy": "pin",
+    },
+    {
       "description": "Keep the application Node.js runtime exact, grouped, and LTS-only",
       "matchManagers": ["dockerfile", "nvm"],
       "matchPackageNames": ["node"],

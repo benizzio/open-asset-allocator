@@ -1,8 +1,9 @@
 /**
  * Validates that Playwright packages, its runner image, and Node.js types are compatible.
  *
- * Run `npm run validate:playwright` from the E2E package, or pass
- * `--dockerfile=/path/to/Dockerfile` to validate a source Dockerfile explicitly.
+ * Run `npm run validate:playwright` from the E2E package, pass
+ * `--dockerfile=/path/to/Dockerfile` to validate a source Dockerfile explicitly,
+ * or pass `--require-image-metadata` while building the runner image.
  * Authored by: OpenCode
  */
 import { readFile } from "node:fs/promises";
@@ -80,17 +81,11 @@ if (dockerfile !== undefined) {
   );
 }
 
-const expectedImageVersion = argumentsByName.get("--image-version");
-if (expectedImageVersion !== undefined) {
-  assertEqual(
-    projectVersion,
-    expectedImageVersion,
-    "expected Docker image version",
-  );
-}
-
 const dockerInfoPath = "/ms-playwright/.docker-info";
-if (expectedImageVersion !== undefined && !existsSync(dockerInfoPath)) {
+if (
+  argumentsByName.has("--require-image-metadata") &&
+  !existsSync(dockerInfoPath)
+) {
   fail(`Playwright image metadata is missing at ${dockerInfoPath}.`);
 }
 if (existsSync(dockerInfoPath)) {
