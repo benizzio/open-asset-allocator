@@ -4,7 +4,7 @@ FROM cosmtrek/air@sha256:488f567197857101ee5929191408fe0c9b833dd7a79695715b56eff
 
 RUN go install github.com/go-delve/delve/cmd/dlv@v1.27.0
 
-FROM golang:1.27.0
+FROM golang:1.27.1
 LABEL authors="benizzio, OpenCode"
 
 WORKDIR /backend/src
