@@ -10,9 +10,10 @@ import (
 // ================================================
 
 type AssetDTS struct {
-	Id     *langext.ParseableInt64 `json:"id"`
-	Name   string                  `json:"name" validate:"required,max=100"`
-	Ticker string                  `json:"ticker" validate:"required,max=40"`
+	Id           *langext.ParseableInt64 `json:"id"`
+	Name         string                  `json:"name" validate:"required,max=100"`
+	Ticker       string                  `json:"ticker" validate:"required,max=40"`
+	ExternalData *ExternalAssetDataDTS   `json:"externalData,omitempty"`
 }
 
 // ExternalAssetDTS is the REST data transfer structure for external asset search results.
@@ -27,6 +28,10 @@ type ExternalAssetDTS struct {
 	ExchangeId   string `json:"exchangeId" validate:"required"`
 	Name         string `json:"name,omitempty"`
 	ExchangeName string `json:"exchangeName,omitempty"`
+}
+
+type ExternalAssetDataDTS struct {
+	Data []ExternalAssetDTS `json:"data"`
 }
 
 // ExternalAssetSearchQueryDTS is the request data transfer structure for external asset
