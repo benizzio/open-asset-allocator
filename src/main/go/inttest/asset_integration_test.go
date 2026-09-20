@@ -532,6 +532,12 @@ func TestPostAssetWithoutExternalData(t *testing.T) {
 // Authored by: OpenCode
 func TestPostAssetRejectsNonZeroId(t *testing.T) {
 	var testTicker = "TEST:POST-ASSET-ID"
+	t.Cleanup(
+		inttestutil.BuildCleanupFunctionBuilder().
+			AddCleanupQuery("DELETE FROM asset WHERE ticker={:ticker}", dbx.Params{"ticker": testTicker}).
+			Build(t),
+	)
+
 	var postAssetJSON = `
 		{
 			"id":999999,
@@ -575,7 +581,14 @@ func TestPostAssetFailureWithMissingRequiredFields(t *testing.T) {
 	t.Run(
 		"WithoutName",
 		func(t *testing.T) {
-			var postAssetJSON = `{"ticker":"TEST:POST-ASSET-NAME"}`
+			var testTicker = "TEST:POST-ASSET-NAME"
+			t.Cleanup(
+				inttestutil.BuildCleanupFunctionBuilder().
+					AddCleanupQuery("DELETE FROM asset WHERE ticker={:ticker}", dbx.Params{"ticker": testTicker}).
+					Build(t),
+			)
+
+			var postAssetJSON = `{"ticker":"` + testTicker + `"}`
 			var actualResponseJSON = string(postAssetForValidationFailure(t, postAssetJSON))
 			var expectedResponseJSON = `
 				{
@@ -590,7 +603,17 @@ func TestPostAssetFailureWithMissingRequiredFields(t *testing.T) {
 	t.Run(
 		"WithoutTicker",
 		func(t *testing.T) {
-			var postAssetJSON = `{"name":"Asset Without Ticker"}`
+			var testName = "Asset Without Ticker"
+			t.Cleanup(
+				inttestutil.BuildCleanupFunctionBuilder().
+					AddCleanupQuery(
+						"DELETE FROM asset WHERE name={:name} AND ticker={:ticker}",
+						dbx.Params{"name": testName, "ticker": ""},
+					).
+					Build(t),
+			)
+
+			var postAssetJSON = `{"name":"` + testName + `"}`
 			var actualResponseJSON = string(postAssetForValidationFailure(t, postAssetJSON))
 			var expectedResponseJSON = `
 				{
@@ -605,10 +628,17 @@ func TestPostAssetFailureWithMissingRequiredFields(t *testing.T) {
 	t.Run(
 		"WithoutExternalSource",
 		func(t *testing.T) {
+			var testTicker = "TEST:POST-ASSET-SOURCE"
+			t.Cleanup(
+				inttestutil.BuildCleanupFunctionBuilder().
+					AddCleanupQuery("DELETE FROM asset WHERE ticker={:ticker}", dbx.Params{"ticker": testTicker}).
+					Build(t),
+			)
+
 			var postAssetJSON = `
 				{
 					"name":"Asset Without External Source",
-					"ticker":"TEST:POST-ASSET-SOURCE",
+					"ticker":"` + testTicker + `",
 					"externalData":{"data":[{"ticker":"IAU","exchangeId":"PCX"}]}
 				}
 			`
@@ -647,7 +677,15 @@ func postAssetForValidationFailure(t *testing.T, postAssetJSON string) []byte {
 // Authored by: OpenCode
 func TestPostAssetWithDuplicateTicker(t *testing.T) {
 	var testTicker = "TEST:POST-ASSET-DUPLICATE"
-	insertTestAsset(t, testTicker, "Existing Asset")
+	var testAsset = insertTestAsset(t, testTicker, "Existing Asset")
+	t.Cleanup(
+		inttestutil.BuildCleanupFunctionBuilder().
+			AddCleanupQuery(
+				"DELETE FROM asset WHERE ticker={:ticker} AND id<>{:fixtureId}",
+				dbx.Params{"ticker": testTicker, "fixtureId": testAsset.Id},
+			).
+			Build(t),
+	)
 
 	var postAssetJSON = `
 		{
