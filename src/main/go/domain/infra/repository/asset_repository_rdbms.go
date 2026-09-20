@@ -110,7 +110,7 @@ func (repository *AssetRDBMSRepository) FindAssetsByTextSearchTerms(
 		queryBuilder.AddWhereClauseAndParam(
 			whereClause,
 			parameterName,
-			rdbms.BuildCaseInsensitiveSubstringPattern(searchTerm),
+			rdbms.BuildILikeSubstringPattern(searchTerm),
 		)
 	}
 	queryBuilder.AddParam("assetTextSearchLimit", limit)

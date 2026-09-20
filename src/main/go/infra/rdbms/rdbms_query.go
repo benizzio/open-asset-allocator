@@ -27,17 +27,17 @@ func processSQL(querySQL string, whereClauses []string) string {
 	return processedSQL
 }
 
-// BuildCaseInsensitiveSubstringPattern creates a PostgreSQL ILIKE pattern for a literal
+// BuildILikeSubstringPattern creates a PostgreSQL ILIKE pattern for a literal
 // case-insensitive substring search. It escapes backslashes and ILIKE wildcard characters so
 // callers can safely bind the returned value as a query parameter.
 //
 // Example:
 //
-//	pattern := rdbms.BuildCaseInsensitiveSubstringPattern("A_B")
+//	pattern := rdbms.BuildILikeSubstringPattern("A_B")
 //	// Use pattern with: column ILIKE {:search} ESCAPE E'\\'
 //
 // Authored by: OpenCode
-func BuildCaseInsensitiveSubstringPattern(searchTerm string) string {
+func BuildILikeSubstringPattern(searchTerm string) string {
 	var escapedSearchTerm = strings.ReplaceAll(searchTerm, `\`, `\\`)
 	escapedSearchTerm = strings.ReplaceAll(escapedSearchTerm, "%", `\%`)
 	escapedSearchTerm = strings.ReplaceAll(escapedSearchTerm, "_", `\_`)
