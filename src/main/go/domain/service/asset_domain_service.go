@@ -22,9 +22,9 @@ func (service *AssetDomService) FindAssetByUniqueIdentifier(uniqueIdentifier str
 	return service.assetRepository.FindAssetByUniqueIdentifier(uniqueIdentifier)
 }
 
-// UpdateAsset delegates the update of an asset's ticker and name to the repository.
+// UpdateAsset delegates the update of an asset's ticker, name, and external data to the repository.
 //
-// Authored by: GitHub Copilot
+// Co-authored by: GitHub Copilot and OpenCode
 func (service *AssetDomService) UpdateAsset(asset *domain.Asset) (*domain.Asset, error) {
 	return service.assetRepository.UpdateAsset(asset)
 }

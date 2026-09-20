@@ -72,10 +72,11 @@ func (controller *AssetRESTController) getAssetById(context *gin.Context) {
 	context.JSON(http.StatusOK, assetDTS)
 }
 
-// putAsset handles PUT requests to update an existing asset's ticker and name fields.
+// putAsset handles PUT requests to replace an existing asset's ticker, name, and external data
+// fields. An omitted or null externalData value clears the persisted external data.
 // Validates that the asset ID is present and non-zero before delegating to the domain service.
 //
-// Authored by: GitHub Copilot
+// Co-authored by: GitHub Copilot and OpenCode
 func (controller *AssetRESTController) putAsset(context *gin.Context) {
 
 	var assetDTS model.AssetDTS

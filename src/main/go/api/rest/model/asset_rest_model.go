@@ -77,6 +77,15 @@ func MapToAssetDTSs(assets []*domain.Asset) []*AssetDTS {
 	return assetsDTS
 }
 
+// MapToAsset maps an asset REST request to its domain representation, including all persisted
+// external asset data. The external asset name and exchange name remain transient and are not
+// included in the domain persistence payload.
+//
+// Example:
+//
+//	var asset = model.MapToAsset(assetDTS)
+//
+// Co-authored by: OpenCode and Igor Benicio de Mesquita
 func MapToAsset(assetDTS *AssetDTS) *domain.Asset {
 
 	if assetDTS == nil {
@@ -88,9 +97,10 @@ func MapToAsset(assetDTS *AssetDTS) *domain.Asset {
 		assetId = int64(*assetDTS.Id)
 	}
 	return &domain.Asset{
-		Id:     assetId,
-		Name:   assetDTS.Name,
-		Ticker: assetDTS.Ticker,
+		Id:           assetId,
+		Name:         assetDTS.Name,
+		Ticker:       assetDTS.Ticker,
+		ExternalData: mapToDomainExternalAssetData(assetDTS.ExternalData),
 	}
 }
 
@@ -100,6 +110,26 @@ func MapToAssets(assetsDTS []*AssetDTS) []*domain.Asset {
 		assets[index] = MapToAsset(assetDTS)
 	}
 	return assets
+}
+
+// mapToDomainExternalAssetData maps the REST external asset data payload to the domain shape used
+// by asset persistence.
+//
+// Authored by: OpenCode
+func mapToDomainExternalAssetData(externalDataDTS *ExternalAssetDataDTS) *domain.ExternalAssetData {
+
+	if externalDataDTS == nil {
+		return nil
+	}
+
+	var externalAssets = make([]domain.ExternalAsset, len(externalDataDTS.Data))
+	for index := range externalDataDTS.Data {
+		externalAssets[index] = *mapToExternalAsset(&externalDataDTS.Data[index])
+	}
+
+	return &domain.ExternalAssetData{
+		Data: externalAssets,
+	}
 }
 
 // mapToExternalAssetDataDTS maps persisted external asset data to its REST representation.

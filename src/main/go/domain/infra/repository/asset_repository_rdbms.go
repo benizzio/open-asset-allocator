@@ -120,8 +120,9 @@ func (repository *AssetRDBMSRepository) FindAssetByUniqueIdentifier(uniqueIdenti
 	return &result, nil
 }
 
-// UpdateAsset updates the ticker and name fields of an existing asset identified by its ID.
-// Returns the freshly-read updated asset from the database.
+// UpdateAsset updates the ticker, name, and external data fields of an existing asset identified by
+// its ID. A nil external data value clears the persisted external_data column. Returns the
+// freshly-read updated asset from the database.
 //
 // Example:
 //
@@ -130,7 +131,7 @@ func (repository *AssetRDBMSRepository) FindAssetByUniqueIdentifier(uniqueIdenti
 // Co-authored by: OpenCode and GitHub Copilot
 func (repository *AssetRDBMSRepository) UpdateAsset(asset *domain.Asset) (*domain.Asset, error) {
 
-	err := repository.dbAdapter.UpdateListedFields(asset, "Ticker", "Name")
+	err := repository.dbAdapter.UpdateListedFields(asset, "Ticker", "Name", "ExternalData")
 	if err != nil {
 		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "Error updating asset", repository)
 	}

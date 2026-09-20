@@ -89,7 +89,7 @@ func TestGetKnownAssetsIncludesPersistedExternalData(t *testing.T) {
 		).Build(t),
 	)
 
-	err := infra.ExecuteDBQuery(
+	var err = infra.ExecuteDBQuery(
 		"UPDATE asset SET external_data = {:externalData}::jsonb WHERE id = {:id}",
 		dbx.Params{
 			"externalData": persistedExternalDataJSON,
@@ -207,24 +207,38 @@ func TestGetAssetByIdOrTicker(t *testing.T) {
 	)
 }
 
-// TestPutAsset tests the PUT /api/asset endpoint to update an existing asset's ticker and name.
+// TestPutAsset tests the PUT /api/asset endpoint to replace an existing asset's ticker, name, and
+// complete external data payload.
 //
-// Authored by: GitHub Copilot
+// Co-authored by: GitHub Copilot and OpenCode
 func TestPutAsset(t *testing.T) {
 
 	var testTickerBefore = "TEST:BEFORE"
 	var testNameBefore = "Test Asset Before Update"
 	var testTickerAfter = "TEST:AFTER"
 	var testNameAfter = "Test Asset After Update"
+	var testExternalDataBeforeJSON = testExternalAssetDataJSON
+	var testExternalDataAfterRequestJSON = `{"data":[{"source":"YAHOO_FINANCE","ticker":"IAU-AFTER","exchangeId":"PCX-AFTER","name":"Transient Name","exchangeName":"Transient Exchange"},{"source":"YAHOO_FINANCE","ticker":"BIL-AFTER","exchangeId":"SECOND-AFTER"}]}`
+	var testExternalDataAfterJSON = `{"data":[{"source":"YAHOO_FINANCE","ticker":"IAU-AFTER","exchangeId":"PCX-AFTER"},{"source":"YAHOO_FINANCE","ticker":"BIL-AFTER","exchangeId":"SECOND-AFTER"}]}`
 
 	var testAsset = insertTestAsset(t, testTickerBefore, testNameBefore)
 	var testAssetIdString = strconv.FormatInt(testAsset.Id, 10)
+
+	var err = infra.ExecuteDBQuery(
+		"UPDATE asset SET external_data = {:externalData}::jsonb WHERE id = {:id}",
+		dbx.Params{
+			"externalData": testExternalDataBeforeJSON,
+			"id":           testAsset.Id,
+		},
+	)
+	assert.NoError(t, err)
 
 	var putAssetJSON = `
 		{
 			"id":` + testAssetIdString + `,
 			"ticker":"` + testTickerAfter + `",
-			"name":"` + testNameAfter + `"
+			"name":"` + testNameAfter + `",
+			"externalData":` + testExternalDataAfterRequestJSON + `
 		}
 	`
 
@@ -241,13 +255,105 @@ func TestPutAsset(t *testing.T) {
 		{
 			"id":` + testAssetIdString + `,
 			"ticker":"` + testTickerAfter + `",
-			"name":"` + testNameAfter + `"
+			"name":"` + testNameAfter + `",
+			"externalData":` + testExternalDataAfterJSON + `
 		}
 	`
 
 	assert.JSONEq(t, expectedResponseJSON, string(body))
 
-	assertPersistedAsset(t, testAsset.Id, testTickerAfter, testNameAfter)
+	assertPersistedAssetWithExternalData(
+		t,
+		testAsset.Id,
+		testTickerAfter,
+		testNameAfter,
+		&testExternalDataAfterJSON,
+	)
+}
+
+// TestPutAssetClearsExternalDataWhenOmitted verifies that a PUT request without externalData
+// clears the existing persisted external data.
+//
+// Authored by: OpenCode
+func TestPutAssetClearsExternalDataWhenOmitted(t *testing.T) {
+	var testAsset = insertTestAsset(t, "TEST:CLEAR-OMITTED", "Test Asset Clear Omitted")
+	var testExternalDataJSON = testExternalAssetDataJSON
+
+	var err = infra.ExecuteDBQuery(
+		"UPDATE asset SET external_data = {:externalData}::jsonb WHERE id = {:id}",
+		dbx.Params{
+			"externalData": testExternalDataJSON,
+			"id":           testAsset.Id,
+		},
+	)
+	assert.NoError(t, err)
+
+	var putAssetJSON = `
+		{
+			"id":` + strconv.FormatInt(testAsset.Id, 10) + `,
+			"ticker":"TEST:CLEAR-OMITTED-AFTER",
+			"name":"Test Asset Clear Omitted After"
+		}
+	`
+	response := putAsset(t, putAssetJSON)
+	defer deferCloseResponseBody(response)
+
+	assert.Equal(t, http.StatusOK, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.JSONEq(t, `
+		{
+			"id":`+strconv.FormatInt(testAsset.Id, 10)+`,
+			"ticker":"TEST:CLEAR-OMITTED-AFTER",
+			"name":"Test Asset Clear Omitted After"
+		}
+	`, string(body))
+
+	assertPersistedAsset(t, testAsset.Id, "TEST:CLEAR-OMITTED-AFTER", "Test Asset Clear Omitted After")
+}
+
+// TestPutAssetClearsExternalDataWhenNull verifies that a PUT request with a null externalData
+// value clears the existing persisted external data.
+//
+// Authored by: OpenCode
+func TestPutAssetClearsExternalDataWhenNull(t *testing.T) {
+	var testAsset = insertTestAsset(t, "TEST:CLEAR-NULL", "Test Asset Clear Null")
+	var testExternalDataJSON = testExternalAssetDataJSON
+
+	var err = infra.ExecuteDBQuery(
+		"UPDATE asset SET external_data = {:externalData}::jsonb WHERE id = {:id}",
+		dbx.Params{
+			"externalData": testExternalDataJSON,
+			"id":           testAsset.Id,
+		},
+	)
+	assert.NoError(t, err)
+
+	var putAssetJSON = `
+		{
+			"id":` + strconv.FormatInt(testAsset.Id, 10) + `,
+			"ticker":"TEST:CLEAR-NULL-AFTER",
+			"name":"Test Asset Clear Null After",
+			"externalData":null
+		}
+	`
+	response := putAsset(t, putAssetJSON)
+	defer deferCloseResponseBody(response)
+
+	assert.Equal(t, http.StatusOK, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.JSONEq(t, `
+		{
+			"id":`+strconv.FormatInt(testAsset.Id, 10)+`,
+			"ticker":"TEST:CLEAR-NULL-AFTER",
+			"name":"Test Asset Clear Null After"
+		}
+	`, string(body))
+
+	assertPersistedAsset(t, testAsset.Id, "TEST:CLEAR-NULL-AFTER", "Test Asset Clear Null After")
 }
 
 // TestPutAssetFailureWithoutId tests the PUT /api/asset endpoint returns a validation error
