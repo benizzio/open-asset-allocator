@@ -14,8 +14,22 @@ type AssetDomService struct {
 	assetIntegrationServicesPerSource AssetIntegrationServicesPerSource
 }
 
-func (service *AssetDomService) GetKnownAssets() ([]*domain.Asset, error) {
-	return service.assetRepository.GetKnownAssets()
+// GetKnownAssets returns all known assets when textSearch is blank. For a nonblank search, every
+// parsed term must occur as a case-insensitive substring of either the asset ticker or name, and
+// the result is limited to maxAssetTextSearchResults.
+//
+// Example:
+//
+//	assets, err := assetService.GetKnownAssets(`spdr "bloomberg"`)
+//
+// Authored by: OpenCode
+func (service *AssetDomService) GetKnownAssets(textSearch string) ([]*domain.Asset, error) {
+	var searchTerms = parseAssetTextSearch(textSearch)
+	if len(searchTerms) == 0 {
+		return service.assetRepository.GetKnownAssets()
+	}
+
+	return service.assetRepository.FindAssetsByTextSearchTerms(searchTerms, maxAssetTextSearchResults)
 }
 
 func (service *AssetDomService) FindAssetByUniqueIdentifier(uniqueIdentifier string) (*domain.Asset, error) {

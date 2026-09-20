@@ -4,7 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra"
@@ -22,6 +24,9 @@ const (
 		SELECT id, ticker, name, external_data FROM asset
 	` + rdbms.WhereClausePlaceholder + `
 		ORDER BY ticker
+	`
+	assetsTextSearchSQL = assetsSQL + `
+		LIMIT {:assetTextSearchLimit}
 	`
 )
 
@@ -79,6 +84,58 @@ func (repository *AssetRDBMSRepository) GetKnownAssets() ([]*domain.Asset, error
 	}
 
 	return langext.ToPointerSlice(result), nil
+}
+
+// FindAssetsByTextSearchTerms returns assets matching every search term against either the ticker or
+// name, using case-insensitive substring matching. Terms containing spaces therefore match an
+// exact ordered phrase. Results are ordered by ticker and restricted to the requested limit.
+//
+// Example:
+//
+//	assets, err := assetRepository.FindAssetsByTextSearchTerms([]string{"spdr bloomberg"}, 20)
+//
+// Authored by: OpenCode
+func (repository *AssetRDBMSRepository) FindAssetsByTextSearchTerms(
+	searchTerms []string,
+	limit int,
+) ([]*domain.Asset, error) {
+
+	var queryBuilder = rdbms.BuildQuery[domain.Asset](repository.dbAdapter, assetsTextSearchSQL)
+	for index, searchTerm := range searchTerms {
+		var parameterName = fmt.Sprintf("assetTextSearch%d", index)
+		var whereClause = fmt.Sprintf(
+			`AND (ticker ILIKE {:%s} ESCAPE E'\\' OR name ILIKE {:%s} ESCAPE E'\\')`,
+			parameterName,
+			parameterName,
+		)
+		queryBuilder.AddWhereClauseAndParam(
+			whereClause,
+			parameterName,
+			buildAssetTextSearchPattern(searchTerm),
+		)
+	}
+	queryBuilder.AddParam("assetTextSearchLimit", limit)
+
+	var result, err = queryBuilder.Build().FindWithRowScanner(assetRowScanner)
+	if err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(
+			err,
+			"Error searching known assets",
+			repository,
+		)
+	}
+
+	return langext.ToPointerSlice(result), nil
+}
+
+// buildAssetTextSearchPattern creates an escaped case-insensitive substring pattern for PostgreSQL.
+//
+// Authored by: OpenCode
+func buildAssetTextSearchPattern(searchTerm string) string {
+	var escapedSearchTerm = strings.ReplaceAll(searchTerm, `\`, `\\`)
+	escapedSearchTerm = strings.ReplaceAll(escapedSearchTerm, "%", `\%`)
+	escapedSearchTerm = strings.ReplaceAll(escapedSearchTerm, "_", `\_`)
+	return "%" + escapedSearchTerm + "%"
 }
 
 // FindAssetByUniqueIdentifier retrieves a single asset by numeric id or ticker. Numeric input is

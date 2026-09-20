@@ -2,8 +2,10 @@ package inttest
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strconv"
 	"testing"
 
@@ -148,6 +150,157 @@ func TestGetKnownAssetsIncludesPersistedExternalData(t *testing.T) {
 		}
 	`
 	assert.JSONEq(t, expectedAssetJSON, string(persistedAssetJSON))
+}
+
+// TestGetKnownAssetsWithTextSearch verifies case-insensitive terms, cross-field matching, exact
+// quoted phrases, and unmatched quote handling for GET /api/asset.
+//
+// Authored by: OpenCode
+func TestGetKnownAssetsWithTextSearch(t *testing.T) {
+	var crossFieldAsset = insertTestAsset(t, "TEST:CROSS-FIELD", "Alpha Search Asset")
+
+	var testCases = []struct {
+		name             string
+		textSearch       string
+		expectedResponse string
+	}{
+		{
+			name:       "case insensitive terms in any order",
+			textSearch: "BLOOMBERG spdr",
+			expectedResponse: `
+				[
+					{
+						"id": 1,
+						"name": "SPDR Bloomberg 1-3 Month T-Bill ETF",
+						"ticker": "ARCA:BIL"
+					}
+				]
+			`,
+		},
+		{
+			name:       "terms can match ticker and name independently",
+			textSearch: "CROSS alpha",
+			expectedResponse: fmt.Sprintf(`
+				[
+					{
+						"id": %d,
+						"name": "Alpha Search Asset",
+						"ticker": "TEST:CROSS-FIELD"
+					}
+				]
+			`, crossFieldAsset.Id),
+		},
+		{
+			name:       "quoted phrase preserves order",
+			textSearch: `"SPDR Bloomberg"`,
+			expectedResponse: `
+				[
+					{
+						"id": 1,
+						"name": "SPDR Bloomberg 1-3 Month T-Bill ETF",
+						"ticker": "ARCA:BIL"
+					}
+				]
+			`,
+		},
+		{
+			name:             "quoted phrase with reversed order does not match",
+			textSearch:       `"Bloomberg SPDR"`,
+			expectedResponse: `[]`,
+		},
+		{
+			name:       "unmatched quote is treated as ordinary terms",
+			textSearch: `"spdr bloomberg`,
+			expectedResponse: `
+				[
+					{
+						"id": 1,
+						"name": "SPDR Bloomberg 1-3 Month T-Bill ETF",
+						"ticker": "ARCA:BIL"
+					}
+				]
+			`,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			response, err := getAssetsByTextSearch(t, testCase.textSearch)
+			assert.NoError(t, err)
+			defer deferCloseResponseBody(response)
+
+			assert.Equal(t, http.StatusOK, response.StatusCode)
+			body, err := io.ReadAll(response.Body)
+			assert.NoError(t, err)
+			assert.JSONEq(t, testCase.expectedResponse, string(body))
+		})
+	}
+}
+
+// TestGetKnownAssetsWithTextSearchLimit verifies that text searches are capped at 20 results while
+// a blank textSearch parameter continues to return the complete asset list.
+//
+// Authored by: OpenCode
+func TestGetKnownAssetsWithTextSearchLimit(t *testing.T) {
+	const matchingAssetCount = 21
+	const initialAssetCount = 7
+
+	t.Cleanup(
+		inttestutil.BuildCleanupFunctionBuilder().
+			AddCleanupQuery("DELETE FROM asset WHERE ticker LIKE 'TEST:TEXTSEARCH-LIMIT-%'", nil).
+			Build(t),
+	)
+
+	for index := 1; index <= matchingAssetCount; index++ {
+		var ticker = fmt.Sprintf("TEST:TEXTSEARCH-LIMIT-%02d", index)
+		var name = fmt.Sprintf("Text Search Limit Asset %02d", index)
+		err := infra.ExecuteDBQuery(
+			"INSERT INTO asset (ticker, name) VALUES ({:ticker}, {:name})",
+			dbx.Params{"ticker": ticker, "name": name},
+		)
+		assert.NoError(t, err)
+	}
+
+	response, err := getAssetsByTextSearch(t, "textsearch-limit")
+	assert.NoError(t, err)
+	defer deferCloseResponseBody(response)
+
+	assert.Equal(t, http.StatusOK, response.StatusCode)
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+
+	var searchedAssets []struct {
+		Ticker string `json:"ticker"`
+	}
+	err = json.Unmarshal(body, &searchedAssets)
+	assert.NoError(t, err)
+	assert.Len(t, searchedAssets, 20)
+	assert.Equal(t, "TEST:TEXTSEARCH-LIMIT-01", searchedAssets[0].Ticker)
+	assert.Equal(t, "TEST:TEXTSEARCH-LIMIT-20", searchedAssets[19].Ticker)
+
+	blankSearchResponse, err := getAssetsByTextSearch(t, "")
+	assert.NoError(t, err)
+	defer deferCloseResponseBody(blankSearchResponse)
+
+	assert.Equal(t, http.StatusOK, blankSearchResponse.StatusCode)
+	blankSearchBody, err := io.ReadAll(blankSearchResponse.Body)
+	assert.NoError(t, err)
+
+	var allAssets []json.RawMessage
+	err = json.Unmarshal(blankSearchBody, &allAssets)
+	assert.NoError(t, err)
+	assert.Len(t, allAssets, initialAssetCount+matchingAssetCount)
+}
+
+// getAssetsByTextSearch sends an encoded textSearch request to the known-assets endpoint.
+//
+// Authored by: OpenCode
+func getAssetsByTextSearch(t *testing.T, textSearch string) (*http.Response, error) {
+	t.Helper()
+
+	var queryValues = url.Values{}
+	queryValues.Set("textSearch", textSearch)
+	return http.Get(infra.TestAPIURLPrefix + "/asset?" + queryValues.Encode())
 }
 
 func TestGetAssetByIdOrTicker(t *testing.T) {

@@ -52,7 +52,17 @@ func (controller *AssetRESTController) BuildRoutes() []infra.RESTRoute {
 
 func (controller *AssetRESTController) getKnownAssets(context *gin.Context) {
 
-	assets, err := controller.assetDomService.GetKnownAssets()
+	var assetSearchQueryDTS model.AssetSearchQueryDTS
+	valid, err := gininfra.BindAndValidateQueryWithInvalidResponse(context, &assetSearchQueryDTS)
+	if err != nil {
+		gininfra.HandleAPIError(context, "Error binding asset search query", err)
+		return
+	}
+	if !valid {
+		return
+	}
+
+	assets, err := controller.assetDomService.GetKnownAssets(assetSearchQueryDTS.TextSearch)
 	if gininfra.HandleAPIError(context, "Error getting known assets", err) {
 		return
 	}

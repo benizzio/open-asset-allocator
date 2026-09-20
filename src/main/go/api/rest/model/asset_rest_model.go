@@ -34,6 +34,14 @@ type ExternalAssetDataDTS struct {
 	Data []ExternalAssetDTS `json:"data"`
 }
 
+// AssetSearchQueryDTS is the REST data transfer structure for filtering known
+// assets by their ticker or name.
+//
+// Authored by: OpenCode
+type AssetSearchQueryDTS struct {
+	TextSearch string `form:"textSearch" json:"textSearch"`
+}
+
 // ExternalAssetSearchQueryDTS is the request data transfer structure for external asset
 // search query parameters.
 //
