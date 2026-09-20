@@ -13,9 +13,14 @@ import (
 )
 
 const (
+	// assetsSQL retrieves the asset fields required by asset endpoints in stable ticker order.
+	//
+	// Authored by: OpenCode
 	assetsSQL = `
 		SELECT id, ticker, name, external_data FROM asset
-	` + rdbms.WhereClausePlaceholder
+	` + rdbms.WhereClausePlaceholder + `
+		ORDER BY ticker
+	`
 )
 
 // assetRowScanner reads a persisted asset row, including its optional external data payload,

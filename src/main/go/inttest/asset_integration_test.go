@@ -1,14 +1,17 @@
 package inttest
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
 	"strconv"
 	"testing"
 
+	dbx "github.com/go-ozzo/ozzo-dbx"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/benizzio/open-asset-allocator/inttest/infra"
+	inttestutil "github.com/benizzio/open-asset-allocator/inttest/util"
 )
 
 // TestGetKnownAssets tests the GET /api/asset endpoint to retrieve all known assets.
@@ -35,6 +38,16 @@ func TestGetKnownAssets(t *testing.T) {
 				"ticker": "ARCA:BIL"
 			},
 			{
+				"id": 6,
+				"name": "iShares Msci Brazil ETF",
+				"ticker": "ARCA:EWZ"
+			},
+			{
+				"id": 7,
+				"name": "SPDR S&P 500 ETF Trust",
+				"ticker": "ARCA:SPY"
+			},
+			{
 				"id": 2,
 				"name": "iShares 0-5 Year TIPS Bond ETF",
 				"ticker": "ARCA:STIP"
@@ -45,28 +58,96 @@ func TestGetKnownAssets(t *testing.T) {
 				"ticker": "NasdaqGM:IEF"
 			},
 			{
-				"id": 4,
-				"name": "iShares 20+ Year Treasury Bond ETF",
-				"ticker": "NasdaqGM:TLT"
-			},
-			{
 				"id": 5,
 				"name": "iShares Short Treasury Bond ETF",
 				"ticker": "NasdaqGM:SHV"
 			},
 			{
-				"id": 6,
-				"name": "iShares Msci Brazil ETF",
-				"ticker": "ARCA:EWZ"
-			},
-			{
-				"id": 7,
-				"name": "SPDR S&P 500 ETF Trust",
-				"ticker": "ARCA:SPY"
+				"id": 4,
+				"name": "iShares 20+ Year Treasury Bond ETF",
+				"ticker": "NasdaqGM:TLT"
 			}
 		]
 	`
 	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
+}
+
+// TestGetKnownAssetsIncludesPersistedExternalData verifies that GET /api/asset returns the
+// complete external data payload persisted for an asset.
+//
+// Authored by: OpenCode
+func TestGetKnownAssetsIncludesPersistedExternalData(t *testing.T) {
+	const persistedExternalDataJSON = `{"data":[{"source":"YAHOO_FINANCE","ticker":"BIL-PERSISTED","exchangeId":"PCX-PERSISTED"},{"source":"YAHOO_FINANCE","ticker":"BIL-SECOND","exchangeId":"SECOND"}]}`
+
+	var assetId int64 = 1
+	var originalExternalData = capturePersistedAssetExternalData(t, assetId)
+	t.Cleanup(
+		addAssetExternalDataRestoreCleanup(
+			inttestutil.BuildCleanupFunctionBuilder(),
+			assetId,
+			originalExternalData,
+		).Build(t),
+	)
+
+	err := infra.ExecuteDBQuery(
+		"UPDATE asset SET external_data = {:externalData}::jsonb WHERE id = {:id}",
+		dbx.Params{
+			"externalData": persistedExternalDataJSON,
+			"id":           assetId,
+		},
+	)
+	assert.NoError(t, err)
+
+	response, err := http.Get(infra.TestAPIURLPrefix + "/asset")
+	assert.NoError(t, err)
+	defer deferCloseResponseBody(response)
+
+	assert.Equal(t, http.StatusOK, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+
+	var actualAssets []json.RawMessage
+	err = json.Unmarshal(body, &actualAssets)
+	assert.NoError(t, err)
+
+	var persistedAssetJSON json.RawMessage
+	for _, assetJSON := range actualAssets {
+		var assetIdentifier struct {
+			Id int64 `json:"id"`
+		}
+		err = json.Unmarshal(assetJSON, &assetIdentifier)
+		assert.NoError(t, err)
+		if assetIdentifier.Id == assetId {
+			persistedAssetJSON = assetJSON
+			break
+		}
+	}
+
+	assert.NotEmpty(t, persistedAssetJSON)
+	var expectedAssetJSON = `
+		{
+			"id": 1,
+			"name": "SPDR Bloomberg 1-3 Month T-Bill ETF",
+			"ticker": "ARCA:BIL",
+			"externalData": {
+				"data": [
+					{
+						"source": "YAHOO_FINANCE",
+						"ticker": "BIL-PERSISTED",
+						"exchangeId": "PCX-PERSISTED"
+					},
+					{
+						"source": "YAHOO_FINANCE",
+						"ticker": "BIL-SECOND",
+						"exchangeId": "SECOND"
+					}
+				]
+			}
+		}
+	`
+	assert.JSONEq(t, expectedAssetJSON, string(persistedAssetJSON))
 }
 
 func TestGetAssetByIdOrTicker(t *testing.T) {
@@ -403,6 +484,16 @@ func TestGetAssetByIdInvalidId(t *testing.T) {
 					"ticker": "ARCA:BIL"
 				},
 				{
+					"id": 6,
+					"name": "iShares Msci Brazil ETF",
+					"ticker": "ARCA:EWZ"
+				},
+				{
+					"id": 7,
+					"name": "SPDR S&P 500 ETF Trust",
+					"ticker": "ARCA:SPY"
+				},
+				{
 					"id": 2,
 					"name": "iShares 0-5 Year TIPS Bond ETF",
 					"ticker": "ARCA:STIP"
@@ -413,24 +504,14 @@ func TestGetAssetByIdInvalidId(t *testing.T) {
 					"ticker": "NasdaqGM:IEF"
 				},
 				{
-					"id": 4,
-					"name": "iShares 20+ Year Treasury Bond ETF",
-					"ticker": "NasdaqGM:TLT"
-				},
-				{
 					"id": 5,
 					"name": "iShares Short Treasury Bond ETF",
 					"ticker": "NasdaqGM:SHV"
 				},
 				{
-					"id": 6,
-					"name": "iShares Msci Brazil ETF",
-					"ticker": "ARCA:EWZ"
-				},
-				{
-					"id": 7,
-					"name": "SPDR S&P 500 ETF Trust",
-					"ticker": "ARCA:SPY"
+					"id": 4,
+					"name": "iShares 20+ Year Treasury Bond ETF",
+					"ticker": "NasdaqGM:TLT"
 				}
 			]
 		`
