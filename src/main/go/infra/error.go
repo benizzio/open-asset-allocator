@@ -35,19 +35,21 @@ func (domError *DomainValidationError) Error() string {
 	return domError.Message
 }
 
-// ConflictError represents an application conflict that should be returned as an HTTP 409 response.
+// UniqueConstraintViolationError represents an application error caused by a violated database
+// uniqueness constraint. Its transport-specific mapping is handled by the API boundary.
 //
 // Authored by: OpenCode
-type ConflictError struct {
-	Message string
-	Details []string
+type UniqueConstraintViolationError struct {
+	ConstraintName string
+	Message        string
+	Details        []string
 }
 
-// Error returns the conflict message.
+// Error returns the uniqueness-constraint violation message.
 //
 // Authored by: OpenCode
-func (conflictError *ConflictError) Error() string {
-	return conflictError.Message
+func (constraintError *UniqueConstraintViolationError) Error() string {
+	return constraintError.Message
 }
 
 // ======================================================================
@@ -81,15 +83,28 @@ func BuildDomainValidationError(message string, causes []*AppError) error {
 	return &DomainValidationError{Message: message, Causes: causes}
 }
 
-// BuildConflictError creates an application conflict with an optional list of client-facing details.
+// BuildUniqueConstraintViolationError creates an error for a violated database uniqueness
+// constraint with an optional list of details.
 //
 // Example:
 //
-//	return BuildConflictError("Asset already exists", []string{"Ticker is already registered"})
+//	return BuildUniqueConstraintViolationError(
+//		"asset_ticker_uk",
+//		"Asset already exists",
+//		[]string{"Ticker is already registered"},
+//	)
 //
 // Authored by: OpenCode
-func BuildConflictError(message string, details []string) error {
-	return &ConflictError{Message: message, Details: details}
+func BuildUniqueConstraintViolationError(
+	constraintName string,
+	message string,
+	details []string,
+) error {
+	return &UniqueConstraintViolationError{
+		ConstraintName: constraintName,
+		Message:        message,
+		Details:        details,
+	}
 }
 
 // ======================================================================

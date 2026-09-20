@@ -6,8 +6,6 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/lib/pq"
-
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/benizzio/open-asset-allocator/infra/rdbms"
@@ -15,6 +13,8 @@ import (
 )
 
 const (
+	assetTickerUniqueConstraint = "asset_ticker_uk"
+
 	// assetsSQL retrieves the asset fields required by asset endpoints in stable ticker order.
 	//
 	// Authored by: OpenCode
@@ -123,7 +123,7 @@ func (repository *AssetRDBMSRepository) FindAssetByUniqueIdentifier(uniqueIdenti
 }
 
 // InsertAsset inserts one asset, including optional external data, and returns the generated
-// persisted asset. Duplicate tickers are returned as a conflict error.
+// persisted asset. Duplicate tickers are returned as a unique-constraint violation.
 //
 // Example:
 //
@@ -134,8 +134,9 @@ func (repository *AssetRDBMSRepository) InsertAsset(asset *domain.Asset) (*domai
 	var insertingCopyAsset = *asset
 	err := repository.dbAdapter.Insert(&insertingCopyAsset)
 	if err != nil {
-		if isAssetTickerUniqueViolation(err) {
-			return nil, infra.BuildConflictError(
+		if rdbms.IsUniqueConstraintViolation(err, assetTickerUniqueConstraint) {
+			return nil, infra.BuildUniqueConstraintViolationError(
+				assetTickerUniqueConstraint,
 				"Asset already exists",
 				[]string{"Asset with ticker " + asset.Ticker + " already exists"},
 			)
@@ -145,17 +146,6 @@ func (repository *AssetRDBMSRepository) InsertAsset(asset *domain.Asset) (*domai
 	}
 
 	return &insertingCopyAsset, nil
-}
-
-// isAssetTickerUniqueViolation identifies the asset ticker unique-key violation produced by
-// PostgreSQL during single-asset insertion.
-//
-// Authored by: OpenCode
-func isAssetTickerUniqueViolation(err error) bool {
-	var postgresError *pq.Error
-	return errors.As(err, &postgresError) &&
-		postgresError.Code == "23505" &&
-		postgresError.Constraint == "asset_ticker_uk"
 }
 
 // UpdateAsset updates the ticker, name, and external data fields of an existing asset identified by

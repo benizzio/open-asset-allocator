@@ -83,10 +83,6 @@ func (controller *AssetRESTController) getAssetById(context *gin.Context) {
 // postAsset handles POST requests that create an asset with optional external data. The database
 // generates the asset ID; non-zero client-supplied IDs are rejected.
 //
-// Example request:
-//
-//	{"name":"iShares Gold Trust","ticker":"ARCA:IAU","externalData":{"data":[]}}
-//
 // Authored by: OpenCode
 func (controller *AssetRESTController) postAsset(context *gin.Context) {
 
