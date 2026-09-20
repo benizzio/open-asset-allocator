@@ -55,7 +55,7 @@ func HandleAPIError(context *gin.Context, message string, cause error) bool {
 
 // handleDomainError checks if the error matches a known domain error type and sends the corresponding HTTP response.
 //
-// Co-authored by: GitHub Copilot and OpenCode
+// Co-authored by: GitHub Copilot
 func handleDomainError(context *gin.Context, cause error) bool {
 
 	if domValidationError, ok := errors.AsType[*infra.DomainValidationError](cause); ok {
@@ -79,7 +79,7 @@ func handleDomainError(context *gin.Context, cause error) bool {
 
 // handleInfrastructureError maps known infrastructure errors to their HTTP responses.
 //
-// Co-authored by: GitHub Copilot and OpenCode
+// Authored by: OpenCode
 func handleInfrastructureError(context *gin.Context, cause error) bool {
 
 	if constraintError, ok := errors.AsType[*infra.UniqueConstraintViolationError](cause); ok {
