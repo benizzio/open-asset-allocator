@@ -15,8 +15,8 @@ import (
 )
 
 // HandleAPIError handles an error from the API layer by logging it and sending an appropriate HTTP response.
-// It first attempts to match the error to a known domain error type (e.g. DomainValidationError) and sends
-// a specific response. If no domain match is found, it falls back to a generic 500 Internal Server Error.
+// It first attempts to match the error to a known domain or infrastructure error type and sends a
+// specific response. If no known error matches, it falls back to a generic 500 Internal Server Error.
 // Returns true if an error was present and handled, false otherwise.
 //
 // Example:
@@ -26,7 +26,7 @@ import (
 //		return
 //	}
 //
-// Co-authored by: GitHub Copilot
+// Co-authored by: GitHub Copilot and OpenCode
 func HandleAPIError(context *gin.Context, message string, cause error) bool {
 
 	var handle = cause != nil
@@ -35,6 +35,9 @@ func HandleAPIError(context *gin.Context, message string, cause error) bool {
 		glog.Error(message, ": ", cause)
 
 		var handled = handleDomainError(context, cause)
+		if !handled {
+			handled = handleInfrastructureError(context, cause)
+		}
 		if handled {
 			return true
 		}
@@ -65,6 +68,25 @@ func handleDomainError(context *gin.Context, cause error) bool {
 			http.StatusBadRequest, model.ErrorResponse{
 				ErrorMessage: domValidationError.Message,
 				Details:      validationMessages,
+			},
+		)
+
+		return true
+	}
+
+	return false
+}
+
+// handleInfrastructureError maps known infrastructure errors to their HTTP responses.
+//
+// Authored by: OpenCode
+func handleInfrastructureError(context *gin.Context, cause error) bool {
+
+	if constraintError, ok := errors.AsType[*infra.UniqueConstraintViolationError](cause); ok {
+		context.JSON(
+			http.StatusConflict, model.ErrorResponse{
+				ErrorMessage: constraintError.Message,
+				Details:      constraintError.Details,
 			},
 		)
 

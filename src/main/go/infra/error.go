@@ -35,6 +35,23 @@ func (domError *DomainValidationError) Error() string {
 	return domError.Message
 }
 
+// UniqueConstraintViolationError represents an application error caused by a violated database
+// uniqueness constraint. Its transport-specific mapping is handled by the API boundary.
+//
+// Authored by: OpenCode
+type UniqueConstraintViolationError struct {
+	ConstraintName string
+	Message        string
+	Details        []string
+}
+
+// Error returns the uniqueness-constraint violation message.
+//
+// Authored by: OpenCode
+func (constraintError *UniqueConstraintViolationError) Error() string {
+	return constraintError.Message
+}
+
 // ======================================================================
 // Error API
 // ======================================================================
@@ -64,6 +81,30 @@ func PropagateAsAppErrorWithNewMessage(cause error, message string, origin any) 
 
 func BuildDomainValidationError(message string, causes []*AppError) error {
 	return &DomainValidationError{Message: message, Causes: causes}
+}
+
+// BuildUniqueConstraintViolationError creates an error for a violated database uniqueness
+// constraint with an optional list of details.
+//
+// Example:
+//
+//	return BuildUniqueConstraintViolationError(
+//		"asset_ticker_uk",
+//		"Asset already exists",
+//		[]string{"Ticker is already registered"},
+//	)
+//
+// Authored by: OpenCode
+func BuildUniqueConstraintViolationError(
+	constraintName string,
+	message string,
+	details []string,
+) error {
+	return &UniqueConstraintViolationError{
+		ConstraintName: constraintName,
+		Message:        message,
+		Details:        details,
+	}
 }
 
 // ======================================================================

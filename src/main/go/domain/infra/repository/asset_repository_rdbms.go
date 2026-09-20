@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"strconv"
 
 	"github.com/benizzio/open-asset-allocator/domain"
@@ -13,9 +14,19 @@ import (
 )
 
 const (
+	assetTickerUniqueConstraint = "asset_ticker_uk"
+
+	// assetsSQL retrieves the asset fields required by asset endpoints in stable ticker order.
+	//
+	// Authored by: OpenCode
 	assetsSQL = `
 		SELECT id, ticker, name, external_data FROM asset
-	` + rdbms.WhereClausePlaceholder
+	` + rdbms.WhereClausePlaceholder + `
+		ORDER BY ticker
+	`
+	assetsTextSearchSQL = assetsSQL + `
+		LIMIT {:assetTextSearchLimit}
+	`
 )
 
 // assetRowScanner reads a persisted asset row, including its optional external data payload,
@@ -74,6 +85,48 @@ func (repository *AssetRDBMSRepository) GetKnownAssets() ([]*domain.Asset, error
 	return langext.ToPointerSlice(result), nil
 }
 
+// FindAssetsByTextSearchTerms returns assets matching every search term against either the ticker or
+// name, using case-insensitive substring matching. Terms containing spaces therefore match an
+// exact ordered phrase. Results are ordered by ticker and restricted to the requested limit.
+//
+// Example:
+//
+//	assets, err := assetRepository.FindAssetsByTextSearchTerms([]string{"spdr bloomberg"}, 20)
+//
+// Authored by: OpenCode
+func (repository *AssetRDBMSRepository) FindAssetsByTextSearchTerms(
+	searchTerms []string,
+	limit int,
+) ([]*domain.Asset, error) {
+
+	var queryBuilder = rdbms.BuildQuery[domain.Asset](repository.dbAdapter, assetsTextSearchSQL)
+	for index, searchTerm := range searchTerms {
+		var parameterName = fmt.Sprintf("assetTextSearch%d", index)
+		var whereClause = fmt.Sprintf(
+			`AND (ticker ILIKE {:%s} ESCAPE E'\\' OR name ILIKE {:%s} ESCAPE E'\\')`,
+			parameterName,
+			parameterName,
+		)
+		queryBuilder.AddWhereClauseAndParam(
+			whereClause,
+			parameterName,
+			rdbms.BuildILikeSubstringPattern(searchTerm),
+		)
+	}
+	queryBuilder.AddParam("assetTextSearchLimit", limit)
+
+	var result, err = queryBuilder.Build().FindWithRowScanner(assetRowScanner)
+	if err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(
+			err,
+			"Error searching known assets",
+			repository,
+		)
+	}
+
+	return langext.ToPointerSlice(result), nil
+}
+
 // FindAssetByUniqueIdentifier retrieves a single asset by numeric id or ticker. Numeric input is
 // matched against both columns to preserve the existing lookup behavior.
 //
@@ -115,8 +168,35 @@ func (repository *AssetRDBMSRepository) FindAssetByUniqueIdentifier(uniqueIdenti
 	return &result, nil
 }
 
-// UpdateAsset updates the ticker and name fields of an existing asset identified by its ID.
-// Returns the freshly-read updated asset from the database.
+// InsertAsset inserts one asset, including optional external data, and returns the generated
+// persisted asset. Duplicate tickers are returned as a unique-constraint violation.
+//
+// Example:
+//
+//	createdAsset, err := assetRepository.InsertAsset(asset)
+//
+// Authored by: OpenCode
+func (repository *AssetRDBMSRepository) InsertAsset(asset *domain.Asset) (*domain.Asset, error) {
+	var insertingCopyAsset = *asset
+	err := repository.dbAdapter.Insert(&insertingCopyAsset)
+	if err != nil {
+		if rdbms.IsUniqueConstraintViolation(err, assetTickerUniqueConstraint) {
+			return nil, infra.BuildUniqueConstraintViolationError(
+				assetTickerUniqueConstraint,
+				"Asset already exists",
+				[]string{"Asset with ticker " + asset.Ticker + " already exists"},
+			)
+		}
+
+		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "Error inserting asset", repository)
+	}
+
+	return &insertingCopyAsset, nil
+}
+
+// UpdateAsset updates the ticker, name, and external data fields of an existing asset identified by
+// its ID. A nil external data value clears the persisted external_data column. Returns the
+// freshly-read updated asset from the database.
 //
 // Example:
 //
@@ -125,7 +205,7 @@ func (repository *AssetRDBMSRepository) FindAssetByUniqueIdentifier(uniqueIdenti
 // Co-authored by: OpenCode and GitHub Copilot
 func (repository *AssetRDBMSRepository) UpdateAsset(asset *domain.Asset) (*domain.Asset, error) {
 
-	err := repository.dbAdapter.UpdateListedFields(asset, "Ticker", "Name")
+	err := repository.dbAdapter.UpdateListedFields(asset, "Ticker", "Name", "ExternalData")
 	if err != nil {
 		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "Error updating asset", repository)
 	}

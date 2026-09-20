@@ -2,8 +2,10 @@ package service
 
 import (
 	"context"
+	"strings"
 
 	"github.com/benizzio/open-asset-allocator/domain"
+	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/benizzio/open-asset-allocator/langext"
 )
 
@@ -14,17 +16,57 @@ type AssetDomService struct {
 	assetIntegrationServicesPerSource AssetIntegrationServicesPerSource
 }
 
-func (service *AssetDomService) GetKnownAssets() ([]*domain.Asset, error) {
-	return service.assetRepository.GetKnownAssets()
+// GetKnownAssets returns all known assets when textSearch is blank. For a nonblank search, every
+// parsed term must occur as a case-insensitive substring of either the asset ticker or name, and
+// the result is limited to maxAssetTextSearchResults.
+//
+// Example:
+//
+//	assets, err := assetService.GetKnownAssets(`spdr "bloomberg"`)
+//
+// Authored by: OpenCode
+func (service *AssetDomService) GetKnownAssets(textSearch string) ([]*domain.Asset, error) {
+	var searchTerms = parseAssetTextSearch(textSearch)
+	if len(searchTerms) == 0 {
+		if strings.TrimSpace(textSearch) == "" {
+			return service.assetRepository.GetKnownAssets()
+		}
+		return []*domain.Asset{}, nil
+	}
+	if len(searchTerms) > maxAssetTextSearchTerms {
+		var validationError = infra.BuildAppErrorFormattedUnconverted(
+			service,
+			"Text search must not exceed %d terms",
+			maxAssetTextSearchTerms,
+		)
+		return nil, infra.BuildDomainValidationError(
+			"Asset text search validation failed",
+			[]*infra.AppError{validationError},
+		)
+	}
+
+	return service.assetRepository.FindAssetsByTextSearchTerms(searchTerms, maxAssetTextSearchResults)
 }
 
 func (service *AssetDomService) FindAssetByUniqueIdentifier(uniqueIdentifier string) (*domain.Asset, error) {
 	return service.assetRepository.FindAssetByUniqueIdentifier(uniqueIdentifier)
 }
 
-// UpdateAsset delegates the update of an asset's ticker and name to the repository.
+// CreateAsset delegates insertion of one asset, including its optional external data, to the
+// repository and returns the generated persisted asset.
 //
-// Authored by: GitHub Copilot
+// Example:
+//
+//	createdAsset, err := assetService.CreateAsset(asset)
+//
+// Authored by: OpenCode
+func (service *AssetDomService) CreateAsset(asset *domain.Asset) (*domain.Asset, error) {
+	return service.assetRepository.InsertAsset(asset)
+}
+
+// UpdateAsset delegates the update of an asset's ticker, name, and external data to the repository.
+//
+// Co-authored by: GitHub Copilot and OpenCode
 func (service *AssetDomService) UpdateAsset(asset *domain.Asset) (*domain.Asset, error) {
 	return service.assetRepository.UpdateAsset(asset)
 }
