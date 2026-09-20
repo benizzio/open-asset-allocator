@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"strings"
 
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra"
@@ -111,7 +110,7 @@ func (repository *AssetRDBMSRepository) FindAssetsByTextSearchTerms(
 		queryBuilder.AddWhereClauseAndParam(
 			whereClause,
 			parameterName,
-			buildAssetTextSearchPattern(searchTerm),
+			rdbms.BuildCaseInsensitiveSubstringPattern(searchTerm),
 		)
 	}
 	queryBuilder.AddParam("assetTextSearchLimit", limit)
@@ -126,16 +125,6 @@ func (repository *AssetRDBMSRepository) FindAssetsByTextSearchTerms(
 	}
 
 	return langext.ToPointerSlice(result), nil
-}
-
-// buildAssetTextSearchPattern creates an escaped case-insensitive substring pattern for PostgreSQL.
-//
-// Authored by: OpenCode
-func buildAssetTextSearchPattern(searchTerm string) string {
-	var escapedSearchTerm = strings.ReplaceAll(searchTerm, `\`, `\\`)
-	escapedSearchTerm = strings.ReplaceAll(escapedSearchTerm, "%", `\%`)
-	escapedSearchTerm = strings.ReplaceAll(escapedSearchTerm, "_", `\_`)
-	return "%" + escapedSearchTerm + "%"
 }
 
 // FindAssetByUniqueIdentifier retrieves a single asset by numeric id or ticker. Numeric input is

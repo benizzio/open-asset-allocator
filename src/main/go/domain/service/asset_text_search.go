@@ -14,8 +14,6 @@ const (
 //
 // Authored by: OpenCode
 func parseAssetTextSearch(textSearch string) []string {
-	textSearch = removeUnmatchedAssetTextSearchQuote(textSearch)
-
 	var searchTerms = make([]string, 0)
 	var unquotedTerm strings.Builder
 	var quotedTerm strings.Builder
@@ -49,19 +47,6 @@ func parseAssetTextSearch(textSearch string) []string {
 	}
 
 	return searchTerms
-}
-
-// removeUnmatchedAssetTextSearchQuote removes the final quote when the input contains an odd
-// number of quote characters, leaving all remaining quotes available for phrase parsing.
-//
-// Authored by: OpenCode
-func removeUnmatchedAssetTextSearchQuote(textSearch string) string {
-	if strings.Count(textSearch, `"`)%2 == 0 {
-		return textSearch
-	}
-
-	var lastQuoteIndex = strings.LastIndex(textSearch, `"`)
-	return textSearch[:lastQuoteIndex] + textSearch[lastQuoteIndex+1:]
 }
 
 // appendAssetTextSearchTerms appends nonblank whitespace-separated search terms to the result.

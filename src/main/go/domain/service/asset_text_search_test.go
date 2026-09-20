@@ -36,9 +36,9 @@ func TestParseAssetTextSearch(t *testing.T) {
 			expected:   []string{"spdr", "bloomberg"},
 		},
 		{
-			name:       "unmatched quote does not split a term",
+			name:       "unmatched quote separates ordinary terms",
 			textSearch: `spdr"bloomberg`,
-			expected:   []string{"spdrbloomberg"},
+			expected:   []string{"spdr", "bloomberg"},
 		},
 		{
 			name:       "phrase whitespace is normalized",
