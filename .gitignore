@@ -8,3 +8,9 @@ vendor/
 **/.parcel-cache/
 src/main/web-static/dist/
 **/__pycache__/
+
+# Graphify local cache, configuration, and incremental state
+/graphify-out/cache/
+/graphify-out/.graphify_*
+/graphify-out/cost.json
+/graphify-out/manifest.json
