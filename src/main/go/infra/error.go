@@ -35,6 +35,21 @@ func (domError *DomainValidationError) Error() string {
 	return domError.Message
 }
 
+// ConflictError represents an application conflict that should be returned as an HTTP 409 response.
+//
+// Authored by: OpenCode
+type ConflictError struct {
+	Message string
+	Details []string
+}
+
+// Error returns the conflict message.
+//
+// Authored by: OpenCode
+func (conflictError *ConflictError) Error() string {
+	return conflictError.Message
+}
+
 // ======================================================================
 // Error API
 // ======================================================================
@@ -64,6 +79,17 @@ func PropagateAsAppErrorWithNewMessage(cause error, message string, origin any) 
 
 func BuildDomainValidationError(message string, causes []*AppError) error {
 	return &DomainValidationError{Message: message, Causes: causes}
+}
+
+// BuildConflictError creates an application conflict with an optional list of client-facing details.
+//
+// Example:
+//
+//	return BuildConflictError("Asset already exists", []string{"Ticker is already registered"})
+//
+// Authored by: OpenCode
+func BuildConflictError(message string, details []string) error {
+	return &ConflictError{Message: message, Details: details}
 }
 
 // ======================================================================

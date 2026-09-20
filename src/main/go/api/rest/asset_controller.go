@@ -17,6 +17,9 @@ type AssetRESTController struct {
 	assetDomService *service.AssetDomService
 }
 
+// BuildRoutes returns the HTTP routes handled by the asset REST controller.
+//
+// Co-authored by: OpenCode and Igor Benicio de Mesquita
 func (controller *AssetRESTController) BuildRoutes() []infra.RESTRoute {
 	return []infra.RESTRoute{
 		{
@@ -28,6 +31,11 @@ func (controller *AssetRESTController) BuildRoutes() []infra.RESTRoute {
 			Method:   http.MethodGet,
 			Path:     "/api/asset/:" + assetIdOrTickerParam,
 			Handlers: gin.HandlersChain{controller.getAssetById},
+		},
+		{
+			Method:   http.MethodPost,
+			Path:     "/api/asset",
+			Handlers: gin.HandlersChain{controller.postAsset},
 		},
 		{
 			Method:   http.MethodPut,
@@ -70,6 +78,51 @@ func (controller *AssetRESTController) getAssetById(context *gin.Context) {
 
 	var assetDTS = model.MapToAssetDTS(asset)
 	context.JSON(http.StatusOK, assetDTS)
+}
+
+// postAsset handles POST requests that create an asset with optional external data. The database
+// generates the asset ID; non-zero client-supplied IDs are rejected.
+//
+// Example request:
+//
+//	{"name":"iShares Gold Trust","ticker":"ARCA:IAU","externalData":{"data":[]}}
+//
+// Authored by: OpenCode
+func (controller *AssetRESTController) postAsset(context *gin.Context) {
+
+	var assetDTS model.AssetDTS
+	valid, err := gininfra.BindAndValidateJSONWithInvalidResponse(context, &assetDTS)
+	if err != nil {
+		gininfra.HandleAPIError(context, bindAssetErrorMessage, err)
+		return
+	}
+	if !valid {
+		return
+	}
+
+	if assetDTS.Id != nil && !langext.IsZeroValue(*assetDTS.Id) {
+		var validationErrors = validation.BuildCustomValidationErrorsBuilder().
+			CustomValidationError(
+				assetDTS,
+				"Id",
+				"custom",
+				"Asset ID must be omitted or zero for creation",
+				*assetDTS.Id,
+			).
+			Build()
+
+		gininfra.RespondWithCustomValidationErrors(context, validationErrors, assetDTS)
+		return
+	}
+
+	var asset = model.MapToAsset(&assetDTS)
+	createdAsset, err := controller.assetDomService.CreateAsset(asset)
+	if gininfra.HandleAPIError(context, "Error creating asset", err) {
+		return
+	}
+
+	var responseBody = model.MapToAssetDTS(createdAsset)
+	context.JSON(http.StatusCreated, responseBody)
 }
 
 // putAsset handles PUT requests to replace an existing asset's ticker, name, and external data

@@ -207,6 +207,268 @@ func TestGetAssetByIdOrTicker(t *testing.T) {
 	)
 }
 
+// TestPostAsset creates an asset with multiple external data entries and verifies that transient
+// external asset display fields are excluded from both the response and persistence.
+//
+// Authored by: OpenCode
+func TestPostAsset(t *testing.T) {
+	var testTicker = "TEST:POST-ASSET"
+	var testName = "Test Asset Created"
+	var externalDataRequestJSON = `{"data":[{"source":"YAHOO_FINANCE","ticker":"IAU-CREATED","exchangeId":"PCX-CREATED","name":"Transient Name","exchangeName":"Transient Exchange"},{"source":"YAHOO_FINANCE","ticker":"BIL-CREATED","exchangeId":"SECOND-CREATED"}]}`
+	var persistedExternalDataJSON = `{"data":[{"source":"YAHOO_FINANCE","ticker":"IAU-CREATED","exchangeId":"PCX-CREATED"},{"source":"YAHOO_FINANCE","ticker":"BIL-CREATED","exchangeId":"SECOND-CREATED"}]}`
+
+	t.Cleanup(
+		inttestutil.BuildCleanupFunctionBuilder().
+			AddCleanupQuery("DELETE FROM asset WHERE ticker={:ticker}", dbx.Params{"ticker": testTicker}).
+			Build(t),
+	)
+
+	var postAssetJSON = `
+		{
+			"name":"` + testName + `",
+			"ticker":"` + testTicker + `",
+			"externalData":` + externalDataRequestJSON + `
+		}
+	`
+	response := postAsset(t, postAssetJSON)
+	defer deferCloseResponseBody(response)
+
+	assert.Equal(t, http.StatusCreated, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+
+	var expectedResponseJSON = `
+		{
+			"name":"` + testName + `",
+			"ticker":"` + testTicker + `",
+			"externalData":` + persistedExternalDataJSON + `
+		}
+	`
+	inttestutil.AssertJSONEqualIgnoringFields(t, expectedResponseJSON, string(body), "id")
+
+	var responseAsset struct {
+		Id *int64 `json:"id"`
+	}
+	err = json.Unmarshal(body, &responseAsset)
+	assert.NoError(t, err)
+	if assert.NotNil(t, responseAsset.Id) {
+		assert.NotZero(t, *responseAsset.Id)
+		assertPersistedAssetWithExternalData(
+			t,
+			*responseAsset.Id,
+			testTicker,
+			testName,
+			&persistedExternalDataJSON,
+		)
+	}
+}
+
+// TestPostAssetWithoutExternalData creates an asset without external data and verifies that the
+// optional database column remains NULL.
+//
+// Authored by: OpenCode
+func TestPostAssetWithoutExternalData(t *testing.T) {
+	var testTicker = "TEST:POST-ASSET-NO-EXTERNAL"
+	var testName = "Test Asset Without External Data"
+
+	t.Cleanup(
+		inttestutil.BuildCleanupFunctionBuilder().
+			AddCleanupQuery("DELETE FROM asset WHERE ticker={:ticker}", dbx.Params{"ticker": testTicker}).
+			Build(t),
+	)
+
+	var postAssetJSON = `
+		{
+			"name":"` + testName + `",
+			"ticker":"` + testTicker + `"
+		}
+	`
+	response := postAsset(t, postAssetJSON)
+	defer deferCloseResponseBody(response)
+
+	assert.Equal(t, http.StatusCreated, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+
+	var expectedResponseJSON = `
+		{
+			"name":"` + testName + `",
+			"ticker":"` + testTicker + `"
+		}
+	`
+	inttestutil.AssertJSONEqualIgnoringFields(t, expectedResponseJSON, string(body), "id")
+
+	var responseAsset struct {
+		Id *int64 `json:"id"`
+	}
+	err = json.Unmarshal(body, &responseAsset)
+	assert.NoError(t, err)
+	if assert.NotNil(t, responseAsset.Id) {
+		assert.NotZero(t, *responseAsset.Id)
+		assertPersistedAsset(t, *responseAsset.Id, testTicker, testName)
+	}
+}
+
+// TestPostAssetRejectsNonZeroId verifies that POST does not accept a client-supplied asset ID and
+// does not insert the rejected asset.
+//
+// Authored by: OpenCode
+func TestPostAssetRejectsNonZeroId(t *testing.T) {
+	var testTicker = "TEST:POST-ASSET-ID"
+	var postAssetJSON = `
+		{
+			"id":999999,
+			"name":"Asset With Client ID",
+			"ticker":"` + testTicker + `"
+		}
+	`
+
+	response := postAsset(t, postAssetJSON)
+	defer deferCloseResponseBody(response)
+
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	var expectedResponseJSON = `
+		{
+			"errorMessage":"Validation failed",
+			"details":["Field 'id' failed validation: Asset ID must be omitted or zero for creation"]
+		}
+	`
+	assert.JSONEq(t, expectedResponseJSON, string(body))
+
+	var assetCount int
+	err = infra.FetchWithDBQuery(
+		"SELECT COUNT(*) FROM asset WHERE ticker = {:ticker}",
+		dbx.Params{"ticker": testTicker},
+		func(rows *dbx.Rows) error {
+			return rows.Scan(&assetCount)
+		},
+	)
+	assert.NoError(t, err)
+	assert.Zero(t, assetCount)
+}
+
+// TestPostAssetFailureWithMissingRequiredFields verifies validation for asset fields and nested
+// external asset fields.
+//
+// Authored by: OpenCode
+func TestPostAssetFailureWithMissingRequiredFields(t *testing.T) {
+	t.Run(
+		"WithoutName",
+		func(t *testing.T) {
+			var postAssetJSON = `{"ticker":"TEST:POST-ASSET-NAME"}`
+			var actualResponseJSON = string(postAssetForValidationFailure(t, postAssetJSON))
+			var expectedResponseJSON = `
+				{
+					"errorMessage":"Validation failed",
+					"details":["Field 'name' failed validation: is required"]
+				}
+			`
+			assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
+		},
+	)
+
+	t.Run(
+		"WithoutTicker",
+		func(t *testing.T) {
+			var postAssetJSON = `{"name":"Asset Without Ticker"}`
+			var actualResponseJSON = string(postAssetForValidationFailure(t, postAssetJSON))
+			var expectedResponseJSON = `
+				{
+					"errorMessage":"Validation failed",
+					"details":["Field 'ticker' failed validation: is required"]
+				}
+			`
+			assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
+		},
+	)
+
+	t.Run(
+		"WithoutExternalSource",
+		func(t *testing.T) {
+			var postAssetJSON = `
+				{
+					"name":"Asset Without External Source",
+					"ticker":"TEST:POST-ASSET-SOURCE",
+					"externalData":{"data":[{"ticker":"IAU","exchangeId":"PCX"}]}
+				}
+			`
+			var actualResponseJSON = string(postAssetForValidationFailure(t, postAssetJSON))
+			var expectedResponseJSON = `
+				{
+					"errorMessage":"Validation failed",
+					"details":["Field 'externalData.data[0].source' failed validation: is required"]
+				}
+			`
+			assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
+		},
+	)
+}
+
+// postAssetForValidationFailure sends an invalid asset creation request and returns its response
+// body after asserting the expected bad-request status.
+//
+// Authored by: OpenCode
+func postAssetForValidationFailure(t *testing.T, postAssetJSON string) []byte {
+	t.Helper()
+
+	var response = postAsset(t, postAssetJSON)
+	defer deferCloseResponseBody(response)
+
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, body)
+	return body
+}
+
+// TestPostAssetWithDuplicateTicker verifies that a duplicate asset ticker returns HTTP 409 and
+// does not create an additional record.
+//
+// Authored by: OpenCode
+func TestPostAssetWithDuplicateTicker(t *testing.T) {
+	var testTicker = "TEST:POST-ASSET-DUPLICATE"
+	insertTestAsset(t, testTicker, "Existing Asset")
+
+	var postAssetJSON = `
+		{
+			"name":"Duplicate Asset",
+			"ticker":"` + testTicker + `"
+		}
+	`
+	response := postAsset(t, postAssetJSON)
+	defer deferCloseResponseBody(response)
+
+	assert.Equal(t, http.StatusConflict, response.StatusCode)
+
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(t, err)
+	var expectedResponseJSON = `
+		{
+			"errorMessage":"Asset already exists",
+			"details":["Asset with ticker ` + testTicker + ` already exists"]
+		}
+	`
+	assert.JSONEq(t, expectedResponseJSON, string(body))
+
+	var assetCount int
+	err = infra.FetchWithDBQuery(
+		"SELECT COUNT(*) FROM asset WHERE ticker = {:ticker}",
+		dbx.Params{"ticker": testTicker},
+		func(rows *dbx.Rows) error {
+			return rows.Scan(&assetCount)
+		},
+	)
+	assert.NoError(t, err)
+	assert.Equal(t, 1, assetCount)
+}
+
 // TestPutAsset tests the PUT /api/asset endpoint to replace an existing asset's ticker, name, and
 // complete external data payload.
 //

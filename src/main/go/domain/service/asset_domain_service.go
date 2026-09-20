@@ -22,6 +22,18 @@ func (service *AssetDomService) FindAssetByUniqueIdentifier(uniqueIdentifier str
 	return service.assetRepository.FindAssetByUniqueIdentifier(uniqueIdentifier)
 }
 
+// CreateAsset delegates insertion of one asset, including its optional external data, to the
+// repository and returns the generated persisted asset.
+//
+// Example:
+//
+//	createdAsset, err := assetService.CreateAsset(asset)
+//
+// Authored by: OpenCode
+func (service *AssetDomService) CreateAsset(asset *domain.Asset) (*domain.Asset, error) {
+	return service.assetRepository.InsertAsset(asset)
+}
+
 // UpdateAsset delegates the update of an asset's ticker, name, and external data to the repository.
 //
 // Co-authored by: GitHub Copilot and OpenCode

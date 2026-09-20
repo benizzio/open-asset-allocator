@@ -170,6 +170,28 @@ func putAsset(t *testing.T, putAssetJSON string) *http.Response {
 	return response
 }
 
+// postAsset sends a POST request to the /api/asset endpoint with the given JSON body.
+//
+// Authored by: OpenCode
+func postAsset(t *testing.T, postAssetJSON string) *http.Response {
+	t.Helper()
+
+	request, err := http.NewRequest(
+		http.MethodPost,
+		inttestinfra.TestAPIURLPrefix+"/asset",
+		strings.NewReader(postAssetJSON),
+	)
+	assert.NoError(t, err)
+
+	request.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	response, err := client.Do(request)
+	assert.NoError(t, err)
+
+	return response
+}
+
 // getExternalAssets sends a GET request to the /api/external-asset endpoint with the given raw
 // query string and returns the response status code and body.
 //

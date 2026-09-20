@@ -15,8 +15,9 @@ import (
 )
 
 // HandleAPIError handles an error from the API layer by logging it and sending an appropriate HTTP response.
-// It first attempts to match the error to a known domain error type (e.g. DomainValidationError) and sends
-// a specific response. If no domain match is found, it falls back to a generic 500 Internal Server Error.
+// It first attempts to match the error to a known domain error type (e.g. DomainValidationError or
+// ConflictError) and sends a specific response. If no domain match is found, it falls back to a
+// generic 500 Internal Server Error.
 // Returns true if an error was present and handled, false otherwise.
 //
 // Example:
@@ -26,7 +27,7 @@ import (
 //		return
 //	}
 //
-// Co-authored by: GitHub Copilot
+// Co-authored by: GitHub Copilot and OpenCode
 func HandleAPIError(context *gin.Context, message string, cause error) bool {
 
 	var handle = cause != nil
@@ -52,7 +53,7 @@ func HandleAPIError(context *gin.Context, message string, cause error) bool {
 
 // handleDomainError checks if the error matches a known domain error type and sends the corresponding HTTP response.
 //
-// Co-authored by: GitHub Copilot
+// Co-authored by: GitHub Copilot and OpenCode
 func handleDomainError(context *gin.Context, cause error) bool {
 
 	if domValidationError, ok := errors.AsType[*infra.DomainValidationError](cause); ok {
@@ -65,6 +66,17 @@ func handleDomainError(context *gin.Context, cause error) bool {
 			http.StatusBadRequest, model.ErrorResponse{
 				ErrorMessage: domValidationError.Message,
 				Details:      validationMessages,
+			},
+		)
+
+		return true
+	}
+
+	if conflictError, ok := errors.AsType[*infra.ConflictError](cause); ok {
+		context.JSON(
+			http.StatusConflict, model.ErrorResponse{
+				ErrorMessage: conflictError.Message,
+				Details:      conflictError.Details,
 			},
 		)
 
