@@ -39,7 +39,7 @@ type ExternalAssetDataDTS struct {
 //
 // Authored by: OpenCode
 type AssetSearchQueryDTS struct {
-	TextSearch string `form:"textSearch" json:"textSearch"`
+	TextSearch string `form:"textSearch" json:"textSearch" validate:"max=100"`
 }
 
 // ExternalAssetSearchQueryDTS is the request data transfer structure for external asset

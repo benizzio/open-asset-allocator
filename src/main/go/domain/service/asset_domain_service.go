@@ -2,8 +2,10 @@ package service
 
 import (
 	"context"
+	"strings"
 
 	"github.com/benizzio/open-asset-allocator/domain"
+	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/benizzio/open-asset-allocator/langext"
 )
 
@@ -26,7 +28,21 @@ type AssetDomService struct {
 func (service *AssetDomService) GetKnownAssets(textSearch string) ([]*domain.Asset, error) {
 	var searchTerms = parseAssetTextSearch(textSearch)
 	if len(searchTerms) == 0 {
-		return service.assetRepository.GetKnownAssets()
+		if strings.TrimSpace(textSearch) == "" {
+			return service.assetRepository.GetKnownAssets()
+		}
+		return []*domain.Asset{}, nil
+	}
+	if len(searchTerms) > maxAssetTextSearchTerms {
+		var validationError = infra.BuildAppErrorFormattedUnconverted(
+			service,
+			"Text search must not exceed %d terms",
+			maxAssetTextSearchTerms,
+		)
+		return nil, infra.BuildDomainValidationError(
+			"Asset text search validation failed",
+			[]*infra.AppError{validationError},
+		)
 	}
 
 	return service.assetRepository.FindAssetsByTextSearchTerms(searchTerms, maxAssetTextSearchResults)

@@ -7,6 +7,10 @@ const (
 	//
 	// Authored by: OpenCode
 	maxAssetTextSearchResults = 20
+	// maxAssetTextSearchTerms is the maximum number of predicates accepted for one asset search.
+	//
+	// Authored by: OpenCode
+	maxAssetTextSearchTerms = 20
 )
 
 // parseAssetTextSearch converts free-text asset search input into required search terms. Quoted

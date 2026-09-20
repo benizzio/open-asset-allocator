@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"testing"
 
 	dbx "github.com/go-ozzo/ozzo-dbx"
@@ -238,7 +239,7 @@ func TestGetKnownAssetsWithTextSearch(t *testing.T) {
 }
 
 // TestGetKnownAssetsWithTextSearchLimit verifies that text searches are capped at 20 results while
-// a blank textSearch parameter continues to return the complete asset list.
+// an empty or whitespace-only textSearch parameter continues to return the complete asset list.
 //
 // Authored by: OpenCode
 func TestGetKnownAssetsWithTextSearchLimit(t *testing.T) {
@@ -290,6 +291,65 @@ func TestGetKnownAssetsWithTextSearchLimit(t *testing.T) {
 	err = json.Unmarshal(blankSearchBody, &allAssets)
 	assert.NoError(t, err)
 	assert.Len(t, allAssets, initialAssetCount+matchingAssetCount)
+
+	whitespaceSearchResponse, err := getAssetsByTextSearch(t, " \t ")
+	assert.NoError(t, err)
+	defer deferCloseResponseBody(whitespaceSearchResponse)
+
+	assert.Equal(t, http.StatusOK, whitespaceSearchResponse.StatusCode)
+	whitespaceSearchBody, err := io.ReadAll(whitespaceSearchResponse.Body)
+	assert.NoError(t, err)
+
+	var whitespaceSearchAssets []json.RawMessage
+	err = json.Unmarshal(whitespaceSearchBody, &whitespaceSearchAssets)
+	assert.NoError(t, err)
+	assert.Len(t, whitespaceSearchAssets, initialAssetCount+matchingAssetCount)
+}
+
+// TestGetKnownAssetsRejectsInvalidTextSearch verifies request-length and parsed-term limits and
+// confirms that nonblank input producing no terms returns an empty result.
+//
+// Authored by: OpenCode
+func TestGetKnownAssetsRejectsInvalidTextSearch(t *testing.T) {
+	t.Run("request length exceeds maximum", func(t *testing.T) {
+		var response, err = getAssetsByTextSearch(t, strings.Repeat("a", 101))
+		assert.NoError(t, err)
+		defer deferCloseResponseBody(response)
+
+		assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+		body, err := io.ReadAll(response.Body)
+		assert.NoError(t, err)
+		assert.JSONEq(t, `{
+			"errorMessage": "Validation failed",
+			"details": ["Field 'textSearch' failed validation: must not exceed 100"]
+		}`, string(body))
+	})
+
+	t.Run("parsed term count exceeds maximum", func(t *testing.T) {
+		var textSearch = strings.TrimSpace(strings.Repeat("a ", 21))
+		var response, err = getAssetsByTextSearch(t, textSearch)
+		assert.NoError(t, err)
+		defer deferCloseResponseBody(response)
+
+		assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+		body, err := io.ReadAll(response.Body)
+		assert.NoError(t, err)
+		assert.JSONEq(t, `{
+			"errorMessage": "Asset text search validation failed",
+			"details": ["Text search must not exceed 20 terms"]
+		}`, string(body))
+	})
+
+	t.Run("nonblank input producing no terms", func(t *testing.T) {
+		var response, err = getAssetsByTextSearch(t, `""`)
+		assert.NoError(t, err)
+		defer deferCloseResponseBody(response)
+
+		assert.Equal(t, http.StatusOK, response.StatusCode)
+		body, err := io.ReadAll(response.Body)
+		assert.NoError(t, err)
+		assert.JSONEq(t, `[]`, string(body))
+	})
 }
 
 // getAssetsByTextSearch sends an encoded textSearch request to the known-assets endpoint.
