@@ -97,6 +97,15 @@
         </div>
     </div>
 
+    <div id="assets-container"
+         hx-get="/websrc/pages/assets.html"
+         hx-trigger="route-reached"
+         data-hx-trigger-on-route="/assets/*!route-reached"
+         data-hx-trigger-on-route-clean-on-exit
+    >
+        <!-- TODO add skeleton placeholder elements that mimic the content after it's ready -->
+    </div>
+
     <div id="notifications-container"
          hx-get="/websrc/components/notifications.html"
          hx-trigger="load once"
