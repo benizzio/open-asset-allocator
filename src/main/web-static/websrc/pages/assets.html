@@ -1,19 +1,181 @@
-<!-- TODO
- page that loads a table containing all assets registered in the back-end
- No pagination is necessary
- Table columns should show only the basic properties, no id is necessary (external asset info should not be included)
- the table header and footer should be sticky. Footer should contain a + button (similar style to existing portfolio forms
+<!-- Co-authored by: OpenCode -->
+<div data-exclusive-display-container>
 
- ###
- when + button is clicked, we navigate to `/assets/new`
- a form is shown with the basic fields to save the asset data (similar style as the `/portfolios/new` page)
- external asset data is postponed with a TODO
+    <div id="assets"
+         data-display-on-route="/assets"
+         hx-get="/api/asset"
+         hx-trigger="load once, reload-assets"
+         handlebars-template="asset-list"
+         hx-on::after-request="assetsPage.handleAssetListAfterRequest(event)"
+    >
+        <div class="row justify-content-center my-5">
+            <div class="col-12">
+                <div class="card placeholder-glow">
+                    <div class="card-header placeholder col-4">placeholder</div>
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th class="placeholder col-4">placeholder</th>
+                                <th class="placeholder col-6">placeholder</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td class="placeholder">placeholder</td>
+                                <td class="placeholder">placeholder</td>
+                            </tr>
+                            <tr>
+                                <td class="placeholder">placeholder</td>
+                                <td class="placeholder">placeholder</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
- ###
- when an asset row is clicked, we navigate to `/asset/1`
- a form is shown with the basic fields to update the asset data (similar style as the `/portfolio/{portfolioId}/edit` page)
- external asset data is postponed with a TODO
+    <script id="asset-list" type="text/x-handlebars-template">
+        <div class="row justify-content-center my-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h1 class="h4 mb-0">Assets</h1>
+                    </div>
 
- ###
- An `Assets` option must be added to the main menu, that will navigate to /assets
--->
+                    <div class="card-body p-0">
+                        <div class="asset-table-scroll">
+                            <table class="table table-hover table-striped mb-0">
+                                <thead class="sticky-header">
+                                <tr>
+                                    <th scope="col">Ticker</th>
+                                    <th scope="col">Name</th>
+                                </tr>
+                                </thead>
+
+                                <tbody class="table-group-divider">
+                                {{#if this.length}}
+                                    {{#each this}}
+                                        <tr class="asset-table-row"
+                                            data-navigate-to="/asset/{{id}}"
+                                            tabindex="0"
+                                        >
+                                            <td class="text-wrap-break-all">
+                                                <a href="/asset/{{id}}"
+                                                   data-navigate-to="/asset/{{id}}"
+                                                   onclick="event.preventDefault()"
+                                                >
+                                                    {{ticker}}
+                                                </a>
+                                            </td>
+                                            <td class="text-wrap-break-word">{{name}}</td>
+                                        </tr>
+                                    {{/each}}
+                                {{else}}
+                                    <tr>
+                                        <td colspan="2" class="text-center text-body-secondary py-4">
+                                            No assets have been registered yet.
+                                        </td>
+                                    </tr>
+                                {{/if}}
+                                </tbody>
+
+                                <tfoot class="sticky-footer">
+                                <tr>
+                                    <td colspan="2">
+                                        <div class="d-flex justify-content-end">
+                                            <button type="button"
+                                                    class="btn btn-secondary"
+                                                    data-navigate-to="/assets/new"
+                                                    aria-label="New asset"
+                                                    title="New asset"
+                                            >
+                                                <span class="bi bi-plus-circle h5" aria-hidden="true"></span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <div id="new-asset"
+         data-display-on-route="/assets/new"
+         class="row justify-content-center my-5"
+    >
+        <div class="col-12 col-lg-8">
+            <div class="d-flex justify-content-start mb-3">
+                <button type="button"
+                        class="btn btn-secondary"
+                        onclick="assetsPage.navigateToAssets()"
+                        aria-label="Back to assets"
+                >
+                    <span class="bi bi-arrow-left" aria-hidden="true"></span>
+                    <span>Back</span>
+                </button>
+            </div>
+
+            <div class="card border border-primary border-dashed">
+                <div class="card-header">
+                    <h1 class="h4 mb-0">New asset</h1>
+                </div>
+
+                <form id="new-asset-form"
+                      class="needs-validation"
+                      hx-post="/api/asset"
+                      hx-ext="form-json"
+                      hx-validate="true"
+                      hx-swap="none"
+                      hx-disabled-elt="find button"
+                      hx-on::after-request="assetsPage.handleCreateAfterRequest(event)"
+                      novalidate
+                >
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="new-asset-ticker" class="form-label">Ticker</label>
+                            <input id="new-asset-ticker"
+                                   type="text"
+                                   name="ticker"
+                                   class="form-control"
+                                   placeholder="Ticker"
+                                   required
+                                   autocomplete="off"
+                                   maxlength="40"
+                            />
+                        </div>
+
+                        <div>
+                            <label for="new-asset-name" class="form-label">Name</label>
+                            <input id="new-asset-name"
+                                   type="text"
+                                   name="name"
+                                   class="form-control"
+                                   placeholder="Name"
+                                   required
+                                   autocomplete="off"
+                                   maxlength="100"
+                            />
+                        </div>
+
+                        <!-- TODO: external asset data manipulation will be added later. -->
+                    </div>
+
+                    <div class="card-footer text-end">
+                        <button type="button" class="btn btn-secondary" onclick="assetsPage.navigateToAssets()">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">Create</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>

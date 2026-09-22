@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
+<!-- Co-authored by: OpenCode and Igor Benicio de Mesquita -->
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -25,6 +26,9 @@
             <ul class="navbar-nav">
                 <li class="nav-item">
                     <a class="nav-link" href="/portfolios">Portfolios</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/assets">Assets</a>
                 </li>
             </ul>
         </div>
@@ -103,7 +107,56 @@
          data-hx-trigger-on-route="/assets/*!route-reached"
          data-hx-trigger-on-route-clean-on-exit
     >
-        <!-- TODO add skeleton placeholder elements that mimic the content after it's ready -->
+        <div data-display-on-route="/assets/*" style="display: none">
+            <div class="row justify-content-center my-5">
+                <div class="col-12">
+                    <div class="card placeholder-glow">
+                        <div class="card-header placeholder col-4">placeholder</div>
+                        <div class="card-body">
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th class="placeholder col-4">placeholder</th>
+                                    <th class="placeholder col-6">placeholder</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td class="placeholder">placeholder</td>
+                                    <td class="placeholder">placeholder</td>
+                                </tr>
+                                <tr>
+                                    <td class="placeholder">placeholder</td>
+                                    <td class="placeholder">placeholder</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="asset-container"
+         hx-get="/websrc/pages/asset.html"
+         hx-trigger="route-reached"
+         data-hx-trigger-on-route="/asset/:assetId/*!route-reached"
+         data-hx-trigger-on-route-clean-on-exit
+    >
+        <div data-display-on-route="/asset/*" style="display: none">
+            <div class="row justify-content-center my-5">
+                <div class="col-12 col-lg-8">
+                    <div class="card placeholder-glow">
+                        <div class="card-header placeholder col-5">placeholder</div>
+                        <div class="card-body">
+                            <div class="placeholder col-12 mb-3">placeholder</div>
+                            <div class="placeholder col-12">placeholder</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="notifications-container"

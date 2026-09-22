@@ -1,0 +1,110 @@
+<!-- Authored by: OpenCode -->
+<div data-display-on-route="/asset/:assetId" style="display: none">
+    <div id="asset-context"
+         hx-get="/api/asset/:assetId"
+         hx-trigger="load once"
+         handlebars-template="asset-edit"
+         hx-on::after-request="assetsPage.handleAssetLoadAfterRequest(event)"
+         hx-on::after-settle="assetsPage.initializeAssetEditor(this)"
+    >
+        <div class="row justify-content-center my-5">
+            <div class="col-12 col-lg-8">
+                <div class="card placeholder-glow">
+                    <div class="card-header placeholder col-5">placeholder</div>
+                    <div class="card-body">
+                        <div class="placeholder col-12 mb-3">placeholder</div>
+                        <div class="placeholder col-12">placeholder</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="asset-edit" type="text/x-handlebars-template">
+    <div data-asset-view>
+        {{{ domJSON "asset-data" this }}}
+
+        <div class="row justify-content-center my-5">
+            <div class="col-12 col-lg-8">
+                <div class="d-flex justify-content-start mb-3">
+                    <button type="button"
+                            class="btn btn-secondary"
+                            onclick="assetsPage.navigateToAssets()"
+                            aria-label="Back to assets"
+                    >
+                        <span class="bi bi-arrow-left" aria-hidden="true"></span>
+                        <span>Back</span>
+                    </button>
+                </div>
+
+                <div class="card" data-asset-editor>
+                    <div class="card-header">
+                        <h1 class="h4 mb-0">Edit asset</h1>
+                    </div>
+
+                    <form id="edit-asset-form"
+                          class="needs-validation"
+                          hx-put="/api/asset"
+                          hx-ext="form-json"
+                          hx-validate="true"
+                          hx-swap="none"
+                          hx-disabled-elt="find button"
+                          hx-on::config-request="assetsPage.prepareUpdateRequest(event)"
+                          hx-on::after-request="assetsPage.handleUpdateAfterRequest(event)"
+                          novalidate
+                    >
+                        <div class="card-body">
+                            <input type="hidden" name="id" value="{{id}}" />
+
+                            <div class="mb-3">
+                                <label for="edit-asset-ticker" class="form-label">Ticker</label>
+                                <input id="edit-asset-ticker"
+                                       type="text"
+                                       name="ticker"
+                                       class="form-control"
+                                       placeholder="Ticker"
+                                       value="{{ticker}}"
+                                       required
+                                       autocomplete="off"
+                                       maxlength="40"
+                                />
+                            </div>
+
+                            <div>
+                                <label for="edit-asset-name" class="form-label">Name</label>
+                                <input id="edit-asset-name"
+                                       type="text"
+                                       name="name"
+                                       class="form-control"
+                                       placeholder="Name"
+                                       value="{{name}}"
+                                       required
+                                       autocomplete="off"
+                                       maxlength="100"
+                                />
+                            </div>
+
+                            {{#if externalData}}
+                                <input type="hidden"
+                                       name="externalData"
+                                       value=""
+                                       data-external-data-marker
+                                />
+                            {{/if}}
+
+                            <!-- TODO: external asset data manipulation will be added later. -->
+                        </div>
+
+                        <div class="card-footer text-end">
+                            <button type="button" class="btn btn-secondary" onclick="assetsPage.navigateToAssets()">
+                                Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
