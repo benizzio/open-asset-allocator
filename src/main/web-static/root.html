@@ -28,7 +28,7 @@
                     <a class="nav-link" href="/portfolios">Portfolios</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/assets">Assets</a>
+                    <a class="nav-link" href="/asset">Assets</a>
                 </li>
             </ul>
         </div>
@@ -101,13 +101,13 @@
         </div>
     </div>
 
-    <div id="assets-container"
-         hx-get="/websrc/pages/assets.html"
+    <div id="asset-container"
+         hx-get="/websrc/pages/asset.html"
          hx-trigger="route-reached"
-         data-hx-trigger-on-route="/assets/*!route-reached"
+         data-hx-trigger-on-route="/asset/*!route-reached"
          data-hx-trigger-on-route-clean-on-exit
     >
-        <div data-display-on-route="/assets/*" style="display: none">
+        <div data-display-on-regexp-route="asset(?:/.*)?" style="display: none">
             <div class="row justify-content-center my-5">
                 <div class="col-12">
                     <div class="card placeholder-glow">
@@ -131,27 +131,6 @@
                                 </tr>
                                 </tbody>
                             </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="asset-container"
-         hx-get="/websrc/pages/asset.html"
-         hx-trigger="route-reached"
-         data-hx-trigger-on-route="/asset/:assetId/*!route-reached"
-         data-hx-trigger-on-route-clean-on-exit
-    >
-        <div data-display-on-route="/asset/*" style="display: none">
-            <div class="row justify-content-center my-5">
-                <div class="col-12 col-lg-8">
-                    <div class="card placeholder-glow">
-                        <div class="card-header placeholder col-5">placeholder</div>
-                        <div class="card-body">
-                            <div class="placeholder col-12 mb-3">placeholder</div>
-                            <div class="placeholder col-12">placeholder</div>
                         </div>
                     </div>
                 </div>

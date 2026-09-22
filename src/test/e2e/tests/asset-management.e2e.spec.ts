@@ -1,5 +1,5 @@
 /**
- * Covers the first assets page version through browser, HTTP API, and PostgreSQL boundaries.
+ * Covers scenarios 8, 8.1, and 9 for asset management through browser, API, and PostgreSQL boundaries.
  *
  * Assets are seeded directly in PostgreSQL so each scenario remains independent from other API
  * flows. The update scenario verifies that deferred external-data editing does not clear the
@@ -7,8 +7,9 @@
  *
  * Authored by: OpenCode
  */
-import type { Response } from '@playwright/test';
+import type { Page, Response } from '@playwright/test';
 import { expect, test } from '../support/fixtures';
+import type { E2eDatabase } from '../support/database';
 
 const ORIGINAL_TICKER = 'E2E:ORIGINAL';
 const ORIGINAL_NAME = 'E2E Original Asset';
@@ -44,24 +45,25 @@ type AssetRow = {
 };
 
 test.describe('asset management', () => {
-  test('lists, creates, edits, and cancels asset changes', async ({ database, page }) => {
-    await page.goto('/assets');
+  test('scenario 8: lists, creates, edits, and cancels asset changes with clicks', async ({ database, page }) => {
+    await page.goto('/');
+    await page.getByRole('link', { name: 'Assets', exact: true }).click();
     await expectAssetTable(page);
 
     await page.getByRole('button', { name: 'New asset' }).click();
-    await expect(page).toHaveURL(/\/assets\/new$/);
+    await expectNewAssetForm(page);
 
     await page.getByRole('textbox', { name: 'Ticker' }).fill(DRAFT_TICKER);
     await page.getByRole('textbox', { name: 'Name' }).fill(DRAFT_NAME);
 
     const cancelledCreateListResponsePromise = page.waitForResponse(isAssetCollectionRequest);
     await page.getByRole('button', { name: 'Cancel' }).click();
-    await expect(page).toHaveURL(/\/assets$/);
+    await expect(page).toHaveURL(/\/asset$/);
     await cancelledCreateListResponsePromise;
     await expect(page.getByText('No assets have been registered yet.')).toBeVisible();
 
     await page.getByRole('button', { name: 'New asset' }).click();
-    await expect(page).toHaveURL(/\/assets\/new$/);
+    await expectNewAssetForm(page);
 
     await page.getByRole('textbox', { name: 'Ticker' }).fill(CREATED_TICKER);
     await page.getByRole('textbox', { name: 'Name' }).fill(CREATED_NAME);
@@ -117,7 +119,7 @@ test.describe('asset management', () => {
 
     const listResponsePromise = page.waitForResponse(isAssetCollectionRequest);
     await page.getByRole('button', { name: 'Cancel' }).click();
-    await expect(page).toHaveURL(/\/assets$/);
+    await expect(page).toHaveURL(/\/asset$/);
     await listResponsePromise;
     await expect(page.getByRole('cell', { name: UPDATED_TICKER, exact: true })).toBeVisible();
     await expect(page.getByRole('cell', { name: DRAFT_TICKER, exact: true })).toHaveCount(0);
@@ -136,7 +138,28 @@ test.describe('asset management', () => {
     }]);
   });
 
-  test('preserves deferred external data when saving basic asset fields', async ({ database, page }) => {
+  test('scenario 8.1: opens asset pages through direct browser URLs', async ({ database, page }) => {
+    const asset = await seedAsset(database, ORIGINAL_TICKER, ORIGINAL_NAME);
+
+    await page.goto('/asset');
+    await expectAssetTable(page, asset);
+    await page.reload();
+    await expectAssetTable(page, asset);
+
+    await page.goto('/asset/new');
+    await expectNewAssetForm(page);
+    await page.reload();
+    await expectNewAssetForm(page);
+
+    await page.goto(`/asset/${asset.id}`);
+    await expectAssetEditor(page, asset);
+    await page.reload();
+    await expectAssetEditor(page, asset);
+
+    await expectPersistedAsset(database, asset, null);
+  });
+
+  test('scenario 9: preserves deferred external data when saving basic asset fields', async ({ database, page }) => {
     const asset = await seedAsset(database, ORIGINAL_TICKER, ORIGINAL_NAME, PERSISTED_EXTERNAL_DATA);
 
     await page.goto(`/asset/${asset.id}`);
@@ -173,14 +196,14 @@ test.describe('asset management', () => {
     expect(JSON.parse(persistedAssets[0].external_data ?? 'null')).toEqual(PERSISTED_EXTERNAL_DATA);
 
     await page.getByRole('button', { name: 'Cancel' }).click();
-    await expect(page).toHaveURL(/\/assets$/);
+    await expect(page).toHaveURL(/\/asset$/);
     await expect(page.getByRole('cell', { name: UPDATED_TICKER, exact: true })).toBeVisible();
   });
 });
 
 /** Seeds one asset directly in PostgreSQL for a browser scenario. */
 async function seedAsset(
-  database: { query<Row extends object>(text: string, values?: unknown[]): Promise<readonly Row[]> },
+  database: E2eDatabase,
   ticker: string,
   name: string,
   externalData?: object,
@@ -196,22 +219,59 @@ async function seedAsset(
   return rows[0];
 }
 
-/** Asserts the list route, basic columns, and empty-state behavior. */
-async function expectAssetTable(page: import('@playwright/test').Page): Promise<void> {
-  await expect(page).toHaveURL(/\/assets$/);
+/** Asserts the list route, basic columns, and expected asset or empty state. */
+async function expectAssetTable(page: Page, asset?: Asset): Promise<void> {
+  await expect(page).toHaveURL(/\/asset$/);
   await expect(page.getByRole('link', { name: 'Assets', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Assets', exact: true })).toBeVisible();
   await expect(page.getByRole('columnheader', { name: 'Ticker', exact: true })).toBeVisible();
   await expect(page.getByRole('columnheader', { name: 'Name', exact: true })).toBeVisible();
-  await expect(page.getByText('No assets have been registered yet.')).toBeVisible();
+
+  if(asset) {
+    await expect(page.getByRole('cell', { name: asset.ticker, exact: true })).toBeVisible();
+    await expect(page.getByRole('cell', { name: asset.name, exact: true })).toBeVisible();
+  } else {
+    await expect(page.getByText('No assets have been registered yet.')).toBeVisible();
+  }
+}
+
+/** Asserts the shared form is configured for creating an asset. */
+async function expectNewAssetForm(page: Page): Promise<void> {
+  await expect(page).toHaveURL(/\/asset\/new$/);
+  await expect(page.getByRole('heading', { name: 'New asset', exact: true })).toBeVisible();
+  await expect(page.getByRole('textbox', { name: 'Ticker' })).toHaveValue('');
+  await expect(page.getByRole('textbox', { name: 'Name' })).toHaveValue('');
+  await expect(page.getByRole('button', { name: 'Create', exact: true })).toBeVisible();
 }
 
 /** Asserts the edit route contains the expected basic asset fields. */
-async function expectAssetEditor(page: import('@playwright/test').Page, asset: Asset): Promise<void> {
+async function expectAssetEditor(page: Page, asset: Asset): Promise<void> {
   await expect(page).toHaveURL(`/asset/${asset.id}`);
   await expect(page.getByRole('heading', { name: 'Edit asset', exact: true })).toBeVisible();
   await expect(page.getByRole('textbox', { name: 'Ticker' })).toHaveValue(asset.ticker);
   await expect(page.getByRole('textbox', { name: 'Name' })).toHaveValue(asset.name);
+  await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeVisible();
+}
+
+/** Asserts one asset's complete persisted state directly in PostgreSQL. */
+async function expectPersistedAsset(
+  database: E2eDatabase,
+  asset: Asset,
+  externalData: object | null,
+): Promise<void> {
+  const rows = await database.query<AssetRow>(
+    `SELECT id, name, ticker, external_data::text AS external_data
+     FROM public.asset
+     WHERE id = $1`,
+    [asset.id],
+  );
+
+  expect(rows).toEqual([{
+    external_data: externalData ? JSON.stringify(externalData) : null,
+    id: asset.id,
+    name: asset.name,
+    ticker: asset.ticker,
+  }]);
 }
 
 /** Matches the same-origin request that loads the asset collection. */

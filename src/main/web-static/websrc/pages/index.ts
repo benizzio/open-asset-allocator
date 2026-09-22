@@ -6,5 +6,5 @@
  *
  * Authored by: OpenCode
  */
-export { default as AssetsPage } from "./assets";
+export { default as AssetPage } from "./asset";
 export { default as PortfolioPage } from "./portfolio";

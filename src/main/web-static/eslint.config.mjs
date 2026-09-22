@@ -76,6 +76,19 @@ export default [
                                 "Import from the public API 'application' (index.ts) only; " +
                                 "deep imports are not allowed.",
                         },
+                        // pages public API only
+                        // Authored by: OpenCode
+                        {
+                            group: [
+                                "**/pages/**",
+                                "pages/**",
+                                "./pages/**",
+                                "../pages/**",
+                            ],
+                            message:
+                                "Import from the public API 'pages' (index.ts) only; " +
+                                "deep imports are not allowed.",
+                        },
                         // Block deep imports into the local 'infra/handlebars' module; import only from its public API
                         // Authored by: GitHub Copilot
                         {

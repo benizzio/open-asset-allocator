@@ -2,7 +2,7 @@ import { registerPortfolioAnalysisHandlebarsHelpers } from "./portfolio-analysis
 import { toChartContent } from "./chart-contents";
 import portfolioHistoryManagement from "../components/portfolio-history-management";
 import allocationPlanManagement from "../components/allocation-plan-management";
-import { AssetsPage, PortfolioPage } from "../pages";
+import { AssetPage, PortfolioPage } from "../pages";
 import notifications from "../components/notifications";
 import AssetComposedColumnsInput from "../components/asset-composed-columns-input";
 
@@ -18,7 +18,7 @@ const Application = {
         globalThis["portfolioHistoryManagement"] = portfolioHistoryManagement;
         globalThis["allocationPlanManagement"] = allocationPlanManagement;
         globalThis["portfolioPage"] = PortfolioPage;
-        globalThis["assetsPage"] = AssetsPage;
+        globalThis["assetPage"] = AssetPage;
         globalThis["notifications"] = notifications;
         globalThis["AssetComposedColumnsInput"] = AssetComposedColumnsInput;
     },
