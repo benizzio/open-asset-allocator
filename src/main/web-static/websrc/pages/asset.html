@@ -74,65 +74,7 @@
 
             <div id="asset-form-error" style="display: none"></div>
 
-            <div id="asset-form-content" class="card" data-asset-view>
-                <div class="card-header">
-                    <h1 id="asset-form-heading" class="h4 mb-0">New asset</h1>
-                </div>
-
-                <form id="asset-form"
-                      class="needs-validation"
-                      data-operation="create"
-                      hx-post="/api/asset"
-                      hx-ext="form-json"
-                      hx-validate="true"
-                      hx-swap="none"
-                      hx-disabled-elt="find button"
-                      hx-on::config-request="assetPage.prepareAssetRequest(event)"
-                      hx-on::after-request="assetPage.handleMutationAfterRequest(event)"
-                      novalidate
-                >
-                    <div class="card-body">
-                        <input id="asset-id" type="hidden" name="id" disabled />
-
-                        <div class="mb-3">
-                            <label for="asset-ticker" class="form-label">Ticker</label>
-                            <input id="asset-ticker"
-                                   type="text"
-                                   name="ticker"
-                                   class="form-control"
-                                   placeholder="Ticker"
-                                   required
-                                   autocomplete="off"
-                                   maxlength="40"
-                            />
-                        </div>
-
-                        <div>
-                            <label for="asset-name" class="form-label">Name</label>
-                            <input id="asset-name"
-                                   type="text"
-                                   name="name"
-                                   class="form-control"
-                                   placeholder="Name"
-                                   required
-                                   autocomplete="off"
-                                   maxlength="100"
-                            />
-                        </div>
-
-                        <!-- TODO: external asset data manipulation will be added later. -->
-                    </div>
-
-                    <div class="card-footer text-end">
-                        <button type="button" class="btn btn-secondary" onclick="assetPage.navigateToAssets()">
-                            Cancel
-                        </button>
-                        <button id="asset-submit" type="submit" class="btn btn-primary">Create</button>
-                    </div>
-                </form>
-
-                <script id="asset-data" type="application/json"></script>
-            </div>
+            <div id="asset-form-content" data-asset-view></div>
 
             <div id="asset-detail-loader"
                  hx-get="/api/asset/:assetId"
@@ -145,6 +87,106 @@
             </div>
         </div>
     </div>
+
+    <!-- The create and edit forms own their HTTP operations; both render the same field partial. -->
+    <!-- Authored by: OpenCode -->
+    <script id="asset-form-fields" type="text/x-handlebars-template">
+        <div class="mb-3">
+            <label for="{{idPrefix}}-ticker" class="form-label">Ticker</label>
+            <input id="{{idPrefix}}-ticker"
+                   type="text"
+                   name="ticker"
+                   class="form-control"
+                   placeholder="Ticker"
+                   value="{{ticker}}"
+                   required
+                   autocomplete="off"
+                   maxlength="40"
+            />
+        </div>
+
+        <div>
+            <label for="{{idPrefix}}-name" class="form-label">Name</label>
+            <input id="{{idPrefix}}-name"
+                   type="text"
+                   name="name"
+                   class="form-control"
+                   placeholder="Name"
+                   value="{{name}}"
+                   required
+                   autocomplete="off"
+                   maxlength="100"
+            />
+        </div>
+
+        <!-- TODO: external asset data manipulation will be added later. -->
+    </script>
+
+    <script id="asset-create-form" type="text/x-handlebars-template">
+        <div class="card border-primary border-dashed">
+            <div class="card-header">
+                <h1 class="h4 mb-0">New asset</h1>
+            </div>
+
+            <form id="create-asset-form"
+                  class="needs-validation"
+                  hx-post="/api/asset"
+                  hx-ext="form-json"
+                  hx-validate="true"
+                  hx-swap="none"
+                  hx-disabled-elt="find button"
+                  hx-on::after-request="assetPage.handleCreateAfterRequest(event)"
+                  novalidate
+            >
+                <div class="card-body">
+                    {{> asset-form-fields idPrefix="create-asset"}}
+                </div>
+
+                <div class="card-footer text-end">
+                    <button type="button" class="btn btn-secondary" onclick="assetPage.navigateToAssets()">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">Create</button>
+                </div>
+            </form>
+        </div>
+    </script>
+
+    <script id="asset-edit-form" type="text/x-handlebars-template">
+        <div class="card">
+            <div class="card-header">
+                <h1 class="h4 mb-0">Edit asset</h1>
+            </div>
+
+            <form id="edit-asset-form"
+                  class="needs-validation"
+                  hx-put="/api/asset"
+                  hx-ext="form-json"
+                  hx-vals="{{stringify (object externalData=externalData)}}"
+                  hx-validate="true"
+                  hx-swap="none"
+                  hx-disabled-elt="find button"
+                  hx-on::after-request="assetPage.handleSaveAfterRequest(event)"
+                  novalidate
+            >
+                <div class="card-body">
+                    <input type="hidden" name="id" value="{{id}}" />
+                    {{!-- form-json includes named fields, then hx-vals supplies the original structured value. --}}
+                    {{#if externalData}}
+                        <input type="hidden" name="externalData" value="" />
+                    {{/if}}
+                    {{> asset-form-fields idPrefix="edit-asset"}}
+                </div>
+
+                <div class="card-footer text-end">
+                    <button type="button" class="btn btn-secondary" onclick="assetPage.navigateToAssets()">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </script>
 
     <script id="asset-list" type="text/x-handlebars-template">
         <div class="row justify-content-center my-5">
@@ -213,6 +255,10 @@
                 </div>
             </div>
         </div>
+    </script>
+
+    <script type="text/javascript">
+        HandlebarsUtils.registerPartialToContainer("asset-form-view", "asset-form-fields");
     </script>
 
 </div>

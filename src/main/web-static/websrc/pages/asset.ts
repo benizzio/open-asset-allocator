@@ -1,13 +1,13 @@
 /**
- * Coordinates the shared asset list and create/edit form page.
+ * Coordinates asset list, creation, and editing on one page.
  *
- * The controller changes one form between create and edit operations based on the active route.
- * HTMX remains responsible for all asset HTTP requests, while this module validates responses,
- * populates the shared form, and preserves deferred external asset data during updates.
+ * HTMX handles HTTP requests and each form declares its own operation in HTML. This controller
+ * renders the create or edit template, checks API response identities, and navigates between views.
  *
  * Authored by: OpenCode
  */
 import htmx from "htmx.org";
+import * as Handlebars from "handlebars";
 import notifications from "../components/notifications";
 import { NotificationType } from "../infra/infra-types";
 import { AfterRequestEventDetail } from "../infra/htmx";
@@ -23,7 +23,6 @@ type AssetDTO = {
 };
 
 type AssetRequestEvent = CustomEvent<AfterRequestEventDetail>;
-type AssetOperation = "create" | "edit";
 
 const ASSETS_PATH = "/asset";
 const NEW_ASSET_PATH = "/asset/new";
@@ -71,55 +70,11 @@ function normalizeAsset(value: unknown): AssetDTO | null {
     };
 }
 
-/** Returns the single form shared by create and edit operations. Authored by: OpenCode. */
-function getAssetForm(): HTMLFormElement | null {
-    return document.querySelector("#asset-form") as HTMLFormElement | null;
-}
-
 /** Extracts and decodes the asset identifier from the current detail route. Authored by: OpenCode. */
 function getAssetIdentifierFromLocation(): string | null {
 
     const match = globalThis.location.pathname.match(ASSET_IDENTIFIER_PATH_PATTERN);
     return match ? decodeURIComponent(match[1]) : null;
-}
-
-/** Reads the active create or edit operation from the shared form. Authored by: OpenCode. */
-function getAssetOperation(form: HTMLFormElement): AssetOperation {
-    return form.dataset.operation === "edit" ? "edit" : "create";
-}
-
-/** Reports whether a loaded asset carries external data that an update must preserve. Authored by: OpenCode. */
-function hasExternalData(asset: AssetDTO): boolean {
-    return Object.prototype.hasOwnProperty.call(asset, "externalData")
-        && asset.externalData !== undefined
-        && asset.externalData !== null;
-}
-
-/** Updates both the current and reset baseline value of one form input. Authored by: OpenCode. */
-function setInputValue(form: HTMLFormElement, name: string, value: string): void {
-
-    const input = form.elements.namedItem(name) as HTMLInputElement | null;
-
-    if(input) {
-        input.value = value;
-        input.defaultValue = value;
-    }
-}
-
-/** Stores the loaded asset in the page for later update payload preparation. Authored by: OpenCode. */
-function setAssetData(asset: AssetDTO | null): void {
-
-    const assetDataElement = document.querySelector("#asset-data");
-
-    if(assetDataElement) {
-        assetDataElement.textContent = asset ? JSON.stringify(asset) : "";
-    }
-}
-
-/** Reads and validates the asset stored in the page's JSON state element. Authored by: OpenCode. */
-function readAssetData(): AssetDTO | null {
-    const assetDataElement = document.querySelector("#asset-data");
-    return normalizeAsset(parseJSON(assetDataElement?.textContent));
 }
 
 /** Switches the edit view between its loading placeholder and form content. Authored by: OpenCode. */
@@ -167,42 +122,25 @@ function displayAssetList(): void {
     }
 }
 
-/** Resets and configures the shared form for a create or edit operation. Authored by: OpenCode. */
-function configureAssetForm(operation: AssetOperation, asset: AssetDTO | null = null): void {
+/** Renders the operation-specific form and binds HTMX to the inserted form. Authored by: OpenCode. */
+function renderAssetForm(templateId: "asset-create-form" | "asset-edit-form", asset?: AssetDTO): void {
 
-    const form = getAssetForm();
-    const heading = document.querySelector("#asset-form-heading");
-    const submitButton = document.querySelector("#asset-submit") as HTMLButtonElement | null;
-    const formCard = document.querySelector("#asset-form-content");
+    const template = document.getElementById(templateId);
+    const contentElement = document.querySelector("#asset-form-content") as HTMLElement | null;
     const errorElement = document.querySelector("#asset-form-error") as HTMLElement | null;
-    const idInput = form?.elements.namedItem("id") as HTMLInputElement | null;
 
-    if(!form || !heading || !submitButton || !formCard || !idInput) {
+    if(!template || !contentElement) {
         return;
     }
-
-    form.reset();
-    form.classList.remove("was-validated");
-    form.dataset.operation = operation;
-    form.removeAttribute("hx-vals");
-    form.querySelector("[data-external-data-marker]")?.remove();
-
-    const isEdit = operation === "edit";
-    heading.textContent = isEdit ? "Edit asset" : "New asset";
-    submitButton.textContent = isEdit ? "Save" : "Create";
-    formCard.classList.toggle("border-primary", !isEdit);
-    formCard.classList.toggle("border-dashed", !isEdit);
-    idInput.disabled = !isEdit;
 
     if(errorElement) {
         errorElement.innerHTML = "";
         errorElement.style.display = "none";
     }
 
-    setInputValue(form, "id", isEdit && asset ? String(asset.id) : "");
-    setInputValue(form, "ticker", isEdit && asset ? asset.ticker : "");
-    setInputValue(form, "name", isEdit && asset ? asset.name : "");
-    setAssetData(isEdit ? asset : null);
+    contentElement.innerHTML = Handlebars.compile(template.innerHTML)(asset ?? {});
+    // The script-loaded HTMX instance owns the form-json extension used by these forms.
+    globalThis.htmx.process(contentElement);
     setFormLoading(false);
 }
 
@@ -259,45 +197,18 @@ function renderAssetLoadError(): void {
     `;
 }
 
-/** Adds unchanged external data to an edit request so PUT does not clear it. Authored by: OpenCode. */
-function prepareExternalData(form: HTMLFormElement, event: CustomEvent): void {
-
-    const asset = readAssetData();
-    const externalDataMarker = form.querySelector("[data-external-data-marker]");
-    const requestFormData = (event.detail as { formData?: FormData }).formData;
-
-    if(!asset || !hasExternalData(asset)) {
-        form.removeAttribute("hx-vals");
-        externalDataMarker?.remove();
-        requestFormData?.delete("externalData");
-        return;
-    }
-
-    if(!externalDataMarker) {
-        const marker = document.createElement("input");
-        marker.type = "hidden";
-        marker.name = "externalData";
-        marker.value = "";
-        marker.setAttribute("data-external-data-marker", "true");
-        form.appendChild(marker);
-        requestFormData?.append("externalData", "");
-    }
-
-    form.setAttribute("hx-vals", JSON.stringify({ externalData: asset.externalData }));
-}
-
 /**
- * Provides browser behavior for the shared asset list and create/edit form page.
+ * Provides browser behavior for the asset list and operation-specific forms.
  *
  * Use the exported instance through `globalThis.assetPage` from HTMX attributes. For example,
- * `assetPage.initializeAssetFormRoute()` configures the shared form after route navigation.
+ * `assetPage.initializeAssetFormRoute()` renders the appropriate form after route navigation.
  *
  * Authored by: OpenCode
  */
 const AssetPage = {
 
     /**
-     * Navigates to the shared form in create mode.
+     * Navigates to the asset creation form.
      *
      * Example: `<button onclick="assetPage.navigateToNewAsset()">New asset</button>`.
      *
@@ -309,7 +220,7 @@ const AssetPage = {
     },
 
     /**
-     * Navigates to one asset and loads it into the shared edit form.
+     * Navigates to one asset and loads it into the edit form.
      *
      * Example: `assetPage.navigateToAsset("42")` opens `/asset/42`.
      *
@@ -380,7 +291,7 @@ const AssetPage = {
     },
 
     /**
-     * Configures the shared form for `/asset/new` or requests data for `/asset/:assetId`.
+     * Renders the creation form for `/asset/new` or requests data for `/asset/:assetId`.
      *
      * Example: invoke from the route-trigger elements in `asset.html`.
      *
@@ -391,7 +302,7 @@ const AssetPage = {
         displayAssetForm();
 
         if(globalThis.location.pathname === NEW_ASSET_PATH) {
-            configureAssetForm("create");
+            renderAssetForm("asset-create-form");
             return;
         }
 
@@ -410,7 +321,7 @@ const AssetPage = {
     },
 
     /**
-     * Validates a loaded asset against the route identifier and populates the shared edit form.
+     * Validates a loaded asset against the route identifier and renders the edit form.
      *
      * Example: configure on the detail loader's `htmx:afterRequest` event.
      *
@@ -430,36 +341,42 @@ const AssetPage = {
             return;
         }
 
-        configureAssetForm("edit", asset);
+        renderAssetForm("asset-edit-form", asset);
     },
 
     /**
-     * Changes the shared HTMX form request between POST and PUT and retains external data on edits.
+     * Handles a successful POST response by navigating to the generated asset's edit route.
+     * A failed request leaves the creation form and its input values in place.
      *
-     * Example: configure on the form's `htmx:configRequest` event.
+     * Example: configure on the creation form's `htmx:afterRequest` event.
      *
      * Authored by: OpenCode
      */
-    prepareAssetRequest(event: CustomEvent): void {
-        const form = event.currentTarget as HTMLFormElement | null;
-
-        if(!form || getAssetOperation(form) === "create") {
+    handleCreateAfterRequest(event: AssetRequestEvent): void {
+        if(!event.detail.successful) {
             return;
         }
 
-        event.detail.verb = "put";
-        prepareExternalData(form, event);
+        const asset = normalizeAsset(parseJSON(event.detail.xhr.response));
+
+        if(!asset || asset.id <= 0) {
+            notifyUnexpectedResponse("The server returned an invalid asset.");
+            return;
+        }
+
+        notifySuccess("Asset created", "The asset was created and is ready for editing.");
+        this.navigateToAsset(String(asset.id));
     },
 
     /**
-     * Handles successful POST and PUT responses according to the shared form's current operation.
-     * Failed requests retain the user's form values for correction.
+     * Validates a successful PUT response and refreshes the saved values on the edit route.
+     * A failed request leaves the edit form and its input values in place.
      *
-     * Example: configure on the form's `htmx:afterRequest` event.
+     * Example: configure on the edit form's `htmx:afterRequest` event.
      *
      * Authored by: OpenCode
      */
-    handleMutationAfterRequest(event: AssetRequestEvent): void {
+    handleSaveAfterRequest(event: AssetRequestEvent): void {
         if(!event.detail.successful) {
             return;
         }
@@ -472,12 +389,6 @@ const AssetPage = {
             return;
         }
 
-        if(getAssetOperation(form) === "create") {
-            notifySuccess("Asset created", "The asset was created and is ready for editing.");
-            this.navigateToAsset(String(asset.id));
-            return;
-        }
-
         const requestedId = (form.elements.namedItem("id") as HTMLInputElement | null)?.value;
 
         if(String(asset.id) !== requestedId) {
@@ -485,7 +396,7 @@ const AssetPage = {
             return;
         }
 
-        configureAssetForm("edit", asset);
+        renderAssetForm("asset-edit-form", asset);
         notifySuccess("Asset saved", "The asset changes were saved.");
     },
 };

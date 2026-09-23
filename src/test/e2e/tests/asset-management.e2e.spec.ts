@@ -136,6 +136,22 @@ test.describe('asset management', () => {
       name: UPDATED_NAME,
       ticker: UPDATED_TICKER,
     }]);
+
+    await page.getByRole('button', { name: 'New asset' }).click();
+    await expectNewAssetForm(page);
+    await page.getByRole('textbox', { name: 'Ticker' }).fill(UPDATED_TICKER);
+    await page.getByRole('textbox', { name: 'Name' }).fill(DRAFT_NAME);
+
+    const duplicateResponsePromise = page.waitForResponse(isAssetCreationRequest);
+    await page.getByRole('button', { name: 'Create' }).click();
+    expect((await duplicateResponsePromise).ok()).toBe(false);
+    await expect(page.locator('.toast.text-bg-danger')).toContainText('Error');
+    await expect(page.getByRole('textbox', { name: 'Ticker' })).toHaveValue(UPDATED_TICKER);
+    await expect(page.getByRole('textbox', { name: 'Name' })).toHaveValue(DRAFT_NAME);
+    await expect(page).toHaveURL(/\/asset\/new$/);
+
+    await page.getByRole('button', { name: 'Cancel' }).click();
+    await expect(page.getByRole('cell', { name: DRAFT_NAME, exact: true })).toHaveCount(0);
   });
 
   test('scenario 8.1: opens asset pages through direct browser URLs', async ({ database, page }) => {
@@ -161,9 +177,21 @@ test.describe('asset management', () => {
 
   test('scenario 9: preserves deferred external data when saving basic asset fields', async ({ database, page }) => {
     const asset = await seedAsset(database, ORIGINAL_TICKER, ORIGINAL_NAME, PERSISTED_EXTERNAL_DATA);
+    await seedAsset(database, CREATED_TICKER, CREATED_NAME);
 
     await page.goto(`/asset/${asset.id}`);
     await expectAssetEditor(page, { ...asset, externalData: PERSISTED_EXTERNAL_DATA });
+
+    await page.getByRole('textbox', { name: 'Ticker' }).fill(CREATED_TICKER);
+    await page.getByRole('textbox', { name: 'Name' }).fill(DRAFT_NAME);
+
+    const duplicateUpdatePromise = page.waitForResponse(isAssetUpdateRequest);
+    await page.getByRole('button', { name: 'Save' }).click();
+    expect((await duplicateUpdatePromise).ok()).toBe(false);
+    await expect(page.locator('.toast.text-bg-danger')).toContainText('Error');
+    await expect(page.getByRole('textbox', { name: 'Ticker' })).toHaveValue(CREATED_TICKER);
+    await expect(page.getByRole('textbox', { name: 'Name' })).toHaveValue(DRAFT_NAME);
+    await expectPersistedAsset(database, asset, PERSISTED_EXTERNAL_DATA);
 
     await page.getByRole('textbox', { name: 'Ticker' }).fill(UPDATED_TICKER);
     await page.getByRole('textbox', { name: 'Name' }).fill(UPDATED_NAME);
@@ -266,12 +294,13 @@ async function expectPersistedAsset(
     [asset.id],
   );
 
-  expect(rows).toEqual([{
-    external_data: externalData ? JSON.stringify(externalData) : null,
+  expect(rows).toHaveLength(1);
+  expect(rows[0]).toMatchObject({
     id: asset.id,
     name: asset.name,
     ticker: asset.ticker,
-  }]);
+  });
+  expect(JSON.parse(rows[0].external_data ?? 'null')).toEqual(externalData);
 }
 
 /** Matches the same-origin request that loads the asset collection. */
