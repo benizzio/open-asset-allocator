@@ -7,7 +7,7 @@
  *
  * Authored by: OpenCode
  */
-import type { Page, Response } from '@playwright/test';
+import type { Locator, Page, Response } from '@playwright/test';
 import { expect, test } from '../support/fixtures';
 import type { E2eDatabase } from '../support/database';
 
@@ -203,6 +203,10 @@ test.describe('asset management', () => {
     await page.reload();
     await expect(page.getByRole('heading', { name: 'Asset could not be loaded' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Save', exact: true })).toHaveCount(0);
+    await expectIconOnlyButton(
+      page.locator('#asset-edit-error').getByRole('button', { name: 'Back to assets', exact: true }),
+      'arrow-left',
+    );
     expect(newAssetDetailRequests).toHaveLength(0);
 
     await expectPersistedAsset(database, asset, null);
@@ -310,7 +314,9 @@ async function expectNewAssetForm(page: Page): Promise<void> {
   await expect(page.getByRole('heading', { name: 'New asset', exact: true })).toBeVisible();
   await expect(page.getByRole('textbox', { name: 'Ticker' })).toHaveValue('');
   await expect(page.getByRole('textbox', { name: 'Name' })).toHaveValue('');
-  await expect(page.getByRole('button', { name: 'Create', exact: true })).toBeVisible();
+  await expectIconOnlyButton(page.getByRole('button', { name: 'Back to assets', exact: true }), 'arrow-left');
+  await expectIconOnlyButton(page.getByRole('button', { name: 'Cancel', exact: true }), 'x-circle');
+  await expectIconOnlyButton(page.getByRole('button', { name: 'Create', exact: true }), 'plus-circle');
 }
 
 /** Asserts the edit route contains the expected basic asset fields. */
@@ -319,7 +325,17 @@ async function expectAssetEditor(page: Page, asset: Asset): Promise<void> {
   await expect(page.getByRole('heading', { name: 'Edit asset', exact: true })).toBeVisible();
   await expect(page.getByRole('textbox', { name: 'Ticker' })).toHaveValue(asset.ticker);
   await expect(page.getByRole('textbox', { name: 'Name' })).toHaveValue(asset.name);
-  await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeVisible();
+  await expectIconOnlyButton(page.getByRole('button', { name: 'Back to assets', exact: true }), 'arrow-left');
+  await expectIconOnlyButton(page.getByRole('button', { name: 'Cancel', exact: true }), 'x-circle');
+  await expectIconOnlyButton(page.getByRole('button', { name: 'Save', exact: true }), 'save-fill');
+}
+
+/** Verifies an action button has an accessible label and icon without visible text. Authored by: OpenCode. */
+async function expectIconOnlyButton(button: Locator, iconName: string): Promise<void> {
+  await expect(button).toBeVisible();
+  await expect(button).toHaveText('');
+  await expect(button).toHaveAttribute('title', /.+/);
+  await expect(button.locator(`span.bi-${iconName}`)).toHaveAttribute('aria-hidden', 'true');
 }
 
 /** Asserts one asset's complete persisted state directly in PostgreSQL. */
