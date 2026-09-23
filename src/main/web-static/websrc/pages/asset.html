@@ -1,10 +1,11 @@
 <!-- Co-authored by: OpenCode and Igor Benicio de Mesquita -->
-<div data-exclusive-display-container>
+<div id="asset-page" data-exclusive-display-container>
 
     <div id="assets"
          data-display-on-route="/asset"
+         data-hx-trigger-on-route="/asset!reload-assets"
          hx-get="/api/asset"
-         hx-trigger="load once, reload-assets"
+         hx-trigger="reload-assets"
          handlebars-template="asset-list"
          hx-on::after-request="assetPage.handleAssetListAfterRequest(event)"
     >
@@ -37,18 +38,10 @@
         </div>
     </div>
 
-    <div class="d-none"
-         data-hx-trigger-on-route="/asset/new!initialize-asset-route"
-         hx-on:initialize-asset-route="assetPage.initializeAssetFormRoute()"
-    ></div>
-
-    <div class="d-none"
-         data-hx-trigger-on-route="/asset/:assetId!initialize-asset-route"
-         hx-on:initialize-asset-route="assetPage.initializeAssetFormRoute()"
-    ></div>
-
-    <div id="asset-form-view"
-         data-display-on-regexp-route="asset/.+"
+    <div id="asset-create-view"
+         data-display-on-route="/asset/new"
+         data-hx-trigger-on-route="/asset/new!show-create-form"
+         hx-on:show-create-form="assetPage.renderCreateForm(this)"
          class="row justify-content-center my-5"
          style="display: none"
     >
@@ -64,7 +57,36 @@
                 </button>
             </div>
 
-            <div id="asset-form-loading" class="card placeholder-glow" style="display: none">
+            <div id="asset-create-content" data-asset-view></div>
+        </div>
+    </div>
+
+    <div id="asset-edit-view"
+         data-display-on-regexp-route="asset/(?!new$)[^/]+"
+         data-hx-trigger-on-route="/asset/:assetId!load-asset"
+         hx-get="/api/asset/:assetId"
+         hx-trigger="load-asset[detail.routerPathData.assetId !== 'new'] queue:last"
+         hx-target="#asset-edit-content"
+         handlebars-template="asset-edit-form"
+         hx-on:load-asset="assetPage.prepareAssetEditView(this)"
+         hx-on::before-swap="assetPage.validateAssetBeforeSwap(event)"
+         hx-on::after-request="assetPage.handleAssetLoadAfterRequest(event)"
+         class="row justify-content-center my-5"
+         style="display: none"
+    >
+        <div class="col-12 col-lg-8">
+            <div class="d-flex justify-content-start mb-3">
+                <button type="button"
+                        class="btn btn-secondary"
+                        onclick="assetPage.navigateToAssets()"
+                        aria-label="Back to assets"
+                >
+                    <span class="bi bi-arrow-left" aria-hidden="true"></span>
+                    <span>Back</span>
+                </button>
+            </div>
+
+            <div id="asset-edit-loading" class="card placeholder-glow">
                 <div class="card-header placeholder col-5">placeholder</div>
                 <div class="card-body">
                     <div class="placeholder col-12 mb-3">placeholder</div>
@@ -72,19 +94,8 @@
                 </div>
             </div>
 
-            <div id="asset-form-error" style="display: none"></div>
-
-            <div id="asset-form-content" data-asset-view></div>
-
-            <div id="asset-detail-loader"
-                 hx-get="/api/asset/:assetId"
-                 hx-include="find input"
-                 hx-trigger="load-asset"
-                 hx-swap="none"
-                 hx-on::after-request="assetPage.handleAssetLoadAfterRequest(event)"
-            >
-                <input type="hidden" name="assetId" />
-            </div>
+            <div id="asset-edit-error" style="display: none"></div>
+            <div id="asset-edit-content" data-asset-view></div>
         </div>
     </div>
 
@@ -258,7 +269,7 @@
     </script>
 
     <script type="text/javascript">
-        HandlebarsUtils.registerPartialToContainer("asset-form-view", "asset-form-fields");
+        HandlebarsUtils.registerPartialToContainer("asset-page", "asset-form-fields");
     </script>
 
 </div>

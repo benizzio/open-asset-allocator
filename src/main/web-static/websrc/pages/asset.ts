@@ -10,7 +10,7 @@ import htmx from "htmx.org";
 import * as Handlebars from "handlebars";
 import notifications from "../components/notifications";
 import { NotificationType } from "../infra/infra-types";
-import { AfterRequestEventDetail } from "../infra/htmx";
+import { AfterRequestEventDetail, BeforeSwapEventDetail } from "../infra/htmx";
 import Router from "../infra/routing";
 
 type ExternalAssetData = Record<string, unknown>;
@@ -23,6 +23,7 @@ type AssetDTO = {
 };
 
 type AssetRequestEvent = CustomEvent<AfterRequestEventDetail>;
+type AssetBeforeSwapEvent = CustomEvent<BeforeSwapEventDetail>;
 
 const ASSETS_PATH = "/asset";
 const NEW_ASSET_PATH = "/asset/new";
@@ -77,71 +78,22 @@ function getAssetIdentifierFromLocation(): string | null {
     return match ? decodeURIComponent(match[1]) : null;
 }
 
-/** Switches the edit view between its loading placeholder and form content. Authored by: OpenCode. */
-function setFormLoading(isLoading: boolean): void {
-
-    const loadingElement = document.querySelector("#asset-form-loading") as HTMLElement | null;
-    const contentElement = document.querySelector("#asset-form-content") as HTMLElement | null;
-
-    if(loadingElement) {
-        loadingElement.style.display = isLoading ? null : "none";
-    }
-
-    if(contentElement) {
-        contentElement.style.display = isLoading ? "none" : null;
-    }
-}
-
-/** Displays the shared form and hides the asset collection in the mounted page. Authored by: OpenCode. */
-function displayAssetForm(): void {
-
-    const assetsElement = document.querySelector("#assets") as HTMLElement | null;
-    const formViewElement = document.querySelector("#asset-form-view") as HTMLElement | null;
-
-    if(assetsElement) {
-        assetsElement.style.display = "none";
-    }
-
-    if(formViewElement) {
-        formViewElement.style.display = null;
-    }
-}
-
-/** Displays the asset collection and hides the shared form in the mounted page. Authored by: OpenCode. */
-function displayAssetList(): void {
-
-    const assetsElement = document.querySelector("#assets") as HTMLElement | null;
-    const formViewElement = document.querySelector("#asset-form-view") as HTMLElement | null;
-
-    if(formViewElement) {
-        formViewElement.style.display = "none";
-    }
-
-    if(assetsElement) {
-        assetsElement.style.display = null;
-    }
-}
-
 /** Renders the operation-specific form and binds HTMX to the inserted form. Authored by: OpenCode. */
-function renderAssetForm(templateId: "asset-create-form" | "asset-edit-form", asset?: AssetDTO): void {
+function renderAssetForm(
+    templateId: "asset-create-form" | "asset-edit-form",
+    contentElement: HTMLElement,
+    asset?: AssetDTO,
+): void {
 
     const template = document.getElementById(templateId);
-    const contentElement = document.querySelector("#asset-form-content") as HTMLElement | null;
-    const errorElement = document.querySelector("#asset-form-error") as HTMLElement | null;
 
-    if(!template || !contentElement) {
+    if(!template) {
         return;
-    }
-
-    if(errorElement) {
-        errorElement.innerHTML = "";
-        errorElement.style.display = "none";
     }
 
     contentElement.innerHTML = Handlebars.compile(template.innerHTML)(asset ?? {});
     // The script-loaded HTMX instance owns the form-json extension used by these forms.
     globalThis.htmx.process(contentElement);
-    setFormLoading(false);
 }
 
 /** Shows a success toast through the application notification component. Authored by: OpenCode. */
@@ -172,18 +124,22 @@ function renderListError(target: HTMLElement): void {
     `;
 }
 
-/** Displays a recoverable detail-load error without destroying the shared form. Authored by: OpenCode. */
+/** Displays a recoverable detail-load error without destroying the edit route bindings. Authored by: OpenCode. */
 function renderAssetLoadError(): void {
 
-    const contentElement = document.querySelector("#asset-form-content") as HTMLElement | null;
-    const errorElement = document.querySelector("#asset-form-error") as HTMLElement | null;
+    const contentElement = document.querySelector("#asset-edit-content") as HTMLElement | null;
+    const errorElement = document.querySelector("#asset-edit-error") as HTMLElement | null;
+    const loadingElement = document.querySelector("#asset-edit-loading") as HTMLElement | null;
 
     if(!contentElement || !errorElement) {
         return;
     }
 
-    setFormLoading(false);
-    contentElement.style.display = "none";
+    contentElement.innerHTML = "";
+
+    if(loadingElement) {
+        loadingElement.style.display = "none";
+    }
     errorElement.style.display = null;
 
     errorElement.innerHTML = `
@@ -201,7 +157,7 @@ function renderAssetLoadError(): void {
  * Provides browser behavior for the asset list and operation-specific forms.
  *
  * Use the exported instance through `globalThis.assetPage` from HTMX attributes. For example,
- * `assetPage.initializeAssetFormRoute()` renders the appropriate form after route navigation.
+ * `assetPage.renderCreateForm(view)` renders a new create form when its route is entered.
  *
  * Authored by: OpenCode
  */
@@ -216,7 +172,6 @@ const AssetPage = {
      */
     navigateToNewAsset(): void {
         Router.navigateTo(NEW_ASSET_PATH);
-        this.initializeAssetFormRoute();
     },
 
     /**
@@ -228,7 +183,6 @@ const AssetPage = {
      */
     navigateToAsset(assetId: string): void {
         Router.navigateTo(`/asset/${ encodeURIComponent(assetId) }`);
-        this.initializeAssetFormRoute();
     },
 
     /**
@@ -245,7 +199,7 @@ const AssetPage = {
     },
 
     /**
-     * Navigates to the asset table and reloads its data when the page is already mounted.
+     * Navigates to the asset table, whose route binding reloads its data.
      *
      * Example: `<button type="button" onclick="assetPage.navigateToAssets()">Back</button>`.
      *
@@ -253,13 +207,6 @@ const AssetPage = {
      */
     navigateToAssets(): void {
         Router.navigateTo(ASSETS_PATH);
-        displayAssetList();
-
-        const assetsElement = document.querySelector("#assets") as HTMLElement | null;
-
-        if(assetsElement) {
-            htmx.trigger(assetsElement, "reload-assets");
-        }
     },
 
     /**
@@ -291,57 +238,97 @@ const AssetPage = {
     },
 
     /**
-     * Renders the creation form for `/asset/new` or requests data for `/asset/:assetId`.
+     * Renders a blank creation form each time the create route is entered.
      *
-     * Example: invoke from the route-trigger elements in `asset.html`.
+     * Example: invoke from the create view's `show-create-form` route event.
      *
      * Authored by: OpenCode
      */
-    initializeAssetFormRoute(): void {
+    renderCreateForm(view: HTMLElement): void {
+        const contentElement = view.querySelector("#asset-create-content") as HTMLElement | null;
 
-        displayAssetForm();
-
-        if(globalThis.location.pathname === NEW_ASSET_PATH) {
-            renderAssetForm("asset-create-form");
-            return;
+        if(contentElement) {
+            renderAssetForm("asset-create-form", contentElement);
         }
-
-        const requestedIdentifier = getAssetIdentifierFromLocation();
-        const detailLoader = document.querySelector("#asset-detail-loader") as HTMLElement | null;
-        const identifierInput = detailLoader?.querySelector("input[name='assetId']") as HTMLInputElement | null;
-
-        if(!requestedIdentifier || !detailLoader || !identifierInput) {
-            renderAssetLoadError();
-            return;
-        }
-
-        identifierInput.value = requestedIdentifier;
-        setFormLoading(true);
-        htmx.trigger(detailLoader, "load-asset");
     },
 
     /**
-     * Validates a loaded asset against the route identifier and renders the edit form.
+     * Resets the edit view to its loading placeholder before the route-owned GET begins.
      *
-     * Example: configure on the detail loader's `htmx:afterRequest` event.
+     * Example: invoke from the edit view's `load-asset` route event.
      *
      * Authored by: OpenCode
      */
-    handleAssetLoadAfterRequest(event: AssetRequestEvent): void {
-        if(!event.detail.successful) {
-            renderAssetLoadError();
+    prepareAssetEditView(view: HTMLElement): void {
+        const contentElement = view.querySelector("#asset-edit-content") as HTMLElement | null;
+        const errorElement = view.querySelector("#asset-edit-error") as HTMLElement | null;
+        const loadingElement = view.querySelector("#asset-edit-loading") as HTMLElement | null;
+
+        if(contentElement) {
+            contentElement.innerHTML = "";
+        }
+
+        if(errorElement) {
+            errorElement.style.display = "none";
+            errorElement.innerHTML = "";
+        }
+
+        if(loadingElement) {
+            loadingElement.style.display = null;
+        }
+    },
+
+    /**
+     * Rejects an asset response whose ID does not match the requested edit route before HTMX renders it.
+     *
+     * Example: configure on the edit view's `htmx:beforeSwap` event.
+     *
+     * Authored by: OpenCode
+     */
+    validateAssetBeforeSwap(event: AssetBeforeSwapEvent): void {
+        if(event.detail.isError || event.detail.requestConfig.verb !== "get") {
             return;
         }
 
         const asset = normalizeAsset(parseJSON(event.detail.xhr.response));
         const requestedIdentifier = getAssetIdentifierFromLocation();
+        const requestPath = new URL(event.detail.xhr.responseURL).pathname;
 
-        if(!asset || requestedIdentifier === null || String(asset.id) !== requestedIdentifier) {
+        if(!asset || !requestedIdentifier || requestedIdentifier === "new"
+            || requestPath !== `/api/asset/${ encodeURIComponent(requestedIdentifier) }`
+            || String(asset.id) !== requestedIdentifier) {
+            event.detail.shouldSwap = false;
+
+            if(requestedIdentifier && requestedIdentifier !== "new") {
+                renderAssetLoadError();
+            }
+        }
+    },
+
+    /**
+     * Hides the edit loading placeholder on success or displays a retryable load error on failure.
+     *
+     * Example: configure on the edit view's `htmx:afterRequest` event.
+     *
+     * Authored by: OpenCode
+     */
+    handleAssetLoadAfterRequest(event: AssetRequestEvent): void {
+        const requestedIdentifier = getAssetIdentifierFromLocation();
+
+        if(event.target !== event.currentTarget || !requestedIdentifier || requestedIdentifier === "new") {
+            return;
+        }
+
+        if(!event.detail.successful) {
             renderAssetLoadError();
             return;
         }
 
-        renderAssetForm("asset-edit-form", asset);
+        const loadingElement = document.querySelector("#asset-edit-loading") as HTMLElement | null;
+
+        if(loadingElement) {
+            loadingElement.style.display = "none";
+        }
     },
 
     /**
@@ -396,7 +383,11 @@ const AssetPage = {
             return;
         }
 
-        renderAssetForm("asset-edit-form", asset);
+        const contentElement = document.querySelector("#asset-edit-content") as HTMLElement | null;
+
+        if(contentElement) {
+            renderAssetForm("asset-edit-form", contentElement, asset);
+        }
         notifySuccess("Asset saved", "The asset changes were saved.");
     },
 };

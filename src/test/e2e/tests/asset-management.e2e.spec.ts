@@ -156,6 +156,13 @@ test.describe('asset management', () => {
 
   test('scenario 8.1: opens asset pages through direct browser URLs', async ({ database, page }) => {
     const asset = await seedAsset(database, ORIGINAL_TICKER, ORIGINAL_NAME);
+    const otherAsset = await seedAsset(database, CREATED_TICKER, CREATED_NAME);
+    const newAssetDetailRequests: string[] = [];
+    page.on('request', (request) => {
+      if(new URL(request.url()).pathname === '/api/asset/new') {
+        newAssetDetailRequests.push(request.url());
+      }
+    });
 
     await page.goto('/asset');
     await expectAssetTable(page, asset);
@@ -166,13 +173,40 @@ test.describe('asset management', () => {
     await expectNewAssetForm(page);
     await page.reload();
     await expectNewAssetForm(page);
+    expect(newAssetDetailRequests).toHaveLength(0);
 
     await page.goto(`/asset/${asset.id}`);
     await expectAssetEditor(page, asset);
     await page.reload();
     await expectAssetEditor(page, asset);
 
+    await navigateWithinApp(page, '/asset/new');
+    await expectNewAssetForm(page);
+    await page.goBack();
+    await expectAssetEditor(page, asset);
+    await page.goForward();
+    await expectNewAssetForm(page);
+
+    await navigateWithinApp(page, `/asset/${asset.id}`);
+    await expectAssetEditor(page, asset);
+
+    await navigateWithinApp(page, `/asset/${otherAsset.id}`);
+    await expectAssetEditor(page, otherAsset);
+    await page.goBack();
+    await expectAssetEditor(page, asset);
+
+    await page.route(`**/api/asset/${asset.id}`, async (route) => {
+      const response = await route.fetch();
+      const loadedAsset = await response.json() as Asset;
+      await route.fulfill({ response, json: { ...loadedAsset, id: asset.id + 100 } });
+    });
+    await page.reload();
+    await expect(page.getByRole('heading', { name: 'Asset could not be loaded' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Save', exact: true })).toHaveCount(0);
+    expect(newAssetDetailRequests).toHaveLength(0);
+
     await expectPersistedAsset(database, asset, null);
+    await expectPersistedAsset(database, otherAsset, null);
   });
 
   test('scenario 9: preserves deferred external data when saving basic asset fields', async ({ database, page }) => {
@@ -228,6 +262,13 @@ test.describe('asset management', () => {
     await expect(page.getByRole('cell', { name: UPDATED_TICKER, exact: true })).toBeVisible();
   });
 });
+
+/** Navigates within the mounted SPA to exercise route handlers without reloading the document. Authored by: OpenCode. */
+async function navigateWithinApp(page: Page, path: string): Promise<void> {
+  await page.evaluate((destination) => {
+    (window as unknown as { navigateTo: (path: string) => void }).navigateTo(destination);
+  }, path);
+}
 
 /** Seeds one asset directly in PostgreSQL for a browser scenario. */
 async function seedAsset(
