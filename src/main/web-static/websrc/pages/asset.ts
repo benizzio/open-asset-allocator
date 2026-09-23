@@ -138,8 +138,13 @@ function renderAssetLoadError(): void {
         <div class="alert alert-danger mb-0" role="alert">
             <h2 class="h5">Asset could not be loaded</h2>
             <p>The requested asset is not available for editing.</p>
-            <button type="button" class="btn btn-outline-danger" onclick="assetPage.navigateToAssets()">
-                Back to assets
+            <button type="button"
+                    class="btn btn-outline-danger"
+                    onclick="assetPage.navigateToAssets()"
+                    aria-label="Back to assets"
+                    title="Back to assets"
+            >
+                <span class="bi bi-arrow-left h5 mb-0" aria-hidden="true"></span>
             </button>
         </div>
     `;
