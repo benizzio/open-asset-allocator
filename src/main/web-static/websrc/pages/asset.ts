@@ -12,15 +12,7 @@ import notifications from "../components/notifications";
 import { NotificationType } from "../infra/infra-types";
 import { AfterRequestEventDetail, BeforeSwapEventDetail } from "../infra/htmx";
 import Router from "../infra/routing";
-
-type ExternalAssetData = Record<string, unknown>;
-
-type AssetDTO = {
-    id: number;
-    name: string;
-    ticker: string;
-    externalData?: ExternalAssetData | null;
-};
+import type { Asset } from "../domain/asset";
 
 type AssetRequestEvent = CustomEvent<AfterRequestEventDetail>;
 type AssetBeforeSwapEvent = CustomEvent<BeforeSwapEventDetail>;
@@ -44,7 +36,7 @@ function parseJSON(value: unknown): unknown | null {
 }
 
 /** Validates and normalizes an API response into the asset shape used by this page. Authored by: OpenCode. */
-function normalizeAsset(value: unknown): AssetDTO | null {
+function normalizeAsset(value: unknown): Asset | null {
 
     if(typeof value !== "object" || value === null) {
         return null;
@@ -67,7 +59,7 @@ function normalizeAsset(value: unknown): AssetDTO | null {
         id: numericId,
         name: candidate.name,
         ticker: candidate.ticker,
-        externalData: externalData as ExternalAssetData | null | undefined,
+        externalData: externalData as Asset["externalData"],
     };
 }
 
@@ -82,7 +74,7 @@ function getAssetIdentifierFromLocation(): string | null {
 function renderAssetForm(
     templateId: "asset-create-form" | "asset-edit-form",
     contentElement: HTMLElement,
-    asset?: AssetDTO,
+    asset?: Asset,
 ): void {
 
     const template = document.getElementById(templateId);
@@ -346,7 +338,7 @@ const AssetPage = {
 
         const asset = normalizeAsset(parseJSON(event.detail.xhr.response));
 
-        if(!asset || asset.id <= 0) {
+        if(!asset || typeof asset.id !== "number" || asset.id <= 0) {
             notifyUnexpectedResponse("The server returned an invalid asset.");
             return;
         }
@@ -371,7 +363,7 @@ const AssetPage = {
         const form = event.currentTarget as HTMLFormElement | null;
         const asset = normalizeAsset(parseJSON(event.detail.xhr.response));
 
-        if(!form || !asset || asset.id <= 0) {
+        if(!form || !asset || typeof asset.id !== "number" || asset.id <= 0) {
             notifyUnexpectedResponse("The server returned an invalid asset.");
             return;
         }
