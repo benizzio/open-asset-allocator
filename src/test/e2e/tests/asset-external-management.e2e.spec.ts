@@ -1,10 +1,11 @@
 /**
- * Covers scenarios 10–12 for external-asset search and ordered draft persistence in both asset forms.
+ * Covers scenarios 10–13 for external-asset search and ordered draft persistence in both asset forms.
  * Provider responses are mocked while asset writes are checked directly in PostgreSQL.
  *
  * Authored by: OpenCode
  */
 import { expect, test } from '../support/fixtures';
+import type { Page } from '@playwright/test';
 import type { E2eDatabase } from '../support/database';
 
 const FIRST = { source: 'YAHOO_FINANCE', ticker: 'IAU', exchangeId: 'PCX' };
@@ -198,6 +199,66 @@ test('scenario 12: ignores an older search response when a newer query is pendin
   await expect(results).toContainText('NEW');
   await expect(results).not.toContainText('OLD');
 });
+
+test('scenario 13: fills only empty asset fields when an external result is added', async ({ page, database }) => {
+  const rows = await database.query<{ id: number }>(
+    "INSERT INTO public.asset (ticker, name) VALUES ('AUTOFILL-EDIT', 'Autofill Edit') RETURNING id",
+  );
+  const editAssetId = rows[0].id;
+  const additionalResult = { source: 'YAHOO_FINANCE', ticker: 'GLD', exchangeId: 'PCX' };
+
+  await page.route('**/api/external-asset?*', async (route) => {
+    await route.fulfill({ json: [
+      { ...FIRST, name: 'Gold Trust', exchangeName: 'NYSE Arca' },
+      { ...SECOND, name: 'Treasury Bill', exchangeName: 'NASDAQ' },
+      { ...additionalResult, name: 'SPDR Gold Shares', exchangeName: 'NYSE Arca' },
+    ] });
+  });
+
+  for(const view of [{ path: '/asset/new', isEdit: false }, { path: `/asset/${editAssetId}`, isEdit: true }]) {
+    await page.goto(view.path);
+    const ticker = page.getByRole('textbox', { name: 'Ticker', exact: true });
+    const name = page.getByRole('textbox', { name: 'Name', exact: true });
+
+    if(view.isEdit) {
+      await ticker.fill('');
+      await name.fill('');
+    }
+
+    await searchAndAdd(page, FIRST.ticker, FIRST.exchangeId);
+    await expect(ticker).toHaveValue('PCX:IAU');
+    await expect(name).toHaveValue('Gold Trust');
+
+    await name.fill('Keep this name');
+    await ticker.fill('');
+    await searchAndAdd(page, SECOND.ticker, SECOND.exchangeId);
+    await expect(ticker).toHaveValue('NMS:BIL');
+    await expect(name).toHaveValue('Keep this name');
+
+    await ticker.fill('Keep this ticker');
+    await name.fill('');
+    await searchAndAdd(page, additionalResult.ticker, additionalResult.exchangeId);
+    await expect(ticker).toHaveValue('Keep this ticker');
+    await expect(name).toHaveValue('SPDR Gold Shares');
+  }
+
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+  const persisted = await database.query<{ ticker: string; name: string; external_data: string | null }>(
+    'SELECT ticker, name, external_data::text AS external_data FROM public.asset WHERE id = $1', [editAssetId],
+  );
+  expect(persisted).toEqual([{ ticker: 'AUTOFILL-EDIT', name: 'Autofill Edit', external_data: null }]);
+});
+
+/** Searches and adds one mocked provider result. Authored by: OpenCode. */
+async function searchAndAdd(page: Page, ticker: string, exchangeId: string): Promise<void> {
+  const query = page.getByRole('searchbox', { name: 'Search external assets' });
+
+  await query.fill('gold');
+  await query.press('Enter');
+  await page.getByRole('button', {
+    name: `Add ${ticker} from YAHOO_FINANCE on ${exchangeId}`,
+  }).click();
+}
 
 /** Asserts exactly the identifiers and priority order stored by the asset write. Authored by: OpenCode. */
 async function expectPersistedOrder(database: E2eDatabase, assetId: number, expected: typeof FIRST[] | null) {

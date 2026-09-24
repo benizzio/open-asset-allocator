@@ -111,6 +111,20 @@ function clearSearch(form: HTMLFormElement, draft: Draft): void {
     showMessage(form, "");
 }
 
+/** Fills only blank main asset fields from the selected provider result. Authored by: OpenCode. */
+function fillEmptyAssetFields(form: HTMLFormElement, selected: ExternalAsset): void {
+    const ticker = form.querySelector<HTMLInputElement>("input[name=\"ticker\"]");
+    const name = form.querySelector<HTMLInputElement>("input[name=\"name\"]");
+
+    if(ticker && !ticker.value.trim()) {
+        ticker.value = `${ selected.exchangeId }:${ selected.ticker }`;
+    }
+
+    if(name && !name.value.trim() && selected.name) {
+        name.value = selected.name;
+    }
+}
+
 /** Validates a provider record before showing or storing it. Authored by: OpenCode. */
 function isExternalAsset(value: unknown): value is ExternalAsset {
     if(typeof value !== "object" || value === null) {
@@ -256,6 +270,8 @@ export function addExternalAsset(form: HTMLFormElement, index: number): void {
         );
         return;
     }
+
+    fillEmptyAssetFields(form, selected);
     draft.records.push(persistedRecord(selected));
     renderRecords(form, draft);
     clearSearch(form, draft);
