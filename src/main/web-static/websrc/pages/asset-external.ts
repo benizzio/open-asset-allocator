@@ -5,6 +5,7 @@
  * Authored by: OpenCode
  */
 import * as Handlebars from "handlebars";
+import notifications from "../components/notifications";
 import type { Asset, ExternalAsset } from "../domain/asset";
 
 type Draft = { records: ExternalAsset[]; results: ExternalAsset[]; sequence: number; cleared: boolean; };
@@ -60,13 +61,40 @@ function renderRecords(form: HTMLFormElement, draft: Draft): void {
     updatePayload(form, draft);
 }
 
-/** Reports search and duplicate feedback next to the relevant form. Authored by: OpenCode. */
+/** Updates the polite status shown during a search or when it returns no results. Authored by: OpenCode. */
 function showMessage(form: HTMLFormElement, message: string): void {
     const target = findPart(form, "[data-external-message]");
 
     if(target) {
         target.textContent = message;
     }
+}
+
+/**
+ * Displays search validation and operation failures through the shared error-toast component.
+ * Authored by: OpenCode.
+ */
+function showError(message: string): void {
+    notifications.notifyError(new Error(message));
+}
+
+/** Clears the current query and results, invalidating requests started before this reset. Authored by: OpenCode. */
+function clearSearch(form: HTMLFormElement, draft: Draft): void {
+    const input = form.querySelector<HTMLInputElement>("[data-external-query]");
+    const search = findPart(form, "[data-external-search]");
+
+    draft.sequence++;
+    draft.results = [];
+
+    if(input) {
+        input.value = "";
+    }
+
+    if(search) {
+        search.innerHTML = "";
+        search.removeAttribute("hx-vals");
+    }
+    showMessage(form, "");
 }
 
 /** Validates a provider record before showing or storing it. Authored by: OpenCode. */
@@ -125,9 +153,11 @@ export function searchExternalAssets(form: HTMLFormElement): void {
     draft.sequence++;
     draft.results = [];
     search.innerHTML = "";
+    search.removeAttribute("hx-vals");
+    showMessage(form, "");
 
     if(!query || query.length > 100) {
-        showMessage(form, "Enter a search term of at most 100 characters.");
+        showError("Enter a search term containing 1 to 100 characters.");
         return;
     }
     showMessage(form, "Searching external assets…");
@@ -165,7 +195,8 @@ export function handleExternalSearchAfterRequest(event: SearchEvent): void {
 
     if(!event.detail.successful) {
         search.innerHTML = "";
-        showMessage(form, "External assets could not be searched. Try again.");
+        showMessage(form, "");
+        showError("External assets could not be searched. Try again.");
         return;
     }
 
@@ -182,7 +213,8 @@ export function handleExternalSearchAfterRequest(event: SearchEvent): void {
         showMessage(form, draft.results.length ? "" : "No external assets found.");
     } catch {
         search.innerHTML = "";
-        showMessage(form, "External assets could not be searched. Try again.");
+        showMessage(form, "");
+        showError("External assets could not be searched. Try again.");
     }
 }
 
@@ -201,13 +233,14 @@ export function addExternalAsset(form: HTMLFormElement, index: number): void {
 
     if(draft.records.some(record => record.source === selected.source && record.ticker === selected.ticker
         && record.exchangeId === selected.exchangeId)) {
-        showMessage(form,
-            `${ selected.ticker } from ${ selected.source } on exchange ${ selected.exchangeId } is already added.`);
+        showError(
+            `${ selected.ticker } from ${ selected.source } on exchange ${ selected.exchangeId } is already added.`,
+        );
         return;
     }
     draft.records.push(persistedRecord(selected));
-    showMessage(form, "");
     renderRecords(form, draft);
+    clearSearch(form, draft);
 }
 
 /**

@@ -12,12 +12,14 @@ const SECOND = { source: 'YAHOO_FINANCE', ticker: 'BIL', exchangeId: 'NMS' };
 
 test('scenario 10: searches, adds, reorders, removes and persists external assets', async ({ page, database }) => {
   const selectorErrors: string[] = [];
+  let searchRequests = 0;
   page.on('console', (message) => {
     if(message.type() === 'error' && message.text().includes('hx-disabled-elt')) {
       selectorErrors.push(message.text());
     }
   });
   await page.route('**/api/external-asset?*', async (route) => {
+    searchRequests++;
     const query = new URL(route.request().url()).searchParams.get('query');
     await route.fulfill({ json: query === 'empty' ? [] : [
       { ...FIRST, name: 'Gold Trust', exchangeName: 'NYSE Arca' },
@@ -30,6 +32,16 @@ test('scenario 10: searches, adds, reorders, removes and persists external asset
 
   await page.goto('/asset/new');
   const query = page.getByRole('searchbox', { name: 'Search external assets' });
+  await query.fill('   ');
+  await page.getByRole('button', { name: 'Search external assets' }).click();
+  const invalidSearchToast = page.locator('.toast.text-bg-danger').filter({ hasText: 'Enter a search term' });
+  await expect(invalidSearchToast).toBeVisible();
+  expect(searchRequests).toBe(0);
+  await query.evaluate((element) => { (element as HTMLInputElement).value = 'x'.repeat(101); });
+  await query.press('Enter');
+  await expect(page.locator('.toast.text-bg-danger').filter({ hasText: '1 to 100 characters' }).last()).toBeVisible();
+  expect(searchRequests).toBe(0);
+
   await query.fill('gold');
   const searchResponse = page.waitForResponse(response => response.url().includes('/api/external-asset?'));
   await query.press('Enter');
@@ -41,12 +53,23 @@ test('scenario 10: searches, adds, reorders, removes and persists external asset
   await expect(page.getByText('The server returned an invalid asset.')).toHaveCount(0);
   expect(selectorErrors).toEqual([]);
   await page.getByRole('button', { name: 'Add IAU from YAHOO_FINANCE on PCX' }).click();
+  await expect(query).toHaveValue('');
+  await expect(page.getByRole('table', { name: 'External asset search results' })).toHaveCount(0);
+
+  await query.fill('gold');
+  const duplicateSearch = page.waitForResponse(response => response.url().includes('/api/external-asset?'));
+  await query.press('Enter');
+  expect((await duplicateSearch).status()).toBe(200);
   await page.getByRole('button', { name: 'Add IAU from YAHOO_FINANCE on PCX' }).click();
-  await expect(page.locator('[data-external-message]')).toContainText('already added');
+  const duplicateToast = page.locator('.toast.text-bg-danger').filter({ hasText: 'already added' });
+  await expect(duplicateToast).toBeVisible();
+  await expect(page.getByRole('table', { name: 'External asset search results' }).locator('tbody tr')).toHaveCount(7);
 
   const registered = page.getByRole('table', { name: 'Registered external assets in priority order' });
   await expect(registered.getByRole('row')).toHaveCount(2);
   await page.getByRole('button', { name: 'Add BIL from YAHOO_FINANCE on NMS' }).click();
+  await expect(query).toHaveValue('');
+  await expect(page.getByRole('table', { name: 'External asset search results' })).toHaveCount(0);
   await registered.getByRole('button', { name: 'Move BIL up' }).click();
   await expect(registered.locator('tbody tr').first()).toContainText('BIL');
   await expect(registered.getByRole('button', { name: 'Move BIL up' })).toBeDisabled();
@@ -78,6 +101,7 @@ test('scenario 10: searches, adds, reorders, removes and persists external asset
 
 test('scenario 11: limits search results and keeps edit drafts until save or cancel', async ({ page, database }) => {
   const selectorErrors: string[] = [];
+  let searchRequests = 0;
   page.on('console', (message) => {
     if(message.type() === 'error' && message.text().includes('hx-disabled-elt')) {
       selectorErrors.push(message.text());
@@ -91,6 +115,7 @@ test('scenario 11: limits search results and keeps edit drafts until save or can
   const id = rows[0].id;
   await database.query("INSERT INTO public.asset (ticker, name) VALUES ('TAKEN', 'Taken')");
   await page.route('**/api/external-asset?*', async (route) => {
+    searchRequests++;
     const query = new URL(route.request().url()).searchParams.get('query');
     if(query === 'failure') {
       await route.fulfill({ status: 500, json: { errorMessage: 'Search failed' } });
@@ -104,14 +129,26 @@ test('scenario 11: limits search results and keeps edit drafts until save or can
   await page.goto(`/asset/${id}`);
   const registered = page.getByRole('table', { name: 'Registered external assets in priority order' });
   await expect(registered.locator('tbody tr')).toHaveCount(2);
-  await page.getByRole('searchbox', { name: 'Search external assets' }).fill('gold');
+  const query = page.getByRole('searchbox', { name: 'Search external assets' });
+  await query.fill('   ');
+  await query.press('Enter');
+  const invalidSearchToast = page.locator('.toast.text-bg-danger').filter({ hasText: 'Enter a search term' });
+  await expect(invalidSearchToast).toBeVisible();
+  expect(searchRequests).toBe(0);
+
+  await query.fill('gold');
   await page.getByRole('button', { name: 'Search external assets' }).click();
   const results = page.getByRole('table', { name: 'External asset search results' });
   await expect(results.locator('tbody tr')).toHaveCount(10);
   await expect(page.getByText('The server returned an invalid asset.')).toHaveCount(0);
   expect(selectorErrors).toEqual([]);
   await results.getByRole('button', { name: 'Add IAU from YAHOO_FINANCE on PCX' }).click();
-  await expect(page.locator('[data-external-message]')).toContainText('already added');
+  await expect(page.locator('.toast.text-bg-danger').filter({ hasText: 'already added' })).toBeVisible();
+  await expect(results.locator('tbody tr')).toHaveCount(10);
+  await results.getByRole('button', { name: 'Add EXTERNAL-1 from YAHOO_FINANCE on PCX' }).click();
+  await expect(query).toHaveValue('');
+  await expect(page.getByRole('table', { name: 'External asset search results' })).toHaveCount(0);
+  await expect(registered.locator('tbody tr')).toHaveCount(3);
   await registered.getByRole('button', { name: 'Move BIL up' }).click();
 
   await page.getByRole('textbox', { name: 'Ticker', exact: true }).fill('TAKEN');
@@ -122,12 +159,13 @@ test('scenario 11: limits search results and keeps edit drafts until save or can
   await expect(registered.locator('tbody tr').first()).toContainText('BIL');
   await expectPersistedOrder(database, id, [FIRST, SECOND]);
 
-  await page.getByRole('searchbox', { name: 'Search external assets' }).fill('empty');
+  await query.fill('empty');
   await page.getByRole('button', { name: 'Search external assets' }).click();
   await expect(page.locator('[data-external-message]')).toContainText('No external assets found.');
-  await page.getByRole('searchbox', { name: 'Search external assets' }).fill('failure');
+  await query.fill('failure');
   await page.getByRole('button', { name: 'Search external assets' }).click();
-  await expect(page.locator('[data-external-message]')).toContainText('could not be searched');
+  await expect(page.locator('.toast.text-bg-danger').filter({ hasText: 'could not be searched' })).toBeVisible();
+  await expect(page.locator('[data-external-message]')).toHaveText('');
 
   await page.getByRole('button', { name: 'Cancel', exact: true }).click();
   await page.goto(`/asset/${id}`);
