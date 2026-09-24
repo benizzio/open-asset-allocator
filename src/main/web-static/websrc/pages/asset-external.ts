@@ -7,6 +7,7 @@
 import * as Handlebars from "handlebars";
 import notifications from "../components/notifications";
 import type { Asset, ExternalAsset } from "../domain/asset";
+import { NotificationType } from "../infra/infra-types";
 
 type Draft = { records: ExternalAsset[]; results: ExternalAsset[]; sequence: number; cleared: boolean; };
 type SearchEvent = CustomEvent<{ xhr: XMLHttpRequest; successful: boolean; }>;
@@ -71,11 +72,24 @@ function showMessage(form: HTMLFormElement, message: string): void {
 }
 
 /**
- * Displays search validation and operation failures through the shared error-toast component.
+ * Displays provider search and operation failures through the shared error-toast component.
  * Authored by: OpenCode.
  */
 function showError(message: string): void {
     notifications.notifyError(new Error(message));
+}
+
+/**
+ * Displays duplicate and search-validation feedback through the shared warning-toast component.
+ * Authored by: OpenCode.
+ */
+function showWarning(message: string): void {
+    notifications.notify({ title: "Warning", content: message, type: NotificationType.WARNING });
+}
+
+/** Displays non-error search feedback through the shared notification component. Authored by: OpenCode. */
+function showInformation(message: string): void {
+    notifications.notify({ title: "External asset search", content: message, type: NotificationType.INFO });
 }
 
 /** Clears the current query and results, invalidating requests started before this reset. Authored by: OpenCode. */
@@ -157,7 +171,7 @@ export function searchExternalAssets(form: HTMLFormElement): void {
     showMessage(form, "");
 
     if(!query || query.length > 100) {
-        showError("Enter a search term containing 1 to 100 characters.");
+        showWarning("Enter a search term containing 1 to 100 characters.");
         return;
     }
     showMessage(form, "Searching external assets…");
@@ -180,7 +194,7 @@ export function handleExternalSearchBeforeRequest(event: SearchEvent): void {
 }
 
 /**
- * Renders the current provider response, capped at ten rows, or a local failure message.
+ * Renders the current provider response, capped at ten rows, and reports empty or failed searches.
  * Example: bind to the search target's `htmx:afterRequest` event.
  * Authored by: OpenCode.
  */
@@ -210,7 +224,11 @@ export function handleExternalSearchAfterRequest(event: SearchEvent): void {
 
         search.innerHTML = draft.results.length
             ? renderTemplate("asset-external-results", draft.results) : "";
-        showMessage(form, draft.results.length ? "" : "No external assets found.");
+        showMessage(form, "");
+
+        if(draft.results.length === 0) {
+            showInformation("No external assets found.");
+        }
     } catch {
         search.innerHTML = "";
         showMessage(form, "");
@@ -233,7 +251,7 @@ export function addExternalAsset(form: HTMLFormElement, index: number): void {
 
     if(draft.records.some(record => record.source === selected.source && record.ticker === selected.ticker
         && record.exchangeId === selected.exchangeId)) {
-        showError(
+        showWarning(
             `${ selected.ticker } from ${ selected.source } on exchange ${ selected.exchangeId } is already added.`,
         );
         return;

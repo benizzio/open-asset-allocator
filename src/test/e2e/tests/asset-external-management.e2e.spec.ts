@@ -34,12 +34,12 @@ test('scenario 10: searches, adds, reorders, removes and persists external asset
   const query = page.getByRole('searchbox', { name: 'Search external assets' });
   await query.fill('   ');
   await page.getByRole('button', { name: 'Search external assets' }).click();
-  const invalidSearchToast = page.locator('.toast.text-bg-danger').filter({ hasText: 'Enter a search term' });
+  const invalidSearchToast = page.locator('.toast.text-bg-warning').filter({ hasText: 'Enter a search term' });
   await expect(invalidSearchToast).toBeVisible();
   expect(searchRequests).toBe(0);
   await query.evaluate((element) => { (element as HTMLInputElement).value = 'x'.repeat(101); });
   await query.press('Enter');
-  await expect(page.locator('.toast.text-bg-danger').filter({ hasText: '1 to 100 characters' }).last()).toBeVisible();
+  await expect(page.locator('.toast.text-bg-warning').filter({ hasText: '1 to 100 characters' }).last()).toBeVisible();
   expect(searchRequests).toBe(0);
 
   await query.fill('gold');
@@ -61,7 +61,7 @@ test('scenario 10: searches, adds, reorders, removes and persists external asset
   await query.press('Enter');
   expect((await duplicateSearch).status()).toBe(200);
   await page.getByRole('button', { name: 'Add IAU from YAHOO_FINANCE on PCX' }).click();
-  const duplicateToast = page.locator('.toast.text-bg-danger').filter({ hasText: 'already added' });
+  const duplicateToast = page.locator('.toast.text-bg-warning').filter({ hasText: 'already added' });
   await expect(duplicateToast).toBeVisible();
   await expect(page.getByRole('table', { name: 'External asset search results' }).locator('tbody tr')).toHaveCount(7);
 
@@ -132,7 +132,7 @@ test('scenario 11: limits search results and keeps edit drafts until save or can
   const query = page.getByRole('searchbox', { name: 'Search external assets' });
   await query.fill('   ');
   await query.press('Enter');
-  const invalidSearchToast = page.locator('.toast.text-bg-danger').filter({ hasText: 'Enter a search term' });
+  const invalidSearchToast = page.locator('.toast.text-bg-warning').filter({ hasText: 'Enter a search term' });
   await expect(invalidSearchToast).toBeVisible();
   expect(searchRequests).toBe(0);
 
@@ -143,7 +143,7 @@ test('scenario 11: limits search results and keeps edit drafts until save or can
   await expect(page.getByText('The server returned an invalid asset.')).toHaveCount(0);
   expect(selectorErrors).toEqual([]);
   await results.getByRole('button', { name: 'Add IAU from YAHOO_FINANCE on PCX' }).click();
-  await expect(page.locator('.toast.text-bg-danger').filter({ hasText: 'already added' })).toBeVisible();
+  await expect(page.locator('.toast.text-bg-warning').filter({ hasText: 'already added' })).toBeVisible();
   await expect(results.locator('tbody tr')).toHaveCount(10);
   await results.getByRole('button', { name: 'Add EXTERNAL-1 from YAHOO_FINANCE on PCX' }).click();
   await expect(query).toHaveValue('');
@@ -161,7 +161,8 @@ test('scenario 11: limits search results and keeps edit drafts until save or can
 
   await query.fill('empty');
   await page.getByRole('button', { name: 'Search external assets' }).click();
-  await expect(page.locator('[data-external-message]')).toContainText('No external assets found.');
+  await expect(page.locator('.toast.text-bg-primary').filter({ hasText: 'No external assets found.' })).toBeVisible();
+  await expect(page.locator('[data-external-message]')).toHaveText('');
   await query.fill('failure');
   await page.getByRole('button', { name: 'Search external assets' }).click();
   await expect(page.locator('.toast.text-bg-danger').filter({ hasText: 'could not be searched' })).toBeVisible();
