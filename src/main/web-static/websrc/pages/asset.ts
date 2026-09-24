@@ -13,6 +13,16 @@ import { NotificationType } from "../infra/infra-types";
 import { AfterRequestEventDetail, BeforeSwapEventDetail } from "../infra/htmx";
 import Router from "../infra/routing";
 import type { Asset } from "../domain/asset";
+import {
+    addExternalAsset,
+    handleExternalSearchAfterRequest,
+    handleExternalSearchBeforeRequest,
+    hasValidExternalData,
+    initializeExternalDraft,
+    moveExternalAsset,
+    removeExternalAsset,
+    searchExternalAssets,
+} from "./asset-external";
 
 type AssetRequestEvent = CustomEvent<AfterRequestEventDetail>;
 type AssetBeforeSwapEvent = CustomEvent<BeforeSwapEventDetail>;
@@ -51,7 +61,7 @@ function normalizeAsset(value: unknown): Asset | null {
 
     const externalData = candidate.externalData;
 
-    if(externalData !== undefined && externalData !== null && typeof externalData !== "object") {
+    if(!hasValidExternalData(externalData)) {
         return null;
     }
 
@@ -84,6 +94,11 @@ function renderAssetForm(
     }
 
     contentElement.innerHTML = Handlebars.compile(template.innerHTML)(asset ?? {});
+    const form = contentElement.querySelector("form") as HTMLFormElement | null;
+
+    if(form) {
+        initializeExternalDraft(form, asset);
+    }
     // The script-loaded HTMX instance owns the form-json extension used by these forms.
     globalThis.htmx.process(contentElement);
 }
@@ -159,6 +174,25 @@ function renderAssetLoadError(): void {
  * Authored by: OpenCode
  */
 const AssetPage = {
+
+    searchExternalAssets,
+    handleExternalSearchBeforeRequest,
+    handleExternalSearchAfterRequest,
+    addExternalAsset,
+    removeExternalAsset,
+    moveExternalAsset,
+
+    /** Runs provider search on Enter without submitting the parent asset form. Authored by: OpenCode. */
+    handleExternalSearchKeydown(event: KeyboardEvent): void {
+        if(event.key === "Enter") {
+            event.preventDefault();
+            const form = (event.target as HTMLElement).closest("form");
+
+            if(form) {
+                searchExternalAssets(form);
+            }
+        }
+    },
 
     /**
      * Navigates to the asset creation form.
@@ -287,9 +321,13 @@ const AssetPage = {
             return;
         }
 
+        const requestPath = new URL(event.detail.xhr.responseURL).pathname;
+
+        if(!requestPath.startsWith("/api/asset/")) {
+            return;
+        }
         const asset = normalizeAsset(parseJSON(event.detail.xhr.response));
         const requestedIdentifier = getAssetIdentifierFromLocation();
-        const requestPath = new URL(event.detail.xhr.responseURL).pathname;
 
         if(!asset || !requestedIdentifier || requestedIdentifier === "new"
             || requestPath !== `/api/asset/${ encodeURIComponent(requestedIdentifier) }`
@@ -325,6 +363,12 @@ const AssetPage = {
 
         if(loadingElement) {
             loadingElement.style.display = "none";
+        }
+        const form = document.querySelector<HTMLFormElement>("#edit-asset-form");
+        const asset = normalizeAsset(parseJSON(event.detail.xhr.response));
+
+        if(form && asset) {
+            initializeExternalDraft(form, asset);
         }
     },
 

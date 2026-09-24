@@ -45,7 +45,7 @@
          class="row justify-content-center my-5"
          style="display: none"
     >
-        <div class="col-12 col-lg-8">
+        <div class="col-12 col-lg-8 pb-5 mb-5">
             <div class="d-flex justify-content-start mb-3">
                 <button type="button"
                         class="btn btn-secondary"
@@ -74,7 +74,7 @@
          class="row justify-content-center my-5"
          style="display: none"
     >
-        <div class="col-12 col-lg-8">
+        <div class="col-12 col-lg-8 pb-5 mb-5">
             <div class="d-flex justify-content-start mb-3">
                 <button type="button"
                         class="btn btn-secondary"
@@ -116,7 +116,7 @@
             />
         </div>
 
-        <div>
+        <div class="mb-4">
             <label for="{{idPrefix}}-name" class="form-label">Name</label>
             <input id="{{idPrefix}}-name"
                    type="text"
@@ -130,7 +130,104 @@
             />
         </div>
 
-        <!-- TODO: external asset data manipulation will be added later. -->
+        {{> asset-external-assets}}
+    </script>
+
+    <!-- Shares provider search and ordered external records between create and edit. Authored by: OpenCode. -->
+    <script id="asset-external-assets" type="text/x-handlebars-template">
+        <section aria-label="External assets" data-external-assets>
+            <h2 class="h5">External assets</h2>
+            <p class="form-text">The first external asset is preferred in portfolio allocations.</p>
+            <label for="{{idPrefix}}-external-query" class="form-label">Search external assets</label>
+            <div class="input-group mb-2">
+                <input id="{{idPrefix}}-external-query"
+                       type="search"
+                       class="form-control"
+                       data-external-query
+                       placeholder="Search by ticker or name"
+                       autocomplete="off"
+                       maxlength="100"
+                       onkeydown="assetPage.handleExternalSearchKeydown(event)"
+                />
+                <button type="button" class="btn btn-secondary"
+                        onclick="assetPage.searchExternalAssets(this.closest('form'))"
+                        aria-label="Search external assets" title="Search external assets">
+                    <span class="bi bi-search h5 mb-0" aria-hidden="true"></span>
+                </button>
+            </div>
+            <div data-external-search
+                 hx-get="/api/external-asset"
+                 hx-trigger="search-external-assets"
+                 hx-swap="none"
+                 hx-params="query"
+                 hx-on::before-request="assetPage.handleExternalSearchBeforeRequest(event)"
+                 hx-on::after-request="assetPage.handleExternalSearchAfterRequest(event)"
+                 aria-live="polite"
+            ></div>
+            <div data-external-message role="status" aria-live="polite"></div>
+            <h3 class="h6 mt-3">Registered external assets</h3>
+            <div data-external-records></div>
+        </section>
+    </script>
+
+    <!-- Renders search results with escaped provider metadata. Authored by: OpenCode. -->
+    <script id="asset-external-results" type="text/x-handlebars-template">
+        <div class="table-responsive mb-3">
+            <table class="table table-sm table-hover">
+                <caption class="visually-hidden">External asset search results</caption>
+                <thead><tr><th scope="col">Source</th><th scope="col">Ticker</th>
+                    <th scope="col">Name</th><th scope="col">Exchange</th><th scope="col">Action</th></tr></thead>
+                <tbody>
+                {{#each this}}
+                    <tr><td>{{source}}</td><td>{{ticker}}</td><td>{{name}}</td>
+                        <td>{{exchangeName}} ({{exchangeId}})</td>
+                        <td><button type="button" class="btn btn-secondary btn-sm"
+                                    onclick="assetPage.addExternalAsset(this.closest('form'), {{@index}})"
+                                    aria-label="Add {{ticker}} from {{source}} on {{exchangeId}}"
+                                    title="Add external asset">
+                            <span class="bi bi-plus-circle" aria-hidden="true"></span>
+                        </button></td></tr>
+                {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </script>
+
+    <!-- Renders persisted identifiers in priority order. Authored by: OpenCode. -->
+    <script id="asset-external-records" type="text/x-handlebars-template">
+        {{#if this.length}}
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <caption class="visually-hidden">Registered external assets in priority order</caption>
+                    <thead><tr><th scope="col">Source</th><th scope="col">Ticker</th>
+                        <th scope="col">Exchange ID</th><th scope="col">Actions</th></tr></thead>
+                    <tbody>
+                    {{#each this}}
+                        <tr><td>{{source}}</td><td>{{ticker}}</td><td>{{exchangeId}}</td>
+                            <td class="text-nowrap">
+                                <button type="button" class="btn btn-secondary btn-sm"
+                                        onclick="assetPage.moveExternalAsset(this.closest('form'), {{@index}}, -1)"
+                                        aria-label="Move {{ticker}} up" title="Move up" {{#if @first}}disabled{{/if}}>
+                                    <span class="bi bi-arrow-up" aria-hidden="true"></span>
+                                </button>
+                                <button type="button" class="btn btn-secondary btn-sm"
+                                        onclick="assetPage.moveExternalAsset(this.closest('form'), {{@index}}, 1)"
+                                        aria-label="Move {{ticker}} down" title="Move down" {{#if @last}}disabled{{/if}}>
+                                    <span class="bi bi-arrow-down" aria-hidden="true"></span>
+                                </button>
+                                <button type="button" class="btn btn-danger btn-sm"
+                                        onclick="assetPage.removeExternalAsset(this.closest('form'), {{@index}})"
+                                        aria-label="Remove {{ticker}}" title="Remove external asset">
+                                    <span class="bi bi-dash-circle" aria-hidden="true"></span>
+                                </button>
+                            </td></tr>
+                    {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        {{else}}
+            <p class="text-body-secondary">No external assets added.</p>
+        {{/if}}
     </script>
 
     <script id="asset-create-form" type="text/x-handlebars-template">
@@ -184,7 +281,6 @@
                   class="needs-validation"
                   hx-put="/api/asset"
                   hx-ext="form-json"
-                  hx-vals="{{stringify (object externalData=externalData)}}"
                   hx-validate="true"
                   hx-swap="none"
                   hx-disabled-elt="find button"
@@ -193,10 +289,6 @@
             >
                 <div class="card-body">
                     <input type="hidden" name="id" value="{{id}}" />
-                    {{!-- form-json includes named fields, then hx-vals supplies the original structured value. --}}
-                    {{#if externalData}}
-                        <input type="hidden" name="externalData" value="" />
-                    {{/if}}
                     {{> asset-form-fields idPrefix="edit-asset"}}
                 </div>
 
@@ -292,6 +384,7 @@
 
     <script type="text/javascript">
         HandlebarsUtils.registerPartialToContainer("asset-page", "asset-form-fields");
+        HandlebarsUtils.registerPartialToContainer("asset-page", "asset-external-assets");
     </script>
 
 </div>
