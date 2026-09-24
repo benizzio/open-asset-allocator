@@ -136,41 +136,45 @@
     <!-- Groups external assets in a bordered subsection with a nested search panel for create and edit.
          Authored by: OpenCode. -->
     <script id="asset-external-assets" type="text/x-handlebars-template">
-        <section class="border rounded p-3" aria-label="External assets" data-external-assets>
-            <h2 class="h5">External assets</h2>
-            <p class="form-text">The first external asset is preferred in portfolio allocations.</p>
-            <div class="border rounded bg-body-tertiary p-3 mb-3" role="group" aria-label="External asset search">
-                <label for="{{idPrefix}}-external-query" class="form-label">Search external assets</label>
-                <div class="input-group mb-2">
-                    <input id="{{idPrefix}}-external-query"
-                           type="search"
-                           class="form-control"
-                           data-external-query
-                           placeholder="Search by ticker or name"
-                           autocomplete="off"
-                           maxlength="100"
-                           onkeydown="assetPage.handleExternalSearchKeydown(event)"
-                    />
-                    <button type="button" class="btn btn-secondary"
-                            onclick="assetPage.searchExternalAssets(this.closest('form'))"
-                            aria-label="Search external assets" title="Search external assets">
-                        <span class="bi bi-search h5 mb-0" aria-hidden="true"></span>
-                    </button>
-                </div>
-                <div data-external-search
-                     hx-get="/api/external-asset"
-                     hx-trigger="search-external-assets"
-                     hx-swap="none"
-                     hx-params="query"
-                     hx-disabled-elt="unset"
-                     hx-on::before-request="assetPage.handleExternalSearchBeforeRequest(event)"
-                     hx-on::after-request="assetPage.handleExternalSearchAfterRequest(event)"
-                     aria-live="polite"
-                ></div>
-                <div data-external-message role="status" aria-live="polite"></div>
+        <section class="card mb-0" aria-label="External assets" data-external-assets>
+            <div class="card-header">
+                <h2 class="h5 mb-0">External assets</h2>
+                <p class="form-text mb-0">The first external asset is preferred in portfolio allocations.</p>
             </div>
-            <h3 class="h6">Registered external assets</h3>
-            <div data-external-records></div>
+            <div class="card-body">
+                <div class="border rounded bg-body-tertiary p-3 mb-3" role="group" aria-label="External asset search">
+                    <label for="{{idPrefix}}-external-query" class="form-label">Search external assets</label>
+                    <div class="input-group mb-2">
+                        <input id="{{idPrefix}}-external-query"
+                               type="search"
+                               class="form-control"
+                               data-external-query
+                               placeholder="Search by ticker or name"
+                               autocomplete="off"
+                               maxlength="100"
+                               onkeydown="assetPage.handleExternalSearchKeydown(event)"
+                        />
+                        <button type="button" class="btn btn-secondary"
+                                onclick="assetPage.searchExternalAssets(this.closest('form'))"
+                                aria-label="Search external assets" title="Search external assets">
+                            <span class="bi bi-search h5 mb-0" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                    <div data-external-search
+                         hx-get="/api/external-asset"
+                         hx-trigger="search-external-assets"
+                         hx-swap="none"
+                         hx-params="query"
+                         hx-disabled-elt="unset"
+                         hx-on::before-request="assetPage.handleExternalSearchBeforeRequest(event)"
+                         hx-on::after-request="assetPage.handleExternalSearchAfterRequest(event)"
+                         aria-live="polite"
+                    ></div>
+                    <div data-external-message role="status" aria-live="polite"></div>
+                </div>
+                <h3 class="h6">Registered external assets</h3>
+                <div data-external-records></div>
+            </div>
         </section>
     </script>
 
