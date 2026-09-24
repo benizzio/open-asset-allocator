@@ -1,17 +1,17 @@
 # Graph Report - open-asset-allocator  (2026-09-24)
 
 ## Corpus Check
-- 288 files · ~302,263 words
+- 288 files · ~302,407 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 24 file(s) not represented in the graph (top: (none) 16, .csv 2, .dbm 1)
 
 ## Summary
-- 2298 nodes · 5327 edges · 151 communities (105 shown, 46 thin omitted)
+- 2299 nodes · 5328 edges · 151 communities (105 shown, 46 thin omitted)
 - Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 323 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f383f6ff`
+- Built from commit: `745a9e2b`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -25,12 +25,12 @@
 - allocation-plan-management.ts
 - portfolio-allocation-history-management.e2e.spec.ts
 - portfolio_integration_test.go
-- BuildCleanupFunctionBuilder
+- assert_db.go
 - testing.T
-- asset_integration_client_yahoo.go
+- go_pkg_github_com_benizzio_open_asset_allocator_langext
 - github.com/gin-gonic/gin.Context
 - chart-utils.ts
-- go_pkg_context
+- AssetDomService
 - golang_ext_util_concurrent.go
 - portfolio-chart.ts
 - portfolio-allocation-map.e2e.spec.ts
@@ -39,16 +39,16 @@
 - capturePersistedAssetExternalData
 - PortfolioAllocation
 - logFanOutConsumer
-- service/index.ts
+- allocation-plan.ts
 - context.Context
 - asset_integration_test.go
 - binding-htmx-trigger-on-route.ts
 - asset.ts
 - allocation-plan-chart.ts
-- allocation-plan.ts
+- fractal-allocation-plan-mapping.ts
 - portfolio_rest_mapping.go
 - NewOrderedMapIterator
-- infra.ts
+- AssetComposedColumnInput
 - AllocationPlan
 - web-static/package.json
 - e2e/package.json
@@ -58,9 +58,9 @@
 - validate-playwright-version.mjs
 - portfolio-visualization.e2e.spec.ts
 - Portfolio Holdings Editor
-- Asset
+- asset_rest_model.go
 - T
-- http_client.go
+- go_pkg_fmt
 - allocation_plan_rest_model.go
 - handlebars-lang.ts
 - portfolio-editing.e2e.spec.ts
@@ -70,14 +70,14 @@
 - binding-financial-input.ts
 - asset-management.e2e.spec.ts
 - app.go
-- dom-utils.ts
-- binding-dom-attribute-on-route.ts
+- dom/index.ts
+- RESTRoute
 - BONDS (60% slice)
 - CustomFieldError
 - devDependencies
 - Asset Allocation Donut Chart
 - deferCloseResponseBody
-- go_pkg_github_com_benizzio_open_asset_allocator_langext
+- .buildAppComponents
 - dependencies
 - Portfolio Detail Page
 - compilerOptions
@@ -96,27 +96,27 @@
 - golang_ext_util_struct.go
 - rdbms_adapter.go
 - htmx/index.ts
-- SetupTestInfra
-- asset_integration_service_yahoo.go
+- go_pkg_strconv
+- go_pkg_time
 - custom_validation_error_handling.go
-- binding-dom-bootstrap-form.ts
+- CustomValidationErrorsBuilder
 - .query
-- AllocationPlanIdentifier
+- T
 - go_pkg_reflect
 - joinAny
 - FormRowValueElements
 - chart-contents.ts
 - Verify Assets Against Planned Allocation Percentages
 - Asset Class Allocation
-- time.Time
+- manage_db.go
 - .proxyrc.js
 - go_pkg_testing
 - Incremental Graph Re-Extraction
 - destroy.sh
-- binding-dom-display-on-route.ts
+- dom-utils.ts
 - macos-provisioning.sh
 - scripts
-- portfolio-allocation.ts
+- bignumber.js
 - Portfolio Section Navigation
 - start-debug.sh
 - stop.sh
@@ -218,7 +218,7 @@
 
 ### Community 0 - "allocation_plan_domain_service.go"
 Cohesion: 0.08
-Nodes (31): DomainValidationError, UniqueConstraintViolationError, MapTreeNode[T], allocationPlanValidationData, levelSliceSizeValidationData, AllocationHierarchy, AllocationPlanRepository, appendLevelDescription() (+23 more)
+Nodes (35): DomainValidationError, UniqueConstraintViolationError, allocationPlanValidationData, levelSliceSizeValidationData, cleanNilAllocations(), AllocationHierarchy, AllocationPlanRepository, appendLevelDescription() (+27 more)
 
 ### Community 1 - "rdbms_query.go"
 Cohesion: 0.18
@@ -241,56 +241,56 @@ Cohesion: 0.05
 Nodes (49): Root AGENTS Instructions for Copilot, Dependabot Dependency Updates, Renovate Runtime Coordination, Atomic Persistence-Verified E2E Testing, Open Asset Allocator Architecture, Runtime Version Coordination, Portfolio History Form TODOs, Allocation Planning (+41 more)
 
 ### Community 6 - "allocation-plan-management.ts"
-Cohesion: 0.08
-Nodes (24): htmx.org, Application, addPlannedAllocationRow(), allocationPlanManagement, AllocationPlanningHierarchicalFormEntry, FormRowHierarchicalStructure, getHierarchicalFieldForValidation(), mapFormRowHierarchicalStructure() (+16 more)
+Cohesion: 0.05
+Nodes (40): bootstrap, htmx.org, Application, addPlannedAllocationRow(), allocationPlanManagement, AllocationPlanningHierarchicalFormEntry, FormRowHierarchicalStructure, getHierarchicalFieldForValidation() (+32 more)
 
 ### Community 7 - "portfolio-allocation-history-management.e2e.spec.ts"
 Cohesion: 0.06
 Nodes (34): installCanvasTextRecorder(), DEFAULT_ALLOCATION_STRUCTURE, expectEditableObservationRows(), ExpectedObservationRow, expectExistingAsset(), expectNewObservationRows(), expectPersistedAllocations(), expectPersistedModifiedPortfolioHistory() (+26 more)
 
 ### Community 8 - "portfolio_integration_test.go"
-Cohesion: 0.15
-Nodes (21): TestPostAssetWithoutExternalData(), postPortfolioForValidationFailure(), putForValidationFailure(), TestGetAvailablePortfolioAllocationClasses(), TestGetAvailablePortfolioAllocationClassesNoneFound(), TestGetPortfolio(), TestGetPortfolios(), TestPostPortfolio() (+13 more)
+Cohesion: 0.12
+Nodes (29): postAssetForValidationFailure(), TestPostAsset(), TestPostAssetFailureWithMissingRequiredFields(), TestPostAssetRejectsNonZeroId(), TestPostAssetWithDuplicateTicker(), TestPostAssetWithoutExternalData(), postAsset(), FetchWithDBQuery() (+21 more)
 
-### Community 9 - "BuildCleanupFunctionBuilder"
-Cohesion: 0.25
-Nodes (26): github.com/go-ozzo/ozzo-dbx.NullStringMap, TestPostAllocationPlanForInsertion(), TestPostAllocationPlanForUpdate_ChangesHierarchicalId(), TestPostAllocationPlanForUpdate_DeletesPlannedAllocationAndKeepsAsset(), TestPostAllocationPlanForUpdate_DoesNotOverwriteExistingAssetName(), TestPostAsset(), assertPersistedAssetWithExternalData(), TestPostPortfolioAllocationHistoryFullMerge() (+18 more)
+### Community 9 - "assert_db.go"
+Cohesion: 0.26
+Nodes (24): github.com/go-ozzo/ozzo-dbx.NullStringMap, TestPostAllocationPlanForInsertion(), TestPostAllocationPlanForUpdate_ChangesHierarchicalId(), TestPostAllocationPlanForUpdate_DeletesPlannedAllocationAndKeepsAsset(), TestPostAllocationPlanForUpdate_DoesNotOverwriteExistingAssetName(), assertPersistedAssetWithExternalData(), TestPostPortfolioAllocationHistoryFullMerge(), TestPostPortfolioAllocationHistoryInsertEmptyZeroTimestamp() (+16 more)
 
 ### Community 10 - "testing.T"
 Cohesion: 0.14
 Nodes (33): testing.T, demoStringer, TestCustomSlice_PrettyString_Empty(), TestCustomSlice_PrettyString_Int(), TestCustomSlice_PrettyString_Single(), TestCustomSlice_PrettyString_String(), TestCustomSlice_PrettyString_Stringer(), TestCustomSlice_PrettyString_Struct() (+25 more)
 
-### Community 11 - "asset_integration_client_yahoo.go"
-Cohesion: 0.18
-Nodes (12): go_pkg_github_com_benizzio_open_asset_allocator_infra_util_http_httpclient, go_pkg_net_url, YahooFinanceChartDTS, YahooFinanceChartIndicatorsDTS, YahooFinanceChartMetaDTS, YahooFinanceChartQuoteIndicatorDTS, YahooFinanceSearchResponseDTS, buildQuoteAssetLastClosePriceURL() (+4 more)
+### Community 11 - "go_pkg_github_com_benizzio_open_asset_allocator_langext"
+Cohesion: 0.25
+Nodes (10): go_pkg_context, go_pkg_github_com_benizzio_open_asset_allocator_api_rest_model, go_pkg_github_com_benizzio_open_asset_allocator_application, go_pkg_github_com_benizzio_open_asset_allocator_domain, go_pkg_github_com_benizzio_open_asset_allocator_domain_service, go_pkg_github_com_benizzio_open_asset_allocator_infra, go_pkg_github_com_benizzio_open_asset_allocator_infra_gin, go_pkg_github_com_benizzio_open_asset_allocator_infra_validation (+2 more)
 
 ### Community 12 - "github.com/gin-gonic/gin.Context"
-Cohesion: 0.05
-Nodes (52): go_pkg_github_com_benizzio_open_asset_allocator_api_rest_model, go_pkg_github_com_benizzio_open_asset_allocator_application, go_pkg_github_com_benizzio_open_asset_allocator_domain_service, go_pkg_github_com_benizzio_open_asset_allocator_infra, go_pkg_github_com_benizzio_open_asset_allocator_infra_gin, go_pkg_github_com_benizzio_open_asset_allocator_infra_validation, go_pkg_github_com_benizzio_open_asset_allocator_root, go_pkg_github_com_gin_gonic_gin (+44 more)
+Cohesion: 0.14
+Nodes (20): github.com/gin-gonic/gin.Context, PortfolioDTS, AssetRESTController, PortfolioRESTController, MapToPortfolio(), MapToPortfolioDTS(), MapToPortfolioDTSs(), HandleAPIError() (+12 more)
 
 ### Community 13 - "chart-utils.ts"
 Cohesion: 0.10
-Nodes (30): chroma-js, patternomaly, chartContentRepo, getChartContent(), getChartContentFromChart(), loadChart(), buildChartInteractions(), buildChartOptions() (+22 more)
+Nodes (31): chartjs-plugin-datalabels, chroma-js, patternomaly, chartContentRepo, getChartContent(), getChartContentFromChart(), loadChart(), buildChartInteractions() (+23 more)
 
-### Community 14 - "go_pkg_context"
-Cohesion: 0.13
-Nodes (13): go_pkg_context, AssetIntegrationServicesPerSource, BuildAllocationPlanManagementAppService(), AllocationPlanManagementAppService, mapNewAssetsPerTickerFromPlannedAllocations(), replacePersistedAssetsOnPlannedAllocations(), AssetsPerTicker, AssetIntegrationService (+5 more)
+### Community 14 - "AssetDomService"
+Cohesion: 0.17
+Nodes (7): AssetIntegrationServicesPerSource, BuildAssetRESTController(), AssetIntegrationService, AssetRepository, BuildAssetDomService(), collectIntegrationServices(), AssetDomService
 
 ### Community 15 - "golang_ext_util_concurrent.go"
 Cohesion: 0.18
 Nodes (25): go_pkg_runtime, go_pkg_slices, context.CancelFunc, sync.WaitGroup, I, concurrentSliceResult, SliceFromItem, SliceFromItemWithContext (+17 more)
 
 ### Community 16 - "portfolio-chart.ts"
-Cohesion: 0.16
-Nodes (15): chart.js, changeChartData(), chartDataSelectionEventHandler(), FractalPortfolioMultiChartDataSource, generateDataKey(), getChartContent(), interactionObserverCallback(), getAccumulatedAllocationsPerProperty() (+7 more)
+Cohesion: 0.13
+Nodes (19): chart.js, changeChartData(), chartDataSelectionEventHandler(), FractalPortfolioMultiChartDataSource, generateDataKey(), getChartContent(), interactionObserverCallback(), getAccumulatedAllocationsPerProperty() (+11 more)
 
 ### Community 17 - "portfolio-allocation-map.e2e.spec.ts"
 Cohesion: 0.08
 Nodes (33): ASSET_DATA, DatabaseSnapshot, DEFAULT_ALLOCATION_STRUCTURE, expandRootAndAssertChildren(), expectAllocationMapShell(), expectAnalysisTable(), ExpectedDivergenceNode, expectNodeRow() (+25 more)
 
 ### Community 18 - "PropagateAsAppErrorWithNewMessage"
-Cohesion: 0.12
-Nodes (16): github.com/go-ozzo/ozzo-dbx.Rows, AllocationPlanRDBMSRepository, AllocationRDBMSRepository, AssetRDBMSRepository, PortfolioRDBMSRepository, S, Asset, PlannedAllocation (+8 more)
+Cohesion: 0.10
+Nodes (23): go_pkg_errors, go_pkg_github_com_benizzio_open_asset_allocator_domain_allocation, go_pkg_github_com_benizzio_open_asset_allocator_infra_rdbms, database/sql.Rows, github.com/go-ozzo/ozzo-dbx.Rows, AllocationRDBMSRepository, AssetRDBMSRepository, PortfolioRDBMSRepository (+15 more)
 
 ### Community 19 - "SQLTransactionalContext"
 Cohesion: 0.24
@@ -301,56 +301,52 @@ Cohesion: 0.33
 Nodes (9): database/sql.NullString, StringPointerToNullString(), StringToNullString(), TestGetKnownAssetsIncludesPersistedExternalData(), addAssetExternalDataRestoreCleanup(), capturePersistedAssetExternalData(), TestGetPortfolioAllocationHistoryOmitsExternalAssetWhenNull(), TestGetPortfolioAllocationHistoryWithProjectedExternalAsset() (+1 more)
 
 ### Community 21 - "PortfolioAllocation"
-Cohesion: 0.11
-Nodes (19): go_pkg_github_com_shopspring_decimal, portfolioAllocationJoinedRowDTS, PortfolioAllocationRDBMSRepository, BuildPortfolioAllocationRESTController(), BuildPortfolioAllocationManagementAppService(), PortfolioAllocationManagementAppService, mapNewAssetsPerTickerFromPortfolioAllocations(), replacePersistedAssetsOnPortfolioAllocations() (+11 more)
+Cohesion: 0.09
+Nodes (27): go_pkg_github_com_shopspring_decimal, portfolioAllocationJoinedRowDTS, PortfolioAllocationRDBMSRepository, PortfolioAllocationRESTController, BuildPortfolioAllocationRESTController(), mapNewAssetsPerTickerFromPlannedAllocations(), replacePersistedAssetsOnPlannedAllocations(), BuildPortfolioAllocationManagementAppService() (+19 more)
 
 ### Community 22 - "logFanOutConsumer"
 Cohesion: 0.10
 Nodes (20): go_pkg_github_com_nhatthm_httpmock, go_pkg_sync, github.com/nhatthm/httpmock.Server, sync.Mutex, testing.M, testing.TB, logFanOutConsumer, BuildDeferRegistry() (+12 more)
 
-### Community 23 - "service/index.ts"
-Cohesion: 0.22
-Nodes (15): CompleteAllocationPlan, SerializableCompleteAllocationPlan, SerializablePortfolioCompleteAllocationPlanSet, Portfolio, PortfolioDTO, AllocationDomainService, mapAllocationStructure(), mapToAllocationPlan() (+7 more)
+### Community 23 - "allocation-plan.ts"
+Cohesion: 0.15
+Nodes (22): AllocationStructureDTO, AllocationPlan, AllocationPlanDTO, CompleteAllocationPlan, PlannedAllocation, PlannedAllocationDTO, SerializableCompleteAllocationPlan, SerializableFractalHierarchicalAllocationPlan (+14 more)
 
 ### Community 24 - "context.Context"
-Cohesion: 0.12
-Nodes (31): allocationIterationMappingContextValue, contextKey, divergenceAnalysisContextValue, potentialDivergencesPerHierarchicalId, context.Context, SliceIterator, PlannedAllocation, buildAllocationIterationContext() (+23 more)
+Cohesion: 0.10
+Nodes (36): allocationIterationMappingContextValue, contextKey, divergenceAnalysisContextValue, potentialDivergencesPerHierarchicalId, context.Context, PlannedAllocation, buildAllocationIterationContext(), buildDivergenceAnalysisContext() (+28 more)
 
 ### Community 25 - "asset_integration_test.go"
-Cohesion: 0.12
-Nodes (28): github.com/go-ozzo/ozzo-dbx.Params, getAssetsByTextSearch(), postAssetForValidationFailure(), TestGetAssetByIdInvalidId(), TestGetAssetByIdNotFound(), TestGetAssetByIdOrTicker(), TestGetKnownAssets(), TestGetKnownAssetsRejectsInvalidTextSearch() (+20 more)
+Cohesion: 0.20
+Nodes (18): getAssetsByTextSearch(), TestGetAssetByIdInvalidId(), TestGetAssetByIdNotFound(), TestGetAssetByIdOrTicker(), TestGetKnownAssets(), TestGetKnownAssetsRejectsInvalidTextSearch(), TestGetKnownAssetsWithTextSearch(), TestGetKnownAssetsWithTextSearchLimit() (+10 more)
 
 ### Community 26 - "binding-htmx-trigger-on-route.ts"
-Cohesion: 0.18
-Nodes (22): bindCLickNavigation(), bindKeypressNavigation(), bindNavigateToElements(), bindNavigateToInDescendants(), buildDestinationPath(), navigate(), addDisableRouteRemovalObserver(), bindCleanOnExitRouteBehaviourOnElement() (+14 more)
+Cohesion: 0.11
+Nodes (35): Level, Levels, LogLevel, addAttributes(), addRouterHooks(), bindAttributeOnRoute(), bindAttributeOnRouteElements(), bindAttributeOnRouteInDescendants() (+27 more)
 
 ### Community 27 - "asset.ts"
-Cohesion: 0.08
-Nodes (27): AssetComposedColumnInput, getAsset(), Asset, ExternalAsset, AssetBeforeSwapEvent, AssetRequestEvent, addExternalAsset(), Draft (+19 more)
+Cohesion: 0.11
+Nodes (25): Asset, ExternalAsset, AssetBeforeSwapEvent, AssetRequestEvent, addExternalAsset(), Draft, drafts, findPart() (+17 more)
 
 ### Community 28 - "allocation-plan-chart.ts"
 Cohesion: 0.23
-Nodes (10): chartDataSelectionEventHandler(), FractalPlannedAllocationMultiChartDataSource, getChartContent(), getSelectedDataKey(), interactionObserverCallback(), mapChildDatasets(), mapDataset(), toChartDataMap() (+2 more)
+Nodes (11): chartDataSelectionEventHandler(), FractalPlannedAllocationMultiChartDataSource, getChartContent(), getSelectedDataKey(), interactionObserverCallback(), mapChildDatasets(), mapDataset(), toChartDataMap() (+3 more)
 
-### Community 29 - "allocation-plan.ts"
-Cohesion: 0.12
-Nodes (29): bignumber.js, AllocationHierarchyLevel, AllocationHierarchyLevelDTO, AllocationPlanType, ASSET_ALLOCATION_PLAN, BALANCING_EXECUTION_PLAN, AllocationStructure, AllocationStructureDTO (+21 more)
+### Community 29 - "fractal-allocation-plan-mapping.ts"
+Cohesion: 0.18
+Nodes (20): AllocationHierarchyLevel, AllocationHierarchyLevelDTO, AllocationPlanType, ASSET_ALLOCATION_PLAN, BALANCING_EXECUTION_PLAN, AllocationStructure, LOWEST_AVAILABLE_HIERARCHY_LEVEL, LOWEST_AVAILABLE_HIERARCHY_LEVEL_INDEX (+12 more)
 
 ### Community 30 - "portfolio_rest_mapping.go"
-Cohesion: 0.16
-Nodes (24): go_pkg_time, github.com/shopspring/decimal.Decimal, DivergenceAnalysisDTS, portfolioAllocationsPerObservationTimestamp, PortfolioObservationTimestampDTS, PotentialDivergenceDTS, AggregateAndMapToPortfolioHistoryDTSs(), aggregateHistoryAsDTSMap() (+16 more)
+Cohesion: 0.14
+Nodes (29): github.com/shopspring/decimal.Decimal, AllocationPlanIdentifierDTS, AnalysisOptionsDTS, DivergenceAnalysisDTS, portfolioAllocationsPerObservationTimestamp, PortfolioObservationTimestampDTS, PotentialDivergenceDTS, AggregateAndMapToPortfolioHistoryDTSs() (+21 more)
 
 ### Community 31 - "NewOrderedMapIterator"
 Cohesion: 0.14
 Nodes (17): go_pkg_cmp, go_pkg_sort, K, KeyValue, MapIterator, OrderedMapIterator, OrderedMapIterator[K, V], NewOrderedMapIterator() (+9 more)
 
-### Community 32 - "infra.ts"
-Cohesion: 0.11
-Nodes (18): bootstrap, chartjs-plugin-datalabels, BootstrapNotification, NOTIFICATION_TYPE_BOOTSTRAP_CLASSES, DomInfra, handlebarsInfra, bootRouterDebouncing(), DOM_SETTLING_BEHAVIOR_EVENT_HANDLER() (+10 more)
-
 ### Community 33 - "AllocationPlan"
-Cohesion: 0.26
-Nodes (8): plannedAllocationJoinedRowDTS, GetPlanType(), PlanType, AllocationPlan, buildAllocationPlanFromRow(), buildPlannedAllocationFromRow(), mapPlannedAllocationRow(), mapPlannedAllocationRows()
+Cohesion: 0.16
+Nodes (13): AllocationPlanRDBMSRepository, plannedAllocationJoinedRowDTS, GetPlanType(), PlanType, Asset, AllocationPlan, PlannedAllocation, buildAllocationPlanFromRow() (+5 more)
 
 ### Community 34 - "web-static/package.json"
 Cohesion: 0.12
@@ -384,25 +380,25 @@ Nodes (19): DEFAULT_ALLOCATION_STRUCTURE, EMPTY_PORTFOLIO_NAMES, expectAllocatio
 Cohesion: 0.12
 Nodes (19): Manage Portfolio Allocation Data Panel, Allocation Map Tab, Allocation Plan Tab, Asset Classification, Asset Identity and Description, Bonds Asset Class, Cash Reserve Designation, Add and Remove Holding Controls (+11 more)
 
-### Community 42 - "Asset"
-Cohesion: 0.15
-Nodes (23): go_pkg_errors, database/sql.Rows, AssetDTS, AssetSearchQueryDTS, ExternalAssetDataDTS, ExternalAssetDTS, ExternalAssetSearchQueryDTS, MapToAsset() (+15 more)
+### Community 42 - "asset_rest_model.go"
+Cohesion: 0.27
+Nodes (15): AssetDTS, AssetSearchQueryDTS, ExternalAssetDataDTS, ExternalAssetDTS, ExternalAssetSearchQueryDTS, MapToAsset(), MapToAssetDTS(), MapToAssetDTSs() (+7 more)
 
 ### Community 43 - "T"
 Cohesion: 0.23
 Nodes (8): github.com/go-ozzo/ozzo-dbx.Query, QueryBuilder, QueryBuilder[T], QueryExecutor, QueryExecutor[T], RowScanner, T, withParams()
 
-### Community 44 - "http_client.go"
-Cohesion: 0.16
-Nodes (13): go_pkg_encoding_json, go_pkg_strconv, net/http.Response, RequestOption, ParseableInt, CloseResponseBody(), DecodeJSONResponse(), ExecuteGet() (+5 more)
+### Community 44 - "go_pkg_fmt"
+Cohesion: 0.14
+Nodes (17): go_pkg_flag, go_pkg_fmt, go_pkg_github_com_benizzio_open_asset_allocator_root, go_pkg_github_com_golang_glog, go_pkg_net, go_pkg_net_http, go_pkg_path_filepath, net/http.Response (+9 more)
 
 ### Community 45 - "allocation_plan_rest_model.go"
 Cohesion: 0.33
 Nodes (13): AllocationPlanAssetDTS, AllocationPlanDTS, PlannedAllocationDTS, MapToAllocationPlan(), mapToAllocationPlanAssetDTS(), mapToAllocationPlanDTS(), MapToAllocationPlanDTSs(), mapToAssetFromAllocationPlan() (+5 more)
 
 ### Community 46 - "handlebars-lang.ts"
-Cohesion: 0.09
-Nodes (41): handlebars, domJSONHelper(), registerHandlebarsDOMHelpers(), handlebarsFormatCurrency(), registerHandlebarsFormatHelper(), arrayHelper(), comparatorHelper(), concatHelper() (+33 more)
+Cohesion: 0.08
+Nodes (42): handlebars, domJSONHelper(), registerHandlebarsDOMHelpers(), handlebarsFormatCurrency(), registerHandlebarsFormatHelper(), arrayHelper(), comparatorHelper(), concatHelper() (+34 more)
 
 ### Community 47 - "portfolio-editing.e2e.spec.ts"
 Cohesion: 0.16
@@ -432,13 +428,13 @@ Nodes (6): Asset, AssetRow, expectAssetEditor(), expectIconOnlyButton(), expectN
 Cohesion: 0.07
 Nodes (27): go_pkg_github_com_benizzio_open_asset_allocator_api_rest, go_pkg_github_com_benizzio_open_asset_allocator_domain_infra_anticorruption, go_pkg_github_com_benizzio_open_asset_allocator_domain_infra_integration, go_pkg_github_com_benizzio_open_asset_allocator_domain_infra_repository, go_pkg_os, go_pkg_os_signal, go_pkg_syscall, github.com/gin-gonic/gin.Engine (+19 more)
 
-### Community 54 - "dom-utils.ts"
-Cohesion: 0.16
-Nodes (13): addDisplayObserver(), bindExclusiveDisplay(), bindExclusiveDisplayContainerInDescendants(), bindExclusiveDisplayInDescendants(), hideAllSiblings(), maskNumberDecimalPlaces(), maskTagInput(), maskTickerInput() (+5 more)
+### Community 54 - "dom/index.ts"
+Cohesion: 0.18
+Nodes (14): BootstrapClasses, BootstrapIconClasses, bindBootstrapValidationCleaning(), bindBootstrapValidationOnSubmit(), bindBootstrapValidationToDefaultForm(), bindFormsInDescendants(), addDisplayObserver(), bindExclusiveDisplay() (+6 more)
 
-### Community 55 - "binding-dom-attribute-on-route.ts"
-Cohesion: 0.40
-Nodes (9): addAttributes(), addRouterHooks(), bindAttributeOnRoute(), bindAttributeOnRouteElements(), bindAttributeOnRouteInDescendants(), executeImmediatelyIfOnRoute(), extractBindingData(), removeAttributes() (+1 more)
+### Community 55 - "RESTRoute"
+Cohesion: 0.20
+Nodes (6): github.com/gin-gonic/gin.HandlersChain, DivergenceAnalysisRESTController, BuildDivergenceAnalysisRESTController(), BuildPortfolioAnalysisConfigurationAppService(), PortfolioAnalysisConfigurationAppService, RESTRoute
 
 ### Community 56 - "BONDS (60% slice)"
 Cohesion: 0.14
@@ -460,9 +456,9 @@ Nodes (14): Allocation Map Tab, Allocation Plan Tab, ARCA:EWZ Allocation 4.55%, 
 Cohesion: 0.10
 Nodes (35): TestGetAllocationPlans(), TestPostAllocationPlanValidation_ChildlessHierarchyBranches(), TestPostAllocationPlanValidation_DuplicateHierarchicalIds(), TestPostAllocationPlanValidation_EmptyDetails(), TestPostAllocationPlanValidation_EmptyHierarchicalId(), TestPostAllocationPlanValidation_InvalidSizeHierarchyBranches(), TestPostAllocationPlanValidation_MissingDetails(), TestPostAllocationPlanValidation_MissingHierarchicalId() (+27 more)
 
-### Community 61 - "go_pkg_github_com_benizzio_open_asset_allocator_langext"
-Cohesion: 0.10
-Nodes (21): AllocationStructure, go_pkg_github_com_benizzio_open_asset_allocator_domain, go_pkg_github_com_benizzio_open_asset_allocator_domain_allocation, go_pkg_github_com_benizzio_open_asset_allocator_infra_rdbms, go_pkg_github_com_benizzio_open_asset_allocator_langext, BuildPortfolioRESTController(), BuildPortfolioAnalysisConfigurationAppService(), PortfolioAnalysisConfigurationAppService (+13 more)
+### Community 61 - ".buildAppComponents"
+Cohesion: 0.12
+Nodes (16): AllocationStructure, AllocationPlanRESTController, BuildAllocationPlanRESTController(), BuildPortfolioRESTController(), BuildAllocationPlanManagementAppService(), AllocationPlanManagementAppService, BuildPortfolioDivergenceAnalysisAppService(), AllocationRepository (+8 more)
 
 ### Community 62 - "dependencies"
 Cohesion: 0.14
@@ -516,6 +512,10 @@ Nodes (10): Dark Theme, Global All Assets Portfolio, My Portfolio Example, My Po
 Cohesion: 0.42
 Nodes (9): go_pkg_regexp, extractArrayIndexInfo(), handleArrayIndexPath(), handleFinalRemoval(), handleRegularFieldPath(), isArrayIndexNotation(), processArrayElements(), removeNestedField() (+1 more)
 
+### Community 76 - "SliceIterator[T]"
+Cohesion: 0.31
+Nodes (4): SliceIterator, SliceIterator[T], T, NewSliceIterator()
+
 ### Community 77 - "golang_ext_util_struct.go"
 Cohesion: 0.29
 Nodes (7): deepCompleteReflective(), DeepCompleteStruct(), GetStructName(), GetStructNamespaceDescription(), GetStructType(), T, StructString()
@@ -525,32 +525,32 @@ Cohesion: 0.21
 Nodes (9): database/sql.Stmt, database/sql.Tx, buildPingContext(), BuildQueryInTransaction(), createBulkInsertPreparedStatement(), executeBulkInsertPreparedStatement(), T, prepareBulkInsertValues() (+1 more)
 
 ### Community 79 - "htmx/index.ts"
-Cohesion: 0.11
-Nodes (25): api, APIError, APIErrorResponse, bindHTMXTransformResponseElement(), bindHTMXTransformResponseElements(), bindHTMXTransformResponseInDescendants(), extractPathRegExpForTransform(), htmxTransformResponse (+17 more)
+Cohesion: 0.13
+Nodes (22): api, APIError, APIErrorResponse, bindHTMXTransformResponseElement(), bindHTMXTransformResponseElements(), bindHTMXTransformResponseInDescendants(), extractPathRegExpForTransform(), htmxTransformResponse (+14 more)
 
-### Community 80 - "SetupTestInfra"
+### Community 80 - "go_pkg_strconv"
 Cohesion: 0.25
-Nodes (7): buildAndRunPostgresqlTestcontainer(), buildDatabaseConnection(), withPostgresLogging(), runFlywayTestcontainer(), SetupTestInfra(), InitializeDBState(), testcontainers.CustomizeRequestOption
+Nodes (5): go_pkg_encoding_json, go_pkg_strconv, ParseableInt, TestParseableInt64_UnmarshalJSON(), TestParseInt64()
 
-### Community 81 - "asset_integration_service_yahoo.go"
-Cohesion: 0.20
-Nodes (11): YahooFinanceAssetIntegrationService, AssetExternalSource, go_pkg_database_sql_driver, go_pkg_github_com_benizzio_open_asset_allocator_infra_rdbms_sqlext, go_pkg_golang_org_x_text_currency, ExternalAsset, BuildYahooFinanceAssetIntegrationService(), mapToExternalAsset() (+3 more)
+### Community 81 - "go_pkg_time"
+Cohesion: 0.08
+Nodes (31): YahooFinanceAssetIntegrationService, AssetExternalSource, go_pkg_database_sql_driver, go_pkg_github_com_benizzio_open_asset_allocator_infra_rdbms_sqlext, go_pkg_github_com_benizzio_open_asset_allocator_infra_util_http_httpclient, go_pkg_golang_org_x_text_currency, go_pkg_net_url, go_pkg_time (+23 more)
 
 ### Community 82 - "custom_validation_error_handling.go"
 Cohesion: 0.39
 Nodes (8): go_pkg_github_com_benizzio_open_asset_allocator_infra_json, asValidationErrors(), formatErrorMessage(), formatValidationError(), FormatValidationErrorMessages(), validator.FieldError, validator.ValidationErrors, MapValidationErrorsToMessages()
 
-### Community 83 - "binding-dom-bootstrap-form.ts"
-Cohesion: 0.39
-Nodes (6): BootstrapClasses, BootstrapIconClasses, bindBootstrapValidationCleaning(), bindBootstrapValidationOnSubmit(), bindBootstrapValidationToDefaultForm(), bindFormsInDescendants()
+### Community 83 - "CustomValidationErrorsBuilder"
+Cohesion: 0.31
+Nodes (5): go_pkg_github_com_go_playground_validator_v10, buildCustomValidationError(), CustomValidationErrorsBuilder, validator.FieldError, validator.ValidationErrors
 
 ### Community 84 - ".query"
 Cohesion: 0.24
 Nodes (9): seedPortfolioHistoryModificationData(), readDatabaseSnapshot(), seedAllocationMapData(), expectedPlannedAllocation(), expectPersistedAllocationPlan(), expectPersistedAllocationPlanManagement(), plannedAllocationId(), queryPlannedAllocations() (+1 more)
 
-### Community 85 - "AllocationPlanIdentifier"
-Cohesion: 0.43
-Nodes (6): AllocationPlanIdentifierDTS, AnalysisOptionsDTS, mapToAllocationPlanIdentifierDTS(), mapToAllocationPlanIdentifierDTSs(), MapToAnalysisOptionsDTS(), AllocationPlanIdentifier
+### Community 85 - "T"
+Cohesion: 0.47
+Nodes (3): MapTreeNode[T], MapTreeNode, T
 
 ### Community 86 - "go_pkg_reflect"
 Cohesion: 0.40
@@ -572,17 +572,17 @@ Nodes (7): Create or Modify Allocation Plan, External Cash Inflow, Big or Disrup
 Cohesion: 0.33
 Nodes (7): Asset Class Allocation, Bonds Allocation 45 Percent, Monthly Portfolio Snapshot 202602, Portfolio Detail Screen, Portfolio Workspace Navigation, Stocks Allocation 55 Percent, Total Market Value 60000
 
-### Community 94 - "time.Time"
-Cohesion: 0.31
-Nodes (7): golang.org/x/text/currency.Unit, time.Time, ExternalAssetQuote, extractLastClose(), mapToExternalAssetQuote(), BuildAppErrorFormatted(), NullTime
+### Community 92 - "manage_db.go"
+Cohesion: 0.48
+Nodes (4): github.com/go-ozzo/ozzo-dbx.Params, createDBCleanupFunctionMulti(), CleanupFunctionBuilder, testSQLParamsPair
 
 ### Community 95 - ".proxyrc.js"
 Cohesion: 0.29
 Nodes (6): ref_fs, http-proxy-middleware, ref_path, { createProxyMiddleware }, fs, path
 
 ### Community 97 - "go_pkg_testing"
-Cohesion: 0.06
-Nodes (39): malformedQueryBindingTarget, go_pkg_database_sql, go_pkg_flag, go_pkg_fmt, go_pkg_github_com_benizzio_open_asset_allocator_infra_util, go_pkg_github_com_benizzio_open_asset_allocator_inttest_infra, go_pkg_github_com_benizzio_open_asset_allocator_inttest_util, go_pkg_github_com_go_ozzo_ozzo_dbx (+31 more)
+Cohesion: 0.07
+Nodes (33): malformedQueryBindingTarget, go_pkg_database_sql, go_pkg_github_com_benizzio_open_asset_allocator_infra_util, go_pkg_github_com_benizzio_open_asset_allocator_inttest_infra, go_pkg_github_com_benizzio_open_asset_allocator_inttest_util, go_pkg_github_com_go_ozzo_ozzo_dbx, go_pkg_github_com_moby_moby_api_types_container, go_pkg_github_com_stretchr_testify_assert (+25 more)
 
 ### Community 99 - "Incremental Graph Re-Extraction"
 Cohesion: 0.50
@@ -592,9 +592,9 @@ Nodes (4): Graphify URL Ingestion, Cluster-Only Graph Refresh, Incremental Graph
 Cohesion: 0.50
 Nodes (3): POSTGRES_DATA_DIR, POSTGRES_DEV_DATA_DIR, destroy.sh script
 
-### Community 101 - "binding-dom-display-on-route.ts"
-Cohesion: 0.42
-Nodes (8): addDisplayOnRouteRemovalObserver(), bindDisplayOnRoute(), bindDisplayOnRouteElements(), bindDisplayOnRouteInDescendants(), changeElementDisplay(), configDisplayOnRouteHooks(), executeImmediatelyIfOnRoute(), navigoRouter
+### Community 101 - "dom-utils.ts"
+Cohesion: 0.18
+Nodes (12): addRemoveObserver(), contextDataCache, ensureSharedObserver(), getCacheableContextData(), observedElements, addDisplayOnRouteRemovalObserver(), bindDisplayOnRoute(), bindDisplayOnRouteElements() (+4 more)
 
 ### Community 102 - "macos-provisioning.sh"
 Cohesion: 0.50
@@ -604,9 +604,9 @@ Nodes (3): NVM_DIR, PATH, macos-provisioning.sh script
 Cohesion: 0.50
 Nodes (4): scripts, build, clean, dev
 
-### Community 104 - "portfolio-allocation.ts"
-Cohesion: 0.18
-Nodes (10): getValueLabel(), registerPortfolioAnalysisHandlebarsHelpers(), ObservationTimestamp, PortfolioAllocation, PortfolioAllocationDTO, PortfolioSnapshotDTO, DivergenceAnalysis, PotentialDivergence (+2 more)
+### Community 104 - "bignumber.js"
+Cohesion: 0.29
+Nodes (7): bignumber.js, getValueLabel(), registerPortfolioAnalysisHandlebarsHelpers(), ObservationTimestamp, DivergenceAnalysis, PotentialDivergence, Format
 
 ### Community 105 - "Portfolio Section Navigation"
 Cohesion: 0.50
@@ -638,15 +638,15 @@ Nodes (3): Frontend Module Architecture, HTMX-First API Calls, index.ts Module A
 
 ## Knowledge Gaps
 - **347 isolated node(s):** `build-dev.sh script`, `POSTGRES_DEV_DATA_DIR`, `build.sh script`, `destroy.sh script`, `POSTGRES_DEV_DATA_DIR` (+342 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 569 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 570 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **46 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `PlannedAllocation` connect `PropagateAsAppErrorWithNewMessage` to `allocation_plan_domain_service.go`, `AllocationPlan`, `HierarchicalId`, `allocation_plan_rest_model.go`, `go_pkg_context`, `context.Context`, `portfolio_rest_mapping.go`?**
+- **Why does `PlannedAllocation` connect `AllocationPlan` to `allocation_plan_domain_service.go`, `HierarchicalId`, `allocation_plan_rest_model.go`, `PortfolioAllocation`, `context.Context`, `portfolio_rest_mapping.go`?**
   _High betweenness centrality (0.011) - this node is a cross-community bridge._
-- **Why does `Asset` connect `Asset` to `allocation_plan_domain_service.go`, `AllocationPlan`, `allocation_plan_rest_model.go`, `go_pkg_context`, `PropagateAsAppErrorWithNewMessage`, `PortfolioAllocation`, `asset_integration_test.go`?**
+- **Why does `Asset` connect `PropagateAsAppErrorWithNewMessage` to `allocation_plan_domain_service.go`, `AllocationPlan`, `asset_rest_model.go`, `allocation_plan_rest_model.go`, `AssetDomService`, `PortfolioAllocation`, `asset_integration_test.go`?**
   _High betweenness centrality (0.010) - this node is a cross-community bridge._
 - **Why does `NewOrderedMapIterator()` connect `NewOrderedMapIterator` to `context.Context`?**
   _High betweenness centrality (0.008) - this node is a cross-community bridge._
@@ -655,6 +655,6 @@ _Questions this graph is uniquely positioned to answer:_
 - **What connects `build-dev.sh script`, `POSTGRES_DEV_DATA_DIR`, `build.sh script` to the rest of the system?**
   _347 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `allocation_plan_domain_service.go` be split into smaller, more focused modules?**
-  _Cohesion score 0.07744107744107744 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07686932215234102 - nodes in this community are weakly interconnected._
 - **Should `generate_report.py` be split into smaller, more focused modules?**
   _Cohesion score 0.06170598911070781 - nodes in this community are weakly interconnected._

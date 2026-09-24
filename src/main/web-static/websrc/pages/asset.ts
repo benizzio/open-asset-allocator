@@ -31,6 +31,16 @@ const ASSETS_PATH = "/asset";
 const NEW_ASSET_PATH = "/asset/new";
 const ASSET_IDENTIFIER_PATH_PATTERN = /^\/asset\/([^/]+)\/?$/;
 
+/**
+ * Limits mutation handling to the form's own asset API response, excluding nested search GETs.
+ * Authored by: OpenCode.
+ */
+function isAssetFormResponse(event: AssetRequestEvent, method: "post" | "put"): boolean {
+    return event.detail.requestConfig.elt === event.currentTarget
+        && event.detail.requestConfig.verb === method
+        && new URL(event.detail.xhr.responseURL).pathname === "/api/asset";
+}
+
 /** Parses an unknown response value as JSON without propagating malformed-response errors. Authored by: OpenCode. */
 function parseJSON(value: unknown): unknown | null {
 
@@ -381,7 +391,7 @@ const AssetPage = {
      * Authored by: OpenCode
      */
     handleCreateAfterRequest(event: AssetRequestEvent): void {
-        if(!event.detail.successful) {
+        if(!isAssetFormResponse(event, "post") || !event.detail.successful) {
             return;
         }
 
@@ -405,7 +415,7 @@ const AssetPage = {
      * Authored by: OpenCode
      */
     handleSaveAfterRequest(event: AssetRequestEvent): void {
-        if(!event.detail.successful) {
+        if(!isAssetFormResponse(event, "put") || !event.detail.successful) {
             return;
         }
 

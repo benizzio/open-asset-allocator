@@ -11,11 +11,20 @@ const FIRST = { source: 'YAHOO_FINANCE', ticker: 'IAU', exchangeId: 'PCX' };
 const SECOND = { source: 'YAHOO_FINANCE', ticker: 'BIL', exchangeId: 'NMS' };
 
 test('scenario 10: searches, adds, reorders, removes and persists external assets', async ({ page, database }) => {
+  const selectorErrors: string[] = [];
+  page.on('console', (message) => {
+    if(message.type() === 'error' && message.text().includes('hx-disabled-elt')) {
+      selectorErrors.push(message.text());
+    }
+  });
   await page.route('**/api/external-asset?*', async (route) => {
     const query = new URL(route.request().url()).searchParams.get('query');
     await route.fulfill({ json: query === 'empty' ? [] : [
       { ...FIRST, name: 'Gold Trust', exchangeName: 'NYSE Arca' },
       { ...SECOND, name: 'Treasury Bill', exchangeName: 'NASDAQ' },
+      ...Array.from({ length: 5 }, (_, index) => ({
+        ...FIRST, ticker: `GOLD-${index + 1}`, name: `Gold asset ${index + 1}`, exchangeName: 'NYSE Arca',
+      })),
     ] });
   });
 
@@ -24,9 +33,13 @@ test('scenario 10: searches, adds, reorders, removes and persists external asset
   await query.fill('gold');
   const searchResponse = page.waitForResponse(response => response.url().includes('/api/external-asset?'));
   await query.press('Enter');
-  expect((await searchResponse).status()).toBe(200);
+  const searched = await searchResponse;
+  expect(searched.status()).toBe(200);
+  expect(await searched.json()).toHaveLength(7);
   await expect(page.getByRole('heading', { name: 'New asset' })).toBeVisible();
-  await expect(page.getByRole('table', { name: 'External asset search results' }).getByRole('row')).toHaveCount(3);
+  await expect(page.getByRole('table', { name: 'External asset search results' }).locator('tbody tr')).toHaveCount(7);
+  await expect(page.getByText('The server returned an invalid asset.')).toHaveCount(0);
+  expect(selectorErrors).toEqual([]);
   await page.getByRole('button', { name: 'Add IAU from YAHOO_FINANCE on PCX' }).click();
   await page.getByRole('button', { name: 'Add IAU from YAHOO_FINANCE on PCX' }).click();
   await expect(page.locator('[data-external-message]')).toContainText('already added');
@@ -64,6 +77,12 @@ test('scenario 10: searches, adds, reorders, removes and persists external asset
 });
 
 test('scenario 11: limits search results and keeps edit drafts until save or cancel', async ({ page, database }) => {
+  const selectorErrors: string[] = [];
+  page.on('console', (message) => {
+    if(message.type() === 'error' && message.text().includes('hx-disabled-elt')) {
+      selectorErrors.push(message.text());
+    }
+  });
   const rows = await database.query<{ id: number }>(
     `INSERT INTO public.asset (ticker, name, external_data)
      VALUES ('EXTERNAL-EDIT', 'External Edit', $1::jsonb) RETURNING id`,
@@ -89,6 +108,8 @@ test('scenario 11: limits search results and keeps edit drafts until save or can
   await page.getByRole('button', { name: 'Search external assets' }).click();
   const results = page.getByRole('table', { name: 'External asset search results' });
   await expect(results.locator('tbody tr')).toHaveCount(10);
+  await expect(page.getByText('The server returned an invalid asset.')).toHaveCount(0);
+  expect(selectorErrors).toEqual([]);
   await results.getByRole('button', { name: 'Add IAU from YAHOO_FINANCE on PCX' }).click();
   await expect(page.locator('[data-external-message]')).toContainText('already added');
   await registered.getByRole('button', { name: 'Move BIL up' }).click();
