@@ -9,9 +9,10 @@ vendor/
 src/main/web-static/dist/
 **/__pycache__/
 
-# Graphify local cache, configuration, and incremental state
-/graphify-out/cache/
-/graphify-out/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/
-/graphify-out/.graphify_*
-/graphify-out/cost.json
-/graphify-out/manifest.json
+# Graphify local cache, configuration, and incremental state in every scope.
+# Co-authored by: GPT-6 Sol and Igor Benicio de Mesquita
+**/graphify-out/cache/
+**/graphify-out/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/
+**/graphify-out/.graphify_*
+**/graphify-out/cost.json
+**/graphify-out/manifest.json

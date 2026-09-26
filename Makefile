@@ -1,8 +1,22 @@
 .DEFAULT_GOAL := build
 
-.PHONY: frontend-install validate-node-version e2e e2e-ci e2e-chromium e2e-firefox e2e-ui e2e-headed e2e-report e2e-logs e2e-clean
+.PHONY: frontend-install validate-node-version graphify-update graphify-refresh e2e e2e-ci e2e-chromium e2e-firefox e2e-ui e2e-headed e2e-report e2e-logs e2e-clean
 
 E2E_ARGS ?=
+
+GRAPHIFY_SCOPE ?= all
+
+# Updates the selected knowledge graph's code without re-extracting documents.
+# Example: make graphify-update GRAPHIFY_SCOPE=frontend
+# Co-authored by: GPT-6 Sol and Igor Benicio de Mesquita
+graphify-update:
+	./graphify.sh update $(GRAPHIFY_SCOPE)
+
+# Refreshes semantic sources using an explicitly configured Graphify backend.
+# Example: make graphify-refresh GRAPHIFY_SCOPE=backend
+# Co-authored by: GPT-6 Sol and Igor Benicio de Mesquita
+graphify-refresh:
+	./graphify.sh refresh $(GRAPHIFY_SCOPE)
 
 
 # Runs golangci-lint on the Go source

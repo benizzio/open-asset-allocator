@@ -4,6 +4,13 @@
 
 Refer to the general instructions in the root `../../../AGENTS.md` for broader instructions.
 
+## Graphify scope
+
+For frontend questions use `src/main/web-static/graphify-out/graph.json` from the repository root with an explicit
+`--graph` argument. For example, `graphify query "routing" --graph src/main/web-static/graphify-out/graph.json`.
+After changing frontend code run `./graphify.sh update frontend`; changed HTML/HTMX templates require a semantic
+refresh as described in the root instructions. Cross-module questions also require the backend or remainder graph.
+
 ## Front-end and browser code standards
 
 <CodeStructure>

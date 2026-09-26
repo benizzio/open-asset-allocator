@@ -1,2 +1,4 @@
 graphify-out/** linguist-generated=true
+src/main/web-static/graphify-out/** linguist-generated=true
+src/main/go/graphify-out/** linguist-generated=true
 .agents/skills/graphify/** linguist-generated=true

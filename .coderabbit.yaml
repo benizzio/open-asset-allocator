@@ -8,6 +8,8 @@ reviews:
   high_level_summary: true
   path_filters:
     - "!graphify-out/**"
+    - "!src/main/web-static/graphify-out/**"
+    - "!src/main/go/graphify-out/**"
     - "!.agents/skills/graphify/**"
   auto_review:
     enabled: true

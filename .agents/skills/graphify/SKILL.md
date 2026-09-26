@@ -5,6 +5,14 @@ description: "Use for any question about a codebase, its architecture, file rela
 
 # /graphify
 
+> Repository-specific scope override (GPT-6 Sol): This monorepo's `AGENTS.md` defines three independent graphs.
+> For codebase questions, select the matching scope and pass `--graph` to query/path/explain; the root graph covers
+> the remainder only. For updates and initial extraction use `./graphify.sh` and the scope-specific semantic
+> workflow in `AGENTS.md`, not this skill's default root-wide pipeline. Do not run this skill's root-wide semantic
+> detection on the remainder graph: the script supplies exclusions the skill's default pipeline does not.
+> This overrides any single-graph default
+> later in this vendored skill. The upstream instructions below remain available for extraction details.
+
 Turn any folder of files into a navigable knowledge graph with community detection, an honest audit trail, and three outputs: interactive HTML, GraphRAG-ready JSON, and a plain-language GRAPH_REPORT.md.
 
 ## Usage

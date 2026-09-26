@@ -4,6 +4,13 @@
 
 Refer to the general instructions in the root `../../../AGENTS.md` for broader instructions.
 
+## Graphify scope
+
+For backend questions use `src/main/go/graphify-out/graph.json` from the repository root with an explicit `--graph`.
+For example, `graphify query "portfolio allocation" --graph src/main/go/graphify-out/graph.json`.
+After changing backend code run `./graphify.sh update backend`. Refresh documentation semantically as described in
+the root instructions. Cross-module questions also require the frontend or remainder graph.
+
 ## Go language standards
 
 <CodingStandards>
