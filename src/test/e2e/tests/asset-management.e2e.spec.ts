@@ -158,7 +158,11 @@ test.describe('asset management', () => {
     await expect(page.getByRole('textbox', { name: 'Name' })).toHaveValue(DRAFT_NAME);
     await expect(page).toHaveURL(/\/asset\/new$/);
 
+    const duplicateCancelListResponsePromise = page.waitForResponse(isAssetCollectionRequest);
     await page.getByRole('button', { name: 'Cancel' }).click();
+    await expect(page).toHaveURL(/\/asset$/);
+    await duplicateCancelListResponsePromise;
+    await expect(page.getByRole('cell', { name: UPDATED_TICKER, exact: true })).toBeVisible();
     await expect(page.getByRole('cell', { name: DRAFT_NAME, exact: true })).toHaveCount(0);
   });
 
