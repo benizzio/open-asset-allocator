@@ -37,9 +37,9 @@ Refer to the general instructions in the root `../../../AGENTS.md` for broader i
 - When adding authoring code docs in JavaScript and TypeScript files, use proper JSDoc syntax:
   ```javascript
   /**
-  * @author OpenCode
-  * @author benizzio
-  */
+   * @author OpenCode
+   * @author benizzio
+   */
   ```
 
 </CustomCodeDocs>
