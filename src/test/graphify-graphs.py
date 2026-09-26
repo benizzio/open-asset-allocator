@@ -5,6 +5,7 @@ Authored by: GPT-6 Sol
 """
 
 import json
+import re
 from pathlib import Path
 
 
@@ -26,6 +27,24 @@ def _validate_graph(scope: str, path: Path) -> set[str]:
         assert edge["source"] in ids and edge["target"] in ids, f"{scope}: dangling edge {edge}"
     for hyperedge in graph.get("graph", {}).get("hyperedges", []):
         assert set(hyperedge["nodes"]).issubset(ids), f"{scope}: dangling hyperedge {hyperedge['id']}"
+
+    connected = {
+        endpoint for edge in graph["links"] for endpoint in (edge["source"], edge["target"])
+    }
+    connected.update(
+        endpoint for hyperedge in graph.get("graph", {}).get("hyperedges", []) for endpoint in hyperedge["nodes"]
+    )
+    assert all(node.get("source_file") or node["id"] in connected for node in nodes), (
+        f"{scope}: disconnected source-less reference"
+    )
+
+    report = (path.parent / "GRAPH_REPORT.md").read_text(encoding="utf-8")
+    summary = re.search(r"(?m)^- (\d+) nodes · (\d+) edges", report)
+    assert summary and (int(summary[1]), int(summary[2])) == (len(nodes), len(graph["links"])), (
+        f"{scope}: report and graph counts differ"
+    )
+    revision = graph.get("built_at_commit")
+    assert revision and f"Built from commit: `{revision[:8]}`" in report, f"{scope}: revision mismatch"
 
     sources = {
         item["source_file"]
@@ -56,6 +75,22 @@ def _main() -> None:
     assert any(source.endswith(".md") for source in sources["backend"]), "backend: missing documentation"
     assert any(source.startswith("src/test/e2e/") for source in sources["remainder"]), "remainder: missing E2E"
     assert any(source.startswith("src/main/docker/") for source in sources["remainder"]), "remainder: missing Docker"
+    migration_sql = {
+        path.relative_to(REPOSITORY_ROOT).as_posix()
+        for path in REPOSITORY_ROOT.glob("src/main/flyway/sql/*.sql")
+    }
+    assert migration_sql <= sources["remainder"], "remainder: missing Flyway SQL files"
+    remainder = json.loads(GRAPH_PATHS["remainder"].read_text(encoding="utf-8"))
+    for source in migration_sql:
+        assert any(
+            node.get("source_file") == source and node.get("label") != Path(source).name
+            for node in remainder["nodes"]
+        ), f"remainder: migration content missing from {source}"
+    assert any(
+        node.get("source_file", "").endswith("migration-[1]-database_creation.sql")
+        and node.get("label") == "allocation_plan"
+        for node in remainder["nodes"]
+    ), "remainder: migration content was not indexed"
     assert not any(
         source.startswith(("src/main/web-static/", "src/main/go/")) for source in sources["remainder"]
     ), "remainder: contains an excluded module"

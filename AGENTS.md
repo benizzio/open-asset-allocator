@@ -191,14 +191,23 @@ Rules:
   a repo-relative module path changed node source paths and lost existing semantic nodes on a subsequent update.
   For changes spanning scopes, run each affected command. The root `graphify update .` is safe for the **remainder**
   because its tracked `graphify-out/.graphify_build.json` excludes both modules; it does not update their graphs.
+  With the SQL extra installed, 0.9.64 can recreate disconnected Flyway SQL stubs on every root update. Run
+  `src/ext/graphify/prune-sql-stubs.py` with Graphify's Python interpreter, then
+  `graphify cluster-only "$PWD" --no-label` and `python3 src/test/graphify-graphs.py`. The cleanup refuses unknown
+  disconnected nodes.
   AST updates preserve existing semantic nodes but do not refresh HTML/HTMX, docs, or images.
 - For changed semantic sources, use `graphify extract <absolute-scope-path>` with a configured Graphify backend,
   followed by `graphify cluster-only <absolute-scope-path> --no-label` to refresh the report and visualization. For
-  agent-assisted extraction in a module, start the skill inside that module and keep its output there. Do not use the skill's
+  OpenCode-assisted extraction in a module, start the skill inside that module and keep its output there. Validate
+  each semantic chunk's source membership, relationship schema, and provenance before merging. When merging a
+  host-agent chunk, set `_origin` to `semantic` and `source_location` to null: an agent's `L1-L3` without an origin
+  is interpreted as AST by Graphify 0.9.64 and can leave stale semantic nodes behind. For the remainder, enumerate
+  allowed files using the tracked root excludes before dispatching host-agent extraction. Do not use the skill's
   root-wide detection/rebuild or `/graphify --update` for the remainder: those instructions do not read its
-  `.graphify_build.json` exclusions. Use the native CLI for remainder builds instead.
+  `.graphify_build.json` exclusions. Use native scoped Graphify APIs to merge reviewed chunks and regenerate outputs.
 - The three tracked `.graphify_build.json` files define corpus boundaries for native Graphify commands. Keep the
   installed Graphify version compatible with the vendored skill (`.agents/skills/graphify/.graphify_version`).
-  This repository's 0.9.64 installation lacks the optional SQL parser; migration SQL content is not represented
-  until `graphifyy[sql]` is available and the remainder is rebuilt. See `docs/graphify-scopes.md` for maintenance,
-  validation, and the migration baseline.
+  SQL migration content requires the optional `graphifyy[sql]` extra. The current remainder graph was rebuilt with
+  that extra, but a fresh checkout needs it for future SQL re-extraction. The 0.9.64 parser does not identify every
+  statement in every migration; seven parser gaps have reviewed host-agent semantic supplements. See
+  `docs/graphify-scopes.md` for maintenance, validation, and coverage limits.
