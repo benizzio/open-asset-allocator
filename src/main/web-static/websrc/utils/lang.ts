@@ -17,8 +17,43 @@ import { BigNumber } from "bignumber.js";
  * - Provide at least one concrete @example covering success and an edge case
  * - If a function performs mutation clearly document it and highlight expected invariants
  *
- * Authored by: GitHub Copilot
+ * @author GitHub Copilot
+ * @author OpenCode
  */
+
+/**
+ * Parses a string as JSON without propagating syntax errors, while preserving values that are already decoded.
+ *
+ * Non-string values are returned unchanged, except `null` and `undefined`, which are normalized to `null`.
+ * A malformed JSON string returns `null` instead of throwing an error.
+ *
+ * @param value - JSON text or an already decoded value.
+ * @returns The parsed JSON value, the original non-string value, or `null` for nullish values and malformed JSON.
+ *
+ * @example
+ * parseJSONOrNull('{"id":42}') // => { id: 42 }
+ *
+ * @example
+ * const response = { id: 42 };
+ * parseJSONOrNull(response) === response // => true
+ *
+ * @example
+ * parseJSONOrNull('{"id":}') // => null
+ *
+ * @author OpenCode
+ */
+export function parseJSONOrNull(value: unknown): unknown | null {
+
+    if(typeof value !== "string") {
+        return value ?? null;
+    }
+
+    try {
+        return JSON.parse(value);
+    } catch {
+        return null;
+    }
+}
 
 /**
  * Converts an arbitrary property path specification into string segments.

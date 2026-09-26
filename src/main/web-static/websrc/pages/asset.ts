@@ -13,6 +13,7 @@ import { NotificationType } from "../infra/infra-types";
 import { AfterRequestEventDetail, BeforeSwapEventDetail } from "../infra/htmx";
 import Router from "../infra/routing";
 import type { Asset } from "../domain/asset";
+import { parseJSONOrNull } from "../utils/lang";
 import {
     addExternalAsset,
     handleExternalSearchAfterRequest,
@@ -48,23 +49,6 @@ function isAssetFormResponse(event: AssetRequestEvent, method: "post" | "put"): 
     return event.detail.requestConfig.elt === event.currentTarget
         && event.detail.requestConfig.verb === method
         && new URL(event.detail.xhr.responseURL).pathname === "/api/asset";
-}
-
-/**
- * Parses an unknown response value as JSON without propagating malformed-response errors.
- * @author OpenCode
- */
-function parseJSON(value: unknown): unknown | null {
-
-    if(typeof value !== "string") {
-        return value ?? null;
-    }
-
-    try {
-        return JSON.parse(value);
-    } catch {
-        return null;
-    }
 }
 
 /**
@@ -433,7 +417,7 @@ const AssetPage = {
             return;
         }
 
-        const asset = normalizeAsset(parseJSON(event.detail.xhr.response));
+        const asset = normalizeAsset(parseJSONOrNull(event.detail.xhr.response));
 
         if(!asset || String(asset.id) !== requestedIdentifier) {
             event.detail.shouldSwap = false;
@@ -468,7 +452,7 @@ const AssetPage = {
             loadingElement.style.display = "none";
         }
         const form = document.querySelector<HTMLFormElement>("#edit-asset-form");
-        const asset = normalizeAsset(parseJSON(event.detail.xhr.response));
+        const asset = normalizeAsset(parseJSONOrNull(event.detail.xhr.response));
 
         if(form && asset) {
             initializeExternalDraft(form, asset);
@@ -491,7 +475,7 @@ const AssetPage = {
             return;
         }
 
-        const asset = normalizeAsset(parseJSON(event.detail.xhr.response));
+        const asset = normalizeAsset(parseJSONOrNull(event.detail.xhr.response));
 
         if(!asset || typeof asset.id !== "number" || asset.id <= 0) {
             notifyUnexpectedResponse("The server returned an invalid asset.");
@@ -519,7 +503,7 @@ const AssetPage = {
         }
 
         const form = event.currentTarget as HTMLFormElement | null;
-        const asset = normalizeAsset(parseJSON(event.detail.xhr.response));
+        const asset = normalizeAsset(parseJSONOrNull(event.detail.xhr.response));
 
         if(!form || !asset || typeof asset.id !== "number" || asset.id <= 0) {
             notifyUnexpectedResponse("The server returned an invalid asset.");
