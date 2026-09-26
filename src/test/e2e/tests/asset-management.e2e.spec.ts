@@ -1,5 +1,5 @@
 /**
- * Covers scenarios 8, 8.1, 8.2, and 9 for asset management through browser, API, and PostgreSQL boundaries.
+ * Covers scenarios 8, 8.1-8.4, and 9 for asset management through browser, API, and PostgreSQL boundaries.
  *
  * Assets are seeded directly in PostgreSQL so each scenario remains independent from other API
  * flows. The write scenarios verify that forms submit and preserve their complete external data.
@@ -274,6 +274,25 @@ test.describe('asset management', () => {
     expect(detailRequests).toHaveLength(2);
   });
 
+  test('scenario 8.3: ignores an invalid successful response for a superseded asset route', async ({ database, page }) => {
+    const supersededAsset = await seedAsset(database, ORIGINAL_TICKER, ORIGINAL_NAME);
+    const currentAsset = await seedAsset(database, CREATED_TICKER, CREATED_NAME);
+
+    await expectSupersededAssetResponseIgnored(page, supersededAsset, currentAsset, 200, {
+      ...supersededAsset,
+      id: supersededAsset.id + 100,
+    });
+  });
+
+  test('scenario 8.4: ignores a failed response for a superseded asset route', async ({ database, page }) => {
+    const supersededAsset = await seedAsset(database, ORIGINAL_TICKER, ORIGINAL_NAME);
+    const currentAsset = await seedAsset(database, CREATED_TICKER, CREATED_NAME);
+
+    await expectSupersededAssetResponseIgnored(page, supersededAsset, currentAsset, 500, {
+      errorMessage: 'Asset load failed',
+    });
+  });
+
   test('scenario 9: submits and preserves loaded external data when saving asset fields', async ({ database, page }) => {
     const asset = await seedAsset(database, ORIGINAL_TICKER, ORIGINAL_NAME, PERSISTED_EXTERNAL_DATA);
     await seedAsset(database, CREATED_TICKER, CREATED_NAME);
@@ -336,6 +355,56 @@ async function navigateWithinApp(page: Page, path: string): Promise<void> {
   await page.evaluate((destination) => {
     (window as unknown as { navigateTo: (path: string) => void }).navigateTo(destination);
   }, path);
+}
+
+/**
+ * Holds the current request after releasing a superseded response and verifies stale handlers remain inert.
+ * @author OpenCode
+ */
+async function expectSupersededAssetResponseIgnored(
+  page: Page,
+  supersededAsset: Asset,
+  currentAsset: Asset,
+  supersededStatus: number,
+  supersededBody: object,
+): Promise<void> {
+  let releaseSupersededResponse: () => void = () => {};
+  let releaseCurrentResponse: () => void = () => {};
+  const supersededResponseGate = new Promise<void>((resolve) => { releaseSupersededResponse = resolve; });
+  const currentResponseGate = new Promise<void>((resolve) => { releaseCurrentResponse = resolve; });
+
+  await page.route(`**/api/asset/${supersededAsset.id}`, async (route) => {
+    await supersededResponseGate;
+    await route.fulfill({ json: supersededBody, status: supersededStatus });
+  });
+  await page.route(`**/api/asset/${currentAsset.id}`, async (route) => {
+    await currentResponseGate;
+    await route.continue();
+  });
+
+  const supersededRequestPromise = page.waitForRequest((request) => {
+    return request.method() === 'GET'
+      && new URL(request.url()).pathname === `/api/asset/${supersededAsset.id}`;
+  });
+  await page.goto(`/asset/${supersededAsset.id}`);
+  await supersededRequestPromise;
+
+  const currentRequestPromise = page.waitForRequest((request) => {
+    return request.method() === 'GET'
+      && new URL(request.url()).pathname === `/api/asset/${currentAsset.id}`;
+  });
+  await navigateWithinApp(page, `/asset/${currentAsset.id}`);
+  await expect(page).toHaveURL(`/asset/${currentAsset.id}`);
+
+  releaseSupersededResponse();
+  await currentRequestPromise;
+
+  await expect(page.getByRole('heading', { name: 'Asset could not be loaded' })).toHaveCount(0);
+  await expect(page.locator('#asset-edit-loading')).toBeVisible();
+
+  releaseCurrentResponse();
+  await expectAssetEditor(page, currentAsset);
+  await expect(page.getByRole('heading', { name: 'Asset could not be loaded' })).toHaveCount(0);
 }
 
 /**

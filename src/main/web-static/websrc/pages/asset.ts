@@ -38,6 +38,7 @@ type AssetBeforeSwapEvent = CustomEvent<BeforeSwapEventDetail>;
 const ASSETS_PATH = "/asset";
 const NEW_ASSET_PATH = "/asset/new";
 const ASSET_IDENTIFIER_PATH_PATTERN = /^\/asset\/([^/]+)\/?$/;
+const ASSET_DETAIL_API_PATH_PATTERN = /^\/api\/asset\/[^/]+\/?$/;
 
 /**
  * Limits mutation handling to the form's own asset API response, excluding nested search GETs.
@@ -105,6 +106,22 @@ function getAssetIdentifierFromLocation(): string | null {
 
     const match = globalThis.location.pathname.match(ASSET_IDENTIFIER_PATH_PATTERN);
     return match ? decodeURIComponent(match[1]) : null;
+}
+
+/**
+ * Returns the active detail-route identifier only when the response belongs to that route.
+ * @author OpenCode
+ */
+function getCurrentAssetIdentifierForResponse(responseURL: string): string | null {
+
+    const currentIdentifier = getAssetIdentifierFromLocation();
+
+    if(!currentIdentifier || currentIdentifier === "new") {
+        return null;
+    }
+
+    const responsePath = new URL(responseURL, globalThis.location.origin).pathname;
+    return responsePath === `/api/asset/${ encodeURIComponent(currentIdentifier) }` ? currentIdentifier : null;
 }
 
 /**
@@ -405,20 +422,22 @@ const AssetPage = {
 
         const requestPath = new URL(event.detail.xhr.responseURL).pathname;
 
-        if(!requestPath.startsWith("/api/asset/")) {
+        if(!ASSET_DETAIL_API_PATH_PATTERN.test(requestPath)) {
             return;
         }
-        const asset = normalizeAsset(parseJSON(event.detail.xhr.response));
-        const requestedIdentifier = getAssetIdentifierFromLocation();
 
-        if(!asset || !requestedIdentifier || requestedIdentifier === "new"
-            || requestPath !== `/api/asset/${ encodeURIComponent(requestedIdentifier) }`
-            || String(asset.id) !== requestedIdentifier) {
+        const requestedIdentifier = getCurrentAssetIdentifierForResponse(event.detail.xhr.responseURL);
+
+        if(!requestedIdentifier) {
             event.detail.shouldSwap = false;
+            return;
+        }
 
-            if(requestedIdentifier && requestedIdentifier !== "new") {
-                renderAssetLoadError();
-            }
+        const asset = normalizeAsset(parseJSON(event.detail.xhr.response));
+
+        if(!asset || String(asset.id) !== requestedIdentifier) {
+            event.detail.shouldSwap = false;
+            renderAssetLoadError();
         }
     },
 
@@ -433,9 +452,8 @@ const AssetPage = {
      * @author OpenCode
      */
     handleAssetLoadAfterRequest(event: AssetRequestEvent): void {
-        const requestedIdentifier = getAssetIdentifierFromLocation();
-
-        if(event.target !== event.currentTarget || !requestedIdentifier || requestedIdentifier === "new") {
+        if(event.target !== event.currentTarget || event.detail.requestConfig.verb !== "get"
+            || !getCurrentAssetIdentifierForResponse(event.detail.xhr.responseURL)) {
             return;
         }
 
