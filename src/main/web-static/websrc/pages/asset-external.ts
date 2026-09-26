@@ -4,9 +4,10 @@
  *
  * @author OpenCode
  */
-import * as Handlebars from "handlebars";
 import notifications from "../components/notifications";
 import type { Asset, ExternalAsset } from "../domain/asset";
+import DomInfra from "../infra/dom";
+import { handlebarsInfra } from "../infra/handlebars";
 import { NotificationType } from "../infra/infra-types";
 
 /**
@@ -22,23 +23,6 @@ type SearchEvent = CustomEvent<{ xhr: XMLHttpRequest; successful: boolean; }>;
 
 const drafts = new WeakMap<HTMLFormElement, Draft>();
 const requestSequences = new WeakMap<XMLHttpRequest, number>();
-
-/**
- * Finds the search or record element within one asset form.
- * @author OpenCode
- */
-function findPart(form: HTMLFormElement, selector: string): HTMLElement | null {
-    return form.querySelector<HTMLElement>(selector);
-}
-
-/**
- * Reads a Handlebars template and renders provider values as escaped text.
- * @author OpenCode
- */
-function renderTemplate(id: string, data: unknown): string {
-    const template = document.getElementById(id);
-    return template ? Handlebars.compile(template.innerHTML)(data) : "";
-}
 
 /**
  * Returns only fields accepted and persisted by the asset API.
@@ -62,10 +46,10 @@ function updatePayload(form: HTMLFormElement, draft: Draft): void {
  * @author OpenCode
  */
 function renderRecords(form: HTMLFormElement, draft: Draft): void {
-    const target = findPart(form, "[data-external-records]");
+    const target = DomInfra.DomUtils.queryDescendant(form, "[data-external-records]");
 
     if(target) {
-        target.innerHTML = renderTemplate("asset-external-records", draft.records);
+        target.innerHTML = handlebarsInfra.utils.renderTemplateByElementId("asset-external-records", draft.records);
     }
     updatePayload(form, draft);
 }
@@ -75,7 +59,7 @@ function renderRecords(form: HTMLFormElement, draft: Draft): void {
  * @author OpenCode
  */
 function showMessage(form: HTMLFormElement, message: string): void {
-    const target = findPart(form, "[data-external-message]");
+    const target = DomInfra.DomUtils.queryDescendant(form, "[data-external-message]");
 
     if(target) {
         target.textContent = message;
@@ -112,7 +96,7 @@ function showInformation(message: string): void {
  */
 function clearSearch(form: HTMLFormElement, draft: Draft): void {
     const input = form.querySelector<HTMLInputElement>("[data-external-query]");
-    const search = findPart(form, "[data-external-search]");
+    const search = DomInfra.DomUtils.queryDescendant(form, "[data-external-search]");
 
     draft.sequence++;
     draft.results = [];
@@ -207,7 +191,7 @@ export function initializeExternalDraft(form: HTMLFormElement, asset?: Asset): v
 export function searchExternalAssets(form: HTMLFormElement): void {
     const draft = drafts.get(form);
     const input = form.querySelector<HTMLInputElement>("[data-external-query]");
-    const search = findPart(form, "[data-external-search]");
+    const search = DomInfra.DomUtils.queryDescendant(form, "[data-external-search]");
 
     if(!draft || !input || !search) {
         return;
@@ -281,7 +265,7 @@ export function handleExternalSearchAfterRequest(event: SearchEvent): void {
         draft.results = data.slice(0, 10);
 
         search.innerHTML = draft.results.length
-            ? renderTemplate("asset-external-results", draft.results) : "";
+            ? handlebarsInfra.utils.renderTemplateByElementId("asset-external-results", draft.results) : "";
         showMessage(form, "");
 
         if(draft.results.length === 0) {

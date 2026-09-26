@@ -221,6 +221,8 @@ test('scenario 13: fills only empty asset fields when an external result is adde
     const name = page.getByRole('textbox', { name: 'Name', exact: true });
 
     if(view.isEdit) {
+      await expect(ticker).toBeVisible();
+      await expect(page.locator('#asset-edit-content')).not.toHaveClass(/\bhtmx-settling\b/);
       await ticker.fill('');
       await name.fill('');
     }

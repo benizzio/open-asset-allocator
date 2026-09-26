@@ -1,3 +1,12 @@
+/**
+ * Provides shared browser DOM queries, lifecycle checks, context-data access, and HTML escaping.
+ *
+ * @module infra/dom/dom-utils
+ * @author Igor Benicio de Mesquita
+ * @author GitHub Copilot
+ * @author OpenCode
+ */
+
 const contextDataCache = new WeakMap<HTMLElement, unknown>();
 
 const observedElements = new Set<HTMLElement>();
@@ -71,6 +80,30 @@ function escapeHtmlValuePreserveQuotes(value: string): string {
 }
 
 const DomUtils = {
+
+    /**
+     * Finds the first descendant of an arbitrary DOM root that matches a CSS selector.
+     * The root itself is not considered. The generic type lets callers preserve the expected element subtype while
+     * retaining the nullable result of `querySelector`.
+     *
+     * @typeParam TElement - Expected element subtype for the matching descendant.
+     * @param root - Element, document, or document fragment whose descendants are queried.
+     * @param selector - Valid CSS selector used to find the descendant.
+     * @returns The first matching descendant, or `null` when no descendant matches.
+     *
+     * @example
+     * ```ts
+     * const input = DomInfra.DomUtils.queryDescendant<HTMLInputElement>(form, "input[name='ticker']");
+     * if(input) {
+     *     input.value = "NASDAQ:AAPL";
+     * }
+     * ```
+     *
+     * @author OpenCode
+     */
+    queryDescendant<TElement extends Element = HTMLElement>(root: ParentNode, selector: string): TElement | null {
+        return root.querySelector<TElement>(selector);
+    },
 
     queryDirectDescendants(element: HTMLElement, selector: string): NodeListOf<HTMLElement> {
         return element.querySelectorAll(`:scope > ${ selector }`);
