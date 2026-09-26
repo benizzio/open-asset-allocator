@@ -1,22 +1,21 @@
 # Graph Report - open-asset-allocator  (2026-09-26)
 
 ## Corpus Check
-- 100 files · ~221,819 words
+- 98 files · ~221,091 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 20 file(s) not represented in the graph (top: (none) 14, .csv 2, .dbm 1)
 
 ## Summary
-- 749 nodes · 1001 edges · 133 communities (35 shown, 98 thin omitted)
+- 737 nodes · 983 edges · 131 communities (33 shown, 98 thin omitted)
 - Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 48 edges (avg confidence: 0.88)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `da880bc5`
+- Built from commit: `b61803b4`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- graphify.sh
 - go_pkg_net_url
 - generate_report.py
 - go_pkg_database_sql_driver
@@ -103,7 +102,6 @@
 - ref_path
 - src_main_web_static_websrc_pages_index_portfoliopage
 - Comparative E2E Framework Research
-- graphify-scopes.sh
 - src_main_web_static_websrc_pages_index_assetpage
 - graphify-graphs.py
 - Verify Assets Against Planned Allocation Percentages
@@ -197,11 +195,7 @@
 - **Portfolio Observation Holding Fields** — docs_images_portfolio_history_management_asset_identity, docs_images_portfolio_history_management_asset_classification, docs_images_portfolio_history_management_cash_reserve_designation, docs_images_portfolio_history_management_position_quantity, docs_images_portfolio_history_management_market_price, docs_images_portfolio_history_management_total_market_value [EXTRACTED 1.00]
 - **Containerized E2E Execution Topology** — src_main_docker_docker_compose_e2e_e2e_database, src_main_docker_docker_compose_e2e_e2e_migration_engine, src_main_docker_docker_compose_e2e_playwright_runner, src_main_docker_docker_compose_e2e_ci_immutable_monolith, _github_workflows_e2e_e2e_tests_workflow [INFERRED 0.95]
 
-## Communities (133 total, 98 thin omitted)
-
-### Community 0 - "graphify.sh"
-Cohesion: 0.62
-Nodes (6): fail(), prepare_scope(), run_scope(), select_scope(), graphify.sh script, usage()
+## Communities (131 total, 98 thin omitted)
 
 ### Community 2 - "generate_report.py"
 Cohesion: 0.06
@@ -291,10 +285,6 @@ Nodes (10): Dark Theme, Global All Assets Portfolio, My Portfolio Example, My Po
 Cohesion: 0.11
 Nodes (18): Open Asset Allocator Application Fit, E2E Framework Evaluation Framework, E2E Tool Candidate Research, Fourteen E2E Candidate Set, chromedp with Go Testing, CodeceptJS, Comparative E2E Framework Research, Cucumber.js with Playwright or Playwright-BDD (+10 more)
 
-### Community 87 - "graphify-scopes.sh"
-Cohesion: 0.50
-Nodes (4): check(), GRAPHIFY_BIN, GRAPHIFY_TEST_LOG, graphify-scopes.sh script
-
 ### Community 89 - "graphify-graphs.py"
 Cohesion: 0.25
 Nodes (8): json, pathlib, _main(), Path, Validate the committed monorepo Graphify graphs and their source boundaries.…, Check the selected graph's sources and referenced endpoints., Validate all three graphs and assert representative corpus coverage., _validate_graph()
@@ -340,19 +330,19 @@ Cohesion: 1.00
 Nodes (3): Go External Integration Tests, Go Test Workflow, Go Unit Tests
 
 ## Knowledge Gaps
-- **224 isolated node(s):** `build-dev.sh script`, `POSTGRES_DEV_DATA_DIR`, `build.sh script`, `destroy.sh script`, `POSTGRES_DEV_DATA_DIR` (+219 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 390 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **222 isolated node(s):** `build-dev.sh script`, `POSTGRES_DEV_DATA_DIR`, `build.sh script`, `destroy.sh script`, `POSTGRES_DEV_DATA_DIR` (+217 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 388 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **98 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `@playwright/test` connect `validate-playwright-version.mjs` to `package.json`, `portfolio-allocation-plan-management.e2e.spec.ts`, `portfolio-allocation-history-management.e2e.spec.ts`, `portfolio-visualization.e2e.spec.ts`, `portfolio-editing.e2e.spec.ts`, `asset-management.e2e.spec.ts`, `portfolio-allocation-map.e2e.spec.ts`?**
-  _High betweenness centrality (0.068) - this node is a cross-community bridge._
+  _High betweenness centrality (0.070) - this node is a cross-community bridge._
 - **Why does `Asset` connect `Open Asset Allocator` to `asset-management.e2e.spec.ts`?**
-  _High betweenness centrality (0.059) - this node is a cross-community bridge._
+  _High betweenness centrality (0.061) - this node is a cross-community bridge._
 - **What connects `build-dev.sh script`, `POSTGRES_DEV_DATA_DIR`, `build.sh script` to the rest of the system?**
-  _224 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _222 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `generate_report.py` be split into smaller, more focused modules?**
   _Cohesion score 0.06328320802005012 - nodes in this community are weakly interconnected._
 - **Should `portfolio-allocation-plan-management.e2e.spec.ts` be split into smaller, more focused modules?**

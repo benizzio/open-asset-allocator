@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Exercises real scoped extraction, single-scope updates, and deleted-file pruning.
+# Exercises native scoped extraction, single-scope updates, and deleted-file pruning.
 # Run bash src/test/graphify-integration.sh with Graphify 0.9.64 installed.
 # Authored by: GPT-6 Sol
 
@@ -9,21 +9,26 @@ repository_root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)
 fixture=$(mktemp -d /tmp/opencode/graphify-integration.XXXXXX)
 trap 'rm -rf -- "$fixture"' EXIT
 
-mkdir -p "$fixture/.agents/skills/graphify" "$fixture/src/main/web-static/websrc" "$fixture/src/main/go/domain" "$fixture/src/test/e2e"
-cp "$repository_root/graphify.sh" "$fixture/graphify.sh"
-cp "$repository_root/.agents/skills/graphify/.graphify_version" "$fixture/.agents/skills/graphify/.graphify_version"
+mkdir -p "$fixture/graphify-out" "$fixture/src/main/web-static/websrc" "$fixture/src/main/go/domain" "$fixture/src/test/e2e"
+mkdir -p "$fixture/src/main/web-static/graphify-out" "$fixture/src/main/go/graphify-out"
+cp "$repository_root/graphify-out/.graphify_build.json" "$fixture/graphify-out/.graphify_build.json"
+cp "$repository_root/src/main/web-static/graphify-out/.graphify_build.json" "$fixture/src/main/web-static/graphify-out/.graphify_build.json"
+cp "$repository_root/src/main/go/graphify-out/.graphify_build.json" "$fixture/src/main/go/graphify-out/.graphify_build.json"
 printf 'export function primary(): number { return 1; }\n' > "$fixture/src/main/web-static/websrc/primary.ts"
 printf 'export function removable(): number { return 2; }\n' > "$fixture/src/main/web-static/websrc/removable.ts"
 printf '<main>Template marker</main>\n' > "$fixture/src/main/web-static/websrc/primary.html"
 printf 'package domain\ntype Portfolio struct { Name string }\n' > "$fixture/src/main/go/domain/portfolio.go"
 printf 'export function e2eFixture(): boolean { return true; }\n' > "$fixture/src/test/e2e/fixture.ts"
 
-"$fixture/graphify.sh" update all > "$fixture/build.log"
+graphify extract "$fixture/src/main/web-static" --code-only > "$fixture/frontend-build.log"
+graphify extract "$fixture/src/main/go" --code-only > "$fixture/backend-build.log"
+graphify extract "$fixture" --code-only > "$fixture/remainder-build.log"
 backend_graph="$fixture/src/main/go/graphify-out/graph.json"
 remainder_graph="$fixture/graphify-out/graph.json"
 frontend_graph="$fixture/src/main/web-static/graphify-out/graph.json"
 backend_hash=$(sha256sum "$backend_graph")
 remainder_hash=$(sha256sum "$remainder_graph")
+frontend_config_hash=$(sha256sum "$fixture/src/main/web-static/graphify-out/.graphify_build.json")
 
 # Simulates a previously extracted semantic node without calling an external LLM.
 python3 - "$frontend_graph" <<'PY'
@@ -45,13 +50,15 @@ PY
 
 printf 'export function primary(): number { return 3; }\n' > "$fixture/src/main/web-static/websrc/primary.ts"
 rm "$fixture/src/main/web-static/websrc/removable.ts"
+rm "$fixture/src/main/web-static/graphify-out/manifest.json"
 (
   cd /tmp/opencode
-  "$fixture/graphify.sh" update frontend > "$fixture/update.log"
+  graphify update "$fixture/src/main/web-static" > "$fixture/update.log"
 )
 
 [[ $(sha256sum "$backend_graph") == "$backend_hash" ]] || { printf 'Backend graph changed during frontend update\n' >&2; exit 1; }
 [[ $(sha256sum "$remainder_graph") == "$remainder_hash" ]] || { printf 'Remainder graph changed during frontend update\n' >&2; exit 1; }
+[[ $(sha256sum "$fixture/src/main/web-static/graphify-out/.graphify_build.json") == "$frontend_config_hash" ]] || { printf 'Tracked Graphify build configuration changed\n' >&2; exit 1; }
 
 # Verifies that the source membership and deleted-file behavior match the scope.
 python3 - "$fixture" <<'PY'

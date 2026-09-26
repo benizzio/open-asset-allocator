@@ -8,8 +8,8 @@ Refer to the general instructions in the root `../../../AGENTS.md` for broader i
 
 For backend questions use `src/main/go/graphify-out/graph.json` from the repository root with an explicit `--graph`.
 For example, `graphify query "portfolio allocation" --graph src/main/go/graphify-out/graph.json`.
-After changing backend code run `./graphify.sh update backend`. Refresh documentation semantically as described in
-the root instructions. Cross-module questions also require the frontend or remainder graph.
+After changing backend code run `graphify update "$PWD/src/main/go"` from the repository root. Refresh documentation
+semantically as described in the root instructions. Cross-module questions also require the frontend or remainder graph.
 
 ## Go language standards
 

@@ -185,16 +185,20 @@ Rules:
   `graphify-out/wiki/index.md`, use it for broad navigation. Read its `GRAPH_REPORT.md` for architecture review or
   when query/path/explain do not suffice. Store query memory/reflections under that scope's `graphify-out/`, never
   under an unrelated graph.
-- After changing code, run `./graphify.sh update <frontend|backend|remainder|all>` from any working directory (or
-  `make graphify-update GRAPHIFY_SCOPE=frontend` from the repository root). This uses local AST extraction and
-  preserves existing semantic nodes. For changed HTML/HTMX, documentation, or images, run
-  `./graphify.sh refresh <scope>` with an explicitly configured Graphify semantic backend. For agent-assisted
-  extraction of frontend/backend semantic content, start the skill **inside that module** and keep its output there;
-  do not use the skill's default root-wide extraction for the remainder graph, since it does not apply the scripted
-  exclusions. AST-only updates do not refresh semantic content. Use `all` for changes spanning scopes; a regular
-  `/graphify --update` or `graphify update .` does not implement the monorepo routing policy.
-- `./graphify.sh` checks that the installed Graphify version matches `.agents/skills/graphify/.graphify_version`.
-  The scope rules live in that script and regenerate Graphify's ignored build configuration on each invocation.
+- After changing code, use Graphify's native AST update for the affected scopes, from the repository root:
+  `graphify update "$PWD/src/main/web-static"` (frontend), `graphify update "$PWD/src/main/go"` (backend), or
+  `graphify update .` (remainder). Use **absolute paths** for module scan roots: with Graphify 0.9.64, updating via
+  a repo-relative module path changed node source paths and lost existing semantic nodes on a subsequent update.
+  For changes spanning scopes, run each affected command. The root `graphify update .` is safe for the **remainder**
+  because its tracked `graphify-out/.graphify_build.json` excludes both modules; it does not update their graphs.
+  AST updates preserve existing semantic nodes but do not refresh HTML/HTMX, docs, or images.
+- For changed semantic sources, use `graphify extract <absolute-scope-path>` with a configured Graphify backend,
+  followed by `graphify cluster-only <absolute-scope-path> --no-label` to refresh the report and visualization. For
+  agent-assisted extraction in a module, start the skill inside that module and keep its output there. Do not use the skill's
+  root-wide detection/rebuild or `/graphify --update` for the remainder: those instructions do not read its
+  `.graphify_build.json` exclusions. Use the native CLI for remainder builds instead.
+- The three tracked `.graphify_build.json` files define corpus boundaries for native Graphify commands. Keep the
+  installed Graphify version compatible with the vendored skill (`.agents/skills/graphify/.graphify_version`).
   This repository's 0.9.64 installation lacks the optional SQL parser; migration SQL content is not represented
   until `graphifyy[sql]` is available and the remainder is rebuilt. See `docs/graphify-scopes.md` for maintenance,
   validation, and the migration baseline.

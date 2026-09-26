@@ -4,35 +4,41 @@
 
 The graph locations and routing rules are in [the root agent instructions](../AGENTS.md). The root `graphify-out/`
 contains **only** the remainder of the repository. The frontend and backend have their own committed graphs and
-reports. Graphify 0.9.64 is required; the expected version is stored in
-`.agents/skills/graphify/.graphify_version` alongside the vendored skill.
+reports. The graphs were built with Graphify 0.9.64; the vendored skill records its version in
+`.agents/skills/graphify/.graphify_version`.
 
 ## Maintenance
 
-From any working directory, call the repository script by path:
+From the repository root, run the native Graphify CLI for each affected scope:
 
 ```sh
-./graphify.sh update frontend
-./graphify.sh update backend
-./graphify.sh update remainder
-./graphify.sh update all
+graphify update "$PWD/src/main/web-static"
+graphify update "$PWD/src/main/go"
+graphify update .
 ```
 
-The `update` operation uses local AST extraction. If a graph is absent, it builds a code-only graph, then generates
-its report and visualization. On a fresh checkout with committed graphs but no manifest, Graphify reconstructs the
-local incremental state from the existing graph. The script recreates each scope's ignored build configuration on
-every invocation; the remainder's exclusion rules cannot leak into module builds.
+These operations use local AST extraction. The three committed `.graphify_build.json` files are Graphify's own
+persisted build configurations; the root configuration excludes both module trees. Do not put these exclusions in a
+root `.graphifyignore`, which would also affect module scans. On a fresh checkout with committed graphs but no
+manifest, Graphify reconstructs local incremental state from the graphs. A native update of the root does **not**
+update the frontend or backend. For Graphify 0.9.64, pass **absolute** module scan paths: a repository-relative
+module argument was observed to prefix the graph's source paths, and a later update pruned semantic nodes. The
+committed graphs use module-relative source paths; the integration test uses absolute scan paths.
+
+If a graph is absent, build its code corpus with `graphify extract <absolute-scope-path> --code-only`, then run
+`graphify cluster-only <absolute-scope-path> --no-label` to generate its report and visualization. Use `$PWD` for the
+remainder path, or `$PWD/src/main/web-static` and `$PWD/src/main/go` for the module paths. Without the committed graph,
+a code-only build has no pre-existing semantic layer; refresh semantic sources separately.
 
 If HTML/HTMX templates, documents, or images changed, an AST update is insufficient. With a Graphify-supported
-semantic backend configured by the operator, use `./graphify.sh refresh <scope>`; this performs native incremental
-semantic extraction and regenerates the report. A missing backend causes an explicit failure rather than a misleading
-successful refresh. The initial code-only build on a fresh repository without committed graphs needs a semantic
-refresh to reach the committed graphs' coverage. Agent-assisted semantic extraction can run from within a module
+semantic backend configured by the operator, run `graphify extract <absolute-scope-path>`, then
+`graphify cluster-only <absolute-scope-path> --no-label`. Graphify uses the tracked build configuration for that scope and
+fails explicitly if semantic work requires a missing backend. Agent-assisted semantic extraction can run from within a module
 using its module path and output directory. **Do not run the bundled skill's default full pipeline on the repository
-root:** its default detection does not apply the remainder-only exclusions.
+root:** its default detection does not apply the remainder-only exclusions from `.graphify_build.json`.
 
-The script does not install Git hooks or CI jobs. If one is installed later, it must invoke the same scope-aware
-entry point. Native Graphify hooks and direct `graphify update .` do not implement the three-scope routing.
+No Git hooks or CI jobs are installed for Graphify. A native root hook would only refresh the remainder graph; if
+automation is added later, it must run updates for the affected module paths too.
 
 ## Initial migration and remaining coverage
 
@@ -57,14 +63,12 @@ documentation node for a parsed migration.
 ## Validation
 
 ```sh
-bash src/test/graphify-scopes.sh
 bash src/test/graphify-integration.sh
 python3 src/test/graphify-graphs.py
 ```
 
-The routing test uses a fake Graphify executable and checks clean-checkout configuration, working-directory
-independence, exclusions, and failure propagation. The integration test runs real Graphify on a disposable small
-repository, changes and removes a frontend source, and checks that unrelated graph files stay byte-identical.
+The integration test runs native Graphify on a disposable small repository with copies of the tracked build
+configurations. It changes and removes a frontend source, then checks that unrelated graph files stay byte-identical.
 The committed-graph check verifies scope membership, path portability, endpoints, hyperedges, and representative
 frontend template/backend/E2E/Docker sources. SQL content is deliberately **not** counted as covered.
 

@@ -40,6 +40,15 @@ def _validate_graph(scope: str, path: Path) -> set[str]:
 
 def _main() -> None:
     """Validate all three graphs and assert representative corpus coverage."""
+    expected_excludes = {
+        "frontend": [],
+        "backend": [],
+        "remainder": ["src/main/web-static/", "src/main/go/"],
+    }
+    for scope, path in GRAPH_PATHS.items():
+        config = json.loads((path.parent / ".graphify_build.json").read_text(encoding="utf-8"))
+        assert config == {"excludes": expected_excludes[scope], "gitignore": True}, f"{scope}: wrong corpus"
+
     sources = {scope: _validate_graph(scope, path) for scope, path in GRAPH_PATHS.items()}
     assert any(source.endswith(".html") for source in sources["frontend"]), "frontend: missing HTMX templates"
     assert any(source.endswith(".ts") for source in sources["frontend"]), "frontend: missing TypeScript"

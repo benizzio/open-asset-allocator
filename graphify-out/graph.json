@@ -3403,111 +3403,6 @@
       "source_location": "L19"
     },
     {
-      "id": "graphify",
-      "label": "graphify.sh",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "graphify.sh",
-      "file_type": "code",
-      "metadata": {
-        "language": "bash",
-        "kind": "file"
-      },
-      "norm_label": "graphify.sh",
-      "source_file": "graphify.sh",
-      "source_location": "L1"
-    },
-    {
-      "id": "graphify_fail",
-      "label": "fail()",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "graphify.sh",
-      "file_type": "code",
-      "metadata": {
-        "language": "bash",
-        "kind": "bash_function"
-      },
-      "norm_label": "fail()",
-      "source_file": "graphify.sh",
-      "source_location": "L20"
-    },
-    {
-      "id": "graphify_prepare_scope",
-      "label": "prepare_scope()",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "graphify.sh",
-      "file_type": "code",
-      "metadata": {
-        "language": "bash",
-        "kind": "bash_function"
-      },
-      "norm_label": "prepare_scope()",
-      "source_file": "graphify.sh",
-      "source_location": "L46"
-    },
-    {
-      "id": "graphify_run_scope",
-      "label": "run_scope()",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "graphify.sh",
-      "file_type": "code",
-      "metadata": {
-        "language": "bash",
-        "kind": "bash_function"
-      },
-      "norm_label": "run_scope()",
-      "source_file": "graphify.sh",
-      "source_location": "L58"
-    },
-    {
-      "id": "graphify_select_scope",
-      "label": "select_scope()",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "graphify.sh",
-      "file_type": "code",
-      "metadata": {
-        "language": "bash",
-        "kind": "bash_function"
-      },
-      "norm_label": "select_scope()",
-      "source_file": "graphify.sh",
-      "source_location": "L26"
-    },
-    {
-      "id": "graphify_sh__entry",
-      "label": "graphify.sh script",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "graphify.sh",
-      "file_type": "code",
-      "metadata": {
-        "language": "bash",
-        "kind": "bash_entrypoint"
-      },
-      "norm_label": "graphify.sh script",
-      "source_file": "graphify.sh",
-      "source_location": "L1"
-    },
-    {
-      "id": "graphify_usage",
-      "label": "usage()",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "graphify.sh",
-      "file_type": "code",
-      "metadata": {
-        "language": "bash",
-        "kind": "bash_function"
-      },
-      "norm_label": "usage()",
-      "source_file": "graphify.sh",
-      "source_location": "L13"
-    },
-    {
       "id": "destroy",
       "label": "destroy.sh",
       "_origin": "ast",
@@ -5525,7 +5420,7 @@
       "node_kind": "heading",
       "norm_label": "initial migration and remaining coverage",
       "source_file": "docs/graphify-scopes.md",
-      "source_location": "L37"
+      "source_location": "L41"
     },
     {
       "id": "docs_graphify_scopes_maintenance",
@@ -5549,7 +5444,7 @@
       "node_kind": "heading",
       "norm_label": "retrieval comparison",
       "source_file": "docs/graphify-scopes.md",
-      "source_location": "L71"
+      "source_location": "L73"
     },
     {
       "id": "docs_graphify_scopes_validation",
@@ -5561,7 +5456,7 @@
       "node_kind": "heading",
       "norm_label": "validation",
       "source_file": "docs/graphify-scopes.md",
-      "source_location": "L57"
+      "source_location": "L61"
     },
     {
       "id": "src_test_e2e_tsconfig",
@@ -5749,81 +5644,6 @@
       "norm_label": "portfolio_navigation_options",
       "source_file": "src/test/e2e/tests/portfolio-allocation-history-management.e2e.spec.ts",
       "source_location": "L49"
-    },
-    {
-      "id": "src_test_graphify_scopes",
-      "label": "graphify-scopes.sh",
-      "_origin": "ast",
-      "community": 87,
-      "community_name": "graphify-scopes.sh",
-      "file_type": "code",
-      "metadata": {
-        "language": "bash",
-        "kind": "file"
-      },
-      "norm_label": "graphify-scopes.sh",
-      "source_file": "src/test/graphify-scopes.sh",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_test_graphify_scopes_check",
-      "label": "check()",
-      "_origin": "ast",
-      "community": 87,
-      "community_name": "graphify-scopes.sh",
-      "file_type": "code",
-      "metadata": {
-        "language": "bash",
-        "kind": "bash_function"
-      },
-      "norm_label": "check()",
-      "source_file": "src/test/graphify-scopes.sh",
-      "source_location": "L35"
-    },
-    {
-      "id": "src_test_graphify_scopes_graphify_bin",
-      "label": "GRAPHIFY_BIN",
-      "_origin": "ast",
-      "community": 87,
-      "community_name": "graphify-scopes.sh",
-      "file_type": "code",
-      "metadata": {
-        "language": "bash",
-        "kind": "code"
-      },
-      "norm_label": "graphify_bin",
-      "source_file": "src/test/graphify-scopes.sh",
-      "source_location": "L32"
-    },
-    {
-      "id": "src_test_graphify_scopes_graphify_test_log",
-      "label": "GRAPHIFY_TEST_LOG",
-      "_origin": "ast",
-      "community": 87,
-      "community_name": "graphify-scopes.sh",
-      "file_type": "code",
-      "metadata": {
-        "language": "bash",
-        "kind": "code"
-      },
-      "norm_label": "graphify_test_log",
-      "source_file": "src/test/graphify-scopes.sh",
-      "source_location": "L32"
-    },
-    {
-      "id": "src_test_graphify_scopes_sh__entry",
-      "label": "graphify-scopes.sh script",
-      "_origin": "ast",
-      "community": 87,
-      "community_name": "graphify-scopes.sh",
-      "file_type": "code",
-      "metadata": {
-        "language": "bash",
-        "kind": "bash_entrypoint"
-      },
-      "norm_label": "graphify-scopes.sh script",
-      "source_file": "src/test/graphify-scopes.sh",
-      "source_location": "L1"
     },
     {
       "id": "src_test_graphify_graphs",
@@ -10873,90 +10693,6 @@
       "weight": 1.0
     },
     {
-      "source": "graphify_run_scope",
-      "target": "graphify_select_scope",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "graphify.sh",
-      "source_location": "L60",
-      "weight": 1.0
-    },
-    {
-      "source": "graphify_run_scope",
-      "target": "graphify_prepare_scope",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "graphify.sh",
-      "source_location": "L61",
-      "weight": 1.0
-    },
-    {
-      "source": "graphify_run_scope",
-      "target": "graphify_fail",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "graphify.sh",
-      "source_location": "L71",
-      "weight": 1.0
-    },
-    {
-      "source": "graphify_select_scope",
-      "target": "graphify_fail",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "graphify.sh",
-      "source_location": "L40",
-      "weight": 1.0
-    },
-    {
-      "source": "graphify_sh__entry",
-      "target": "graphify_usage",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "graphify.sh",
-      "source_location": "L82",
-      "weight": 1.0
-    },
-    {
-      "source": "graphify_sh__entry",
-      "target": "graphify_fail",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "graphify.sh",
-      "source_location": "L90",
-      "weight": 1.0
-    },
-    {
-      "source": "graphify_sh__entry",
-      "target": "graphify_run_scope",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "graphify.sh",
-      "source_location": "L96",
-      "weight": 1.0
-    },
-    {
       "source": "src_test_e2e_scripts_validate_playwright_version_assertequal",
       "target": "src_test_e2e_scripts_validate_playwright_version_fail",
       "relation": "calls",
@@ -13113,19 +12849,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/graphify-graphs.py",
-      "source_location": "L43",
-      "weight": 1.0
-    },
-    {
-      "source": "src_test_graphify_scopes_sh__entry",
-      "target": "src_test_graphify_scopes_check",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/test/graphify-scopes.sh",
-      "source_location": "L43",
+      "source_location": "L52",
       "weight": 1.0
     },
     {
@@ -15967,7 +15691,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/graphify-scopes.md",
-      "source_location": "L37",
+      "source_location": "L41",
       "weight": 1.0
     },
     {
@@ -15978,7 +15702,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/graphify-scopes.md",
-      "source_location": "L57",
+      "source_location": "L61",
       "weight": 1.0
     },
     {
@@ -15989,7 +15713,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/graphify-scopes.md",
-      "source_location": "L71",
+      "source_location": "L73",
       "weight": 1.0
     },
     {
@@ -16286,17 +16010,6 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "go-dependency-graph.sh",
-      "source_location": "L1",
-      "weight": 1.0
-    },
-    {
-      "source": "graphify",
-      "target": "graphify_sh__entry",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "graphify.sh",
       "source_location": "L1",
       "weight": 1.0
     },
@@ -18204,17 +17917,6 @@
       "weight": 1.0
     },
     {
-      "source": "src_test_graphify_scopes",
-      "target": "src_test_graphify_scopes_sh__entry",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/test/graphify-scopes.sh",
-      "source_location": "L1",
-      "weight": 1.0
-    },
-    {
       "source": "start",
       "target": "start_sh__entry",
       "relation": "contains",
@@ -18512,61 +18214,6 @@
       "weight": 1.0
     },
     {
-      "source": "graphify",
-      "target": "graphify_usage",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "graphify.sh",
-      "source_location": "L13",
-      "weight": 1.0
-    },
-    {
-      "source": "graphify",
-      "target": "graphify_fail",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "graphify.sh",
-      "source_location": "L20",
-      "weight": 1.0
-    },
-    {
-      "source": "graphify",
-      "target": "graphify_select_scope",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "graphify.sh",
-      "source_location": "L26",
-      "weight": 1.0
-    },
-    {
-      "source": "graphify",
-      "target": "graphify_prepare_scope",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "graphify.sh",
-      "source_location": "L46",
-      "weight": 1.0
-    },
-    {
-      "source": "graphify",
-      "target": "graphify_run_scope",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "graphify.sh",
-      "source_location": "L58",
-      "weight": 1.0
-    },
-    {
       "source": "provisioning_arch_provisioning",
       "target": "provisioning_arch_provisioning_nvm_dir",
       "relation": "defines",
@@ -18619,39 +18266,6 @@
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/scripts/start-debug.sh",
       "source_location": "L28",
-      "weight": 1.0
-    },
-    {
-      "source": "src_test_graphify_scopes",
-      "target": "src_test_graphify_scopes_graphify_bin",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/test/graphify-scopes.sh",
-      "source_location": "L32",
-      "weight": 1.0
-    },
-    {
-      "source": "src_test_graphify_scopes",
-      "target": "src_test_graphify_scopes_graphify_test_log",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/test/graphify-scopes.sh",
-      "source_location": "L32",
-      "weight": 1.0
-    },
-    {
-      "source": "src_test_graphify_scopes",
-      "target": "src_test_graphify_scopes_check",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/test/graphify-scopes.sh",
-      "source_location": "L35",
       "weight": 1.0
     },
     {
@@ -19283,7 +18897,7 @@
       "confidence_score": 0.95,
       "context": "Asset",
       "source_file": "docs/graphify-scopes.md",
-      "source_location": "L79",
+      "source_location": "L81",
       "weight": 1.0
     },
     {
@@ -21915,5 +21529,5 @@
       "source_file": "src/main/docker/docker-compose-e2e.yml"
     }
   ],
-  "built_at_commit": "da880bc56b996eabd12ca7d53881aa22494cc340"
+  "built_at_commit": "b61803b40f2fd56e04a25db2ef4c0c7a54015f71"
 }
