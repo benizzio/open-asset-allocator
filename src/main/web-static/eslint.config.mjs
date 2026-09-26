@@ -64,6 +64,19 @@ export default [
                                 "Import from the public API 'domain/service' (index.ts) only; " +
                                 "deep imports are not allowed.",
                         },
+                        // domain/asset public API only
+                        // Authored by: OpenCode
+                        {
+                            group: [
+                                "**/domain/asset/**",
+                                "domain/asset/**",
+                                "./domain/asset/**",
+                                "../domain/asset/**",
+                            ],
+                            message:
+                                "Import from the public API 'domain/asset' (index.ts) only; " +
+                                "deep imports are not allowed.",
+                        },
                         // application public API only (outside the module)
                         {
                             group: [
@@ -74,6 +87,19 @@ export default [
                             ],
                             message:
                                 "Import from the public API 'application' (index.ts) only; " +
+                                "deep imports are not allowed.",
+                        },
+                        // pages public API only
+                        // Authored by: OpenCode
+                        {
+                            group: [
+                                "**/pages/**",
+                                "pages/**",
+                                "./pages/**",
+                                "../pages/**",
+                            ],
+                            message:
+                                "Import from the public API 'pages' (index.ts) only; " +
                                 "deep imports are not allowed.",
                         },
                         // Block deep imports into the local 'infra/handlebars' module; import only from its public API

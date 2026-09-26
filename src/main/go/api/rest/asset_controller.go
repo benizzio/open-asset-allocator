@@ -17,6 +17,10 @@ type AssetRESTController struct {
 	assetDomService *service.AssetDomService
 }
 
+// maxExternalAssetSearchResults limits the aggregated provider results returned by one search.
+// Authored by: OpenCode
+const maxExternalAssetSearchResults = 10
+
 // BuildRoutes returns the HTTP routes handled by the asset REST controller.
 //
 // Co-authored by: OpenCode and Igor Benicio de Mesquita
@@ -181,7 +185,7 @@ func BuildAssetRESTController(assetDomService *service.AssetDomService) *AssetRE
 	}
 }
 
-// getExternalAssets handles GET requests that search external asset providers by query string.
+// getExternalAssets searches external providers and returns at most ten results in provider order.
 //
 // Co-authored by: OpenCode and benizzio
 func (controller *AssetRESTController) getExternalAssets(context *gin.Context) {
@@ -202,6 +206,9 @@ func (controller *AssetRESTController) getExternalAssets(context *gin.Context) {
 	)
 	if gininfra.HandleAPIError(context, "Error searching external assets", err) {
 		return
+	}
+	if len(externalAssets) > maxExternalAssetSearchResults {
+		externalAssets = externalAssets[:maxExternalAssetSearchResults]
 	}
 
 	var externalAssetDTSs = model.MapToExternalAssetDTSs(externalAssets)
