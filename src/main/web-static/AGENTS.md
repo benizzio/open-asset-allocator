@@ -1,8 +1,12 @@
+<!--suppress HtmlUnknownTag -->
+
 # Specific agent instructions for the front-end and JavaScript, TypeScript, HTML and SCSS languages
 
 Refer to the general instructions in the root `../../../AGENTS.md` for broader instructions.
 
 ## Front-end and browser code standards
+
+<CodeStructure>
 
 - the code is structured in the following modules
     - `src/main/web-static/websrc`: the main code for the web application
@@ -25,3 +29,17 @@ Refer to the general instructions in the root `../../../AGENTS.md` for broader i
   `index.ts`, and direct access should be blocked. This should be enforced by `src/main/web-static/eslint.config.mjs`.
   Note: this enforcement is being added gradually — when making changes to a module, the `no-restricted-imports` rule
   should be added for that module if it is not already enforced.
+
+</CodeStructure>
+
+<CustomCodeDocs>
+
+- When adding authoring code docs in JavaScript and TypeScript files, use proper JSDoc syntax:
+  ```javascript
+  /**
+  * @author OpenCode
+  * @author benizzio
+  */
+  ```
+
+</CustomCodeDocs>
