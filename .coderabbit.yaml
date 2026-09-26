@@ -6,6 +6,9 @@ language: "en-US"
 reviews:
   profile: assertive
   high_level_summary: true
+  path_filters:
+    - "!graphify-out/**"
+    - "!.agents/skills/graphify/**"
   auto_review:
     enabled: true
     drafts: false
