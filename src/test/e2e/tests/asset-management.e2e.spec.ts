@@ -1,5 +1,5 @@
 /**
- * Covers scenarios 8, 8.1, and 9 for asset management through browser, API, and PostgreSQL boundaries.
+ * Covers scenarios 8, 8.1, 8.2, and 9 for asset management through browser, API, and PostgreSQL boundaries.
  *
  * Assets are seeded directly in PostgreSQL so each scenario remains independent from other API
  * flows. The write scenarios verify that forms submit and preserve their complete external data.
@@ -219,6 +219,59 @@ test.describe('asset management', () => {
 
     await expectPersistedAsset(database, asset, null);
     await expectPersistedAsset(database, otherAsset, null);
+  });
+
+  test('scenario 8.2: opens an asset once by keyboard without Space scrolling', async ({ database, page }) => {
+    const asset = await seedAsset(database, ORIGINAL_TICKER, ORIGINAL_NAME);
+    await database.query(
+      `INSERT INTO public.asset (ticker, name)
+       SELECT 'E2E:ZZ-FILLER:' || series_number, 'E2E filler asset ' || series_number
+       FROM generate_series(1, 20) AS series_number`,
+    );
+    const detailRequests: string[] = [];
+    page.on('request', (request) => {
+      if(new URL(request.url()).pathname === `/api/asset/${asset.id}`) {
+        detailRequests.push(request.url());
+      }
+    });
+
+    await page.goto('/asset');
+    await expectAssetTable(page, asset);
+
+    await page.getByRole('link', { name: ORIGINAL_TICKER, exact: true }).press('Enter');
+    await expectAssetEditor(page, asset);
+    expect(detailRequests).toHaveLength(1);
+
+    await navigateWithinApp(page, '/asset');
+    await expectAssetTable(page, asset);
+
+    const assetTableScroll = page.locator('.asset-table-scroll');
+    const assetRow = page.getByRole('row').filter({
+      has: page.getByRole('link', { name: ORIGINAL_TICKER, exact: true }),
+    });
+    await expect(assetTableScroll).toBeVisible();
+    expect(await assetTableScroll.evaluate((element) => element.scrollHeight)).toBeGreaterThan(
+      await assetTableScroll.evaluate((element) => element.clientHeight),
+    );
+    await assetTableScroll.evaluate((element) => {
+      element.scrollTop = 0;
+    });
+    await assetRow.focus();
+    const initialScrollTop = await assetTableScroll.evaluate((element) => element.scrollTop);
+    const spaceDefaultPreventedPromise = page.evaluate(() => new Promise<boolean>((resolve) => {
+      document.addEventListener('keypress', (event) => {
+        if(event.key === ' ') {
+          resolve(event.defaultPrevented);
+        }
+      }, { once: true });
+    }));
+
+    await assetRow.press('Space');
+
+    expect(await spaceDefaultPreventedPromise).toBe(true);
+    await expectAssetEditor(page, asset);
+    expect(await assetTableScroll.evaluate((element) => element.scrollTop)).toBe(initialScrollTop);
+    expect(detailRequests).toHaveLength(2);
   });
 
   test('scenario 9: submits and preserves loaded external data when saving asset fields', async ({ database, page }) => {

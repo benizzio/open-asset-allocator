@@ -288,6 +288,7 @@ const AssetPage = {
      */
     handleAssetNavigationKeypress(event: KeyboardEvent, assetId: string): void {
         if(event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
             this.navigateToAsset(assetId);
         }
     },
