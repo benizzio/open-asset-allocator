@@ -655,7 +655,7 @@
       "file_type": "code",
       "norm_label": "asset",
       "source_file": "src/main/web-static/websrc/domain/asset/index.ts",
-      "source_location": "L17"
+      "source_location": "L21"
     },
     {
       "id": "src_main_web_static_websrc_domain_asset_index_externalasset",
@@ -668,7 +668,7 @@
       "file_type": "code",
       "norm_label": "externalasset",
       "source_file": "src/main/web-static/websrc/domain/asset/index.ts",
-      "source_location": "L32"
+      "source_location": "L39"
     },
     {
       "id": "src_main_web_static_websrc_domain_allocation_allocationhierarchyleveldto",
@@ -902,7 +902,7 @@
       "file_type": "code",
       "norm_label": "assetbeforeswapevent",
       "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L28"
+      "source_location": "L36"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_assetrequestevent",
@@ -915,7 +915,7 @@
       "file_type": "code",
       "norm_label": "assetrequestevent",
       "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L27"
+      "source_location": "L31"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_external_draft",
@@ -928,7 +928,7 @@
       "file_type": "code",
       "norm_label": "draft",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L12"
+      "source_location": "L16"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_external_searchevent",
@@ -941,7 +941,7 @@
       "file_type": "code",
       "norm_label": "searchevent",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L13"
+      "source_location": "L21"
     },
     {
       "id": "src_main_web_static_websrc_application_allocation_plan_chart_fractalplannedallocationmultichartdatasource",
@@ -1396,7 +1396,7 @@
       "file_type": "code",
       "norm_label": "asset",
       "source_file": "src/test/e2e/tests/asset-management.e2e.spec.ts",
-      "source_location": "L33"
+      "source_location": "L37"
     },
     {
       "id": "src_test_e2e_tests_asset_management_e2e_spec_assetrow",
@@ -1409,7 +1409,7 @@
       "file_type": "code",
       "norm_label": "assetrow",
       "source_file": "src/test/e2e/tests/asset-management.e2e.spec.ts",
-      "source_location": "L40"
+      "source_location": "L48"
     },
     {
       "id": "src_main_web_static_websrc_components_notifications_bootstrapnotification",
@@ -3170,7 +3170,7 @@
       "file_type": "code",
       "norm_label": "addexternalasset()",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L258"
+      "source_location": "L322"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_external_clearsearch",
@@ -3182,7 +3182,7 @@
       "file_type": "code",
       "norm_label": "clearsearch()",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L96"
+      "source_location": "L128"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_external_fillemptyassetfields",
@@ -3194,7 +3194,7 @@
       "file_type": "code",
       "norm_label": "fillemptyassetfields()",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L115"
+      "source_location": "L150"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_external_findpart",
@@ -3206,7 +3206,7 @@
       "file_type": "code",
       "norm_label": "findpart()",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L19"
+      "source_location": "L30"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_external_handleexternalsearchafterrequest",
@@ -3218,7 +3218,7 @@
       "file_type": "code",
       "norm_label": "handleexternalsearchafterrequest()",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L215"
+      "source_location": "L275"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_external_handleexternalsearchbeforerequest",
@@ -3230,7 +3230,7 @@
       "file_type": "code",
       "norm_label": "handleexternalsearchbeforerequest()",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L201"
+      "source_location": "L257"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_external_hasvalidexternaldata",
@@ -3242,7 +3242,7 @@
       "file_type": "code",
       "norm_label": "hasvalidexternaldata()",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L144"
+      "source_location": "L188"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_external_initializeexternaldraft",
@@ -3254,7 +3254,7 @@
       "file_type": "code",
       "norm_label": "initializeexternaldraft()",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L155"
+      "source_location": "L203"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_external_isexternalasset",
@@ -3266,7 +3266,7 @@
       "file_type": "code",
       "norm_label": "isexternalasset()",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L129"
+      "source_location": "L167"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_external_moveexternalasset",
@@ -3278,7 +3278,7 @@
       "file_type": "code",
       "norm_label": "moveexternalasset()",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L301"
+      "source_location": "L373"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_external_persistedrecord",
@@ -3290,7 +3290,7 @@
       "file_type": "code",
       "norm_label": "persistedrecord()",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L30"
+      "source_location": "L47"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_external_removeexternalasset",
@@ -3302,7 +3302,7 @@
       "file_type": "code",
       "norm_label": "removeexternalasset()",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L285"
+      "source_location": "L353"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_external_renderrecords",
@@ -3314,7 +3314,7 @@
       "file_type": "code",
       "norm_label": "renderrecords()",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L56"
+      "source_location": "L79"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_external_rendertemplate",
@@ -3326,7 +3326,7 @@
       "file_type": "code",
       "norm_label": "rendertemplate()",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L24"
+      "source_location": "L38"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_external_searchexternalassets",
@@ -3338,7 +3338,7 @@
       "file_type": "code",
       "norm_label": "searchexternalassets()",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L171"
+      "source_location": "L223"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_external_showerror",
@@ -3350,7 +3350,7 @@
       "file_type": "code",
       "norm_label": "showerror()",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L78"
+      "source_location": "L104"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_external_showinformation",
@@ -3362,7 +3362,7 @@
       "file_type": "code",
       "norm_label": "showinformation()",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L91"
+      "source_location": "L120"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_external_showmessage",
@@ -3374,7 +3374,7 @@
       "file_type": "code",
       "norm_label": "showmessage()",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L66"
+      "source_location": "L92"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_external_showwarning",
@@ -3386,7 +3386,7 @@
       "file_type": "code",
       "norm_label": "showwarning()",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L86"
+      "source_location": "L112"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_external_updatepayload",
@@ -3398,7 +3398,7 @@
       "file_type": "code",
       "norm_label": "updatepayload()",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L35"
+      "source_location": "L55"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_getassetidentifierfromlocation",
@@ -3410,7 +3410,7 @@
       "file_type": "code",
       "norm_label": "getassetidentifierfromlocation()",
       "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L87"
+      "source_location": "L104"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_isassetformresponse",
@@ -3422,7 +3422,7 @@
       "file_type": "code",
       "norm_label": "isassetformresponse()",
       "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L38"
+      "source_location": "L46"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_normalizeasset",
@@ -3434,7 +3434,7 @@
       "file_type": "code",
       "norm_label": "normalizeasset()",
       "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L59"
+      "source_location": "L73"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_notifysuccess",
@@ -3446,7 +3446,7 @@
       "file_type": "code",
       "norm_label": "notifysuccess()",
       "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L117"
+      "source_location": "L140"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_notifyunexpectedresponse",
@@ -3458,7 +3458,7 @@
       "file_type": "code",
       "norm_label": "notifyunexpectedresponse()",
       "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L122"
+      "source_location": "L148"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_parsejson",
@@ -3470,7 +3470,7 @@
       "file_type": "code",
       "norm_label": "parsejson()",
       "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L45"
+      "source_location": "L56"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_renderassetform",
@@ -3482,7 +3482,7 @@
       "file_type": "code",
       "norm_label": "renderassetform()",
       "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L94"
+      "source_location": "L114"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_renderassetloaderror",
@@ -3494,7 +3494,7 @@
       "file_type": "code",
       "norm_label": "renderassetloaderror()",
       "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L145"
+      "source_location": "L177"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_renderlisterror",
@@ -3506,7 +3506,7 @@
       "file_type": "code",
       "norm_label": "renderlisterror()",
       "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L127"
+      "source_location": "L156"
     },
     {
       "id": "src_main_web_static_websrc_application_allocation_plan_chart_chartdataselectioneventhandler",
@@ -5858,7 +5858,7 @@
       "file_type": "code",
       "norm_label": "expectpersistedorder()",
       "source_file": "src/test/e2e/tests/asset-external-management.e2e.spec.ts",
-      "source_location": "L264"
+      "source_location": "L270"
     },
     {
       "id": "src_test_e2e_tests_asset_external_management_e2e_spec_searchandadd",
@@ -5870,7 +5870,7 @@
       "file_type": "code",
       "norm_label": "searchandadd()",
       "source_file": "src/test/e2e/tests/asset-external-management.e2e.spec.ts",
-      "source_location": "L253"
+      "source_location": "L256"
     },
     {
       "id": "src_test_e2e_tests_portfolio_creation_e2e_spec_isportfoliocollectionrequest",
@@ -6254,7 +6254,7 @@
       "file_type": "code",
       "norm_label": "expectasseteditor()",
       "source_file": "src/test/e2e/tests/asset-management.e2e.spec.ts",
-      "source_location": "L323"
+      "source_location": "L346"
     },
     {
       "id": "src_test_e2e_tests_asset_management_e2e_spec_expectassettable",
@@ -6266,7 +6266,7 @@
       "file_type": "code",
       "norm_label": "expectassettable()",
       "source_file": "src/test/e2e/tests/asset-management.e2e.spec.ts",
-      "source_location": "L296"
+      "source_location": "L313"
     },
     {
       "id": "src_test_e2e_tests_asset_management_e2e_spec_expecticononlybutton",
@@ -6278,7 +6278,7 @@
       "file_type": "code",
       "norm_label": "expecticononlybutton()",
       "source_file": "src/test/e2e/tests/asset-management.e2e.spec.ts",
-      "source_location": "L334"
+      "source_location": "L360"
     },
     {
       "id": "src_test_e2e_tests_asset_management_e2e_spec_expectnewassetform",
@@ -6290,7 +6290,7 @@
       "file_type": "code",
       "norm_label": "expectnewassetform()",
       "source_file": "src/test/e2e/tests/asset-management.e2e.spec.ts",
-      "source_location": "L312"
+      "source_location": "L332"
     },
     {
       "id": "src_test_e2e_tests_asset_management_e2e_spec_expectpersistedasset",
@@ -6302,7 +6302,7 @@
       "file_type": "code",
       "norm_label": "expectpersistedasset()",
       "source_file": "src/test/e2e/tests/asset-management.e2e.spec.ts",
-      "source_location": "L342"
+      "source_location": "L371"
     },
     {
       "id": "src_test_e2e_tests_asset_management_e2e_spec_isassetcollectionrequest",
@@ -6314,7 +6314,7 @@
       "file_type": "code",
       "norm_label": "isassetcollectionrequest()",
       "source_file": "src/test/e2e/tests/asset-management.e2e.spec.ts",
-      "source_location": "L364"
+      "source_location": "L396"
     },
     {
       "id": "src_test_e2e_tests_asset_management_e2e_spec_isassetcreationrequest",
@@ -6326,7 +6326,7 @@
       "file_type": "code",
       "norm_label": "isassetcreationrequest()",
       "source_file": "src/test/e2e/tests/asset-management.e2e.spec.ts",
-      "source_location": "L369"
+      "source_location": "L404"
     },
     {
       "id": "src_test_e2e_tests_asset_management_e2e_spec_isassetdetailrequest",
@@ -6338,7 +6338,7 @@
       "file_type": "code",
       "norm_label": "isassetdetailrequest()",
       "source_file": "src/test/e2e/tests/asset-management.e2e.spec.ts",
-      "source_location": "L379"
+      "source_location": "L420"
     },
     {
       "id": "src_test_e2e_tests_asset_management_e2e_spec_isassetupdaterequest",
@@ -6350,7 +6350,7 @@
       "file_type": "code",
       "norm_label": "isassetupdaterequest()",
       "source_file": "src/test/e2e/tests/asset-management.e2e.spec.ts",
-      "source_location": "L374"
+      "source_location": "L412"
     },
     {
       "id": "src_test_e2e_tests_asset_management_e2e_spec_navigatewithinapp",
@@ -6362,7 +6362,7 @@
       "file_type": "code",
       "norm_label": "navigatewithinapp()",
       "source_file": "src/test/e2e/tests/asset-management.e2e.spec.ts",
-      "source_location": "L271"
+      "source_location": "L282"
     },
     {
       "id": "src_test_e2e_tests_asset_management_e2e_spec_seedasset",
@@ -6374,7 +6374,7 @@
       "file_type": "code",
       "norm_label": "seedasset()",
       "source_file": "src/test/e2e/tests/asset-management.e2e.spec.ts",
-      "source_location": "L278"
+      "source_location": "L292"
     },
     {
       "id": "src_main_web_static_websrc_infra_dom_binding_dom_exclusive_display_adddisplayobserver",
@@ -14727,7 +14727,7 @@
       "file_type": "code",
       "norm_label": "drafts",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L15"
+      "source_location": "L23"
     },
     {
       "id": "src_main_web_static_websrc_pages_asset_external_requestsequences",
@@ -14738,7 +14738,7 @@
       "file_type": "code",
       "norm_label": "requestsequences",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L16"
+      "source_location": "L24"
     },
     {
       "id": "src_main_web_static_websrc_application_allocation_plan_chart",
@@ -22034,7 +22034,7 @@
       "file_type": "code",
       "norm_label": "application",
       "source_file": "src/main/web-static/websrc/application/index.ts",
-      "source_location": "L14"
+      "source_location": "L17"
     },
     {
       "id": "src_main_web_static_websrc_components_allocation_plan_management_allocationplanmanagement",
@@ -22100,7 +22100,7 @@
       "file_type": "code",
       "norm_label": "assetpage",
       "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L186"
+      "source_location": "L222"
     },
     {
       "id": "src_main_web_static_websrc_root",
@@ -37736,7 +37736,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L268",
+      "source_location": "L332",
       "weight": 1.0
     },
     {
@@ -37748,7 +37748,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L274",
+      "source_location": "L338",
       "weight": 1.0
     },
     {
@@ -37760,7 +37760,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L275",
+      "source_location": "L339",
       "weight": 1.0
     },
     {
@@ -37772,7 +37772,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L276",
+      "source_location": "L340",
       "weight": 1.0
     },
     {
@@ -37784,19 +37784,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L277",
-      "weight": 1.0
-    },
-    {
-      "source": "src_main_web_static_websrc_pages_asset_external_clearsearch",
-      "target": "src_main_web_static_websrc_pages_asset_external_showmessage",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L111",
+      "source_location": "L341",
       "weight": 1.0
     },
     {
@@ -37808,7 +37796,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L98",
+      "source_location": "L130",
+      "weight": 1.0
+    },
+    {
+      "source": "src_main_web_static_websrc_pages_asset_external_clearsearch",
+      "target": "src_main_web_static_websrc_pages_asset_external_showmessage",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
+      "source_location": "L143",
       "weight": 1.0
     },
     {
@@ -37820,7 +37820,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L226",
+      "source_location": "L286",
       "weight": 1.0
     },
     {
@@ -37832,7 +37832,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L227",
+      "source_location": "L287",
       "weight": 1.0
     },
     {
@@ -37844,7 +37844,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L240",
+      "source_location": "L300",
       "weight": 1.0
     },
     {
@@ -37856,7 +37856,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L244",
+      "source_location": "L304",
       "weight": 1.0
     },
     {
@@ -37868,7 +37868,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L163",
+      "source_location": "L211",
       "weight": 1.0
     },
     {
@@ -37880,7 +37880,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L307",
+      "source_location": "L379",
       "weight": 1.0
     },
     {
@@ -37892,7 +37892,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L291",
+      "source_location": "L359",
       "weight": 1.0
     },
     {
@@ -37904,7 +37904,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L292",
+      "source_location": "L360",
       "weight": 1.0
     },
     {
@@ -37916,7 +37916,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L57",
+      "source_location": "L80",
       "weight": 1.0
     },
     {
@@ -37928,7 +37928,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L60",
+      "source_location": "L83",
       "weight": 1.0
     },
     {
@@ -37940,7 +37940,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L62",
+      "source_location": "L85",
       "weight": 1.0
     },
     {
@@ -37952,7 +37952,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L174",
+      "source_location": "L226",
       "weight": 1.0
     },
     {
@@ -37964,7 +37964,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L185",
+      "source_location": "L237",
       "weight": 1.0
     },
     {
@@ -37976,7 +37976,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L188",
+      "source_location": "L240",
       "weight": 1.0
     },
     {
@@ -37988,7 +37988,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L67",
+      "source_location": "L93",
       "weight": 1.0
     },
     {
@@ -38000,7 +38000,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L74",
+      "source_location": "L88",
       "weight": 1.0
     },
     {
@@ -38012,7 +38012,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L110",
+      "source_location": "L130",
       "weight": 1.0
     },
     {
@@ -38360,7 +38360,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/asset-management.e2e.spec.ts",
-      "source_location": "L328",
+      "source_location": "L351",
       "weight": 1.0
     },
     {
@@ -38372,7 +38372,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/asset-management.e2e.spec.ts",
-      "source_location": "L317",
+      "source_location": "L337",
       "weight": 1.0
     },
     {
@@ -40280,7 +40280,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/asset-external-management.e2e.spec.ts",
-      "source_location": "L253",
+      "source_location": "L256",
       "weight": 1.0
     },
     {
@@ -40292,7 +40292,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/asset-external-management.e2e.spec.ts",
-      "source_location": "L264",
+      "source_location": "L270",
       "weight": 1.0
     },
     {
@@ -40304,7 +40304,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/asset-management.e2e.spec.ts",
-      "source_location": "L271",
+      "source_location": "L282",
       "weight": 1.0
     },
     {
@@ -40316,7 +40316,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/asset-management.e2e.spec.ts",
-      "source_location": "L278",
+      "source_location": "L292",
       "weight": 1.0
     },
     {
@@ -40328,7 +40328,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/asset-management.e2e.spec.ts",
-      "source_location": "L296",
+      "source_location": "L313",
       "weight": 1.0
     },
     {
@@ -40340,7 +40340,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/asset-management.e2e.spec.ts",
-      "source_location": "L312",
+      "source_location": "L332",
       "weight": 1.0
     },
     {
@@ -40352,7 +40352,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/asset-management.e2e.spec.ts",
-      "source_location": "L323",
+      "source_location": "L346",
       "weight": 1.0
     },
     {
@@ -40364,7 +40364,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/asset-management.e2e.spec.ts",
-      "source_location": "L334",
+      "source_location": "L360",
       "weight": 1.0
     },
     {
@@ -40376,7 +40376,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/asset-management.e2e.spec.ts",
-      "source_location": "L342",
+      "source_location": "L371",
       "weight": 1.0
     },
     {
@@ -40388,7 +40388,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/asset-management.e2e.spec.ts",
-      "source_location": "L379",
+      "source_location": "L420",
       "weight": 1.0
     },
     {
@@ -41629,18 +41629,6 @@
     },
     {
       "source": "src_main_web_static_websrc_pages_index",
-      "target": "src_main_web_static_websrc_pages_portfolio",
-      "relation": "re_exports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "export",
-      "source_file": "src/main/web-static/websrc/pages/index.ts",
-      "source_location": "L10",
-      "weight": 1.0
-    },
-    {
-      "source": "src_main_web_static_websrc_pages_index",
       "target": "src_main_web_static_websrc_pages_asset",
       "relation": "re_exports",
       "_origin": "ast",
@@ -41648,7 +41636,19 @@
       "confidence_score": 1.0,
       "context": "export",
       "source_file": "src/main/web-static/websrc/pages/index.ts",
-      "source_location": "L9",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "src_main_web_static_websrc_pages_index",
+      "target": "src_main_web_static_websrc_pages_portfolio",
+      "relation": "re_exports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "export",
+      "source_file": "src/main/web-static/websrc/pages/index.ts",
+      "source_location": "L15",
       "weight": 1.0
     },
     {
@@ -74864,7 +74864,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/web-static/websrc/application/index.ts",
-      "source_location": "L14",
+      "source_location": "L17",
       "weight": 1.0
     },
     {
@@ -75546,7 +75546,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/web-static/websrc/domain/asset/index.ts",
-      "source_location": "L17",
+      "source_location": "L21",
       "weight": 1.0
     },
     {
@@ -75557,7 +75557,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/web-static/websrc/domain/asset/index.ts",
-      "source_location": "L32",
+      "source_location": "L39",
       "weight": 1.0
     },
     {
@@ -78004,123 +78004,13 @@
     },
     {
       "source": "src_main_web_static_websrc_pages_asset",
-      "target": "src_main_web_static_websrc_pages_asset_notifysuccess",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L117",
-      "weight": 1.0
-    },
-    {
-      "source": "src_main_web_static_websrc_pages_asset",
-      "target": "src_main_web_static_websrc_pages_asset_notifyunexpectedresponse",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L122",
-      "weight": 1.0
-    },
-    {
-      "source": "src_main_web_static_websrc_pages_asset",
-      "target": "src_main_web_static_websrc_pages_asset_renderlisterror",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L127",
-      "weight": 1.0
-    },
-    {
-      "source": "src_main_web_static_websrc_pages_asset",
-      "target": "src_main_web_static_websrc_pages_asset_renderassetloaderror",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L145",
-      "weight": 1.0
-    },
-    {
-      "source": "src_main_web_static_websrc_pages_asset",
-      "target": "src_main_web_static_websrc_pages_asset_assetpage",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L186",
-      "weight": 1.0
-    },
-    {
-      "source": "src_main_web_static_websrc_pages_asset",
-      "target": "src_main_web_static_websrc_pages_asset_assetrequestevent",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L27",
-      "weight": 1.0
-    },
-    {
-      "source": "src_main_web_static_websrc_pages_asset",
-      "target": "src_main_web_static_websrc_pages_asset_assetbeforeswapevent",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L28",
-      "weight": 1.0
-    },
-    {
-      "source": "src_main_web_static_websrc_pages_asset",
-      "target": "src_main_web_static_websrc_pages_asset_isassetformresponse",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L38",
-      "weight": 1.0
-    },
-    {
-      "source": "src_main_web_static_websrc_pages_asset",
-      "target": "src_main_web_static_websrc_pages_asset_parsejson",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L45",
-      "weight": 1.0
-    },
-    {
-      "source": "src_main_web_static_websrc_pages_asset",
-      "target": "src_main_web_static_websrc_pages_asset_normalizeasset",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L59",
-      "weight": 1.0
-    },
-    {
-      "source": "src_main_web_static_websrc_pages_asset",
       "target": "src_main_web_static_websrc_pages_asset_getassetidentifierfromlocation",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L87",
+      "source_location": "L104",
       "weight": 1.0
     },
     {
@@ -78131,227 +78021,117 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L94",
+      "source_location": "L114",
       "weight": 1.0
     },
     {
-      "source": "src_main_web_static_websrc_pages_asset_external",
-      "target": "src_main_web_static_websrc_pages_asset_external_fillemptyassetfields",
+      "source": "src_main_web_static_websrc_pages_asset",
+      "target": "src_main_web_static_websrc_pages_asset_notifysuccess",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L115",
+      "source_file": "src/main/web-static/websrc/pages/asset.ts",
+      "source_location": "L140",
       "weight": 1.0
     },
     {
-      "source": "src_main_web_static_websrc_pages_asset_external",
-      "target": "src_main_web_static_websrc_pages_asset_external_draft",
+      "source": "src_main_web_static_websrc_pages_asset",
+      "target": "src_main_web_static_websrc_pages_asset_notifyunexpectedresponse",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L12",
+      "source_file": "src/main/web-static/websrc/pages/asset.ts",
+      "source_location": "L148",
       "weight": 1.0
     },
     {
-      "source": "src_main_web_static_websrc_pages_asset_external",
-      "target": "src_main_web_static_websrc_pages_asset_external_isexternalasset",
+      "source": "src_main_web_static_websrc_pages_asset",
+      "target": "src_main_web_static_websrc_pages_asset_renderlisterror",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L129",
+      "source_file": "src/main/web-static/websrc/pages/asset.ts",
+      "source_location": "L156",
       "weight": 1.0
     },
     {
-      "source": "src_main_web_static_websrc_pages_asset_external",
-      "target": "src_main_web_static_websrc_pages_asset_external_searchevent",
+      "source": "src_main_web_static_websrc_pages_asset",
+      "target": "src_main_web_static_websrc_pages_asset_renderassetloaderror",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L13",
+      "source_file": "src/main/web-static/websrc/pages/asset.ts",
+      "source_location": "L177",
       "weight": 1.0
     },
     {
-      "source": "src_main_web_static_websrc_pages_asset_external",
-      "target": "src_main_web_static_websrc_pages_asset_external_hasvalidexternaldata",
+      "source": "src_main_web_static_websrc_pages_asset",
+      "target": "src_main_web_static_websrc_pages_asset_assetpage",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L144",
+      "source_file": "src/main/web-static/websrc/pages/asset.ts",
+      "source_location": "L222",
       "weight": 1.0
     },
     {
-      "source": "src_main_web_static_websrc_pages_asset_external",
-      "target": "src_main_web_static_websrc_pages_asset_external_drafts",
+      "source": "src_main_web_static_websrc_pages_asset",
+      "target": "src_main_web_static_websrc_pages_asset_assetrequestevent",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L15",
+      "source_file": "src/main/web-static/websrc/pages/asset.ts",
+      "source_location": "L31",
       "weight": 1.0
     },
     {
-      "source": "src_main_web_static_websrc_pages_asset_external",
-      "target": "src_main_web_static_websrc_pages_asset_external_initializeexternaldraft",
+      "source": "src_main_web_static_websrc_pages_asset",
+      "target": "src_main_web_static_websrc_pages_asset_assetbeforeswapevent",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L155",
+      "source_file": "src/main/web-static/websrc/pages/asset.ts",
+      "source_location": "L36",
       "weight": 1.0
     },
     {
-      "source": "src_main_web_static_websrc_pages_asset_external",
-      "target": "src_main_web_static_websrc_pages_asset_external_requestsequences",
+      "source": "src_main_web_static_websrc_pages_asset",
+      "target": "src_main_web_static_websrc_pages_asset_isassetformresponse",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L16",
+      "source_file": "src/main/web-static/websrc/pages/asset.ts",
+      "source_location": "L46",
       "weight": 1.0
     },
     {
-      "source": "src_main_web_static_websrc_pages_asset_external",
-      "target": "src_main_web_static_websrc_pages_asset_external_searchexternalassets",
+      "source": "src_main_web_static_websrc_pages_asset",
+      "target": "src_main_web_static_websrc_pages_asset_parsejson",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L171",
-      "weight": 1.0
-    },
-    {
-      "source": "src_main_web_static_websrc_pages_asset_external",
-      "target": "src_main_web_static_websrc_pages_asset_external_findpart",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L19",
-      "weight": 1.0
-    },
-    {
-      "source": "src_main_web_static_websrc_pages_asset_external",
-      "target": "src_main_web_static_websrc_pages_asset_external_handleexternalsearchbeforerequest",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L201",
-      "weight": 1.0
-    },
-    {
-      "source": "src_main_web_static_websrc_pages_asset_external",
-      "target": "src_main_web_static_websrc_pages_asset_external_handleexternalsearchafterrequest",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L215",
-      "weight": 1.0
-    },
-    {
-      "source": "src_main_web_static_websrc_pages_asset_external",
-      "target": "src_main_web_static_websrc_pages_asset_external_rendertemplate",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L24",
-      "weight": 1.0
-    },
-    {
-      "source": "src_main_web_static_websrc_pages_asset_external",
-      "target": "src_main_web_static_websrc_pages_asset_external_addexternalasset",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L258",
-      "weight": 1.0
-    },
-    {
-      "source": "src_main_web_static_websrc_pages_asset_external",
-      "target": "src_main_web_static_websrc_pages_asset_external_removeexternalasset",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L285",
-      "weight": 1.0
-    },
-    {
-      "source": "src_main_web_static_websrc_pages_asset_external",
-      "target": "src_main_web_static_websrc_pages_asset_external_persistedrecord",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L30",
-      "weight": 1.0
-    },
-    {
-      "source": "src_main_web_static_websrc_pages_asset_external",
-      "target": "src_main_web_static_websrc_pages_asset_external_moveexternalasset",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L301",
-      "weight": 1.0
-    },
-    {
-      "source": "src_main_web_static_websrc_pages_asset_external",
-      "target": "src_main_web_static_websrc_pages_asset_external_updatepayload",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L35",
-      "weight": 1.0
-    },
-    {
-      "source": "src_main_web_static_websrc_pages_asset_external",
-      "target": "src_main_web_static_websrc_pages_asset_external_renderrecords",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
+      "source_file": "src/main/web-static/websrc/pages/asset.ts",
       "source_location": "L56",
       "weight": 1.0
     },
     {
-      "source": "src_main_web_static_websrc_pages_asset_external",
-      "target": "src_main_web_static_websrc_pages_asset_external_showmessage",
+      "source": "src_main_web_static_websrc_pages_asset",
+      "target": "src_main_web_static_websrc_pages_asset_normalizeasset",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L66",
+      "source_file": "src/main/web-static/websrc/pages/asset.ts",
+      "source_location": "L73",
       "weight": 1.0
     },
     {
@@ -78362,7 +78142,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L78",
+      "source_location": "L104",
       "weight": 1.0
     },
     {
@@ -78373,7 +78153,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L86",
+      "source_location": "L112",
       "weight": 1.0
     },
     {
@@ -78384,7 +78164,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L91",
+      "source_location": "L120",
       "weight": 1.0
     },
     {
@@ -78395,7 +78175,227 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L96",
+      "source_location": "L128",
+      "weight": 1.0
+    },
+    {
+      "source": "src_main_web_static_websrc_pages_asset_external",
+      "target": "src_main_web_static_websrc_pages_asset_external_fillemptyassetfields",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
+      "source_location": "L150",
+      "weight": 1.0
+    },
+    {
+      "source": "src_main_web_static_websrc_pages_asset_external",
+      "target": "src_main_web_static_websrc_pages_asset_external_draft",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "src_main_web_static_websrc_pages_asset_external",
+      "target": "src_main_web_static_websrc_pages_asset_external_isexternalasset",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
+      "source_location": "L167",
+      "weight": 1.0
+    },
+    {
+      "source": "src_main_web_static_websrc_pages_asset_external",
+      "target": "src_main_web_static_websrc_pages_asset_external_hasvalidexternaldata",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
+      "source_location": "L188",
+      "weight": 1.0
+    },
+    {
+      "source": "src_main_web_static_websrc_pages_asset_external",
+      "target": "src_main_web_static_websrc_pages_asset_external_initializeexternaldraft",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
+      "source_location": "L203",
+      "weight": 1.0
+    },
+    {
+      "source": "src_main_web_static_websrc_pages_asset_external",
+      "target": "src_main_web_static_websrc_pages_asset_external_searchevent",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "src_main_web_static_websrc_pages_asset_external",
+      "target": "src_main_web_static_websrc_pages_asset_external_searchexternalassets",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
+      "source_location": "L223",
+      "weight": 1.0
+    },
+    {
+      "source": "src_main_web_static_websrc_pages_asset_external",
+      "target": "src_main_web_static_websrc_pages_asset_external_drafts",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "src_main_web_static_websrc_pages_asset_external",
+      "target": "src_main_web_static_websrc_pages_asset_external_requestsequences",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "src_main_web_static_websrc_pages_asset_external",
+      "target": "src_main_web_static_websrc_pages_asset_external_handleexternalsearchbeforerequest",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
+      "source_location": "L257",
+      "weight": 1.0
+    },
+    {
+      "source": "src_main_web_static_websrc_pages_asset_external",
+      "target": "src_main_web_static_websrc_pages_asset_external_handleexternalsearchafterrequest",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
+      "source_location": "L275",
+      "weight": 1.0
+    },
+    {
+      "source": "src_main_web_static_websrc_pages_asset_external",
+      "target": "src_main_web_static_websrc_pages_asset_external_findpart",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "src_main_web_static_websrc_pages_asset_external",
+      "target": "src_main_web_static_websrc_pages_asset_external_addexternalasset",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
+      "source_location": "L322",
+      "weight": 1.0
+    },
+    {
+      "source": "src_main_web_static_websrc_pages_asset_external",
+      "target": "src_main_web_static_websrc_pages_asset_external_removeexternalasset",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
+      "source_location": "L353",
+      "weight": 1.0
+    },
+    {
+      "source": "src_main_web_static_websrc_pages_asset_external",
+      "target": "src_main_web_static_websrc_pages_asset_external_moveexternalasset",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
+      "source_location": "L373",
+      "weight": 1.0
+    },
+    {
+      "source": "src_main_web_static_websrc_pages_asset_external",
+      "target": "src_main_web_static_websrc_pages_asset_external_rendertemplate",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
+      "source_location": "L38",
+      "weight": 1.0
+    },
+    {
+      "source": "src_main_web_static_websrc_pages_asset_external",
+      "target": "src_main_web_static_websrc_pages_asset_external_persistedrecord",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
+      "source_location": "L47",
+      "weight": 1.0
+    },
+    {
+      "source": "src_main_web_static_websrc_pages_asset_external",
+      "target": "src_main_web_static_websrc_pages_asset_external_updatepayload",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
+      "source_location": "L55",
+      "weight": 1.0
+    },
+    {
+      "source": "src_main_web_static_websrc_pages_asset_external",
+      "target": "src_main_web_static_websrc_pages_asset_external_renderrecords",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
+      "source_location": "L79",
+      "weight": 1.0
+    },
+    {
+      "source": "src_main_web_static_websrc_pages_asset_external",
+      "target": "src_main_web_static_websrc_pages_asset_external_showmessage",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
+      "source_location": "L92",
       "weight": 1.0
     },
     {
@@ -79253,7 +79253,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/asset-management.e2e.spec.ts",
-      "source_location": "L33",
+      "source_location": "L37",
       "weight": 1.0
     },
     {
@@ -79264,7 +79264,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/asset-management.e2e.spec.ts",
-      "source_location": "L40",
+      "source_location": "L48",
       "weight": 1.0
     },
     {
@@ -84512,7 +84512,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L234",
+      "source_location": "L294",
       "weight": 1.0
     },
     {
@@ -84524,7 +84524,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L147",
+      "source_location": "L191",
       "weight": 1.0
     },
     {
@@ -84536,7 +84536,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L157",
+      "source_location": "L205",
       "weight": 1.0
     },
     {
@@ -84548,7 +84548,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "src/main/web-static/websrc/pages/asset-external.ts",
-      "source_location": "L51",
+      "source_location": "L71",
       "weight": 1.0
     },
     {
@@ -84596,7 +84596,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "src/test/e2e/tests/asset-management.e2e.spec.ts",
-      "source_location": "L103",
+      "source_location": "L111",
       "weight": 1.0
     },
     {
@@ -84608,7 +84608,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "src/test/e2e/tests/asset-management.e2e.spec.ts",
-      "source_location": "L59",
+      "source_location": "L67",
       "weight": 1.0
     },
     {
@@ -84620,7 +84620,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "src/test/e2e/tests/asset-management.e2e.spec.ts",
-      "source_location": "L71",
+      "source_location": "L79",
       "weight": 1.0
     },
     {
@@ -87296,7 +87296,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/main/web-static/websrc/application/index.ts",
-      "source_location": "L26",
+      "source_location": "L37",
       "weight": 1.0
     },
     {
@@ -87524,7 +87524,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L188",
+      "source_location": "L224",
       "weight": 1.0
     },
     {
@@ -87536,7 +87536,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L189",
+      "source_location": "L225",
       "weight": 1.0
     },
     {
@@ -87548,7 +87548,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L190",
+      "source_location": "L226",
       "weight": 1.0
     },
     {
@@ -87560,7 +87560,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L191",
+      "source_location": "L227",
       "weight": 1.0
     },
     {
@@ -87572,7 +87572,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L192",
+      "source_location": "L228",
       "weight": 1.0
     },
     {
@@ -87584,7 +87584,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/main/web-static/websrc/pages/asset.ts",
-      "source_location": "L193",
+      "source_location": "L229",
       "weight": 1.0
     },
     {
@@ -90475,5 +90475,5 @@
       "source_file": "src/main/docker/docker-compose-e2e.yml"
     }
   ],
-  "built_at_commit": "3dc9e0dfc06d4be38b530135d537693a3a941d83"
+  "built_at_commit": "9473b24d4bef73f8559fe7be3187dadd900ffcc3"
 }

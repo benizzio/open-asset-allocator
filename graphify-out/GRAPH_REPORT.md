@@ -1,9 +1,9 @@
-# Graph Report - open-asset-allocator  (2026-09-24)
+# Graph Report - open-asset-allocator  (2026-09-26)
 
 ## Corpus Check
-- 288 files · ~303,092 words
+- 288 files · ~303,379 words
 - Verdict: corpus is large enough that graph structure adds value.
-- Unclassified: 24 file(s) not represented in the graph (top: (none) 16, .csv 2, .dbm 1)
+- Unclassified: 25 file(s) not represented in the graph (top: (none) 17, .csv 2, .dbm 1)
 
 ## Summary
 - 2305 nodes · 5347 edges · 158 communities (113 shown, 45 thin omitted)
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `3dc9e0df`
+- Built from commit: `9473b24d`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -688,7 +688,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `Asset` connect `PropagateAsAppErrorWithNewMessage` to `allocation_plan_domain_service.go`, `AssetDomService`, `BuildCleanupFunctionBuilder`, `asset_rest_model.go`, `AllocationPlan`, `allocation_plan_rest_model.go`, `Adapter`, `PortfolioAllocation`?**
   _High betweenness centrality (0.010) - this node is a cross-community bridge._
 - **Why does `NewOrderedMapIterator()` connect `NewOrderedMapIterator` to `context.Context`?**
-  _High betweenness centrality (0.008) - this node is a cross-community bridge._
+  _High betweenness centrality (0.009) - this node is a cross-community bridge._
 - **Are the 73 inferred relationships involving `deferCloseResponseBody()` (e.g. with `TestGetAllocationPlans()` and `TestPostAllocationPlanForInsertion()`) actually correct?**
   _`deferCloseResponseBody()` has 73 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `build-dev.sh script`, `POSTGRES_DEV_DATA_DIR`, `build.sh script` to the rest of the system?**

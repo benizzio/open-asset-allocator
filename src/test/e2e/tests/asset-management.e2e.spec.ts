@@ -5,7 +5,7 @@
  * flows. The update scenario verifies that deferred external-data editing does not clear the
  * existing persisted payload.
  *
- * Authored by: OpenCode
+ * @author OpenCode
  */
 import type { Locator, Page, Response } from '@playwright/test';
 import { expect, test } from '../support/fixtures';
@@ -30,6 +30,10 @@ const PERSISTED_EXTERNAL_DATA = {
   ],
 } as const;
 
+/**
+ * Represents the asset shape returned by the API in asset-management scenarios.
+ * @author OpenCode
+ */
 type Asset = {
   id: number;
   name: string;
@@ -37,6 +41,10 @@ type Asset = {
   externalData?: typeof PERSISTED_EXTERNAL_DATA;
 };
 
+/**
+ * Represents the asset columns read directly from PostgreSQL.
+ * @author OpenCode
+ */
 type AssetRow = {
   external_data: string | null;
   id: number;
@@ -267,14 +275,20 @@ test.describe('asset management', () => {
   });
 });
 
-/** Navigates within the mounted SPA to exercise route handlers without reloading the document. Authored by: OpenCode. */
+/**
+ * Navigates within the mounted SPA to exercise route handlers without reloading the document.
+ * @author OpenCode
+ */
 async function navigateWithinApp(page: Page, path: string): Promise<void> {
   await page.evaluate((destination) => {
     (window as unknown as { navigateTo: (path: string) => void }).navigateTo(destination);
   }, path);
 }
 
-/** Seeds one asset directly in PostgreSQL for a browser scenario. */
+/**
+ * Seeds one asset directly in PostgreSQL for a browser scenario.
+ * @author OpenCode
+ */
 async function seedAsset(
   database: E2eDatabase,
   ticker: string,
@@ -292,7 +306,10 @@ async function seedAsset(
   return rows[0];
 }
 
-/** Asserts the list route, basic columns, and expected asset or empty state. */
+/**
+ * Asserts the list route, basic columns, and expected asset or empty state.
+ * @author OpenCode
+ */
 async function expectAssetTable(page: Page, asset?: Asset): Promise<void> {
   await expect(page).toHaveURL(/\/asset$/);
   await expect(page.getByRole('link', { name: 'Assets', exact: true })).toBeVisible();
@@ -308,7 +325,10 @@ async function expectAssetTable(page: Page, asset?: Asset): Promise<void> {
   }
 }
 
-/** Asserts the shared form is configured for creating an asset. */
+/**
+ * Asserts the shared form is configured for creating an asset.
+ * @author OpenCode
+ */
 async function expectNewAssetForm(page: Page): Promise<void> {
   await expect(page).toHaveURL(/\/asset\/new$/);
   await expect(page.getByRole('heading', { name: 'New asset', exact: true })).toBeVisible();
@@ -319,7 +339,10 @@ async function expectNewAssetForm(page: Page): Promise<void> {
   await expectIconOnlyButton(page.getByRole('button', { name: 'Create', exact: true }), 'plus-circle');
 }
 
-/** Asserts the edit route contains the expected basic asset fields. */
+/**
+ * Asserts the edit route contains the expected basic asset fields.
+ * @author OpenCode
+ */
 async function expectAssetEditor(page: Page, asset: Asset): Promise<void> {
   await expect(page).toHaveURL(`/asset/${asset.id}`);
   await expect(page.getByRole('heading', { name: 'Edit asset', exact: true })).toBeVisible();
@@ -330,7 +353,10 @@ async function expectAssetEditor(page: Page, asset: Asset): Promise<void> {
   await expectIconOnlyButton(page.getByRole('button', { name: 'Save', exact: true }), 'save-fill');
 }
 
-/** Verifies an action button has an accessible label and icon without visible text. Authored by: OpenCode. */
+/**
+ * Verifies an action button has an accessible label and icon without visible text.
+ * @author OpenCode
+ */
 async function expectIconOnlyButton(button: Locator, iconName: string): Promise<void> {
   await expect(button).toBeVisible();
   await expect(button).toHaveText('');
@@ -338,7 +364,10 @@ async function expectIconOnlyButton(button: Locator, iconName: string): Promise<
   await expect(button.locator(`span.bi-${iconName}`)).toHaveAttribute('aria-hidden', 'true');
 }
 
-/** Asserts one asset's complete persisted state directly in PostgreSQL. */
+/**
+ * Asserts one asset's complete persisted state directly in PostgreSQL.
+ * @author OpenCode
+ */
 async function expectPersistedAsset(
   database: E2eDatabase,
   asset: Asset,
@@ -360,22 +389,34 @@ async function expectPersistedAsset(
   expect(JSON.parse(rows[0].external_data ?? 'null')).toEqual(externalData);
 }
 
-/** Matches the same-origin request that loads the asset collection. */
+/**
+ * Matches the same-origin request that loads the asset collection.
+ * @author OpenCode
+ */
 function isAssetCollectionRequest(response: Response): boolean {
   return response.request().method() === 'GET' && new URL(response.url()).pathname === '/api/asset';
 }
 
-/** Matches the same-origin request that creates one asset. */
+/**
+ * Matches the same-origin request that creates one asset.
+ * @author OpenCode
+ */
 function isAssetCreationRequest(response: Response): boolean {
   return response.request().method() === 'POST' && new URL(response.url()).pathname === '/api/asset';
 }
 
-/** Matches the same-origin request that updates one asset. */
+/**
+ * Matches the same-origin request that updates one asset.
+ * @author OpenCode
+ */
 function isAssetUpdateRequest(response: Response): boolean {
   return response.request().method() === 'PUT' && new URL(response.url()).pathname === '/api/asset';
 }
 
-/** Matches an asset detail request, optionally constrained to one identifier. */
+/**
+ * Matches an asset detail request, optionally constrained to one identifier.
+ * @author OpenCode
+ */
 function isAssetDetailRequest(response: Response, identifier: number | undefined): boolean {
   const request = response.request();
   const pathname = new URL(response.url()).pathname;

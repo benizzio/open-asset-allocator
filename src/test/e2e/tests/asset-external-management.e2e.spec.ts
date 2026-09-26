@@ -2,7 +2,7 @@
  * Covers scenarios 10–13 for external-asset search and ordered draft persistence in both asset forms.
  * Provider responses are mocked while asset writes are checked directly in PostgreSQL.
  *
- * Authored by: OpenCode
+ * @author OpenCode
  */
 import { expect, test } from '../support/fixtures';
 import type { Page } from '@playwright/test';
@@ -249,7 +249,10 @@ test('scenario 13: fills only empty asset fields when an external result is adde
   expect(persisted).toEqual([{ ticker: 'AUTOFILL-EDIT', name: 'Autofill Edit', external_data: null }]);
 });
 
-/** Searches and adds one mocked provider result. Authored by: OpenCode. */
+/**
+ * Searches for and adds one mocked provider result to the asset form.
+ * @author OpenCode
+ */
 async function searchAndAdd(page: Page, ticker: string, exchangeId: string): Promise<void> {
   const query = page.getByRole('searchbox', { name: 'Search external assets' });
 
@@ -260,7 +263,10 @@ async function searchAndAdd(page: Page, ticker: string, exchangeId: string): Pro
   }).click();
 }
 
-/** Asserts exactly the identifiers and priority order stored by the asset write. Authored by: OpenCode. */
+/**
+ * Asserts the identifiers and priority order stored by the asset write.
+ * @author OpenCode
+ */
 async function expectPersistedOrder(database: E2eDatabase, assetId: number, expected: typeof FIRST[] | null) {
   const rows = await database.query<{ external_data: string | null }>(
     'SELECT external_data::text AS external_data FROM public.asset WHERE id = $1', [assetId],

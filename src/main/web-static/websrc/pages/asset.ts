@@ -4,7 +4,7 @@
  * HTMX handles HTTP requests and each form declares its own operation in HTML. This controller
  * renders the create or edit template, checks API response identities, and navigates between views.
  *
- * Authored by: OpenCode
+ * @author OpenCode
  */
 import htmx from "htmx.org";
 import * as Handlebars from "handlebars";
@@ -24,7 +24,15 @@ import {
     searchExternalAssets,
 } from "./asset-external";
 
+/**
+ * Carries an HTMX request completion for asset list and form handling.
+ * @author OpenCode
+ */
 type AssetRequestEvent = CustomEvent<AfterRequestEventDetail>;
+/**
+ * Carries an HTMX swap decision for asset detail response validation.
+ * @author OpenCode
+ */
 type AssetBeforeSwapEvent = CustomEvent<BeforeSwapEventDetail>;
 
 const ASSETS_PATH = "/asset";
@@ -33,7 +41,7 @@ const ASSET_IDENTIFIER_PATH_PATTERN = /^\/asset\/([^/]+)\/?$/;
 
 /**
  * Limits mutation handling to the form's own asset API response, excluding nested search GETs.
- * Authored by: OpenCode.
+ * @author OpenCode
  */
 function isAssetFormResponse(event: AssetRequestEvent, method: "post" | "put"): boolean {
     return event.detail.requestConfig.elt === event.currentTarget
@@ -41,7 +49,10 @@ function isAssetFormResponse(event: AssetRequestEvent, method: "post" | "put"): 
         && new URL(event.detail.xhr.responseURL).pathname === "/api/asset";
 }
 
-/** Parses an unknown response value as JSON without propagating malformed-response errors. Authored by: OpenCode. */
+/**
+ * Parses an unknown response value as JSON without propagating malformed-response errors.
+ * @author OpenCode
+ */
 function parseJSON(value: unknown): unknown | null {
 
     if(typeof value !== "string") {
@@ -55,7 +66,10 @@ function parseJSON(value: unknown): unknown | null {
     }
 }
 
-/** Validates and normalizes an API response into the asset shape used by this page. Authored by: OpenCode. */
+/**
+ * Validates and normalizes an API response into the asset shape used by this page.
+ * @author OpenCode
+ */
 function normalizeAsset(value: unknown): Asset | null {
 
     if(typeof value !== "object" || value === null) {
@@ -83,14 +97,20 @@ function normalizeAsset(value: unknown): Asset | null {
     };
 }
 
-/** Extracts and decodes the asset identifier from the current detail route. Authored by: OpenCode. */
+/**
+ * Extracts and decodes the asset identifier from the current detail route.
+ * @author OpenCode
+ */
 function getAssetIdentifierFromLocation(): string | null {
 
     const match = globalThis.location.pathname.match(ASSET_IDENTIFIER_PATH_PATTERN);
     return match ? decodeURIComponent(match[1]) : null;
 }
 
-/** Renders the operation-specific form and binds HTMX to the inserted form. Authored by: OpenCode. */
+/**
+ * Renders the operation-specific form and binds HTMX to the inserted form.
+ * @author OpenCode
+ */
 function renderAssetForm(
     templateId: "asset-create-form" | "asset-edit-form",
     contentElement: HTMLElement,
@@ -113,17 +133,26 @@ function renderAssetForm(
     globalThis.htmx.process(contentElement);
 }
 
-/** Shows a success toast through the application notification component. Authored by: OpenCode. */
+/**
+ * Shows a success toast through the application notification component.
+ * @author OpenCode
+ */
 function notifySuccess(title: string, content: string): void {
     notifications.notify({ title, content, type: NotificationType.SUCCESS });
 }
 
-/** Reports an invalid successful API response through the notification component. Authored by: OpenCode. */
+/**
+ * Reports an invalid successful API response through the notification component.
+ * @author OpenCode
+ */
 function notifyUnexpectedResponse(message: string): void {
     notifications.notifyError(new Error(message));
 }
 
-/** Replaces the collection target with a retryable load error. Authored by: OpenCode. */
+/**
+ * Replaces the collection target with a retryable load error.
+ * @author OpenCode
+ */
 function renderListError(target: HTMLElement): void {
 
     target.innerHTML = `
@@ -141,7 +170,10 @@ function renderListError(target: HTMLElement): void {
     `;
 }
 
-/** Displays a recoverable detail-load error without destroying the edit route bindings. Authored by: OpenCode. */
+/**
+ * Displays a recoverable detail-load error without destroying the edit route bindings.
+ * @author OpenCode
+ */
 function renderAssetLoadError(): void {
 
     const contentElement = document.querySelector("#asset-edit-content") as HTMLElement | null;
@@ -178,10 +210,14 @@ function renderAssetLoadError(): void {
 /**
  * Provides browser behavior for the asset list and operation-specific forms.
  *
- * Use the exported instance through `globalThis.assetPage` from HTMX attributes. For example,
- * `assetPage.renderCreateForm(view)` renders a new create form when its route is entered.
+ * Use the exported instance through `globalThis.assetPage` from HTMX attributes.
  *
- * Authored by: OpenCode
+ * @example
+ * ```ts
+ * assetPage.renderCreateForm(view);
+ * ```
+ *
+ * @author OpenCode
  */
 const AssetPage = {
 
@@ -192,7 +228,15 @@ const AssetPage = {
     removeExternalAsset,
     moveExternalAsset,
 
-    /** Runs provider search on Enter without submitting the parent asset form. Authored by: OpenCode. */
+    /**
+     * Runs provider search on Enter without submitting the parent asset form.
+     *
+     * @example
+     * ```ts
+     * assetPage.handleExternalSearchKeydown(event);
+     * ```
+     * @author OpenCode
+     */
     handleExternalSearchKeydown(event: KeyboardEvent): void {
         if(event.key === "Enter") {
             event.preventDefault();
@@ -207,9 +251,12 @@ const AssetPage = {
     /**
      * Navigates to the asset creation form.
      *
-     * Example: `<button onclick="assetPage.navigateToNewAsset()">New asset</button>`.
+     * @example
+     * ```html
+     * <button onclick="assetPage.navigateToNewAsset()">New asset</button>
+     * ```
      *
-     * Authored by: OpenCode
+     * @author OpenCode
      */
     navigateToNewAsset(): void {
         Router.navigateTo(NEW_ASSET_PATH);
@@ -218,9 +265,12 @@ const AssetPage = {
     /**
      * Navigates to one asset and loads it into the edit form.
      *
-     * Example: `assetPage.navigateToAsset("42")` opens `/asset/42`.
+     * @example
+     * ```ts
+     * assetPage.navigateToAsset("42");
+     * ```
      *
-     * Authored by: OpenCode
+     * @author OpenCode
      */
     navigateToAsset(assetId: string): void {
         Router.navigateTo(`/asset/${ encodeURIComponent(assetId) }`);
@@ -229,9 +279,12 @@ const AssetPage = {
     /**
      * Activates asset-row navigation from Enter or Space without duplicating pointer navigation.
      *
-     * Example: `assetPage.handleAssetNavigationKeypress(event, "42")` from a table row.
+     * @example
+     * ```ts
+     * assetPage.handleAssetNavigationKeypress(event, "42");
+     * ```
      *
-     * Authored by: OpenCode
+     * @author OpenCode
      */
     handleAssetNavigationKeypress(event: KeyboardEvent, assetId: string): void {
         if(event.key === "Enter" || event.key === " ") {
@@ -242,9 +295,12 @@ const AssetPage = {
     /**
      * Navigates to the asset table, whose route binding reloads its data.
      *
-     * Example: `<button type="button" onclick="assetPage.navigateToAssets()">Back</button>`.
+     * @example
+     * ```html
+     * <button type="button" onclick="assetPage.navigateToAssets()">Back</button>
+     * ```
      *
-     * Authored by: OpenCode
+     * @author OpenCode
      */
     navigateToAssets(): void {
         Router.navigateTo(ASSETS_PATH);
@@ -253,9 +309,12 @@ const AssetPage = {
     /**
      * Reissues the asset collection request from an error-state retry control.
      *
-     * Example: `<button onclick="assetPage.reloadAssets()">Try again</button>`.
+     * @example
+     * ```html
+     * <button onclick="assetPage.reloadAssets()">Try again</button>
+     * ```
      *
-     * Authored by: OpenCode
+     * @author OpenCode
      */
     reloadAssets(): void {
         const assetsElement = document.querySelector("#assets") as HTMLElement | null;
@@ -268,9 +327,12 @@ const AssetPage = {
     /**
      * Leaves successful list rendering untouched and renders a stable list error on failure.
      *
-     * Example: configure on the collection target's `htmx:afterRequest` event.
+     * @example
+     * ```html
+     * <div hx-on::after-request="assetPage.handleAssetListAfterRequest(event)"></div>
+     * ```
      *
-     * Authored by: OpenCode
+     * @author OpenCode
      */
     handleAssetListAfterRequest(event: AssetRequestEvent): void {
         if(!event.detail.successful) {
@@ -281,9 +343,12 @@ const AssetPage = {
     /**
      * Renders a blank creation form each time the create route is entered.
      *
-     * Example: invoke from the create view's `show-create-form` route event.
+     * @example
+     * ```ts
+     * assetPage.renderCreateForm(view);
+     * ```
      *
-     * Authored by: OpenCode
+     * @author OpenCode
      */
     renderCreateForm(view: HTMLElement): void {
         const contentElement = view.querySelector("#asset-create-content") as HTMLElement | null;
@@ -296,9 +361,12 @@ const AssetPage = {
     /**
      * Resets the edit view to its loading placeholder before the route-owned GET begins.
      *
-     * Example: invoke from the edit view's `load-asset` route event.
+     * @example
+     * ```ts
+     * assetPage.prepareAssetEditView(view);
+     * ```
      *
-     * Authored by: OpenCode
+     * @author OpenCode
      */
     prepareAssetEditView(view: HTMLElement): void {
         const contentElement = view.querySelector("#asset-edit-content") as HTMLElement | null;
@@ -322,9 +390,12 @@ const AssetPage = {
     /**
      * Rejects an asset response whose ID does not match the requested edit route before HTMX renders it.
      *
-     * Example: configure on the edit view's `htmx:beforeSwap` event.
+     * @example
+     * ```html
+     * <div hx-on::before-swap="assetPage.validateAssetBeforeSwap(event)"></div>
+     * ```
      *
-     * Authored by: OpenCode
+     * @author OpenCode
      */
     validateAssetBeforeSwap(event: AssetBeforeSwapEvent): void {
         if(event.detail.isError || event.detail.requestConfig.verb !== "get") {
@@ -353,9 +424,12 @@ const AssetPage = {
     /**
      * Hides the edit loading placeholder on success or displays a retryable load error on failure.
      *
-     * Example: configure on the edit view's `htmx:afterRequest` event.
+     * @example
+     * ```html
+     * <div hx-on::after-request="assetPage.handleAssetLoadAfterRequest(event)"></div>
+     * ```
      *
-     * Authored by: OpenCode
+     * @author OpenCode
      */
     handleAssetLoadAfterRequest(event: AssetRequestEvent): void {
         const requestedIdentifier = getAssetIdentifierFromLocation();
@@ -386,9 +460,12 @@ const AssetPage = {
      * Handles a successful POST response by navigating to the generated asset's edit route.
      * A failed request leaves the creation form and its input values in place.
      *
-     * Example: configure on the creation form's `htmx:afterRequest` event.
+     * @example
+     * ```html
+     * <form hx-on::after-request="assetPage.handleCreateAfterRequest(event)"></form>
+     * ```
      *
-     * Authored by: OpenCode
+     * @author OpenCode
      */
     handleCreateAfterRequest(event: AssetRequestEvent): void {
         if(!isAssetFormResponse(event, "post") || !event.detail.successful) {
@@ -410,9 +487,12 @@ const AssetPage = {
      * Validates a successful PUT response and refreshes the saved values on the edit route.
      * A failed request leaves the edit form and its input values in place.
      *
-     * Example: configure on the edit form's `htmx:afterRequest` event.
+     * @example
+     * ```html
+     * <form hx-on::after-request="assetPage.handleSaveAfterRequest(event)"></form>
+     * ```
      *
-     * Authored by: OpenCode
+     * @author OpenCode
      */
     handleSaveAfterRequest(event: AssetRequestEvent): void {
         if(!isAssetFormResponse(event, "put") || !event.detail.successful) {
