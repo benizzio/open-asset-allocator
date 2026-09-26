@@ -1,2 +1,8 @@
+# Co-authored by: GPT-6 Sol and Igor Benicio de Mesquita
 graphify-out/** linguist-generated=true
+src/main/web-static/graphify-out/** linguist-generated=true
+src/main/go/graphify-out/** linguist-generated=true
+graphify-out/.graphify_build.json linguist-generated=false
+src/main/web-static/graphify-out/.graphify_build.json linguist-generated=false
+src/main/go/graphify-out/.graphify_build.json linguist-generated=false
 .agents/skills/graphify/** linguist-generated=true

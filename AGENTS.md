@@ -157,19 +157,57 @@ consideration
 
 ## graphify
 
-This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
+This monorepo has three separate Graphify knowledge graphs. Choose by the task's source area, not by the agent's working
+directory. The root graph covers only the remainder of the repository, not the whole application.
+
+| Scope | Source area | Graph (relative to the repository root) |
+| --- | --- | --- |
+| front-end | `src/main/web-static/` | `src/main/web-static/graphify-out/graph.json` |
+| back-end | `src/main/go/` | `src/main/go/graphify-out/graph.json` |
+| remainder | everything outside those two trees, including `src/test/e2e/` and migrations | `graphify-out/graph.json` |
 
 When the user types `/graphify`, use the installed graphify skill or instructions before doing anything else.
 
 Rules:
 
-- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use
-  `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a
-  scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
-- Dirty graphify-out/ files are expected after hooks or incremental updates; dirty graph files are not a reason to skip
-  graphify. Only skip graphify if the task is about stale or incorrect graph output, or the user explicitly says not to
-  use it.
-- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
-- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough
-  context.
-- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
+- From the repository root, query the chosen graph explicitly. For example:
+  `graphify query "asset management" --graph src/main/web-static/graphify-out/graph.json --budget 1200`.
+  Use `graphify explain "Asset" --graph src/main/web-static/graphify-out/graph.json` for a specific symbol, or
+  `graphify path "asset_controller.go" "Asset" --graph src/main/go/graphify-out/graph.json` for a relationship.
+- Graph paths can also be made absolute when running from another directory. For an unknown area, first locate its
+  source files, then select a graph. Never treat the remainder graph as a fallback for front-end or back-end queries.
+  If the selected graph is missing or stale, say so and inspect the source; do not silently switch corpora.
+- For cross-module questions, query the relevant graphs independently and verify the boundary against the source.
+  Graphify does not guarantee that a merged graph represents UI-to-HTTP links. After broad discovery, use precise
+  symbols or `path/to/file::Symbol` with `explain`/`path`; use `--context` only for the requested relation, not for
+  directory filtering.
+- Dirty generated graphs can result from updates; dirtiness alone is not a reason to skip a graph. If a scope has a
+  `graphify-out/wiki/index.md`, use it for broad navigation. Read its `GRAPH_REPORT.md` for architecture review or
+  when query/path/explain do not suffice. Store query memory/reflections under that scope's `graphify-out/`, never
+  under an unrelated graph.
+- After changing code, use Graphify's native AST update for the affected scopes, from the repository root:
+  `graphify update "$PWD/src/main/web-static"` (frontend), `graphify update "$PWD/src/main/go"` (backend), or
+  `graphify update .` (remainder). Use **absolute paths** for module scan roots: with Graphify 0.9.64, updating via
+  a repo-relative module path changed node source paths and lost existing semantic nodes on a subsequent update.
+  For changes spanning scopes, run each affected command. The root `graphify update .` is safe for the **remainder**
+  because its tracked `graphify-out/.graphify_build.json` excludes both modules; it does not update their graphs.
+  With the SQL extra installed, 0.9.64 can recreate disconnected Flyway SQL stubs on every root update. Run
+  `src/ext/graphify/prune-sql-stubs.py` with Graphify's Python interpreter, then
+  `graphify cluster-only "$PWD" --no-label` and `python3 src/test/graphify-graphs.py`. The cleanup refuses unknown
+  disconnected nodes.
+  AST updates preserve existing semantic nodes but do not refresh HTML/HTMX, docs, or images.
+- For changed semantic sources, use `graphify extract <absolute-scope-path>` with a configured Graphify backend,
+  followed by `graphify cluster-only <absolute-scope-path> --no-label` to refresh the report and visualization. For
+  OpenCode-assisted extraction in a module, start the skill inside that module and keep its output there. Validate
+  each semantic chunk's source membership, relationship schema, and provenance before merging. When merging a
+  host-agent chunk, set `_origin` to `semantic` and `source_location` to null: an agent's `L1-L3` without an origin
+  is interpreted as AST by Graphify 0.9.64 and can leave stale semantic nodes behind. For the remainder, enumerate
+  allowed files using the tracked root excludes before dispatching host-agent extraction. Do not use the skill's
+  root-wide detection/rebuild or `/graphify --update` for the remainder: those instructions do not read its
+  `.graphify_build.json` exclusions. Use native scoped Graphify APIs to merge reviewed chunks and regenerate outputs.
+- The three tracked `.graphify_build.json` files define corpus boundaries for native Graphify commands. Keep the
+  installed Graphify version compatible with the vendored skill (`.agents/skills/graphify/.graphify_version`).
+  SQL migration content requires the optional `graphifyy[sql]` extra. The current remainder graph was rebuilt with
+  that extra, but a fresh checkout needs it for future SQL re-extraction. The 0.9.64 parser does not identify every
+  statement in every migration; seven parser gaps have reviewed host-agent semantic supplements. See
+  `docs/graphify-scopes.md` for maintenance, validation, and coverage limits.
