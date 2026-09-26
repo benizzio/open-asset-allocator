@@ -2,8 +2,7 @@
  * Covers scenarios 8, 8.1, and 9 for asset management through browser, API, and PostgreSQL boundaries.
  *
  * Assets are seeded directly in PostgreSQL so each scenario remains independent from other API
- * flows. The update scenario verifies that deferred external-data editing does not clear the
- * existing persisted payload.
+ * flows. The write scenarios verify that forms submit and preserve their complete external data.
  *
  * @author OpenCode
  */
@@ -87,6 +86,7 @@ test.describe('asset management', () => {
     expect(createResponse.status()).toBe(201);
     expect(createResponse.request().headers()['content-type']).toContain('application/json');
     expect(createResponse.request().postDataJSON()).toEqual({
+      externalData: null,
       name: CREATED_NAME,
       ticker: CREATED_TICKER,
     });
@@ -119,7 +119,7 @@ test.describe('asset management', () => {
       ticker: UPDATED_TICKER,
     });
     expect(Number(updateRequest.id)).toBe(createdAsset.id);
-    expect(updateRequest).not.toHaveProperty('externalData');
+    expect(updateRequest.externalData).toBeNull();
     await expectAssetEditor(page, { id: createdAsset.id, name: UPDATED_NAME, ticker: UPDATED_TICKER });
 
     await page.getByRole('textbox', { name: 'Ticker' }).fill(DRAFT_TICKER);
@@ -221,7 +221,7 @@ test.describe('asset management', () => {
     await expectPersistedAsset(database, otherAsset, null);
   });
 
-  test('scenario 9: preserves deferred external data when saving basic asset fields', async ({ database, page }) => {
+  test('scenario 9: submits and preserves loaded external data when saving asset fields', async ({ database, page }) => {
     const asset = await seedAsset(database, ORIGINAL_TICKER, ORIGINAL_NAME, PERSISTED_EXTERNAL_DATA);
     await seedAsset(database, CREATED_TICKER, CREATED_NAME);
 

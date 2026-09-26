@@ -13,7 +13,7 @@ import { NotificationType } from "../infra/infra-types";
  * Holds the ordered provider records and current search state for one asset form.
  * @author OpenCode
  */
-type Draft = { records: ExternalAsset[]; results: ExternalAsset[]; sequence: number; cleared: boolean; };
+type Draft = { records: ExternalAsset[]; results: ExternalAsset[]; sequence: number; };
 /**
  * Carries the HTMX request and outcome used by provider-search event handlers.
  * @author OpenCode
@@ -53,21 +53,6 @@ function persistedRecord(record: ExternalAsset): ExternalAsset {
  * @author OpenCode
  */
 function updatePayload(form: HTMLFormElement, draft: Draft): void {
-    let payload = form.querySelector<HTMLInputElement>("input[name=\"externalData\"]");
-
-    if(draft.records.length === 0 && !draft.cleared) {
-        payload?.remove();
-        form.removeAttribute("hx-vals");
-        return;
-    }
-
-    if(!payload) {
-        payload = document.createElement("input");
-        payload.type = "hidden";
-        payload.name = "externalData";
-        form.append(payload);
-    }
-
     const externalData = draft.records.length ? { data: draft.records.map(persistedRecord) } : null;
     form.setAttribute("hx-vals", JSON.stringify({ externalData }));
 }
@@ -205,7 +190,6 @@ export function initializeExternalDraft(form: HTMLFormElement, asset?: Asset): v
         records: asset?.externalData?.data.map(persistedRecord) ?? [],
         results: [],
         sequence: 0,
-        cleared: false,
     };
     drafts.set(form, draft);
     renderRecords(form, draft);
@@ -355,7 +339,6 @@ export function removeExternalAsset(form: HTMLFormElement, index: number): void 
 
     if(draft && index >= 0 && index < draft.records.length) {
         draft.records.splice(index, 1);
-        draft.cleared = draft.records.length === 0;
         showMessage(form, "");
         renderRecords(form, draft);
     }
