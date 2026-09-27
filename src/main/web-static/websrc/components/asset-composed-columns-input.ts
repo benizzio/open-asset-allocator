@@ -106,7 +106,7 @@ function getAutocompleteState(input: HTMLInputElement): AssetTickerAutocompleteS
         const pointerSelection = state.pointerSelection;
         state.pointerSelection = undefined;
 
-        if(!pointerSelection || pointerSelection.pointerId !== pointerEvent.pointerId) {
+        if(pointerSelection?.pointerId !== pointerEvent.pointerId) {
             return;
         }
 
@@ -289,7 +289,7 @@ function renderAssetTickerSuggestions(input: HTMLInputElement): void {
 
     const state = getAutocompleteState(input);
 
-    if(!state || !state.isOpen) {
+    if(!state?.isOpen) {
         return;
     }
 
@@ -322,7 +322,7 @@ function renderAssetTickerSuggestions(input: HTMLInputElement): void {
         option.className = "asset-ticker-autocomplete__option";
         option.setAttribute("role", "option");
         option.setAttribute("aria-selected", "false");
-        option.setAttribute("data-asset-ticker-option", "");
+        option.dataset.assetTickerOption = "";
         option.dataset.optionIndex = index.toString();
         option.textContent = ticker;
         state.listbox.append(option);
@@ -345,7 +345,7 @@ function highlightAssetTickerOption(input: HTMLInputElement, optionIndex: number
 
     const state = autocompleteStates.get(input);
 
-    if(!state || !state.optionValues.length) {
+    if(!state?.optionValues.length) {
         return;
     }
 
@@ -455,6 +455,7 @@ class AssetComposedColumnInput {
      * Changes the row to display the selected existing asset as read-only fields.
      *
      * @author benizzio
+     * @author GPT-6 Luna
      */
     activateExistingAssetMode(asset: Asset) {
 
@@ -477,6 +478,7 @@ class AssetComposedColumnInput {
      * Changes the row to require the name of an asset that is not yet stored.
      *
      * @author benizzio
+     * @author GPT-6 Luna
      */
     activateNewAssetMode() {
 
