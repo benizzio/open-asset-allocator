@@ -54,6 +54,56 @@
   cursor: pointer;
 }
 
+/**
+ * Styles the bounded, scrollable asset ticker autocomplete used in portfolio forms.
+ *
+ * @author GPT-6 Luna
+ */
+.asset-ticker-autocomplete {
+  position: relative;
+  min-width: 0;
+}
+
+.asset-ticker-autocomplete__suggestions {
+  position: absolute;
+  z-index: 110;
+  top: 100%;
+  right: 0;
+  left: 0;
+  overflow: hidden;
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  background-color: var(--bs-body-bg);
+  box-shadow: var(--bs-box-shadow);
+}
+
+.asset-ticker-autocomplete__listbox {
+  max-height: 16rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+
+.asset-ticker-autocomplete__option,
+.asset-ticker-autocomplete__status {
+  padding: 0.375rem 0.75rem;
+  overflow-wrap: anywhere;
+}
+
+.asset-ticker-autocomplete__option {
+  cursor: pointer;
+}
+
+.asset-ticker-autocomplete__option:hover,
+.asset-ticker-autocomplete__option[aria-selected="true"] {
+  color: var(--bs-dropdown-link-hover-color);
+  background-color: var(--bs-dropdown-link-hover-bg);
+}
+
+.asset-ticker-autocomplete__status {
+  color: var(--bs-secondary-color);
+}
+
 .btn-xs {
   padding: 0.25rem 0.5rem;
   font-size: 0.75rem;

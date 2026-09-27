@@ -8,9 +8,9 @@
  * Scenario 5 modifies a seeded observation, creates a second observation, and
  * verifies both browser state and PostgreSQL persistence.
  *
- * Authored by: OpenCode
+ * @author OpenCode
  */
-import type { Locator, Page } from '@playwright/test';
+import type { Locator, Page, Request } from '@playwright/test';
 import { expect, test } from '../support/fixtures';
 import type { E2eDatabase } from '../support/database';
 import {
@@ -100,6 +100,155 @@ type SeededHistoryModificationData = {
 };
 
 test.describe('portfolio allocation history management', () => {
+  test.describe('scenario 7: asset ticker autocomplete', () => {
+    /** Verifies all matching tickers remain available in a bounded, scrollable list.
+     *
+     * @author GPT-6 Luna
+     */
+    test('scenario 7.1: filters ticker suggestions and allows scrolling', async ({ database, page }) => {
+      const { row, tickerInput, suggestions } = await prepareTickerAutocompleteRow(database, page);
+
+      await expect(tickerInput).toHaveAttribute('aria-expanded', 'true');
+      await expect(suggestions.getByRole('option')).toHaveCount(12);
+
+      await tickerInput.fill('auto-1');
+      await expect(suggestions.getByRole('option')).toHaveCount(2);
+      await expect(suggestions.getByRole('option', { name: 'E2E:AUTO-10', exact: true })).toBeVisible();
+      await expect(suggestions.getByRole('option', { name: 'E2E:AUTO-11', exact: true })).toBeVisible();
+
+      await tickerInput.fill('E2E:');
+      await expect(suggestions.getByRole('option')).toHaveCount(12);
+      await expect(suggestions.evaluate(element => element.scrollHeight > element.clientHeight)).resolves.toBe(true);
+
+      await tickerInput.fill('NO-MATCH');
+      await expect(row.getByRole('status')).toHaveText('No matching assets');
+    });
+
+    /** Verifies a refresh of the prefetched catalog replaces stale options in an open list.
+     *
+     * @author GPT-6 Luna
+     */
+    test('scenario 7.2: refreshes suggestions after the ticker catalog reloads', async ({ database, page }) => {
+      const { suggestions } = await prepareTickerAutocompleteRow(database, page);
+
+      await page.locator('#datalist-assets').evaluate(element => {
+        const staleOption = document.createElement('option');
+        staleOption.value = 'E2E:STALE';
+        element.append(staleOption);
+      });
+      const datalistRefresh = page.waitForResponse(response => {
+        return response.request().method() === 'GET' && new URL(response.url()).pathname === '/api/asset';
+      });
+      await page.evaluate(() => {
+        const assetComposedColumnsInput =
+          (window as unknown as Record<string, { loadDatalists(): void }>)['AssetComposedColumnsInput'];
+        assetComposedColumnsInput.loadDatalists();
+      });
+      await datalistRefresh;
+
+      await expect(page.locator('#datalist-assets option[value="E2E:STALE"]')).toHaveCount(0);
+      await expect(suggestions.getByRole('option')).toHaveCount(12);
+    });
+
+    /** Verifies pointer selection directly starts lookup and populates the existing asset fields.
+     *
+     * @author GPT-6 Luna
+     */
+    test('scenario 7.3: selecting a suggestion immediately looks up the existing asset', async ({ database, page }) => {
+      const { assets, row, tickerInput, suggestions } = await prepareTickerAutocompleteRow(database, page);
+      const ticker = 'E2E:AUTO-11';
+      const lookupRequests: string[] = [];
+      const recordLookupRequest = (request: Request): void => {
+        if(request.method() === 'GET' && new URL(request.url()).pathname === `/api/asset/${ticker}`) {
+          lookupRequests.push(request.url());
+        }
+      };
+      page.on('request', recordLookupRequest);
+      try {
+        const lookupResponse = page.waitForResponse(response => {
+          return response.request().method() === 'GET'
+            && new URL(response.url()).pathname === `/api/asset/${ticker}`;
+        });
+
+        await suggestions.getByRole('option', { name: ticker, exact: true }).click();
+
+        expect((await lookupResponse).status()).toBe(200);
+        expect(lookupRequests).toHaveLength(1);
+        await expectExistingAsset(row, assets[ticker]);
+        await expect(tickerInput).toHaveAttribute('aria-expanded', 'false');
+      } finally {
+        page.off('request', recordLookupRequest);
+      }
+    });
+
+    /** Verifies Arrow navigation and Enter select a suggestion and resolve it through the API.
+     *
+     * @author GPT-6 Luna
+     */
+    test('scenario 7.4: selects the highlighted suggestion with the keyboard', async ({ database, page }) => {
+      const { assets, row, tickerInput } = await prepareTickerAutocompleteRow(database, page);
+      const ticker = 'E2E:AUTO-00';
+
+      await tickerInput.fill(ticker);
+      await tickerInput.press('ArrowDown');
+      const activeOptionId = await tickerInput.getAttribute('aria-activedescendant');
+      expect(activeOptionId).toBeTruthy();
+      await expect(row.locator(`#${activeOptionId}`)).toHaveAttribute('aria-selected', 'true');
+
+      const lookupResponse = page.waitForResponse(response => {
+        return response.request().method() === 'GET'
+          && new URL(response.url()).pathname === `/api/asset/${ticker}`;
+      });
+      await tickerInput.press('Enter');
+
+      expect((await lookupResponse).status()).toBe(200);
+      await expectExistingAsset(row, assets[ticker]);
+    });
+
+    /** Verifies Enter without a selected suggestion preserves manual lookup and new-asset mode.
+     *
+     * @author GPT-6 Luna
+     */
+    test('scenario 7.5: keeps manual search for unmatched tickers', async ({ database, page }) => {
+      const { row, tickerInput } = await prepareTickerAutocompleteRow(database, page);
+      const ticker = 'NO-SUCH-ASSET';
+
+      await tickerInput.fill(ticker);
+      await expect(row.getByRole('status')).toHaveText('No matching assets');
+      const lookupResponse = page.waitForResponse(response => {
+        return response.request().method() === 'GET'
+          && new URL(response.url()).pathname === `/api/asset/${ticker}`;
+      });
+      await tickerInput.press('Enter');
+
+      expect((await lookupResponse).status()).toBe(404);
+      await expect(row.getByText('* Creating new asset', { exact: true })).toBeVisible();
+      await expect(row.getByRole('textbox', { name: 'Asset name' })).toBeVisible();
+    });
+
+    /** Verifies the new-asset reset action clears the row and reopens ticker suggestions.
+     *
+     * @author GPT-6 Luna
+     */
+    test('scenario 7.6: resets a new-asset row to ticker search', async ({ database, page }) => {
+      const { row, tickerInput } = await prepareTickerAutocompleteRow(database, page);
+      const missingAssetTicker = 'NO-SUCH-ASSET';
+      const missingAssetResponse = page.waitForResponse(response => {
+        return response.request().method() === 'GET'
+          && new URL(response.url()).pathname === `/api/asset/${missingAssetTicker}`;
+      });
+
+      await tickerInput.fill(missingAssetTicker);
+      await tickerInput.press('Enter');
+      expect((await missingAssetResponse).status()).toBe(404);
+      await row.locator('[data-asset-action-button]').click();
+      await expect(tickerInput).toHaveValue('');
+      await expect(tickerInput).toHaveAttribute('aria-expanded', 'true');
+      await tickerInput.press('Escape');
+      await expect(tickerInput).toHaveAttribute('aria-expanded', 'false');
+    });
+  });
+
   test('scenario 3: creates and explores a portfolio allocation observation', async ({ database, page }) => {
     test.setTimeout(60_000);
     const seededData = await seedPortfolioHistoryData(database);
@@ -577,6 +726,75 @@ test.describe('portfolio allocation history management', () => {
   });
 });
 
+/** Seeds the portfolio and asset catalog needed to exercise autocomplete filtering and scrolling.
+ *
+ * @author GPT-6 Luna
+ */
+async function seedTickerAutocompleteData(database: E2eDatabase): Promise<{
+  assets: Record<string, SeededAsset>;
+  portfolio: SeededPortfolio;
+}> {
+  const portfolioRows = await database.query<SeededPortfolio>(
+    `INSERT INTO public.portfolio (name, allocation_structure)
+     VALUES ($1, $2::jsonb)
+     RETURNING id, name`,
+    ['E2E Ticker Autocomplete Portfolio', JSON.stringify(DEFAULT_ALLOCATION_STRUCTURE)],
+  );
+  const tickers = Array.from({ length: 12 }, (_, index) => `E2E:AUTO-${index.toString().padStart(2, '0')}`);
+  const values = tickers.map((_, index) => `($${index * 2 + 1}, $${index * 2 + 2})`);
+  const assetParameters = tickers.flatMap((ticker, index) => [ticker, `Autocomplete Asset ${index}`]);
+  const assetRows = await database.query<SeededAsset>(
+    `INSERT INTO public.asset (ticker, name)
+     VALUES ${values.join(', ')}
+     RETURNING id, ticker, name`,
+    assetParameters,
+  );
+
+  expect(portfolioRows).toHaveLength(1);
+  expect(assetRows).toHaveLength(tickers.length);
+
+  return {
+    assets: Object.fromEntries(assetRows.map(asset => [asset.ticker, asset])) as Record<string, SeededAsset>,
+    portfolio: portfolioRows[0],
+  };
+}
+
+/** Seeds the catalog and opens one editable asset row for a focused autocomplete scenario.
+ *
+ * @param database - Isolated test database used to seed the portfolio and assets.
+ * @param page - Browser page used to open the portfolio history form.
+ * @returns The seeded assets and the rendered row controls used by the scenario.
+ *
+ * @author GPT-6 Luna
+ */
+async function prepareTickerAutocompleteRow(database: E2eDatabase, page: Page): Promise<{
+  assets: Record<string, SeededAsset>;
+  row: Locator;
+  tickerInput: Locator;
+  suggestions: Locator;
+}> {
+  const seededData = await seedTickerAutocompleteData(database);
+
+  await page.goto('/');
+  await expectRootShell(page);
+  await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+  await expectPortfolioHistoryManagement(page, seededData.portfolio);
+
+  const newObservationItem = page.locator('#portfolio-history-management-container-0');
+  await newObservationItem.getByRole('textbox', { name: 'Time tag' }).fill('AUTOCOMPLETE');
+  await newObservationItem.locator('#portfolio-history-management-trigger-0 > button').click();
+
+  const form = page.locator('#portfolio-history-management-form-0');
+  const row = await addAllocationRow(page, form, 0);
+
+  return {
+    assets: seededData.assets,
+    row,
+    tickerInput: row.getByRole('combobox', { name: 'Asset ticker' }),
+    suggestions: row.getByRole('listbox', { name: 'Available assets' }),
+  };
+}
+
 /** Seeds one portfolio and the two assets that scenario 3 must resolve as existing. */
 async function seedPortfolioHistoryData(database: E2eDatabase): Promise<{
   assets: Record<string, SeededAsset>;
@@ -869,8 +1087,7 @@ async function fillExistingAssetAllocation(
   totalMarketValue: string,
   cashReserve = false,
 ): Promise<void> {
-  await selectAssetFromDatalist(page, row, asset.ticker);
-  await searchForAsset(page, row, asset.ticker, 200);
+  await selectAssetFromAutocomplete(page, row, asset.ticker);
   await expectExistingAsset(row, asset);
 
   await row.getByRole('combobox', { name: 'Class' }).fill(assetClass);
@@ -886,8 +1103,7 @@ async function fillExistingAssetDirectValueAllocation(
   assetClass: string,
   totalMarketValue: string,
 ): Promise<void> {
-  await selectAssetFromDatalist(page, row, asset.ticker);
-  await searchForAsset(page, row, asset.ticker, 200);
+  await selectAssetFromAutocomplete(page, row, asset.ticker);
   await expectExistingAsset(row, asset);
 
   await row.getByRole('combobox', { name: 'Class' }).fill(assetClass);
@@ -914,13 +1130,41 @@ async function fillNewAssetCalculatedAllocation(
   await fillCalculatedValues(row, quantity, marketPrice, '4,000.00');
 }
 
-/** Selects one known ticker through the populated browser datalist input. */
-async function selectAssetFromDatalist(page: Page, row: Locator, ticker: string): Promise<void> {
+/**
+ * Selects a known autocomplete suggestion and waits for its immediate asset lookup.
+ *
+ * @param page - Browser page that receives the lookup request.
+ * @param row - Portfolio-history allocation row containing the ticker input.
+ * @param ticker - Seeded ticker expected in the autocomplete suggestions.
+ *
+ * @author GPT-6 Luna
+ */
+async function selectAssetFromAutocomplete(page: Page, row: Locator, ticker: string): Promise<void> {
   await expect(page.locator(`#datalist-assets option[value="${ticker}"]`)).toBeAttached();
   const tickerInput = row.getByRole('combobox', { name: 'Asset ticker' });
   await tickerInput.click();
   await tickerInput.fill(ticker);
-  await expect(tickerInput).toHaveValue(ticker);
+
+  const lookupRequests: string[] = [];
+  const recordLookupRequest = (request: Request): void => {
+    if(request.method() === 'GET' && new URL(request.url()).pathname === `/api/asset/${ticker}`) {
+      lookupRequests.push(request.url());
+    }
+  };
+  page.on('request', recordLookupRequest);
+  try {
+    const responsePromise = page.waitForResponse((response) => {
+      return response.request().method() === 'GET'
+        && new URL(response.url()).pathname === `/api/asset/${ticker}`;
+    });
+    await row.getByRole('option', { name: ticker, exact: true }).click();
+    const response = await responsePromise;
+    expect(response.status()).toBe(200);
+    expect(lookupRequests).toHaveLength(1);
+    await expect(tickerInput).toHaveValue(ticker);
+  } finally {
+    page.off('request', recordLookupRequest);
+  }
 }
 
 /** Selects one known class through the populated browser datalist input. */

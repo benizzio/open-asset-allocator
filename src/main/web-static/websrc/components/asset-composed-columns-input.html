@@ -1,3 +1,4 @@
+<!-- Authored by: GPT-6 Luna and benizzio -->
 <body>
 <script id="asset-composed-columns-input" type="text/x-handlebars-template">
 
@@ -13,30 +14,52 @@
             {{assetTicker}}
         {{else}}
 
-            <div class="input-group">
+            <div data-asset-ticker-autocomplete class="asset-ticker-autocomplete">
 
-                <input type="text"
-                       name="{{assetTickerFieldName}}"
-                       placeholder="Asset ticker"
-                       aria-label="Asset ticker"
-                       autocomplete="off"
-                       class="form-control"
-                       value="{{assetTicker}}"
-                       list="datalist-assets"
-                       hx-validate="true"
-                       hx-on::validation:validate="{{assetTickerFieldHTMXOnValidate}}"
-                       oninput="maskTickerInput(this)"
-                       onkeydown="AssetComposedColumnsInput.handleAssetTickerKeydown(event)"
-                       maxlength="40"
-                />
-                <button data-asset-action-button
-                        type="button"
-                        class="btn btn-primary btn-xs"
-                        onclick="{{assetActionButtonOnClick}}"
-                >
-                    <span class="bi bi-search"></span>
-                </button>
+                <div class="input-group">
 
+                    <input type="text"
+                           name="{{assetTickerFieldName}}"
+                           placeholder="Asset ticker"
+                           aria-label="Asset ticker"
+                           autocomplete="off"
+                           class="form-control"
+                           value="{{assetTicker}}"
+                           role="combobox"
+                           aria-autocomplete="list"
+                           aria-haspopup="listbox"
+                           aria-expanded="false"
+                           data-asset-ticker-source="datalist-assets"
+                           hx-validate="true"
+                           hx-on::validation:validate="{{assetTickerFieldHTMXOnValidate}}"
+                           onfocus="AssetComposedColumnsInput.handleAssetTickerFocus(event)"
+                           oninput="maskTickerInput(this); AssetComposedColumnsInput.handleAssetTickerInput(event)"
+                           onkeydown="AssetComposedColumnsInput.handleAssetTickerKeydown(event)"
+                           maxlength="40"
+                    />
+                    <button data-asset-action-button
+                            type="button"
+                            class="btn btn-primary btn-xs"
+                            onclick="{{assetActionButtonOnClick}}"
+                    >
+                        <span class="bi bi-search"></span>
+                    </button>
+
+                </div>
+
+                <div data-asset-ticker-suggestions class="asset-ticker-autocomplete__suggestions" hidden>
+                    <div data-asset-ticker-listbox
+                         class="asset-ticker-autocomplete__listbox"
+                         role="listbox"
+                         aria-label="Available assets"
+                    ></div>
+                    <div data-asset-ticker-status
+                         class="asset-ticker-autocomplete__status"
+                         role="status"
+                         aria-live="polite"
+                         hidden
+                    ></div>
+                </div>
             </div>
 
             <div data-new-asset-ticker-message

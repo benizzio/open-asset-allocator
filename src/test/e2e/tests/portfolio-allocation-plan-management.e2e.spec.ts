@@ -7,9 +7,9 @@
  * Scenario 6 modifies an existing allocation plan, creates a second plan, and
  * verifies the resulting charts and PostgreSQL persistence.
  *
- * Authored by: OpenCode
+ * @author OpenCode
  */
-import type { Locator, Page } from '@playwright/test';
+import type { Locator, Page, Request } from '@playwright/test';
 import { expect, test } from '../support/fixtures';
 import type { E2eDatabase } from '../support/database';
 import {
@@ -1105,21 +1105,48 @@ async function fillExistingAssetAllocation(
   percentageDecimal: string,
   cashReserve: boolean,
 ): Promise<void> {
-  await selectAssetFromDatalist(page, row, asset.ticker);
-  await searchForAsset(page, row, asset.ticker, 200);
+  await selectAssetFromAutocomplete(page, row, asset.ticker);
   await expectExistingAsset(row, asset);
   await expect(row.locator(`input[name="details[${index}][hierarchicalId][1]"]`)).toHaveValue(className);
   await fillPercentage(row, index, percentage, percentageDecimal);
   await setCashReserve(row, cashReserve);
 }
 
-/** Selects a known ticker from the populated browser datalist. */
-async function selectAssetFromDatalist(page: Page, row: Locator, ticker: string): Promise<void> {
+/**
+ * Selects a known autocomplete suggestion and waits for its immediate asset lookup.
+ *
+ * @param page - Browser page that receives the lookup request.
+ * @param row - Allocation-plan row containing the ticker input.
+ * @param ticker - Seeded ticker expected in the autocomplete suggestions.
+ *
+ * @author GPT-6 Luna
+ */
+async function selectAssetFromAutocomplete(page: Page, row: Locator, ticker: string): Promise<void> {
   await expect(page.locator(`#datalist-assets option[value="${ticker}"]`)).toBeAttached();
   const tickerInput = row.getByRole('combobox', { name: 'Asset ticker' });
   await tickerInput.click();
   await tickerInput.fill(ticker);
-  await expect(tickerInput).toHaveValue(ticker);
+
+  const lookupRequests: string[] = [];
+  const recordLookupRequest = (request: Request): void => {
+    if(request.method() === 'GET' && new URL(request.url()).pathname === `/api/asset/${ticker}`) {
+      lookupRequests.push(request.url());
+    }
+  };
+  page.on('request', recordLookupRequest);
+  try {
+    const responsePromise = page.waitForResponse((response) => {
+      return response.request().method() === 'GET'
+        && new URL(response.url()).pathname === `/api/asset/${ticker}`;
+    });
+    await row.getByRole('option', { name: ticker, exact: true }).click();
+    const response = await responsePromise;
+    expect(response.status()).toBe(200);
+    expect(lookupRequests).toHaveLength(1);
+    await expect(tickerInput).toHaveValue(ticker);
+  } finally {
+    page.off('request', recordLookupRequest);
+  }
 }
 
 /** Waits for an asset lookup request and verifies the expected HTTP result. */

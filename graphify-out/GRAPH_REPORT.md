@@ -4,12 +4,12 @@
 - cluster-only mode — file stats not available
 
 ## Summary
-- 801 nodes · 1132 edges · 92 communities (47 shown, 45 thin omitted)
+- 807 nodes · 1138 edges · 92 communities (46 shown, 46 thin omitted)
 - Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 50 edges (avg confidence: 0.88)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `df63ef82`
+- Built from commit: `6f320cdc`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -17,15 +17,14 @@
 - portfolio-allocation-history-management.e2e.spec.ts
 - portfolio-allocation-plan-management.e2e.spec.ts
 - generate_report.py
+- Comparative E2E Framework Research
 - portfolio-allocation-map.e2e.spec.ts
-- Open Asset Allocator
 - package.json
 - Allocation Map View
 - e2e.sh
 - portfolio-visualization.e2e.spec.ts
 - Three-Scope Graph Selection
 - Portfolio Holdings Editor
-- Comparative E2E Framework Research
 - asset
 - portfolio-editing.e2e.spec.ts
 - prune-sql-stubs.py
@@ -69,6 +68,7 @@
 - migration-[11]-portfolio_allocation_fact_time_frame_tag_substitution.sql
 - portfolio_allocation_obs_time
 - migration-[9]-portfolio_allocation_timestamp_dimension_adjustments.sql
+- Specific agent instructions for End to End Test Scripts
 - start.sh
 - Property Graph Exports
 - E2E Diagnostics Artifact
@@ -150,11 +150,11 @@
 - **Portfolio Observation Holding Fields** — docs_images_portfolio_history_management_asset_identity, docs_images_portfolio_history_management_asset_classification, docs_images_portfolio_history_management_cash_reserve_designation, docs_images_portfolio_history_management_position_quantity, docs_images_portfolio_history_management_market_price, docs_images_portfolio_history_management_total_market_value [EXTRACTED 1.00]
 - **Containerized E2E Execution Topology** — src_main_docker_docker_compose_e2e_e2e_database, src_main_docker_docker_compose_e2e_e2e_migration_engine, src_main_docker_docker_compose_e2e_playwright_runner, src_main_docker_docker_compose_e2e_ci_immutable_monolith, _github_workflows_e2e_e2e_tests_workflow [INFERRED 0.95]
 
-## Communities (92 total, 45 thin omitted)
+## Communities (92 total, 46 thin omitted)
 
 ### Community 0 - "portfolio-allocation-history-management.e2e.spec.ts"
 Cohesion: 0.06
-Nodes (54): CanvasPoint, CanvasTextRecorder, clickCanvasPoint(), expectChartTooltip(), expectLatestCanvasPatternState(), expectLatestCanvasTextContains(), expectLatestCanvasTextSet(), findDoughnutSlicePointByTooltip() (+46 more)
+Nodes (57): CanvasPoint, CanvasTextRecorder, clickCanvasPoint(), expectChartTooltip(), expectLatestCanvasPatternState(), expectLatestCanvasTextContains(), expectLatestCanvasTextSet(), findDoughnutSlicePointByTooltip() (+49 more)
 
 ### Community 1 - "portfolio-allocation-plan-management.e2e.spec.ts"
 Cohesion: 0.05
@@ -164,13 +164,13 @@ Nodes (52): seedPortfolioHistoryModificationData(), readDatabaseSnapshot(), seed
 Cohesion: 0.06
 Nodes (55): Any, _anchor(), _base_result_name(), _build_output_mapping(), _category_aliases(), _collect_extra_fields(), visit(), _compact_summary() (+47 more)
 
-### Community 3 - "portfolio-allocation-map.e2e.spec.ts"
+### Community 3 - "Comparative E2E Framework Research"
+Cohesion: 0.05
+Nodes (49): Dependabot Dependency Updates, Renovate Runtime Coordination, Go and Air Image Version Coordination, Application Node.js LTS Runtime Coordination, Playwright and E2E Node Type Major Alignment, Runtime Version Coordination, Portfolio History Form TODOs, Allocation Planning (+41 more)
+
+### Community 4 - "portfolio-allocation-map.e2e.spec.ts"
 Cohesion: 0.08
 Nodes (33): ASSET_DATA, DatabaseSnapshot, DEFAULT_ALLOCATION_STRUCTURE, expandRootAndAssertChildren(), expectAllocationMapShell(), expectAnalysisTable(), ExpectedDivergenceNode, expectNodeRow() (+25 more)
-
-### Community 4 - "Open Asset Allocator"
-Cohesion: 0.08
-Nodes (31): Dependabot Dependency Updates, Renovate Runtime Coordination, Go and Air Image Version Coordination, Application Node.js LTS Runtime Coordination, Playwright and E2E Node Type Major Alignment, Runtime Version Coordination, Portfolio History Form TODOs, Allocation Planning (+23 more)
 
 ### Community 5 - "package.json"
 Cohesion: 0.09
@@ -196,154 +196,150 @@ Nodes (19): CodeRabbit Review Path Filters, Graphify Build Manifest Inclusion Pa
 Cohesion: 0.12
 Nodes (19): Manage Portfolio Allocation Data Panel, Allocation Map Tab, Allocation Plan Tab, Asset Classification, Asset Identity and Description, Bonds Asset Class, Cash Reserve Designation, Add and Remove Holding Controls (+11 more)
 
-### Community 11 - "Comparative E2E Framework Research"
-Cohesion: 0.11
-Nodes (18): Open Asset Allocator Application Fit, E2E Framework Evaluation Framework, E2E Tool Candidate Research, Fourteen E2E Candidate Set, chromedp with Go Testing, CodeceptJS, Comparative E2E Framework Research, Cucumber.js with Playwright or Playwright-BDD (+10 more)
-
-### Community 12 - "asset"
+### Community 11 - "asset"
 Cohesion: 0.21
 Nodes (13): asset_price_last_market_data, asset_ticker_market_data_source, allocation_plan, allocation_plan_unit, asset, asset_value_fact, asset_market_data_source, asset_price_last_market_data (+5 more)
 
-### Community 13 - "portfolio-editing.e2e.spec.ts"
+### Community 12 - "portfolio-editing.e2e.spec.ts"
 Cohesion: 0.16
 Nodes (15): DEFAULT_ALLOCATION_STRUCTURE, expectEditPortfolio(), ExpectedPortfolio, expectPortfolioList(), expectPortfolioNavigation(), expectPortfolioShell(), expectRootShell(), expectRoute() (+7 more)
 
-### Community 14 - "prune-sql-stubs.py"
+### Community 13 - "prune-sql-stubs.py"
 Cohesion: 0.13
 Nodes (15): graphify_cluster, graphify_export, json, networkx_readwrite, pathlib, re, _main(), Remove disconnected Flyway SQL parser stubs from the remainder graph. Graphify… (+7 more)
 
-### Community 15 - "asset-management.e2e.spec.ts"
+### Community 14 - "asset-management.e2e.spec.ts"
 Cohesion: 0.16
 Nodes (8): Asset, AssetRow, expectAssetEditor(), expectIconOnlyButton(), expectNewAssetForm(), expectSupersededAssetResponseIgnored(), navigateWithinApp(), PERSISTED_EXTERNAL_DATA
 
-### Community 16 - "Native scoped Graphify AST updates"
+### Community 15 - "Native scoped Graphify AST updates"
 Cohesion: 0.16
 Nodes (15): Absolute module scan paths, Backend Graphify graph, Code-only graph bootstrap, Operator-configured Graphify semantic backend, Narrow fail-closed Flyway SQL stub repair, Frontend Graphify graph, Native scoped Graphify AST updates, OpenCode host-agent semantic refresh (+7 more)
 
-### Community 17 - "BONDS (60% slice)"
+### Community 16 - "BONDS (60% slice)"
 Cohesion: 0.14
 Nodes (15): 60/40 Portfolio Classic - Example - 20260210-230012, Allocation Plan Management Interface, ARCA:BIL - SPDR Bloomberg 1-3 Month T-Bill ETF (40%), ARCA:EWZ - iShares MSCI Brazil ETF (5%), ARCA:SPY - SPDR S&P 500 ETF Trust (45%), ARCA:STIP - iShares 0-5 Year TIPS Bond ETF (10%), BONDS (60% slice), Cash Reserve Designation (+7 more)
 
-### Community 18 - "validate-playwright-version.mjs"
+### Community 17 - "validate-playwright-version.mjs"
 Cohesion: 0.16
 Nodes (13): ref_node_fs, argumentsByName, assertEqual(), assertNodeMajor(), defaultDockerfile, fail(), nodeTypeVersions, packageDirectory (+5 more)
 
-### Community 19 - "Asset Allocation Donut Chart"
+### Community 18 - "Asset Allocation Donut Chart"
 Cohesion: 0.15
 Nodes (14): Allocation Map Tab, Allocation Plan Tab, ARCA:EWZ Allocation 4.55%, ARCA:SPY Allocation 68.18%, Asset Allocation Donut Chart, Assets for STOCKS Level, February 2026 Portfolio Snapshot, My Portfolio Example (+6 more)
 
-### Community 20 - "test"
+### Community 19 - "test"
 Cohesion: 0.17
 Nodes (7): src_test_e2e_support_fixtures_expect, test, FIRST, SECOND, DEFAULT_ALLOCATION_STRUCTURE, Portfolio, PortfolioRow
 
-### Community 21 - "compilerOptions"
+### Community 20 - "compilerOptions"
 Cohesion: 0.15
 Nodes (12): compilerOptions, allowImportingTsExtensions, esModuleInterop, forceConsistentCasingInFileNames, lib, module, moduleResolution, noEmit (+4 more)
 
-### Community 22 - "Asset Allocation Donut Chart"
+### Community 21 - "Asset Allocation Donut Chart"
 Cohesion: 0.22
 Nodes (11): 60/40 Portfolio Classic - Example - 20260210-230012, Allocation Map Tab, Allocation Plan Tab, Asset Allocation Donut Chart, Asset Classes Level, Bonds 60 Percent Allocation, Edit Portfolio Action, My Portfolio Example - 20260210-230012 (+3 more)
 
-### Community 23 - "Portfolio History Detail View"
+### Community 22 - "Portfolio History Detail View"
 Cohesion: 0.22
 Nodes (11): Active Portfolio Tab, Allocation Map Tab, Allocation Plan Tab, Bonds: 45%, Class-Level Asset Allocation Donut Chart, Edit Portfolio Control, Expanded 202602 History Panel, My Portfolio Example - 20260210-230012 (+3 more)
 
-### Community 24 - "ingest-ghostfolio-activity.sql"
+### Community 23 - "ingest-ghostfolio-activity.sql"
 Cohesion: 0.31
 Nodes (10): pgsql.asset_market_data_source, asset_dimension_mapping, asset_insertion, asset_market_data_source_insertion, ghostf_activity, ghostf_symbol_aggegation, pgsql.asset, yahoo_asset_list (+2 more)
 
-### Community 25 - "Base Application Service"
+### Community 24 - "Base Application Service"
 Cohesion: 0.27
 Nodes (11): Base Application Service, Base Migration Engine, Base PostgreSQL Service, CI E2E Overlay, Immutable E2E Monolith, E2E PostgreSQL Service, E2E Migration Engine, Containerized Playwright Runner (+3 more)
 
-### Community 26 - "database.ts"
+### Community 25 - "database.ts"
 Cohesion: 0.27
 Nodes (6): createE2eDatabase(), E2eDatabase, FLYWAY_HISTORY_TABLES, parsePort(), quoteIdentifier(), requiredEnvironment()
 
-### Community 27 - "Open Asset Allocator Architecture"
+### Community 26 - "Open Asset Allocator Architecture"
 Cohesion: 0.22
 Nodes (9): Root AGENTS Instructions for Copilot, Fractal Long-Term Asset Allocation Strategies, Backend Serves Frontend Static Assets in Production, Go Gin Backend, Hybrid HTMX Lazy-Loading SPA Frontend, Open Asset Allocator Architecture, PostgreSQL Flyway and DuckDB Data Layer, Graphify scopes (+1 more)
 
-### Community 28 - "Portfolio Card Grid"
+### Community 27 - "Portfolio Card Grid"
 Cohesion: 0.22
 Nodes (10): Dark Theme, Global All Assets Portfolio, My Portfolio Example, My Portfolio Example - 20260210-230012, New Portfolio Action, New Portfolio Focus State, Open Asset Allocator Brand, Portfolio Card Grid (+2 more)
 
-### Community 29 - "migration-[5]-allocation_plan_improvements.sql"
+### Community 28 - "migration-[5]-allocation_plan_improvements.sql"
 Cohesion: 0.28
 Nodes (7): allocation_plan.create_timestamp TIMESTAMP DEFAULT now() IF NOT EXISTS, allocation_plan.structure JSONB USING structure::jsonb, allocation_plan_unit.slice renamed slice_size_percentage NUMERIC(5,2), allocation_plan_unit.structural_id text[] USING structural_id::text[], slice_percentage_ck CHECK slice_size_percentage between 0 and 100, allocation_plan_unit.slice_size_percentage NUMERIC(10,5) then divide by 100 then NUMERIC(6,5), slice_percentage_ck replaced with CHECK slice_size_percentage between 0 and 1
 
-### Community 30 - "fixtures.ts"
+### Community 29 - "fixtures.ts"
 Cohesion: 0.39
 Nodes (6): TestFixtures, WorkerFixtures, delay(), hasSuccessfulResponse(), waitFor(), waitForE2eReadiness()
 
-### Community 31 - "Graphify Pipeline"
+### Community 30 - "Graphify Pipeline"
 Cohesion: 0.29
 Nodes (7): Existing Graph Fast Path, Graph Health Diagnostics, Graphify Pipeline, Graphify Honesty Rules, Graph Query, Path, and Explain, Semantic Subagent Extraction, Structural AST Extraction
 
-### Community 32 - "Verify Assets Against Planned Allocation Percentages"
+### Community 31 - "Verify Assets Against Planned Allocation Percentages"
 Cohesion: 0.43
 Nodes (7): Create or Modify Allocation Plan, External Cash Inflow, Big or Disruptive Market Fluctuations?, Verify Assets Against Planned Allocation Percentages, Wait for Planned Interval, Move Resources to Fit the Allocation Plan, Scenario Changed?
 
-### Community 33 - "Asset Class Allocation"
+### Community 32 - "Asset Class Allocation"
 Cohesion: 0.33
 Nodes (7): Asset Class Allocation, Bonds Allocation 45 Percent, Monthly Portfolio Snapshot 202602, Portfolio Detail Screen, Portfolio Workspace Navigation, Stocks Allocation 55 Percent, Total Market Value 60000
+
+### Community 33 - "portfolio_allocation_fact_insertion"
+Cohesion: 0.48
+Nodes (6): asset_dimension_mapping, asset_insertion, portfolio_allocation_fact_insertion, pgsql.asset, pgsql.portfolio_allocation_obs_time, sws_summary
 
 ### Community 34 - "portfolio_allocation_fact_insertion"
 Cohesion: 0.48
 Nodes (6): asset_dimension_mapping, asset_insertion, portfolio_allocation_fact_insertion, pgsql.asset, pgsql.portfolio_allocation_obs_time, sws_summary
 
-### Community 35 - "portfolio_allocation_fact_insertion"
-Cohesion: 0.48
-Nodes (6): asset_dimension_mapping, asset_insertion, portfolio_allocation_fact_insertion, pgsql.asset, pgsql.portfolio_allocation_obs_time, sws_summary
-
-### Community 36 - "Repository Scope Routing"
+### Community 35 - "Repository Scope Routing"
 Cohesion: 0.33
 Nodes (6): Explicit Module Graph Query, Graphify Skill Invocation, Mixed Scope Boundary Verification, Native Per-Scope Graph Maintenance, Repository Scope Routing, Unknown Scope Write Pause
 
-### Community 37 - "@playwright/test"
+### Community 36 - "@playwright/test"
 Cohesion: 0.33
 Nodes (5): ref_node_path, ref_node_url, @playwright/test, defaultArtifactsDirectory, packageDirectory
 
-### Community 38 - "migration-[2]-initial_fixes.sql"
+### Community 37 - "migration-[2]-initial_fixes.sql"
 Cohesion: 0.40
 Nodes (4): asset.name DROP NOT NULL, asset_ticker_uk UNIQUE (asset.ticker), asset_value_fact_pk PRIMARY KEY (class, cash_reserve, asset_id, time_frame_tag), asset_value_fact.time_frame_tag text NOT NULL snapshot classifier
 
-### Community 39 - "Incremental Graph Re-Extraction"
+### Community 38 - "Incremental Graph Re-Extraction"
 Cohesion: 0.50
 Nodes (4): Graphify URL Ingestion, Cluster-Only Graph Refresh, Incremental Graph Re-Extraction, Replace-on-Re-Extract Graph Merge
 
-### Community 40 - "destroy.sh"
+### Community 39 - "destroy.sh"
 Cohesion: 0.50
 Nodes (3): POSTGRES_DATA_DIR, POSTGRES_DEV_DATA_DIR, destroy.sh script
 
-### Community 41 - "macos-provisioning.sh"
+### Community 40 - "macos-provisioning.sh"
 Cohesion: 0.50
 Nodes (3): NVM_DIR, PATH, macos-provisioning.sh script
 
-### Community 43 - "stop.sh"
+### Community 42 - "stop.sh"
 Cohesion: 0.50
 Nodes (3): POSTGRES_DATA_DIR, POSTGRES_DEV_DATA_DIR, stop.sh script
 
-### Community 44 - "validate-node-version.sh"
+### Community 43 - "validate-node-version.sh"
 Cohesion: 0.83
 Nodes (3): fail(), read_node_image(), validate-node-version.sh script
 
-### Community 45 - "Graph Query Traversal"
+### Community 44 - "Graph Query Traversal"
 Cohesion: 0.67
 Nodes (3): Graphify MCP Graph Server, Constrained Graph Vocabulary Expansion, Graph Query Traversal
 
-### Community 46 - "Semantic Extraction Contract"
+### Community 45 - "Semantic Extraction Contract"
 Cohesion: 0.67
 Nodes (3): Extraction Confidence Rubric, Deterministic Full-Path Node Identity, Semantic Extraction Contract
 
-### Community 47 - "Go External Integration Tests"
+### Community 46 - "Go External Integration Tests"
 Cohesion: 1.00
 Nodes (3): Go External Integration Tests, Go Test Workflow, Go Unit Tests
 
 ## Knowledge Gaps
-- **250 isolated node(s):** `CanvasPoint`, `CanvasTextRecorder`, `ExpectedObservationRow`, `NavigationOptionName`, `PersistedAllocation` (+245 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 378 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **45 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **251 isolated node(s):** `CanvasPoint`, `CanvasTextRecorder`, `ExpectedObservationRow`, `NavigationOptionName`, `PersistedAllocation` (+246 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 380 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **46 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
@@ -355,10 +351,10 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `test` connect `test` to `portfolio-allocation-history-management.e2e.spec.ts`, `portfolio-allocation-plan-management.e2e.spec.ts`, `portfolio-allocation-map.e2e.spec.ts`, `portfolio-visualization.e2e.spec.ts`, `portfolio-editing.e2e.spec.ts`, `asset-management.e2e.spec.ts`, `database.ts`, `fixtures.ts`?**
   _High betweenness centrality (0.011) - this node is a cross-community bridge._
 - **What connects `CanvasPoint`, `CanvasTextRecorder`, `ExpectedObservationRow` to the rest of the system?**
-  _250 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _251 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `portfolio-allocation-history-management.e2e.spec.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.06459627329192547 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06126331811263318 - nodes in this community are weakly interconnected._
 - **Should `portfolio-allocation-plan-management.e2e.spec.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.051203277009728626 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05069124423963134 - nodes in this community are weakly interconnected._
 - **Should `generate_report.py` be split into smaller, more focused modules?**
   _Cohesion score 0.06493506493506493 - nodes in this community are weakly interconnected._
