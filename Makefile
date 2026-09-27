@@ -4,7 +4,6 @@
 
 E2E_ARGS ?=
 
-
 # Runs golangci-lint on the Go source
 lint:
 	cd src/main/go && golangci-lint run ./...

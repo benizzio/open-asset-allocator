@@ -1,13 +1,21 @@
 # yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
 # Configures automated CodeRabbit reviews for this repository.
-# Co-authored by: OpenCode and Igor Benicio de Mesquita
+# Co-authored by: OpenCode (GPT-6 Sol and GPT-6 Luna) and Igor Benicio de Mesquita
 language: "en-US"
 
 reviews:
   profile: assertive
   high_level_summary: true
   path_filters:
-    - "!graphify-out/**"
+    - "!graphify-out/graph.json"
+    - "!graphify-out/graph.html"
+    - "!graphify-out/GRAPH_REPORT.md"
+    - "!src/main/web-static/graphify-out/graph.json"
+    - "!src/main/web-static/graphify-out/graph.html"
+    - "!src/main/web-static/graphify-out/GRAPH_REPORT.md"
+    - "!src/main/go/graphify-out/graph.json"
+    - "!src/main/go/graphify-out/graph.html"
+    - "!src/main/go/graphify-out/GRAPH_REPORT.md"
     - "!.agents/skills/graphify/**"
   auto_review:
     enabled: true
