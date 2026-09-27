@@ -1,7 +1,7 @@
 """Validate the committed monorepo Graphify graphs and their source boundaries.
 
-Run ``python3 src/test/graphify-graphs.py`` from any directory after updating graphs.
-Authored by: GPT-6 Sol
+Run ``python3 src/test/graphify/graphify-graphs.py`` from the repository root after updating graphs.
+Co-authored by: GPT-6 Sol and GPT-6 Luna
 """
 
 import json
@@ -9,7 +9,7 @@ import re
 from pathlib import Path
 
 
-REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 GRAPH_PATHS = {
     "frontend": REPOSITORY_ROOT / "src/main/web-static/graphify-out/graph.json",
     "backend": REPOSITORY_ROOT / "src/main/go/graphify-out/graph.json",

@@ -34,7 +34,7 @@ graphify_python=$(head -n 1 "$(command -v graphify)")
 graphify_python=${graphify_python#'#!'}
 "$graphify_python" -B src/ext/graphify/prune-sql-stubs.py
 graphify cluster-only "$PWD" --no-label
-python3 src/test/graphify-graphs.py
+python3 src/test/graphify/graphify-graphs.py
 ```
 
 The repair refuses to write if it finds any disconnected source-less node other than an unowned Flyway SQL AST

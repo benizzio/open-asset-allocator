@@ -193,7 +193,7 @@ Rules:
   because its tracked `graphify-out/.graphify_build.json` excludes both modules; it does not update their graphs.
   With the SQL extra installed, 0.9.64 can recreate disconnected Flyway SQL stubs on every root update. Run
   `src/ext/graphify/prune-sql-stubs.py` with Graphify's Python interpreter, then
-  `graphify cluster-only "$PWD" --no-label` and `python3 src/test/graphify-graphs.py`. The cleanup refuses unknown
+  `graphify cluster-only "$PWD" --no-label` and `python3 src/test/graphify/graphify-graphs.py`. The cleanup refuses unknown
   disconnected nodes.
   AST updates preserve existing semantic nodes but do not refresh HTML/HTMX, docs, or images.
 - For changed semantic sources, use `graphify extract <absolute-scope-path>` with a configured Graphify backend,

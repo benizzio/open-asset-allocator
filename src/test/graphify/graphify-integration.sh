@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 # Exercises native scoped extraction, single-scope updates, and deleted-file pruning.
-# Run bash src/test/graphify-integration.sh with Graphify 0.9.64 installed.
-# Authored by: GPT-6 Sol
+# Run bash src/test/graphify/graphify-integration.sh with Graphify 0.9.64 installed.
+# Co-authored by: GPT-6 Sol and GPT-6 Luna
 
 set -euo pipefail
 
-repository_root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)
-fixture=$(mktemp -d /tmp/opencode/graphify-integration.XXXXXX)
-trap 'rm -rf -- "$fixture"' EXIT
+repository_root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../../.." && pwd)
+fixture=$(mktemp -d "${TMPDIR:-/tmp}/graphify-integration.XXXXXX")
+outside_dir=
+trap 'rm -rf -- "$fixture" "$outside_dir"' EXIT
+outside_dir=$(mktemp -d "${TMPDIR:-/tmp}/graphify-cwd.XXXXXX")
 
 mkdir -p "$fixture/graphify-out" "$fixture/docs" "$fixture/src/main/web-static/websrc" "$fixture/src/main/go/domain" "$fixture/src/main/go/docs" "$fixture/src/test/e2e"
 mkdir -p "$fixture/src/main/web-static/graphify-out" "$fixture/src/main/go/graphify-out"
@@ -39,7 +41,7 @@ graphify_python=${graphify_python#'#!'}
 "$graphify_python" -B - "$fixture" <<'PY'
 """Check Graphify's scoped semantic candidate enumeration.
 
-Authored by: GPT-6 Sol
+Co-authored by: GPT-6 Sol and GPT-6 Luna
 """
 
 import json
@@ -83,7 +85,7 @@ printf 'export function primary(): number { return 3; }\n' > "$fixture/src/main/
 rm "$fixture/src/main/web-static/websrc/removable.ts"
 rm "$fixture/src/main/web-static/graphify-out/manifest.json"
 (
-  cd /tmp/opencode
+  cd "$outside_dir"
   graphify update "$fixture/src/main/web-static" > "$fixture/update.log"
 )
 
@@ -161,7 +163,7 @@ grep -q 'unknown backend' "$fixture/failure.log" || { printf 'Semantic failure w
 "$graphify_python" -B - "$fixture" <<'PY'
 """Inject an AST failure into Graphify's native extraction path.
 
-Authored by: GPT-6 Sol
+Co-authored by: GPT-6 Sol and GPT-6 Luna
 """
 
 import hashlib
@@ -191,7 +193,7 @@ printf '<main>Updated semantic marker</main>\n' > "$fixture/src/main/web-static/
 "$graphify_python" -B - "$fixture" <<'PY'
 """Exercise a changed semantic template through Graphify's native merge API.
 
-Authored by: GPT-6 Sol
+Co-authored by: GPT-6 Sol and GPT-6 Luna
 """
 
 import hashlib
@@ -240,7 +242,7 @@ PY
 "$graphify_python" -B - "$fixture" "$repository_root/src/ext/graphify/prune-sql-stubs.py" <<'PY'
 """Verify narrow, fail-closed cleanup of disconnected SQL parser stubs.
 
-Authored by: GPT-6 Sol
+Co-authored by: GPT-6 Sol and GPT-6 Luna
 """
 
 import importlib.util
