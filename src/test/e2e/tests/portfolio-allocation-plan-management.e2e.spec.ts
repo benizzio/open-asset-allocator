@@ -551,6 +551,49 @@ test.describe('portfolio allocation plan management', () => {
       name: PORTFOLIO_NAME,
     }]);
   });
+
+  /** Verifies the shared create-new ticker action works in an allocation-plan form.
+   *
+   * @author GPT-6 Luna
+   */
+  test('scenario 14.14: creates a new-asset draft from an allocation-plan row', async ({ database, page }) => {
+    const seededData = await seedAllocationPlanData(database);
+    const ticker = 'E2E:PLAN-NEW-ASSET';
+
+    await page.goto('/');
+    await expectRootShell(page);
+    await page.goto(`/portfolio/${seededData.portfolio.id}/allocation/manage`);
+    await expectAllocationPlanManagement(page, seededData.portfolio);
+
+    const newPlanItem = page.locator('#allocation-plan-management-container-0');
+    await newPlanItem.getByRole('textbox', { name: 'New allocation plan name' }).fill('E2E Autocomplete Plan');
+    await newPlanItem.locator('#allocation-plan-management-trigger-0 > button').click();
+
+    const form = page.locator('#allocation-plan-management-form-0');
+    const classRow = await addClassAllocationRow(page, form, 1);
+    await classRow.getByRole('combobox', { name: 'Class' }).fill('BONDS');
+    const assetRow = await addAssetAllocationRow(page, classRow, 2, 1);
+    const tickerInput = assetRow.getByRole('combobox', { name: 'Asset ticker' });
+    await tickerInput.fill(ticker);
+    const createOption = assetRow.getByRole('option', { name: 'No matching assets - create new', exact: true });
+    await expect(createOption).toBeVisible();
+
+    const lookupResponse = page.waitForResponse(response => {
+      return response.request().method() === 'GET'
+        && new URL(response.url()).pathname === `/api/asset/${ticker}`;
+    });
+    await createOption.click();
+
+    expect((await lookupResponse).status()).toBe(404);
+    await expect(tickerInput).toHaveValue(ticker);
+    await expect(tickerInput).toHaveAttribute('readonly', '');
+    await expect(assetRow.getByText('* Creating new asset', { exact: true })).toBeVisible();
+    const assetNameInput = assetRow.getByRole('textbox', { name: 'Asset name' });
+    await expect(assetNameInput).toBeVisible();
+    await expect(assetNameInput).toHaveAttribute('required', '');
+    await expect(assetNameInput).toBeFocused();
+    await expect(database.query('SELECT id FROM public.asset WHERE ticker = $1', [ticker])).resolves.toEqual([]);
+  });
 });
 
 /** Seeds one portfolio and the two assets scenario 4 must resolve as existing. */

@@ -4,12 +4,12 @@
 - cluster-only mode — file stats not available
 
 ## Summary
-- 807 nodes · 1138 edges · 92 communities (46 shown, 46 thin omitted)
+- 811 nodes · 1143 edges · 92 communities (46 shown, 46 thin omitted)
 - Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 50 edges (avg confidence: 0.88)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `6f320cdc`
+- Built from commit: `cc084ba1`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -154,7 +154,7 @@
 
 ### Community 0 - "portfolio-allocation-history-management.e2e.spec.ts"
 Cohesion: 0.06
-Nodes (57): CanvasPoint, CanvasTextRecorder, clickCanvasPoint(), expectChartTooltip(), expectLatestCanvasPatternState(), expectLatestCanvasTextContains(), expectLatestCanvasTextSet(), findDoughnutSlicePointByTooltip() (+49 more)
+Nodes (58): CanvasPoint, CanvasTextRecorder, clickCanvasPoint(), expectChartTooltip(), expectLatestCanvasPatternState(), expectLatestCanvasTextContains(), expectLatestCanvasTextSet(), findDoughnutSlicePointByTooltip() (+50 more)
 
 ### Community 1 - "portfolio-allocation-plan-management.e2e.spec.ts"
 Cohesion: 0.05
@@ -338,14 +338,14 @@ Nodes (3): Go External Integration Tests, Go Test Workflow, Go Unit Tests
 
 ## Knowledge Gaps
 - **251 isolated node(s):** `CanvasPoint`, `CanvasTextRecorder`, `ExpectedObservationRow`, `NavigationOptionName`, `PersistedAllocation` (+246 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 380 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 383 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **46 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `@playwright/test` connect `@playwright/test` to `portfolio-allocation-history-management.e2e.spec.ts`, `portfolio-allocation-plan-management.e2e.spec.ts`, `portfolio-allocation-map.e2e.spec.ts`, `package.json`, `portfolio-visualization.e2e.spec.ts`, `portfolio-editing.e2e.spec.ts`, `asset-management.e2e.spec.ts`, `test`, `fixtures.ts`?**
-  _High betweenness centrality (0.045) - this node is a cross-community bridge._
+  _High betweenness centrality (0.046) - this node is a cross-community bridge._
 - **Why does `E2eDatabase` connect `database.ts` to `portfolio-allocation-history-management.e2e.spec.ts`, `portfolio-allocation-plan-management.e2e.spec.ts`, `portfolio-allocation-map.e2e.spec.ts`, `portfolio-visualization.e2e.spec.ts`, `portfolio-editing.e2e.spec.ts`, `asset-management.e2e.spec.ts`, `test`, `fixtures.ts`?**
   _High betweenness centrality (0.014) - this node is a cross-community bridge._
 - **Why does `test` connect `test` to `portfolio-allocation-history-management.e2e.spec.ts`, `portfolio-allocation-plan-management.e2e.spec.ts`, `portfolio-allocation-map.e2e.spec.ts`, `portfolio-visualization.e2e.spec.ts`, `portfolio-editing.e2e.spec.ts`, `asset-management.e2e.spec.ts`, `database.ts`, `fixtures.ts`?**
@@ -353,7 +353,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **What connects `CanvasPoint`, `CanvasTextRecorder`, `ExpectedObservationRow` to the rest of the system?**
   _251 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `portfolio-allocation-history-management.e2e.spec.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.06126331811263318 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05673274094326726 - nodes in this community are weakly interconnected._
 - **Should `portfolio-allocation-plan-management.e2e.spec.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.05069124423963134 - nodes in this community are weakly interconnected._
 - **Should `generate_report.py` be split into smaller, more focused modules?**

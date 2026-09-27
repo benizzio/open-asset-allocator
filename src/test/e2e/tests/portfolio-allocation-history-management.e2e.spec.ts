@@ -10,7 +10,7 @@
  *
  * @author OpenCode
  */
-import type { Locator, Page, Request } from '@playwright/test';
+import type { Browser, Locator, Page, Request } from '@playwright/test';
 import { expect, test } from '../support/fixtures';
 import type { E2eDatabase } from '../support/database';
 import {
@@ -100,12 +100,12 @@ type SeededHistoryModificationData = {
 };
 
 test.describe('portfolio allocation history management', () => {
-  test.describe('scenario 7: asset ticker autocomplete', () => {
+  test.describe('scenario 14: asset ticker autocomplete feedback and create action', () => {
     /** Verifies all matching tickers remain available in a bounded, scrollable list.
      *
      * @author GPT-6 Luna
      */
-    test('scenario 7.1: filters ticker suggestions and allows scrolling', async ({ database, page }) => {
+    test('scenario 14.1: filters ticker suggestions and allows scrolling', async ({ database, page }) => {
       const { row, tickerInput, suggestions } = await prepareTickerAutocompleteRow(database, page);
 
       await expect(tickerInput).toHaveAttribute('aria-expanded', 'true');
@@ -121,14 +121,15 @@ test.describe('portfolio allocation history management', () => {
       await expect(suggestions.evaluate(element => element.scrollHeight > element.clientHeight)).resolves.toBe(true);
 
       await tickerInput.fill('NO-MATCH');
-      await expect(row.getByRole('status')).toHaveText('No matching assets');
+      await expect(row.getByRole('option', { name: 'No matching assets - create new', exact: true })).toBeVisible();
+      await expect(row.getByRole('status')).toHaveText('No matching assets. Select the create option to continue.');
     });
 
     /** Verifies a refresh of the prefetched catalog replaces stale options in an open list.
      *
      * @author GPT-6 Luna
      */
-    test('scenario 7.2: refreshes suggestions after the ticker catalog reloads', async ({ database, page }) => {
+    test('scenario 14.2: refreshes suggestions after the ticker catalog reloads', async ({ database, page }) => {
       const { suggestions } = await prepareTickerAutocompleteRow(database, page);
 
       await page.locator('#datalist-assets').evaluate(element => {
@@ -154,7 +155,7 @@ test.describe('portfolio allocation history management', () => {
      *
      * @author GPT-6 Luna
      */
-    test('scenario 7.3: selecting a suggestion immediately looks up the existing asset', async ({ database, page }) => {
+    test('scenario 14.3: selecting a suggestion immediately looks up the existing asset', async ({ database, page }) => {
       const { assets, row, tickerInput, suggestions } = await prepareTickerAutocompleteRow(database, page);
       const ticker = 'E2E:AUTO-11';
       const lookupRequests: string[] = [];
@@ -185,7 +186,7 @@ test.describe('portfolio allocation history management', () => {
      *
      * @author GPT-6 Luna
      */
-    test('scenario 7.4: selects the highlighted suggestion with the keyboard', async ({ database, page }) => {
+    test('scenario 14.4: selects the highlighted suggestion with the keyboard', async ({ database, page }) => {
       const { assets, row, tickerInput } = await prepareTickerAutocompleteRow(database, page);
       const ticker = 'E2E:AUTO-00';
 
@@ -193,7 +194,8 @@ test.describe('portfolio allocation history management', () => {
       await tickerInput.press('ArrowDown');
       const activeOptionId = await tickerInput.getAttribute('aria-activedescendant');
       expect(activeOptionId).toBeTruthy();
-      await expect(row.locator(`#${activeOptionId}`)).toHaveAttribute('aria-selected', 'true');
+      const activeOption = row.locator(`#${activeOptionId}`);
+      await expectOptionHighlighted(activeOption);
 
       const lookupResponse = page.waitForResponse(response => {
         return response.request().method() === 'GET'
@@ -209,12 +211,12 @@ test.describe('portfolio allocation history management', () => {
      *
      * @author GPT-6 Luna
      */
-    test('scenario 7.5: keeps manual search for unmatched tickers', async ({ database, page }) => {
+    test('scenario 14.5: keeps manual search for unmatched tickers', async ({ database, page }) => {
       const { row, tickerInput } = await prepareTickerAutocompleteRow(database, page);
       const ticker = 'NO-SUCH-ASSET';
 
       await tickerInput.fill(ticker);
-      await expect(row.getByRole('status')).toHaveText('No matching assets');
+      await expect(row.getByRole('option', { name: 'No matching assets - create new', exact: true })).toBeVisible();
       const lookupResponse = page.waitForResponse(response => {
         return response.request().method() === 'GET'
           && new URL(response.url()).pathname === `/api/asset/${ticker}`;
@@ -230,7 +232,7 @@ test.describe('portfolio allocation history management', () => {
      *
      * @author GPT-6 Luna
      */
-    test('scenario 7.6: resets a new-asset row to ticker search', async ({ database, page }) => {
+    test('scenario 14.6: resets a new-asset row to ticker search', async ({ database, page }) => {
       const { row, tickerInput } = await prepareTickerAutocompleteRow(database, page);
       const missingAssetTicker = 'NO-SUCH-ASSET';
       const missingAssetResponse = page.waitForResponse(response => {
@@ -246,6 +248,218 @@ test.describe('portfolio allocation history management', () => {
       await expect(tickerInput).toHaveAttribute('aria-expanded', 'true');
       await tickerInput.press('Escape');
       await expect(tickerInput).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    /** Verifies pointer hover highlights one row without starting an asset lookup.
+     *
+     * @author GPT-6 Luna
+     */
+    test('scenario 14.7: visibly highlights a hovered ticker without selecting it', async ({ database, page }) => {
+      const { row, tickerInput } = await prepareTickerAutocompleteRow(database, page);
+      const ticker = 'E2E:AUTO-02';
+      const lookupTracking = trackAssetLookupRequests(page, ticker);
+
+      try {
+        await tickerInput.fill(ticker);
+        const option = row.getByRole('option', { name: ticker, exact: true });
+        await option.hover();
+
+        await expectOptionHighlighted(option);
+        await expect(tickerInput).toHaveValue(ticker);
+        await expect(row.locator('input[type="hidden"][data-null-if-empty][name$="[assetId]"]')).toHaveValue('');
+        expect(lookupTracking.requests).toHaveLength(0);
+      } finally {
+        lookupTracking.stop();
+      }
+    });
+
+    /** Verifies selecting the create action resolves the unmatched ticker into new-asset mode.
+     *
+     * @author GPT-6 Luna
+     */
+    test('scenario 14.8: creates a new-asset draft from the pointer-selected action', async ({ database, page }) => {
+      const { row, tickerInput } = await prepareTickerAutocompleteRow(database, page);
+      const ticker = 'E2E:NEW-POINTER';
+      const lookupTracking = trackAssetLookupRequests(page, ticker);
+
+      try {
+        await tickerInput.fill(ticker);
+        const createOption = row.getByRole('option', { name: 'No matching assets - create new', exact: true });
+        await expect(createOption).toBeVisible();
+        const lookupResponse = page.waitForResponse(response => {
+          return response.request().method() === 'GET'
+            && new URL(response.url()).pathname === `/api/asset/${ticker}`;
+        });
+
+        await createOption.click();
+
+        expect((await lookupResponse).status()).toBe(404);
+        expect(lookupTracking.requests).toHaveLength(1);
+        await expectNewAssetMode(row, ticker);
+        await expect(database.query('SELECT id FROM public.asset WHERE ticker = $1', [ticker])).resolves.toEqual([]);
+      } finally {
+        lookupTracking.stop();
+      }
+    });
+
+    /** Verifies keyboard navigation can select the create action and focus the required name field.
+     *
+     * @author GPT-6 Luna
+     */
+    test('scenario 14.9: selects the create action with the keyboard', async ({ database, page }) => {
+      const { row, tickerInput } = await prepareTickerAutocompleteRow(database, page);
+      const ticker = 'E2E:NEW-KEYBOARD';
+      const lookupTracking = trackAssetLookupRequests(page, ticker);
+
+      try {
+        await tickerInput.fill(ticker);
+        await tickerInput.press('ArrowDown');
+        const createOption = row.getByRole('option', { name: 'No matching assets - create new', exact: true });
+        await expectOptionHighlighted(createOption);
+        const lookupResponse = page.waitForResponse(response => {
+          return response.request().method() === 'GET'
+            && new URL(response.url()).pathname === `/api/asset/${ticker}`;
+        });
+
+        await tickerInput.press('Enter');
+
+        expect((await lookupResponse).status()).toBe(404);
+        expect(lookupTracking.requests).toHaveLength(1);
+        await expectNewAssetMode(row, ticker);
+      } finally {
+        lookupTracking.stop();
+      }
+    });
+
+    /** Verifies a touchscreen press visibly highlights and then selects an existing ticker.
+     *
+     * @author GPT-6 Luna
+     */
+    test('scenario 14.10: selects an existing ticker using a touchscreen tap', async ({ database, browser, browserName }) => {
+      test.skip(browserName !== 'chromium', 'Touchscreen input is exercised with Chromium CDP.');
+      const touchPage = await prepareTouchAutocompleteRow(database, browser);
+      const ticker = 'E2E:AUTO-03';
+      const lookupTracking = trackAssetLookupRequests(touchPage.page, ticker);
+      const cdpSession = await touchPage.context.newCDPSession(touchPage.page);
+
+      try {
+        const option = touchPage.row.getByRole('option', { name: ticker, exact: true });
+        await option.scrollIntoViewIfNeeded();
+        const bounds = await option.boundingBox();
+        if(!bounds) {
+          throw new Error('The ticker option has no visible bounds for touchscreen input.');
+        }
+        const x = bounds.x + bounds.width / 2;
+        const y = bounds.y + bounds.height / 2;
+        const lookupResponse = touchPage.page.waitForResponse(response => {
+          return response.request().method() === 'GET'
+            && new URL(response.url()).pathname === `/api/asset/${ticker}`;
+        });
+
+        await cdpSession.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] });
+        await expectOptionHighlighted(option);
+        await cdpSession.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+
+        expect((await lookupResponse).status()).toBe(200);
+        expect(lookupTracking.requests).toHaveLength(1);
+        await expectExistingAsset(touchPage.row, touchPage.assets[ticker]);
+      } finally {
+        lookupTracking.stop();
+        await cdpSession.detach();
+        await touchPage.context.close();
+      }
+    });
+
+    /** Verifies a touchscreen tap selects the create action and opens the new-asset fields.
+     *
+     * @author GPT-6 Luna
+     */
+    test('scenario 14.11: selects the create action using a touchscreen tap', async ({ database, browser, browserName }) => {
+      test.skip(browserName !== 'chromium', 'Touchscreen taps are tested in Chromium.');
+      const touchPage = await prepareTouchAutocompleteRow(database, browser);
+      const ticker = 'E2E:NEW-TOUCH';
+      const lookupTracking = trackAssetLookupRequests(touchPage.page, ticker);
+
+      try {
+        await touchPage.tickerInput.fill(ticker);
+        const option = touchPage.row.getByRole('option', { name: 'No matching assets - create new', exact: true });
+        await expect(option).toBeVisible();
+        const lookupResponse = touchPage.page.waitForResponse(response => {
+          return response.request().method() === 'GET'
+            && new URL(response.url()).pathname === `/api/asset/${ticker}`;
+        });
+
+        await option.tap();
+
+        expect((await lookupResponse).status()).toBe(404);
+        expect(lookupTracking.requests).toHaveLength(1);
+        await expectNewAssetMode(touchPage.row, ticker);
+      } finally {
+        lookupTracking.stop();
+        await touchPage.context.close();
+      }
+    });
+
+    /** Verifies a touch swipe scrolls the list without activating the option where it began.
+     *
+     * @author GPT-6 Luna
+     */
+    test('scenario 14.12: scrolls suggestions with touch without selecting a ticker', async ({ database, browser, browserName }) => {
+      test.skip(browserName !== 'chromium', 'Native touch scrolling is exercised with Chromium CDP.');
+      const touchPage = await prepareTouchAutocompleteRow(database, browser);
+      const ticker = 'E2E:AUTO-00';
+      const lookupTracking = trackAssetLookupRequests(touchPage.page, ticker);
+      const cdpSession = await touchPage.context.newCDPSession(touchPage.page);
+
+      try {
+        const listbox = touchPage.row.getByRole('listbox', { name: 'Available assets' });
+        const initialOption = touchPage.row.getByRole('option', { name: ticker, exact: true });
+        await initialOption.scrollIntoViewIfNeeded();
+        const bounds = await initialOption.boundingBox();
+        if(!bounds) {
+          throw new Error('The first ticker option has no visible bounds for touchscreen scrolling.');
+        }
+        const x = bounds.x + bounds.width / 2;
+        const startY = bounds.y + bounds.height / 2;
+
+        await cdpSession.send('Input.dispatchTouchEvent', {
+          type: 'touchStart',
+          touchPoints: [{ x, y: startY }],
+        });
+        await expectOptionHighlighted(initialOption);
+
+        for(let step = 1; step <= 6; step++) {
+          await cdpSession.send('Input.dispatchTouchEvent', {
+            type: 'touchMove',
+            touchPoints: [{ x, y: startY - step * 18 }],
+          });
+        }
+
+        await cdpSession.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+
+        await expect.poll(() => listbox.evaluate(element => element.scrollTop)).toBeGreaterThan(0);
+        await expect(initialOption).toHaveAttribute('aria-selected', 'false');
+        await expect(touchPage.tickerInput).not.toHaveAttribute('readonly', '');
+        expect(lookupTracking.requests).toHaveLength(0);
+      } finally {
+        lookupTracking.stop();
+        await cdpSession.detach();
+        await touchPage.context.close();
+      }
+    });
+
+    /** Verifies an empty ticker does not offer an invalid create action.
+     *
+     * @author GPT-6 Luna
+     */
+    test('scenario 14.13: does not offer asset creation for an empty ticker', async ({ database, page }) => {
+      const { row, tickerInput, suggestions } = await prepareTickerAutocompleteRow(database, page);
+
+      await tickerInput.fill('');
+
+      await expect(suggestions.getByRole('option', { name: 'No matching assets - create new', exact: true }))
+        .toHaveCount(0);
+      await expect(suggestions.getByRole('option')).toHaveCount(12);
     });
   });
 
@@ -792,6 +1006,116 @@ async function prepareTickerAutocompleteRow(database: E2eDatabase, page: Page): 
     row,
     tickerInput: row.getByRole('combobox', { name: 'Asset ticker' }),
     suggestions: row.getByRole('listbox', { name: 'Available assets' }),
+  };
+}
+
+/** Creates a touch-enabled Chromium page and prepares one editable ticker row.
+ *
+ * @param database - Isolated test database used to seed the portfolio and assets.
+ * @param browser - Chromium browser used to create a touch-capable context.
+ * @returns The isolated context, page, and controls for one autocomplete row.
+ *
+ * @author GPT-6 Luna
+ */
+async function prepareTouchAutocompleteRow(database: E2eDatabase, browser: Browser): Promise<{
+  assets: Record<string, SeededAsset>;
+  context: Awaited<ReturnType<Browser['newContext']>>;
+  page: Page;
+  row: Locator;
+  tickerInput: Locator;
+  suggestions: Locator;
+}> {
+  const context = await browser.newContext({
+    deviceScaleFactor: 1,
+    hasTouch: true,
+    viewport: { width: 1280, height: 900 },
+  });
+
+  try {
+    const page = await context.newPage();
+    const preparedRow = await prepareTickerAutocompleteRow(database, page);
+
+    return { ...preparedRow, context, page };
+  } catch(error) {
+    await context.close();
+    throw error;
+  }
+}
+
+/** Asserts that an option has synchronized accessibility and theme-aware visible highlight state.
+ *
+ * @param option - Rendered suggestion expected to be the active option.
+ *
+ * @author GPT-6 Luna
+ */
+async function expectOptionHighlighted(option: Locator): Promise<void> {
+  await expect(option).toHaveAttribute('aria-selected', 'true');
+
+  const colors = await option.evaluate(element => {
+    const expectedColors = document.createElement('span');
+    expectedColors.style.backgroundColor = 'var(--bs-primary-bg-subtle)';
+    expectedColors.style.color = 'var(--bs-primary-text-emphasis)';
+    element.append(expectedColors);
+    const expectedBackgroundColor = getComputedStyle(expectedColors).backgroundColor;
+    const expectedColor = getComputedStyle(expectedColors).color;
+    expectedColors.remove();
+
+    const actualStyle = getComputedStyle(element);
+    return {
+      actualBackgroundColor: actualStyle.backgroundColor,
+      actualColor: actualStyle.color,
+      boxShadow: actualStyle.boxShadow,
+      expectedBackgroundColor,
+      expectedColor,
+    };
+  });
+
+  expect(colors.actualBackgroundColor).toBe(colors.expectedBackgroundColor);
+  expect(colors.actualColor).toBe(colors.expectedColor);
+  expect(colors.boxShadow).toContain('inset');
+}
+
+/** Asserts the unmatched ticker has entered editable, focused new-asset mode.
+ *
+ * @param row - Allocation row containing the ticker and asset-name inputs.
+ * @param ticker - Unmatched ticker that must remain in the row.
+ *
+ * @author GPT-6 Luna
+ */
+async function expectNewAssetMode(row: Locator, ticker: string): Promise<void> {
+  const tickerInput = row.getByRole('combobox', { name: 'Asset ticker' });
+  const assetNameInput = row.getByRole('textbox', { name: 'Asset name' });
+
+  await expect(tickerInput).toHaveAttribute('readonly', '');
+  await expect(tickerInput).toHaveValue(ticker);
+  await expect(row.getByText('* Creating new asset', { exact: true })).toBeVisible();
+  await expect(assetNameInput).toBeVisible();
+  await expect(assetNameInput).not.toHaveAttribute('readonly', '');
+  await expect(assetNameInput).toHaveAttribute('required', '');
+  await expect(assetNameInput).toBeFocused();
+  await expect(tickerInput).toHaveAttribute('aria-expanded', 'false');
+}
+
+/** Records asset endpoint requests for one ticker and returns a cleanup callback.
+ *
+ * @param page - Page emitting the network requests.
+ * @param ticker - Exact ticker path to record.
+ * @returns Captured request URLs and a method that unregisters the listener.
+ *
+ * @author GPT-6 Luna
+ */
+function trackAssetLookupRequests(page: Page, ticker: string): { requests: string[]; stop: () => void } {
+  const requests: string[] = [];
+  const listener = (request: Request): void => {
+    if(request.method() === 'GET' && new URL(request.url()).pathname === `/api/asset/${ticker}`) {
+      requests.push(request.url());
+    }
+  };
+  page.on('request', listener);
+
+  return {
+    requests,
+    stop: () => page.off('request', listener),
   };
 }
 

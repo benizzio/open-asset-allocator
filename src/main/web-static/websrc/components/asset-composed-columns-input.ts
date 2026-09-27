@@ -18,6 +18,16 @@ const ASSET_TICKER_SUGGESTIONS_ATTRIBUTE = "data-asset-ticker-suggestions";
 const ASSET_TICKER_LISTBOX_ATTRIBUTE = "data-asset-ticker-listbox";
 const ASSET_TICKER_STATUS_ATTRIBUTE = "data-asset-ticker-status";
 
+/** Describes one selectable asset suggestion or missing-ticker create action.
+ *
+ * @author GPT-6 Luna
+ */
+type AssetTickerAutocompleteOption = {
+    kind: "asset" | "create";
+    label: string;
+    ticker: string;
+};
+
 /**
  * Stores per-input DOM references and transient state for keyboard and pointer interaction.
  *
@@ -28,11 +38,12 @@ interface AssetTickerAutocompleteState {
     suggestions: HTMLElement;
     listbox: HTMLElement;
     status: HTMLElement;
-    optionValues: string[];
+    options: AssetTickerAutocompleteOption[];
     activeOptionIndex: number;
+    activeOptionSource: "keyboard" | "pointer" | null;
     isOpen: boolean;
     isLookupPending: boolean;
-    pointerSelection?: { optionIndex: number; pointerId: number; x: number; y: number };
+    pointerSelection?: { optionIndex: number; pointerId: number; x: number; y: number; isCancelled: boolean };
     outsidePointerHandler?: (event: PointerEvent) => void;
     removalObserver?: MutationObserver;
 }
@@ -76,11 +87,36 @@ function getAutocompleteState(input: HTMLInputElement): AssetTickerAutocompleteS
         suggestions,
         listbox,
         status,
-        optionValues: [],
+        options: [],
         activeOptionIndex: -1,
+        activeOptionSource: null,
         isOpen: false,
         isLookupPending: false,
     };
+
+    status.classList.add("visually-hidden");
+
+    listbox.addEventListener("pointerover", event => {
+        const pointerEvent = event as PointerEvent;
+        const option = (pointerEvent.target as HTMLElement).closest<HTMLElement>("[data-asset-ticker-option]");
+
+        if(pointerEvent.pointerType === "mouse" && option) {
+            highlightAssetTickerOption(input, Number(option.dataset.optionIndex), "pointer", false);
+        }
+    });
+
+    listbox.addEventListener("pointerout", event => {
+        const pointerEvent = event as PointerEvent;
+
+        if(pointerEvent.pointerType !== "mouse"
+            || (pointerEvent.relatedTarget instanceof Node && listbox.contains(pointerEvent.relatedTarget))) {
+            return;
+        }
+
+        if(state.activeOptionSource === "pointer" && !state.pointerSelection) {
+            clearAssetTickerOptionHighlight(input);
+        }
+    });
 
     listbox.addEventListener("pointerdown", event => {
         const pointerEvent = event as PointerEvent;
@@ -98,7 +134,26 @@ function getAutocompleteState(input: HTMLInputElement): AssetTickerAutocompleteS
             pointerId: pointerEvent.pointerId,
             x: pointerEvent.clientX,
             y: pointerEvent.clientY,
+            isCancelled: false,
         };
+        highlightAssetTickerOption(input, state.pointerSelection.optionIndex, "pointer", false);
+    });
+
+    listbox.addEventListener("pointermove", event => {
+        const pointerEvent = event as PointerEvent;
+        const pointerSelection = state.pointerSelection;
+
+        if(!pointerSelection || pointerSelection.pointerId !== pointerEvent.pointerId || pointerSelection.isCancelled) {
+            return;
+        }
+
+        const movedX = pointerEvent.clientX - pointerSelection.x;
+        const movedY = pointerEvent.clientY - pointerSelection.y;
+
+        if(Math.hypot(movedX, movedY) > 8) {
+            pointerSelection.isCancelled = true;
+            clearAssetTickerOptionHighlight(input);
+        }
     });
 
     listbox.addEventListener("pointerup", event => {
@@ -106,11 +161,12 @@ function getAutocompleteState(input: HTMLInputElement): AssetTickerAutocompleteS
         const pointerSelection = state.pointerSelection;
         state.pointerSelection = undefined;
 
-        if(pointerSelection?.pointerId !== pointerEvent.pointerId) {
+        if(!pointerSelection || pointerSelection.pointerId !== pointerEvent.pointerId || pointerSelection.isCancelled) {
             return;
         }
 
-        const option = (pointerEvent.target as HTMLElement).closest<HTMLElement>("[data-asset-ticker-option]");
+        const pointerTarget = document.elementFromPoint(pointerEvent.clientX, pointerEvent.clientY);
+        const option = pointerTarget?.closest<HTMLElement>("[data-asset-ticker-option]");
         const optionIndex = option ? Number(option.dataset.optionIndex) : -1;
         const movedX = pointerEvent.clientX - pointerSelection.x;
         const movedY = pointerEvent.clientY - pointerSelection.y;
@@ -119,15 +175,16 @@ function getAutocompleteState(input: HTMLInputElement): AssetTickerAutocompleteS
             return;
         }
 
-        const ticker = state.optionValues[optionIndex];
+        const selectedOption = state.options[optionIndex];
 
-        if(ticker !== undefined) {
-            selectAssetTicker(input, ticker);
+        if(selectedOption) {
+            selectAssetTicker(input, selectedOption.ticker);
         }
     });
 
     listbox.addEventListener("pointercancel", () => {
         state.pointerSelection = undefined;
+        clearAssetTickerOptionHighlight(input);
     });
 
     listbox.addEventListener("click", event => {
@@ -138,10 +195,10 @@ function getAutocompleteState(input: HTMLInputElement): AssetTickerAutocompleteS
         }
 
         const option = (clickEvent.target as HTMLElement).closest<HTMLElement>("[data-asset-ticker-option]");
-        const optionValue = option ? state.optionValues[Number(option.dataset.optionIndex)] : undefined;
+        const selectedOption = option ? state.options[Number(option.dataset.optionIndex)] : undefined;
 
-        if(optionValue !== undefined) {
-            selectAssetTicker(input, optionValue);
+        if(selectedOption) {
+            selectAssetTicker(input, selectedOption.ticker);
         }
     });
 
@@ -260,6 +317,7 @@ function closeAssetTickerAutocomplete(input: HTMLInputElement): void {
 
     state.isOpen = false;
     state.activeOptionIndex = -1;
+    state.activeOptionSource = null;
     state.pointerSelection = undefined;
     state.suggestions.hidden = true;
     state.status.hidden = true;
@@ -279,7 +337,7 @@ function closeAssetTickerAutocomplete(input: HTMLInputElement): void {
 }
 
 /**
- * Filters the current prefetched ticker options and renders every matching result.
+ * Filters prefetched tickers and adds a selectable create action for an unmatched query.
  *
  * @param input - Ticker input whose current value is used as the filter query.
  *
@@ -295,10 +353,11 @@ function renderAssetTickerSuggestions(input: HTMLInputElement): void {
 
     const sourceId = input.dataset.assetTickerSource;
     const source = sourceId ? document.getElementById(sourceId) as HTMLDataListElement | null : null;
-    const query = input.value.toLocaleLowerCase();
+    const tickerQuery = input.value.trim();
+    const query = tickerQuery.toLocaleLowerCase();
     const seenTickers = new Set<string>();
 
-    state.optionValues = source
+    const matchingTickers = source
         ? Array.from(source.options)
             .map(option => option.value.trim())
             .filter(ticker => {
@@ -312,11 +371,19 @@ function renderAssetTickerSuggestions(input: HTMLInputElement): void {
                 return true;
             })
         : [];
+
+    state.options = matchingTickers.length > 0
+        ? matchingTickers.map(ticker => ({ kind: "asset", label: ticker, ticker }))
+        : tickerQuery
+            ? [{ kind: "create", label: "No matching assets - create new", ticker: tickerQuery }]
+            : [];
     state.activeOptionIndex = -1;
+    state.activeOptionSource = null;
+    state.pointerSelection = undefined;
     state.listbox.replaceChildren();
     input.removeAttribute("aria-activedescendant");
 
-    state.optionValues.forEach((ticker, index) => {
+    state.options.forEach((autocompleteOption, index) => {
         const option = document.createElement("div");
         option.id = `${ state.listbox.id }-option-${ index }`;
         option.className = "asset-ticker-autocomplete__option";
@@ -324,32 +391,43 @@ function renderAssetTickerSuggestions(input: HTMLInputElement): void {
         option.setAttribute("aria-selected", "false");
         option.dataset.assetTickerOption = "";
         option.dataset.optionIndex = index.toString();
-        option.textContent = ticker;
+        option.dataset.optionKind = autocompleteOption.kind;
+        option.textContent = autocompleteOption.label;
         state.listbox.append(option);
     });
 
-    state.listbox.hidden = state.optionValues.length === 0;
-    state.status.textContent = "No matching assets";
-    state.status.hidden = state.optionValues.length > 0;
+    const hasMatchingTickers = matchingTickers.length > 0;
+    const hasCreateOption = state.options.some(option => option.kind === "create");
+    state.listbox.hidden = state.options.length === 0;
+    state.status.textContent = "No matching assets. Select the create option to continue.";
+    state.status.hidden = hasMatchingTickers || !hasCreateOption;
 }
 
 /**
- * Highlights a suggestion while keeping the input focused for keyboard navigation.
+ * Highlights one option and optionally scrolls it into view for keyboard navigation.
  *
  * @param input - Input that owns the active listbox.
  * @param optionIndex - Index of the option to highlight.
+ * @param source - Interaction source used to clear transient pointer highlighting.
+ * @param shouldScroll - Whether keyboard navigation should scroll the active option into view.
  *
  * @author GPT-6 Luna
  */
-function highlightAssetTickerOption(input: HTMLInputElement, optionIndex: number): void {
+function highlightAssetTickerOption(
+    input: HTMLInputElement,
+    optionIndex: number,
+    source: "keyboard" | "pointer",
+    shouldScroll: boolean,
+): void {
 
     const state = autocompleteStates.get(input);
 
-    if(!state?.optionValues.length) {
+    if(!state?.options.length) {
         return;
     }
 
-    state.activeOptionIndex = Math.max(0, Math.min(optionIndex, state.optionValues.length - 1));
+    state.activeOptionIndex = Math.max(0, Math.min(optionIndex, state.options.length - 1));
+    state.activeOptionSource = source;
 
     const options = state.listbox.querySelectorAll<HTMLElement>("[data-asset-ticker-option]");
 
@@ -359,8 +437,32 @@ function highlightAssetTickerOption(input: HTMLInputElement, optionIndex: number
 
         if(isActive) {
             input.setAttribute("aria-activedescendant", option.id);
-            option.scrollIntoView({ block: "nearest" });
+
+            if(shouldScroll) {
+                option.scrollIntoView({ block: "nearest" });
+            }
         }
+    });
+}
+
+/** Clears the active option and its corresponding accessibility state.
+ *
+ * @author GPT-6 Luna
+ */
+function clearAssetTickerOptionHighlight(input: HTMLInputElement): void {
+
+    const state = autocompleteStates.get(input);
+
+    if(!state) {
+        return;
+    }
+
+    state.activeOptionIndex = -1;
+    state.activeOptionSource = null;
+    input.removeAttribute("aria-activedescendant");
+
+    state.listbox.querySelectorAll<HTMLElement>("[data-asset-ticker-option]").forEach(option => {
+        option.setAttribute("aria-selected", "false");
     });
 }
 
@@ -492,6 +594,7 @@ class AssetComposedColumnInput {
         this.assetNameInput.required = true;
 
         this.newAssetTickerMessage.style.display = "";
+        this.assetNameInput.focus();
     }
 
     /**
@@ -762,13 +865,13 @@ const AssetComposedColumnsInput = {
             openAssetTickerAutocomplete(inputElement);
             state = getAutocompleteState(inputElement);
 
-            if(state?.optionValues.length) {
+            if(state?.options.length) {
                 event.preventDefault();
 
                 const nextIndex = state.activeOptionIndex < 0
-                    ? (event.key === "ArrowDown" ? 0 : state.optionValues.length - 1)
+                    ? (event.key === "ArrowDown" ? 0 : state.options.length - 1)
                     : state.activeOptionIndex + (event.key === "ArrowDown" ? 1 : -1);
-                highlightAssetTickerOption(inputElement, nextIndex);
+                highlightAssetTickerOption(inputElement, nextIndex, "keyboard", true);
             }
             return;
         }
@@ -791,10 +894,10 @@ const AssetComposedColumnsInput = {
 
             if(state?.activeOptionIndex >= 0) {
                 event.preventDefault();
-                const selectedTicker = state.optionValues[state.activeOptionIndex];
+                const selectedOption = state.options[state.activeOptionIndex];
 
-                if(selectedTicker !== undefined) {
-                    selectAssetTicker(inputElement, selectedTicker);
+                if(selectedOption) {
+                    selectAssetTicker(inputElement, selectedOption.ticker);
                 }
                 return;
             }
