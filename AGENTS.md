@@ -210,4 +210,4 @@ Rules:
   SQL migration content requires the optional `graphifyy[sql]` extra. The current remainder graph was rebuilt with
   that extra, but a fresh checkout needs it for future SQL re-extraction. The 0.9.64 parser does not identify every
   statement in every migration; seven parser gaps have reviewed host-agent semantic supplements. See
-  `docs/graphify-scopes.md` for maintenance, validation, and coverage limits.
+  `docs/graphify-scopes.md` for scoped Graphify maintenance guidance.
