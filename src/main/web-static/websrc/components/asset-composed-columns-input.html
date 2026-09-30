@@ -14,14 +14,16 @@
             {{assetTicker}}
         {{else}}
 
-            <div data-asset-ticker-autocomplete class="asset-ticker-autocomplete">
+            <div data-asset-ticker-autocomplete
+                 data-asset-selection-state="search"
+                 class="asset-ticker-autocomplete"
+            >
 
                 <div class="input-group">
 
                     <input type="text"
-                           name="{{assetTickerFieldName}}"
-                           placeholder="Asset ticker"
-                           aria-label="Asset ticker"
+                           placeholder="Asset"
+                           aria-label="Asset"
                            autocomplete="off"
                            class="form-control"
                            value="{{assetTicker}}"
@@ -30,12 +32,25 @@
                            aria-haspopup="listbox"
                            aria-expanded="false"
                            data-asset-ticker-source="datalist-assets"
+                           data-asset-search-input
                            hx-validate="true"
                            hx-on::validation:validate="{{assetTickerFieldHTMXOnValidate}}"
                            onfocus="AssetComposedColumnsInput.handleAssetTickerFocus(event)"
-                           oninput="maskTickerInput(this); AssetComposedColumnsInput.handleAssetTickerInput(event)"
+                           oninput="AssetComposedColumnsInput.handleAssetTickerInput(event)"
                            onkeydown="AssetComposedColumnsInput.handleAssetTickerKeydown(event)"
+                     />
+                    <input type="text"
+                           name="{{assetTickerFieldName}}"
+                           placeholder="Asset ticker"
+                           aria-label="Asset ticker"
+                           autocomplete="off"
+                           class="form-control"
+                           data-asset-ticker-input
+                           value=""
                            maxlength="40"
+                           readonly
+                           hidden
+                           disabled
                     />
                     <button data-asset-action-button
                             type="button"

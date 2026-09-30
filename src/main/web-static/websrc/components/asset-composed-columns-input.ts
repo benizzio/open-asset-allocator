@@ -17,6 +17,11 @@ const ASSET_TICKER_AUTOCOMPLETE_ATTRIBUTE = "data-asset-ticker-autocomplete";
 const ASSET_TICKER_SUGGESTIONS_ATTRIBUTE = "data-asset-ticker-suggestions";
 const ASSET_TICKER_LISTBOX_ATTRIBUTE = "data-asset-ticker-listbox";
 const ASSET_TICKER_STATUS_ATTRIBUTE = "data-asset-ticker-status";
+const ASSET_SEARCH_INPUT_ATTRIBUTE = "data-asset-search-input";
+const ASSET_TICKER_INPUT_ATTRIBUTE = "data-asset-ticker-input";
+const ASSET_SELECTION_ERROR_MESSAGE = "Reference an existing asset or create a new one";
+const ASSET_LOOKUP_PENDING_ERROR_MESSAGE = "Asset lookup is still in progress";
+const TICKER_CANDIDATE_PATTERN = /^[A-Za-z0-9_:.-]+$/;
 
 /** Describes one selectable asset suggestion or missing-ticker create action.
  *
@@ -353,17 +358,21 @@ function renderAssetTickerSuggestions(input: HTMLInputElement): void {
 
     const sourceId = input.dataset.assetTickerSource;
     const source = sourceId ? document.getElementById(sourceId) as HTMLDataListElement | null : null;
-    const tickerQuery = input.value.trim();
-    const query = tickerQuery.toLocaleLowerCase();
+    const searchQuery = input.value.trim();
+    const query = searchQuery.toLocaleLowerCase();
     const seenTickers = new Set<string>();
 
-    const matchingTickers = source
+    const matchingAssets = source
         ? Array.from(source.options)
-            .map(option => option.value.trim())
-            .filter(ticker => {
+            .map(option => ({
+                ticker: option.value.trim(),
+                label: (option.textContent ?? option.value).trim(),
+            }))
+            .filter(({ ticker, label }) => {
                 const normalizedTicker = ticker.toLocaleLowerCase();
+                const normalizedLabel = label.toLocaleLowerCase();
 
-                if(!ticker || !normalizedTicker.includes(query) || seenTickers.has(normalizedTicker)) {
+                if(!ticker || !normalizedLabel.includes(query) || seenTickers.has(normalizedTicker)) {
                     return false;
                 }
 
@@ -372,10 +381,10 @@ function renderAssetTickerSuggestions(input: HTMLInputElement): void {
             })
         : [];
 
-    state.options = matchingTickers.length > 0
-        ? matchingTickers.map(ticker => ({ kind: "asset", label: ticker, ticker }))
-        : tickerQuery
-            ? [{ kind: "create", label: "No matching assets - create new", ticker: tickerQuery }]
+    state.options = matchingAssets.length > 0
+        ? matchingAssets.map(({ ticker, label }) => ({ kind: "asset", label, ticker }))
+        : searchQuery
+            ? [{ kind: "create", label: "No matching assets - create new", ticker: searchQuery }]
             : [];
     state.activeOptionIndex = -1;
     state.activeOptionSource = null;
@@ -396,7 +405,7 @@ function renderAssetTickerSuggestions(input: HTMLInputElement): void {
         state.listbox.append(option);
     });
 
-    const hasMatchingTickers = matchingTickers.length > 0;
+    const hasMatchingTickers = matchingAssets.length > 0;
     const hasCreateOption = state.options.some(option => option.kind === "create");
     state.listbox.hidden = state.options.length === 0;
     state.status.textContent = "No matching assets. Select the create option to continue.";
@@ -487,15 +496,16 @@ function selectAssetTicker(input: HTMLInputElement, ticker: string): void {
 
     const row = input.closest<HTMLTableRowElement>("tr");
     const assetIdInput = row?.querySelector<HTMLInputElement>("input[type='hidden'][data-null-if-empty]");
+    const assetTickerInput = row?.querySelector<HTMLInputElement>(`[${ ASSET_TICKER_INPUT_ATTRIBUTE }]`);
     const assetNameInput = row?.querySelector<HTMLInputElement>("input[aria-label='Asset name']");
 
-    if(!row?.id || !assetIdInput || !assetNameInput) {
+    if(!row?.id || !assetIdInput || !assetTickerInput || !assetNameInput) {
         console.error("Unable to resolve the asset row for the selected ticker.");
         return;
     }
 
-    new AssetComposedColumnInput(row.id, assetIdInput.name, input.name, assetNameInput.name)
-        .handleAssetActionButtonClick();
+    new AssetComposedColumnInput(row.id, assetIdInput.name, assetTickerInput.name, assetNameInput.name)
+        .handleAssetActionButtonClick(ticker);
 }
 
 const ASSET_ACTION_BUTTON_IDENTITIES = {
@@ -513,9 +523,13 @@ const ASSET_ACTION_BUTTON_IDENTITIES = {
  * Coordinates an asset ticker, its lookup button, and the related form fields for one row.
  *
  * @author benizzio
+ * @author GPT-6 Luna
  */
 class AssetComposedColumnInput {
 
+    container: HTMLElement;
+    autocompleteWrapper: HTMLElement;
+    assetSearchInput: HTMLInputElement;
     assetIdInput: HTMLInputElement;
     assetTickerInput: HTMLInputElement;
     assetActionButton: HTMLButtonElement;
@@ -530,24 +544,52 @@ class AssetComposedColumnInput {
         assetNameFieldName: string,
     ) {
 
-        const container = window[containerId] as HTMLElement;
+        const container = document.getElementById(containerId);
 
-        this.assetIdInput = container.querySelector(`[name='${ assetIdHiddenFieldName }']`);
-        this.assetTickerInput = container.querySelector(`[name='${ assetTickerFieldName }']`);
-        this.assetActionButton = container.querySelector("[data-asset-action-button]");
-        this.newAssetTickerMessage = container.querySelector("[data-new-asset-ticker-message]");
-        this.assetNameInput = container.querySelector(`[name='${ assetNameFieldName }']`);
-        this.assetTickerExtraErrorMessageDiv = container.querySelector(`[${ TICKER_EXTRA_ERROR_MESSAGE_ATTRIBUTE }]`);
+        if(!container) {
+            throw new Error(`Unable to find asset row container '${ containerId }'.`);
+        }
+
+        this.container = container;
+        this.autocompleteWrapper = container.querySelector<HTMLElement>(`[${ ASSET_TICKER_AUTOCOMPLETE_ATTRIBUTE }]`);
+        this.assetSearchInput = container.querySelector<HTMLInputElement>(`[${ ASSET_SEARCH_INPUT_ATTRIBUTE }]`);
+        this.assetIdInput = container.querySelector<HTMLInputElement>(`[name='${ assetIdHiddenFieldName }']`);
+        this.assetTickerInput = container.querySelector<HTMLInputElement>(`[name='${ assetTickerFieldName }']`);
+        this.assetActionButton = container.querySelector<HTMLButtonElement>("[data-asset-action-button]");
+        this.newAssetTickerMessage = container.querySelector<HTMLDivElement>("[data-new-asset-ticker-message]");
+        this.assetNameInput = container.querySelector<HTMLInputElement>(`[name='${ assetNameFieldName }']`);
+
+        this.assetTickerExtraErrorMessageDiv =
+            container.querySelector<HTMLDivElement>(`[${ TICKER_EXTRA_ERROR_MESSAGE_ATTRIBUTE }]`);
+
+        if(!this.autocompleteWrapper || !this.assetSearchInput || !this.assetIdInput || !this.assetTickerInput
+            || !this.assetActionButton || !this.newAssetTickerMessage || !this.assetNameInput
+            || !this.assetTickerExtraErrorMessageDiv) {
+            throw new Error(`Asset row '${ containerId }' is missing required controls.`);
+        }
     }
 
+    /** Returns whether this row is waiting for a search or asset lookup.
+     *
+     * @author GPT-6 Luna
+     */
     isInSearchMode(): boolean {
-        return this.assetActionButton.className === ASSET_ACTION_BUTTON_IDENTITIES.search.classes;
+        return this.autocompleteWrapper.dataset.assetSelectionState === "search";
     }
 
+    /** Returns whether the committed asset state can be cleared with the action button.
+     *
+     * @author GPT-6 Luna
+     */
     isInResetMode(): boolean {
-        return this.assetActionButton.className === ASSET_ACTION_BUTTON_IDENTITIES.reset.classes;
+        const selectionState = this.autocompleteWrapper.dataset.assetSelectionState;
+        return selectionState === "existing" || selectionState === "new";
     }
 
+    /** Updates the search/reset styling and icon without changing row selection state.
+     *
+     * @author GPT-6 Luna
+     */
     switchAssetActionButtonIdentity(identity: typeof ASSET_ACTION_BUTTON_IDENTITIES.search) {
         this.assetActionButton.className = identity.classes;
         this.assetActionButton.innerHTML = `<span class="${ identity.iconClasses }"></span>`;
@@ -559,21 +601,32 @@ class AssetComposedColumnInput {
      * @author benizzio
      * @author GPT-6 Luna
      */
-    activateExistingAssetMode(asset: Asset) {
+    activateExistingAssetMode(asset: Asset): void {
 
         this.completeAssetLookup();
+        this.assetActionButton.focus();
+        this.autocompleteWrapper.dataset.assetSelectionState = "existing";
         this.switchAssetActionButtonIdentity(ASSET_ACTION_BUTTON_IDENTITIES.reset);
 
+        this.assetSearchInput.setCustomValidity("");
+        this.assetSearchInput.readOnly = false;
+        this.assetSearchInput.disabled = true;
+        this.assetSearchInput.hidden = true;
+
+        this.assetTickerInput.hidden = false;
+        this.assetTickerInput.disabled = false;
         this.assetTickerInput.readOnly = true;
         this.assetTickerInput.value = asset.ticker;
 
         this.assetNameInput.style.display = "";
         this.assetNameInput.readOnly = true;
-        this.assetNameInput.value = asset.name;
+        this.assetNameInput.required = false;
+        this.assetNameInput.value = asset.name ?? "";
 
-        this.assetIdInput.value = asset.id.toString();
+        this.assetIdInput.value = asset.id?.toString() ?? "";
 
         this.newAssetTickerMessage.style.display = "none";
+        this.clearSearchErrorFeedback();
     }
 
     /**
@@ -582,18 +635,31 @@ class AssetComposedColumnInput {
      * @author benizzio
      * @author GPT-6 Luna
      */
-    activateNewAssetMode() {
+    activateNewAssetMode(ticker: string): void {
 
         this.completeAssetLookup();
+        this.assetActionButton.focus();
+        this.autocompleteWrapper.dataset.assetSelectionState = "new";
         this.switchAssetActionButtonIdentity(ASSET_ACTION_BUTTON_IDENTITIES.reset);
 
+        this.assetSearchInput.setCustomValidity("");
+        this.assetSearchInput.readOnly = false;
+        this.assetSearchInput.disabled = true;
+        this.assetSearchInput.hidden = true;
+
+        this.assetTickerInput.value = ticker;
+        this.assetTickerInput.hidden = false;
+        this.assetTickerInput.disabled = false;
         this.assetTickerInput.readOnly = true;
 
         this.assetNameInput.style.display = "";
         this.assetNameInput.readOnly = false;
         this.assetNameInput.required = true;
+        this.assetNameInput.value = "";
 
+        this.assetIdInput.value = "";
         this.newAssetTickerMessage.style.display = "";
+        this.clearSearchErrorFeedback();
         this.assetNameInput.focus();
     }
 
@@ -605,20 +671,29 @@ class AssetComposedColumnInput {
      */
     resetToSearchMode() {
 
-        closeAssetTickerAutocomplete(this.assetTickerInput);
-        const autocompleteState = autocompleteStates.get(this.assetTickerInput);
+        closeAssetTickerAutocomplete(this.assetSearchInput);
+        const autocompleteState = autocompleteStates.get(this.assetSearchInput);
 
         if(autocompleteState) {
             autocompleteState.isLookupPending = false;
         }
 
+        this.autocompleteWrapper.dataset.assetSelectionState = "search";
         this.switchAssetActionButtonIdentity(ASSET_ACTION_BUTTON_IDENTITIES.search);
         this.assetActionButton.disabled = false;
 
+        this.assetSearchInput.value = "";
+        this.assetSearchInput.setCustomValidity("");
+        this.assetSearchInput.readOnly = false;
+        this.assetSearchInput.disabled = false;
+        this.assetSearchInput.hidden = false;
+        this.assetSearchInput.classList.remove("is-invalid");
+
         this.assetTickerInput.value = "";
         this.assetTickerInput.setCustomValidity("");
-        this.assetTickerInput.reportValidity();
-        this.assetTickerInput.readOnly = false;
+        this.assetTickerInput.readOnly = true;
+        this.assetTickerInput.disabled = true;
+        this.assetTickerInput.hidden = true;
         this.assetTickerInput.classList.remove("is-invalid");
 
         this.assetNameInput.value = "";
@@ -629,27 +704,50 @@ class AssetComposedColumnInput {
         this.assetIdInput.value = "";
 
         this.newAssetTickerMessage.style.display = "none";
-        this.assetTickerExtraErrorMessageDiv.textContent = "";
-        this.assetTickerExtraErrorMessageDiv.style.display = "none";
+        this.clearSearchErrorFeedback();
 
-        this.assetTickerInput.focus();
-        openAssetTickerAutocomplete(this.assetTickerInput);
+        this.assetSearchInput.focus();
+        openAssetTickerAutocomplete(this.assetSearchInput);
     }
 
+    /** Clears search validation feedback before a new lookup attempt.
+     *
+     * @author GPT-6 Luna
+     */
     clearSearchFieldValidation() {
-        this.assetTickerInput.setCustomValidity("");
-        this.assetTickerInput.reportValidity();
+        this.assetSearchInput.setCustomValidity("");
+        this.assetSearchInput.classList.remove("is-invalid");
+        this.clearSearchErrorFeedback();
     }
 
+    /** Trims and validates a literal ticker or ID before it is sent to the lookup API.
+     *
+     * @author GPT-6 Luna
+     */
     validateSearchUniqueIdentifier(): string {
 
-        const assetUniqueIdentifier = this.assetTickerInput.value.trim();
+        const assetUniqueIdentifier = this.assetSearchInput.value.trim();
 
         if(!assetUniqueIdentifier) {
-            this.assetTickerInput.setCustomValidity("Required for search");
-            this.assetTickerInput.reportValidity();
+            this.assetSearchInput.setCustomValidity("Required for search");
+            this.assetSearchInput.reportValidity();
+            return "";
         }
 
+        if(assetUniqueIdentifier.length > 40) {
+            this.assetSearchInput.setCustomValidity("Asset ticker cannot exceed 40 characters");
+            this.assetSearchInput.reportValidity();
+            return "";
+        }
+
+        if(!TICKER_CANDIDATE_PATTERN.test(assetUniqueIdentifier)) {
+            this.assetSearchInput.setCustomValidity("Ticker may contain only letters, numbers, '-', '_', ':', and '.'");
+            this.assetSearchInput.reportValidity();
+            return "";
+        }
+
+        this.assetSearchInput.value = assetUniqueIdentifier;
+        this.assetSearchInput.setCustomValidity("");
         return assetUniqueIdentifier;
     }
 
@@ -659,11 +757,15 @@ class AssetComposedColumnInput {
      * @author GPT-6 Luna
      * @author benizzio
      */
-    handleAssetActionButtonClick() {
+    handleAssetActionButtonClick(selectedTicker?: string): void {
 
         if(this.isInSearchMode()) {
 
             this.clearSearchFieldValidation();
+
+            if(selectedTicker !== undefined) {
+                this.assetSearchInput.value = selectedTicker;
+            }
             const searchUniqueIdentifier = this.validateSearchUniqueIdentifier();
 
             if(searchUniqueIdentifier) {
@@ -674,15 +776,32 @@ class AssetComposedColumnInput {
                 getAsset(this, searchUniqueIdentifier);
             }
         }
+        else if(this.autocompleteWrapper.dataset.assetSelectionState === "pending") {
+            return;
+        }
         else if(this.isInResetMode()) {
             this.resetToSearchMode();
         }
     }
 
-    validateForPost() {
-        if(this.isInSearchMode()) {
-            this.assetTickerInput.setCustomValidity("Reference an existing asset or create a new one");
-            this.assetTickerInput.reportValidity();
+    /** Sets custom validity when the row has not committed an existing or new ticker.
+     *
+     * @author GPT-6 Luna
+     */
+    validateForPost(): void {
+        const selectionState = this.autocompleteWrapper.dataset.assetSelectionState;
+
+        if(selectionState === "search" || selectionState === "pending") {
+            const message = selectionState === "pending"
+                ? ASSET_LOOKUP_PENDING_ERROR_MESSAGE
+                : ASSET_SELECTION_ERROR_MESSAGE;
+            this.assetSearchInput.setCustomValidity(message);
+            this.assetSearchInput.classList.add("is-invalid");
+            this.assetTickerExtraErrorMessageDiv.textContent = message;
+            this.assetTickerExtraErrorMessageDiv.style.display = "contents";
+        }
+        else {
+            this.assetSearchInput.setCustomValidity("");
         }
     }
 
@@ -695,19 +814,21 @@ class AssetComposedColumnInput {
      */
     beginAssetLookup(): boolean {
 
-        const state = getAutocompleteState(this.assetTickerInput);
+        const state = getAutocompleteState(this.assetSearchInput);
 
         if(state?.isLookupPending) {
             return false;
         }
 
-        closeAssetTickerAutocomplete(this.assetTickerInput);
+        closeAssetTickerAutocomplete(this.assetSearchInput);
 
         if(state) {
             state.isLookupPending = true;
         }
 
-        this.assetTickerInput.readOnly = true;
+        this.autocompleteWrapper.dataset.assetSelectionState = "pending";
+        this.assetSearchInput.setCustomValidity(ASSET_LOOKUP_PENDING_ERROR_MESSAGE);
+        this.assetSearchInput.readOnly = true;
         this.assetActionButton.disabled = true;
         return true;
     }
@@ -719,14 +840,15 @@ class AssetComposedColumnInput {
      */
     completeAssetLookup(): void {
 
-        const state = autocompleteStates.get(this.assetTickerInput);
+        const state = autocompleteStates.get(this.assetSearchInput);
 
         if(state) {
             state.isLookupPending = false;
         }
 
         this.assetActionButton.disabled = false;
-        closeAssetTickerAutocomplete(this.assetTickerInput);
+        closeAssetTickerAutocomplete(this.assetSearchInput);
+        this.assetSearchInput.setCustomValidity("");
     }
 
     /**
@@ -737,8 +859,129 @@ class AssetComposedColumnInput {
     restoreSearchModeAfterLookup(): void {
 
         this.completeAssetLookup();
-        this.assetTickerInput.readOnly = false;
+        this.autocompleteWrapper.dataset.assetSelectionState = "search";
+        this.switchAssetActionButtonIdentity(ASSET_ACTION_BUTTON_IDENTITIES.search);
+        this.assetSearchInput.readOnly = false;
+        this.assetSearchInput.disabled = false;
+        this.assetSearchInput.hidden = false;
+        this.assetTickerInput.value = "";
+        this.assetTickerInput.hidden = true;
+        this.assetTickerInput.disabled = true;
+        this.assetTickerInput.readOnly = true;
+        this.assetIdInput.value = "";
+        this.assetNameInput.value = "";
+        this.assetNameInput.style.display = "none";
+        this.assetNameInput.readOnly = false;
+        this.assetNameInput.required = false;
+        this.newAssetTickerMessage.style.display = "none";
+        this.clearSearchFieldValidation();
+        this.assetSearchInput.focus();
     }
+
+    /** Clears the validation feedback attached to the transient search control.
+     *
+     * @author GPT-6 Luna
+     */
+    clearSearchErrorFeedback(): void {
+        this.assetSearchInput.classList.remove("is-invalid");
+        this.assetTickerExtraErrorMessageDiv.textContent = "";
+        this.assetTickerExtraErrorMessageDiv.style.display = "none";
+    }
+}
+
+/** Validates every editable asset row in one form before native or HTMX submission.
+ *
+ * @param form - Form whose asset selection states should be checked.
+ * @param reportFeedback - Whether to expose the first invalid row to the user.
+ * @returns `true` when every editable asset row has a committed ticker.
+ *
+ * @author GPT-6 Luna
+ */
+function validateAssetRowsForPost(form: HTMLFormElement, reportFeedback: boolean): boolean {
+
+    let isValid = true;
+    let firstInvalidSearchInput: HTMLInputElement | null = null;
+
+    form.querySelectorAll<HTMLElement>(`[${ ASSET_TICKER_AUTOCOMPLETE_ATTRIBUTE }]`).forEach(wrapper => {
+        const searchInput = wrapper.querySelector<HTMLInputElement>(`[${ ASSET_SEARCH_INPUT_ATTRIBUTE }]`);
+        const tickerInput = wrapper.querySelector<HTMLInputElement>(`[${ ASSET_TICKER_INPUT_ATTRIBUTE }]`);
+
+        const errorMessage = wrapper.parentElement?.querySelector<HTMLDivElement>(
+            `[${ TICKER_EXTRA_ERROR_MESSAGE_ATTRIBUTE }]`,
+        );
+        const selectionState = wrapper.dataset.assetSelectionState;
+
+        const hasCommittedTicker = (selectionState === "existing" || selectionState === "new")
+            && Boolean(tickerInput?.value.trim());
+
+        if(hasCommittedTicker) {
+            searchInput?.setCustomValidity("");
+            searchInput?.classList.remove("is-invalid");
+            return;
+        }
+
+        if(!searchInput) {
+            isValid = false;
+            return;
+        }
+
+        const message = selectionState === "pending"
+            ? ASSET_LOOKUP_PENDING_ERROR_MESSAGE
+            : ASSET_SELECTION_ERROR_MESSAGE;
+        searchInput.setCustomValidity(message);
+        searchInput.classList.add("is-invalid");
+
+        if(errorMessage) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = "contents";
+        }
+        firstInvalidSearchInput ??= searchInput;
+        isValid = false;
+    });
+
+    if(!isValid && reportFeedback && firstInvalidSearchInput) {
+        if(firstInvalidSearchInput.willValidate) {
+            firstInvalidSearchInput.reportValidity();
+        }
+        else {
+            firstInvalidSearchInput.focus();
+        }
+    }
+
+    return isValid;
+}
+
+/** Installs form guards for native submits and HTMX requests containing editable asset rows.
+ *
+ * @author GPT-6 Luna
+ */
+function installAssetFormValidationGuards(): void {
+
+    document.addEventListener("submit", event => {
+        const form = event.target;
+
+        if(!(form instanceof HTMLFormElement) || validateAssetRowsForPost(form, true)) {
+            return;
+        }
+
+        event.preventDefault();
+        event.stopImmediatePropagation();
+    }, true);
+
+    document.addEventListener("htmx:beforeRequest", event => {
+        const htmxEvent = event as CustomEvent<{ elt?: Element }>;
+
+        const requestElement = htmxEvent.detail?.elt
+            ?? (event.target instanceof Element ? event.target : null);
+
+        const form = requestElement instanceof HTMLFormElement
+            ? requestElement
+            : requestElement?.closest("form");
+
+        if(form instanceof HTMLFormElement && !validateAssetRowsForPost(form, true)) {
+            event.preventDefault();
+        }
+    });
 }
 
 /**
@@ -746,14 +989,18 @@ class AssetComposedColumnInput {
  *
  * @author GPT-6 Luna
  */
-function getAsset(rowAssetElements: AssetComposedColumnInput, searchUniqueIdentifier: string) {
+function getAsset(rowAssetElements: AssetComposedColumnInput, searchUniqueIdentifier: string): void {
 
     api.getAsset(searchUniqueIdentifier)
         .then(responseBody => {
 
+            if(!rowAssetElements.container.isConnected) {
+                return;
+            }
+
             if(api.isAPIErrorResponse(responseBody)) {
                 if(responseBody.errorMessage === "Data not found") {
-                    rowAssetElements.activateNewAssetMode();
+                    rowAssetElements.activateNewAssetMode(searchUniqueIdentifier);
                 }
                 else {
                     rowAssetElements.restoreSearchModeAfterLookup();
@@ -765,6 +1012,10 @@ function getAsset(rowAssetElements: AssetComposedColumnInput, searchUniqueIdenti
             rowAssetElements.activateExistingAssetMode(responseBody as Asset);
         })
         .catch(error => {
+            if(!rowAssetElements.container.isConnected) {
+                return;
+            }
+
             rowAssetElements.restoreSearchModeAfterLookup();
             console.error("Error fetching asset:", error);
             notifications.notifyErrorResponse({ errorMessage: "Failed to fetch asset data: " + error.message });
@@ -794,13 +1045,13 @@ function loadAssetsDatalist() {
  * Public browser handlers for the shared ticker input template and its row lookup actions.
  *
  * The HTML partial binds `handleAssetTickerFocus`, `handleAssetTickerInput`, and
- * `handleAssetTickerKeydown` directly to each generated ticker input. Existing row-specific
+ * `handleAssetTickerKeydown` directly to each generated search input. Existing row-specific
  * controllers continue to call the asset-action and validation methods with their own field names.
  *
  * @example
  * ```html
  * <input onfocus="AssetComposedColumnsInput.handleAssetTickerFocus(event)"
- *        oninput="maskTickerInput(this); AssetComposedColumnsInput.handleAssetTickerInput(event)"
+ *        oninput="AssetComposedColumnsInput.handleAssetTickerInput(event)"
  *        onkeydown="AssetComposedColumnsInput.handleAssetTickerKeydown(event)">
  * ```
  *
@@ -810,7 +1061,7 @@ function loadAssetsDatalist() {
 const AssetComposedColumnsInput = {
 
     /**
-     * Opens suggestions when an editable asset ticker input receives focus.
+     * Opens suggestions when the editable asset search input receives focus.
      *
      * @param event - Focus event emitted by the ticker input.
      *
@@ -823,23 +1074,36 @@ const AssetComposedColumnsInput = {
     },
 
     /**
-     * Refreshes local ticker suggestions after the ticker input has been masked.
+     * Refreshes local asset suggestions after the search query changes.
      *
      * @param event - Input event emitted by the ticker field.
      *
-     * @example oninput="maskTickerInput(this); AssetComposedColumnsInput.handleAssetTickerInput(event)"
+     * @example oninput="AssetComposedColumnsInput.handleAssetTickerInput(event)"
      *
      * @author GPT-6 Luna
      */
     handleAssetTickerInput(event: Event): void {
 
         const input = event.target as HTMLInputElement;
+        input.setCustomValidity("");
+        input.classList.remove("is-invalid");
+        const autocompleteWrapper = input.closest<HTMLElement>(`[${ ASSET_TICKER_AUTOCOMPLETE_ATTRIBUTE }]`);
+
+        const errorMessage = autocompleteWrapper?.parentElement?.querySelector<HTMLDivElement>(
+            `[${ TICKER_EXTRA_ERROR_MESSAGE_ATTRIBUTE }]`,
+        );
+
+        if(errorMessage) {
+            errorMessage.textContent = "";
+            errorMessage.style.display = "none";
+        }
+
         openAssetTickerAutocomplete(input);
         renderAssetTickerSuggestions(input);
     },
 
     /**
-     * Handles autocomplete navigation, suggestion selection, and the existing Enter-to-search action.
+     * Handles autocomplete navigation, suggestion selection, and literal Enter-to-search fallback.
      *
      * @param event - The keyboard event from the asset ticker input
      *
@@ -943,6 +1207,25 @@ const AssetComposedColumnsInput = {
         rowAssetElements.validateForPost();
     },
 
+    /**
+     * Validates committed asset selections before submitting a form outside an HTMX field-validation event.
+     *
+     * @param form - Form containing one or more editable asset rows.
+     * @returns `true` when every editable row is resolved or in confirmed new-asset mode.
+     *
+     * @example
+     * ```ts
+     * if(AssetComposedColumnsInput.validateFormBeforePost(form)) {
+     *     form.requestSubmit();
+     * }
+     * ```
+     *
+     * @author GPT-6 Luna
+     */
+    validateFormBeforePost(form: HTMLFormElement): boolean {
+        return validateAssetRowsForPost(form, true);
+    },
+
     loadDatalists() {
         loadClassesDatalist();
         loadAssetsDatalist();
@@ -963,5 +1246,7 @@ const AssetComposedColumnsInput = {
         field.reportValidity();
     },
 };
+
+installAssetFormValidationGuards();
 
 export default AssetComposedColumnsInput;

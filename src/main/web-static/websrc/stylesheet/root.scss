@@ -64,6 +64,10 @@
   min-width: 0;
 }
 
+.asset-ticker-autocomplete .input-group > [hidden] {
+  display: none !important;
+}
+
 .asset-ticker-autocomplete__suggestions {
   position: absolute;
   z-index: 110;

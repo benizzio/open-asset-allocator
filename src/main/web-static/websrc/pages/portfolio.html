@@ -192,7 +192,11 @@
 
 <script id="template-asset-datalist" type="text/x-handlebars-template">
 
-    {{> template-monovalue-datalist propertyKey="ticker"}}
+    {{#each .}}
+        {{#if ticker}}
+            <option value="{{ticker}}">{{ticker}} - {{name}}</option>
+        {{/if}}
+    {{/each}}
 
 </script>
 

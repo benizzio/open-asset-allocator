@@ -1,4 +1,4 @@
-import PortfolioPage from "../pages/portfolio";
+import { PortfolioPage } from "../pages";
 import {
     AllocationPlanDTO,
     SerializableCompleteAllocationPlan,
@@ -211,15 +211,28 @@ function addPlannedAllocationRow(
     DomInfra.bindDescendants(newRow);
 }
 
+/** Copies only committed asset tickers into their matching root hierarchy fields.
+ *
+ * @author GPT-6 Luna
+ */
 function copyAssetTickersToHierarchicalIdFields(form: HTMLFormElement) {
 
     form.querySelectorAll<HTMLInputElement>(`input[name$='${ ASSET_TICKER_FIELD_NAME_SUFFIX }']`)
         .forEach((assetTickerInput: HTMLInputElement) => {
 
-            const assetTickerValue = assetTickerInput.value;
-
             const parentTr = assetTickerInput.closest("tr");
-            const allocationIndexString = parentTr.dataset.allocationIndex;
+            const allocationIndexString = parentTr?.dataset.allocationIndex;
+
+            if(!parentTr || !allocationIndexString) {
+                return;
+            }
+
+            const assetAutocomplete = parentTr.querySelector<HTMLElement>("[data-asset-ticker-autocomplete]");
+            const selectionState = assetAutocomplete?.dataset.assetSelectionState;
+
+            const assetTickerValue = selectionState === "existing" || selectionState === "new"
+                ? assetTickerInput.value
+                : "";
 
             const assetIdInput = form.elements.namedItem(
                 `details[${ allocationIndexString }][hierarchicalId][0]`,
@@ -452,6 +465,10 @@ const allocationPlanManagement = {
     },
 
     handleSubmit(form: HTMLFormElement, hierarchySize: number) {
+
+        if(!AssetComposedColumnsInput.validateFormBeforePost(form)) {
+            return;
+        }
 
         copyAssetTickersToHierarchicalIdFields(form);
 
