@@ -525,15 +525,20 @@ test.describe('portfolio allocation history management', () => {
       })).toBeVisible();
     });
 
-    /** Preserves literal Enter lookup when the query also matches names in the suggestion list.
+    /** Preserves literal Enter lookup when matching suggestions are present but none is active.
      *
      * @author GPT-6 Luna
+     * @author benizzio
      */
     test('scenario 15.2: keeps Enter lookup literal when suggestions match the query', async ({ database, page }) => {
       const { row, tickerInput, suggestions } = await prepareTickerAutocompleteRow(database, page);
 
+      await page.mouse.move(0, 0);
       await tickerInput.fill('AUTO');
       await expect(suggestions.getByRole('option')).toHaveCount(12);
+      await expect(suggestions.locator('[aria-selected="true"]')).toHaveCount(0);
+      await expect(tickerInput).not.toHaveAttribute('aria-activedescendant');
+
       const literalLookup = page.waitForResponse(response => {
         return response.request().method() === 'GET'
           && new URL(response.url()).pathname === '/api/asset/AUTO';
