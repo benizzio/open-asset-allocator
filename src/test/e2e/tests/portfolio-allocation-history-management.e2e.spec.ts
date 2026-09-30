@@ -366,8 +366,19 @@ test.describe('portfolio allocation history management', () => {
         await expectExistingAsset(touchPage.row, touchPage.assets[ticker]);
       } finally {
         lookupTracking.stop();
-        await cdpSession.detach();
-        await touchPage.context.close();
+        try {
+          if(!touchPage.page.isClosed()) {
+            await cdpSession.detach();
+          }
+        } catch(error) {
+          if(!touchPage.page.isClosed()) {
+            throw error;
+          }
+        }
+
+        if(!touchPage.context.isClosed()) {
+          await touchPage.context.close();
+        }
       }
     });
 
@@ -1318,6 +1329,9 @@ async function prepareTickerAutocompleteRow(database: E2eDatabase, page: Page): 
   const newObservationItem = page.locator('#portfolio-history-management-container-0');
   await newObservationItem.getByRole('textbox', { name: 'Time tag' }).fill('AUTOCOMPLETE');
   await newObservationItem.locator('#portfolio-history-management-trigger-0 > button').click();
+  const accordionBody = newObservationItem.locator('#portfolio-history-management-0');
+  await expect(accordionBody).toHaveClass(/\bshow\b/);
+  await expect(accordionBody).not.toHaveClass(/\bcollapsing\b/);
 
   const form = page.locator('#portfolio-history-management-form-0');
   const row = await addAllocationRow(page, form, 0);
