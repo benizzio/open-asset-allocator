@@ -1,7 +1,13 @@
+/**
+ * ESLint flat configuration for frontend code, including module boundaries and code-quality rules.
+ * @author OpenCode
+ * @author benizzio
+ */
 import globals from "globals";
 import pluginJs from "@eslint/js";
 import tseslint from "typescript-eslint";
 import stylistic from "@stylistic/eslint-plugin";
+import sonarjs from "eslint-plugin-sonarjs";
 
 export default [
 
@@ -16,10 +22,14 @@ export default [
     ...tseslint.configs.recommended,
 
     {
-        plugins: { "@stylistic": stylistic },
+        plugins: { "@stylistic": stylistic, sonarjs },
         // ESLint rules: https://eslint.org/docs/latest/rules/
         // ESLint Stylistic rules: https://eslint.style/packages/default
         rules: {
+            "sonarjs/cognitive-complexity": ["error", 15],
+            "sonarjs/no-nested-conditional": "error",
+            "@typescript-eslint/prefer-optional-chain": "warn",
+            "@typescript-eslint/prefer-nullish-coalescing": "warn",
             "max-len": ["warn", { code: 120, tabWidth: 4 }],
             // no-unused-vars rules are scoped per-file-type below
             "@stylistic/indent": ["warn", 4],
@@ -194,6 +204,12 @@ export default [
     // Use TypeScript-specific no-unused-vars and disable the core rule for TS files
     {
         files: ["**/*.{ts,tsx}"],
+        languageOptions: {
+            parserOptions: {
+                project: "./tsconfig.eslint.json",
+                tsconfigRootDir: import.meta.dirname,
+            },
+        },
         rules: { "no-unused-vars": "off", "@typescript-eslint/no-unused-vars": ["warn"] },
     },
 ];

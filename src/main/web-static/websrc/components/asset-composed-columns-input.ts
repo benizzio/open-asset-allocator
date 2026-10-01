@@ -5,6 +5,7 @@
  *
  * @author GPT-6 Luna
  * @author benizzio
+ * @author GPT-6.1 Sol
  */
 import { Asset } from "../domain/asset";
 import { BootstrapClasses, BootstrapIconClasses } from "../infra/bootstrap/constants";
@@ -347,6 +348,7 @@ function closeAssetTickerAutocomplete(input: HTMLInputElement): void {
  * @param input - Ticker input whose current value is used as the filter query.
  *
  * @author GPT-6 Luna
+ * @author GPT-6.1 Sol
  */
 function renderAssetTickerSuggestions(input: HTMLInputElement): void {
 
@@ -381,11 +383,13 @@ function renderAssetTickerSuggestions(input: HTMLInputElement): void {
             })
         : [];
 
-    state.options = matchingAssets.length > 0
-        ? matchingAssets.map(({ ticker, label }) => ({ kind: "asset", label, ticker }))
-        : searchQuery
-            ? [{ kind: "create", label: "No matching assets - create new", ticker: searchQuery }]
-            : [];
+    if(matchingAssets.length > 0) {
+        state.options = matchingAssets.map(({ ticker, label }) => ({ kind: "asset", label, ticker }));
+    } else if(searchQuery) {
+        state.options = [{ kind: "create", label: "No matching assets - create new", ticker: searchQuery }];
+    } else {
+        state.options = [];
+    }
     state.activeOptionIndex = -1;
     state.activeOptionSource = null;
     state.pointerSelection = undefined;
@@ -1042,6 +1046,66 @@ function loadAssetsDatalist() {
 }
 
 /**
+ * Moves the active suggestion in response to an arrow key, opening the editable autocomplete if needed.
+ *
+ * @author GPT-6.1 Sol
+ */
+function navigateAssetTickerOptions(input: HTMLInputElement, event: KeyboardEvent): void {
+
+    if(input.readOnly) {
+        return;
+    }
+
+    openAssetTickerAutocomplete(input);
+    const state = getAutocompleteState(input);
+
+    if(!state?.options.length) {
+        return;
+    }
+
+    event.preventDefault();
+    const direction = event.key === "ArrowDown" ? 1 : -1;
+    let nextIndex = state.activeOptionIndex + direction;
+
+    if(state.activeOptionIndex < 0) {
+        nextIndex = direction === 1 ? 0 : state.options.length - 1;
+    }
+
+    highlightAssetTickerOption(input, nextIndex, "keyboard", true);
+}
+
+/**
+ * Selects the active suggestion on Enter, or invokes literal lookup when no suggestion is active.
+ *
+ * @author GPT-6.1 Sol
+ */
+function submitAssetTickerLookup(
+    input: HTMLInputElement,
+    state: AssetTickerAutocompleteState | null,
+    event: KeyboardEvent,
+): void {
+
+    if(state?.activeOptionIndex >= 0) {
+        event.preventDefault();
+        const selectedOption = state.options[state.activeOptionIndex];
+
+        if(selectedOption) {
+            selectAssetTicker(input, selectedOption.ticker);
+        }
+        return;
+    }
+
+    const actionButton = input
+        .closest(".input-group")
+        ?.querySelector<HTMLButtonElement>("[data-asset-action-button]");
+
+    if(actionButton?.className === ASSET_ACTION_BUTTON_IDENTITIES.search.classes) {
+        event.preventDefault();
+        actionButton.click();
+    }
+}
+
+/**
  * Public browser handlers for the shared ticker input template and its row lookup actions.
  *
  * The HTML partial binds `handleAssetTickerFocus`, `handleAssetTickerInput`, and
@@ -1057,6 +1121,7 @@ function loadAssetsDatalist() {
  *
  * @author GPT-6 Luna
  * @author benizzio
+ * @author GPT-6.1 Sol
  */
 const AssetComposedColumnsInput = {
 
@@ -1110,6 +1175,7 @@ const AssetComposedColumnsInput = {
      * @example onkeydown="AssetComposedColumnsInput.handleAssetTickerKeydown(event)"
      *
      * @author GPT-6 Luna
+     * @author GPT-6.1 Sol
      */
     handleAssetTickerKeydown(event: KeyboardEvent) {
 
@@ -1118,25 +1184,11 @@ const AssetComposedColumnsInput = {
         }
 
         const inputElement = event.target as HTMLInputElement;
-        let state = getAutocompleteState(inputElement);
+        const state = getAutocompleteState(inputElement);
 
         if(event.key === "ArrowDown" || event.key === "ArrowUp") {
 
-            if(inputElement.readOnly) {
-                return;
-            }
-
-            openAssetTickerAutocomplete(inputElement);
-            state = getAutocompleteState(inputElement);
-
-            if(state?.options.length) {
-                event.preventDefault();
-
-                const nextIndex = state.activeOptionIndex < 0
-                    ? (event.key === "ArrowDown" ? 0 : state.options.length - 1)
-                    : state.activeOptionIndex + (event.key === "ArrowDown" ? 1 : -1);
-                highlightAssetTickerOption(inputElement, nextIndex, "keyboard", true);
-            }
+            navigateAssetTickerOptions(inputElement, event);
             return;
         }
 
@@ -1156,24 +1208,7 @@ const AssetComposedColumnsInput = {
 
         if(event.key === "Enter") {
 
-            if(state?.activeOptionIndex >= 0) {
-                event.preventDefault();
-                const selectedOption = state.options[state.activeOptionIndex];
-
-                if(selectedOption) {
-                    selectAssetTicker(inputElement, selectedOption.ticker);
-                }
-                return;
-            }
-
-            const actionButton = inputElement
-                .closest(".input-group")
-                ?.querySelector<HTMLButtonElement>("[data-asset-action-button]");
-
-            if(actionButton?.className === ASSET_ACTION_BUTTON_IDENTITIES.search.classes) {
-                event.preventDefault();
-                actionButton.click();
-            }
+            submitAssetTickerLookup(inputElement, state, event);
         }
     },
 

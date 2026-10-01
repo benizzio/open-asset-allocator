@@ -466,6 +466,19 @@ function convertNumberForToInt(
 }
 
 /**
+ * Converts a boolean to an integer when coercion is enabled, or reports the rejected input.
+ * @author OpenCode
+ */
+function convertBooleanForToInt(value: boolean, options?: ToIntOptions): number | undefined {
+
+    if(options?.allowCoercions === true) {
+        return Number(value);
+    }
+
+    return reportToIntCoercion(options, "boolean conversion disallowed", value);
+}
+
+/**
  * Converts an arbitrary value to an integer number with optional coercion control.
  *
  * Coercion Rules (when allowCoercions === true; default is false):
@@ -504,6 +517,7 @@ function convertNumberForToInt(
  *
  * @author GitHub Copilot
  * @author benizzio
+ * @author OpenCode
  */
 export function toInt(value: unknown, options?: ToIntOptions): number | undefined {
 
@@ -532,9 +546,7 @@ export function toInt(value: unknown, options?: ToIntOptions): number | undefine
         }
 
         case "boolean": {
-            return allowCoercions
-                ? (value ? 1 : 0)
-                : reportToIntCoercion(options, "boolean conversion disallowed", value);
+            return convertBooleanForToInt(value, options);
         }
 
         default: {

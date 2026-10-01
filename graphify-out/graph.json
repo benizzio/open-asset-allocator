@@ -839,7 +839,7 @@
       "file_type": "code",
       "norm_label": "clickcanvaspoint()",
       "source_file": "src/test/e2e/support/doughnut-chart.ts",
-      "source_location": "L254"
+      "source_location": "L246"
     },
     {
       "id": "src_test_e2e_support_doughnut_chart_expectcharttooltip",
@@ -851,7 +851,7 @@
       "file_type": "code",
       "norm_label": "expectcharttooltip()",
       "source_file": "src/test/e2e/support/doughnut-chart.ts",
-      "source_location": "L176"
+      "source_location": "L169"
     },
     {
       "id": "src_test_e2e_support_doughnut_chart_expectlatestcanvaspatternstate",
@@ -863,7 +863,7 @@
       "file_type": "code",
       "norm_label": "expectlatestcanvaspatternstate()",
       "source_file": "src/test/e2e/support/doughnut-chart.ts",
-      "source_location": "L159"
+      "source_location": "L152"
     },
     {
       "id": "src_test_e2e_support_doughnut_chart_expectlatestcanvastextcontains",
@@ -875,7 +875,7 @@
       "file_type": "code",
       "norm_label": "expectlatestcanvastextcontains()",
       "source_file": "src/test/e2e/support/doughnut-chart.ts",
-      "source_location": "L138"
+      "source_location": "L136"
     },
     {
       "id": "src_test_e2e_support_doughnut_chart_expectlatestcanvastextset",
@@ -899,7 +899,7 @@
       "file_type": "code",
       "norm_label": "finddoughnutslicepointbytooltip()",
       "source_file": "src/test/e2e/support/doughnut-chart.ts",
-      "source_location": "L211"
+      "source_location": "L203"
     },
     {
       "id": "src_test_e2e_support_doughnut_chart_getdoughnutcenterpoint",
@@ -911,7 +911,7 @@
       "file_type": "code",
       "norm_label": "getdoughnutcenterpoint()",
       "source_file": "src/test/e2e/support/doughnut-chart.ts",
-      "source_location": "L279"
+      "source_location": "L271"
     },
     {
       "id": "src_test_e2e_support_doughnut_chart_getdoughnutslicepoint",
@@ -923,7 +923,7 @@
       "file_type": "code",
       "norm_label": "getdoughnutslicepoint()",
       "source_file": "src/test/e2e/support/doughnut-chart.ts",
-      "source_location": "L363"
+      "source_location": "L355"
     },
     {
       "id": "src_test_e2e_support_doughnut_chart_getlatestcanvaspatternfillcount",
@@ -935,7 +935,7 @@
       "file_type": "code",
       "norm_label": "getlatestcanvaspatternfillcount()",
       "source_file": "src/test/e2e/support/doughnut-chart.ts",
-      "source_location": "L434"
+      "source_location": "L426"
     },
     {
       "id": "src_test_e2e_support_doughnut_chart_getlatestcanvastexts",
@@ -947,7 +947,7 @@
       "file_type": "code",
       "norm_label": "getlatestcanvastexts()",
       "source_file": "src/test/e2e/support/doughnut-chart.ts",
-      "source_location": "L424"
+      "source_location": "L416"
     },
     {
       "id": "src_test_e2e_support_doughnut_chart_installcanvastextrecorder",
@@ -11964,7 +11964,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/support/doughnut-chart.ts",
-      "source_location": "L187",
+      "source_location": "L180",
       "weight": 1.0
     },
     {
@@ -11976,7 +11976,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/support/doughnut-chart.ts",
-      "source_location": "L188",
+      "source_location": "L181",
       "weight": 1.0
     },
     {
@@ -11988,7 +11988,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/support/doughnut-chart.ts",
-      "source_location": "L196",
+      "source_location": "L189",
       "weight": 1.0
     },
     {
@@ -12048,7 +12048,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/support/doughnut-chart.ts",
-      "source_location": "L165",
+      "source_location": "L158",
       "weight": 1.0
     },
     {
@@ -12132,7 +12132,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/support/doughnut-chart.ts",
-      "source_location": "L144",
+      "source_location": "L141",
       "weight": 1.0
     },
     {
@@ -12312,7 +12312,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/support/doughnut-chart.ts",
-      "source_location": "L220",
+      "source_location": "L212",
       "weight": 1.0
     },
     {
@@ -12324,7 +12324,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/support/doughnut-chart.ts",
-      "source_location": "L221",
+      "source_location": "L213",
       "weight": 1.0
     },
     {
@@ -12336,7 +12336,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/support/doughnut-chart.ts",
-      "source_location": "L237",
+      "source_location": "L229",
       "weight": 1.0
     },
     {
@@ -12360,7 +12360,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/support/doughnut-chart.ts",
-      "source_location": "L369",
+      "source_location": "L361",
       "weight": 1.0
     },
     {
@@ -18141,7 +18141,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/support/doughnut-chart.ts",
-      "source_location": "L254",
+      "source_location": "L246",
       "weight": 1.0
     },
     {
@@ -18152,7 +18152,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/support/doughnut-chart.ts",
-      "source_location": "L176",
+      "source_location": "L169",
       "weight": 1.0
     },
     {
@@ -18163,7 +18163,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/support/doughnut-chart.ts",
-      "source_location": "L159",
+      "source_location": "L152",
       "weight": 1.0
     },
     {
@@ -18174,7 +18174,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/support/doughnut-chart.ts",
-      "source_location": "L138",
+      "source_location": "L136",
       "weight": 1.0
     },
     {
@@ -18196,7 +18196,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/support/doughnut-chart.ts",
-      "source_location": "L211",
+      "source_location": "L203",
       "weight": 1.0
     },
     {
@@ -18207,7 +18207,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/support/doughnut-chart.ts",
-      "source_location": "L279",
+      "source_location": "L271",
       "weight": 1.0
     },
     {
@@ -18218,7 +18218,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/support/doughnut-chart.ts",
-      "source_location": "L363",
+      "source_location": "L355",
       "weight": 1.0
     },
     {
@@ -18229,7 +18229,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/support/doughnut-chart.ts",
-      "source_location": "L434",
+      "source_location": "L426",
       "weight": 1.0
     },
     {
@@ -18240,7 +18240,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/support/doughnut-chart.ts",
-      "source_location": "L424",
+      "source_location": "L416",
       "weight": 1.0
     },
     {
@@ -24417,5 +24417,5 @@
       "source_file": "src/main/docker/docker-compose-e2e.yml"
     }
   ],
-  "built_at_commit": "042746293d307d3fac8a140bfe992634eec7f623"
+  "built_at_commit": "c3ec3731fd4726da50c70ea6ecca73e1caaff6f8"
 }

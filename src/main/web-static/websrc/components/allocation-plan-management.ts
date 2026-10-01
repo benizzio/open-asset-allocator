@@ -1,3 +1,9 @@
+/**
+ * Coordinates allocation-plan form updates and server responses for the allocation-management UI.
+ * @author OpenCode
+ * @author benizzio
+ * @author GPT-6.1 Sol
+ */
 import { PortfolioPage } from "../pages";
 import {
     AllocationPlanDTO,
