@@ -1,4 +1,9 @@
-import PortfolioPage from "../pages/portfolio";
+/**
+ * Coordinates allocation-plan form updates and server responses for the allocation-management UI.
+ * @author OpenCode
+ * @author benizzio
+ */
+import { PortfolioPage } from "../pages";
 import {
     AllocationPlanDTO,
     SerializableCompleteAllocationPlan,
