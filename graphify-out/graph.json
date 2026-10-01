@@ -24155,5 +24155,5 @@
       "source_file": "src/main/docker/docker-compose-e2e.yml"
     }
   ],
-  "built_at_commit": "f9211c37b12f9c4b2461b0a2b8fc0061d2282a3a"
+  "built_at_commit": "e06844cd6452a19055025513f123f624dbdcff57"
 }
