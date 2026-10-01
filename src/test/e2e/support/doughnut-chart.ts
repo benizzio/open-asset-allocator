@@ -121,11 +121,9 @@ export async function expectLatestCanvasTextSet(
 ): Promise<void> {
   await expect.poll(async () => {
     const actualTexts = await getLatestCanvasTexts(canvas);
-    if (actualTexts.length === expectedTexts.length && expectedTexts.every((text) => actualTexts.includes(text))) {
-      return true;
-    }
-    throw new Error(`Unexpected canvas text: ${JSON.stringify(actualTexts)}`);
-  }).toBe(true);
+    return [...actualTexts].sort();
+  })
+    .toEqual([...expectedTexts].sort());
 }
 
 /**
@@ -140,13 +138,8 @@ export async function expectLatestCanvasTextContains(
   canvas: Locator,
   expectedTexts: readonly string[],
 ): Promise<void> {
-  await expect.poll(async () => {
-    const actualTexts = await getLatestCanvasTexts(canvas);
-    if (expectedTexts.every((text) => actualTexts.includes(text))) {
-      return true;
-    }
-    throw new Error(`Unexpected canvas text: ${JSON.stringify(actualTexts)}`);
-  }).toBe(true);
+  await expect.poll(() => getLatestCanvasTexts(canvas))
+    .toEqual(expect.arrayContaining([...expectedTexts]));
 }
 
 /**
@@ -194,11 +187,10 @@ export async function expectChartTooltip(
   await page.waitForTimeout(50);
   await expect.poll(async () => {
     const actualTexts = await getLatestCanvasTexts(canvas);
-    if (expectedTexts.every((text) => actualTexts.includes(text))) {
-      return true;
-    }
-    throw new Error(`Unexpected canvas text at ${JSON.stringify({ center, point })}: ${JSON.stringify(actualTexts)}`);
-  }).toBe(true);
+    return { actualTexts, center, point };
+  }).toEqual(expect.objectContaining({
+    actualTexts: expect.arrayContaining([...expectedTexts]),
+  }));
 }
 
 /**

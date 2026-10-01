@@ -1,0 +1,8 @@
+// Type-aware lint rules need nullability information without changing the app's build settings.
+// Authored by: OpenCode
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "strictNullChecks": true
+  }
+}
