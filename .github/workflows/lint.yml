@@ -32,3 +32,26 @@ jobs:
           version: v2.13.2
           working-directory: src/main/go
           args: --new-from-merge-base=origin/main
+
+  frontend-lint:
+    name: Frontend Lint
+    runs-on: ubuntu-latest
+    continue-on-error: false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: src/main/web-static/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: src/main/web-static
+
+      - name: Run frontend lint through Makefile
+        run: make lint-frontend
+    # Co-authored by: OpenCode and Igor Benicio de Mesquita

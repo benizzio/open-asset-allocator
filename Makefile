@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := build
 
-.PHONY: frontend-install validate-node-version e2e e2e-ci e2e-chromium e2e-firefox e2e-ui e2e-headed e2e-report e2e-logs e2e-clean
+.PHONY: lint lint-fmt lint-frontend frontend-install validate-node-version e2e e2e-ci e2e-chromium e2e-firefox e2e-ui e2e-headed e2e-report e2e-logs e2e-clean
 
 E2E_ARGS ?=
 
@@ -11,6 +11,11 @@ lint:
 # Runs golangci-lint formatter (goimports) on the Go source
 lint-fmt:
 	cd src/main/go && golangci-lint fmt ./...
+
+# Runs ESLint on the frontend source.
+lint-frontend:
+	cd src/main/web-static && npm run lint
+# Co-authored by: OpenCode and Igor Benicio de Mesquita
 
 # Installs the front-end npm dependencies
 frontend-install:
