@@ -63,7 +63,7 @@ let nextAutocompleteId = 0;
 let assetDatalistListenerRegistered = false;
 
 /**
- * Resolves or creates the DOM state for one asset search autocomplete.
+ * Lazily initializes the DOM state and listeners for one asset search autocomplete.
  *
  * @param input - Asset search input associated with the autocomplete markup.
  * @returns The widget state, or `null` when the input is not in the component template.
@@ -71,13 +71,30 @@ let assetDatalistListenerRegistered = false;
  * @author GPT-6 Luna
  * @author GPT-6 Sol
  */
-function getAutocompleteState(input: HTMLInputElement): AssetSearchAutocompleteState | null {
+function ensureAutocompleteState(input: HTMLInputElement): AssetSearchAutocompleteState | null {
 
     const currentState = autocompleteStates.get(input);
 
     if(currentState) {
         return currentState;
     }
+
+    const state = createAutocompleteState(input);
+
+    if(!state) {
+        return null;
+    }
+
+    registerAutocompleteListeners(input, state);
+    autocompleteStates.set(input, state);
+    return state;
+}
+
+/** Builds an autocomplete state from the input's markup and accessibility controls.
+ *
+ * @author GPT-6 Sol
+ */
+function createAutocompleteState(input: HTMLInputElement): AssetSearchAutocompleteState | null {
 
     const wrapper = input.closest<HTMLElement>(`[${ ASSET_SEARCH_AUTOCOMPLETE_ATTRIBUTE }]`);
     const suggestions = wrapper?.querySelector<HTMLElement>(`[${ ASSET_SEARCH_SUGGESTIONS_ATTRIBUTE }]`);
@@ -105,6 +122,17 @@ function getAutocompleteState(input: HTMLInputElement): AssetSearchAutocompleteS
     };
 
     status.classList.add("visually-hidden");
+
+    return state;
+}
+
+/** Registers the autocomplete's pointer, click, and focus listeners on its DOM controls.
+ *
+ * @author GPT-6 Sol
+ */
+function registerAutocompleteListeners(input: HTMLInputElement, state: AssetSearchAutocompleteState): void {
+
+    const { listbox, wrapper } = state;
 
     listbox.addEventListener("pointerover", event => {
         const pointerEvent = event as PointerEvent;
@@ -221,9 +249,6 @@ function getAutocompleteState(input: HTMLInputElement): AssetSearchAutocompleteS
 
         closeAssetSearchAutocomplete(input);
     });
-
-    autocompleteStates.set(input, state);
-    return state;
 }
 
 /**
@@ -268,7 +293,7 @@ function openAssetSearchAutocomplete(input: HTMLInputElement): void {
         return;
     }
 
-    const state = getAutocompleteState(input);
+    const state = ensureAutocompleteState(input);
 
     if(!state || state.isLookupPending) {
         return;
@@ -360,7 +385,7 @@ function closeAssetSearchAutocomplete(input: HTMLInputElement): void {
  */
 function renderAssetSearchSuggestions(input: HTMLInputElement): void {
 
-    const state = getAutocompleteState(input);
+    const state = ensureAutocompleteState(input);
 
     if(!state?.isOpen) {
         return;
@@ -832,7 +857,7 @@ class AssetComposedColumnInput {
      */
     beginAssetLookup(): boolean {
 
-        const state = getAutocompleteState(this.assetSearchInput);
+        const state = ensureAutocompleteState(this.assetSearchInput);
 
         if(state?.isLookupPending) {
             return false;
@@ -1074,7 +1099,7 @@ function navigateAssetSearchOptions(input: HTMLInputElement, event: KeyboardEven
     }
 
     openAssetSearchAutocomplete(input);
-    const state = getAutocompleteState(input);
+    const state = ensureAutocompleteState(input);
 
     if(!state?.options.length) {
         return;
@@ -1206,7 +1231,7 @@ const AssetComposedColumnsInput = {
         }
 
         const inputElement = event.target as HTMLInputElement;
-        const state = getAutocompleteState(inputElement);
+        const state = ensureAutocompleteState(inputElement);
 
         if(event.key === "ArrowDown" || event.key === "ArrowUp") {
 
