@@ -3,6 +3,7 @@
  * @author OpenCode
  * @author benizzio
  * @author GPT-6.1 Sol
+ * @author GPT-6 Sol
  */
 import { PortfolioPage } from "../pages";
 import {
@@ -19,7 +20,7 @@ import * as handlebars from "handlebars";
 import { isNullish, toInt } from "../utils/lang";
 import { Portfolio } from "../domain/portfolio";
 import { AllocationHierarchyLevel, AllocationPlanType } from "../domain/allocation";
-import AssetComposedColumnsInput from "./asset-composed-columns-input";
+import AssetComposedColumnsInput, { AssetSelectionState } from "./asset-composed-columns-input";
 import htmx from "htmx.org";
 import Router from "../infra/routing";
 import notifications from "./notifications";
@@ -237,7 +238,8 @@ function copyAssetTickersToHierarchicalIdFields(form: HTMLFormElement) {
             const assetSearchAutocomplete = parentTr.querySelector<HTMLElement>("[data-asset-search-autocomplete]");
             const selectionState = assetSearchAutocomplete?.dataset.assetSelectionState;
 
-            const assetTickerValue = selectionState === "existing" || selectionState === "new"
+            const assetTickerValue = selectionState === AssetSelectionState.EXISTING
+                || selectionState === AssetSelectionState.NEW
                 ? assetTickerInput.value
                 : "";
 

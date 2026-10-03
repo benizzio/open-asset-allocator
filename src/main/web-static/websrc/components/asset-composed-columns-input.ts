@@ -25,6 +25,21 @@ const ASSET_SELECTION_ERROR_MESSAGE = "Reference an existing asset or create a n
 const ASSET_LOOKUP_PENDING_ERROR_MESSAGE = "Asset lookup is still in progress";
 const TICKER_CANDIDATE_PATTERN = /^[A-Za-z0-9_:.-]+$/;
 
+/** Identifies the search, in-flight lookup, or committed asset selection stored on an autocomplete wrapper.
+ *
+ * The HTML template initializes `data-asset-selection-state` to `search`. Read or update subsequent
+ * states through `element.dataset.assetSelectionState` and these members, for example:
+ * `wrapper.dataset.assetSelectionState = AssetSelectionState.PENDING`.
+ *
+ * @author GPT-6 Sol
+ */
+export enum AssetSelectionState {
+    SEARCH = "search",
+    PENDING = "pending",
+    EXISTING = "existing",
+    NEW = "new",
+}
+
 /** Describes one selectable asset suggestion or missing-ticker create action.
  *
  * @author GPT-6 Luna
@@ -613,18 +628,20 @@ class AssetComposedColumnInput {
     /** Returns whether this row is waiting for a search or asset lookup.
      *
      * @author GPT-6 Luna
+     * @author GPT-6 Sol
      */
     isInSearchMode(): boolean {
-        return this.autocompleteWrapper.dataset.assetSelectionState === "search";
+        return this.autocompleteWrapper.dataset.assetSelectionState === AssetSelectionState.SEARCH;
     }
 
     /** Returns whether the committed asset state can be cleared with the action button.
      *
      * @author GPT-6 Luna
+     * @author GPT-6 Sol
      */
     isInResetMode(): boolean {
         const selectionState = this.autocompleteWrapper.dataset.assetSelectionState;
-        return selectionState === "existing" || selectionState === "new";
+        return selectionState === AssetSelectionState.EXISTING || selectionState === AssetSelectionState.NEW;
     }
 
     /** Updates the search/reset styling and icon without changing row selection state.
@@ -641,12 +658,13 @@ class AssetComposedColumnInput {
      *
      * @author benizzio
      * @author GPT-6 Luna
+     * @author GPT-6 Sol
      */
     activateExistingAssetMode(asset: Asset): void {
 
         this.completeAssetLookup();
         this.assetActionButton.focus();
-        this.autocompleteWrapper.dataset.assetSelectionState = "existing";
+        this.autocompleteWrapper.dataset.assetSelectionState = AssetSelectionState.EXISTING;
         this.switchAssetActionButtonIdentity(ASSET_ACTION_BUTTON_IDENTITIES.reset);
 
         this.assetSearchInput.setCustomValidity("");
@@ -675,12 +693,13 @@ class AssetComposedColumnInput {
      *
      * @author benizzio
      * @author GPT-6 Luna
+     * @author GPT-6 Sol
      */
     activateNewAssetMode(ticker: string): void {
 
         this.completeAssetLookup();
         this.assetActionButton.focus();
-        this.autocompleteWrapper.dataset.assetSelectionState = "new";
+        this.autocompleteWrapper.dataset.assetSelectionState = AssetSelectionState.NEW;
         this.switchAssetActionButtonIdentity(ASSET_ACTION_BUTTON_IDENTITIES.reset);
 
         this.assetSearchInput.setCustomValidity("");
@@ -720,7 +739,7 @@ class AssetComposedColumnInput {
             autocompleteState.isLookupPending = false;
         }
 
-        this.autocompleteWrapper.dataset.assetSelectionState = "search";
+        this.autocompleteWrapper.dataset.assetSelectionState = AssetSelectionState.SEARCH;
         this.switchAssetActionButtonIdentity(ASSET_ACTION_BUTTON_IDENTITIES.search);
         this.assetActionButton.disabled = false;
 
@@ -798,6 +817,7 @@ class AssetComposedColumnInput {
      *
      * @author GPT-6 Luna
      * @author benizzio
+     * @author GPT-6 Sol
      */
     handleAssetActionButtonClick(selectedTicker?: string): void {
 
@@ -818,7 +838,7 @@ class AssetComposedColumnInput {
                 getAsset(this, searchUniqueIdentifier);
             }
         }
-        else if(this.autocompleteWrapper.dataset.assetSelectionState === "pending") {
+        else if(this.autocompleteWrapper.dataset.assetSelectionState === AssetSelectionState.PENDING) {
             return;
         }
         else if(this.isInResetMode()) {
@@ -829,12 +849,13 @@ class AssetComposedColumnInput {
     /** Sets custom validity when the row has not committed an existing or new ticker.
      *
      * @author GPT-6 Luna
+     * @author GPT-6 Sol
      */
     validateForPost(): void {
         const selectionState = this.autocompleteWrapper.dataset.assetSelectionState;
 
-        if(selectionState === "search" || selectionState === "pending") {
-            const message = selectionState === "pending"
+        if(selectionState === AssetSelectionState.SEARCH || selectionState === AssetSelectionState.PENDING) {
+            const message = selectionState === AssetSelectionState.PENDING
                 ? ASSET_LOOKUP_PENDING_ERROR_MESSAGE
                 : ASSET_SELECTION_ERROR_MESSAGE;
             this.assetSearchInput.setCustomValidity(message);
@@ -869,7 +890,7 @@ class AssetComposedColumnInput {
             state.isLookupPending = true;
         }
 
-        this.autocompleteWrapper.dataset.assetSelectionState = "pending";
+        this.autocompleteWrapper.dataset.assetSelectionState = AssetSelectionState.PENDING;
         this.assetSearchInput.setCustomValidity(ASSET_LOOKUP_PENDING_ERROR_MESSAGE);
         this.assetSearchInput.readOnly = true;
         this.assetActionButton.disabled = true;
@@ -899,11 +920,12 @@ class AssetComposedColumnInput {
      * Restores editable search mode after a lookup fails for a reason other than a missing asset.
      *
      * @author GPT-6 Luna
+     * @author GPT-6 Sol
      */
     restoreSearchModeAfterLookup(): void {
 
         this.completeAssetLookup();
-        this.autocompleteWrapper.dataset.assetSelectionState = "search";
+        this.autocompleteWrapper.dataset.assetSelectionState = AssetSelectionState.SEARCH;
         this.switchAssetActionButtonIdentity(ASSET_ACTION_BUTTON_IDENTITIES.search);
         this.assetSearchInput.readOnly = false;
         this.assetSearchInput.disabled = false;
@@ -956,7 +978,8 @@ function validateAssetRowsForPost(form: HTMLFormElement, reportFeedback: boolean
         );
         const selectionState = wrapper.dataset.assetSelectionState;
 
-        const hasCommittedTicker = (selectionState === "existing" || selectionState === "new")
+        const hasCommittedTicker = (selectionState === AssetSelectionState.EXISTING
+            || selectionState === AssetSelectionState.NEW)
             && Boolean(tickerInput?.value.trim());
 
         if(hasCommittedTicker) {
@@ -970,7 +993,7 @@ function validateAssetRowsForPost(form: HTMLFormElement, reportFeedback: boolean
             return;
         }
 
-        const message = selectionState === "pending"
+        const message = selectionState === AssetSelectionState.PENDING
             ? ASSET_LOOKUP_PENDING_ERROR_MESSAGE
             : ASSET_SELECTION_ERROR_MESSAGE;
         searchInput.setCustomValidity(message);
