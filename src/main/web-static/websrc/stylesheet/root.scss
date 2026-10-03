@@ -55,20 +55,21 @@
 }
 
 /**
- * Styles the bounded, scrollable asset ticker autocomplete used in portfolio forms.
+ * Styles the bounded, scrollable asset search autocomplete used in portfolio forms.
  *
  * @author GPT-6 Luna
+ * @author GPT-6 Sol
  */
-.asset-ticker-autocomplete {
+.asset-search-autocomplete {
   position: relative;
   min-width: 0;
 }
 
-.asset-ticker-autocomplete .input-group > [hidden] {
+.asset-search-autocomplete .input-group > [hidden] {
   display: none !important;
 }
 
-.asset-ticker-autocomplete__suggestions {
+.asset-search-autocomplete__suggestions {
   position: absolute;
   z-index: 110;
   top: 100%;
@@ -81,43 +82,44 @@
   box-shadow: var(--bs-box-shadow);
 }
 
-.asset-ticker-autocomplete__listbox {
+.asset-search-autocomplete__listbox {
   max-height: 16rem;
   overflow-y: auto;
   overscroll-behavior: contain;
   touch-action: pan-y;
 }
 
-.asset-ticker-autocomplete__option,
-.asset-ticker-autocomplete__status {
+.asset-search-autocomplete__option,
+.asset-search-autocomplete__status {
   padding: 0.375rem 0.75rem;
   overflow-wrap: anywhere;
 }
 
-.asset-ticker-autocomplete__option {
+.asset-search-autocomplete__option {
   cursor: pointer;
 }
 
-.asset-ticker-autocomplete__option[aria-selected="true"] {
+.asset-search-autocomplete__option[aria-selected="true"] {
   color: var(--bs-primary-text-emphasis);
   background-color: var(--bs-primary-bg-subtle);
   box-shadow: inset 0 0 0 1px var(--bs-primary-text-emphasis);
 }
 
-.asset-ticker-autocomplete__status {
+.asset-search-autocomplete__status {
   color: var(--bs-secondary-color);
 }
 
-.asset-ticker-autocomplete [data-asset-action-button].btn-primary {
+.asset-search-autocomplete [data-asset-action-button].btn-primary {
   display: inline-flex;
   align-items: center;
 }
 
-/** Shows the asset-creation affordance beside the search icon in ticker search mode.
+/** Shows the asset-creation affordance beside the search icon in asset search mode.
  *
  * @author GPT-6 Luna
+ * @author GPT-6 Sol
  */
-.asset-ticker-autocomplete [data-asset-action-button].btn-primary::after {
+.asset-search-autocomplete [data-asset-action-button].btn-primary::after {
   margin-left: 0.25rem;
   font-family: "bootstrap-icons";
   content: "\f151";

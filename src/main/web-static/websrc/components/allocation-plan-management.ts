@@ -220,6 +220,7 @@ function addPlannedAllocationRow(
 /** Copies only committed asset tickers into their matching root hierarchy fields.
  *
  * @author GPT-6 Luna
+ * @author GPT-6 Sol
  */
 function copyAssetTickersToHierarchicalIdFields(form: HTMLFormElement) {
 
@@ -233,8 +234,8 @@ function copyAssetTickersToHierarchicalIdFields(form: HTMLFormElement) {
                 return;
             }
 
-            const assetAutocomplete = parentTr.querySelector<HTMLElement>("[data-asset-ticker-autocomplete]");
-            const selectionState = assetAutocomplete?.dataset.assetSelectionState;
+            const assetSearchAutocomplete = parentTr.querySelector<HTMLElement>("[data-asset-search-autocomplete]");
+            const selectionState = assetSearchAutocomplete?.dataset.assetSelectionState;
 
             const assetTickerValue = selectionState === "existing" || selectionState === "new"
                 ? assetTickerInput.value

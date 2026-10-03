@@ -1,4 +1,6 @@
-<!-- Authored by: GPT-6 Luna and benizzio -->
+<!-- Shared asset search and committed ticker controls for portfolio form rows.
+     Authored by: GPT-6 Luna and benizzio
+     Co-authored by: GPT-6 Sol and benizzio -->
 <body>
 <script id="asset-composed-columns-input" type="text/x-handlebars-template">
 
@@ -14,9 +16,9 @@
             {{assetTicker}}
         {{else}}
 
-            <div data-asset-ticker-autocomplete
+            <div data-asset-search-autocomplete
                  data-asset-selection-state="search"
-                 class="asset-ticker-autocomplete"
+                 class="asset-search-autocomplete"
             >
 
                 <div class="input-group">
@@ -31,13 +33,13 @@
                            aria-autocomplete="list"
                            aria-haspopup="listbox"
                            aria-expanded="false"
-                           data-asset-ticker-source="datalist-assets"
+                           data-asset-search-source="datalist-assets"
                            data-asset-search-input
                            hx-validate="true"
                            hx-on::validation:validate="{{assetTickerFieldHTMXOnValidate}}"
-                           onfocus="AssetComposedColumnsInput.handleAssetTickerFocus(event)"
-                           oninput="AssetComposedColumnsInput.handleAssetTickerInput(event)"
-                           onkeydown="AssetComposedColumnsInput.handleAssetTickerKeydown(event)"
+                           onfocus="AssetComposedColumnsInput.handleAssetSearchFocus(event)"
+                           oninput="AssetComposedColumnsInput.handleAssetSearchInput(event)"
+                           onkeydown="AssetComposedColumnsInput.handleAssetSearchKeydown(event)"
                      />
                     <input type="text"
                            name="{{assetTickerFieldName}}"
@@ -62,14 +64,14 @@
 
                 </div>
 
-                <div data-asset-ticker-suggestions class="asset-ticker-autocomplete__suggestions" hidden>
-                    <div data-asset-ticker-listbox
-                         class="asset-ticker-autocomplete__listbox"
+                <div data-asset-search-suggestions class="asset-search-autocomplete__suggestions" hidden>
+                    <div data-asset-search-listbox
+                         class="asset-search-autocomplete__listbox"
                          role="listbox"
                          aria-label="Available assets"
                     ></div>
-                    <div data-asset-ticker-status
-                         class="asset-ticker-autocomplete__status"
+                    <div data-asset-search-status
+                         class="asset-search-autocomplete__status"
                          role="status"
                          aria-live="polite"
                          hidden
