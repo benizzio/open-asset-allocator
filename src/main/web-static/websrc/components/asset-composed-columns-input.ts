@@ -181,7 +181,7 @@ function registerAutocompleteListeners(input: HTMLInputElement, state: AssetSear
         const pointerEvent = event as PointerEvent;
         const pointerSelection = state.pointerSelection;
 
-        if(!pointerSelection || pointerSelection.pointerId !== pointerEvent.pointerId || pointerSelection.isCancelled) {
+        if(pointerSelection?.pointerId !== pointerEvent.pointerId || pointerSelection?.isCancelled !== false) {
             return;
         }
 
@@ -199,7 +199,7 @@ function registerAutocompleteListeners(input: HTMLInputElement, state: AssetSear
         const pointerSelection = state.pointerSelection;
         state.pointerSelection = undefined;
 
-        if(!pointerSelection || pointerSelection.pointerId !== pointerEvent.pointerId || pointerSelection.isCancelled) {
+        if(pointerSelection?.pointerId !== pointerEvent.pointerId || pointerSelection?.isCancelled !== false) {
             return;
         }
 
