@@ -341,6 +341,7 @@ test.describe('portfolio allocation history management', () => {
     /** Verifies a touchscreen press visibly highlights and then selects an existing ticker.
      *
      * @author GPT-6 Luna
+     * @author GPT-6 Sol
      */
     test('scenario 14.10: selects an existing ticker using a touchscreen tap', async ({ database, browser, browserName }) => {
       test.skip(browserName !== 'chromium', 'Touchscreen input is exercised with Chromium CDP.');
@@ -372,19 +373,8 @@ test.describe('portfolio allocation history management', () => {
         await expectExistingAsset(touchPage.row, touchPage.assets[ticker]);
       } finally {
         lookupTracking.stop();
-        try {
-          if(!touchPage.page.isClosed()) {
-            await cdpSession.detach();
-          }
-        } catch(error) {
-          if(!touchPage.page.isClosed()) {
-            throw error;
-          }
-        }
-
-        if(!touchPage.context.isClosed()) {
-          await touchPage.context.close();
-        }
+        await cdpSession.detach().catch(() => undefined);
+        await touchPage.context.close().catch(() => undefined);
       }
     });
 
@@ -421,6 +411,7 @@ test.describe('portfolio allocation history management', () => {
     /** Verifies a touch swipe scrolls the list without activating the option where it began.
      *
      * @author GPT-6 Luna
+     * @author GPT-6 Sol
      */
     test('scenario 14.12: scrolls suggestions with touch without selecting a ticker', async ({ database, browser, browserName }) => {
       test.skip(browserName !== 'chromium', 'Native touch scrolling is exercised with Chromium CDP.');
@@ -461,8 +452,8 @@ test.describe('portfolio allocation history management', () => {
         expect(lookupTracking.requests).toHaveLength(0);
       } finally {
         lookupTracking.stop();
-        await cdpSession.detach();
-        await touchPage.context.close();
+        await cdpSession.detach().catch(() => undefined);
+        await touchPage.context.close().catch(() => undefined);
       }
     });
 
