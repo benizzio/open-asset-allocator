@@ -3017,7 +3017,7 @@
       "file_type": "code",
       "norm_label": ".activateexistingassetmode()",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L663"
+      "source_location": "L666"
     },
     {
       "id": "websrc_components_asset_composed_columns_input_assetcomposedcolumninput_activatenewassetmode",
@@ -3029,7 +3029,7 @@
       "file_type": "code",
       "norm_label": ".activatenewassetmode()",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L698"
+      "source_location": "L701"
     },
     {
       "id": "websrc_components_asset_composed_columns_input_assetcomposedcolumninput_beginassetlookup",
@@ -3041,7 +3041,7 @@
       "file_type": "code",
       "norm_label": ".beginassetlookup()",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L879"
+      "source_location": "L882"
     },
     {
       "id": "websrc_components_asset_composed_columns_input_assetcomposedcolumninput_clearsearcherrorfeedback",
@@ -3053,7 +3053,7 @@
       "file_type": "code",
       "norm_label": ".clearsearcherrorfeedback()",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L951"
+      "source_location": "L954"
     },
     {
       "id": "websrc_components_asset_composed_columns_input_assetcomposedcolumninput_clearsearchfieldvalidation",
@@ -3065,7 +3065,7 @@
       "file_type": "code",
       "norm_label": ".clearsearchfieldvalidation()",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L778"
+      "source_location": "L781"
     },
     {
       "id": "websrc_components_asset_composed_columns_input_assetcomposedcolumninput_completeassetlookup",
@@ -3077,7 +3077,7 @@
       "file_type": "code",
       "norm_label": ".completeassetlookup()",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L906"
+      "source_location": "L909"
     },
     {
       "id": "websrc_components_asset_composed_columns_input_assetcomposedcolumninput_constructor",
@@ -3101,7 +3101,7 @@
       "file_type": "code",
       "norm_label": ".handleassetactionbuttonclick()",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L822"
+      "source_location": "L825"
     },
     {
       "id": "websrc_components_asset_composed_columns_input_assetcomposedcolumninput_isinresetmode",
@@ -3113,7 +3113,7 @@
       "file_type": "code",
       "norm_label": ".isinresetmode()",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L642"
+      "source_location": "L645"
     },
     {
       "id": "websrc_components_asset_composed_columns_input_assetcomposedcolumninput_isinsearchmode",
@@ -3125,7 +3125,7 @@
       "file_type": "code",
       "norm_label": ".isinsearchmode()",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L633"
+      "source_location": "L636"
     },
     {
       "id": "websrc_components_asset_composed_columns_input_assetcomposedcolumninput_resettosearchmode",
@@ -3137,7 +3137,7 @@
       "file_type": "code",
       "norm_label": ".resettosearchmode()",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L733"
+      "source_location": "L736"
     },
     {
       "id": "websrc_components_asset_composed_columns_input_assetcomposedcolumninput_restoresearchmodeafterlookup",
@@ -3149,7 +3149,7 @@
       "file_type": "code",
       "norm_label": ".restoresearchmodeafterlookup()",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L925"
+      "source_location": "L928"
     },
     {
       "id": "websrc_components_asset_composed_columns_input_assetcomposedcolumninput_switchassetactionbuttonidentity",
@@ -3161,7 +3161,7 @@
       "file_type": "code",
       "norm_label": ".switchassetactionbuttonidentity()",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L651"
+      "source_location": "L654"
     },
     {
       "id": "websrc_components_asset_composed_columns_input_assetcomposedcolumninput_validateforpost",
@@ -3173,7 +3173,7 @@
       "file_type": "code",
       "norm_label": ".validateforpost()",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L854"
+      "source_location": "L857"
     },
     {
       "id": "websrc_components_asset_composed_columns_input_assetcomposedcolumninput_validatesearchuniqueidentifier",
@@ -3185,7 +3185,7 @@
       "file_type": "code",
       "norm_label": ".validatesearchuniqueidentifier()",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L788"
+      "source_location": "L791"
     },
     {
       "id": "websrc_components_asset_composed_columns_input_clearassetsearchoptionhighlight",
@@ -3257,7 +3257,7 @@
       "file_type": "code",
       "norm_label": "getasset()",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L1060"
+      "source_location": "L1063"
     },
     {
       "id": "websrc_components_asset_composed_columns_input_highlightassetsearchoption",
@@ -3281,7 +3281,7 @@
       "file_type": "code",
       "norm_label": "installassetformvalidationguards()",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L1026"
+      "source_location": "L1029"
     },
     {
       "id": "websrc_components_asset_composed_columns_input_loadassetsdatalist",
@@ -3293,7 +3293,7 @@
       "file_type": "code",
       "norm_label": "loadassetsdatalist()",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L1104"
+      "source_location": "L1107"
     },
     {
       "id": "websrc_components_asset_composed_columns_input_loadclassesdatalist",
@@ -3305,7 +3305,7 @@
       "file_type": "code",
       "norm_label": "loadclassesdatalist()",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L1093"
+      "source_location": "L1096"
     },
     {
       "id": "websrc_components_asset_composed_columns_input_navigateassetsearchoptions",
@@ -3317,7 +3317,7 @@
       "file_type": "code",
       "norm_label": "navigateassetsearchoptions()",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L1118"
+      "source_location": "L1121"
     },
     {
       "id": "websrc_components_asset_composed_columns_input_openassetsearchautocomplete",
@@ -3377,7 +3377,7 @@
       "file_type": "code",
       "norm_label": "submitassetsearchlookup()",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L1148"
+      "source_location": "L1151"
     },
     {
       "id": "websrc_components_asset_composed_columns_input_validateassetrowsforpost",
@@ -3389,7 +3389,7 @@
       "file_type": "code",
       "norm_label": "validateassetrowsforpost()",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L967"
+      "source_location": "L970"
     },
     {
       "id": "websrc_pages_asset_external_addexternalasset",
@@ -5999,7 +5999,7 @@
       "file_type": "code",
       "norm_label": "assetcomposedcolumnsinput",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L1193"
+      "source_location": "L1196"
     },
     {
       "id": "websrc_components_portfolio_history_management_portfoliohistorymanagement",
@@ -7930,7 +7930,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L665",
+      "source_location": "L668",
       "weight": 1.0
     },
     {
@@ -7942,7 +7942,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L668",
+      "source_location": "L671",
       "weight": 1.0
     },
     {
@@ -7954,24 +7954,12 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L688",
+      "source_location": "L691",
       "weight": 1.0
     },
     {
       "source": "websrc_components_asset_composed_columns_input_assetcomposedcolumninput_activatenewassetmode",
       "target": "websrc_components_asset_composed_columns_input_assetcomposedcolumninput_completeassetlookup",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L700",
-      "weight": 1.0
-    },
-    {
-      "source": "websrc_components_asset_composed_columns_input_assetcomposedcolumninput_activatenewassetmode",
-      "target": "websrc_components_asset_composed_columns_input_assetcomposedcolumninput_switchassetactionbuttonidentity",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -7983,6 +7971,18 @@
     },
     {
       "source": "websrc_components_asset_composed_columns_input_assetcomposedcolumninput_activatenewassetmode",
+      "target": "websrc_components_asset_composed_columns_input_assetcomposedcolumninput_switchassetactionbuttonidentity",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "websrc/components/asset-composed-columns-input.ts",
+      "source_location": "L706",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_asset_composed_columns_input_assetcomposedcolumninput_activatenewassetmode",
       "target": "websrc_components_asset_composed_columns_input_assetcomposedcolumninput_clearsearcherrorfeedback",
       "relation": "calls",
       "_origin": "ast",
@@ -7990,7 +7990,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L722",
+      "source_location": "L725",
       "weight": 1.0
     },
     {
@@ -8002,7 +8002,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L881",
+      "source_location": "L884",
       "weight": 1.0
     },
     {
@@ -8014,7 +8014,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L887",
+      "source_location": "L890",
       "weight": 1.0
     },
     {
@@ -8026,7 +8026,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L781",
+      "source_location": "L784",
       "weight": 1.0
     },
     {
@@ -8038,7 +8038,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L915",
+      "source_location": "L918",
       "weight": 1.0
     },
     {
@@ -8050,7 +8050,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L824",
+      "source_location": "L827",
       "weight": 1.0
     },
     {
@@ -8062,7 +8062,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L826",
+      "source_location": "L829",
       "weight": 1.0
     },
     {
@@ -8074,7 +8074,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L831",
+      "source_location": "L834",
       "weight": 1.0
     },
     {
@@ -8086,7 +8086,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L834",
+      "source_location": "L837",
       "weight": 1.0
     },
     {
@@ -8098,7 +8098,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L838",
+      "source_location": "L841",
       "weight": 1.0
     },
     {
@@ -8110,7 +8110,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L844",
+      "source_location": "L847",
       "weight": 1.0
     },
     {
@@ -8122,7 +8122,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L845",
+      "source_location": "L848",
       "weight": 1.0
     },
     {
@@ -8134,7 +8134,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L735",
+      "source_location": "L738",
       "weight": 1.0
     },
     {
@@ -8146,7 +8146,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L743",
+      "source_location": "L746",
       "weight": 1.0
     },
     {
@@ -8158,7 +8158,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L768",
+      "source_location": "L771",
       "weight": 1.0
     },
     {
@@ -8170,7 +8170,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L771",
+      "source_location": "L774",
       "weight": 1.0
     },
     {
@@ -8182,7 +8182,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L927",
+      "source_location": "L930",
       "weight": 1.0
     },
     {
@@ -8194,7 +8194,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L929",
+      "source_location": "L932",
       "weight": 1.0
     },
     {
@@ -8206,7 +8206,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L943",
+      "source_location": "L946",
       "weight": 1.0
     },
     {
@@ -8254,7 +8254,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L1062",
+      "source_location": "L1065",
       "weight": 1.0
     },
     {
@@ -8266,7 +8266,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L1071",
+      "source_location": "L1074",
       "weight": 1.0
     },
     {
@@ -8278,7 +8278,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L1074",
+      "source_location": "L1077",
       "weight": 1.0
     },
     {
@@ -8290,7 +8290,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L1080",
+      "source_location": "L1083",
       "weight": 1.0
     },
     {
@@ -8302,7 +8302,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L1031",
+      "source_location": "L1034",
       "weight": 1.0
     },
     {
@@ -8314,7 +8314,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L1107",
+      "source_location": "L1110",
       "weight": 1.0
     },
     {
@@ -8326,7 +8326,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L1124",
+      "source_location": "L1127",
       "weight": 1.0
     },
     {
@@ -8338,7 +8338,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L1125",
+      "source_location": "L1128",
       "weight": 1.0
     },
     {
@@ -8350,7 +8350,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L1139",
+      "source_location": "L1142",
       "weight": 1.0
     },
     {
@@ -8506,7 +8506,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L1159",
+      "source_location": "L1162",
       "weight": 1.0
     },
     {
@@ -17665,7 +17665,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L663",
+      "source_location": "L666",
       "weight": 1.0
     },
     {
@@ -18938,7 +18938,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L1026",
+      "source_location": "L1029",
       "weight": 1.0
     },
     {
@@ -18949,7 +18949,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L1060",
+      "source_location": "L1063",
       "weight": 1.0
     },
     {
@@ -18960,7 +18960,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L1093",
+      "source_location": "L1096",
       "weight": 1.0
     },
     {
@@ -18971,18 +18971,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L1104",
-      "weight": 1.0
-    },
-    {
-      "source": "websrc_components_asset_composed_columns_input",
-      "target": "websrc_components_asset_composed_columns_input_navigateassetsearchoptions",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L1118",
+      "source_location": "L1107",
       "weight": 1.0
     },
     {
@@ -18998,13 +18987,24 @@
     },
     {
       "source": "websrc_components_asset_composed_columns_input",
+      "target": "websrc_components_asset_composed_columns_input_navigateassetsearchoptions",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "websrc/components/asset-composed-columns-input.ts",
+      "source_location": "L1121",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_asset_composed_columns_input",
       "target": "websrc_components_asset_composed_columns_input_submitassetsearchlookup",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L1148",
+      "source_location": "L1151",
       "weight": 1.0
     },
     {
@@ -19015,7 +19015,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L1193",
+      "source_location": "L1196",
       "weight": 1.0
     },
     {
@@ -19191,7 +19191,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L967",
+      "source_location": "L970",
       "weight": 1.0
     },
     {
@@ -22722,7 +22722,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L633",
+      "source_location": "L636",
       "weight": 1.0
     },
     {
@@ -22733,7 +22733,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L642",
+      "source_location": "L645",
       "weight": 1.0
     },
     {
@@ -22744,7 +22744,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L651",
+      "source_location": "L654",
       "weight": 1.0
     },
     {
@@ -22755,7 +22755,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L663",
+      "source_location": "L666",
       "weight": 1.0
     },
     {
@@ -22766,7 +22766,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L698",
+      "source_location": "L701",
       "weight": 1.0
     },
     {
@@ -22777,7 +22777,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L733",
+      "source_location": "L736",
       "weight": 1.0
     },
     {
@@ -22788,7 +22788,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L778",
+      "source_location": "L781",
       "weight": 1.0
     },
     {
@@ -22799,7 +22799,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L788",
+      "source_location": "L791",
       "weight": 1.0
     },
     {
@@ -22810,7 +22810,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L822",
+      "source_location": "L825",
       "weight": 1.0
     },
     {
@@ -22821,7 +22821,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L854",
+      "source_location": "L857",
       "weight": 1.0
     },
     {
@@ -22832,7 +22832,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L879",
+      "source_location": "L882",
       "weight": 1.0
     },
     {
@@ -22843,7 +22843,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L906",
+      "source_location": "L909",
       "weight": 1.0
     },
     {
@@ -22854,7 +22854,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L925",
+      "source_location": "L928",
       "weight": 1.0
     },
     {
@@ -22865,7 +22865,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/asset-composed-columns-input.ts",
-      "source_location": "L951",
+      "source_location": "L954",
       "weight": 1.0
     },
     {
@@ -24066,5 +24066,5 @@
       "source_file": "websrc/components/portfolio-navigation.html"
     }
   ],
-  "built_at_commit": "87d660adce1bbd06e3c44dff9e0748141c6d192b"
+  "built_at_commit": "9f5ba67712567550732c467291e59408487a7fca"
 }

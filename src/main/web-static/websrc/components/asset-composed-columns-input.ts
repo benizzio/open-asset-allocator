@@ -618,9 +618,12 @@ class AssetComposedColumnInput {
         this.assetTickerExtraErrorMessageDiv =
             container.querySelector<HTMLDivElement>(`[${ TICKER_EXTRA_ERROR_MESSAGE_ATTRIBUTE }]`);
 
-        if(!this.autocompleteWrapper || !this.assetSearchInput || !this.assetIdInput || !this.assetTickerInput
+        const hasMissingRequiredControls = !this.autocompleteWrapper || !this.assetSearchInput
+            || !this.assetIdInput || !this.assetTickerInput
             || !this.assetActionButton || !this.newAssetTickerMessage || !this.assetNameInput
-            || !this.assetTickerExtraErrorMessageDiv) {
+            || !this.assetTickerExtraErrorMessageDiv;
+
+        if(hasMissingRequiredControls) {
             throw new Error(`Asset row '${ containerId }' is missing required controls.`);
         }
     }
