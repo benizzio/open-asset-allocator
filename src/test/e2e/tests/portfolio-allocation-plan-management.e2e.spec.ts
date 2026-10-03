@@ -7,9 +7,9 @@
  * Scenario 6 modifies an existing allocation plan, creates a second plan, and
  * verifies the resulting charts and PostgreSQL persistence.
  *
- * Authored by: OpenCode
+ * @author OpenCode
  */
-import type { Locator, Page } from '@playwright/test';
+import type { Locator, Page, Request } from '@playwright/test';
 import { expect, test } from '../support/fixtures';
 import type { E2eDatabase } from '../support/database';
 import {
@@ -187,6 +187,7 @@ test.describe('portfolio allocation plan management', () => {
       '75',
       '0.75',
       false,
+      'Bond',
     );
 
     const stocksClassRow = await addClassAllocationRow(page, newPlanForm, 4);
@@ -550,6 +551,49 @@ test.describe('portfolio allocation plan management', () => {
       id: seededData.portfolio.id,
       name: PORTFOLIO_NAME,
     }]);
+  });
+
+  /** Verifies the shared create-new ticker action works in an allocation-plan form.
+   *
+   * @author GPT-6 Luna
+   */
+  test('scenario 14.14: creates a new-asset draft from an allocation-plan row', async ({ database, page }) => {
+    const seededData = await seedAllocationPlanData(database);
+    const ticker = 'E2E:PLAN-NEW-ASSET';
+
+    await page.goto('/');
+    await expectRootShell(page);
+    await page.goto(`/portfolio/${seededData.portfolio.id}/allocation/manage`);
+    await expectAllocationPlanManagement(page, seededData.portfolio);
+
+    const newPlanItem = page.locator('#allocation-plan-management-container-0');
+    await newPlanItem.getByRole('textbox', { name: 'New allocation plan name' }).fill('E2E Autocomplete Plan');
+    await newPlanItem.locator('#allocation-plan-management-trigger-0 > button').click();
+
+    const form = page.locator('#allocation-plan-management-form-0');
+    const classRow = await addClassAllocationRow(page, form, 1);
+    await classRow.getByRole('combobox', { name: 'Class' }).fill('BONDS');
+    const assetRow = await addAssetAllocationRow(page, classRow, 2, 1);
+    const tickerInput = assetRow.getByRole('combobox', { name: 'Asset', exact: true });
+    await tickerInput.fill(ticker);
+    const createOption = assetRow.getByRole('option', { name: 'No matching assets - create new', exact: true });
+    await expect(createOption).toBeVisible();
+
+    const lookupResponse = page.waitForResponse(response => {
+      return response.request().method() === 'GET'
+        && new URL(response.url()).pathname === `/api/asset/${ticker}`;
+    });
+    await createOption.click();
+
+    expect((await lookupResponse).status()).toBe(404);
+    await expect(assetRow.getByRole('textbox', { name: 'Asset ticker', exact: true })).toHaveValue(ticker);
+    await expect(assetRow.getByRole('textbox', { name: 'Asset ticker', exact: true })).toHaveAttribute('readonly', '');
+    await expect(assetRow.getByText('* Creating new asset', { exact: true })).toBeVisible();
+    const assetNameInput = assetRow.getByRole('textbox', { name: 'Asset name' });
+    await expect(assetNameInput).toBeVisible();
+    await expect(assetNameInput).toHaveAttribute('required', '');
+    await expect(assetNameInput).toBeFocused();
+    await expect(database.query('SELECT id FROM public.asset WHERE ticker = $1', [ticker])).resolves.toEqual([]);
   });
 });
 
@@ -979,7 +1023,8 @@ async function expectManagedAllocationPlanForm(
 
     if (expected.parent) {
       await expect(row.getByRole('combobox', { name: 'Class' })).toHaveValue(expected.className);
-      await expect(row.getByRole('combobox', { name: 'Asset ticker' })).toHaveCount(0);
+      await expect(row.getByRole('combobox', { name: 'Asset', exact: true })).toHaveCount(0);
+      await expect(row.getByRole('textbox', { name: 'Asset ticker', exact: true })).toHaveCount(0);
       continue;
     }
 
@@ -990,7 +1035,8 @@ async function expectManagedAllocationPlanForm(
     await expect(row.locator('td').nth(1)).toHaveText(expected.assetTicker);
     await expect(row.locator('td').nth(2)).toHaveText(expected.assetName);
     await expect(row.getByRole('combobox', { name: 'Class' })).toHaveCount(0);
-    await expect(row.getByRole('combobox', { name: 'Asset ticker' })).toHaveCount(0);
+    await expect(row.getByRole('combobox', { name: 'Asset', exact: true })).toHaveCount(0);
+    await expect(row.getByRole('textbox', { name: 'Asset ticker', exact: true })).toHaveCount(0);
     await expect(row.getByRole('textbox', { name: 'Asset name' })).toHaveCount(0);
   }
 
@@ -1086,7 +1132,7 @@ async function fillNewAssetAllocation(
   await expect(row.getByText('* Creating new asset', { exact: true })).toBeVisible();
   await expect(row.getByRole('textbox', { name: 'Asset name' })).toBeVisible();
 
-  const tickerInput = row.getByRole('combobox', { name: 'Asset ticker' });
+  const tickerInput = row.getByRole('textbox', { name: 'Asset ticker', exact: true });
   await expect(tickerInput).toHaveValue(ticker);
   await row.getByRole('textbox', { name: 'Asset name' }).fill(name);
   await expect(row.locator(`input[name="details[${index}][hierarchicalId][1]"]`)).toHaveValue(className);
@@ -1094,7 +1140,11 @@ async function fillNewAssetAllocation(
   await setCashReserve(row, cashReserve);
 }
 
-/** Fills an existing asset row and verifies the resolved asset and inherited class. */
+/** Fills an existing asset row and verifies the resolved asset and inherited class.
+ *
+ * @param searchQuery - Optional partial ticker/name query used to select the asset.
+ * @author GPT-6 Luna
+ */
 async function fillExistingAssetAllocation(
   page: Page,
   row: Locator,
@@ -1104,27 +1154,61 @@ async function fillExistingAssetAllocation(
   percentage: string,
   percentageDecimal: string,
   cashReserve: boolean,
+  searchQuery?: string,
 ): Promise<void> {
-  await selectAssetFromDatalist(page, row, asset.ticker);
-  await searchForAsset(page, row, asset.ticker, 200);
+  await selectAssetFromAutocomplete(page, row, asset.ticker, searchQuery);
   await expectExistingAsset(row, asset);
   await expect(row.locator(`input[name="details[${index}][hierarchicalId][1]"]`)).toHaveValue(className);
   await fillPercentage(row, index, percentage, percentageDecimal);
   await setCashReserve(row, cashReserve);
 }
 
-/** Selects a known ticker from the populated browser datalist. */
-async function selectAssetFromDatalist(page: Page, row: Locator, ticker: string): Promise<void> {
+/**
+ * Selects a known autocomplete suggestion and waits for its immediate asset lookup.
+ *
+ * @param page - Browser page that receives the lookup request.
+ * @param row - Allocation-plan row containing the ticker input.
+ * @param ticker - Seeded ticker expected in the autocomplete suggestions.
+ *
+ * @author GPT-6 Luna
+ */
+async function selectAssetFromAutocomplete(
+  page: Page,
+  row: Locator,
+  ticker: string,
+  searchQuery: string = ticker,
+): Promise<void> {
   await expect(page.locator(`#datalist-assets option[value="${ticker}"]`)).toBeAttached();
-  const tickerInput = row.getByRole('combobox', { name: 'Asset ticker' });
+  const tickerInput = row.getByRole('combobox', { name: 'Asset', exact: true });
   await tickerInput.click();
-  await tickerInput.fill(ticker);
-  await expect(tickerInput).toHaveValue(ticker);
+  await tickerInput.fill(searchQuery);
+
+  const lookupRequests: string[] = [];
+  const recordLookupRequest = (request: Request): void => {
+    if(request.method() === 'GET' && new URL(request.url()).pathname === `/api/asset/${ticker}`) {
+      lookupRequests.push(request.url());
+    }
+  };
+  page.on('request', recordLookupRequest);
+  try {
+    const responsePromise = page.waitForResponse((response) => {
+      return response.request().method() === 'GET'
+        && new URL(response.url()).pathname === `/api/asset/${ticker}`;
+    });
+    const optionLabel = await page.locator(`#datalist-assets option[value="${ticker}"]`).textContent();
+    await row.getByRole('option', { name: optionLabel?.trim(), exact: true }).click();
+    const response = await responsePromise;
+    expect(response.status()).toBe(200);
+    expect(lookupRequests).toHaveLength(1);
+    await expect(row.getByRole('textbox', { name: 'Asset ticker', exact: true })).toHaveValue(ticker);
+  } finally {
+    page.off('request', recordLookupRequest);
+  }
 }
 
 /** Waits for an asset lookup request and verifies the expected HTTP result. */
 async function searchForAsset(page: Page, row: Locator, ticker: string, status: number): Promise<void> {
-  const tickerInput = row.getByRole('combobox', { name: 'Asset ticker' });
+  const tickerInput = row.getByRole('combobox', { name: 'Asset', exact: true });
   await tickerInput.fill(ticker);
 
   const responsePromise = page.waitForResponse((response) => {
@@ -1138,8 +1222,8 @@ async function searchForAsset(page: Page, row: Locator, ticker: string, status: 
 
 /** Verifies the read-only fields produced by an existing asset lookup. */
 async function expectExistingAsset(row: Locator, asset: SeededAsset): Promise<void> {
-  await expect(row.getByRole('combobox', { name: 'Asset ticker' })).toHaveAttribute('readonly', '');
-  await expect(row.getByRole('combobox', { name: 'Asset ticker' })).toHaveValue(asset.ticker);
+  await expect(row.getByRole('textbox', { name: 'Asset ticker', exact: true })).toHaveAttribute('readonly', '');
+  await expect(row.getByRole('textbox', { name: 'Asset ticker', exact: true })).toHaveValue(asset.ticker);
   await expect(row.getByRole('textbox', { name: 'Asset name' })).toBeVisible();
   await expect(row.getByRole('textbox', { name: 'Asset name' })).toHaveAttribute('readonly', '');
   await expect(row.getByRole('textbox', { name: 'Asset name' })).toHaveValue(asset.name);
@@ -1237,7 +1321,8 @@ async function expectDraftAllocationRow(form: Locator, expected: ExpectedAllocat
 
   if (expected.parent) {
     await expect(row.getByRole('combobox', { name: 'Class' })).toHaveValue(expected.className);
-    await expect(row.getByRole('combobox', { name: 'Asset ticker' })).toHaveCount(0);
+    await expect(row.getByRole('combobox', { name: 'Asset', exact: true })).toHaveCount(0);
+    await expect(row.getByRole('textbox', { name: 'Asset ticker', exact: true })).toHaveCount(0);
     return;
   }
 
@@ -1246,7 +1331,7 @@ async function expectDraftAllocationRow(form: Locator, expected: ExpectedAllocat
   }
 
   await expect(row.locator(`input[name="details[${expected.index}][hierarchicalId][1]"]`)).toHaveValue(expected.className);
-  await expect(row.getByRole('combobox', { name: 'Asset ticker' })).toHaveValue(expected.assetTicker);
+  await expect(row.getByRole('textbox', { name: 'Asset ticker', exact: true })).toHaveValue(expected.assetTicker);
   await expect(row.getByRole('textbox', { name: 'Asset name' })).toHaveValue(expected.assetName);
 }
 
@@ -1334,7 +1419,8 @@ async function expectSavedAllocationPlanForm(form: Locator): Promise<void> {
 
     if (expected.parent) {
       await expect(row.getByRole('combobox', { name: 'Class' })).toBeEditable();
-      await expect(row.getByRole('combobox', { name: 'Asset ticker' })).toHaveCount(0);
+      await expect(row.getByRole('combobox', { name: 'Asset', exact: true })).toHaveCount(0);
+      await expect(row.getByRole('textbox', { name: 'Asset ticker', exact: true })).toHaveCount(0);
       continue;
     }
 
@@ -1343,7 +1429,8 @@ async function expectSavedAllocationPlanForm(form: Locator): Promise<void> {
     }
 
     await expect(row.getByRole('textbox', { name: 'Class' })).toHaveCount(0);
-    await expect(row.getByRole('combobox', { name: 'Asset ticker' })).toHaveCount(0);
+    await expect(row.getByRole('combobox', { name: 'Asset', exact: true })).toHaveCount(0);
+    await expect(row.getByRole('textbox', { name: 'Asset ticker', exact: true })).toHaveCount(0);
     await expect(row.getByRole('textbox', { name: 'Asset name' })).toHaveCount(0);
     await expect(row.locator('td').nth(1)).toHaveText(expected.assetTicker);
     await expect(row.locator('td').nth(2)).toHaveText(expected.assetName);

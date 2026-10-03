@@ -2,6 +2,8 @@
  * Coordinates allocation-plan form updates and server responses for the allocation-management UI.
  * @author OpenCode
  * @author benizzio
+ * @author GPT-6.1 Sol
+ * @author GPT-6 Sol
  */
 import { PortfolioPage } from "../pages";
 import {
@@ -18,7 +20,7 @@ import * as handlebars from "handlebars";
 import { isNullish, toInt } from "../utils/lang";
 import { Portfolio } from "../domain/portfolio";
 import { AllocationHierarchyLevel, AllocationPlanType } from "../domain/allocation";
-import AssetComposedColumnsInput from "./asset-composed-columns-input";
+import AssetComposedColumnsInput, { AssetSelectionState } from "./asset-composed-columns-input";
 import htmx from "htmx.org";
 import Router from "../infra/routing";
 import notifications from "./notifications";
@@ -216,15 +218,30 @@ function addPlannedAllocationRow(
     DomInfra.bindDescendants(newRow);
 }
 
+/** Copies only committed asset tickers into their matching root hierarchy fields.
+ *
+ * @author GPT-6 Luna
+ * @author GPT-6 Sol
+ */
 function copyAssetTickersToHierarchicalIdFields(form: HTMLFormElement) {
 
     form.querySelectorAll<HTMLInputElement>(`input[name$='${ ASSET_TICKER_FIELD_NAME_SUFFIX }']`)
         .forEach((assetTickerInput: HTMLInputElement) => {
 
-            const assetTickerValue = assetTickerInput.value;
-
             const parentTr = assetTickerInput.closest("tr");
-            const allocationIndexString = parentTr.dataset.allocationIndex;
+            const allocationIndexString = parentTr?.dataset.allocationIndex;
+
+            if(!parentTr || !allocationIndexString) {
+                return;
+            }
+
+            const assetSearchAutocomplete = parentTr.querySelector<HTMLElement>("[data-asset-search-autocomplete]");
+            const selectionState = assetSearchAutocomplete?.dataset.assetSelectionState;
+
+            const assetTickerValue = selectionState === AssetSelectionState.EXISTING
+                || selectionState === AssetSelectionState.NEW
+                ? assetTickerInput.value
+                : "";
 
             const assetIdInput = form.elements.namedItem(
                 `details[${ allocationIndexString }][hierarchicalId][0]`,
@@ -457,6 +474,10 @@ const allocationPlanManagement = {
     },
 
     handleSubmit(form: HTMLFormElement, hierarchySize: number) {
+
+        if(!AssetComposedColumnsInput.validateFormBeforePost(form)) {
+            return;
+        }
 
         copyAssetTickersToHierarchicalIdFields(form);
 

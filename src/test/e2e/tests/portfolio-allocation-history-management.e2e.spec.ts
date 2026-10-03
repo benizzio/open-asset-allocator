@@ -8,9 +8,10 @@
  * Scenario 5 modifies a seeded observation, creates a second observation, and
  * verifies both browser state and PostgreSQL persistence.
  *
- * Authored by: OpenCode
+ * @author OpenCode
+ * @author GPT-6 Sol
  */
-import type { Locator, Page } from '@playwright/test';
+import type { Browser, Locator, Page, Request, Route } from '@playwright/test';
 import { expect, test } from '../support/fixtures';
 import type { E2eDatabase } from '../support/database';
 import {
@@ -100,6 +101,711 @@ type SeededHistoryModificationData = {
 };
 
 test.describe('portfolio allocation history management', () => {
+  test.describe('scenario 14: asset search autocomplete feedback and create action', () => {
+    /** Verifies all matching assets remain available in a bounded, scrollable list.
+     *
+     * @author GPT-6 Luna
+     * @author GPT-6 Sol
+     */
+    test('scenario 14.1: filters asset suggestions and allows scrolling', async ({ database, page }) => {
+      const { row, assetSearchInput, suggestions } = await prepareAssetSearchAutocompleteRow(database, page);
+
+      await expect(assetSearchInput).toHaveAttribute('aria-expanded', 'true');
+      await expect(suggestions.getByRole('option')).toHaveCount(15);
+
+      await assetSearchInput.fill('auto-1');
+      await expect(suggestions.getByRole('option')).toHaveCount(2);
+      await expect(suggestions.getByRole('option', { name: 'E2E:AUTO-10 - Autocomplete Asset 10', exact: true })).toBeVisible();
+      await expect(suggestions.getByRole('option', { name: 'E2E:AUTO-11 - Autocomplete Asset 11', exact: true })).toBeVisible();
+
+      await assetSearchInput.fill('E2E:');
+      await expect(suggestions.getByRole('option')).toHaveCount(12);
+      await expect(suggestions.evaluate(element => element.scrollHeight > element.clientHeight)).resolves.toBe(true);
+
+      await assetSearchInput.fill('NO-MATCH');
+      await expect(row.getByRole('option', { name: 'No matching assets - create new', exact: true })).toBeVisible();
+      await expect(row.getByRole('status')).toHaveText('No matching assets. Select the create option to continue.');
+    });
+
+    /** Verifies a refresh of the prefetched catalog removes visible stale options from an open list.
+     *
+     * @author GPT-6 Luna
+     * @author GPT-6 Sol
+     */
+    test('scenario 14.2: refreshes suggestions after the ticker catalog reloads', async ({ database, page }) => {
+      const { suggestions, assetSearchInput } = await prepareAssetSearchAutocompleteRow(database, page);
+
+      await page.locator('#datalist-assets').evaluate(element => {
+        const staleOption = document.createElement('option');
+        staleOption.value = 'E2E:STALE';
+        staleOption.textContent = 'E2E:STALE';
+        element.append(staleOption);
+      });
+      await assetSearchInput.fill('E2E:');
+      await expect(suggestions.getByRole('option', { name: 'E2E:STALE', exact: true })).toBeVisible();
+
+      const datalistRefresh = page.waitForResponse(response => {
+        return response.request().method() === 'GET' && new URL(response.url()).pathname === '/api/asset';
+      });
+      await page.evaluate(() => {
+        const assetComposedColumnsInput =
+          (window as unknown as Record<string, { loadDatalists(): void }>)['AssetComposedColumnsInput'];
+        assetComposedColumnsInput.loadDatalists();
+      });
+      await datalistRefresh;
+
+      await expect(page.locator('#datalist-assets option[value="E2E:STALE"]')).toHaveCount(0);
+      await expect(suggestions.getByRole('option', { name: 'E2E:STALE', exact: true })).toHaveCount(0);
+      await expect(suggestions.getByRole('option')).toHaveCount(12);
+    });
+
+    /** Verifies pointer selection directly starts lookup and populates the existing asset fields.
+     *
+     * @author GPT-6 Luna
+     * @author GPT-6 Sol
+     */
+    test('scenario 14.3: selecting a suggestion immediately looks up the existing asset', async ({ database, page }) => {
+      const { assets, row, assetSearchInput, suggestions } = await prepareAssetSearchAutocompleteRow(database, page);
+      const ticker = 'E2E:AUTO-11';
+      const lookupRequests: string[] = [];
+      const recordLookupRequest = (request: Request): void => {
+        if(request.method() === 'GET' && new URL(request.url()).pathname === `/api/asset/${ticker}`) {
+          lookupRequests.push(request.url());
+        }
+      };
+      page.on('request', recordLookupRequest);
+      try {
+        const lookupResponse = page.waitForResponse(response => {
+          return response.request().method() === 'GET'
+            && new URL(response.url()).pathname === `/api/asset/${ticker}`;
+        });
+
+        await suggestions.getByRole('option', { name: `${ticker} - ${assets[ticker].name}`, exact: true }).click();
+
+        expect((await lookupResponse).status()).toBe(200);
+        expect(lookupRequests).toHaveLength(1);
+        await expectExistingAsset(row, assets[ticker]);
+        await expect(row.locator('[data-asset-search-input]')).toBeHidden();
+        await expect(row.locator('[data-asset-search-input]')).toHaveAttribute('aria-expanded', 'false');
+      } finally {
+        page.off('request', recordLookupRequest);
+      }
+    });
+
+    /** Verifies Arrow navigation and Enter select a suggestion and resolve it through the API.
+     *
+     * @author GPT-6 Luna
+     * @author GPT-6 Sol
+     */
+    test('scenario 14.4: selects the highlighted suggestion with the keyboard', async ({ database, page }) => {
+      const { assets, row, assetSearchInput } = await prepareAssetSearchAutocompleteRow(database, page);
+      const ticker = 'E2E:AUTO-00';
+
+      await assetSearchInput.fill(ticker);
+      await assetSearchInput.press('ArrowDown');
+      const activeOptionId = await assetSearchInput.getAttribute('aria-activedescendant');
+      expect(activeOptionId).toBeTruthy();
+      const activeOption = row.locator(`#${activeOptionId}`);
+      await expectOptionHighlighted(activeOption);
+
+      const lookupResponse = page.waitForResponse(response => {
+        return response.request().method() === 'GET'
+          && new URL(response.url()).pathname === `/api/asset/${ticker}`;
+      });
+      await assetSearchInput.press('Enter');
+
+      expect((await lookupResponse).status()).toBe(200);
+      await expectExistingAsset(row, assets[ticker]);
+    });
+
+    /** Verifies Enter without a selected suggestion preserves manual lookup and new-asset mode.
+     *
+     * @author GPT-6 Luna
+     * @author GPT-6 Sol
+     */
+    test('scenario 14.5: keeps manual search for unmatched tickers', async ({ database, page }) => {
+      const { row, assetSearchInput } = await prepareAssetSearchAutocompleteRow(database, page);
+      const ticker = 'NO-SUCH-ASSET';
+
+      await assetSearchInput.fill(ticker);
+      await expect(row.getByRole('option', { name: 'No matching assets - create new', exact: true })).toBeVisible();
+      const lookupResponse = page.waitForResponse(response => {
+        return response.request().method() === 'GET'
+          && new URL(response.url()).pathname === `/api/asset/${ticker}`;
+      });
+      await assetSearchInput.press('Enter');
+
+      expect((await lookupResponse).status()).toBe(404);
+      await expect(row.getByText('* Creating new asset', { exact: true })).toBeVisible();
+      await expect(row.getByRole('textbox', { name: 'Asset name' })).toBeVisible();
+    });
+
+    /** Verifies the new-asset reset action clears the row and reopens asset suggestions.
+     *
+     * @author GPT-6 Luna
+     * @author GPT-6 Sol
+     */
+    test('scenario 14.6: resets a new-asset row to asset search', async ({ database, page }) => {
+      const { row, assetSearchInput } = await prepareAssetSearchAutocompleteRow(database, page);
+      const missingAssetTicker = 'NO-SUCH-ASSET';
+      const missingAssetResponse = page.waitForResponse(response => {
+        return response.request().method() === 'GET'
+          && new URL(response.url()).pathname === `/api/asset/${missingAssetTicker}`;
+      });
+
+      await assetSearchInput.fill(missingAssetTicker);
+      await assetSearchInput.press('Enter');
+      expect((await missingAssetResponse).status()).toBe(404);
+      await row.locator('[data-asset-action-button]').click();
+      await expect(assetSearchInput).toHaveValue('');
+      await expect(assetSearchInput).toHaveAttribute('aria-expanded', 'true');
+      await assetSearchInput.press('Escape');
+      await expect(assetSearchInput).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    /** Verifies pointer hover highlights one row without starting an asset lookup.
+     *
+     * @author GPT-6 Luna
+     * @author GPT-6 Sol
+     */
+    test('scenario 14.7: visibly highlights a hovered asset without selecting it', async ({ database, page }) => {
+      const { row, assetSearchInput } = await prepareAssetSearchAutocompleteRow(database, page);
+      const ticker = 'E2E:AUTO-02';
+      const lookupTracking = trackAssetLookupRequests(page, ticker);
+
+      try {
+        await assetSearchInput.fill(ticker);
+        const option = row.getByRole('option', { name: `${ticker} - Autocomplete Asset 2`, exact: true });
+        await option.hover();
+
+        await expectOptionHighlighted(option);
+        await expect(assetSearchInput).toHaveValue(ticker);
+        await expect(row.locator('input[type="hidden"][data-null-if-empty][name$="[assetId]"]')).toHaveValue('');
+        expect(lookupTracking.requests).toHaveLength(0);
+      } finally {
+        lookupTracking.stop();
+      }
+    });
+
+    /** Verifies selecting the create action resolves the unmatched ticker into new-asset mode.
+     *
+     * @author GPT-6 Luna
+     * @author GPT-6 Sol
+     */
+    test('scenario 14.8: creates a new-asset draft from the pointer-selected action', async ({ database, page }) => {
+      const { row, assetSearchInput } = await prepareAssetSearchAutocompleteRow(database, page);
+      const ticker = 'E2E:NEW-POINTER';
+      const lookupTracking = trackAssetLookupRequests(page, ticker);
+
+      try {
+        await assetSearchInput.fill(ticker);
+        const createOption = row.getByRole('option', { name: 'No matching assets - create new', exact: true });
+        await expect(createOption).toBeVisible();
+        const lookupResponse = page.waitForResponse(response => {
+          return response.request().method() === 'GET'
+            && new URL(response.url()).pathname === `/api/asset/${ticker}`;
+        });
+
+        await createOption.click();
+
+        expect((await lookupResponse).status()).toBe(404);
+        expect(lookupTracking.requests).toHaveLength(1);
+        await expectNewAssetMode(row, ticker);
+        await expect(database.query('SELECT id FROM public.asset WHERE ticker = $1', [ticker])).resolves.toEqual([]);
+      } finally {
+        lookupTracking.stop();
+      }
+    });
+
+    /** Verifies keyboard navigation can select the create action and focus the required name field.
+     *
+     * @author GPT-6 Luna
+     * @author GPT-6 Sol
+     */
+    test('scenario 14.9: selects the create action with the keyboard', async ({ database, page }) => {
+      const { row, assetSearchInput } = await prepareAssetSearchAutocompleteRow(database, page);
+      const ticker = 'E2E:NEW-KEYBOARD';
+      const lookupTracking = trackAssetLookupRequests(page, ticker);
+
+      try {
+        await assetSearchInput.fill(ticker);
+        await assetSearchInput.press('ArrowDown');
+        const createOption = row.getByRole('option', { name: 'No matching assets - create new', exact: true });
+        await expectOptionHighlighted(createOption);
+        const lookupResponse = page.waitForResponse(response => {
+          return response.request().method() === 'GET'
+            && new URL(response.url()).pathname === `/api/asset/${ticker}`;
+        });
+
+        await assetSearchInput.press('Enter');
+
+        expect((await lookupResponse).status()).toBe(404);
+        expect(lookupTracking.requests).toHaveLength(1);
+        await expectNewAssetMode(row, ticker);
+      } finally {
+        lookupTracking.stop();
+      }
+    });
+
+    /** Verifies a touchscreen press visibly highlights and then selects an existing ticker.
+     *
+     * @author GPT-6 Luna
+     * @author GPT-6 Sol
+     */
+    test('scenario 14.10: selects an existing ticker using a touchscreen tap', async ({ database, browser, browserName }) => {
+      test.skip(browserName !== 'chromium', 'Touchscreen input is exercised with Chromium CDP.');
+      const touchPage = await prepareTouchAutocompleteRow(database, browser);
+      const ticker = 'E2E:AUTO-03';
+      const lookupTracking = trackAssetLookupRequests(touchPage.page, ticker);
+      const cdpSession = await touchPage.context.newCDPSession(touchPage.page);
+
+      try {
+        const option = touchPage.row.getByRole('option', { name: `${ticker} - Autocomplete Asset 3`, exact: true });
+        await option.scrollIntoViewIfNeeded();
+        const bounds = await option.boundingBox();
+        if(!bounds) {
+          throw new Error('The asset option has no visible bounds for touchscreen input.');
+        }
+        const x = bounds.x + bounds.width / 2;
+        const y = bounds.y + bounds.height / 2;
+        const lookupResponse = touchPage.page.waitForResponse(response => {
+          return response.request().method() === 'GET'
+            && new URL(response.url()).pathname === `/api/asset/${ticker}`;
+        });
+
+        await cdpSession.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] });
+        await expectOptionHighlighted(option);
+        await cdpSession.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+
+        expect((await lookupResponse).status()).toBe(200);
+        expect(lookupTracking.requests).toHaveLength(1);
+        await expectExistingAsset(touchPage.row, touchPage.assets[ticker]);
+      } finally {
+        lookupTracking.stop();
+        await cdpSession.detach().catch(() => undefined);
+        await touchPage.context.close().catch(() => undefined);
+      }
+    });
+
+    /** Verifies a touchscreen tap selects the create action and opens the new-asset fields.
+     *
+     * @author GPT-6 Luna
+     * @author GPT-6 Sol
+     */
+    test('scenario 14.11: selects the create action using a touchscreen tap', async ({ database, browser, browserName }) => {
+      test.skip(browserName !== 'chromium', 'Touchscreen taps are tested in Chromium.');
+      const touchPage = await prepareTouchAutocompleteRow(database, browser);
+      const ticker = 'E2E:NEW-TOUCH';
+      const lookupTracking = trackAssetLookupRequests(touchPage.page, ticker);
+
+      try {
+        await touchPage.assetSearchInput.fill(ticker);
+        const option = touchPage.row.getByRole('option', { name: 'No matching assets - create new', exact: true });
+        await expect(option).toBeVisible();
+        const lookupResponse = touchPage.page.waitForResponse(response => {
+          return response.request().method() === 'GET'
+            && new URL(response.url()).pathname === `/api/asset/${ticker}`;
+        });
+
+        await option.tap();
+
+        expect((await lookupResponse).status()).toBe(404);
+        expect(lookupTracking.requests).toHaveLength(1);
+        await expectNewAssetMode(touchPage.row, ticker);
+      } finally {
+        lookupTracking.stop();
+        await touchPage.context.close();
+      }
+    });
+
+    /** Verifies a touch swipe scrolls the list without activating the option where it began.
+     *
+     * @author GPT-6 Luna
+     * @author GPT-6 Sol
+     */
+    test('scenario 14.12: scrolls suggestions with touch without selecting a ticker', async ({ database, browser, browserName }) => {
+      test.skip(browserName !== 'chromium', 'Native touch scrolling is exercised with Chromium CDP.');
+      const touchPage = await prepareTouchAutocompleteRow(database, browser);
+      const ticker = 'E2E:AUTO-00';
+      const lookupTracking = trackAssetLookupRequests(touchPage.page, ticker);
+      const cdpSession = await touchPage.context.newCDPSession(touchPage.page);
+
+      try {
+        const listbox = touchPage.row.getByRole('listbox', { name: 'Available assets' });
+        const initialOption = touchPage.row.getByRole('option', { name: `${ticker} - Autocomplete Asset 0`, exact: true });
+        await initialOption.scrollIntoViewIfNeeded();
+        const bounds = await initialOption.boundingBox();
+        if(!bounds) {
+          throw new Error('The first asset option has no visible bounds for touchscreen scrolling.');
+        }
+        const x = bounds.x + bounds.width / 2;
+        const startY = bounds.y + bounds.height / 2;
+
+        await cdpSession.send('Input.dispatchTouchEvent', {
+          type: 'touchStart',
+          touchPoints: [{ x, y: startY }],
+        });
+        await expectOptionHighlighted(initialOption);
+
+        for(let step = 1; step <= 6; step++) {
+          await cdpSession.send('Input.dispatchTouchEvent', {
+            type: 'touchMove',
+            touchPoints: [{ x, y: startY - step * 18 }],
+          });
+        }
+
+        await cdpSession.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+
+        await expect.poll(() => listbox.evaluate(element => element.scrollTop)).toBeGreaterThan(0);
+        await expect(initialOption).toHaveAttribute('aria-selected', 'false');
+        await expect(touchPage.assetSearchInput).not.toHaveAttribute('readonly', '');
+        expect(lookupTracking.requests).toHaveLength(0);
+      } finally {
+        lookupTracking.stop();
+        await cdpSession.detach().catch(() => undefined);
+        await touchPage.context.close().catch(() => undefined);
+      }
+    });
+
+    /** Verifies an empty ticker does not offer an invalid create action.
+     *
+     * @author GPT-6 Luna
+     * @author GPT-6 Sol
+     */
+    test('scenario 14.13: does not offer asset creation for an empty ticker', async ({ database, page }) => {
+      const { row, assetSearchInput, suggestions } = await prepareAssetSearchAutocompleteRow(database, page);
+
+      await assetSearchInput.fill('');
+
+      await expect(suggestions.getByRole('option', { name: 'No matching assets - create new', exact: true }))
+        .toHaveCount(0);
+      await expect(suggestions.getByRole('option')).toHaveCount(15);
+    });
+  });
+
+  test.describe('scenario 15: asset name search and committed ticker state', () => {
+    /** Verifies ticker/name labels, duplicate-name results, long queries, and committed field serialization.
+     *
+     * @author GPT-6 Luna
+     * @author GPT-6 Sol
+     */
+    test('scenario 15.1: searches full asset labels and commits only the selected ticker', async ({ database, page }) => {
+      const { assets, row, assetSearchInput, suggestions } = await prepareAssetSearchAutocompleteRow(database, page);
+      const firstTicker = 'SEARCH:NAME-ONE';
+      const secondTicker = 'SEARCH:NAME-TWO';
+      const label = 'North America: Equity & <Growth>';
+      const datalistOption = page.locator(`#datalist-assets option[value="${firstTicker}"]`);
+
+      await expect(datalistOption).toHaveText(`${firstTicker} - ${label}`);
+      await expect(datalistOption).toHaveAttribute('value', firstTicker);
+      await expect(datalistOption.locator('xpath=./*')).toHaveCount(0);
+
+      await assetSearchInput.fill('aMeRiCa: equity & <gRoWtH>');
+      await expect(suggestions.getByRole('option')).toHaveCount(2);
+      await expect(suggestions.getByRole('option', { name: `${firstTicker} - ${label}`, exact: true })).toBeVisible();
+      await expect(suggestions.getByRole('option', { name: `${secondTicker} - ${label}`, exact: true })).toBeVisible();
+
+      const lookupResponse = page.waitForResponse(response => {
+        return response.request().method() === 'GET'
+          && new URL(response.url()).pathname === `/api/asset/${firstTicker}`;
+      });
+      await suggestions.getByRole('option', { name: `${firstTicker} - ${label}`, exact: true }).click();
+      expect((await lookupResponse).status()).toBe(200);
+
+      const committedTicker = row.getByRole('textbox', { name: 'Asset ticker', exact: true });
+      await expect(committedTicker).toBeVisible();
+      await expect(committedTicker).toHaveValue(firstTicker);
+      await expect(row.locator('[data-asset-search-input]')).toBeHidden();
+      await expect(row.locator('[data-asset-search-input]')).not.toHaveAttribute('name');
+      await expect(row.locator(`input[name="allocations[0][assetTicker]"]`)).toHaveCount(1);
+      await expect(committedTicker).toHaveValue(assets[firstTicker].ticker);
+      const formDataEntries = await row.locator('xpath=ancestor::form').evaluate(form => {
+        return Array.from(new FormData(form as HTMLFormElement).entries());
+      });
+      expect(formDataEntries).toContainEqual(['allocations[0][assetTicker]', firstTicker]);
+      expect(formDataEntries.some(([, value]) => value === 'aMeRiCa: equity & <gRoWtH>')).toBe(false);
+
+      await row.locator('[data-asset-action-button]').click();
+      await assetSearchInput.fill('An Extremely Long Name for a Global Balanced Portfolio');
+      await expect(assetSearchInput).toHaveValue('An Extremely Long Name for a Global Balanced Portfolio');
+      await expect(suggestions.getByRole('option', {
+        name: 'SEARCH:LONG - An Extremely Long Name for a Global Balanced Portfolio',
+        exact: true,
+      })).toBeVisible();
+    });
+
+    /** Preserves literal Enter lookup when matching suggestions are present but none is active.
+     *
+     * @author GPT-6 Luna
+     * @author benizzio
+     * @author GPT-6 Sol
+     */
+    test('scenario 15.2: keeps Enter lookup literal when suggestions match the query', async ({ database, page }) => {
+      const { row, assetSearchInput, suggestions } = await prepareAssetSearchAutocompleteRow(database, page);
+
+      await page.mouse.move(0, 0);
+      await assetSearchInput.fill('AUTO');
+      await expect(suggestions.getByRole('option')).toHaveCount(12);
+      await expect(suggestions.locator('[aria-selected="true"]')).toHaveCount(0);
+      await expect(assetSearchInput).not.toHaveAttribute('aria-activedescendant');
+
+      const literalLookup = page.waitForResponse(response => {
+        return response.request().method() === 'GET'
+          && new URL(response.url()).pathname === '/api/asset/AUTO';
+      });
+      await assetSearchInput.press('Enter');
+
+      expect((await literalLookup).status()).toBe(404);
+      await expectNewAssetMode(row, 'AUTO');
+      await expect(database.query('SELECT id FROM public.asset WHERE ticker = $1', ['AUTO'])).resolves.toEqual([]);
+    });
+
+    /** Rejects invalid literal ticker candidates without changing the query or issuing a lookup.
+     *
+     * @author GPT-6 Luna
+     * @author GPT-6 Sol
+     */
+    test('scenario 15.3: rejects empty, malformed, and overlength ticker candidates', async ({ database, page }) => {
+      const { row, assetSearchInput } = await prepareAssetSearchAutocompleteRow(database, page);
+      const lookupRequests: string[] = [];
+      const recordLookup = (request: Request): void => {
+        if(request.method() === 'GET' && new URL(request.url()).pathname.startsWith('/api/asset/')) {
+          lookupRequests.push(request.url());
+        }
+      };
+      page.on('request', recordLookup);
+
+      try {
+        for(const candidate of ['', 'BAD TICKER', 'X'.repeat(41)]) {
+          await assetSearchInput.fill(candidate);
+          await row.locator('[data-asset-action-button]').click();
+
+          await expect(assetSearchInput).toBeVisible();
+          await expect(assetSearchInput).toHaveValue(candidate);
+          await expect(row.locator('[data-asset-ticker-input]')).toBeHidden();
+          await expect.poll(() => assetSearchInput.evaluate(input => (input as HTMLInputElement).validationMessage))
+            .not.toBe('');
+        }
+
+        expect(lookupRequests).toHaveLength(0);
+      } finally {
+        page.off('request', recordLookup);
+      }
+    });
+
+    /** Ensures an unresolved but valid name/ticker query cannot be submitted as a portfolio allocation.
+     *
+     * @author GPT-6 Luna
+     * @author GPT-6 Sol
+     */
+    test('scenario 15.4: blocks history writes until an asset is committed', async ({ database, page }) => {
+      const { row, assetSearchInput } = await prepareAssetSearchAutocompleteRow(database, page);
+      const form = page.locator('#portfolio-history-management-form-0');
+      const portfolioId = Number((await page.locator('input[name="portfolioId"]').first().inputValue()));
+      const writeRequests: string[] = [];
+      const recordWrite = (request: Request): void => {
+        if(request.method() === 'POST') {
+          writeRequests.push(request.url());
+        }
+      };
+      page.on('request', recordWrite);
+
+      try {
+        await row.getByRole('combobox', { name: 'Class' }).fill('BONDS');
+        await row.getByRole('textbox', { name: 'Total market value' }).fill('100');
+        for(const query of ['', 'SEARCH:NAME-ONE']) {
+          await assetSearchInput.fill(query);
+          await form.locator('button[type="submit"]').click();
+
+          await expect(row.locator('[data-asset-ticker-extra-error-message]'))
+            .toHaveText('Reference an existing asset or create a new one');
+          expect(writeRequests).toHaveLength(0);
+          await expect(database.query(
+            'SELECT portfolio_id FROM public.portfolio_allocation_fact WHERE portfolio_id = $1',
+            [portfolioId],
+          )).resolves.toEqual([]);
+        }
+      } finally {
+        page.off('request', recordWrite);
+      }
+    });
+
+    /** Prevents form writes while an asset lookup is awaiting its response.
+     *
+     * @author GPT-6 Luna
+     * @author GPT-6 Sol
+     */
+    test('scenario 15.5: blocks history writes while an asset lookup is pending', async ({ database, page }) => {
+      const { row, assetSearchInput } = await prepareAssetSearchAutocompleteRow(database, page);
+      const form = page.locator('#portfolio-history-management-form-0');
+      const lookupTicker = 'E2E:PENDING-LOOKUP';
+      const writeRequests: string[] = [];
+      let releaseLookup: () => void = () => undefined;
+      let notifyLookupStarted: () => void = () => undefined;
+      const lookupGate = new Promise<void>(resolve => { releaseLookup = resolve; });
+      const lookupStarted = new Promise<void>(resolve => { notifyLookupStarted = resolve; });
+      const recordWrite = (request: Request): void => {
+        if(request.method() === 'POST') {
+          writeRequests.push(request.url());
+        }
+      };
+      const routeLookup = async (route: Route): Promise<void> => {
+        notifyLookupStarted();
+        await lookupGate;
+        await route.fulfill({
+          status: 404,
+          contentType: 'application/json',
+          body: JSON.stringify({ errorMessage: 'Data not found', details: [] }),
+        });
+      };
+      page.on('request', recordWrite);
+      await page.route(`**/api/asset/${lookupTicker}`, routeLookup);
+
+      try {
+        await row.getByRole('combobox', { name: 'Class' }).fill('BONDS');
+        await row.getByRole('textbox', { name: 'Total market value' }).fill('100');
+        await assetSearchInput.fill(lookupTicker);
+        await row.locator('[data-asset-action-button]').click();
+        await lookupStarted;
+        await expect(row.locator('[data-asset-search-autocomplete]'))
+          .toHaveAttribute('data-asset-selection-state', 'pending');
+
+        await form.locator('button[type="submit"]').click();
+        await expect(row.locator('[data-asset-ticker-extra-error-message]'))
+          .toHaveText('Asset lookup is still in progress');
+        expect(writeRequests).toHaveLength(0);
+
+        releaseLookup();
+        await expectNewAssetMode(row, lookupTicker);
+        await expect(database.query('SELECT id FROM public.asset WHERE ticker = $1', [lookupTicker]))
+          .resolves.toEqual([]);
+      } finally {
+        releaseLookup();
+        page.off('request', recordWrite);
+        await page.unroute(`**/api/asset/${lookupTicker}`, routeLookup);
+      }
+    });
+
+    /** Keeps button lookup literal, resolves numeric IDs to canonical tickers, and permits reset/reselection.
+     *
+     * @author GPT-6 Luna
+     * @author GPT-6 Sol
+     */
+    test('scenario 15.6: uses literal button lookup and commits the ticker returned for an ID', async ({ database, page }) => {
+      const { assets, row, assetSearchInput, suggestions } = await prepareAssetSearchAutocompleteRow(database, page);
+      const matchingNameQuery = 'AUTO';
+      const literalLookupRequests: string[] = [];
+      const recordLookup = (request: Request): void => {
+        if(request.method() === 'GET' && new URL(request.url()).pathname.startsWith('/api/asset/')) {
+          literalLookupRequests.push(new URL(request.url()).pathname);
+        }
+      };
+      page.on('request', recordLookup);
+
+      try {
+        await assetSearchInput.fill(matchingNameQuery);
+        await expect(suggestions.getByRole('option')).toHaveCount(12);
+        const literalLookup = page.waitForResponse(response => {
+          return response.request().method() === 'GET'
+            && new URL(response.url()).pathname === `/api/asset/${matchingNameQuery}`;
+        });
+        await row.locator('[data-asset-action-button]').click();
+
+        expect((await literalLookup).status()).toBe(404);
+        await expectNewAssetMode(row, matchingNameQuery);
+        await row.locator('[data-asset-action-button]').click();
+
+        const asset = assets['E2E:AUTO-00'];
+        const numericId = asset.id.toString();
+        await assetSearchInput.fill(numericId);
+        const idLookup = page.waitForResponse(response => {
+          return response.request().method() === 'GET'
+            && new URL(response.url()).pathname === `/api/asset/${numericId}`;
+        });
+        await row.locator('[data-asset-action-button]').click();
+
+        expect((await idLookup).status()).toBe(200);
+        await expectExistingAsset(row, asset);
+        await expect(row.locator('input[name="allocations[0][assetId]"]')).toHaveValue(numericId);
+        await expect(row.locator('input[name="allocations[0][assetTicker]"]')).toHaveValue(asset.ticker);
+        expect(literalLookupRequests).toEqual([`/api/asset/${matchingNameQuery}`, `/api/asset/${numericId}`]);
+
+        await row.locator('[data-asset-action-button]').click();
+        await expect(assetSearchInput).toBeVisible();
+        await expect(assetSearchInput).toHaveValue('');
+        await expect(row.locator('input[name="allocations[0][assetId]"]')).toHaveValue('');
+        await expect(row.getByRole('textbox', { name: 'Asset name', exact: true })).toBeHidden();
+
+        await assetSearchInput.fill('Autocomplete Asset 1');
+        await expect(suggestions.getByRole('option', {
+          name: 'E2E:AUTO-01 - Autocomplete Asset 1',
+          exact: true,
+        })).toBeVisible();
+        const reselection = page.waitForResponse(response => {
+          return response.request().method() === 'GET'
+            && new URL(response.url()).pathname === '/api/asset/E2E:AUTO-01';
+        });
+        await suggestions.getByRole('option', {
+          name: 'E2E:AUTO-01 - Autocomplete Asset 1',
+          exact: true,
+        }).click();
+
+        expect((await reselection).status()).toBe(200);
+        await expectExistingAsset(row, assets['E2E:AUTO-01']);
+      } finally {
+        page.off('request', recordLookup);
+      }
+    });
+
+    /** Restores the typed query after a failed lookup instead of committing it as a new ticker.
+     *
+     * @author GPT-6 Luna
+     * @author GPT-6 Sol
+     */
+    test('scenario 15.7: restores search state after a non-not-found lookup failure', async ({ database, page }) => {
+      const { assets, row, assetSearchInput } = await prepareAssetSearchAutocompleteRow(database, page);
+      const failedTicker = 'E2E:AUTO-00';
+      const failedLookupRoute = async (route: Route): Promise<void> => {
+        await route.fulfill({
+          status: 500,
+          contentType: 'application/json',
+          body: JSON.stringify({ errorMessage: 'Temporary lookup failure', details: [] }),
+        });
+      };
+      await page.route(`**/api/asset/${failedTicker}`, failedLookupRoute);
+
+      try {
+        await assetSearchInput.fill(failedTicker);
+        const failedLookup = page.waitForResponse(response => {
+          return response.request().method() === 'GET'
+            && new URL(response.url()).pathname === `/api/asset/${failedTicker}`;
+        });
+        await row.locator('[data-asset-action-button]').click();
+
+        expect((await failedLookup).status()).toBe(500);
+        await expect(row.locator('[data-asset-search-autocomplete]'))
+          .toHaveAttribute('data-asset-selection-state', 'search');
+        await expect(assetSearchInput).toBeVisible();
+        await expect(assetSearchInput).toHaveValue(failedTicker);
+        await expect(row.locator('[data-asset-ticker-input]')).toBeHidden();
+        await expect(row.locator('input[name="allocations[0][assetId]"]')).toHaveValue('');
+
+        await page.unroute(`**/api/asset/${failedTicker}`, failedLookupRoute);
+        await assetSearchInput.fill('E2E:AUTO-00');
+        const recoveredLookup = page.waitForResponse(response => {
+          return response.request().method() === 'GET'
+            && new URL(response.url()).pathname === `/api/asset/${failedTicker}`;
+        });
+        await row.locator('[data-asset-action-button]').click();
+
+        expect((await recoveredLookup).status()).toBe(200);
+        await expectExistingAsset(row, assets[failedTicker]);
+      } finally {
+        await page.unroute(`**/api/asset/${failedTicker}`, failedLookupRoute);
+      }
+    });
+  });
+
   test('scenario 3: creates and explores a portfolio allocation observation', async ({ database, page }) => {
     test.setTimeout(60_000);
     const seededData = await seedPortfolioHistoryData(database);
@@ -577,6 +1283,202 @@ test.describe('portfolio allocation history management', () => {
   });
 });
 
+/** Seeds the portfolio and asset catalog needed to exercise asset search filtering and scrolling.
+ *
+ * @author GPT-6 Luna
+ * @author GPT-6 Sol
+ */
+async function seedAssetSearchAutocompleteData(database: E2eDatabase): Promise<{
+  assets: Record<string, SeededAsset>;
+  portfolio: SeededPortfolio;
+}> {
+  const portfolioRows = await database.query<SeededPortfolio>(
+    `INSERT INTO public.portfolio (name, allocation_structure)
+     VALUES ($1, $2::jsonb)
+     RETURNING id, name`,
+    ['E2E Ticker Autocomplete Portfolio', JSON.stringify(DEFAULT_ALLOCATION_STRUCTURE)],
+  );
+  const autoAssets = Array.from({ length: 12 }, (_, index) => ({
+    ticker: `E2E:AUTO-${index.toString().padStart(2, '0')}`,
+    name: `Autocomplete Asset ${index}`,
+  }));
+  const assetsToSeed = [
+    ...autoAssets,
+    { ticker: 'SEARCH:NAME-ONE', name: 'North America: Equity & <Growth>' },
+    { ticker: 'SEARCH:NAME-TWO', name: 'North America: Equity & <Growth>' },
+    { ticker: 'SEARCH:LONG', name: 'An Extremely Long Name for a Global Balanced Portfolio' },
+  ];
+  const values = assetsToSeed.map((_, index) => `($${index * 2 + 1}, $${index * 2 + 2})`);
+  const assetParameters = assetsToSeed.flatMap(({ ticker, name }) => [ticker, name]);
+  const assetRows = await database.query<SeededAsset>(
+    `INSERT INTO public.asset (ticker, name)
+     VALUES ${values.join(', ')}
+     RETURNING id, ticker, name`,
+    assetParameters,
+  );
+
+  expect(portfolioRows).toHaveLength(1);
+  expect(assetRows).toHaveLength(assetsToSeed.length);
+
+  return {
+    assets: Object.fromEntries(assetRows.map(asset => [asset.ticker, asset])) as Record<string, SeededAsset>,
+    portfolio: portfolioRows[0],
+  };
+}
+
+/** Seeds the catalog and opens one editable asset row for a focused asset search scenario.
+ *
+ * @param database - Isolated test database used to seed the portfolio and assets.
+ * @param page - Browser page used to open the portfolio history form.
+ * @returns The seeded assets and the rendered row controls used by the scenario.
+ *
+ * @author GPT-6 Luna
+ * @author GPT-6 Sol
+ */
+async function prepareAssetSearchAutocompleteRow(database: E2eDatabase, page: Page): Promise<{
+  assets: Record<string, SeededAsset>;
+  row: Locator;
+  assetSearchInput: Locator;
+  suggestions: Locator;
+}> {
+  const seededData = await seedAssetSearchAutocompleteData(database);
+
+  await page.goto('/');
+  await expectRootShell(page);
+  await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+  await expectPortfolioHistoryManagement(page, seededData.portfolio);
+
+  const newObservationItem = page.locator('#portfolio-history-management-container-0');
+  await newObservationItem.getByRole('textbox', { name: 'Time tag' }).fill('AUTOCOMPLETE');
+  await newObservationItem.locator('#portfolio-history-management-trigger-0 > button').click();
+  const accordionBody = newObservationItem.locator('#portfolio-history-management-0');
+  await expect(accordionBody).toHaveClass(/\bshow\b/);
+  await expect(accordionBody).not.toHaveClass(/\bcollapsing\b/);
+
+  const form = page.locator('#portfolio-history-management-form-0');
+  const row = await addAllocationRow(page, form, 0);
+
+  return {
+    assets: seededData.assets,
+    row,
+    assetSearchInput: row.getByRole('combobox', { name: 'Asset', exact: true }),
+    suggestions: row.getByRole('listbox', { name: 'Available assets' }),
+  };
+}
+
+/** Creates a touch-enabled Chromium page and prepares one editable asset search row.
+ *
+ * @param database - Isolated test database used to seed the portfolio and assets.
+ * @param browser - Chromium browser used to create a touch-capable context.
+ * @returns The isolated context, page, and controls for one autocomplete row.
+ *
+ * @author GPT-6 Luna
+ * @author GPT-6 Sol
+ */
+async function prepareTouchAutocompleteRow(database: E2eDatabase, browser: Browser): Promise<{
+  assets: Record<string, SeededAsset>;
+  context: Awaited<ReturnType<Browser['newContext']>>;
+  page: Page;
+  row: Locator;
+  assetSearchInput: Locator;
+  suggestions: Locator;
+}> {
+  const context = await browser.newContext({
+    deviceScaleFactor: 1,
+    hasTouch: true,
+    viewport: { width: 1280, height: 900 },
+  });
+
+  try {
+    const page = await context.newPage();
+    const preparedRow = await prepareAssetSearchAutocompleteRow(database, page);
+
+    return { ...preparedRow, context, page };
+  } catch(error) {
+    await context.close();
+    throw error;
+  }
+}
+
+/** Asserts that an option has synchronized accessibility and theme-aware visible highlight state.
+ *
+ * @param option - Rendered suggestion expected to be the active option.
+ *
+ * @author GPT-6 Luna
+ */
+async function expectOptionHighlighted(option: Locator): Promise<void> {
+  await expect(option).toHaveAttribute('aria-selected', 'true');
+
+  const colors = await option.evaluate(element => {
+    const expectedColors = document.createElement('span');
+    expectedColors.style.backgroundColor = 'var(--bs-primary-bg-subtle)';
+    expectedColors.style.color = 'var(--bs-primary-text-emphasis)';
+    element.append(expectedColors);
+    const expectedBackgroundColor = getComputedStyle(expectedColors).backgroundColor;
+    const expectedColor = getComputedStyle(expectedColors).color;
+    expectedColors.remove();
+
+    const actualStyle = getComputedStyle(element);
+    return {
+      actualBackgroundColor: actualStyle.backgroundColor,
+      actualColor: actualStyle.color,
+      boxShadow: actualStyle.boxShadow,
+      expectedBackgroundColor,
+      expectedColor,
+    };
+  });
+
+  expect(colors.actualBackgroundColor).toBe(colors.expectedBackgroundColor);
+  expect(colors.actualColor).toBe(colors.expectedColor);
+  expect(colors.boxShadow).toContain('inset');
+}
+
+/** Asserts the unmatched ticker has entered editable, focused new-asset mode.
+ *
+ * @param row - Allocation row containing the ticker and asset-name inputs.
+ * @param ticker - Unmatched ticker that must remain in the row.
+ *
+ * @author GPT-6 Luna
+ */
+async function expectNewAssetMode(row: Locator, ticker: string): Promise<void> {
+  const tickerInput = row.getByRole('textbox', { name: 'Asset ticker', exact: true });
+  const assetNameInput = row.getByRole('textbox', { name: 'Asset name' });
+
+  await expect(tickerInput).toHaveAttribute('readonly', '');
+  await expect(tickerInput).toHaveValue(ticker);
+  await expect(row.getByText('* Creating new asset', { exact: true })).toBeVisible();
+  await expect(assetNameInput).toBeVisible();
+  await expect(assetNameInput).not.toHaveAttribute('readonly', '');
+  await expect(assetNameInput).toHaveAttribute('required', '');
+  await expect(assetNameInput).toBeFocused();
+  await expect(row.locator('[data-asset-search-input]')).toBeHidden();
+  await expect(row.locator('[data-asset-search-input]')).toHaveAttribute('aria-expanded', 'false');
+  await expect(tickerInput).toBeVisible();
+}
+
+/** Records asset endpoint requests for one ticker and returns a cleanup callback.
+ *
+ * @param page - Page emitting the network requests.
+ * @param ticker - Exact ticker path to record.
+ * @returns Captured request URLs and a method that unregisters the listener.
+ *
+ * @author GPT-6 Luna
+ */
+function trackAssetLookupRequests(page: Page, ticker: string): { requests: string[]; stop: () => void } {
+  const requests: string[] = [];
+  const listener = (request: Request): void => {
+    if(request.method() === 'GET' && new URL(request.url()).pathname === `/api/asset/${ticker}`) {
+      requests.push(request.url());
+    }
+  };
+  page.on('request', listener);
+
+  return {
+    requests,
+    stop: () => page.off('request', listener),
+  };
+}
+
 /** Seeds one portfolio and the two assets that scenario 3 must resolve as existing. */
 async function seedPortfolioHistoryData(database: E2eDatabase): Promise<{
   assets: Record<string, SeededAsset>;
@@ -869,8 +1771,7 @@ async function fillExistingAssetAllocation(
   totalMarketValue: string,
   cashReserve = false,
 ): Promise<void> {
-  await selectAssetFromDatalist(page, row, asset.ticker);
-  await searchForAsset(page, row, asset.ticker, 200);
+  await selectAssetFromAutocomplete(page, row, asset.ticker);
   await expectExistingAsset(row, asset);
 
   await row.getByRole('combobox', { name: 'Class' }).fill(assetClass);
@@ -886,8 +1787,7 @@ async function fillExistingAssetDirectValueAllocation(
   assetClass: string,
   totalMarketValue: string,
 ): Promise<void> {
-  await selectAssetFromDatalist(page, row, asset.ticker);
-  await searchForAsset(page, row, asset.ticker, 200);
+  await selectAssetFromAutocomplete(page, row, asset.ticker);
   await expectExistingAsset(row, asset);
 
   await row.getByRole('combobox', { name: 'Class' }).fill(assetClass);
@@ -914,13 +1814,43 @@ async function fillNewAssetCalculatedAllocation(
   await fillCalculatedValues(row, quantity, marketPrice, '4,000.00');
 }
 
-/** Selects one known ticker through the populated browser datalist input. */
-async function selectAssetFromDatalist(page: Page, row: Locator, ticker: string): Promise<void> {
+/**
+ * Selects a known autocomplete suggestion and waits for its immediate asset lookup.
+ *
+ * @param page - Browser page that receives the lookup request.
+ * @param row - Portfolio-history allocation row containing the asset search input.
+ * @param ticker - Seeded ticker expected in the autocomplete suggestions.
+ *
+ * @author GPT-6 Luna
+ * @author GPT-6 Sol
+ */
+async function selectAssetFromAutocomplete(page: Page, row: Locator, ticker: string): Promise<void> {
   await expect(page.locator(`#datalist-assets option[value="${ticker}"]`)).toBeAttached();
-  const tickerInput = row.getByRole('combobox', { name: 'Asset ticker' });
-  await tickerInput.click();
-  await tickerInput.fill(ticker);
-  await expect(tickerInput).toHaveValue(ticker);
+  const assetSearchInput = row.getByRole('combobox', { name: 'Asset', exact: true });
+  await assetSearchInput.click();
+  await assetSearchInput.fill(ticker);
+
+  const lookupRequests: string[] = [];
+  const recordLookupRequest = (request: Request): void => {
+    if(request.method() === 'GET' && new URL(request.url()).pathname === `/api/asset/${ticker}`) {
+      lookupRequests.push(request.url());
+    }
+  };
+  page.on('request', recordLookupRequest);
+  try {
+    const responsePromise = page.waitForResponse((response) => {
+      return response.request().method() === 'GET'
+        && new URL(response.url()).pathname === `/api/asset/${ticker}`;
+    });
+    const optionLabel = await page.locator(`#datalist-assets option[value="${ticker}"]`).textContent();
+    await row.getByRole('option', { name: optionLabel?.trim(), exact: true }).click();
+    const response = await responsePromise;
+    expect(response.status()).toBe(200);
+    expect(lookupRequests).toHaveLength(1);
+    await expect(row.getByRole('textbox', { name: 'Asset ticker', exact: true })).toHaveValue(ticker);
+  } finally {
+    page.off('request', recordLookupRequest);
+  }
 }
 
 /** Selects one known class through the populated browser datalist input. */
@@ -932,10 +1862,13 @@ async function selectClassFromDatalist(page: Page, row: Locator, assetClass: str
   await expect(classInput).toHaveValue(assetClass);
 }
 
-/** Waits for the asset lookup and verifies its HTTP result. */
+/** Waits for the asset lookup and verifies its HTTP result.
+ *
+ * @author GPT-6 Sol
+ */
 async function searchForAsset(page: Page, row: Locator, ticker: string, status: number): Promise<void> {
-  const tickerInput = row.getByRole('combobox', { name: 'Asset ticker' });
-  await tickerInput.fill(ticker);
+  const assetSearchInput = row.getByRole('combobox', { name: 'Asset', exact: true });
+  await assetSearchInput.fill(ticker);
 
   const responsePromise = page.waitForResponse((response) => {
     return response.request().method() === 'GET'
@@ -948,8 +1881,8 @@ async function searchForAsset(page: Page, row: Locator, ticker: string, status: 
 
 /** Verifies that an asset lookup selected the expected existing asset. */
 async function expectExistingAsset(row: Locator, asset: SeededAsset): Promise<void> {
-  await expect(row.getByRole('combobox', { name: 'Asset ticker' })).toHaveAttribute('readonly', '');
-  await expect(row.getByRole('combobox', { name: 'Asset ticker' })).toHaveValue(asset.ticker);
+  await expect(row.getByRole('textbox', { name: 'Asset ticker', exact: true })).toHaveAttribute('readonly', '');
+  await expect(row.getByRole('textbox', { name: 'Asset ticker', exact: true })).toHaveValue(asset.ticker);
   await expect(row.getByRole('textbox', { name: 'Asset name' })).toBeVisible();
   await expect(row.getByRole('textbox', { name: 'Asset name' })).toHaveAttribute('readonly', '');
   await expect(row.getByRole('textbox', { name: 'Asset name' })).toHaveValue(asset.name);
@@ -1044,7 +1977,7 @@ async function expectEditableObservationRows(
 
   for (const [index, expected] of expectedRows.entries()) {
     const row = rows.nth(index);
-    await expect(row.getByRole('combobox', { name: 'Asset ticker' })).toHaveValue(expected.ticker);
+    await expect(row.getByRole('textbox', { name: 'Asset ticker', exact: true })).toHaveValue(expected.ticker);
     await expect(row.getByRole('textbox', { name: 'Asset name' })).toHaveValue(expected.name);
     await expect(row.getByRole('combobox', { name: 'Class' })).toHaveValue(expected.assetClass);
     await expect(row.getByRole('checkbox')).toBeChecked({ checked: expected.cashReserve });
@@ -1071,7 +2004,8 @@ async function expectReadOnlyObservationRows(
     );
     await expect(row.locator('td').nth(0)).toContainText(expected.ticker);
     await expect(row.locator('td').nth(1)).toContainText(expected.name);
-    await expect(row.getByRole('combobox', { name: 'Asset ticker' })).toHaveCount(0);
+    await expect(row.getByRole('combobox', { name: 'Asset', exact: true })).toHaveCount(0);
+    await expect(row.getByRole('textbox', { name: 'Asset ticker', exact: true })).toHaveCount(0);
     await expect(row.getByRole('textbox', { name: 'Asset name' })).toHaveCount(0);
     await expect(row.getByRole('combobox', { name: 'Class' })).toHaveValue(expected.assetClass);
     await expect(row.getByRole('checkbox')).toBeChecked({ checked: expected.cashReserve });
@@ -1161,7 +2095,8 @@ async function expectReloadedObservationRows(form: Locator, observationId: numbe
     await expect(row).toBeVisible();
     await expect(row.locator('td').nth(0)).toContainText(expected.ticker);
     await expect(row.locator('td').nth(1)).toContainText(expected.name);
-    await expect(row.getByRole('combobox', { name: 'Asset ticker' })).toHaveCount(0);
+    await expect(row.getByRole('combobox', { name: 'Asset', exact: true })).toHaveCount(0);
+    await expect(row.getByRole('textbox', { name: 'Asset ticker', exact: true })).toHaveCount(0);
     await expect(row.getByRole('textbox', { name: 'Asset name' })).toHaveCount(0);
     await expect(row.getByRole('combobox', { name: 'Class' })).toHaveValue(expected.assetClass);
     await expect(row.getByRole('checkbox')).not.toBeChecked();

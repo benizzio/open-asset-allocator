@@ -1,3 +1,13 @@
+/**
+ * Provides shared asset search autocomplete and composed asset-field behavior for portfolio forms.
+ *
+ * @module components/asset-composed-columns-input
+ *
+ * @author GPT-6 Luna
+ * @author benizzio
+ * @author GPT-6.1 Sol
+ * @author GPT-6 Sol
+ */
 import { Asset } from "../domain/asset";
 import { BootstrapClasses, BootstrapIconClasses } from "../infra/bootstrap/constants";
 import api from "../api/api";
@@ -5,6 +15,553 @@ import htmx from "htmx.org";
 import notifications from "./notifications";
 
 const TICKER_EXTRA_ERROR_MESSAGE_ATTRIBUTE = "data-asset-ticker-extra-error-message";
+const ASSET_SEARCH_AUTOCOMPLETE_ATTRIBUTE = "data-asset-search-autocomplete";
+const ASSET_SEARCH_SUGGESTIONS_ATTRIBUTE = "data-asset-search-suggestions";
+const ASSET_SEARCH_LISTBOX_ATTRIBUTE = "data-asset-search-listbox";
+const ASSET_SEARCH_STATUS_ATTRIBUTE = "data-asset-search-status";
+const ASSET_SEARCH_INPUT_ATTRIBUTE = "data-asset-search-input";
+const ASSET_TICKER_INPUT_ATTRIBUTE = "data-asset-ticker-input";
+const ASSET_SELECTION_ERROR_MESSAGE = "Reference an existing asset or create a new one";
+const ASSET_LOOKUP_PENDING_ERROR_MESSAGE = "Asset lookup is still in progress";
+const TICKER_CANDIDATE_PATTERN = /^[A-Za-z0-9_:.-]+$/;
+
+/** Identifies the search, in-flight lookup, or committed asset selection stored on an autocomplete wrapper.
+ *
+ * The HTML template initializes `data-asset-selection-state` to `search`. Read or update subsequent
+ * states through `element.dataset.assetSelectionState` and these members, for example:
+ * `wrapper.dataset.assetSelectionState = AssetSelectionState.PENDING`.
+ *
+ * @author GPT-6 Sol
+ */
+export enum AssetSelectionState {
+    SEARCH = "search",
+    PENDING = "pending",
+    EXISTING = "existing",
+    NEW = "new",
+}
+
+/** Describes one selectable asset suggestion or missing-ticker create action.
+ *
+ * @author GPT-6 Luna
+ * @author GPT-6 Sol
+ */
+type AssetSearchAutocompleteOption = {
+    kind: "asset" | "create";
+    label: string;
+    ticker: string;
+};
+
+/**
+ * Stores per-input DOM references and transient state for keyboard and pointer interaction.
+ *
+ * @author GPT-6 Luna
+ * @author GPT-6 Sol
+ */
+interface AssetSearchAutocompleteState {
+    wrapper: HTMLElement;
+    suggestions: HTMLElement;
+    listbox: HTMLElement;
+    status: HTMLElement;
+    options: AssetSearchAutocompleteOption[];
+    activeOptionIndex: number;
+    activeOptionSource: "keyboard" | "pointer" | null;
+    isOpen: boolean;
+    isLookupPending: boolean;
+    pointerSelection?: { optionIndex: number; pointerId: number; x: number; y: number; isCancelled: boolean };
+    outsidePointerHandler?: (event: PointerEvent) => void;
+    removalObserver?: MutationObserver;
+}
+
+const autocompleteStates = new WeakMap<HTMLInputElement, AssetSearchAutocompleteState>();
+let activeAutocompleteInput: HTMLInputElement | null = null;
+let nextAutocompleteId = 0;
+let assetDatalistListenerRegistered = false;
+
+/**
+ * Lazily initializes the DOM state and listeners for one asset search autocomplete.
+ *
+ * @param input - Asset search input associated with the autocomplete markup.
+ * @returns The widget state, or `null` when the input is not in the component template.
+ *
+ * @author GPT-6 Luna
+ * @author GPT-6 Sol
+ */
+function ensureAutocompleteState(input: HTMLInputElement): AssetSearchAutocompleteState | null {
+
+    const currentState = autocompleteStates.get(input);
+
+    if(currentState) {
+        return currentState;
+    }
+
+    const state = createAutocompleteState(input);
+
+    if(!state) {
+        return null;
+    }
+
+    registerAutocompleteListeners(input, state);
+    autocompleteStates.set(input, state);
+    return state;
+}
+
+/** Builds an autocomplete state from the input's markup and accessibility controls.
+ *
+ * @author GPT-6 Sol
+ */
+function createAutocompleteState(input: HTMLInputElement): AssetSearchAutocompleteState | null {
+
+    const wrapper = input.closest<HTMLElement>(`[${ ASSET_SEARCH_AUTOCOMPLETE_ATTRIBUTE }]`);
+    const suggestions = wrapper?.querySelector<HTMLElement>(`[${ ASSET_SEARCH_SUGGESTIONS_ATTRIBUTE }]`);
+    const listbox = wrapper?.querySelector<HTMLElement>(`[${ ASSET_SEARCH_LISTBOX_ATTRIBUTE }]`);
+    const status = wrapper?.querySelector<HTMLElement>(`[${ ASSET_SEARCH_STATUS_ATTRIBUTE }]`);
+
+    if(!wrapper || !suggestions || !listbox || !status) {
+        return null;
+    }
+
+    const listboxId = `asset-search-listbox-${ ++nextAutocompleteId }`;
+    listbox.id = listboxId;
+    input.setAttribute("aria-controls", listboxId);
+
+    const state: AssetSearchAutocompleteState = {
+        wrapper,
+        suggestions,
+        listbox,
+        status,
+        options: [],
+        activeOptionIndex: -1,
+        activeOptionSource: null,
+        isOpen: false,
+        isLookupPending: false,
+    };
+
+    status.classList.add("visually-hidden");
+
+    return state;
+}
+
+/** Registers the autocomplete's pointer, click, and focus listeners on its DOM controls.
+ *
+ * @author GPT-6 Sol
+ */
+function registerAutocompleteListeners(input: HTMLInputElement, state: AssetSearchAutocompleteState): void {
+
+    const { listbox, wrapper } = state;
+
+    listbox.addEventListener("pointerover", event => {
+        const pointerEvent = event as PointerEvent;
+        const option = (pointerEvent.target as HTMLElement).closest<HTMLElement>("[data-asset-search-option]");
+
+        if(pointerEvent.pointerType === "mouse" && option) {
+            highlightAssetSearchOption(input, Number(option.dataset.optionIndex), "pointer", false);
+        }
+    });
+
+    listbox.addEventListener("pointerout", event => {
+        const pointerEvent = event as PointerEvent;
+
+        if(pointerEvent.pointerType !== "mouse"
+            || (pointerEvent.relatedTarget instanceof Node && listbox.contains(pointerEvent.relatedTarget))) {
+            return;
+        }
+
+        if(state.activeOptionSource === "pointer" && !state.pointerSelection) {
+            clearAssetSearchOptionHighlight(input);
+        }
+    });
+
+    listbox.addEventListener("pointerdown", event => {
+        const pointerEvent = event as PointerEvent;
+        const option = (pointerEvent.target as HTMLElement).closest<HTMLElement>("[data-asset-search-option]");
+
+        if(!option || pointerEvent.button !== 0) {
+            state.pointerSelection = undefined;
+            return;
+        }
+
+        pointerEvent.preventDefault();
+
+        state.pointerSelection = {
+            optionIndex: Number(option.dataset.optionIndex),
+            pointerId: pointerEvent.pointerId,
+            x: pointerEvent.clientX,
+            y: pointerEvent.clientY,
+            isCancelled: false,
+        };
+        highlightAssetSearchOption(input, state.pointerSelection.optionIndex, "pointer", false);
+    });
+
+    listbox.addEventListener("pointermove", event => {
+        const pointerEvent = event as PointerEvent;
+        const pointerSelection = state.pointerSelection;
+
+        if(pointerSelection?.pointerId !== pointerEvent.pointerId || pointerSelection?.isCancelled !== false) {
+            return;
+        }
+
+        const movedX = pointerEvent.clientX - pointerSelection.x;
+        const movedY = pointerEvent.clientY - pointerSelection.y;
+
+        if(Math.hypot(movedX, movedY) > 8) {
+            pointerSelection.isCancelled = true;
+            clearAssetSearchOptionHighlight(input);
+        }
+    });
+
+    listbox.addEventListener("pointerup", event => {
+        const pointerEvent = event as PointerEvent;
+        const pointerSelection = state.pointerSelection;
+        state.pointerSelection = undefined;
+
+        if(pointerSelection?.pointerId !== pointerEvent.pointerId || pointerSelection?.isCancelled !== false) {
+            return;
+        }
+
+        const pointerTarget = document.elementFromPoint(pointerEvent.clientX, pointerEvent.clientY);
+        const option = pointerTarget?.closest<HTMLElement>("[data-asset-search-option]");
+        const optionIndex = option ? Number(option.dataset.optionIndex) : -1;
+        const movedX = pointerEvent.clientX - pointerSelection.x;
+        const movedY = pointerEvent.clientY - pointerSelection.y;
+
+        if(optionIndex !== pointerSelection.optionIndex || Math.hypot(movedX, movedY) > 8) {
+            return;
+        }
+
+        const selectedOption = state.options[optionIndex];
+
+        if(selectedOption) {
+            selectAssetSearchOption(input, selectedOption.ticker);
+        }
+    });
+
+    listbox.addEventListener("pointercancel", () => {
+        state.pointerSelection = undefined;
+        clearAssetSearchOptionHighlight(input);
+    });
+
+    listbox.addEventListener("click", event => {
+        const clickEvent = event as MouseEvent;
+
+        if(clickEvent.detail !== 0) {
+            return;
+        }
+
+        const option = (clickEvent.target as HTMLElement).closest<HTMLElement>("[data-asset-search-option]");
+        const selectedOption = option ? state.options[Number(option.dataset.optionIndex)] : undefined;
+
+        if(selectedOption) {
+            selectAssetSearchOption(input, selectedOption.ticker);
+        }
+    });
+
+    wrapper.addEventListener("focusout", event => {
+        const focusEvent = event as FocusEvent;
+
+        if(focusEvent.relatedTarget && wrapper.contains(focusEvent.relatedTarget as Node)) {
+            return;
+        }
+
+        closeAssetSearchAutocomplete(input);
+    });
+}
+
+/**
+ * Installs the shared listener that refreshes an open widget after its HTMX datalist reloads.
+ *
+ * @author GPT-6 Luna
+ * @author GPT-6 Sol
+ */
+function ensureAssetDatalistLifecycleListener(): void {
+
+    if(assetDatalistListenerRegistered) {
+        return;
+    }
+
+    document.addEventListener("htmx:afterSettle", event => {
+        const htmxEvent = event as CustomEvent<{ elt?: Element }>;
+        const datalist = document.getElementById("datalist-assets");
+
+        if(!datalist || (htmxEvent.detail?.elt !== datalist && event.target !== datalist)) {
+            return;
+        }
+
+        if(activeAutocompleteInput && autocompleteStates.get(activeAutocompleteInput)?.isOpen) {
+            renderAssetSearchSuggestions(activeAutocompleteInput);
+        }
+    });
+
+    assetDatalistListenerRegistered = true;
+}
+
+/**
+ * Opens one autocomplete and keeps its visible results synchronized with the local datalist.
+ *
+ * @param input - Editable asset search input to open.
+ *
+ * @author GPT-6 Luna
+ * @author GPT-6 Sol
+ */
+function openAssetSearchAutocomplete(input: HTMLInputElement): void {
+
+    if(input.readOnly || input.disabled) {
+        return;
+    }
+
+    const state = ensureAutocompleteState(input);
+
+    if(!state || state.isLookupPending) {
+        return;
+    }
+
+    if(state.isOpen) {
+        return;
+    }
+
+    ensureAssetDatalistLifecycleListener();
+
+    if(activeAutocompleteInput && activeAutocompleteInput !== input) {
+        closeAssetSearchAutocomplete(activeAutocompleteInput);
+    }
+
+    activeAutocompleteInput = input;
+    state.isOpen = true;
+    state.suggestions.hidden = false;
+    input.setAttribute("aria-expanded", "true");
+
+    state.outsidePointerHandler = event => {
+        if(!state.wrapper.contains(event.target as Node)) {
+            closeAssetSearchAutocomplete(input);
+        }
+    };
+    document.addEventListener("pointerdown", state.outsidePointerHandler, true);
+
+    state.removalObserver = new MutationObserver(() => {
+        if(!input.isConnected || input.getClientRects().length === 0) {
+            closeAssetSearchAutocomplete(input);
+        }
+    });
+
+    state.removalObserver.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["class", "hidden", "style"],
+    });
+
+    renderAssetSearchSuggestions(input);
+}
+
+/**
+ * Closes one autocomplete without changing the asset search query.
+ *
+ * @param input - Asset search input whose suggestions should be dismissed.
+ *
+ * @author GPT-6 Luna
+ * @author GPT-6 Sol
+ */
+function closeAssetSearchAutocomplete(input: HTMLInputElement): void {
+
+    const state = autocompleteStates.get(input);
+
+    if(!state) {
+        return;
+    }
+
+    state.isOpen = false;
+    state.activeOptionIndex = -1;
+    state.activeOptionSource = null;
+    state.pointerSelection = undefined;
+    state.suggestions.hidden = true;
+    state.status.hidden = true;
+    input.setAttribute("aria-expanded", "false");
+    input.removeAttribute("aria-activedescendant");
+
+    if(state.outsidePointerHandler) {
+        document.removeEventListener("pointerdown", state.outsidePointerHandler, true);
+    }
+    state.outsidePointerHandler = undefined;
+    state.removalObserver?.disconnect();
+    state.removalObserver = undefined;
+
+    if(activeAutocompleteInput === input) {
+        activeAutocompleteInput = null;
+    }
+}
+
+/**
+ * Filters prefetched assets and adds a selectable create action for an unmatched query.
+ *
+ * @param input - Asset search input whose current value is used as the filter query.
+ *
+ * @author GPT-6 Luna
+ * @author GPT-6.1 Sol
+ * @author GPT-6 Sol
+ */
+function renderAssetSearchSuggestions(input: HTMLInputElement): void {
+
+    const state = ensureAutocompleteState(input);
+
+    if(!state?.isOpen) {
+        return;
+    }
+
+    const sourceId = input.dataset.assetSearchSource;
+    const source = sourceId ? document.getElementById(sourceId) as HTMLDataListElement | null : null;
+    const searchQuery = input.value.trim();
+    const query = searchQuery.toLocaleLowerCase();
+    const seenTickers = new Set<string>();
+
+    const matchingAssets = source
+        ? Array.from(source.options)
+            .map(option => ({
+                ticker: option.value.trim(),
+                label: (option.textContent ?? option.value).trim(),
+            }))
+            .filter(({ ticker, label }) => {
+                const normalizedTicker = ticker.toLocaleLowerCase();
+                const normalizedLabel = label.toLocaleLowerCase();
+
+                if(!ticker || !normalizedLabel.includes(query) || seenTickers.has(normalizedTicker)) {
+                    return false;
+                }
+
+                seenTickers.add(normalizedTicker);
+                return true;
+            })
+        : [];
+
+    if(matchingAssets.length > 0) {
+        state.options = matchingAssets.map(({ ticker, label }) => ({ kind: "asset", label, ticker }));
+    } else if(searchQuery) {
+        state.options = [{ kind: "create", label: "No matching assets - create new", ticker: searchQuery }];
+    } else {
+        state.options = [];
+    }
+    state.activeOptionIndex = -1;
+    state.activeOptionSource = null;
+    state.pointerSelection = undefined;
+    state.listbox.replaceChildren();
+    input.removeAttribute("aria-activedescendant");
+
+    state.options.forEach((autocompleteOption, index) => {
+        const option = document.createElement("div");
+        option.id = `${ state.listbox.id }-option-${ index }`;
+        option.className = "asset-search-autocomplete__option";
+        option.setAttribute("role", "option");
+        option.setAttribute("aria-selected", "false");
+        option.dataset.assetSearchOption = "";
+        option.dataset.optionIndex = index.toString();
+        option.dataset.optionKind = autocompleteOption.kind;
+        option.textContent = autocompleteOption.label;
+        state.listbox.append(option);
+    });
+
+    const hasMatchingTickers = matchingAssets.length > 0;
+    const hasCreateOption = state.options.some(option => option.kind === "create");
+    state.listbox.hidden = state.options.length === 0;
+    state.status.textContent = "No matching assets. Select the create option to continue.";
+    state.status.hidden = hasMatchingTickers || !hasCreateOption;
+}
+
+/**
+ * Highlights one option and optionally scrolls it into view for keyboard navigation.
+ *
+ * @param input - Input that owns the active listbox.
+ * @param optionIndex - Index of the option to highlight.
+ * @param source - Interaction source used to clear transient pointer highlighting.
+ * @param shouldScroll - Whether keyboard navigation should scroll the active option into view.
+ *
+ * @author GPT-6 Luna
+ * @author GPT-6 Sol
+ */
+function highlightAssetSearchOption(
+    input: HTMLInputElement,
+    optionIndex: number,
+    source: "keyboard" | "pointer",
+    shouldScroll: boolean,
+): void {
+
+    const state = autocompleteStates.get(input);
+
+    if(!state?.options.length) {
+        return;
+    }
+
+    state.activeOptionIndex = Math.max(0, Math.min(optionIndex, state.options.length - 1));
+    state.activeOptionSource = source;
+
+    const options = state.listbox.querySelectorAll<HTMLElement>("[data-asset-search-option]");
+
+    options.forEach((option, index) => {
+        const isActive = index === state.activeOptionIndex;
+        option.setAttribute("aria-selected", isActive.toString());
+
+        if(isActive) {
+            input.setAttribute("aria-activedescendant", option.id);
+
+            if(shouldScroll) {
+                option.scrollIntoView({ block: "nearest" });
+            }
+        }
+    });
+}
+
+/** Clears the active option and its corresponding accessibility state.
+ *
+ * @author GPT-6 Luna
+ * @author GPT-6 Sol
+ */
+function clearAssetSearchOptionHighlight(input: HTMLInputElement): void {
+
+    const state = autocompleteStates.get(input);
+
+    if(!state) {
+        return;
+    }
+
+    state.activeOptionIndex = -1;
+    state.activeOptionSource = null;
+    input.removeAttribute("aria-activedescendant");
+
+    state.listbox.querySelectorAll<HTMLElement>("[data-asset-search-option]").forEach(option => {
+        option.setAttribute("aria-selected", "false");
+    });
+}
+
+/**
+ * Selects an asset search option and delegates ticker resolution to the existing row search action.
+ *
+ * @param input - Input associated with the selected suggestion.
+ * @param ticker - Exact ticker value from the datalist.
+ *
+ * @author GPT-6 Luna
+ * @author GPT-6 Sol
+ */
+function selectAssetSearchOption(input: HTMLInputElement, ticker: string): void {
+
+    const state = autocompleteStates.get(input);
+
+    if(input.readOnly || state?.isLookupPending) {
+        return;
+    }
+
+    input.value = ticker;
+    closeAssetSearchAutocomplete(input);
+
+    const row = input.closest<HTMLTableRowElement>("tr");
+    const assetIdInput = row?.querySelector<HTMLInputElement>("input[type='hidden'][data-null-if-empty]");
+    const assetTickerInput = row?.querySelector<HTMLInputElement>(`[${ ASSET_TICKER_INPUT_ATTRIBUTE }]`);
+    const assetNameInput = row?.querySelector<HTMLInputElement>("input[aria-label='Asset name']");
+
+    if(!row?.id || !assetIdInput || !assetTickerInput || !assetNameInput) {
+        console.error("Unable to resolve the asset row for the selected ticker.");
+        return;
+    }
+
+    new AssetComposedColumnInput(row.id, assetIdInput.name, assetTickerInput.name, assetNameInput.name)
+        .handleAssetActionButtonClick(ticker);
+}
 
 const ASSET_ACTION_BUTTON_IDENTITIES = {
     search: {
@@ -17,8 +574,18 @@ const ASSET_ACTION_BUTTON_IDENTITIES = {
     },
 };
 
+/**
+ * Coordinates an asset search input, its lookup button, and the related form fields for one row.
+ *
+ * @author benizzio
+ * @author GPT-6 Luna
+ * @author GPT-6 Sol
+ */
 class AssetComposedColumnInput {
 
+    container: HTMLElement;
+    autocompleteWrapper: HTMLElement;
+    assetSearchInput: HTMLInputElement;
     assetIdInput: HTMLInputElement;
     assetTickerInput: HTMLInputElement;
     assetActionButton: HTMLButtonElement;
@@ -33,67 +600,164 @@ class AssetComposedColumnInput {
         assetNameFieldName: string,
     ) {
 
-        const container = window[containerId] as HTMLElement;
+        const container = document.getElementById(containerId);
 
-        this.assetIdInput = container.querySelector(`[name='${ assetIdHiddenFieldName }']`);
-        this.assetTickerInput = container.querySelector(`[name='${ assetTickerFieldName }']`);
-        this.assetActionButton = container.querySelector("[data-asset-action-button]");
-        this.newAssetTickerMessage = container.querySelector("[data-new-asset-ticker-message]");
-        this.assetNameInput = container.querySelector(`[name='${ assetNameFieldName }']`);
-        this.assetTickerExtraErrorMessageDiv = container.querySelector(`[${ TICKER_EXTRA_ERROR_MESSAGE_ATTRIBUTE }]`);
+        if(!container) {
+            throw new Error(`Unable to find asset row container '${ containerId }'.`);
+        }
+
+        this.container = container;
+        this.autocompleteWrapper = container.querySelector<HTMLElement>(`[${ ASSET_SEARCH_AUTOCOMPLETE_ATTRIBUTE }]`);
+        this.assetSearchInput = container.querySelector<HTMLInputElement>(`[${ ASSET_SEARCH_INPUT_ATTRIBUTE }]`);
+        this.assetIdInput = container.querySelector<HTMLInputElement>(`[name='${ assetIdHiddenFieldName }']`);
+        this.assetTickerInput = container.querySelector<HTMLInputElement>(`[name='${ assetTickerFieldName }']`);
+        this.assetActionButton = container.querySelector<HTMLButtonElement>("[data-asset-action-button]");
+        this.newAssetTickerMessage = container.querySelector<HTMLDivElement>("[data-new-asset-ticker-message]");
+        this.assetNameInput = container.querySelector<HTMLInputElement>(`[name='${ assetNameFieldName }']`);
+
+        this.assetTickerExtraErrorMessageDiv =
+            container.querySelector<HTMLDivElement>(`[${ TICKER_EXTRA_ERROR_MESSAGE_ATTRIBUTE }]`);
+
+        const hasMissingRequiredControls = !this.autocompleteWrapper || !this.assetSearchInput
+            || !this.assetIdInput || !this.assetTickerInput
+            || !this.assetActionButton || !this.newAssetTickerMessage || !this.assetNameInput
+            || !this.assetTickerExtraErrorMessageDiv;
+
+        if(hasMissingRequiredControls) {
+            throw new Error(`Asset row '${ containerId }' is missing required controls.`);
+        }
     }
 
+    /** Returns whether this row is waiting for a search or asset lookup.
+     *
+     * @author GPT-6 Luna
+     * @author GPT-6 Sol
+     */
     isInSearchMode(): boolean {
-        return this.assetActionButton.className === ASSET_ACTION_BUTTON_IDENTITIES.search.classes;
+        return this.autocompleteWrapper.dataset.assetSelectionState === AssetSelectionState.SEARCH;
     }
 
+    /** Returns whether the committed asset state can be cleared with the action button.
+     *
+     * @author GPT-6 Luna
+     * @author GPT-6 Sol
+     */
     isInResetMode(): boolean {
-        return this.assetActionButton.className === ASSET_ACTION_BUTTON_IDENTITIES.reset.classes;
+        const selectionState = this.autocompleteWrapper.dataset.assetSelectionState;
+        return selectionState === AssetSelectionState.EXISTING || selectionState === AssetSelectionState.NEW;
     }
 
+    /** Updates the search/reset styling and icon without changing row selection state.
+     *
+     * @author GPT-6 Luna
+     */
     switchAssetActionButtonIdentity(identity: typeof ASSET_ACTION_BUTTON_IDENTITIES.search) {
         this.assetActionButton.className = identity.classes;
         this.assetActionButton.innerHTML = `<span class="${ identity.iconClasses }"></span>`;
     }
 
-    activateExistingAssetMode(asset: Asset) {
+    /**
+     * Changes the row to display the selected existing asset as read-only fields.
+     *
+     * @author benizzio
+     * @author GPT-6 Luna
+     * @author GPT-6 Sol
+     */
+    activateExistingAssetMode(asset: Asset): void {
 
+        this.completeAssetLookup();
+        this.assetActionButton.focus();
+        this.autocompleteWrapper.dataset.assetSelectionState = AssetSelectionState.EXISTING;
         this.switchAssetActionButtonIdentity(ASSET_ACTION_BUTTON_IDENTITIES.reset);
 
+        this.assetSearchInput.setCustomValidity("");
+        this.assetSearchInput.readOnly = false;
+        this.assetSearchInput.disabled = true;
+        this.assetSearchInput.hidden = true;
+
+        this.assetTickerInput.hidden = false;
+        this.assetTickerInput.disabled = false;
         this.assetTickerInput.readOnly = true;
         this.assetTickerInput.value = asset.ticker;
 
         this.assetNameInput.style.display = "";
         this.assetNameInput.readOnly = true;
-        this.assetNameInput.value = asset.name;
+        this.assetNameInput.required = false;
+        this.assetNameInput.value = asset.name ?? "";
 
-        this.assetIdInput.value = asset.id.toString();
+        this.assetIdInput.value = asset.id?.toString() ?? "";
 
         this.newAssetTickerMessage.style.display = "none";
+        this.clearSearchErrorFeedback();
     }
 
-    activateNewAssetMode() {
+    /**
+     * Changes the row to require the name of an asset that is not yet stored.
+     *
+     * @author benizzio
+     * @author GPT-6 Luna
+     * @author GPT-6 Sol
+     */
+    activateNewAssetMode(ticker: string): void {
 
+        this.completeAssetLookup();
+        this.assetActionButton.focus();
+        this.autocompleteWrapper.dataset.assetSelectionState = AssetSelectionState.NEW;
         this.switchAssetActionButtonIdentity(ASSET_ACTION_BUTTON_IDENTITIES.reset);
 
+        this.assetSearchInput.setCustomValidity("");
+        this.assetSearchInput.readOnly = false;
+        this.assetSearchInput.disabled = true;
+        this.assetSearchInput.hidden = true;
+
+        this.assetTickerInput.value = ticker;
+        this.assetTickerInput.hidden = false;
+        this.assetTickerInput.disabled = false;
         this.assetTickerInput.readOnly = true;
 
         this.assetNameInput.style.display = "";
         this.assetNameInput.readOnly = false;
         this.assetNameInput.required = true;
+        this.assetNameInput.value = "";
 
+        this.assetIdInput.value = "";
         this.newAssetTickerMessage.style.display = "";
+        this.clearSearchErrorFeedback();
+        this.assetNameInput.focus();
     }
 
+    /**
+     * Clears the current asset and restores editable asset search mode.
+     *
+     * @author GPT-6 Luna
+     * @author benizzio
+     * @author GPT-6 Sol
+     */
     resetToSearchMode() {
 
+        closeAssetSearchAutocomplete(this.assetSearchInput);
+        const autocompleteState = autocompleteStates.get(this.assetSearchInput);
+
+        if(autocompleteState) {
+            autocompleteState.isLookupPending = false;
+        }
+
+        this.autocompleteWrapper.dataset.assetSelectionState = AssetSelectionState.SEARCH;
         this.switchAssetActionButtonIdentity(ASSET_ACTION_BUTTON_IDENTITIES.search);
+        this.assetActionButton.disabled = false;
+
+        this.assetSearchInput.value = "";
+        this.assetSearchInput.setCustomValidity("");
+        this.assetSearchInput.readOnly = false;
+        this.assetSearchInput.disabled = false;
+        this.assetSearchInput.hidden = false;
+        this.assetSearchInput.classList.remove("is-invalid");
 
         this.assetTickerInput.value = "";
         this.assetTickerInput.setCustomValidity("");
-        this.assetTickerInput.reportValidity();
-        this.assetTickerInput.focus();
-        this.assetTickerInput.readOnly = false;
+        this.assetTickerInput.readOnly = true;
+        this.assetTickerInput.disabled = true;
+        this.assetTickerInput.hidden = true;
         this.assetTickerInput.classList.remove("is-invalid");
 
         this.assetNameInput.value = "";
@@ -104,61 +768,332 @@ class AssetComposedColumnInput {
         this.assetIdInput.value = "";
 
         this.newAssetTickerMessage.style.display = "none";
-        this.assetTickerExtraErrorMessageDiv.textContent = "";
-        this.assetTickerExtraErrorMessageDiv.style.display = "none";
+        this.clearSearchErrorFeedback();
+
+        this.assetSearchInput.focus();
+        openAssetSearchAutocomplete(this.assetSearchInput);
     }
 
+    /** Clears search validation feedback before a new lookup attempt.
+     *
+     * @author GPT-6 Luna
+     */
     clearSearchFieldValidation() {
-        this.assetTickerInput.setCustomValidity("");
-        this.assetTickerInput.reportValidity();
+        this.assetSearchInput.setCustomValidity("");
+        this.assetSearchInput.classList.remove("is-invalid");
+        this.clearSearchErrorFeedback();
     }
 
+    /** Trims and validates a literal ticker or ID before it is sent to the lookup API.
+     *
+     * @author GPT-6 Luna
+     */
     validateSearchUniqueIdentifier(): string {
 
-        const assetUniqueIdentifier = this.assetTickerInput.value.trim();
+        const assetUniqueIdentifier = this.assetSearchInput.value.trim();
 
         if(!assetUniqueIdentifier) {
-            this.assetTickerInput.setCustomValidity("Required for search");
-            this.assetTickerInput.reportValidity();
+            this.assetSearchInput.setCustomValidity("Required for search");
+            this.assetSearchInput.reportValidity();
+            return "";
         }
 
+        if(assetUniqueIdentifier.length > 40) {
+            this.assetSearchInput.setCustomValidity("Asset ticker cannot exceed 40 characters");
+            this.assetSearchInput.reportValidity();
+            return "";
+        }
+
+        if(!TICKER_CANDIDATE_PATTERN.test(assetUniqueIdentifier)) {
+            this.assetSearchInput.setCustomValidity("Ticker may contain only letters, numbers, '-', '_', ':', and '.'");
+            this.assetSearchInput.reportValidity();
+            return "";
+        }
+
+        this.assetSearchInput.value = assetUniqueIdentifier;
+        this.assetSearchInput.setCustomValidity("");
         return assetUniqueIdentifier;
     }
 
-    handleAssetActionButtonClick() {
+    /**
+     * Searches for the typed ticker or resets a previously resolved asset.
+     *
+     * @author GPT-6 Luna
+     * @author benizzio
+     * @author GPT-6 Sol
+     */
+    handleAssetActionButtonClick(selectedTicker?: string): void {
 
         if(this.isInSearchMode()) {
 
             this.clearSearchFieldValidation();
+
+            if(selectedTicker !== undefined) {
+                this.assetSearchInput.value = selectedTicker;
+            }
             const searchUniqueIdentifier = this.validateSearchUniqueIdentifier();
 
             if(searchUniqueIdentifier) {
+                if(!this.beginAssetLookup()) {
+                    return;
+                }
+
                 getAsset(this, searchUniqueIdentifier);
             }
+        }
+        else if(this.autocompleteWrapper.dataset.assetSelectionState === AssetSelectionState.PENDING) {
+            return;
         }
         else if(this.isInResetMode()) {
             this.resetToSearchMode();
         }
     }
 
-    validateForPost() {
-        if(this.isInSearchMode()) {
-            this.assetTickerInput.setCustomValidity("Reference an existing asset or create a new one");
-            this.assetTickerInput.reportValidity();
+    /** Sets custom validity when the row has not committed an existing or new ticker.
+     *
+     * @author GPT-6 Luna
+     * @author GPT-6 Sol
+     */
+    validateForPost(): void {
+        const selectionState = this.autocompleteWrapper.dataset.assetSelectionState;
+
+        if(selectionState === AssetSelectionState.SEARCH || selectionState === AssetSelectionState.PENDING) {
+            const message = selectionState === AssetSelectionState.PENDING
+                ? ASSET_LOOKUP_PENDING_ERROR_MESSAGE
+                : ASSET_SELECTION_ERROR_MESSAGE;
+            this.assetSearchInput.setCustomValidity(message);
+            this.assetSearchInput.classList.add("is-invalid");
+            this.assetTickerExtraErrorMessageDiv.textContent = message;
+            this.assetTickerExtraErrorMessageDiv.style.display = "contents";
         }
+        else {
+            this.assetSearchInput.setCustomValidity("");
+        }
+    }
+
+    /**
+     * Marks a row lookup as pending and locks the ticker against duplicate requests.
+     *
+     * @returns `false` when a lookup is already pending; otherwise `true`.
+     *
+     * @author GPT-6 Luna
+     * @author GPT-6 Sol
+     */
+    beginAssetLookup(): boolean {
+
+        const state = ensureAutocompleteState(this.assetSearchInput);
+
+        if(state?.isLookupPending) {
+            return false;
+        }
+
+        closeAssetSearchAutocomplete(this.assetSearchInput);
+
+        if(state) {
+            state.isLookupPending = true;
+        }
+
+        this.autocompleteWrapper.dataset.assetSelectionState = AssetSelectionState.PENDING;
+        this.assetSearchInput.setCustomValidity(ASSET_LOOKUP_PENDING_ERROR_MESSAGE);
+        this.assetSearchInput.readOnly = true;
+        this.assetActionButton.disabled = true;
+        return true;
+    }
+
+    /**
+     * Releases lookup state after an existing asset or a new-asset path is resolved.
+     *
+     * @author GPT-6 Luna
+     * @author GPT-6 Sol
+     */
+    completeAssetLookup(): void {
+
+        const state = autocompleteStates.get(this.assetSearchInput);
+
+        if(state) {
+            state.isLookupPending = false;
+        }
+
+        this.assetActionButton.disabled = false;
+        closeAssetSearchAutocomplete(this.assetSearchInput);
+        this.assetSearchInput.setCustomValidity("");
+    }
+
+    /**
+     * Restores editable search mode after a lookup fails for a reason other than a missing asset.
+     *
+     * @author GPT-6 Luna
+     * @author GPT-6 Sol
+     */
+    restoreSearchModeAfterLookup(): void {
+
+        this.completeAssetLookup();
+        this.autocompleteWrapper.dataset.assetSelectionState = AssetSelectionState.SEARCH;
+        this.switchAssetActionButtonIdentity(ASSET_ACTION_BUTTON_IDENTITIES.search);
+        this.assetSearchInput.readOnly = false;
+        this.assetSearchInput.disabled = false;
+        this.assetSearchInput.hidden = false;
+        this.assetTickerInput.value = "";
+        this.assetTickerInput.hidden = true;
+        this.assetTickerInput.disabled = true;
+        this.assetTickerInput.readOnly = true;
+        this.assetIdInput.value = "";
+        this.assetNameInput.value = "";
+        this.assetNameInput.style.display = "none";
+        this.assetNameInput.readOnly = false;
+        this.assetNameInput.required = false;
+        this.newAssetTickerMessage.style.display = "none";
+        this.clearSearchFieldValidation();
+        this.assetSearchInput.focus();
+    }
+
+    /** Clears the validation feedback attached to the transient search control.
+     *
+     * @author GPT-6 Luna
+     */
+    clearSearchErrorFeedback(): void {
+        this.assetSearchInput.classList.remove("is-invalid");
+        this.assetTickerExtraErrorMessageDiv.textContent = "";
+        this.assetTickerExtraErrorMessageDiv.style.display = "none";
     }
 }
 
-function getAsset(rowAssetElements: AssetComposedColumnInput, searchUniqueIdentifier: string) {
+/** Validates one asset row and returns its search control when the row is invalid.
+ *
+ * @param wrapper - Autocomplete wrapper containing the asset row's search and ticker inputs.
+ * @returns Whether the row has a committed ticker and the invalid search input, if present.
+ *
+ * @author GPT-6 Sol
+ */
+function validateAssetRowForPost(wrapper: HTMLElement): {
+    isValid: boolean;
+    invalidSearchInput: HTMLInputElement | null;
+} {
+
+    const searchInput = wrapper.querySelector<HTMLInputElement>(`[${ ASSET_SEARCH_INPUT_ATTRIBUTE }]`);
+    const tickerInput = wrapper.querySelector<HTMLInputElement>(`[${ ASSET_TICKER_INPUT_ATTRIBUTE }]`);
+
+    const errorMessage = wrapper.parentElement?.querySelector<HTMLDivElement>(
+        `[${ TICKER_EXTRA_ERROR_MESSAGE_ATTRIBUTE }]`,
+    );
+    const selectionState = wrapper.dataset.assetSelectionState;
+
+    const hasCommittedTicker = (selectionState === AssetSelectionState.EXISTING
+        || selectionState === AssetSelectionState.NEW)
+        && Boolean(tickerInput?.value.trim());
+
+    if(hasCommittedTicker) {
+        searchInput?.setCustomValidity("");
+        searchInput?.classList.remove("is-invalid");
+        return { isValid: true, invalidSearchInput: null };
+    }
+
+    if(!searchInput) {
+        return { isValid: false, invalidSearchInput: null };
+    }
+
+    const message = selectionState === AssetSelectionState.PENDING
+        ? ASSET_LOOKUP_PENDING_ERROR_MESSAGE
+        : ASSET_SELECTION_ERROR_MESSAGE;
+    searchInput.setCustomValidity(message);
+    searchInput.classList.add("is-invalid");
+
+    if(errorMessage) {
+        errorMessage.textContent = message;
+        errorMessage.style.display = "contents";
+    }
+
+    return { isValid: false, invalidSearchInput: searchInput };
+}
+
+/** Validates every editable asset row in one form before native or HTMX submission.
+ *
+ * @param form - Form whose asset selection states should be checked.
+ * @param reportFeedback - Whether to expose the first invalid row to the user.
+ * @returns `true` when every editable asset row has a committed ticker.
+ *
+ * @author GPT-6 Luna
+ * @author GPT-6 Sol
+ */
+function validateAssetRowsForPost(form: HTMLFormElement, reportFeedback: boolean): boolean {
+
+    let isValid = true;
+    let firstInvalidSearchInput: HTMLInputElement | null = null;
+
+    form.querySelectorAll<HTMLElement>(`[${ ASSET_SEARCH_AUTOCOMPLETE_ATTRIBUTE }]`).forEach(wrapper => {
+        const rowValidation = validateAssetRowForPost(wrapper);
+
+        if(!rowValidation.isValid) {
+            firstInvalidSearchInput ??= rowValidation.invalidSearchInput;
+            isValid = false;
+        }
+    });
+
+    if(!isValid && reportFeedback && firstInvalidSearchInput) {
+        if(firstInvalidSearchInput.willValidate) {
+            firstInvalidSearchInput.reportValidity();
+        }
+        else {
+            firstInvalidSearchInput.focus();
+        }
+    }
+
+    return isValid;
+}
+
+/** Installs form guards for native submits and HTMX requests containing editable asset rows.
+ *
+ * @author GPT-6 Luna
+ */
+function installAssetFormValidationGuards(): void {
+
+    document.addEventListener("submit", event => {
+        const form = event.target;
+
+        if(!(form instanceof HTMLFormElement) || validateAssetRowsForPost(form, true)) {
+            return;
+        }
+
+        event.preventDefault();
+        event.stopImmediatePropagation();
+    }, true);
+
+    document.addEventListener("htmx:beforeRequest", event => {
+        const htmxEvent = event as CustomEvent<{ elt?: Element }>;
+
+        const requestElement = htmxEvent.detail?.elt
+            ?? (event.target instanceof Element ? event.target : null);
+
+        const form = requestElement instanceof HTMLFormElement
+            ? requestElement
+            : requestElement?.closest("form");
+
+        if(form instanceof HTMLFormElement && !validateAssetRowsForPost(form, true)) {
+            event.preventDefault();
+        }
+    });
+}
+
+/**
+ * Resolves an asset ticker and updates its owning row with the API result.
+ *
+ * @author GPT-6 Luna
+ */
+function getAsset(rowAssetElements: AssetComposedColumnInput, searchUniqueIdentifier: string): void {
 
     api.getAsset(searchUniqueIdentifier)
         .then(responseBody => {
 
+            if(!rowAssetElements.container.isConnected) {
+                return;
+            }
+
             if(api.isAPIErrorResponse(responseBody)) {
                 if(responseBody.errorMessage === "Data not found") {
-                    rowAssetElements.activateNewAssetMode();
+                    rowAssetElements.activateNewAssetMode(searchUniqueIdentifier);
                 }
                 else {
+                    rowAssetElements.restoreSearchModeAfterLookup();
                     notifications.notifyErrorResponse(responseBody);
                 }
                 return;
@@ -167,6 +1102,11 @@ function getAsset(rowAssetElements: AssetComposedColumnInput, searchUniqueIdenti
             rowAssetElements.activateExistingAssetMode(responseBody as Asset);
         })
         .catch(error => {
+            if(!rowAssetElements.container.isConnected) {
+                return;
+            }
+
+            rowAssetElements.restoreSearchModeAfterLookup();
             console.error("Error fetching asset:", error);
             notifications.notifyErrorResponse({ errorMessage: "Failed to fetch asset data: " + error.message });
         });
@@ -177,39 +1117,190 @@ function loadClassesDatalist() {
     htmx.trigger(datalistElement, "load-classes");
 }
 
+/**
+ * Reloads the shared prefetched asset ticker source.
+ *
+ * @author GPT-6 Luna
+ * @author benizzio
+ */
 function loadAssetsDatalist() {
     const datalistElement: HTMLElement = window["datalist-assets"];
+
+    ensureAssetDatalistLifecycleListener();
     datalistElement.dataset.assetsInitialized = "false";
     htmx.trigger(datalistElement, "load-assets");
 }
 
+/**
+ * Moves the active suggestion in response to an arrow key, opening the editable autocomplete if needed.
+ *
+ * @author GPT-6.1 Sol
+ * @author GPT-6 Sol
+ */
+function navigateAssetSearchOptions(input: HTMLInputElement, event: KeyboardEvent): void {
+
+    if(input.readOnly) {
+        return;
+    }
+
+    openAssetSearchAutocomplete(input);
+    const state = ensureAutocompleteState(input);
+
+    if(!state?.options.length) {
+        return;
+    }
+
+    event.preventDefault();
+    const direction = event.key === "ArrowDown" ? 1 : -1;
+    let nextIndex = state.activeOptionIndex + direction;
+
+    if(state.activeOptionIndex < 0) {
+        nextIndex = direction === 1 ? 0 : state.options.length - 1;
+    }
+
+    highlightAssetSearchOption(input, nextIndex, "keyboard", true);
+}
+
+/**
+ * Selects the active suggestion on Enter, or invokes literal lookup when no suggestion is active.
+ *
+ * @author GPT-6.1 Sol
+ * @author GPT-6 Sol
+ */
+function submitAssetSearchLookup(
+    input: HTMLInputElement,
+    state: AssetSearchAutocompleteState | null,
+    event: KeyboardEvent,
+): void {
+
+    if(state?.activeOptionIndex >= 0) {
+        event.preventDefault();
+        const selectedOption = state.options[state.activeOptionIndex];
+
+        if(selectedOption) {
+            selectAssetSearchOption(input, selectedOption.ticker);
+        }
+        return;
+    }
+
+    const actionButton = input
+        .closest(".input-group")
+        ?.querySelector<HTMLButtonElement>("[data-asset-action-button]");
+
+    if(actionButton?.className === ASSET_ACTION_BUTTON_IDENTITIES.search.classes) {
+        event.preventDefault();
+        actionButton.click();
+    }
+}
+
+/**
+ * Public browser handlers for the shared asset search input template and its row lookup actions.
+ *
+ * The HTML partial binds `handleAssetSearchFocus`, `handleAssetSearchInput`, and
+ * `handleAssetSearchKeydown` directly to each generated search input. Existing row-specific
+ * controllers continue to call the asset-action and validation methods with their own field names.
+ *
+ * @example
+ * ```html
+ * <input onfocus="AssetComposedColumnsInput.handleAssetSearchFocus(event)"
+ *        oninput="AssetComposedColumnsInput.handleAssetSearchInput(event)"
+ *        onkeydown="AssetComposedColumnsInput.handleAssetSearchKeydown(event)">
+ * ```
+ *
+ * @author GPT-6 Luna
+ * @author benizzio
+ * @author GPT-6.1 Sol
+ * @author GPT-6 Sol
+ */
 const AssetComposedColumnsInput = {
 
     /**
-     * Handles keydown on the asset ticker input field. When Enter is pressed and the asset
-     * action button is in search mode, triggers the search by clicking the action button.
-     * Does not trigger reset/cancel mode on Enter — only the button handles that.
+     * Opens suggestions when the editable asset search input receives focus.
      *
-     * @param event - The keyboard event from the asset ticker input
+     * @param event - Focus event emitted by the asset search input.
      *
-     * @example onkeydown="AssetComposedColumnsInput.handleAssetTickerKeydown(event)"
+     * @example onfocus="AssetComposedColumnsInput.handleAssetSearchFocus(event)"
      *
-     * Authored by: GitHub Copilot
+     * @author GPT-6 Luna
+     * @author GPT-6 Sol
      */
-    handleAssetTickerKeydown(event: KeyboardEvent) {
+    handleAssetSearchFocus(event: FocusEvent): void {
+        openAssetSearchAutocomplete(event.target as HTMLInputElement);
+    },
+
+    /**
+     * Refreshes local asset suggestions after the search query changes.
+     *
+     * @param event - Input event emitted by the asset search field.
+     *
+     * @example oninput="AssetComposedColumnsInput.handleAssetSearchInput(event)"
+     *
+     * @author GPT-6 Luna
+     * @author GPT-6 Sol
+     */
+    handleAssetSearchInput(event: Event): void {
+
+        const input = event.target as HTMLInputElement;
+        input.setCustomValidity("");
+        input.classList.remove("is-invalid");
+        const autocompleteWrapper = input.closest<HTMLElement>(`[${ ASSET_SEARCH_AUTOCOMPLETE_ATTRIBUTE }]`);
+
+        const errorMessage = autocompleteWrapper?.parentElement?.querySelector<HTMLDivElement>(
+            `[${ TICKER_EXTRA_ERROR_MESSAGE_ATTRIBUTE }]`,
+        );
+
+        if(errorMessage) {
+            errorMessage.textContent = "";
+            errorMessage.style.display = "none";
+        }
+
+        openAssetSearchAutocomplete(input);
+        renderAssetSearchSuggestions(input);
+    },
+
+    /**
+     * Handles autocomplete navigation, suggestion selection, and literal Enter-to-search fallback.
+     *
+     * @param event - The keyboard event from the asset search input.
+     *
+     * @example onkeydown="AssetComposedColumnsInput.handleAssetSearchKeydown(event)"
+     *
+     * @author GPT-6 Luna
+     * @author GPT-6.1 Sol
+     * @author GPT-6 Sol
+     */
+    handleAssetSearchKeydown(event: KeyboardEvent) {
+
+        if(event.isComposing) {
+            return;
+        }
+
+        const inputElement = event.target as HTMLInputElement;
+        const state = ensureAutocompleteState(inputElement);
+
+        if(event.key === "ArrowDown" || event.key === "ArrowUp") {
+
+            navigateAssetSearchOptions(inputElement, event);
+            return;
+        }
+
+        if(event.key === "Escape") {
+
+            if(state?.isOpen) {
+                event.preventDefault();
+                closeAssetSearchAutocomplete(inputElement);
+            }
+            return;
+        }
+
+        if(event.key === "Tab") {
+            closeAssetSearchAutocomplete(inputElement);
+            return;
+        }
 
         if(event.key === "Enter") {
 
-            const inputElement = event.target as HTMLElement;
-
-            const actionButton = inputElement
-                .closest(".input-group")
-                ?.querySelector<HTMLButtonElement>("[data-asset-action-button]");
-
-            if(actionButton?.className === ASSET_ACTION_BUTTON_IDENTITIES.search.classes) {
-                event.preventDefault();
-                actionButton.click();
-            }
+            submitAssetSearchLookup(inputElement, state, event);
         }
     },
 
@@ -243,6 +1334,25 @@ const AssetComposedColumnsInput = {
         rowAssetElements.validateForPost();
     },
 
+    /**
+     * Validates committed asset selections before submitting a form outside an HTMX field-validation event.
+     *
+     * @param form - Form containing one or more editable asset rows.
+     * @returns `true` when every editable row is resolved or in confirmed new-asset mode.
+     *
+     * @example
+     * ```ts
+     * if(AssetComposedColumnsInput.validateFormBeforePost(form)) {
+     *     form.requestSubmit();
+     * }
+     * ```
+     *
+     * @author GPT-6 Luna
+     */
+    validateFormBeforePost(form: HTMLFormElement): boolean {
+        return validateAssetRowsForPost(form, true);
+    },
+
     loadDatalists() {
         loadClassesDatalist();
         loadAssetsDatalist();
@@ -263,5 +1373,7 @@ const AssetComposedColumnsInput = {
         field.reportValidity();
     },
 };
+
+installAssetFormValidationGuards();
 
 export default AssetComposedColumnsInput;

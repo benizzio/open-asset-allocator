@@ -1,3 +1,6 @@
+<!-- Shared asset search and committed ticker controls for portfolio form rows.
+     Authored by: GPT-6 Luna and benizzio
+     Co-authored by: GPT-6 Sol and benizzio -->
 <body>
 <script id="asset-composed-columns-input" type="text/x-handlebars-template">
 
@@ -13,30 +16,66 @@
             {{assetTicker}}
         {{else}}
 
-            <div class="input-group">
+            <div data-asset-search-autocomplete
+                 data-asset-selection-state="search"
+                 class="asset-search-autocomplete"
+            >
 
-                <input type="text"
-                       name="{{assetTickerFieldName}}"
-                       placeholder="Asset ticker"
-                       aria-label="Asset ticker"
-                       autocomplete="off"
-                       class="form-control"
-                       value="{{assetTicker}}"
-                       list="datalist-assets"
-                       hx-validate="true"
-                       hx-on::validation:validate="{{assetTickerFieldHTMXOnValidate}}"
-                       oninput="maskTickerInput(this)"
-                       onkeydown="AssetComposedColumnsInput.handleAssetTickerKeydown(event)"
-                       maxlength="40"
-                />
-                <button data-asset-action-button
-                        type="button"
-                        class="btn btn-primary btn-xs"
-                        onclick="{{assetActionButtonOnClick}}"
-                >
-                    <span class="bi bi-search"></span>
-                </button>
+                <div class="input-group">
 
+                    <input type="text"
+                           placeholder="Asset"
+                           aria-label="Asset"
+                           autocomplete="off"
+                           class="form-control"
+                           role="combobox"
+                           aria-autocomplete="list"
+                           aria-haspopup="listbox"
+                           aria-expanded="false"
+                           data-asset-search-source="datalist-assets"
+                           data-asset-search-input
+                           hx-validate="true"
+                           hx-on::validation:validate="{{assetTickerFieldHTMXOnValidate}}"
+                           onfocus="AssetComposedColumnsInput.handleAssetSearchFocus(event)"
+                           oninput="AssetComposedColumnsInput.handleAssetSearchInput(event)"
+                           onkeydown="AssetComposedColumnsInput.handleAssetSearchKeydown(event)"
+                     />
+                    <input type="text"
+                           name="{{assetTickerFieldName}}"
+                           placeholder="Asset ticker"
+                           aria-label="Asset ticker"
+                           autocomplete="off"
+                           class="form-control"
+                           data-asset-ticker-input
+                           value=""
+                           maxlength="40"
+                           readonly
+                           hidden
+                           disabled
+                    />
+                    <button data-asset-action-button
+                            type="button"
+                            class="btn btn-primary btn-xs"
+                            onclick="{{assetActionButtonOnClick}}"
+                    >
+                        <span class="bi bi-search"></span>
+                    </button>
+
+                </div>
+
+                <div data-asset-search-suggestions class="asset-search-autocomplete__suggestions" hidden>
+                    <div data-asset-search-listbox
+                         class="asset-search-autocomplete__listbox"
+                         role="listbox"
+                         aria-label="Available assets"
+                    ></div>
+                    <div data-asset-search-status
+                         class="asset-search-autocomplete__status"
+                         role="status"
+                         aria-live="polite"
+                         hidden
+                    ></div>
+                </div>
             </div>
 
             <div data-new-asset-ticker-message
