@@ -192,6 +192,23 @@ export default [
                                 "Import from the public API 'infra/routing' (index.ts) only; " +
                                 "deep imports are not allowed.",
                         },
+                        // Block deep imports into the composed asset-column module while leaving its local imports alone
+                        // Authored by: GPT-6 Luna
+                        {
+                            group: [
+                                "**/asset-composed-columns-input/*",
+                                "**/asset-composed-columns-input/**",
+                                "asset-composed-columns-input/*",
+                                "asset-composed-columns-input/**",
+                                "./asset-composed-columns-input/*",
+                                "./asset-composed-columns-input/**",
+                                "../asset-composed-columns-input/*",
+                                "../asset-composed-columns-input/**",
+                            ],
+                            message:
+                                "Import from the public API 'components/asset-composed-columns-input' (index.ts) only; " +
+                                "deep imports are not allowed.",
+                        },
                     ],
                 },
             ],
