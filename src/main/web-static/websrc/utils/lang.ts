@@ -607,15 +607,18 @@ export function isNullish(value: unknown): value is null | undefined {
  * coerceToBigNumber("invalid") // => BigNumber(0)
  *
  * @author GitHub Copilot
+ * @author GPT-6 Luna
  */
 export function coerceToBigNumber(value: unknown): BigNumber {
 
     try {
         // Convert unknown value to BigNumber.Value type before passing to constructor
-        const coercedValue: BigNumber.Value = (typeof value === "string" ||
+        const isSupportedPrimitive = typeof value === "string" ||
             typeof value === "number" ||
-            typeof value === "bigint" ||
-            value instanceof BigNumber)
+            typeof value === "bigint";
+        const isSupportedValue = isSupportedPrimitive || value instanceof BigNumber;
+
+        const coercedValue: BigNumber.Value = isSupportedValue
             ? value as BigNumber.Value
             : 0;
 

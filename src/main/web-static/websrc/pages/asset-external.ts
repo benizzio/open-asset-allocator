@@ -153,11 +153,26 @@ function isExternalAsset(value: unknown): value is ExternalAsset {
  * }
  * ```
  * @author OpenCode
+ * @author GPT-6 Luna
  */
 export function hasValidExternalData(value: unknown): value is Asset["externalData"] {
-    return value === undefined || value === null || (typeof value === "object" && value !== null
-        && Array.isArray((value as { data?: unknown }).data)
-        && (value as { data: unknown[] }).data.every(isExternalAsset));
+    const isMissingExternalData = value === undefined || value === null;
+
+    if(isMissingExternalData) {
+        return true;
+    }
+
+    if(typeof value !== "object") {
+        return false;
+    }
+
+    const externalAssets = (value as { data?: unknown }).data;
+
+    if(!Array.isArray(externalAssets)) {
+        return false;
+    }
+
+    return externalAssets.every(isExternalAsset);
 }
 
 /**

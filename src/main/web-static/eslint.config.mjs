@@ -2,6 +2,7 @@
  * ESLint flat configuration for frontend code, including module boundaries and code-quality rules.
  * @author OpenCode
  * @author benizzio
+ * @author GPT-6 Luna
  */
 import globals from "globals";
 import pluginJs from "@eslint/js";
@@ -27,10 +28,13 @@ export default [
         // ESLint Stylistic rules: https://eslint.style/packages/default
         rules: {
             "sonarjs/cognitive-complexity": ["error", 15],
+            "sonarjs/expression-complexity": ["error", { max: 3 }],
+            "sonarjs/no-duplicate-string": ["warn", { threshold: 3 }],
             "sonarjs/no-nested-conditional": "error",
             "@typescript-eslint/prefer-optional-chain": "warn",
             "@typescript-eslint/prefer-nullish-coalescing": "warn",
             "max-len": ["warn", { code: 120, tabWidth: 4 }],
+            "max-lines": ["warn", { max: 600 }],
             // no-unused-vars rules are scoped per-file-type below
             "@stylistic/indent": ["warn", 4],
             "@stylistic/semi": ["error", "always"],
@@ -186,6 +190,23 @@ export default [
                             ],
                             message:
                                 "Import from the public API 'infra/routing' (index.ts) only; " +
+                                "deep imports are not allowed.",
+                        },
+                        // Block deep imports into the composed asset-column module while leaving its local imports alone
+                        // Authored by: GPT-6 Luna
+                        {
+                            group: [
+                                "**/asset-composed-columns-input/*",
+                                "**/asset-composed-columns-input/**",
+                                "asset-composed-columns-input/*",
+                                "asset-composed-columns-input/**",
+                                "./asset-composed-columns-input/*",
+                                "./asset-composed-columns-input/**",
+                                "../asset-composed-columns-input/*",
+                                "../asset-composed-columns-input/**",
+                            ],
+                            message:
+                                "Import from the public API 'components/asset-composed-columns-input' (index.ts) only; " +
                                 "deep imports are not allowed.",
                         },
                     ],
