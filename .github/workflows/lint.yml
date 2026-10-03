@@ -1,8 +1,14 @@
+# Cancels superseded lint runs per pull request/workflow to keep CI focused on the latest commit.
+# Co-authored by: OpenCode and Igor Benicio de Mesquita
 name: Lint
 permissions:
   contents: read
 on:
   pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   lint:
@@ -56,4 +62,3 @@ jobs:
 
       - name: Run frontend lint through Makefile
         run: make lint-frontend
-    # Co-authored by: OpenCode and Igor Benicio de Mesquita
