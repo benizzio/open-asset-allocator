@@ -1,10 +1,14 @@
-# Runs containerized Playwright E2E tests against the immutable production monolith.
-# Authored by: OpenCode
+# Runs containerized Playwright E2E tests against the immutable production monolith; cancels superseded runs per pull request/workflow.
+# Co-authored by: OpenCode and Igor Benicio de Mesquita
 name: E2E Tests
 permissions:
   contents: read
 on:
   pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   e2e:
