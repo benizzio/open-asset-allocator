@@ -125,18 +125,23 @@ test.describe('portfolio allocation history management', () => {
       await expect(row.getByRole('status')).toHaveText('No matching assets. Select the create option to continue.');
     });
 
-    /** Verifies a refresh of the prefetched catalog replaces stale options in an open list.
+    /** Verifies a refresh of the prefetched catalog removes visible stale options from an open list.
      *
      * @author GPT-6 Luna
+     * @author GPT-6 Sol
      */
     test('scenario 14.2: refreshes suggestions after the ticker catalog reloads', async ({ database, page }) => {
-      const { suggestions } = await prepareTickerAutocompleteRow(database, page);
+      const { suggestions, tickerInput } = await prepareTickerAutocompleteRow(database, page);
 
       await page.locator('#datalist-assets').evaluate(element => {
         const staleOption = document.createElement('option');
         staleOption.value = 'E2E:STALE';
+        staleOption.textContent = 'E2E:STALE';
         element.append(staleOption);
       });
+      await tickerInput.fill('E2E:');
+      await expect(suggestions.getByRole('option', { name: 'E2E:STALE', exact: true })).toBeVisible();
+
       const datalistRefresh = page.waitForResponse(response => {
         return response.request().method() === 'GET' && new URL(response.url()).pathname === '/api/asset';
       });
@@ -148,7 +153,8 @@ test.describe('portfolio allocation history management', () => {
       await datalistRefresh;
 
       await expect(page.locator('#datalist-assets option[value="E2E:STALE"]')).toHaveCount(0);
-      await expect(suggestions.getByRole('option')).toHaveCount(15);
+      await expect(suggestions.getByRole('option', { name: 'E2E:STALE', exact: true })).toHaveCount(0);
+      await expect(suggestions.getByRole('option')).toHaveCount(12);
     });
 
     /** Verifies pointer selection directly starts lookup and populates the existing asset fields.
