@@ -618,10 +618,13 @@ class AssetComposedColumnInput {
         this.assetTickerExtraErrorMessageDiv =
             container.querySelector<HTMLDivElement>(`[${ TICKER_EXTRA_ERROR_MESSAGE_ATTRIBUTE }]`);
 
-        const hasMissingRequiredControls = !this.autocompleteWrapper || !this.assetSearchInput
-            || !this.assetIdInput || !this.assetTickerInput
-            || !this.assetActionButton || !this.newAssetTickerMessage || !this.assetNameInput
-            || !this.assetTickerExtraErrorMessageDiv;
+        const hasMissingSearchControls = !this.autocompleteWrapper || !this.assetSearchInput;
+        const hasMissingAssetControls = !this.assetIdInput || !this.assetTickerInput;
+        const hasMissingActionControls = !this.assetActionButton || !this.newAssetTickerMessage;
+        const hasMissingNameAndValidationControls = !this.assetNameInput || !this.assetTickerExtraErrorMessageDiv;
+
+        const hasMissingRequiredControls = hasMissingSearchControls || hasMissingAssetControls
+            || hasMissingActionControls || hasMissingNameAndValidationControls;
 
         if(hasMissingRequiredControls) {
             throw new Error(`Asset row '${ containerId }' is missing required controls.`);

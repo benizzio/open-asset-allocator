@@ -14,6 +14,8 @@ require the backend or remainder graph.
 
 ## Front-end and browser code standards
 
+### Code structure
+
 <CodeStructure>
 
 - the code is structured in the following modules
@@ -40,6 +42,8 @@ require the backend or remainder graph.
 
 </CodeStructure>
 
+### Custom code documentation
+
 <CustomCodeDocs>
 
 - When adding authoring code docs in JavaScript and TypeScript files, use proper JSDoc syntax:
@@ -51,3 +55,18 @@ require the backend or remainder graph.
   ```
 
 </CustomCodeDocs>
+
+### Reviewing
+
+- When reviewing frontend source files, leave file-specific comments identifying lint warnings, including the file,
+  line, and rule. Report the warnings without implementing their fixes; implementation agents should address them.
+
+### Linting and refactoring
+
+- When a source file exceeds the `max-lines` warning threshold, decompose it with the single responsibility principle
+  in mind. Group cohesive responsibilities rather than splitting code solely to meet the line limit.
+- Assess whether repeated string literals `no-duplicate-string` warnings represent a finite domain before recommending an enum. Use an appropriate
+  shared constant when repetition should be centralized but an enum does not fit; not every repeated string is an enum
+  candidate.
+
+<!-- Co-authored by: GPT-6 Luna and benizzio -->
