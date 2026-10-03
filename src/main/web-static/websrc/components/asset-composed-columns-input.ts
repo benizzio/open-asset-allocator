@@ -958,6 +958,54 @@ class AssetComposedColumnInput {
     }
 }
 
+/** Validates one asset row and returns its search control when the row is invalid.
+ *
+ * @param wrapper - Autocomplete wrapper containing the asset row's search and ticker inputs.
+ * @returns Whether the row has a committed ticker and the invalid search input, if present.
+ *
+ * @author GPT-6 Sol
+ */
+function validateAssetRowForPost(wrapper: HTMLElement): {
+    isValid: boolean;
+    invalidSearchInput: HTMLInputElement | null;
+} {
+
+    const searchInput = wrapper.querySelector<HTMLInputElement>(`[${ ASSET_SEARCH_INPUT_ATTRIBUTE }]`);
+    const tickerInput = wrapper.querySelector<HTMLInputElement>(`[${ ASSET_TICKER_INPUT_ATTRIBUTE }]`);
+
+    const errorMessage = wrapper.parentElement?.querySelector<HTMLDivElement>(
+        `[${ TICKER_EXTRA_ERROR_MESSAGE_ATTRIBUTE }]`,
+    );
+    const selectionState = wrapper.dataset.assetSelectionState;
+
+    const hasCommittedTicker = (selectionState === AssetSelectionState.EXISTING
+        || selectionState === AssetSelectionState.NEW)
+        && Boolean(tickerInput?.value.trim());
+
+    if(hasCommittedTicker) {
+        searchInput?.setCustomValidity("");
+        searchInput?.classList.remove("is-invalid");
+        return { isValid: true, invalidSearchInput: null };
+    }
+
+    if(!searchInput) {
+        return { isValid: false, invalidSearchInput: null };
+    }
+
+    const message = selectionState === AssetSelectionState.PENDING
+        ? ASSET_LOOKUP_PENDING_ERROR_MESSAGE
+        : ASSET_SELECTION_ERROR_MESSAGE;
+    searchInput.setCustomValidity(message);
+    searchInput.classList.add("is-invalid");
+
+    if(errorMessage) {
+        errorMessage.textContent = message;
+        errorMessage.style.display = "contents";
+    }
+
+    return { isValid: false, invalidSearchInput: searchInput };
+}
+
 /** Validates every editable asset row in one form before native or HTMX submission.
  *
  * @param form - Form whose asset selection states should be checked.
@@ -973,41 +1021,12 @@ function validateAssetRowsForPost(form: HTMLFormElement, reportFeedback: boolean
     let firstInvalidSearchInput: HTMLInputElement | null = null;
 
     form.querySelectorAll<HTMLElement>(`[${ ASSET_SEARCH_AUTOCOMPLETE_ATTRIBUTE }]`).forEach(wrapper => {
-        const searchInput = wrapper.querySelector<HTMLInputElement>(`[${ ASSET_SEARCH_INPUT_ATTRIBUTE }]`);
-        const tickerInput = wrapper.querySelector<HTMLInputElement>(`[${ ASSET_TICKER_INPUT_ATTRIBUTE }]`);
+        const rowValidation = validateAssetRowForPost(wrapper);
 
-        const errorMessage = wrapper.parentElement?.querySelector<HTMLDivElement>(
-            `[${ TICKER_EXTRA_ERROR_MESSAGE_ATTRIBUTE }]`,
-        );
-        const selectionState = wrapper.dataset.assetSelectionState;
-
-        const hasCommittedTicker = (selectionState === AssetSelectionState.EXISTING
-            || selectionState === AssetSelectionState.NEW)
-            && Boolean(tickerInput?.value.trim());
-
-        if(hasCommittedTicker) {
-            searchInput?.setCustomValidity("");
-            searchInput?.classList.remove("is-invalid");
-            return;
-        }
-
-        if(!searchInput) {
+        if(!rowValidation.isValid) {
+            firstInvalidSearchInput ??= rowValidation.invalidSearchInput;
             isValid = false;
-            return;
         }
-
-        const message = selectionState === AssetSelectionState.PENDING
-            ? ASSET_LOOKUP_PENDING_ERROR_MESSAGE
-            : ASSET_SELECTION_ERROR_MESSAGE;
-        searchInput.setCustomValidity(message);
-        searchInput.classList.add("is-invalid");
-
-        if(errorMessage) {
-            errorMessage.textContent = message;
-            errorMessage.style.display = "contents";
-        }
-        firstInvalidSearchInput ??= searchInput;
-        isValid = false;
     });
 
     if(!isValid && reportFeedback && firstInvalidSearchInput) {
