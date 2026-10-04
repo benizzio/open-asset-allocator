@@ -85,6 +85,28 @@ func (repository *AssetRDBMSRepository) GetKnownAssets() ([]*domain.Asset, error
 	return langext.ToPointerSlice(result), nil
 }
 
+// FindAssetByTicker retrieves one asset by its exact ticker, including any persisted external data.
+//
+// Example:
+//
+//	asset, err := assetRepository.FindAssetByTicker("ARCA:BIL")
+//
+// Authored by: OpenCode
+func (repository *AssetRDBMSRepository) FindAssetByTicker(ticker string) (*domain.Asset, error) {
+	var queryBuilder = rdbms.BuildQuery[domain.Asset](repository.dbAdapter, assetsSQL)
+	queryBuilder.AddWhereClauseAndParam("AND ticker = {:ticker}", "ticker", ticker)
+
+	result, err := queryBuilder.Build().GetWithRowScanner(assetRowScanner)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "Error getting asset by ticker", repository)
+	}
+
+	return &result, nil
+}
+
 // FindAssetsByTextSearchTerms returns assets matching every search term against either the ticker or
 // name, using case-insensitive substring matching. Terms containing spaces therefore match an
 // exact ordered phrase. Results are ordered by ticker and restricted to the requested limit.

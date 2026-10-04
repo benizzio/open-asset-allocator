@@ -3,6 +3,7 @@ package anticorruption
 import (
 	"context"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/shopspring/decimal"
@@ -93,9 +94,10 @@ func mapToExternalAsset(quote *integration.YahooFinanceSearchQuoteDTS) *domain.E
 
 // QuoteAssetLastClosePrice queries the Yahoo Finance chart API for the last close price of the given
 // asset and returns it as a domain ExternalAssetQuote.
-// Validates that the asset source matches domain.YahooFinanceSource before proceeding.
+// Validates the asset identifiers and provider response, and uses requestContext for cancellation.
 //
 // Parameters:
+//   - requestContext: context used to cancel or time out the provider request
 //   - asset: the external asset to quote, must have Source set to domain.YahooFinanceSource
 //
 // Returns:
@@ -109,7 +111,7 @@ func mapToExternalAsset(quote *integration.YahooFinanceSearchQuoteDTS) *domain.E
 //	var client = integration.BuildYahooFinanceAssetIntegrationClient(yahooFinanceConfig)
 //	var service = BuildYahooFinanceAssetIntegrationService(client)
 //	var asset = &domain.ExternalAsset{Source: domain.YahooFinanceSource, Ticker: "AAPL", ExchangeId: "NMS"}
-//	quote, err := service.QuoteAssetLastClosePrice(asset)
+//	quote, err := service.QuoteAssetLastClosePrice(context.Background(), asset)
 //	if err != nil {
 //	    // handle error
 //	}
@@ -117,9 +119,13 @@ func mapToExternalAsset(quote *integration.YahooFinanceSearchQuoteDTS) *domain.E
 //
 // Co-authored by: GitHub Copilot (claude-opus-4.6) and benizzio
 func (service *YahooFinanceAssetIntegrationService) QuoteAssetLastClosePrice(
+	requestContext context.Context,
 	asset *domain.ExternalAsset,
 ) (*domain.ExternalAssetQuote, error) {
 
+	if asset == nil {
+		return nil, infra.BuildAppError("external asset is required for Yahoo Finance quote", service)
+	}
 	if asset.Source != domain.YahooFinanceSource {
 		return nil, infra.BuildAppErrorFormatted(
 			service,
@@ -127,10 +133,14 @@ func (service *YahooFinanceAssetIntegrationService) QuoteAssetLastClosePrice(
 			asset.Source,
 		)
 	}
+	if strings.TrimSpace(asset.Ticker) == "" || strings.TrimSpace(asset.ExchangeId) == "" {
+		return nil, infra.BuildAppError(
+			"Yahoo Finance quote requires an external asset ticker and exchange ID",
+			service,
+		)
+	}
 
-	// TODO before quoting here, validate if `asset` has all the required fields. If not, quote should return error.
-
-	var chartResponse, err = service.Client.QuoteAssetLastClosePrice(asset.Ticker)
+	var chartResponse, err = service.Client.QuoteAssetLastClosePrice(requestContext, asset.Ticker)
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +150,22 @@ func (service *YahooFinanceAssetIntegrationService) QuoteAssetLastClosePrice(
 		return nil, mapErr
 	}
 
-	// TODO before returning, validate if the `Ticker` and `ExchangeId` match original `asset`. If not, return error
+	if externalAssetQuote.Ticker != asset.Ticker {
+		return nil, infra.BuildAppErrorFormatted(
+			service,
+			"Yahoo Finance quote ticker %s does not match requested ticker %s",
+			externalAssetQuote.Ticker,
+			asset.Ticker,
+		)
+	}
+	if externalAssetQuote.ExchangeId != asset.ExchangeId {
+		return nil, infra.BuildAppErrorFormatted(
+			service,
+			"Yahoo Finance quote exchange ID %s does not match requested exchange ID %s",
+			externalAssetQuote.ExchangeId,
+			asset.ExchangeId,
+		)
+	}
 
 	return externalAssetQuote, nil
 }
@@ -152,6 +177,10 @@ func (service *YahooFinanceAssetIntegrationService) QuoteAssetLastClosePrice(
 func mapToExternalAssetQuote(
 	chartResponse *integration.YahooFinanceChartResponseDTS,
 ) (*domain.ExternalAssetQuote, error) {
+
+	if chartResponse == nil {
+		return nil, infra.BuildAppError("Yahoo Finance chart response is empty", serviceOrigin)
+	}
 
 	var results = chartResponse.Chart.Result
 	if len(results) == 0 {

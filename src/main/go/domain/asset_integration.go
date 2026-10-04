@@ -3,8 +3,8 @@ package domain
 import "context"
 
 // AssetIntegrationService defines the contract for external asset providers used by the
-// domain layer. Implementations must return normalized assets for their source and must
-// respect cancellation in SearchAssets so request-scoped fan-out work can stop promptly.
+// domain layer. Implementations must return normalized assets for their source and respect
+// request-scoped cancellation for provider searches and quotes.
 //
 // Co-authored by: OpenCode and benizzio
 type AssetIntegrationService interface {
@@ -15,6 +15,13 @@ type AssetIntegrationService interface {
 	SearchAssets(ctx context.Context, queryValue string) ([]*ExternalAsset, error)
 
 	// QuoteAssetLastClosePrice fetches the latest close quote for one normalized external asset.
-	// It returns the provider quote translated to the domain model or an error when quoting fails.
-	QuoteAssetLastClosePrice(asset *ExternalAsset) (*ExternalAssetQuote, error)
+	// It respects ctx cancellation and returns the provider quote translated to the domain model or
+	// an error when quoting fails.
+	//
+	// Example:
+	//
+	//	quote, err := provider.QuoteAssetLastClosePrice(ctx, asset)
+	//
+	// Authored by: OpenCode
+	QuoteAssetLastClosePrice(ctx context.Context, asset *ExternalAsset) (*ExternalAssetQuote, error)
 }

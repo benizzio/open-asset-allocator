@@ -108,9 +108,11 @@ func buildSearchAssetsURL(searchURL string, queryValue string) (string, error) {
 
 // QuoteAssetLastClosePrice queries the Yahoo Finance chart API for the last close price data
 // of the asset identified by the given ticker. Returns the full chart response DTS containing
-// metadata, timestamps, and indicator data.
+// metadata, timestamps, and indicator data. The request uses requestContext for cancellation and
+// deadlines.
 //
 // Parameters:
+//   - requestContext: context used to cancel or time out the HTTP request
 //   - ticker: the asset ticker symbol (e.g., "AAPL")
 //
 // Returns:
@@ -123,7 +125,7 @@ func buildSearchAssetsURL(searchURL string, queryValue string) (string, error) {
 //	    SearchURL: "https://query2.finance.yahoo.com/v1/finance/search",
 //	    ChartURL:  "https://query2.finance.yahoo.com/v8/finance/chart/",
 //	})
-//	response, err := client.QuoteAssetLastClosePrice("AAPL")
+//	response, err := client.QuoteAssetLastClosePrice(context.Background(), "AAPL")
 //	if err != nil {
 //	    // handle error
 //	}
@@ -132,6 +134,7 @@ func buildSearchAssetsURL(searchURL string, queryValue string) (string, error) {
 //
 // Authored by: GitHub Copilot (claude-opus-4.6)
 func (client *YahooFinanceAssetIntegrationClient) QuoteAssetLastClosePrice(
+	requestContext context.Context,
 	ticker string,
 ) (*YahooFinanceChartResponseDTS, error) {
 
@@ -141,7 +144,7 @@ func (client *YahooFinanceAssetIntegrationClient) QuoteAssetLastClosePrice(
 	}
 
 	var chartResponse, getErr = httpclient.ExecuteGetJSON[YahooFinanceChartResponseDTS](
-		context.Background(),
+		requestContext,
 		requestURL,
 		yahooFinanceDefaultOptions...,
 	)

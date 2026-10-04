@@ -65,7 +65,7 @@ func TestQuoteAssetLastClosePrice_IAU(t *testing.T) {
 		infra.ReadConfig().IntegrationConfig.YahooFinanceConfig,
 	)
 
-	var chartResponse, err = client.QuoteAssetLastClosePrice(iauTicker)
+	var chartResponse, err = client.QuoteAssetLastClosePrice(context.Background(), iauTicker)
 
 	require.NoError(t, err, "QuoteAssetLastClosePrice should not return an error")
 	require.NotNil(t, chartResponse, "QuoteAssetLastClosePrice response should not be nil")
