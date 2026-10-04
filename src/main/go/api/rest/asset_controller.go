@@ -51,6 +51,15 @@ func (controller *AssetRESTController) BuildRoutes() []infra.RESTRoute {
 			Path:     "/api/external-asset",
 			Handlers: gin.HandlersChain{controller.getExternalAssets},
 		},
+		{
+			Method: http.MethodGet,
+			Path: "/api/asset/:" + assetTickerParam +
+				"/external-asset/:" + externalAssetSourceParam +
+				"/:" + externalAssetExchangeIdParam +
+				"/:" + externalAssetTickerParam +
+				"/quote",
+			Handlers: gin.HandlersChain{controller.getExternalAssetQuote},
+		},
 	}
 }
 
@@ -213,4 +222,10 @@ func (controller *AssetRESTController) getExternalAssets(context *gin.Context) {
 
 	var externalAssetDTSs = model.MapToExternalAssetDTSs(externalAssets)
 	context.JSON(http.StatusOK, externalAssetDTSs)
+}
+
+func (controller *AssetRESTController) getExternalAssetQuote(context *gin.Context) {
+	// TODO implement quote retrieval
+	//  - obtain data from asset in DB, validate (match with path params) if does not exist
+	//  - return an entire DTS of `ExternalAssetQuote`
 }

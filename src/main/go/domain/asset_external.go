@@ -30,7 +30,7 @@ type ExternalAssetData struct {
 	Data []ExternalAsset `json:"data"`
 }
 
-func (externalData *ExternalAssetData) Scan(value interface{}) error {
+func (externalData *ExternalAssetData) Scan(value any) error {
 	return sqlext.ScanJsonColumn(value, externalData)
 }
 
@@ -39,9 +39,9 @@ func (externalData ExternalAssetData) Value() (driver.Value, error) {
 }
 
 type ExternalAsset struct {
-	Source       AssetExternalSource `json:"source"`
-	Ticker       string              `json:"ticker"`
-	ExchangeId   string              `json:"exchangeId"`
+	Source       AssetExternalSource `json:"source" validate:"required"`
+	Ticker       string              `json:"ticker" validate:"required"`
+	ExchangeId   string              `json:"exchangeId" validate:"required"`
 	Name         string              `json:"-"`
 	ExchangeName string              `json:"-"`
 }

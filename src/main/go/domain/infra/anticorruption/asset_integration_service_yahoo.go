@@ -2,6 +2,7 @@ package anticorruption
 
 import (
 	"context"
+	"slices"
 	"time"
 
 	"github.com/shopspring/decimal"
@@ -127,6 +128,8 @@ func (service *YahooFinanceAssetIntegrationService) QuoteAssetLastClosePrice(
 		)
 	}
 
+	// TODO before quoting here, validate if `asset` has all the required fields. If not, quote should return error.
+
 	var chartResponse, err = service.Client.QuoteAssetLastClosePrice(asset.Ticker)
 	if err != nil {
 		return nil, err
@@ -136,6 +139,8 @@ func (service *YahooFinanceAssetIntegrationService) QuoteAssetLastClosePrice(
 	if mapErr != nil {
 		return nil, mapErr
 	}
+
+	// TODO before returning, validate if the `Ticker` and `ExchangeId` match original `asset`. If not, return error
 
 	return externalAssetQuote, nil
 }
@@ -182,7 +187,7 @@ func mapToExternalAssetQuote(
 // extractLastClose retrieves the last close price and its corresponding timestamp
 // from the chart result indicators and timestamps arrays.
 //
-// Authored by: GitHub Copilot (claude-opus-4.6)
+// Co-Authored by: GitHub Copilot (claude-opus-4.6) and benizzio
 func extractLastClose(
 	result *integration.YahooFinanceChartResultDTS,
 ) (decimal.Decimal, time.Time, error) {
@@ -202,12 +207,12 @@ func extractLastClose(
 	}
 
 	var closePrices = result.Indicators.Quote[0].Close
-	for index := len(closePrices) - 1; index >= 0; index-- {
-		if closePrices[index] == nil || index >= len(result.Timestamps) {
+	for index, closePrice := range slices.Backward(closePrices) {
+		if closePrice == nil || index >= len(result.Timestamps) {
 			continue
 		}
 
-		var lastCloseQuote = decimal.NewFromFloat(*closePrices[index])
+		var lastCloseQuote = decimal.NewFromFloat(*closePrice)
 		var lastCloseDate = time.Unix(result.Timestamps[index], 0)
 
 		return lastCloseQuote, lastCloseDate, nil
