@@ -6,6 +6,7 @@ import (
 
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra"
+	"github.com/benizzio/open-asset-allocator/infra/validation"
 	"github.com/benizzio/open-asset-allocator/langext"
 )
 
@@ -53,38 +54,41 @@ func (service *AssetDomService) FindAssetByUniqueIdentifier(uniqueIdentifier str
 }
 
 // QuoteExternalAssetLastClosePrice quotes a persisted external-asset association for the given
-// local asset ticker. It returns a nil quote without error when the asset or association is missing.
+// local asset ID or ticker. It returns a nil quote without error when the asset or association is missing.
 //
 // Example:
 //
 //	quote, err := assetService.QuoteExternalAssetLastClosePrice(ctx, "ARCA:BIL", externalAsset)
+//	quoteById, err := assetService.QuoteExternalAssetLastClosePrice(ctx, "1", externalAsset)
 //
 // Authored by: OpenCode
 func (service *AssetDomService) QuoteExternalAssetLastClosePrice(
 	requestContext context.Context,
-	assetTicker string,
+	assetIdOrTicker string,
 	requestedExternalAsset *domain.ExternalAsset,
 ) (*domain.ExternalAssetQuote, error) {
 	if requestContext == nil {
 		return nil, infra.BuildAppError("Request context is required to retrieve an asset quote", service)
 	}
-	if strings.TrimSpace(assetTicker) == "" {
-		return nil, buildExternalAssetQuoteValidationError(service, "Asset ticker is required")
+	if strings.TrimSpace(assetIdOrTicker) == "" {
+		return nil, buildExternalAssetQuoteValidationError(service, "Asset ID or ticker is required")
 	}
 	if requestedExternalAsset == nil {
 		return nil, buildExternalAssetQuoteValidationError(service, "External asset identifiers are required")
 	}
-	if strings.TrimSpace(requestedExternalAsset.Ticker) == "" {
-		return nil, buildExternalAssetQuoteValidationError(service, "External asset ticker is required")
-	}
-	if strings.TrimSpace(requestedExternalAsset.ExchangeId) == "" {
-		return nil, buildExternalAssetQuoteValidationError(service, "External asset exchange ID is required")
+	var validationMessages = validation.DeepValidate(requestedExternalAsset)
+	if len(validationMessages) > 0 {
+		var validationErrors = make([]*infra.AppError, 0, len(validationMessages))
+		for _, message := range validationMessages {
+			validationErrors = append(validationErrors, infra.BuildAppErrorFormattedUnconverted(service, "%s", message))
+		}
+		return nil, infra.BuildDomainValidationError("External asset quote validation failed", validationErrors)
 	}
 	if err := requestedExternalAsset.Source.Validate(); err != nil {
 		return nil, err
 	}
 
-	asset, err := service.assetRepository.FindAssetByTicker(assetTicker)
+	asset, err := service.assetRepository.FindAssetByUniqueIdentifier(assetIdOrTicker)
 	if err != nil {
 		return nil, err
 	}
@@ -122,8 +126,8 @@ func (service *AssetDomService) QuoteExternalAssetLastClosePrice(
 	return nil, nil
 }
 
-// buildExternalAssetQuoteValidationError converts an invalid quote identifier into a domain
-// validation error that the REST layer maps to HTTP 400.
+// buildExternalAssetQuoteValidationError describes an invalid quote identifier using the domain's
+// validation error type.
 //
 // Authored by: OpenCode
 func buildExternalAssetQuoteValidationError(origin any, message string) error {

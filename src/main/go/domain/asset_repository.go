@@ -11,15 +11,6 @@ type AssetRepository interface {
 	//
 	// Authored by: OpenCode
 	GetKnownAssets() ([]*Asset, error)
-	// FindAssetByTicker returns the asset whose ticker exactly matches ticker, or nil when no such
-	// asset exists.
-	//
-	// Example:
-	//
-	//	asset, err := assetRepository.FindAssetByTicker("ARCA:BIL")
-	//
-	// Authored by: OpenCode
-	FindAssetByTicker(ticker string) (*Asset, error)
 	// FindAssetsByTextSearchTerms returns persisted assets matching every search term
 	// against either the ticker or name, ordered by ticker and limited by limit.
 	// A term containing spaces is treated as an exact ordered phrase.

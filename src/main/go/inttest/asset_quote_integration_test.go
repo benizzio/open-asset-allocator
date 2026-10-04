@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"testing"
 
 	dbx "github.com/go-ozzo/ozzo-dbx"
@@ -16,8 +17,8 @@ import (
 
 const yahooFinanceQuoteRequestURI = "/v8/finance/chart/IAU?events=history&interval=1d"
 
-// TestGetExternalAssetQuoteSuccess verifies a quote response is retrieved from the provider using
-// the exact external asset association persisted for a local asset.
+// TestGetExternalAssetQuoteSuccess verifies quote responses using either a local asset ticker or
+// ID and the exact external asset association persisted for that asset.
 //
 // Authored by: OpenCode
 func TestGetExternalAssetQuoteSuccess(t *testing.T) {
@@ -39,20 +40,29 @@ func TestGetExternalAssetQuoteSuccess(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	var yahooFinanceMockServer = inttestinfra.SetupYahooFinanceMockTest(t)
-	yahooFinanceMockServer.ExpectGet(yahooFinanceQuoteRequestURI).
-		WithHeader("User-Agent", yahooFinanceExpectedUserAgent).
-		Return(`{"chart":{"result":[{"meta":{"symbol":"IAU","exchangeName":"PCX","currency":"USD"},"timestamp":[1704067200,1704153600],"indicators":{"quote":[{"close":[20.15,null]}]}}]}}`)
-
-	var statusCode, responseBody = getExternalAssetQuote(t, assetTicker, "YAHOO_FINANCE", "PCX", "IAU")
-	assert.Equal(t, http.StatusOK, statusCode)
-	assert.JSONEq(t, `{
+	const chartResponseJSON = `{"chart":{"result":[{"meta":{"symbol":"IAU","exchangeName":"PCX","currency":"USD"},"timestamp":[1704067200,1704153600],"indicators":{"quote":[{"close":[20.15,null]}]}}]}}`
+	const expectedQuoteJSON = `{
 		"ticker":"IAU",
 		"exchangeId":"PCX",
 		"currency":"USD",
 		"lastCloseQuote":"20.15",
 		"lastCloseDate":"2024-01-01T00:00:00Z"
-	}`, responseBody)
+	}`
+	var yahooFinanceMockServer = inttestinfra.SetupYahooFinanceMockTest(t)
+	yahooFinanceMockServer.ExpectGet(yahooFinanceQuoteRequestURI).
+		WithHeader("User-Agent", yahooFinanceExpectedUserAgent).
+		Return(chartResponseJSON)
+
+	var statusCode, responseBody = getExternalAssetQuote(t, assetTicker, "YAHOO_FINANCE", "PCX", "IAU")
+	assert.Equal(t, http.StatusOK, statusCode)
+	assert.JSONEq(t, expectedQuoteJSON, responseBody)
+
+	yahooFinanceMockServer.ExpectGet(yahooFinanceQuoteRequestURI).
+		WithHeader("User-Agent", yahooFinanceExpectedUserAgent).
+		Return(chartResponseJSON)
+	statusCode, responseBody = getExternalAssetQuote(t, strconv.FormatInt(asset.Id, 10), "YAHOO_FINANCE", "PCX", "IAU")
+	assert.Equal(t, http.StatusOK, statusCode)
+	assert.JSONEq(t, expectedQuoteJSON, responseBody)
 }
 
 // TestGetExternalAssetQuoteNotFound verifies that the endpoint returns 404 without calling Yahoo
@@ -127,8 +137,8 @@ func TestGetExternalAssetQuoteNotFound(t *testing.T) {
 		assert.JSONEq(t, `{"errorMessage":"Data not found","details":["External asset quote with identifier TEST:QUOTE-NOT-MATCHED/YAHOO_FINANCE/PCX/OTHER not found"]}`, responseBody)
 	})
 
-	// Ticker lookup must not fall back to a numeric database ID when the path segment is numeric.
-	t.Run("numeric path segment is treated as ticker only", func(t *testing.T) {
+	// Asset ID 1 exists but has no matching external data.
+	t.Run("numeric asset ID without association is not found", func(t *testing.T) {
 		var statusCode, responseBody = getExternalAssetQuote(t, "1", "YAHOO_FINANCE", "PCX", "IAU")
 		assert.Equal(t, http.StatusNotFound, statusCode)
 		assert.JSONEq(t, `{"errorMessage":"Data not found","details":["External asset quote with identifier 1/YAHOO_FINANCE/PCX/IAU not found"]}`, responseBody)
@@ -213,13 +223,13 @@ func TestGetExternalAssetQuoteRejectsMismatchedProviderExchange(t *testing.T) {
 	assert.JSONEq(t, `{"errorMessage":"Internal server error"}`, responseBody)
 }
 
-// getExternalAssetQuote sends a request for the given local and external asset identifiers and
-// returns its status code and response body.
+// getExternalAssetQuote requests a quote by local asset ID or ticker and external identifiers,
+// returning its status code and response body.
 //
 // Authored by: OpenCode
 func getExternalAssetQuote(
 	t *testing.T,
-	assetTicker string,
+	assetIdOrTicker string,
 	source string,
 	exchangeId string,
 	externalTicker string,
@@ -227,7 +237,7 @@ func getExternalAssetQuote(
 	t.Helper()
 
 	var requestURL = inttestinfra.TestAPIURLPrefix +
-		"/asset/" + url.PathEscape(assetTicker) +
+		"/asset/" + url.PathEscape(assetIdOrTicker) +
 		"/external-asset/" + url.PathEscape(source) +
 		"/" + url.PathEscape(exchangeId) +
 		"/" + url.PathEscape(externalTicker) +
