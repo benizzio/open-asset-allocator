@@ -231,6 +231,7 @@ func (controller *AssetRESTController) getExternalAssets(context *gin.Context) {
 //
 // Co-authored by: OpenCode and benizzio
 func (controller *AssetRESTController) getExternalAssetQuote(context *gin.Context) {
+
 	var assetIdOrTicker = context.Param(assetIdOrTickerParam)
 	var requestedExternalAsset = &domain.ExternalAsset{
 		Source:     domain.AssetExternalSource(context.Param(externalAssetSourceParam)),

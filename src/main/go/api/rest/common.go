@@ -5,7 +5,6 @@ const (
 	observationTimestampIdParam           = "observationTimestampId"
 	planIdParam                           = "planId"
 	assetIdOrTickerParam                  = "assetIdOrTicker"
-	assetTickerParam                      = "assetTicker"
 	externalAssetSourceParam              = "externalAssetSource"
 	externalAssetExchangeIdParam          = "externalAssetExchangeId"
 	externalAssetTickerParam              = "externalAssetTicker"
