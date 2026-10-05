@@ -53,8 +53,9 @@ func (service *AssetDomService) FindAssetByUniqueIdentifier(uniqueIdentifier str
 	return service.assetRepository.FindAssetByUniqueIdentifier(uniqueIdentifier)
 }
 
-// QuoteExternalAssetLastClosePrice quotes a persisted external-asset association for the given
-// local asset ID or ticker. It returns a nil quote without error when the asset or association is missing.
+// QuoteExternalAssetLastClosePrice validates an external asset and quotes its persisted association
+// for the given local asset ID or ticker. It returns a nil quote without error when the local asset
+// or matching persisted association is missing.
 //
 // Example:
 //
@@ -67,24 +68,11 @@ func (service *AssetDomService) QuoteExternalAssetLastClosePrice(
 	assetIdOrTicker string,
 	requestedExternalAsset *domain.ExternalAsset,
 ) (*domain.ExternalAssetQuote, error) {
-	if requestContext == nil {
-		return nil, infra.BuildAppError("Request context is required to retrieve an asset quote", service)
-	}
-	if strings.TrimSpace(assetIdOrTicker) == "" {
-		return nil, buildExternalAssetQuoteValidationError(service, "Asset ID or ticker is required")
-	}
-	if requestedExternalAsset == nil {
-		return nil, buildExternalAssetQuoteValidationError(service, "External asset identifiers are required")
-	}
-	var validationMessages = validation.DeepValidate(requestedExternalAsset)
-	if len(validationMessages) > 0 {
-		var validationErrors = make([]*infra.AppError, 0, len(validationMessages))
-		for _, message := range validationMessages {
-			validationErrors = append(validationErrors, infra.BuildAppErrorFormattedUnconverted(service, "%s", message))
-		}
-		return nil, infra.BuildDomainValidationError("External asset quote validation failed", validationErrors)
-	}
-	if err := requestedExternalAsset.Source.Validate(); err != nil {
+	if err := service.validateExternalAssetQuoteRequest(
+		requestContext,
+		assetIdOrTicker,
+		requestedExternalAsset,
+	); err != nil {
 		return nil, err
 	}
 
@@ -96,34 +84,88 @@ func (service *AssetDomService) QuoteExternalAssetLastClosePrice(
 		return nil, nil
 	}
 
-	for index := range asset.ExternalData.Data {
-		var persistedExternalAsset = &asset.ExternalData.Data[index]
-		if persistedExternalAsset.Source != requestedExternalAsset.Source ||
-			persistedExternalAsset.ExchangeId != requestedExternalAsset.ExchangeId ||
-			persistedExternalAsset.Ticker != requestedExternalAsset.Ticker {
-			continue
-		}
-
-		var integrationService, exists = service.assetIntegrationServicesPerSource[persistedExternalAsset.Source]
-		if !exists || integrationService == nil {
-			return nil, infra.BuildAppErrorFormatted(
-				service,
-				"No integration service is configured for external asset source %s",
-				persistedExternalAsset.Source,
-			)
-		}
-
-		quote, quoteErr := integrationService.QuoteAssetLastClosePrice(requestContext, persistedExternalAsset)
-		if quoteErr != nil {
-			return nil, quoteErr
-		}
-		if quote == nil {
-			return nil, infra.BuildAppError("External asset integration returned an empty quote", service)
-		}
-		return quote, nil
+	var persistedExternalAsset = findPersistedExternalAssetQuoteMatch(
+		asset.ExternalData.Data,
+		requestedExternalAsset,
+	)
+	if persistedExternalAsset == nil {
+		return nil, nil
 	}
 
-	return nil, nil
+	return service.quotePersistedExternalAssetLastClosePrice(requestContext, persistedExternalAsset)
+}
+
+// validateExternalAssetQuoteRequest validates the request before repository access.
+// Authored by: OpenCode
+func (service *AssetDomService) validateExternalAssetQuoteRequest(
+	requestContext context.Context,
+	assetIdOrTicker string,
+	requestedExternalAsset *domain.ExternalAsset,
+) error {
+	if requestContext == nil {
+		return infra.BuildAppError("Request context is required to retrieve an asset quote", service)
+	}
+	if strings.TrimSpace(assetIdOrTicker) == "" {
+		return buildExternalAssetQuoteValidationError(service, "Asset ID or ticker is required")
+	}
+	if requestedExternalAsset == nil {
+		return buildExternalAssetQuoteValidationError(service, "External asset identifiers are required")
+	}
+
+	var validationMessages = validation.DeepValidate(requestedExternalAsset)
+	if len(validationMessages) > 0 {
+		var validationErrors = make([]*infra.AppError, 0, len(validationMessages))
+		for _, message := range validationMessages {
+			validationErrors = append(validationErrors, infra.BuildAppErrorFormattedUnconverted(service, "%s", message))
+		}
+		return infra.BuildDomainValidationError("External asset quote validation failed", validationErrors)
+	}
+
+	return requestedExternalAsset.Source.Validate()
+}
+
+// findPersistedExternalAssetQuoteMatch returns the persisted association with the requested identifiers.
+// Authored by: OpenCode
+func findPersistedExternalAssetQuoteMatch(
+	persistedExternalAssets []domain.ExternalAsset,
+	requestedExternalAsset *domain.ExternalAsset,
+) *domain.ExternalAsset {
+	for index := range persistedExternalAssets {
+		var persistedExternalAsset = &persistedExternalAssets[index]
+		if persistedExternalAsset.Source == requestedExternalAsset.Source &&
+			persistedExternalAsset.ExchangeId == requestedExternalAsset.ExchangeId &&
+			persistedExternalAsset.Ticker == requestedExternalAsset.Ticker {
+			return persistedExternalAsset
+		}
+	}
+
+	return nil
+}
+
+// quotePersistedExternalAssetLastClosePrice queries the integration service for a persisted association.
+// Authored by: OpenCode
+func (service *AssetDomService) quotePersistedExternalAssetLastClosePrice(
+	requestContext context.Context,
+	persistedExternalAsset *domain.ExternalAsset,
+) (*domain.ExternalAssetQuote, error) {
+	var integrationService, exists = service.assetIntegrationServicesPerSource[persistedExternalAsset.Source]
+	if !exists || integrationService == nil {
+		return nil, infra.BuildAppErrorFormatted(
+			service,
+			"No integration service is configured for external asset source %s",
+			persistedExternalAsset.Source,
+		)
+	}
+
+	quote, err := integrationService.QuoteAssetLastClosePrice(requestContext, persistedExternalAsset)
+	if err != nil {
+		return nil, err
+	}
+	if quote == nil {
+		return nil, infra.BuildAppError("External asset integration returned an empty quote", service)
+	}
+
+	return quote, nil
 }
 
 // buildExternalAssetQuoteValidationError describes an invalid quote identifier using the domain's

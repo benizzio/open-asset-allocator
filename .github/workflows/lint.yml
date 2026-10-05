@@ -39,6 +39,13 @@ jobs:
           working-directory: src/main/go
           args: --new-from-merge-base=origin/main
 
+      - name: Run full Go cognitive complexity check
+        uses: golangci/golangci-lint-action@v7
+        with:
+          version: v2.13.2
+          working-directory: src/main/go
+          args: --enable-only=gocognit
+
   frontend-lint:
     name: Frontend Lint
     runs-on: ubuntu-latest

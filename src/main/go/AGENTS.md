@@ -76,3 +76,10 @@ semantically as described in the root instructions. Cross-module questions also 
   Run with: `go test -count=1 -tags=extinttest ./extinttest/...` or `make test-ext`
 
 </CodeStructure>
+
+## Linting standards
+
+- Run `make lint-backend` for the complete configured backend lint suite or `make lint-backend-complexity` to run the
+  cognitive complexity rule across the entire backend, including functions unchanged by the current diff.
+- to refactor a function that's extrapolating the cognitive complexity limit, decompose it with the single responsibility principle
+  in mind
