@@ -33,14 +33,14 @@ jobs:
           go-version: ${{ steps.go-version.outputs.GO_VERSION }}
 
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v7
+        uses: golangci/golangci-lint-action@9fae48acfc02a90574d7c304a1758ef9895495fa
         with:
           version: v2.13.2
           working-directory: src/main/go
           args: --new-from-merge-base=origin/main
 
       - name: Run full Go cognitive complexity check
-        uses: golangci/golangci-lint-action@v7
+        uses: golangci/golangci-lint-action@9fae48acfc02a90574d7c304a1758ef9895495fa
         with:
           version: v2.13.2
           working-directory: src/main/go
