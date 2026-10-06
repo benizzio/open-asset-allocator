@@ -105,14 +105,17 @@ func (service *AssetDomService) validateExternalAssetQuoteRequest(
 	if requestContext == nil {
 		return infra.BuildAppError("Request context is required to retrieve an asset quote", service)
 	}
-	if strings.TrimSpace(assetIdOrTicker) == "" {
+	if langext.IsZeroValue(strings.TrimSpace(assetIdOrTicker)) {
 		return buildExternalAssetQuoteValidationError(service, "Asset ID or ticker is required")
 	}
 	if requestedExternalAsset == nil {
 		return buildExternalAssetQuoteValidationError(service, "External asset identifiers are required")
 	}
 
-	var validationMessages = validation.DeepValidate(requestedExternalAsset)
+	var externalAssetForValidation = *requestedExternalAsset
+	externalAssetForValidation.Ticker = strings.TrimSpace(externalAssetForValidation.Ticker)
+	externalAssetForValidation.ExchangeId = strings.TrimSpace(externalAssetForValidation.ExchangeId)
+	var validationMessages = validation.DeepValidate(&externalAssetForValidation)
 	if len(validationMessages) > 0 {
 		var validationErrors = make([]*infra.AppError, 0, len(validationMessages))
 		for _, message := range validationMessages {

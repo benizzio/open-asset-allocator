@@ -157,6 +157,32 @@ func TestGetExternalAssetQuoteRejectsInvalidSource(t *testing.T) {
 	assert.JSONEq(t, `{"errorMessage":"Invalid AssetExternalSource UNSUPPORTED"}`, responseBody)
 }
 
+// TestGetExternalAssetQuoteRejectsWhitespaceIdentifiers verifies blank external identifiers fail
+// validation before any quote request is sent to Yahoo Finance.
+//
+// Authored by: OpenCode
+func TestGetExternalAssetQuoteRejectsWhitespaceIdentifiers(t *testing.T) {
+	var yahooFinanceMockServer = inttestinfra.SetupYahooFinanceMockTest(t)
+
+	var statusCode, responseBody = getExternalAssetQuote(t, "ARCA:BIL", "YAHOO_FINANCE", "PCX", "   ")
+	assert.Equal(t, http.StatusBadRequest, statusCode)
+	assert.JSONEq(
+		t,
+		`{"errorMessage":"External asset quote validation failed","details":["Field 'ticker' failed validation: is required"]}`,
+		responseBody,
+	)
+
+	statusCode, responseBody = getExternalAssetQuote(t, "ARCA:BIL", "YAHOO_FINANCE", "   ", "IAU")
+	assert.Equal(t, http.StatusBadRequest, statusCode)
+	assert.JSONEq(
+		t,
+		`{"errorMessage":"External asset quote validation failed","details":["Field 'exchangeId' failed validation: is required"]}`,
+		responseBody,
+	)
+
+	assert.Empty(t, yahooFinanceMockServer.Requests)
+}
+
 // TestGetExternalAssetQuoteRejectsMismatchedProviderTicker verifies Yahoo responses for a different
 // ticker are treated as provider errors rather than returned as the requested asset's quote.
 //
