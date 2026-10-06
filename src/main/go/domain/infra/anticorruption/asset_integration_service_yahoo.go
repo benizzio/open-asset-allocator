@@ -12,6 +12,7 @@ import (
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/domain/infra/integration"
 	"github.com/benizzio/open-asset-allocator/infra"
+	"github.com/benizzio/open-asset-allocator/langext"
 )
 
 // serviceOrigin is a zero-value pointer used as the origin type reference
@@ -133,7 +134,8 @@ func (service *YahooFinanceAssetIntegrationService) QuoteAssetLastClosePrice(
 			asset.Source,
 		)
 	}
-	if strings.TrimSpace(asset.Ticker) == "" || strings.TrimSpace(asset.ExchangeId) == "" {
+	if langext.IsZeroValue(strings.TrimSpace(asset.Ticker)) ||
+		langext.IsZeroValue(strings.TrimSpace(asset.ExchangeId)) {
 		return nil, infra.BuildAppError(
 			"Yahoo Finance quote requires an external asset ticker and exchange ID",
 			service,

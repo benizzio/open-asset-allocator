@@ -4,17 +4,6 @@
   "graph": {},
   "nodes": [
     {
-      "id": "api_rest_divergence_analysis_controller_builddivergenceanalysisrestcontroller",
-      "label": "BuildDivergenceAnalysisRESTController()",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "github.com/gin-gonic/gin.Context",
-      "file_type": "code",
-      "norm_label": "builddivergenceanalysisrestcontroller()",
-      "source_file": "api/rest/divergence_analysis_controller.go",
-      "source_location": "L89"
-    },
-    {
       "id": "api_rest_model_asset_rest_model",
       "label": "asset_rest_model.go",
       "_origin": "ast",
@@ -156,39 +145,6 @@
       "norm_label": "maptoportfoliodtss()",
       "source_file": "api/rest/model/portfolio_rest_mapping.go",
       "source_location": "L31"
-    },
-    {
-      "id": "application_portfolio_analysis_configuration_service",
-      "label": "portfolio_analysis_configuration_service.go",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "github.com/gin-gonic/gin.Context",
-      "file_type": "code",
-      "norm_label": "portfolio_analysis_configuration_service.go",
-      "source_file": "application/portfolio_analysis_configuration_service.go",
-      "source_location": "L1"
-    },
-    {
-      "id": "application_portfolio_analysis_configuration_service_buildportfolioanalysisconfigurationappservice",
-      "label": "BuildPortfolioAnalysisConfigurationAppService()",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "github.com/gin-gonic/gin.Context",
-      "file_type": "code",
-      "norm_label": "buildportfolioanalysisconfigurationappservice()",
-      "source_file": "application/portfolio_analysis_configuration_service.go",
-      "source_location": "L43"
-    },
-    {
-      "id": "application_portfolio_analysis_configuration_service_go_application_portfolioanalysisconfigurationappservice",
-      "label": "PortfolioAnalysisConfigurationAppService",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "github.com/gin-gonic/gin.Context",
-      "file_type": "code",
-      "norm_label": "portfolioanalysisconfigurationappservice",
-      "source_file": "application/portfolio_analysis_configuration_service.go",
-      "source_location": "L9"
     },
     {
       "id": "domain_asset_external_go_domain_externalassetdata",
@@ -367,6 +323,28 @@
       "source_location": "L23"
     },
     {
+      "id": "infra_validation_custom_validation_error_builder",
+      "label": "custom_validation_error_builder.go",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "github.com/gin-gonic/gin.Context",
+      "file_type": "code",
+      "norm_label": "custom_validation_error_builder.go",
+      "source_file": "infra/validation/custom_validation_error_builder.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "infra_validation_custom_validation_error_builder_buildcustomvalidationerror",
+      "label": "buildCustomValidationError()",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "github.com/gin-gonic/gin.Context",
+      "file_type": "code",
+      "norm_label": "buildcustomvalidationerror()",
+      "source_file": "infra/validation/custom_validation_error_builder.go",
+      "source_location": "L152"
+    },
+    {
       "id": "infra_validation_custom_validation_error_builder_buildcustomvalidationerrorsbuilder",
       "label": "BuildCustomValidationErrorsBuilder()",
       "_origin": "ast",
@@ -376,6 +354,39 @@
       "norm_label": "buildcustomvalidationerrorsbuilder()",
       "source_file": "infra/validation/custom_validation_error_builder.go",
       "source_location": "L132"
+    },
+    {
+      "id": "infra_validation_custom_validation_error_builder_go_validation_customvalidationerrorsbuilder",
+      "label": "CustomValidationErrorsBuilder",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "github.com/gin-gonic/gin.Context",
+      "file_type": "code",
+      "norm_label": "customvalidationerrorsbuilder",
+      "source_file": "infra/validation/custom_validation_error_builder.go",
+      "source_location": "L12"
+    },
+    {
+      "id": "infra_validation_custom_validation_error_builder_go_validator_fielderror",
+      "label": "validator.FieldError",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "github.com/gin-gonic/gin.Context",
+      "file_type": "code",
+      "norm_label": "validator.fielderror",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "infra_validation_custom_validation_error_builder_go_validator_validationerrors",
+      "label": "validator.ValidationErrors",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "github.com/gin-gonic/gin.Context",
+      "file_type": "code",
+      "norm_label": "validator.validationerrors",
+      "source_file": "",
+      "source_location": ""
     },
     {
       "id": "langext_golang_ext_parseable_int64_parseint64",
@@ -631,17 +642,6 @@
       "source_location": "L154"
     },
     {
-      "id": "rest_divergenceanalysisrestcontroller",
-      "label": "DivergenceAnalysisRESTController",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "github.com/gin-gonic/gin.Context",
-      "file_type": "code",
-      "norm_label": "divergenceanalysisrestcontroller",
-      "source_file": "api/rest/divergence_analysis_controller.go",
-      "source_location": "L15"
-    },
-    {
       "id": "rest_divergenceanalysisrestcontroller_buildroutes",
       "label": ".BuildRoutes()",
       "_origin": "ast",
@@ -827,6 +827,50 @@
       "norm_label": ".putportfolio()",
       "source_file": "api/rest/portfolio_controller.go",
       "source_location": "L103"
+    },
+    {
+      "id": "validation_customvalidationerrorsbuilder_build",
+      "label": ".Build()",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "github.com/gin-gonic/gin.Context",
+      "file_type": "code",
+      "norm_label": ".build()",
+      "source_file": "infra/validation/custom_validation_error_builder.go",
+      "source_location": "L91"
+    },
+    {
+      "id": "validation_customvalidationerrorsbuilder_customvalidationerror",
+      "label": ".CustomValidationError()",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "github.com/gin-gonic/gin.Context",
+      "file_type": "code",
+      "norm_label": ".customvalidationerror()",
+      "source_file": "infra/validation/custom_validation_error_builder.go",
+      "source_location": "L62"
+    },
+    {
+      "id": "validation_customvalidationerrorsbuilder_customvalidationerrorfullnamespace",
+      "label": ".CustomValidationErrorFullNamespace()",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "github.com/gin-gonic/gin.Context",
+      "file_type": "code",
+      "norm_label": ".customvalidationerrorfullnamespace()",
+      "source_file": "infra/validation/custom_validation_error_builder.go",
+      "source_location": "L74"
+    },
+    {
+      "id": "api_rest_divergence_analysis_controller_builddivergenceanalysisrestcontroller",
+      "label": "BuildDivergenceAnalysisRESTController()",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "PortfolioAllocation",
+      "file_type": "code",
+      "norm_label": "builddivergenceanalysisrestcontroller()",
+      "source_file": "api/rest/divergence_analysis_controller.go",
+      "source_location": "L89"
     },
     {
       "id": "api_rest_model_allocation_rest_model",
@@ -1157,6 +1201,39 @@
       "norm_label": "buildallocationplanmanagementappservice()",
       "source_file": "application/allocation_plan_management_service.go",
       "source_location": "L100"
+    },
+    {
+      "id": "application_portfolio_analysis_configuration_service",
+      "label": "portfolio_analysis_configuration_service.go",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "PortfolioAllocation",
+      "file_type": "code",
+      "norm_label": "portfolio_analysis_configuration_service.go",
+      "source_file": "application/portfolio_analysis_configuration_service.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "application_portfolio_analysis_configuration_service_buildportfolioanalysisconfigurationappservice",
+      "label": "BuildPortfolioAnalysisConfigurationAppService()",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "PortfolioAllocation",
+      "file_type": "code",
+      "norm_label": "buildportfolioanalysisconfigurationappservice()",
+      "source_file": "application/portfolio_analysis_configuration_service.go",
+      "source_location": "L43"
+    },
+    {
+      "id": "application_portfolio_analysis_configuration_service_go_application_portfolioanalysisconfigurationappservice",
+      "label": "PortfolioAnalysisConfigurationAppService",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "PortfolioAllocation",
+      "file_type": "code",
+      "norm_label": "portfolioanalysisconfigurationappservice",
+      "source_file": "application/portfolio_analysis_configuration_service.go",
+      "source_location": "L9"
     },
     {
       "id": "application_portfolioallocationmanagementappservice_manageobservationtimestamp",
@@ -1542,6 +1619,17 @@
       "norm_label": "portfolioallocationjoinedrowdts",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_model.go",
       "source_location": "L14"
+    },
+    {
+      "id": "rest_divergenceanalysisrestcontroller",
+      "label": "DivergenceAnalysisRESTController",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "PortfolioAllocation",
+      "file_type": "code",
+      "norm_label": "divergenceanalysisrestcontroller",
+      "source_file": "api/rest/divergence_analysis_controller.go",
+      "source_location": "L15"
     },
     {
       "id": "service_allocationplandomservice_getallallocationplanidentifiers",
@@ -4591,61 +4679,6 @@
       "source_location": "L29"
     },
     {
-      "id": "api_rest_allocation_plan_controller",
-      "label": "allocation_plan_controller.go",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "go_pkg_github_com_benizzio_open_asset_allocator_langext",
-      "file_type": "code",
-      "norm_label": "allocation_plan_controller.go",
-      "source_file": "api/rest/allocation_plan_controller.go",
-      "source_location": "L1"
-    },
-    {
-      "id": "api_rest_asset_controller",
-      "label": "asset_controller.go",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "go_pkg_github_com_benizzio_open_asset_allocator_langext",
-      "file_type": "code",
-      "norm_label": "asset_controller.go",
-      "source_file": "api/rest/asset_controller.go",
-      "source_location": "L1"
-    },
-    {
-      "id": "api_rest_divergence_analysis_controller",
-      "label": "divergence_analysis_controller.go",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "go_pkg_github_com_benizzio_open_asset_allocator_langext",
-      "file_type": "code",
-      "norm_label": "divergence_analysis_controller.go",
-      "source_file": "api/rest/divergence_analysis_controller.go",
-      "source_location": "L1"
-    },
-    {
-      "id": "api_rest_portfolio_allocation_controller",
-      "label": "portfolio_allocation_controller.go",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "go_pkg_github_com_benizzio_open_asset_allocator_langext",
-      "file_type": "code",
-      "norm_label": "portfolio_allocation_controller.go",
-      "source_file": "api/rest/portfolio_allocation_controller.go",
-      "source_location": "L1"
-    },
-    {
-      "id": "api_rest_portfolio_controller",
-      "label": "portfolio_controller.go",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "go_pkg_github_com_benizzio_open_asset_allocator_langext",
-      "file_type": "code",
-      "norm_label": "portfolio_controller.go",
-      "source_file": "api/rest/portfolio_controller.go",
-      "source_location": "L1"
-    },
-    {
       "id": "application_allocation_plan_management_service",
       "label": "allocation_plan_management_service.go",
       "_origin": "ast",
@@ -4665,6 +4698,28 @@
       "file_type": "code",
       "norm_label": "potfolio_allocation_management_service.go",
       "source_file": "application/potfolio_allocation_management_service.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "domain_infra_anticorruption_asset_integration_service_yahoo",
+      "label": "asset_integration_service_yahoo.go",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "go_pkg_github_com_benizzio_open_asset_allocator_langext",
+      "file_type": "code",
+      "norm_label": "asset_integration_service_yahoo.go",
+      "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "domain_infra_integration_asset_integration_client_yahoo",
+      "label": "asset_integration_client_yahoo.go",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "go_pkg_github_com_benizzio_open_asset_allocator_langext",
+      "file_type": "code",
+      "norm_label": "asset_integration_client_yahoo.go",
+      "source_file": "domain/infra/integration/asset_integration_client_yahoo.go",
       "source_location": "L1"
     },
     {
@@ -4720,6 +4775,39 @@
       "file_type": "code",
       "norm_label": "portfolio_repository_rdbms.go",
       "source_file": "domain/infra/repository/portfolio_repository_rdbms.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "domain_service_asset_domain_service",
+      "label": "asset_domain_service.go",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "go_pkg_github_com_benizzio_open_asset_allocator_langext",
+      "file_type": "code",
+      "norm_label": "asset_domain_service.go",
+      "source_file": "domain/service/asset_domain_service.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "domain_service_asset_domain_service_test",
+      "label": "asset_domain_service_test.go",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "go_pkg_github_com_benizzio_open_asset_allocator_langext",
+      "file_type": "code",
+      "norm_label": "asset_domain_service_test.go",
+      "source_file": "domain/service/asset_domain_service_test.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "domain_service_portfolio_allocation_domain_service",
+      "label": "portfolio_allocation_domain_service.go",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "go_pkg_github_com_benizzio_open_asset_allocator_langext",
+      "file_type": "code",
+      "norm_label": "portfolio_allocation_domain_service.go",
+      "source_file": "domain/service/portfolio_allocation_domain_service.go",
       "source_location": "L1"
     },
     {
@@ -4976,6 +5064,17 @@
       "source_location": "L36"
     },
     {
+      "id": "domain_portfolio_allocation",
+      "label": "portfolio_allocation.go",
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "rdbms_adapter.go",
+      "file_type": "code",
+      "norm_label": "portfolio_allocation.go",
+      "source_file": "domain/portfolio_allocation.go",
+      "source_location": "L1"
+    },
+    {
       "id": "go_type_database_sql_row",
       "label": "database/sql.Row",
       "_origin": "ast",
@@ -5127,6 +5226,28 @@
       "file_type": "code",
       "norm_label": "sqlext_null_time.go",
       "source_file": "infra/rdbms/sqlext/sqlext_null_time.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "langext_golang_ext_parseable_int",
+      "label": "golang_ext_parseable_int.go",
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "rdbms_adapter.go",
+      "file_type": "code",
+      "norm_label": "golang_ext_parseable_int.go",
+      "source_file": "langext/golang_ext_parseable_int.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "langext_golang_ext_parseable_int64",
+      "label": "golang_ext_parseable_int64.go",
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "rdbms_adapter.go",
+      "file_type": "code",
+      "norm_label": "golang_ext_parseable_int64.go",
+      "source_file": "langext/golang_ext_parseable_int64.go",
       "source_location": "L1"
     },
     {
@@ -5722,193 +5843,6 @@
       "norm_label": ".get()",
       "source_file": "infra/rdbms/rdbms_query_transactional.go",
       "source_location": "L115"
-    },
-    {
-      "id": "domain_asset_integration",
-      "label": "asset_integration.go",
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "go_pkg_context",
-      "file_type": "code",
-      "norm_label": "asset_integration.go",
-      "source_file": "domain/asset_integration.go",
-      "source_location": "L1"
-    },
-    {
-      "id": "domain_asset_integration_go_domain_assetintegrationservice",
-      "label": "AssetIntegrationService",
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "go_pkg_context",
-      "file_type": "code",
-      "norm_label": "assetintegrationservice",
-      "source_file": "domain/asset_integration.go",
-      "source_location": "L10"
-    },
-    {
-      "id": "domain_asset_repository",
-      "label": "asset_repository.go",
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "go_pkg_context",
-      "file_type": "code",
-      "norm_label": "asset_repository.go",
-      "source_file": "domain/asset_repository.go",
-      "source_location": "L1"
-    },
-    {
-      "id": "domain_asset_repository_go_domain_assetrepository",
-      "label": "AssetRepository",
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "go_pkg_context",
-      "file_type": "code",
-      "norm_label": "assetrepository",
-      "source_file": "domain/asset_repository.go",
-      "source_location": "L5"
-    },
-    {
-      "id": "domain_infra_anticorruption_asset_integration_service_yahoo",
-      "label": "asset_integration_service_yahoo.go",
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "go_pkg_context",
-      "file_type": "code",
-      "norm_label": "asset_integration_service_yahoo.go",
-      "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L1"
-    },
-    {
-      "id": "domain_infra_integration_asset_integration_client_yahoo",
-      "label": "asset_integration_client_yahoo.go",
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "go_pkg_context",
-      "file_type": "code",
-      "norm_label": "asset_integration_client_yahoo.go",
-      "source_file": "domain/infra/integration/asset_integration_client_yahoo.go",
-      "source_location": "L1"
-    },
-    {
-      "id": "domain_portfolio_allocation",
-      "label": "portfolio_allocation.go",
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "go_pkg_context",
-      "file_type": "code",
-      "norm_label": "portfolio_allocation.go",
-      "source_file": "domain/portfolio_allocation.go",
-      "source_location": "L1"
-    },
-    {
-      "id": "domain_service_asset_domain_service",
-      "label": "asset_domain_service.go",
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "go_pkg_context",
-      "file_type": "code",
-      "norm_label": "asset_domain_service.go",
-      "source_file": "domain/service/asset_domain_service.go",
-      "source_location": "L1"
-    },
-    {
-      "id": "domain_service_asset_domain_service_buildassetdomservice",
-      "label": "BuildAssetDomService()",
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "go_pkg_context",
-      "file_type": "code",
-      "norm_label": "buildassetdomservice()",
-      "source_file": "domain/service/asset_domain_service.go",
-      "source_location": "L273"
-    },
-    {
-      "id": "domain_service_asset_domain_service_collectintegrationservices",
-      "label": "collectIntegrationServices()",
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "go_pkg_context",
-      "file_type": "code",
-      "norm_label": "collectintegrationservices()",
-      "source_file": "domain/service/asset_domain_service.go",
-      "source_location": "L237"
-    },
-    {
-      "id": "domain_service_asset_domain_service_test",
-      "label": "asset_domain_service_test.go",
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "go_pkg_context",
-      "file_type": "code",
-      "norm_label": "asset_domain_service_test.go",
-      "source_file": "domain/service/asset_domain_service_test.go",
-      "source_location": "L1"
-    },
-    {
-      "id": "domain_service_asset_domain_service_test_testgetknownassetsrejectsexcesssearchterms",
-      "label": "TestGetKnownAssetsRejectsExcessSearchTerms()",
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "go_pkg_context",
-      "file_type": "code",
-      "norm_label": "testgetknownassetsrejectsexcesssearchterms()",
-      "source_file": "domain/service/asset_domain_service_test.go",
-      "source_location": "L17"
-    },
-    {
-      "id": "domain_service_asset_domain_service_test_testgetknownassetsreturnsemptyfornonblankzerotermsearch",
-      "label": "TestGetKnownAssetsReturnsEmptyForNonblankZeroTermSearch()",
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "go_pkg_context",
-      "file_type": "code",
-      "norm_label": "testgetknownassetsreturnsemptyfornonblankzerotermsearch()",
-      "source_file": "domain/service/asset_domain_service_test.go",
-      "source_location": "L34"
-    },
-    {
-      "id": "domain_service_portfolio_allocation_domain_service",
-      "label": "portfolio_allocation_domain_service.go",
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "go_pkg_context",
-      "file_type": "code",
-      "norm_label": "portfolio_allocation_domain_service.go",
-      "source_file": "domain/service/portfolio_allocation_domain_service.go",
-      "source_location": "L1"
-    },
-    {
-      "id": "extinttest_yahoo_finance_integration_client_ext_test",
-      "label": "yahoo_finance_integration_client_ext_test.go",
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "go_pkg_context",
-      "file_type": "code",
-      "norm_label": "yahoo_finance_integration_client_ext_test.go",
-      "source_file": "extinttest/yahoo_finance_integration_client_ext_test.go",
-      "source_location": "L1"
-    },
-    {
-      "id": "service_assetdomservice_searchexternalassets",
-      "label": ".SearchExternalAssets()",
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "go_pkg_context",
-      "file_type": "code",
-      "norm_label": ".searchexternalassets()",
-      "source_file": "domain/service/asset_domain_service.go",
-      "source_location": "L256"
-    },
-    {
-      "id": "service_assetintegrationservicespersource",
-      "label": "AssetIntegrationServicesPerSource",
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "go_pkg_context",
-      "file_type": "code",
-      "norm_label": "assetintegrationservicespersource",
-      "source_file": "domain/service/asset_domain_service.go",
-      "source_location": "L13"
     },
     {
       "id": "inttest_util_assert_json_extension",
@@ -6967,6 +6901,17 @@
       "source_location": "L1"
     },
     {
+      "id": "infra_error_buildapperrorformatted",
+      "label": "BuildAppErrorFormatted()",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "allocation_plan_domain_service.go",
+      "file_type": "code",
+      "norm_label": "buildapperrorformatted()",
+      "source_file": "infra/error.go",
+      "source_location": "L63"
+    },
+    {
       "id": "infra_error_buildapperrorformattedunconverted",
       "label": "BuildAppErrorFormattedUnconverted()",
       "_origin": "ast",
@@ -7457,40 +7402,40 @@
       "label": "YahooFinanceAssetIntegrationService",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": "yahoofinanceassetintegrationservice",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L26"
+      "source_location": "L27"
     },
     {
       "id": "anticorruption_yahoofinanceassetintegrationservice_quoteassetlastcloseprice",
       "label": ".QuoteAssetLastClosePrice()",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": ".quoteassetlastcloseprice()",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L121"
+      "source_location": "L122"
     },
     {
       "id": "anticorruption_yahoofinanceassetintegrationservice_searchassets",
       "label": ".SearchAssets()",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": ".searchassets()",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L54"
+      "source_location": "L55"
     },
     {
       "id": "domain_asset_external_go_domain_externalasset",
       "label": "ExternalAsset",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": "externalasset",
       "source_file": "domain/asset_external.go",
@@ -7501,18 +7446,73 @@
       "label": "ExternalAssetQuote",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": "externalassetquote",
       "source_file": "domain/asset_external.go",
       "source_location": "L49"
     },
     {
+      "id": "domain_asset_go_domain_asset",
+      "label": "Asset",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "Asset",
+      "file_type": "code",
+      "norm_label": "asset",
+      "source_file": "domain/asset.go",
+      "source_location": "L3"
+    },
+    {
+      "id": "domain_asset_integration",
+      "label": "asset_integration.go",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "Asset",
+      "file_type": "code",
+      "norm_label": "asset_integration.go",
+      "source_file": "domain/asset_integration.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "domain_asset_integration_go_domain_assetintegrationservice",
+      "label": "AssetIntegrationService",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "Asset",
+      "file_type": "code",
+      "norm_label": "assetintegrationservice",
+      "source_file": "domain/asset_integration.go",
+      "source_location": "L10"
+    },
+    {
+      "id": "domain_asset_repository",
+      "label": "asset_repository.go",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "Asset",
+      "file_type": "code",
+      "norm_label": "asset_repository.go",
+      "source_file": "domain/asset_repository.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "domain_asset_repository_go_domain_assetrepository",
+      "label": "AssetRepository",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "Asset",
+      "file_type": "code",
+      "norm_label": "assetrepository",
+      "source_file": "domain/asset_repository.go",
+      "source_location": "L5"
+    },
+    {
       "id": "domain_assetexternalsource",
       "label": "AssetExternalSource",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": "assetexternalsource",
       "source_file": "domain/asset_external.go",
@@ -7523,7 +7523,7 @@
       "label": ".Validate()",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": ".validate()",
       "source_file": "domain/asset_external.go",
@@ -7534,62 +7534,62 @@
       "label": "BuildYahooFinanceAssetIntegrationService()",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": "buildyahoofinanceassetintegrationservice()",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L273"
+      "source_location": "L275"
     },
     {
       "id": "domain_infra_anticorruption_asset_integration_service_yahoo_extractlastclose",
       "label": "extractLastClose()",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": "extractlastclose()",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L220"
+      "source_location": "L222"
     },
     {
       "id": "domain_infra_anticorruption_asset_integration_service_yahoo_maptoexternalasset",
       "label": "mapToExternalAsset()",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": "maptoexternalasset()",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L85"
+      "source_location": "L86"
     },
     {
       "id": "domain_infra_anticorruption_asset_integration_service_yahoo_maptoexternalassetquote",
       "label": "mapToExternalAssetQuote()",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": "maptoexternalassetquote()",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L177"
+      "source_location": "L179"
     },
     {
       "id": "domain_infra_anticorruption_asset_integration_service_yahoo_maptoexternalassets",
       "label": "mapToExternalAssets()",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": "maptoexternalassets()",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L72"
+      "source_location": "L73"
     },
     {
       "id": "domain_infra_integration_asset_integration_client_yahoo_buildquoteassetlastclosepriceurl",
       "label": "buildQuoteAssetLastClosePriceURL()",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": "buildquoteassetlastclosepriceurl()",
       "source_file": "domain/infra/integration/asset_integration_client_yahoo.go",
@@ -7600,7 +7600,7 @@
       "label": "buildSearchAssetsURL()",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": "buildsearchassetsurl()",
       "source_file": "domain/infra/integration/asset_integration_client_yahoo.go",
@@ -7611,7 +7611,7 @@
       "label": "YahooFinanceAssetIntegrationClient",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": "yahoofinanceassetintegrationclient",
       "source_file": "domain/infra/integration/asset_integration_client_yahoo.go",
@@ -7622,7 +7622,7 @@
       "label": "asset_integration_client_yahoo_model.go",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": "asset_integration_client_yahoo_model.go",
       "source_file": "domain/infra/integration/asset_integration_client_yahoo_model.go",
@@ -7633,7 +7633,7 @@
       "label": "YahooFinanceChartResponseDTS",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": "yahoofinancechartresponsedts",
       "source_file": "domain/infra/integration/asset_integration_client_yahoo_model.go",
@@ -7644,7 +7644,7 @@
       "label": "YahooFinanceChartResultDTS",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": "yahoofinancechartresultdts",
       "source_file": "domain/infra/integration/asset_integration_client_yahoo_model.go",
@@ -7655,51 +7655,161 @@
       "label": "YahooFinanceSearchQuoteDTS",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": "yahoofinancesearchquotedts",
       "source_file": "domain/infra/integration/asset_integration_client_yahoo_model.go",
       "source_location": "L13"
     },
     {
+      "id": "domain_infra_repository_asset_repository_rdbms_buildassetinsertvalue",
+      "label": "buildAssetInsertValue()",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "Asset",
+      "file_type": "code",
+      "norm_label": "buildassetinsertvalue()",
+      "source_file": "domain/infra/repository/asset_repository_rdbms.go",
+      "source_location": "L299"
+    },
+    {
+      "id": "domain_infra_repository_asset_repository_rdbms_buildassetinsertvalues",
+      "label": "buildAssetInsertValues()",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "Asset",
+      "file_type": "code",
+      "norm_label": "buildassetinsertvalues()",
+      "source_file": "domain/infra/repository/asset_repository_rdbms.go",
+      "source_location": "L278"
+    },
+    {
+      "id": "domain_service_asset_domain_service_buildassetdomservice",
+      "label": "BuildAssetDomService()",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "Asset",
+      "file_type": "code",
+      "norm_label": "buildassetdomservice()",
+      "source_file": "domain/service/asset_domain_service.go",
+      "source_location": "L273"
+    },
+    {
+      "id": "domain_service_asset_domain_service_collectintegrationservices",
+      "label": "collectIntegrationServices()",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "Asset",
+      "file_type": "code",
+      "norm_label": "collectintegrationservices()",
+      "source_file": "domain/service/asset_domain_service.go",
+      "source_location": "L237"
+    },
+    {
       "id": "domain_service_asset_domain_service_findpersistedexternalassetquotematch",
       "label": "findPersistedExternalAssetQuoteMatch()",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": "findpersistedexternalassetquotematch()",
       "source_file": "domain/service/asset_domain_service.go",
       "source_location": "L132"
     },
     {
+      "id": "domain_service_asset_domain_service_go_service_assetdomservice",
+      "label": "AssetDomService",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "Asset",
+      "file_type": "code",
+      "norm_label": "assetdomservice",
+      "source_file": "domain/service/asset_domain_service.go",
+      "source_location": "L15"
+    },
+    {
+      "id": "domain_service_asset_domain_service_test_testgetknownassetsrejectsexcesssearchterms",
+      "label": "TestGetKnownAssetsRejectsExcessSearchTerms()",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "Asset",
+      "file_type": "code",
+      "norm_label": "testgetknownassetsrejectsexcesssearchterms()",
+      "source_file": "domain/service/asset_domain_service_test.go",
+      "source_location": "L17"
+    },
+    {
+      "id": "domain_service_asset_domain_service_test_testgetknownassetsreturnsemptyfornonblankzerotermsearch",
+      "label": "TestGetKnownAssetsReturnsEmptyForNonblankZeroTermSearch()",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "Asset",
+      "file_type": "code",
+      "norm_label": "testgetknownassetsreturnsemptyfornonblankzerotermsearch()",
+      "source_file": "domain/service/asset_domain_service_test.go",
+      "source_location": "L34"
+    },
+    {
+      "id": "domain_service_asset_text_search",
+      "label": "asset_text_search.go",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "Asset",
+      "file_type": "code",
+      "norm_label": "asset_text_search.go",
+      "source_file": "domain/service/asset_text_search.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "domain_service_asset_text_search_appendassettextsearchphrase",
+      "label": "appendAssetTextSearchPhrase()",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "Asset",
+      "file_type": "code",
+      "norm_label": "appendassettextsearchphrase()",
+      "source_file": "domain/service/asset_text_search.go",
+      "source_location": "L66"
+    },
+    {
+      "id": "domain_service_asset_text_search_appendassettextsearchterms",
+      "label": "appendAssetTextSearchTerms()",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "Asset",
+      "file_type": "code",
+      "norm_label": "appendassettextsearchterms()",
+      "source_file": "domain/service/asset_text_search.go",
+      "source_location": "L59"
+    },
+    {
+      "id": "domain_service_asset_text_search_parseassettextsearch",
+      "label": "parseAssetTextSearch()",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "Asset",
+      "file_type": "code",
+      "norm_label": "parseassettextsearch()",
+      "source_file": "domain/service/asset_text_search.go",
+      "source_location": "L20"
+    },
+    {
       "id": "go_type_golang_org_x_text_currency_unit",
       "label": "golang.org/x/text/currency.Unit",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": "golang.org/x/text/currency.unit",
       "source_file": "",
       "source_location": ""
     },
     {
-      "id": "infra_error_buildapperrorformatted",
-      "label": "BuildAppErrorFormatted()",
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "ExternalAsset",
-      "file_type": "code",
-      "norm_label": "buildapperrorformatted()",
-      "source_file": "infra/error.go",
-      "source_location": "L63"
-    },
-    {
       "id": "infra_error_propagateasapperror",
       "label": "PropagateAsAppError()",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": "propagateasapperror()",
       "source_file": "infra/error.go",
@@ -7710,7 +7820,7 @@
       "label": ".QuoteAssetLastClosePrice()",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": ".quoteassetlastcloseprice()",
       "source_file": "domain/infra/integration/asset_integration_client_yahoo.go",
@@ -7721,7 +7831,7 @@
       "label": ".SearchAssets()",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": ".searchassets()",
       "source_file": "domain/infra/integration/asset_integration_client_yahoo.go",
@@ -7732,7 +7842,7 @@
       "label": "YahooFinanceChartDTS",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": "yahoofinancechartdts",
       "source_file": "domain/infra/integration/asset_integration_client_yahoo_model.go",
@@ -7743,7 +7853,7 @@
       "label": "YahooFinanceChartIndicatorsDTS",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": "yahoofinancechartindicatorsdts",
       "source_file": "domain/infra/integration/asset_integration_client_yahoo_model.go",
@@ -7754,7 +7864,7 @@
       "label": "YahooFinanceChartMetaDTS",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": "yahoofinancechartmetadts",
       "source_file": "domain/infra/integration/asset_integration_client_yahoo_model.go",
@@ -7765,7 +7875,7 @@
       "label": "YahooFinanceChartQuoteIndicatorDTS",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": "yahoofinancechartquoteindicatordts",
       "source_file": "domain/infra/integration/asset_integration_client_yahoo_model.go",
@@ -7776,18 +7886,73 @@
       "label": "YahooFinanceSearchResponseDTS",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": "yahoofinancesearchresponsedts",
       "source_file": "domain/infra/integration/asset_integration_client_yahoo_model.go",
       "source_location": "L24"
     },
     {
+      "id": "service_assetdomservice_createasset",
+      "label": ".CreateAsset()",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "Asset",
+      "file_type": "code",
+      "norm_label": ".createasset()",
+      "source_file": "domain/service/asset_domain_service.go",
+      "source_location": "L192"
+    },
+    {
+      "id": "service_assetdomservice_findassetbyuniqueidentifier",
+      "label": ".FindAssetByUniqueIdentifier()",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "Asset",
+      "file_type": "code",
+      "norm_label": ".findassetbyuniqueidentifier()",
+      "source_file": "domain/service/asset_domain_service.go",
+      "source_location": "L52"
+    },
+    {
+      "id": "service_assetdomservice_getknownassets",
+      "label": ".GetKnownAssets()",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "Asset",
+      "file_type": "code",
+      "norm_label": ".getknownassets()",
+      "source_file": "domain/service/asset_domain_service.go",
+      "source_location": "L29"
+    },
+    {
+      "id": "service_assetdomservice_insertassetsintransaction",
+      "label": ".InsertAssetsInTransaction()",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "Asset",
+      "file_type": "code",
+      "norm_label": ".insertassetsintransaction()",
+      "source_file": "domain/service/asset_domain_service.go",
+      "source_location": "L203"
+    },
+    {
+      "id": "service_assetdomservice_insertmappedassetsintransaction",
+      "label": ".InsertMappedAssetsInTransaction()",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "Asset",
+      "file_type": "code",
+      "norm_label": ".insertmappedassetsintransaction()",
+      "source_file": "domain/service/asset_domain_service.go",
+      "source_location": "L210"
+    },
+    {
       "id": "service_assetdomservice_quoteexternalassetlastcloseprice",
       "label": ".QuoteExternalAssetLastClosePrice()",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": ".quoteexternalassetlastcloseprice()",
       "source_file": "domain/service/asset_domain_service.go",
@@ -7798,11 +7963,99 @@
       "label": ".quotePersistedExternalAssetLastClosePrice()",
       "_origin": "ast",
       "community": 4,
-      "community_name": "ExternalAsset",
+      "community_name": "Asset",
       "file_type": "code",
       "norm_label": ".quotepersistedexternalassetlastcloseprice()",
       "source_file": "domain/service/asset_domain_service.go",
       "source_location": "L150"
+    },
+    {
+      "id": "service_assetdomservice_searchexternalassets",
+      "label": ".SearchExternalAssets()",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "Asset",
+      "file_type": "code",
+      "norm_label": ".searchexternalassets()",
+      "source_file": "domain/service/asset_domain_service.go",
+      "source_location": "L256"
+    },
+    {
+      "id": "service_assetdomservice_updateasset",
+      "label": ".UpdateAsset()",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "Asset",
+      "file_type": "code",
+      "norm_label": ".updateasset()",
+      "source_file": "domain/service/asset_domain_service.go",
+      "source_location": "L199"
+    },
+    {
+      "id": "service_assetintegrationservicespersource",
+      "label": "AssetIntegrationServicesPerSource",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "Asset",
+      "file_type": "code",
+      "norm_label": "assetintegrationservicespersource",
+      "source_file": "domain/service/asset_domain_service.go",
+      "source_location": "L13"
+    },
+    {
+      "id": "api_rest_allocation_plan_controller",
+      "label": "allocation_plan_controller.go",
+      "_origin": "ast",
+      "community": 40,
+      "community_name": "go_pkg_net_http",
+      "file_type": "code",
+      "norm_label": "allocation_plan_controller.go",
+      "source_file": "api/rest/allocation_plan_controller.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "api_rest_asset_controller",
+      "label": "asset_controller.go",
+      "_origin": "ast",
+      "community": 40,
+      "community_name": "go_pkg_net_http",
+      "file_type": "code",
+      "norm_label": "asset_controller.go",
+      "source_file": "api/rest/asset_controller.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "api_rest_divergence_analysis_controller",
+      "label": "divergence_analysis_controller.go",
+      "_origin": "ast",
+      "community": 40,
+      "community_name": "go_pkg_net_http",
+      "file_type": "code",
+      "norm_label": "divergence_analysis_controller.go",
+      "source_file": "api/rest/divergence_analysis_controller.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "api_rest_portfolio_allocation_controller",
+      "label": "portfolio_allocation_controller.go",
+      "_origin": "ast",
+      "community": 40,
+      "community_name": "go_pkg_net_http",
+      "file_type": "code",
+      "norm_label": "portfolio_allocation_controller.go",
+      "source_file": "api/rest/portfolio_allocation_controller.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "api_rest_portfolio_controller",
+      "label": "portfolio_controller.go",
+      "_origin": "ast",
+      "community": 40,
+      "community_name": "go_pkg_net_http",
+      "file_type": "code",
+      "norm_label": "portfolio_controller.go",
+      "source_file": "api/rest/portfolio_controller.go",
+      "source_location": "L1"
     },
     {
       "id": "gin_malformedquerybindingtarget",
@@ -7846,50 +8099,6 @@
       "file_type": "code",
       "norm_label": "gin_validation_query_test.go",
       "source_file": "infra/gin/gin_validation_query_test.go",
-      "source_location": "L1"
-    },
-    {
-      "id": "infra_gin_server",
-      "label": "gin_server.go",
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "go_pkg_net_http",
-      "file_type": "code",
-      "norm_label": "gin_server.go",
-      "source_file": "infra/gin_server.go",
-      "source_location": "L1"
-    },
-    {
-      "id": "inttest_http_test_utils",
-      "label": "http_test_utils.go",
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "go_pkg_net_http",
-      "file_type": "code",
-      "norm_label": "http_test_utils.go",
-      "source_file": "inttest/http_test_utils.go",
-      "source_location": "L1"
-    },
-    {
-      "id": "langext_golang_ext_parseable_int",
-      "label": "golang_ext_parseable_int.go",
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "go_pkg_net_http",
-      "file_type": "code",
-      "norm_label": "golang_ext_parseable_int.go",
-      "source_file": "langext/golang_ext_parseable_int.go",
-      "source_location": "L1"
-    },
-    {
-      "id": "langext_golang_ext_parseable_int64",
-      "label": "golang_ext_parseable_int64.go",
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "go_pkg_net_http",
-      "file_type": "code",
-      "norm_label": "golang_ext_parseable_int64.go",
-      "source_file": "langext/golang_ext_parseable_int64.go",
       "source_location": "L1"
     },
     {
@@ -8166,6 +8375,17 @@
       "norm_label": "buildyahoofinanceassetintegrationclient()",
       "source_file": "domain/infra/integration/asset_integration_client_yahoo.go",
       "source_location": "L197"
+    },
+    {
+      "id": "extinttest_yahoo_finance_integration_client_ext_test",
+      "label": "yahoo_finance_integration_client_ext_test.go",
+      "_origin": "ast",
+      "community": 43,
+      "community_name": "Configuration",
+      "file_type": "code",
+      "norm_label": "yahoo_finance_integration_client_ext_test.go",
+      "source_file": "extinttest/yahoo_finance_integration_client_ext_test.go",
+      "source_location": "L1"
     },
     {
       "id": "extinttest_yahoo_finance_integration_client_ext_test_testquoteassetlastcloseprice_iau",
@@ -8454,6 +8674,17 @@
       "source_location": "L1"
     },
     {
+      "id": "infra_gin_server",
+      "label": "gin_server.go",
+      "_origin": "ast",
+      "community": 45,
+      "community_name": "go_pkg_fmt",
+      "file_type": "code",
+      "norm_label": "gin_server.go",
+      "source_file": "infra/gin_server.go",
+      "source_location": "L1"
+    },
+    {
       "id": "infra_logging",
       "label": "logging.go",
       "_origin": "ast",
@@ -8473,6 +8704,17 @@
       "file_type": "code",
       "norm_label": "sqlext_utils.go",
       "source_file": "infra/rdbms/sqlext/sqlext_utils.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "inttest_http_test_utils",
+      "label": "http_test_utils.go",
+      "_origin": "ast",
+      "community": 45,
+      "community_name": "go_pkg_fmt",
+      "file_type": "code",
+      "norm_label": "http_test_utils.go",
+      "source_file": "inttest/http_test_utils.go",
       "source_location": "L1"
     },
     {
@@ -8716,61 +8958,6 @@
       "norm_label": "custom_field_error.go",
       "source_file": "infra/validation/custom_field_error.go",
       "source_location": "L1"
-    },
-    {
-      "id": "infra_validation_custom_validation_error_builder",
-      "label": "custom_validation_error_builder.go",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "reflect.Type",
-      "file_type": "code",
-      "norm_label": "custom_validation_error_builder.go",
-      "source_file": "infra/validation/custom_validation_error_builder.go",
-      "source_location": "L1"
-    },
-    {
-      "id": "infra_validation_custom_validation_error_builder_buildcustomvalidationerror",
-      "label": "buildCustomValidationError()",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "reflect.Type",
-      "file_type": "code",
-      "norm_label": "buildcustomvalidationerror()",
-      "source_file": "infra/validation/custom_validation_error_builder.go",
-      "source_location": "L152"
-    },
-    {
-      "id": "infra_validation_custom_validation_error_builder_go_validation_customvalidationerrorsbuilder",
-      "label": "CustomValidationErrorsBuilder",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "reflect.Type",
-      "file_type": "code",
-      "norm_label": "customvalidationerrorsbuilder",
-      "source_file": "infra/validation/custom_validation_error_builder.go",
-      "source_location": "L12"
-    },
-    {
-      "id": "infra_validation_custom_validation_error_builder_go_validator_fielderror",
-      "label": "validator.FieldError",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "reflect.Type",
-      "file_type": "code",
-      "norm_label": "validator.fielderror",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "infra_validation_custom_validation_error_builder_go_validator_validationerrors",
-      "label": "validator.ValidationErrors",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "reflect.Type",
-      "file_type": "code",
-      "norm_label": "validator.validationerrors",
-      "source_file": "",
-      "source_location": ""
     },
     {
       "id": "infra_validation_custom_validation_error_handling",
@@ -9167,39 +9354,6 @@
       "norm_label": ".value()",
       "source_file": "infra/validation/custom_field_error.go",
       "source_location": "L54"
-    },
-    {
-      "id": "validation_customvalidationerrorsbuilder_build",
-      "label": ".Build()",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "reflect.Type",
-      "file_type": "code",
-      "norm_label": ".build()",
-      "source_file": "infra/validation/custom_validation_error_builder.go",
-      "source_location": "L91"
-    },
-    {
-      "id": "validation_customvalidationerrorsbuilder_customvalidationerror",
-      "label": ".CustomValidationError()",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "reflect.Type",
-      "file_type": "code",
-      "norm_label": ".customvalidationerror()",
-      "source_file": "infra/validation/custom_validation_error_builder.go",
-      "source_location": "L62"
-    },
-    {
-      "id": "validation_customvalidationerrorsbuilder_customvalidationerrorfullnamespace",
-      "label": ".CustomValidationErrorFullNamespace()",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "reflect.Type",
-      "file_type": "code",
-      "norm_label": ".customvalidationerrorfullnamespace()",
-      "source_file": "infra/validation/custom_validation_error_builder.go",
-      "source_location": "L74"
     },
     {
       "id": "application_allocationiterationmappingcontextvalue",
@@ -10383,7 +10537,7 @@
       "label": ".Scan()",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": ".scan()",
       "source_file": "domain/allocation/allocation.go",
@@ -10394,7 +10548,7 @@
       "label": ".String()",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": ".string()",
       "source_file": "domain/allocation/allocation.go",
@@ -10405,7 +10559,7 @@
       "label": "allocation_plan_rest_model.go",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "allocation_plan_rest_model.go",
       "source_file": "api/rest/model/allocation_plan_rest_model.go",
@@ -10416,7 +10570,7 @@
       "label": "MapToAllocationPlan()",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "maptoallocationplan()",
       "source_file": "api/rest/model/allocation_plan_rest_model.go",
@@ -10427,7 +10581,7 @@
       "label": "mapToAllocationPlanAssetDTS()",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "maptoallocationplanassetdts()",
       "source_file": "api/rest/model/allocation_plan_rest_model.go",
@@ -10438,7 +10592,7 @@
       "label": "mapToAllocationPlanDTS()",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "maptoallocationplandts()",
       "source_file": "api/rest/model/allocation_plan_rest_model.go",
@@ -10449,7 +10603,7 @@
       "label": "MapToAllocationPlanDTSs()",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "maptoallocationplandtss()",
       "source_file": "api/rest/model/allocation_plan_rest_model.go",
@@ -10460,7 +10614,7 @@
       "label": "mapToAssetFromAllocationPlan()",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "maptoassetfromallocationplan()",
       "source_file": "api/rest/model/allocation_plan_rest_model.go",
@@ -10471,7 +10625,7 @@
       "label": "mapToPlannedAllocation()",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "maptoplannedallocation()",
       "source_file": "api/rest/model/allocation_plan_rest_model.go",
@@ -10482,7 +10636,7 @@
       "label": "mapToPlannedAllocationDTS()",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "maptoplannedallocationdts()",
       "source_file": "api/rest/model/allocation_plan_rest_model.go",
@@ -10493,7 +10647,7 @@
       "label": "mapToPlannedAllocationDTSs()",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "maptoplannedallocationdtss()",
       "source_file": "api/rest/model/allocation_plan_rest_model.go",
@@ -10504,7 +10658,7 @@
       "label": "mapToPlannedAllocations()",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "maptoplannedallocations()",
       "source_file": "api/rest/model/allocation_plan_rest_model.go",
@@ -10515,7 +10669,7 @@
       "label": "mapNewAssetsPerTickerFromPlannedAllocations()",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "mapnewassetspertickerfromplannedallocations()",
       "source_file": "application/allocation_plan_management_service.go",
@@ -10526,7 +10680,7 @@
       "label": "replacePersistedAssetsOnPlannedAllocations()",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "replacepersistedassetsonplannedallocations()",
       "source_file": "application/allocation_plan_management_service.go",
@@ -10537,7 +10691,7 @@
       "label": ".persistNewAssets()",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": ".persistnewassets()",
       "source_file": "application/allocation_plan_management_service.go",
@@ -10548,7 +10702,7 @@
       "label": "allocation/allocation.go",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "allocation/allocation.go",
       "source_file": "domain/allocation/allocation.go",
@@ -10559,7 +10713,7 @@
       "label": "GetPlanType()",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "getplantype()",
       "source_file": "domain/allocation/allocation.go",
@@ -10570,7 +10724,7 @@
       "label": "PlanType",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "plantype",
       "source_file": "domain/allocation/allocation.go",
@@ -10581,7 +10735,7 @@
       "label": "allocation_plan.go",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "allocation_plan.go",
       "source_file": "domain/allocation_plan.go",
@@ -10592,7 +10746,7 @@
       "label": "AllocationPlan",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "allocationplan",
       "source_file": "domain/allocation_plan.go",
@@ -10603,7 +10757,7 @@
       "label": "PlannedAllocation",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "plannedallocation",
       "source_file": "domain/allocation_plan.go",
@@ -10614,29 +10768,18 @@
       "label": ".AddDetail()",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": ".adddetail()",
       "source_file": "domain/allocation_plan.go",
       "source_location": "L44"
     },
     {
-      "id": "domain_asset_go_domain_asset",
-      "label": "Asset",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "Asset",
-      "file_type": "code",
-      "norm_label": "asset",
-      "source_file": "domain/asset.go",
-      "source_location": "L3"
-    },
-    {
       "id": "domain_asset_go_domain_assetsperticker",
       "label": "AssetsPerTicker",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "assetsperticker",
       "source_file": "domain/asset.go",
@@ -10647,7 +10790,7 @@
       "label": "allocation_plan_repository_model.go",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "allocation_plan_repository_model.go",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
@@ -10658,7 +10801,7 @@
       "label": "buildAllocationPlanFromRow()",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "buildallocationplanfromrow()",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
@@ -10669,7 +10812,7 @@
       "label": "buildPlannedAllocationFromRow()",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "buildplannedallocationfromrow()",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
@@ -10680,7 +10823,7 @@
       "label": "mapPlannedAllocationRow()",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "mapplannedallocationrow()",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
@@ -10691,106 +10834,29 @@
       "label": "mapPlannedAllocationRows()",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "mapplannedallocationrows()",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
       "source_location": "L24"
     },
     {
-      "id": "domain_infra_repository_asset_repository_rdbms_buildassetinsertvalue",
-      "label": "buildAssetInsertValue()",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "Asset",
-      "file_type": "code",
-      "norm_label": "buildassetinsertvalue()",
-      "source_file": "domain/infra/repository/asset_repository_rdbms.go",
-      "source_location": "L299"
-    },
-    {
-      "id": "domain_infra_repository_asset_repository_rdbms_buildassetinsertvalues",
-      "label": "buildAssetInsertValues()",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "Asset",
-      "file_type": "code",
-      "norm_label": "buildassetinsertvalues()",
-      "source_file": "domain/infra/repository/asset_repository_rdbms.go",
-      "source_location": "L278"
-    },
-    {
       "id": "domain_plannedallocationsperhierarchicalid_get",
       "label": ".Get()",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": ".get()",
       "source_file": "domain/allocation_plan.go",
       "source_location": "L14"
     },
     {
-      "id": "domain_service_asset_domain_service_go_service_assetdomservice",
-      "label": "AssetDomService",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "Asset",
-      "file_type": "code",
-      "norm_label": "assetdomservice",
-      "source_file": "domain/service/asset_domain_service.go",
-      "source_location": "L15"
-    },
-    {
-      "id": "domain_service_asset_text_search",
-      "label": "asset_text_search.go",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "Asset",
-      "file_type": "code",
-      "norm_label": "asset_text_search.go",
-      "source_file": "domain/service/asset_text_search.go",
-      "source_location": "L1"
-    },
-    {
-      "id": "domain_service_asset_text_search_appendassettextsearchphrase",
-      "label": "appendAssetTextSearchPhrase()",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "Asset",
-      "file_type": "code",
-      "norm_label": "appendassettextsearchphrase()",
-      "source_file": "domain/service/asset_text_search.go",
-      "source_location": "L66"
-    },
-    {
-      "id": "domain_service_asset_text_search_appendassettextsearchterms",
-      "label": "appendAssetTextSearchTerms()",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "Asset",
-      "file_type": "code",
-      "norm_label": "appendassettextsearchterms()",
-      "source_file": "domain/service/asset_text_search.go",
-      "source_location": "L59"
-    },
-    {
-      "id": "domain_service_asset_text_search_parseassettextsearch",
-      "label": "parseAssetTextSearch()",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "Asset",
-      "file_type": "code",
-      "norm_label": "parseassettextsearch()",
-      "source_file": "domain/service/asset_text_search.go",
-      "source_location": "L20"
-    },
-    {
       "id": "go_type_time_time",
       "label": "time.Time",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "time.time",
       "source_file": "",
@@ -10801,7 +10867,7 @@
       "label": "NullTime",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "nulltime",
       "source_file": "infra/rdbms/sqlext/sqlext_null_time.go",
@@ -10812,7 +10878,7 @@
       "label": "ParseableInt64",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "parseableint64",
       "source_file": "langext/golang_ext_parseable_int64.go",
@@ -10823,7 +10889,7 @@
       "label": ".UnmarshalJSON()",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": ".unmarshaljson()",
       "source_file": "langext/golang_ext_parseable_int64.go",
@@ -10834,7 +10900,7 @@
       "label": "AllocationPlanAssetDTS",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "allocationplanassetdts",
       "source_file": "api/rest/model/allocation_plan_rest_model.go",
@@ -10845,7 +10911,7 @@
       "label": "AllocationPlanDTS",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "allocationplandts",
       "source_file": "api/rest/model/allocation_plan_rest_model.go",
@@ -10856,7 +10922,7 @@
       "label": "PlannedAllocationDTS",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "plannedallocationdts",
       "source_file": "api/rest/model/allocation_plan_rest_model.go",
@@ -10867,7 +10933,7 @@
       "label": ".GetAllAllocationPlans()",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": ".getallallocationplans()",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
@@ -10878,7 +10944,7 @@
       "label": ".GetAllocationPlan()",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": ".getallocationplan()",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
@@ -10889,7 +10955,7 @@
       "label": "plannedAllocationJoinedRowDTS",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": "plannedallocationjoinedrowdts",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
@@ -10900,84 +10966,18 @@
       "label": ".GetAllocationPlans()",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": ".getallocationplans()",
       "source_file": "domain/service/allocation_plan_domain_service.go",
       "source_location": "L21"
     },
     {
-      "id": "service_assetdomservice_createasset",
-      "label": ".CreateAsset()",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "Asset",
-      "file_type": "code",
-      "norm_label": ".createasset()",
-      "source_file": "domain/service/asset_domain_service.go",
-      "source_location": "L192"
-    },
-    {
-      "id": "service_assetdomservice_findassetbyuniqueidentifier",
-      "label": ".FindAssetByUniqueIdentifier()",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "Asset",
-      "file_type": "code",
-      "norm_label": ".findassetbyuniqueidentifier()",
-      "source_file": "domain/service/asset_domain_service.go",
-      "source_location": "L52"
-    },
-    {
-      "id": "service_assetdomservice_getknownassets",
-      "label": ".GetKnownAssets()",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "Asset",
-      "file_type": "code",
-      "norm_label": ".getknownassets()",
-      "source_file": "domain/service/asset_domain_service.go",
-      "source_location": "L29"
-    },
-    {
-      "id": "service_assetdomservice_insertassetsintransaction",
-      "label": ".InsertAssetsInTransaction()",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "Asset",
-      "file_type": "code",
-      "norm_label": ".insertassetsintransaction()",
-      "source_file": "domain/service/asset_domain_service.go",
-      "source_location": "L203"
-    },
-    {
-      "id": "service_assetdomservice_insertmappedassetsintransaction",
-      "label": ".InsertMappedAssetsInTransaction()",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "Asset",
-      "file_type": "code",
-      "norm_label": ".insertmappedassetsintransaction()",
-      "source_file": "domain/service/asset_domain_service.go",
-      "source_location": "L210"
-    },
-    {
-      "id": "service_assetdomservice_updateasset",
-      "label": ".UpdateAsset()",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "Asset",
-      "file_type": "code",
-      "norm_label": ".updateasset()",
-      "source_file": "domain/service/asset_domain_service.go",
-      "source_location": "L199"
-    },
-    {
       "id": "sqlext_nulltime_totimereference",
       "label": ".ToTimeReference()",
       "_origin": "ast",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "file_type": "code",
       "norm_label": ".totimereference()",
       "source_file": "infra/rdbms/sqlext/sqlext_null_time.go",
@@ -11072,6 +11072,18 @@
       "source_file": "AGENTS.md",
       "source_location": null,
       "source_url": null
+    },
+    {
+      "id": "go_pkg_github_com_go_playground_validator_v10",
+      "label": "go_pkg_github_com_go_playground_validator_v10",
+      "_origin": "semantic",
+      "community": 0,
+      "community_name": "github.com/gin-gonic/gin.Context",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "go_pkg_github_com_go_playground_validator_v10",
+      "source_file": "",
+      "type": "external"
     },
     {
       "id": "go_pkg_net_url",
@@ -11326,26 +11338,14 @@
       "type": "external"
     },
     {
-      "id": "go_pkg_github_com_benizzio_open_asset_allocator_api_rest_model",
-      "label": "go_pkg_github_com_benizzio_open_asset_allocator_api_rest_model",
+      "id": "go_pkg_context",
+      "label": "go_pkg_context",
       "_origin": "semantic",
       "community": 2,
       "community_name": "go_pkg_github_com_benizzio_open_asset_allocator_langext",
       "external": true,
       "file_type": "concept",
-      "norm_label": "go_pkg_github_com_benizzio_open_asset_allocator_api_rest_model",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "go_pkg_github_com_benizzio_open_asset_allocator_application",
-      "label": "go_pkg_github_com_benizzio_open_asset_allocator_application",
-      "_origin": "semantic",
-      "community": 2,
-      "community_name": "go_pkg_github_com_benizzio_open_asset_allocator_langext",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "go_pkg_github_com_benizzio_open_asset_allocator_application",
+      "norm_label": "go_pkg_context",
       "source_file": "",
       "type": "external"
     },
@@ -11362,18 +11362,6 @@
       "type": "external"
     },
     {
-      "id": "go_pkg_github_com_benizzio_open_asset_allocator_domain_service",
-      "label": "go_pkg_github_com_benizzio_open_asset_allocator_domain_service",
-      "_origin": "semantic",
-      "community": 2,
-      "community_name": "go_pkg_github_com_benizzio_open_asset_allocator_langext",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "go_pkg_github_com_benizzio_open_asset_allocator_domain_service",
-      "source_file": "",
-      "type": "external"
-    },
-    {
       "id": "go_pkg_github_com_benizzio_open_asset_allocator_infra",
       "label": "go_pkg_github_com_benizzio_open_asset_allocator_infra",
       "_origin": "semantic",
@@ -11382,18 +11370,6 @@
       "external": true,
       "file_type": "concept",
       "norm_label": "go_pkg_github_com_benizzio_open_asset_allocator_infra",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "go_pkg_github_com_benizzio_open_asset_allocator_infra_gin",
-      "label": "go_pkg_github_com_benizzio_open_asset_allocator_infra_gin",
-      "_origin": "semantic",
-      "community": 2,
-      "community_name": "go_pkg_github_com_benizzio_open_asset_allocator_langext",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "go_pkg_github_com_benizzio_open_asset_allocator_infra_gin",
       "source_file": "",
       "type": "external"
     },
@@ -11410,14 +11386,14 @@
       "type": "external"
     },
     {
-      "id": "go_pkg_github_com_benizzio_open_asset_allocator_infra_validation",
-      "label": "go_pkg_github_com_benizzio_open_asset_allocator_infra_validation",
+      "id": "go_pkg_github_com_benizzio_open_asset_allocator_infra_util_http_httpclient",
+      "label": "go_pkg_github_com_benizzio_open_asset_allocator_infra_util_http_httpclient",
       "_origin": "semantic",
       "community": 2,
       "community_name": "go_pkg_github_com_benizzio_open_asset_allocator_langext",
       "external": true,
       "file_type": "concept",
-      "norm_label": "go_pkg_github_com_benizzio_open_asset_allocator_infra_validation",
+      "norm_label": "go_pkg_github_com_benizzio_open_asset_allocator_infra_util_http_httpclient",
       "source_file": "",
       "type": "external"
     },
@@ -11434,6 +11410,18 @@
       "type": "external"
     },
     {
+      "id": "go_pkg_strings",
+      "label": "go_pkg_strings",
+      "_origin": "semantic",
+      "community": 2,
+      "community_name": "go_pkg_github_com_benizzio_open_asset_allocator_langext",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "go_pkg_strings",
+      "source_file": "",
+      "type": "external"
+    },
+    {
       "id": "go_pkg_database_sql",
       "label": "go_pkg_database_sql",
       "_origin": "semantic",
@@ -11442,6 +11430,30 @@
       "external": true,
       "file_type": "concept",
       "norm_label": "go_pkg_database_sql",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "go_pkg_encoding_json",
+      "label": "go_pkg_encoding_json",
+      "_origin": "semantic",
+      "community": 21,
+      "community_name": "rdbms_adapter.go",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "go_pkg_encoding_json",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "go_pkg_errors",
+      "label": "go_pkg_errors",
+      "_origin": "semantic",
+      "community": 21,
+      "community_name": "rdbms_adapter.go",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "go_pkg_errors",
       "source_file": "",
       "type": "external"
     },
@@ -11458,71 +11470,11 @@
       "type": "external"
     },
     {
-      "id": "go_pkg_context",
-      "label": "go_pkg_context",
-      "_origin": "semantic",
-      "community": 24,
-      "community_name": "go_pkg_context",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "go_pkg_context",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "go_pkg_github_com_benizzio_open_asset_allocator_domain_infra_integration",
-      "label": "go_pkg_github_com_benizzio_open_asset_allocator_domain_infra_integration",
-      "_origin": "semantic",
-      "community": 24,
-      "community_name": "go_pkg_context",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "go_pkg_github_com_benizzio_open_asset_allocator_domain_infra_integration",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "go_pkg_github_com_benizzio_open_asset_allocator_infra_util_http_httpclient",
-      "label": "go_pkg_github_com_benizzio_open_asset_allocator_infra_util_http_httpclient",
-      "_origin": "semantic",
-      "community": 24,
-      "community_name": "go_pkg_context",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "go_pkg_github_com_benizzio_open_asset_allocator_infra_util_http_httpclient",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "go_pkg_github_com_stretchr_testify_require",
-      "label": "go_pkg_github_com_stretchr_testify_require",
-      "_origin": "semantic",
-      "community": 24,
-      "community_name": "go_pkg_context",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "go_pkg_github_com_stretchr_testify_require",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "go_pkg_strings",
-      "label": "go_pkg_strings",
-      "_origin": "semantic",
-      "community": 24,
-      "community_name": "go_pkg_context",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "go_pkg_strings",
-      "source_file": "",
-      "type": "external"
-    },
-    {
       "id": "go_pkg_time",
       "label": "go_pkg_time",
       "_origin": "semantic",
-      "community": 24,
-      "community_name": "go_pkg_context",
+      "community": 21,
+      "community_name": "rdbms_adapter.go",
       "external": true,
       "file_type": "concept",
       "norm_label": "go_pkg_time",
@@ -11542,26 +11494,62 @@
       "type": "external"
     },
     {
-      "id": "go_pkg_encoding_json",
-      "label": "go_pkg_encoding_json",
+      "id": "go_pkg_github_com_benizzio_open_asset_allocator_api_rest_model",
+      "label": "go_pkg_github_com_benizzio_open_asset_allocator_api_rest_model",
       "_origin": "semantic",
       "community": 40,
       "community_name": "go_pkg_net_http",
       "external": true,
       "file_type": "concept",
-      "norm_label": "go_pkg_encoding_json",
+      "norm_label": "go_pkg_github_com_benizzio_open_asset_allocator_api_rest_model",
       "source_file": "",
       "type": "external"
     },
     {
-      "id": "go_pkg_errors",
-      "label": "go_pkg_errors",
+      "id": "go_pkg_github_com_benizzio_open_asset_allocator_application",
+      "label": "go_pkg_github_com_benizzio_open_asset_allocator_application",
       "_origin": "semantic",
       "community": 40,
       "community_name": "go_pkg_net_http",
       "external": true,
       "file_type": "concept",
-      "norm_label": "go_pkg_errors",
+      "norm_label": "go_pkg_github_com_benizzio_open_asset_allocator_application",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "go_pkg_github_com_benizzio_open_asset_allocator_domain_service",
+      "label": "go_pkg_github_com_benizzio_open_asset_allocator_domain_service",
+      "_origin": "semantic",
+      "community": 40,
+      "community_name": "go_pkg_net_http",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "go_pkg_github_com_benizzio_open_asset_allocator_domain_service",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "go_pkg_github_com_benizzio_open_asset_allocator_infra_gin",
+      "label": "go_pkg_github_com_benizzio_open_asset_allocator_infra_gin",
+      "_origin": "semantic",
+      "community": 40,
+      "community_name": "go_pkg_net_http",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "go_pkg_github_com_benizzio_open_asset_allocator_infra_gin",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "go_pkg_github_com_benizzio_open_asset_allocator_infra_validation",
+      "label": "go_pkg_github_com_benizzio_open_asset_allocator_infra_validation",
+      "_origin": "semantic",
+      "community": 40,
+      "community_name": "go_pkg_net_http",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "go_pkg_github_com_benizzio_open_asset_allocator_infra_validation",
       "source_file": "",
       "type": "external"
     },
@@ -11578,26 +11566,14 @@
       "type": "external"
     },
     {
-      "id": "go_pkg_github_com_golang_glog",
-      "label": "go_pkg_github_com_golang_glog",
+      "id": "go_pkg_github_com_stretchr_testify_require",
+      "label": "go_pkg_github_com_stretchr_testify_require",
       "_origin": "semantic",
       "community": 40,
       "community_name": "go_pkg_net_http",
       "external": true,
       "file_type": "concept",
-      "norm_label": "go_pkg_github_com_golang_glog",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "go_pkg_net",
-      "label": "go_pkg_net",
-      "_origin": "semantic",
-      "community": 40,
-      "community_name": "go_pkg_net_http",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "go_pkg_net",
+      "norm_label": "go_pkg_github_com_stretchr_testify_require",
       "source_file": "",
       "type": "external"
     },
@@ -11686,6 +11662,18 @@
       "type": "external"
     },
     {
+      "id": "go_pkg_github_com_benizzio_open_asset_allocator_domain_infra_integration",
+      "label": "go_pkg_github_com_benizzio_open_asset_allocator_domain_infra_integration",
+      "_origin": "semantic",
+      "community": 43,
+      "community_name": "Configuration",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "go_pkg_github_com_benizzio_open_asset_allocator_domain_infra_integration",
+      "source_file": "",
+      "type": "external"
+    },
+    {
       "id": "go_pkg_github_com_benizzio_open_asset_allocator_infra_util",
       "label": "go_pkg_github_com_benizzio_open_asset_allocator_infra_util",
       "_origin": "semantic",
@@ -11746,6 +11734,18 @@
       "type": "external"
     },
     {
+      "id": "go_pkg_github_com_golang_glog",
+      "label": "go_pkg_github_com_golang_glog",
+      "_origin": "semantic",
+      "community": 45,
+      "community_name": "go_pkg_fmt",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "go_pkg_github_com_golang_glog",
+      "source_file": "",
+      "type": "external"
+    },
+    {
       "id": "go_pkg_golang_org_x_text_currency",
       "label": "go_pkg_golang_org_x_text_currency",
       "_origin": "semantic",
@@ -11754,6 +11754,18 @@
       "external": true,
       "file_type": "concept",
       "norm_label": "go_pkg_golang_org_x_text_currency",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "go_pkg_net",
+      "label": "go_pkg_net",
+      "_origin": "semantic",
+      "community": 45,
+      "community_name": "go_pkg_fmt",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "go_pkg_net",
       "source_file": "",
       "type": "external"
     },
@@ -11778,18 +11790,6 @@
       "external": true,
       "file_type": "concept",
       "norm_label": "go_pkg_github_com_go_playground_universal_translator",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "go_pkg_github_com_go_playground_validator_v10",
-      "label": "go_pkg_github_com_go_playground_validator_v10",
-      "_origin": "semantic",
-      "community": 5,
-      "community_name": "reflect.Type",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "go_pkg_github_com_go_playground_validator_v10",
       "source_file": "",
       "type": "external"
     },
@@ -11822,7 +11822,7 @@
       "label": "go_pkg_github_com_benizzio_open_asset_allocator_domain_allocation",
       "_origin": "semantic",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "external": true,
       "file_type": "concept",
       "norm_label": "go_pkg_github_com_benizzio_open_asset_allocator_domain_allocation",
@@ -11834,7 +11834,7 @@
       "label": "go_pkg_github_com_shopspring_decimal",
       "_origin": "semantic",
       "community": 9,
-      "community_name": "Asset",
+      "community_name": "AllocationPlan",
       "external": true,
       "file_type": "concept",
       "norm_label": "go_pkg_github_com_shopspring_decimal",
@@ -11864,7 +11864,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L127",
+      "source_location": "L128",
       "weight": 1.0
     },
     {
@@ -11876,7 +11876,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L130",
+      "source_location": "L131",
+      "weight": 1.0
+    },
+    {
+      "source": "anticorruption_yahoofinanceassetintegrationservice_quoteassetlastcloseprice",
+      "target": "langext_golang_ext_util_iszerovalue",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
+      "source_location": "L137",
       "weight": 1.0
     },
     {
@@ -11888,7 +11900,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L148",
+      "source_location": "L150",
       "weight": 1.0
     },
     {
@@ -11900,7 +11912,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L64",
+      "source_location": "L65",
       "weight": 1.0
     },
     {
@@ -12824,7 +12836,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L225",
+      "source_location": "L227",
       "weight": 1.0
     },
     {
@@ -12836,7 +12848,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L182",
+      "source_location": "L184",
       "weight": 1.0
     },
     {
@@ -12848,7 +12860,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L194",
+      "source_location": "L196",
       "weight": 1.0
     },
     {
@@ -12860,7 +12872,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L202",
+      "source_location": "L204",
       "weight": 1.0
     },
     {
@@ -12872,7 +12884,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L76",
+      "source_location": "L77",
       "weight": 1.0
     },
     {
@@ -19136,7 +19148,7 @@
       "confidence_score": 1.0,
       "context": "field",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L27",
+      "source_location": "L28",
       "weight": 1.0
     },
     {
@@ -22593,6 +22605,18 @@
       "context": "import",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
       "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "domain_infra_anticorruption_asset_integration_service_yahoo",
+      "target": "go_pkg_github_com_benizzio_open_asset_allocator_langext",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
+      "source_location": "L15",
       "weight": 1.0
     },
     {
@@ -27308,7 +27332,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L121",
+      "source_location": "L122",
       "weight": 1.0
     },
     {
@@ -27320,7 +27344,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L121",
+      "source_location": "L122",
       "weight": 1.0
     },
     {
@@ -27332,7 +27356,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L54",
+      "source_location": "L55",
       "weight": 1.0
     },
     {
@@ -28832,7 +28856,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L273",
+      "source_location": "L275",
       "weight": 1.0
     },
     {
@@ -28844,7 +28868,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L220",
+      "source_location": "L222",
       "weight": 1.0
     },
     {
@@ -28856,7 +28880,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L85",
+      "source_location": "L86",
       "weight": 1.0
     },
     {
@@ -28868,7 +28892,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L177",
+      "source_location": "L179",
       "weight": 1.0
     },
     {
@@ -28880,7 +28904,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L72",
+      "source_location": "L73",
       "weight": 1.0
     },
     {
@@ -34004,7 +34028,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L121",
+      "source_location": "L122",
       "weight": 1.0
     },
     {
@@ -34016,7 +34040,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L54",
+      "source_location": "L55",
       "weight": 1.0
     },
     {
@@ -34940,7 +34964,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L273",
+      "source_location": "L275",
       "weight": 1.0
     },
     {
@@ -34952,7 +34976,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L220",
+      "source_location": "L222",
       "weight": 1.0
     },
     {
@@ -34964,7 +34988,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L220",
+      "source_location": "L222",
       "weight": 1.0
     },
     {
@@ -34976,7 +35000,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L85",
+      "source_location": "L86",
       "weight": 1.0
     },
     {
@@ -34988,7 +35012,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L177",
+      "source_location": "L179",
       "weight": 1.0
     },
     {
@@ -35000,7 +35024,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L72",
+      "source_location": "L73",
       "weight": 1.0
     },
     {
@@ -38595,7 +38619,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L177",
+      "source_location": "L179",
       "weight": 1.0
     },
     {
@@ -38606,7 +38630,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L220",
+      "source_location": "L222",
       "weight": 1.0
     },
     {
@@ -38617,7 +38641,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L26",
+      "source_location": "L27",
       "weight": 1.0
     },
     {
@@ -38628,7 +38652,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L273",
+      "source_location": "L275",
       "weight": 1.0
     },
     {
@@ -38639,7 +38663,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L72",
+      "source_location": "L73",
       "weight": 1.0
     },
     {
@@ -38650,7 +38674,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L85",
+      "source_location": "L86",
       "weight": 1.0
     },
     {
@@ -43534,7 +43558,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L121",
+      "source_location": "L122",
       "weight": 1.0
     },
     {
@@ -43545,7 +43569,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/anticorruption/asset_integration_service_yahoo.go",
-      "source_location": "L54",
+      "source_location": "L55",
       "weight": 1.0
     },
     {
@@ -48887,5 +48911,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "b72edb38bb01e0be3806f055606916ad69b3514f"
+  "built_at_commit": "4f5a233f0703d1097af59df807a198b6c9e04593"
 }
