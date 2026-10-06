@@ -2,10 +2,12 @@ package rest
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/benizzio/open-asset-allocator/api/rest/model"
+	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/infra"
 	gininfra "github.com/benizzio/open-asset-allocator/infra/gin"
@@ -50,6 +52,15 @@ func (controller *AssetRESTController) BuildRoutes() []infra.RESTRoute {
 			Method:   http.MethodGet,
 			Path:     "/api/external-asset",
 			Handlers: gin.HandlersChain{controller.getExternalAssets},
+		},
+		{
+			Method: http.MethodGet,
+			Path: "/api/asset/:" + assetIdOrTickerParam +
+				"/external-asset/:" + externalAssetSourceParam +
+				"/:" + externalAssetExchangeIdParam +
+				"/:" + externalAssetTickerParam +
+				"/quote",
+			Handlers: gin.HandlersChain{controller.getExternalAssetQuote},
 		},
 	}
 }
@@ -213,4 +224,41 @@ func (controller *AssetRESTController) getExternalAssets(context *gin.Context) {
 
 	var externalAssetDTSs = model.MapToExternalAssetDTSs(externalAssets)
 	context.JSON(http.StatusOK, externalAssetDTSs)
+}
+
+// getExternalAssetQuote returns a quote only for an external asset association persisted on the
+// requested local asset.
+//
+// Co-authored by: OpenCode and benizzio
+func (controller *AssetRESTController) getExternalAssetQuote(context *gin.Context) {
+
+	var assetIdOrTicker = context.Param(assetIdOrTickerParam)
+	var requestedExternalAsset = &domain.ExternalAsset{
+		Source:     domain.AssetExternalSource(context.Param(externalAssetSourceParam)),
+		ExchangeId: context.Param(externalAssetExchangeIdParam),
+		Ticker:     context.Param(externalAssetTickerParam),
+	}
+
+	quote, err := controller.assetDomService.QuoteExternalAssetLastClosePrice(
+		context.Request.Context(),
+		assetIdOrTicker,
+		requestedExternalAsset,
+	)
+	if gininfra.HandleAPIError(context, "Error retrieving external asset quote", err) {
+		return
+	}
+	if quote == nil {
+		var externalAssetIdentifier = strings.Join(
+			[]string{
+				assetIdOrTicker,
+				string(requestedExternalAsset.Source),
+				requestedExternalAsset.ExchangeId,
+				requestedExternalAsset.Ticker,
+			}, "/",
+		)
+		gininfra.SendDataNotFoundResponse(context, "External asset quote", externalAssetIdentifier)
+		return
+	}
+
+	context.JSON(http.StatusOK, model.MapToExternalAssetQuoteDTS(quote))
 }

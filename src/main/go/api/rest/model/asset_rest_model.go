@@ -1,6 +1,10 @@
 package model
 
 import (
+	"time"
+
+	"github.com/shopspring/decimal"
+
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/langext"
 )
@@ -48,6 +52,18 @@ type AssetSearchQueryDTS struct {
 // Authored by: GitHub Copilot
 type ExternalAssetSearchQueryDTS struct {
 	Query string `form:"query" json:"query" validate:"required,max=100"`
+}
+
+// ExternalAssetQuoteDTS is the REST response for the latest close quote of a persisted external
+// asset association.
+//
+// Authored by: OpenCode
+type ExternalAssetQuoteDTS struct {
+	Ticker         string          `json:"ticker"`
+	ExchangeId     string          `json:"exchangeId"`
+	Currency       string          `json:"currency"`
+	LastCloseQuote decimal.Decimal `json:"lastCloseQuote"`
+	LastCloseDate  time.Time       `json:"lastCloseDate"`
 }
 
 // ================================================
@@ -203,4 +219,26 @@ func MapToExternalAssetDTSs(externalAssets []*domain.ExternalAsset) []*ExternalA
 		externalAssetDTSs[index] = MapToExternalAssetDTS(externalAsset)
 	}
 	return externalAssetDTSs
+}
+
+// MapToExternalAssetQuoteDTS maps a domain quote to its complete REST response representation.
+// Currency is encoded as its ISO currency code and the close timestamp is normalized to UTC.
+//
+// Example:
+//
+//	quoteDTS := model.MapToExternalAssetQuoteDTS(quote)
+//
+// Authored by: OpenCode
+func MapToExternalAssetQuoteDTS(quote *domain.ExternalAssetQuote) *ExternalAssetQuoteDTS {
+	if quote == nil {
+		return nil
+	}
+
+	return &ExternalAssetQuoteDTS{
+		Ticker:         quote.Ticker,
+		ExchangeId:     quote.ExchangeId,
+		Currency:       quote.Currency.String(),
+		LastCloseQuote: quote.LastCloseQuote,
+		LastCloseDate:  quote.LastCloseDate.UTC(),
+	}
 }

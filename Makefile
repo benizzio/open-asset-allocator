@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := build
 
-.PHONY: lint-backend lint-fmt-backend lint-frontend frontend-install validate-node-version e2e e2e-ci e2e-chromium e2e-firefox e2e-ui e2e-headed e2e-report e2e-logs e2e-clean
+.PHONY: lint-backend lint-backend-complexity lint-fmt-backend lint-frontend frontend-install validate-node-version e2e e2e-ci e2e-chromium e2e-firefox e2e-ui e2e-headed e2e-report e2e-logs e2e-clean
 
 E2E_ARGS ?=
 
@@ -8,6 +8,11 @@ E2E_ARGS ?=
 # Co-authored by: OpenCode and Igor Benicio de Mesquita
 lint-backend:
 	cd src/main/go && golangci-lint run ./...
+
+# Runs the cognitive complexity rule across all Go backend functions.
+# Authored by: OpenCode
+lint-backend-complexity:
+	cd src/main/go && golangci-lint run --enable-only=gocognit ./...
 
 # Runs the golangci-lint formatter (goimports) on the Go backend source.
 # Co-authored by: OpenCode and Igor Benicio de Mesquita
