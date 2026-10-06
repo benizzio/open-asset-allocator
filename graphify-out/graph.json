@@ -11083,30 +11083,6 @@
       "weight": 1.0
     },
     {
-      "source": "docs_research_best_maintained_and_community_adopted_e2e_testing_tool_for_the_open_asset_allocator_project_generate_report_category_aliases",
-      "target": "docs_research_best_maintained_and_community_adopted_e2e_testing_tool_for_the_open_asset_allocator_project_generate_report_main",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "docs/research/best-maintained-and-community-adopted-e2e-testing-tool-for-the-open-asset-allocator-project/generate_report.py",
-      "source_location": "L437",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_research_best_maintained_and_community_adopted_e2e_testing_tool_for_the_open_asset_allocator_project_generate_report_collect_extra_fields",
-      "target": "docs_research_best_maintained_and_community_adopted_e2e_testing_tool_for_the_open_asset_allocator_project_generate_report_main",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "docs/research/best-maintained-and-community-adopted-e2e-testing-tool-for-the-open-asset-allocator-project/generate_report.py",
-      "source_location": "L489",
-      "weight": 1.0
-    },
-    {
       "source": "docs_research_best_maintained_and_community_adopted_e2e_testing_tool_for_the_open_asset_allocator_project_generate_report_collect_extra_fields_visit",
       "target": "docs_research_best_maintained_and_community_adopted_e2e_testing_tool_for_the_open_asset_allocator_project_generate_report_collect_extra_fields_visit",
       "relation": "calls",
@@ -11311,18 +11287,6 @@
       "weight": 1.0
     },
     {
-      "source": "docs_research_best_maintained_and_community_adopted_e2e_testing_tool_for_the_open_asset_allocator_project_generate_report_humanize",
-      "target": "docs_research_best_maintained_and_community_adopted_e2e_testing_tool_for_the_open_asset_allocator_project_generate_report_main",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "docs/research/best-maintained-and-community-adopted-e2e-testing-tool-for-the-open-asset-allocator-project/generate_report.py",
-      "source_location": "L458",
-      "weight": 1.0
-    },
-    {
       "source": "docs_research_best_maintained_and_community_adopted_e2e_testing_tool_for_the_open_asset_allocator_project_generate_report_inline_value",
       "target": "docs_research_best_maintained_and_community_adopted_e2e_testing_tool_for_the_open_asset_allocator_project_generate_report_inline_value",
       "relation": "calls",
@@ -11344,18 +11308,6 @@
       "context": "call",
       "source_file": "docs/research/best-maintained-and-community-adopted-e2e-testing-tool-for-the-open-asset-allocator-project/generate_report.py",
       "source_location": "L162",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_research_best_maintained_and_community_adopted_e2e_testing_tool_for_the_open_asset_allocator_project_generate_report_is_visible",
-      "target": "docs_research_best_maintained_and_community_adopted_e2e_testing_tool_for_the_open_asset_allocator_project_generate_report_main",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "docs/research/best-maintained-and-community-adopted-e2e-testing-tool-for-the-open-asset-allocator-project/generate_report.py",
-      "source_location": "L457",
       "weight": 1.0
     },
     {
@@ -11395,18 +11347,6 @@
       "weight": 1.0
     },
     {
-      "source": "docs_research_best_maintained_and_community_adopted_e2e_testing_tool_for_the_open_asset_allocator_project_generate_report_lookup_field",
-      "target": "docs_research_best_maintained_and_community_adopted_e2e_testing_tool_for_the_open_asset_allocator_project_generate_report_main",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "docs/research/best-maintained-and-community-adopted-e2e-testing-tool-for-the-open-asset-allocator-project/generate_report.py",
-      "source_location": "L456",
-      "weight": 1.0
-    },
-    {
       "source": "docs_research_best_maintained_and_community_adopted_e2e_testing_tool_for_the_open_asset_allocator_project_generate_report_main",
       "target": "docs_research_best_maintained_and_community_adopted_e2e_testing_tool_for_the_open_asset_allocator_project_generate_report_validate_topic_dir",
       "relation": "calls",
@@ -11420,14 +11360,50 @@
     },
     {
       "source": "docs_research_best_maintained_and_community_adopted_e2e_testing_tool_for_the_open_asset_allocator_project_generate_report_main",
-      "target": "docs_research_best_maintained_and_community_adopted_e2e_testing_tool_for_the_open_asset_allocator_project_generate_report_unique_anchors",
+      "target": "docs_research_best_maintained_and_community_adopted_e2e_testing_tool_for_the_open_asset_allocator_project_generate_report_category_aliases",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "docs/research/best-maintained-and-community-adopted-e2e-testing-tool-for-the-open-asset-allocator-project/generate_report.py",
-      "source_location": "L440",
+      "source_location": "L437",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_research_best_maintained_and_community_adopted_e2e_testing_tool_for_the_open_asset_allocator_project_generate_report_main",
+      "target": "docs_research_best_maintained_and_community_adopted_e2e_testing_tool_for_the_open_asset_allocator_project_generate_report_lookup_field",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "docs/research/best-maintained-and-community-adopted-e2e-testing-tool-for-the-open-asset-allocator-project/generate_report.py",
+      "source_location": "L456",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_research_best_maintained_and_community_adopted_e2e_testing_tool_for_the_open_asset_allocator_project_generate_report_main",
+      "target": "docs_research_best_maintained_and_community_adopted_e2e_testing_tool_for_the_open_asset_allocator_project_generate_report_is_visible",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "docs/research/best-maintained-and-community-adopted-e2e-testing-tool-for-the-open-asset-allocator-project/generate_report.py",
+      "source_location": "L457",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_research_best_maintained_and_community_adopted_e2e_testing_tool_for_the_open_asset_allocator_project_generate_report_main",
+      "target": "docs_research_best_maintained_and_community_adopted_e2e_testing_tool_for_the_open_asset_allocator_project_generate_report_humanize",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "docs/research/best-maintained-and-community-adopted-e2e-testing-tool-for-the-open-asset-allocator-project/generate_report.py",
+      "source_location": "L458",
       "weight": 1.0
     },
     {
@@ -11440,6 +11416,30 @@
       "context": "call",
       "source_file": "docs/research/best-maintained-and-community-adopted-e2e-testing-tool-for-the-open-asset-allocator-project/generate_report.py",
       "source_location": "L484",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_research_best_maintained_and_community_adopted_e2e_testing_tool_for_the_open_asset_allocator_project_generate_report_main",
+      "target": "docs_research_best_maintained_and_community_adopted_e2e_testing_tool_for_the_open_asset_allocator_project_generate_report_collect_extra_fields",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "docs/research/best-maintained-and-community-adopted-e2e-testing-tool-for-the-open-asset-allocator-project/generate_report.py",
+      "source_location": "L489",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_research_best_maintained_and_community_adopted_e2e_testing_tool_for_the_open_asset_allocator_project_generate_report_unique_anchors",
+      "target": "docs_research_best_maintained_and_community_adopted_e2e_testing_tool_for_the_open_asset_allocator_project_generate_report_main",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "docs/research/best-maintained-and-community-adopted-e2e-testing-tool-for-the-open-asset-allocator-project/generate_report.py",
+      "source_location": "L440",
       "weight": 1.0
     },
     {
@@ -15583,18 +15583,6 @@
       "weight": 1.0
     },
     {
-      "source": "ref_playwright_test",
-      "target": "src_test_e2e_package",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/test/e2e/package.json",
-      "source_location": "L15",
-      "weight": 1.0
-    },
-    {
       "source": "src_ext_graphify_prune_sql_stubs",
       "target": "json",
       "relation": "imports",
@@ -15604,6 +15592,18 @@
       "context": "import",
       "source_file": "src/ext/graphify/prune-sql-stubs.py",
       "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "src_test_e2e_package",
+      "target": "ref_playwright_test",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/test/e2e/package.json",
+      "source_location": "L15",
       "weight": 1.0
     },
     {
@@ -16232,19 +16232,6 @@
     },
     {
       "source": "ref_playwright_test",
-      "target": "src_test_e2e_tests_portfolio_allocation_map_e2e_spec",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/test/e2e/tests/portfolio-allocation-map.e2e.spec.ts",
-      "source_location": "L10",
-      "type_only": true,
-      "weight": 1.0
-    },
-    {
-      "source": "ref_playwright_test",
       "target": "src_test_e2e_tests_portfolio_visualization_e2e_spec",
       "relation": "imports_from",
       "_origin": "ast",
@@ -16502,18 +16489,6 @@
     },
     {
       "source": "src_test_e2e_support_fixtures",
-      "target": "src_test_e2e_tests_portfolio_allocation_map_e2e_spec",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/test/e2e/tests/portfolio-allocation-map.e2e.spec.ts",
-      "source_location": "L11",
-      "weight": 1.0
-    },
-    {
-      "source": "src_test_e2e_support_fixtures",
       "target": "src_test_e2e_tests_portfolio_visualization_e2e_spec",
       "relation": "imports_from",
       "_origin": "ast",
@@ -16636,6 +16611,31 @@
       "source_file": "src/test/e2e/tests/portfolio-allocation-history-management.e2e.spec.ts",
       "source_location": "L16",
       "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "source": "src_test_e2e_tests_portfolio_allocation_map_e2e_spec",
+      "target": "ref_playwright_test",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/test/e2e/tests/portfolio-allocation-map.e2e.spec.ts",
+      "source_location": "L10",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "source": "src_test_e2e_tests_portfolio_allocation_map_e2e_spec",
+      "target": "src_test_e2e_support_fixtures",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/test/e2e/tests/portfolio-allocation-map.e2e.spec.ts",
+      "source_location": "L11",
       "weight": 1.0
     },
     {
@@ -21542,8 +21542,8 @@
       "weight": 1.0
     },
     {
-      "source": "_github_workflows_lint_go_lint_workflow",
-      "target": "_github_workflows_lint_full_backend_cognitive_complexity_check",
+      "source": "_github_workflows_lint_full_backend_cognitive_complexity_check",
+      "target": "_github_workflows_lint_go_lint_workflow",
       "relation": "implements",
       "_origin": "semantic",
       "confidence": "EXTRACTED",
@@ -24443,5 +24443,5 @@
       "source_file": "src/main/docker/docker-compose-e2e.yml"
     }
   ],
-  "built_at_commit": "557288c113c98c953696f5f0a0a54beca2e50ba0"
+  "built_at_commit": "9e035013d3006f86725f53d7cd94a489733ed4b9"
 }
