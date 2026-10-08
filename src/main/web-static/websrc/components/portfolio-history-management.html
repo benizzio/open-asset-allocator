@@ -239,29 +239,25 @@
                 </button>
             </div>
 
-            <!-- Hidden first-provider keys for this allocation. Co-authored by: GPT-6 Luna and benizzio -->
+            <!-- Hidden first-provider keys for this allocation. Co-authored by: GPT-6 Luna, GPT-6 Sol and benizzio -->
             <fieldset hidden
                       data-external-asset-keys
-                      {{#unless externalAsset.source}}disabled{{else}}
-                          {{#unless externalAsset.exchangeId}}disabled{{else}}
-                              {{#unless externalAsset.ticker}}disabled{{/unless}}
-                          {{/unless}}
-                      {{/unless}}
+                      {{#unless (and externalAsset.source externalAsset.exchangeId externalAsset.ticker)}}disabled{{/unless}}
             >
                 <input type="hidden"
                        name="allocations[{{allocationIndex}}][externalAsset][source]"
                        data-external-asset-key="source"
-                       value="{{#if externalAsset.source}}{{#if externalAsset.exchangeId}}{{#if externalAsset.ticker}}{{externalAsset.source}}{{/if}}{{/if}}{{/if}}"
+                       value="{{#if (and externalAsset.source externalAsset.exchangeId externalAsset.ticker)}}{{externalAsset.source}}{{/if}}"
                 />
                 <input type="hidden"
                        name="allocations[{{allocationIndex}}][externalAsset][exchangeId]"
                        data-external-asset-key="exchangeId"
-                       value="{{#if externalAsset.source}}{{#if externalAsset.exchangeId}}{{#if externalAsset.ticker}}{{externalAsset.exchangeId}}{{/if}}{{/if}}{{/if}}"
+                       value="{{#if (and externalAsset.source externalAsset.exchangeId externalAsset.ticker)}}{{externalAsset.exchangeId}}{{/if}}"
                 />
                 <input type="hidden"
                        name="allocations[{{allocationIndex}}][externalAsset][ticker]"
                        data-external-asset-key="ticker"
-                       value="{{#if externalAsset.source}}{{#if externalAsset.exchangeId}}{{#if externalAsset.ticker}}{{externalAsset.ticker}}{{/if}}{{/if}}{{/if}}"
+                       value="{{#if (and externalAsset.source externalAsset.exchangeId externalAsset.ticker)}}{{externalAsset.ticker}}{{/if}}"
                 />
             </fieldset>
         </td>

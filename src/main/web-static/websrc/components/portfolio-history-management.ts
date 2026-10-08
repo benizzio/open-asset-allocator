@@ -4,6 +4,7 @@
  * @example `portfolioHistoryManagement.init()`
  * @author GPT-6 Luna
  * @author benizzio
+ * @author GPT-6 Sol
  */
 
 import htmx from "htmx.org";
@@ -14,6 +15,7 @@ import Router from "../infra/routing";
 import { createPortfolioHistoryQuoteAction } from "./portfolio-history-quote";
 import AssetComposedColumnsInput, {
     ASSET_ROW_SELECTION_CHANGE_EVENT,
+    AssetRowSelectionChangeState,
     type AssetRowSelectionChangeEvent,
 } from "./asset-composed-columns-input";
 import { toInt } from "../utils/lang";
@@ -28,6 +30,21 @@ const EXTERNAL_ASSET_KEYS_SELECTOR = "[data-external-asset-keys]";
 const EXTERNAL_ASSET_SOURCE_SELECTOR = "[data-external-asset-key=\"source\"]";
 const EXTERNAL_ASSET_EXCHANGE_ID_SELECTOR = "[data-external-asset-key=\"exchangeId\"]";
 const EXTERNAL_ASSET_TICKER_SELECTOR = "[data-external-asset-key=\"ticker\"]";
+
+/** Creates the row-scoped quote action before its first use in row normalization.
+ *
+ * @author GPT-6 Sol
+ */
+const portfolioHistoryQuoteAction = createPortfolioHistoryQuoteAction(recalculatePortfolioHistoryAllocation);
+
+/** Reuses the existing portfolio-history row calculation after a quote changes Market Price.
+ *
+ * @author GPT-6 Luna
+ * @author GPT-6 Sol
+ */
+function recalculatePortfolioHistoryAllocation(allocationIndex: number, observationTimestampId: number): void {
+    portfolioHistoryManagement.handleInputQuantityOrMarketPrice(allocationIndex, String(observationTimestampId));
+}
 
 /** Returns trimmed, complete provider keys or `null` when at least one identifier is invalid.
  *
@@ -112,6 +129,7 @@ function normalizePortfolioHistoryRow(row: HTMLTableRowElement): void {
 /** Applies one bubbling asset-selection event only to its owning portfolio-history row.
  *
  * @author GPT-6 Luna
+ * @author GPT-6 Sol
  */
 function handleAssetRowSelectionChange(event: Event): void {
     if(!(event instanceof CustomEvent)) {
@@ -134,12 +152,12 @@ function handleAssetRowSelectionChange(event: Event): void {
         return;
     }
 
-    if(detail.state === "existing") {
+    if(detail.state === AssetRowSelectionChangeState.EXISTING) {
         if(fieldset) {
             synchronizeExternalAssetKeyGroup(fieldset, detail.asset.externalData?.data?.[0]);
         }
     }
-    else if(detail.state === "new" || detail.state === "search") {
+    else if(detail.state === AssetRowSelectionChangeState.NEW || detail.state === AssetRowSelectionChangeState.SEARCH) {
         if(fieldset) {
             synchronizeExternalAssetKeyGroup(fieldset, undefined);
         }
@@ -432,15 +450,5 @@ const portfolioHistoryManagement = {
         Router.navigateTo(`/portfolio/${ portfolioId }/history`);
     },
 };
-
-/** Reuses the existing portfolio-history row calculation after a quote changes Market Price.
- *
- * @author GPT-6 Luna
- */
-function recalculatePortfolioHistoryAllocation(allocationIndex: number, observationTimestampId: number): void {
-    portfolioHistoryManagement.handleInputQuantityOrMarketPrice(allocationIndex, String(observationTimestampId));
-}
-
-const portfolioHistoryQuoteAction = createPortfolioHistoryQuoteAction(recalculatePortfolioHistoryAllocation);
 
 export default portfolioHistoryManagement;

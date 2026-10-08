@@ -2,12 +2,13 @@
  * Controls asset lookup and selection transitions for one composed asset row.
  *
  * @author GPT-6 Luna
+ * @author GPT-6 Sol
  */
 
 import { Asset } from "../../domain/asset";
 import api from "../../api/api";
 import notifications from "../notifications";
-import { ASSET_ROW_SELECTION_CHANGE_EVENT } from "./selection-events";
+import { ASSET_ROW_SELECTION_CHANGE_EVENT, AssetRowSelectionChangeState } from "./selection-events";
 import type {
     AssetRowSelectionChangeDetail,
     AssetRowSelectionChangePayload,
@@ -164,7 +165,7 @@ export class AssetRowController {
         this.assetIdInput.value = asset.id?.toString() ?? "";
         this.newAssetTickerMessage.style.display = "none";
         this.clearSearchErrorFeedback();
-        this.publishSelectionChange({ state: "existing", asset });
+        this.publishSelectionChange({ state: AssetRowSelectionChangeState.EXISTING, asset });
     }
 
     /** Changes the row to require a name for an asset that is not yet stored.
@@ -198,7 +199,7 @@ export class AssetRowController {
         this.newAssetTickerMessage.style.display = "";
         this.clearSearchErrorFeedback();
         this.assetNameInput.focus();
-        this.publishSelectionChange({ state: "new" });
+        this.publishSelectionChange({ state: AssetRowSelectionChangeState.NEW });
     }
 
     /** Clears the committed asset and restores editable search mode.
@@ -244,7 +245,7 @@ export class AssetRowController {
 
         this.assetSearchInput.focus();
         this.autocomplete.open(this.assetSearchInput);
-        this.publishSelectionChange({ state: "search" });
+        this.publishSelectionChange({ state: AssetRowSelectionChangeState.SEARCH });
     }
 
     /** Initializes a missing or invalid generation without resetting a valid row's history.

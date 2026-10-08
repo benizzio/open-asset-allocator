@@ -3,6 +3,7 @@
  *
  * @module components/asset-composed-columns-input
  * @author GPT-6 Luna
+ * @author GPT-6 Sol
  */
 
 import htmx from "htmx.org";
@@ -21,7 +22,7 @@ import {
 import { installAssetFormValidationGuards, invalidateSelectedAsset, validateAssetRowsForPost } from "./form-validation";
 
 export { AssetSelectionState } from "./constants";
-export { ASSET_ROW_SELECTION_CHANGE_EVENT } from "./selection-events";
+export { ASSET_ROW_SELECTION_CHANGE_EVENT, AssetRowSelectionChangeState } from "./selection-events";
 export type {
     AssetRowSelectionChangeDetail,
     AssetRowSelectionChangeEvent,
