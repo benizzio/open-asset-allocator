@@ -3184,19 +3184,7 @@
       "file_type": "code",
       "norm_label": "addallocationrow()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1774"
-    },
-    {
-      "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_addunrelatedhtmxbutton",
-      "label": "addUnrelatedHtmxButton()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "portfolio-history-external-quote.e2e.spec.ts",
-      "file_type": "code",
-      "norm_label": "addunrelatedhtmxbutton()",
-      "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1394"
+      "source_location": "L1406"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_createquoteresponsegate",
@@ -3208,7 +3196,7 @@
       "file_type": "code",
       "norm_label": "createquoteresponsegate()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1965"
+      "source_location": "L1597"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_expectexistingasset",
@@ -3220,7 +3208,7 @@
       "file_type": "code",
       "norm_label": "expectexistingasset()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1846"
+      "source_location": "L1478"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_expectexternalquoteeligibility",
@@ -3232,7 +3220,7 @@
       "file_type": "code",
       "norm_label": "expectexternalquoteeligibility()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1619"
+      "source_location": "L1251"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_expectfinancialvalues",
@@ -3244,7 +3232,7 @@
       "file_type": "code",
       "norm_label": "expectfinancialvalues()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1695"
+      "source_location": "L1327"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_expectmanagementobservationorder",
@@ -3256,7 +3244,7 @@
       "file_type": "code",
       "norm_label": "expectmanagementobservationorder()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1941"
+      "source_location": "L1573"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_expectportfoliohistorymanagement",
@@ -3268,7 +3256,7 @@
       "file_type": "code",
       "norm_label": "expectportfoliohistorymanagement()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1738"
+      "source_location": "L1370"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_expectquoteactionidle",
@@ -3280,7 +3268,7 @@
       "file_type": "code",
       "norm_label": "expectquoteactionidle()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1712"
+      "source_location": "L1344"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_expectrootshell",
@@ -3292,7 +3280,7 @@
       "file_type": "code",
       "norm_label": "expectrootshell()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1725"
+      "source_location": "L1357"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_expectsuccessnotification",
@@ -3304,7 +3292,7 @@
       "file_type": "code",
       "norm_label": "expectsuccessnotification()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1899"
+      "source_location": "L1531"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_externalassetquotepath",
@@ -3316,7 +3304,7 @@
       "file_type": "code",
       "norm_label": "externalassetquotepath()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1651"
+      "source_location": "L1283"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_externalquoteresponse",
@@ -3328,7 +3316,7 @@
       "file_type": "code",
       "norm_label": "externalquoteresponse()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1667"
+      "source_location": "L1299"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_fillcalculatedvalues",
@@ -3340,7 +3328,7 @@
       "file_type": "code",
       "norm_label": "fillcalculatedvalues()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1865"
+      "source_location": "L1497"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_filldirecttotalmarketvalue",
@@ -3352,7 +3340,7 @@
       "file_type": "code",
       "norm_label": "filldirecttotalmarketvalue()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1886"
+      "source_location": "L1518"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_findobservationbytag",
@@ -3364,7 +3352,7 @@
       "file_type": "code",
       "norm_label": "findobservationbytag()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1918"
+      "source_location": "L1550"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_opennewexternalquoteform",
@@ -3376,7 +3364,7 @@
       "file_type": "code",
       "norm_label": "opennewexternalquoteform()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1592"
+      "source_location": "L1224"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_searchforasset",
@@ -3388,7 +3376,7 @@
       "file_type": "code",
       "norm_label": "searchforasset()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1829"
+      "source_location": "L1461"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_seedexternalassetquotedata",
@@ -3400,7 +3388,7 @@
       "file_type": "code",
       "norm_label": "seedexternalassetquotedata()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1438"
+      "source_location": "L1070"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_seedexternalquoteisolationdata",
@@ -3412,7 +3400,7 @@
       "file_type": "code",
       "norm_label": "seedexternalquoteisolationdata()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1541"
+      "source_location": "L1173"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_seedexternalquoteloadedhistory",
@@ -3424,7 +3412,7 @@
       "file_type": "code",
       "norm_label": "seedexternalquoteloadedhistory()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1477"
+      "source_location": "L1109"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_selectassetfromautocomplete",
@@ -3436,7 +3424,7 @@
       "file_type": "code",
       "norm_label": "selectassetfromautocomplete()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1791"
+      "source_location": "L1423"
     },
     {
       "id": "src_test_e2e_support_doughnut_chart_installcanvastextrecorder",
@@ -14104,7 +14092,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1601",
+      "source_location": "L1233",
       "weight": 1.0
     },
     {
@@ -14116,7 +14104,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1599",
+      "source_location": "L1231",
       "weight": 1.0
     },
     {
@@ -15832,19 +15820,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1774",
-      "weight": 1.0
-    },
-    {
-      "source": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_addunrelatedhtmxbutton",
-      "target": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1394",
+      "source_location": "L1406",
       "weight": 1.0
     },
     {
@@ -15856,7 +15832,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1965",
+      "source_location": "L1597",
       "weight": 1.0
     },
     {
@@ -15868,7 +15844,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1846",
+      "source_location": "L1478",
       "weight": 1.0
     },
     {
@@ -15880,7 +15856,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1619",
+      "source_location": "L1251",
       "weight": 1.0
     },
     {
@@ -15892,7 +15868,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1695",
+      "source_location": "L1327",
       "weight": 1.0
     },
     {
@@ -15904,7 +15880,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1941",
+      "source_location": "L1573",
       "weight": 1.0
     },
     {
@@ -15916,7 +15892,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1738",
+      "source_location": "L1370",
       "weight": 1.0
     },
     {
@@ -15928,7 +15904,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1712",
+      "source_location": "L1344",
       "weight": 1.0
     },
     {
@@ -15940,7 +15916,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1725",
+      "source_location": "L1357",
       "weight": 1.0
     },
     {
@@ -15952,7 +15928,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1899",
+      "source_location": "L1531",
       "weight": 1.0
     },
     {
@@ -15964,7 +15940,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1651",
+      "source_location": "L1283",
       "weight": 1.0
     },
     {
@@ -15976,7 +15952,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1667",
+      "source_location": "L1299",
       "weight": 1.0
     },
     {
@@ -15988,7 +15964,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1865",
+      "source_location": "L1497",
       "weight": 1.0
     },
     {
@@ -16000,7 +15976,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1886",
+      "source_location": "L1518",
       "weight": 1.0
     },
     {
@@ -16012,7 +15988,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1918",
+      "source_location": "L1550",
       "weight": 1.0
     },
     {
@@ -16024,7 +16000,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1592",
+      "source_location": "L1224",
       "weight": 1.0
     },
     {
@@ -16036,7 +16012,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1829",
+      "source_location": "L1461",
       "weight": 1.0
     },
     {
@@ -16048,7 +16024,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1438",
+      "source_location": "L1070",
       "weight": 1.0
     },
     {
@@ -16060,7 +16036,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1541",
+      "source_location": "L1173",
       "weight": 1.0
     },
     {
@@ -16072,7 +16048,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1477",
+      "source_location": "L1109",
       "weight": 1.0
     },
     {
@@ -16084,7 +16060,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1791",
+      "source_location": "L1423",
       "weight": 1.0
     },
     {
@@ -25266,5 +25242,5 @@
       "source_file": "src/main/docker/docker-compose-e2e.yml"
     }
   ],
-  "built_at_commit": "039bbce1ad930863b5ec7d919020b0a2c8fb04ca"
+  "built_at_commit": "f44fbfba434bfc7b3585db2ec30de32df0141089"
 }
