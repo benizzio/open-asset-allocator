@@ -4,7 +4,7 @@
  * @example
  * ```ts
  * const quoteAction = createPortfolioHistoryQuoteAction(recalculateAllocation);
- * quoteAction.init();
+ * quoteAction.bindRow(row);
  * quoteAction.updateButtonVisibility(row);
  * ```
  *

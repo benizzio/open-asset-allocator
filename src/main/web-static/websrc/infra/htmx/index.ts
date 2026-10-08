@@ -8,6 +8,8 @@ import { logger, LogLevel } from "../logging";
 import { APIErrorResponse } from "../../api/api";
 
 const NULL_IF_EMPTY_ATTRIBUTE = "data-null-if-empty";
+const suppressedAfterRequestErrorNotifications = new WeakSet<XMLHttpRequest>();
+const afterRequestErrorEventHandlers = new WeakMap<CustomEventHandler, CustomEventHandler>();
 
 type EventDetail = { [key: string]: unknown; };
 
@@ -142,6 +144,31 @@ function prepareFormData(event: CustomEvent) {
 
 }
 
+/** Returns an idempotent afterRequest wrapper that skips only explicitly suppressed request notifications.
+ *
+ * @author GPT-6 Luna
+ */
+function getAfterRequestErrorEventHandler(handler: CustomEventHandler): CustomEventHandler {
+    const cachedHandler = afterRequestErrorEventHandlers.get(handler);
+
+    if(cachedHandler) {
+        return cachedHandler;
+    }
+
+    const wrappedHandler: CustomEventHandler = event => {
+        const detail = (event as CustomEvent<AfterRequestEventDetail>).detail;
+
+        if(detail?.xhr && suppressedAfterRequestErrorNotifications.has(detail.xhr)) {
+            return;
+        }
+
+        handler(event);
+    };
+
+    afterRequestErrorEventHandlers.set(handler, wrappedHandler);
+    return wrappedHandler;
+}
+
 function addEventListeners(
     domSettlingBehaviorEventHandler: CustomEventHandler,
     afterRequestErrorHandler: CustomEventHandler,
@@ -149,7 +176,7 @@ function addEventListeners(
 
     document.addEventListener("htmx:configRequest", configEnhancedRequestEventListener);
 
-    document.body.addEventListener("htmx:afterRequest", afterRequestErrorHandler);
+    document.body.addEventListener("htmx:afterRequest", getAfterRequestErrorEventHandler(afterRequestErrorHandler));
 
     // Add settling behaviour needed for HTMX own bindings
     const afterSettleCustomEventHandler = (event: CustomEvent) => {
@@ -170,7 +197,7 @@ function toErrorResponse(eventDetail: AfterRequestEventDetail): APIErrorResponse
 
     const contentType = eventDetail.xhr.getResponseHeader("content-type");
 
-    if(contentType && contentType.includes("application/json")) {
+    if(contentType?.includes("application/json")) {
         return InfraTypesUtils.toErrorResponse(eventDetail.xhr.response);
     }
 
@@ -178,6 +205,24 @@ function toErrorResponse(eventDetail: AfterRequestEventDetail): APIErrorResponse
 }
 
 export const HtmxInfra = {
+
+    /** Suppresses only the global error notification for one stale HTMX request, without stopping event propagation.
+     *
+     * Call synchronously from that request's `htmx:afterRequest` handler when its owning UI has become stale.
+     * Other listeners still receive the event; only the shared error-notification callback skips this XHR.
+     *
+     * @param xhr - The failed request whose error should not be shown because its owning UI is stale.
+     * @example
+     * ```ts
+     * if(isStaleRequest) {
+     *     HtmxInfra.suppressAfterRequestErrorNotification(event.detail.xhr);
+     * }
+     * ```
+     * @author GPT-6 Luna
+     */
+    suppressAfterRequestErrorNotification(xhr: XMLHttpRequest): void {
+        suppressedAfterRequestErrorNotifications.add(xhr);
+    },
 
     /**
      * Initializes the htmx infrastructure of the application.

@@ -123,6 +123,7 @@ function normalizePortfolioHistoryRow(row: HTMLTableRowElement): void {
         });
     }
 
+    portfolioHistoryQuoteAction.bindRow(row);
     portfolioHistoryQuoteAction.updateButtonVisibility(row);
 }
 
@@ -312,7 +313,6 @@ const portfolioHistoryManagement = {
 
         // Repeated init calls use the same callback, so the document keeps one delegated listener.
         document.addEventListener(ASSET_ROW_SELECTION_CHANGE_EVENT, handleAssetRowSelectionChange);
-        portfolioHistoryQuoteAction.init();
         const managementContainer = document.getElementById(PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER);
 
         managementContainer

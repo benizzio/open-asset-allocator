@@ -5,6 +5,7 @@
  */
 
 import { BigNumber } from "bignumber.js";
+import { HtmxInfra } from "../../infra/htmx";
 import type { AfterRequestEventDetail, RequestConfigEventDetail } from "../../infra/htmx";
 import notifications from "../notifications";
 
@@ -41,18 +42,21 @@ export type RecalculatePortfolioAllocation = (
  * @example
  * ```ts
  * const quoteAction = createPortfolioHistoryQuoteAction(recalculateAllocation);
- * quoteAction.init();
+ * quoteAction.bindRow(row);
  * quoteAction.updateButtonVisibility(row);
  * ```
  *
  * @author GPT-6 Luna
  */
 export type PortfolioHistoryQuoteAction = {
-    /** Installs idempotent HTMX lifecycle listeners for quote buttons.
+    /** Binds idempotent HTMX lifecycle listeners to the quote button owned by one portfolio-history row.
+     *
+     * @param row - Portfolio-history allocation row containing the quote action.
+     * @example `quoteAction.bindRow(row)`
      *
      * @author GPT-6 Luna
      */
-    init(): void;
+    bindRow(row: HTMLTableRowElement): void;
     /** Shows the row's quote action only when its persisted asset and provider keys are complete.
      *
      * @author GPT-6 Luna
@@ -66,13 +70,13 @@ export type PortfolioHistoryQuoteAction = {
  * responses after row replacement or selection changes, and delegates total recalculation to the existing row logic.
  *
  * @param recalculateAllocation - Existing portfolio-history quantity × market-price calculation.
- * @returns A controller for initializing listeners and refreshing one row's action visibility.
+ * @returns A controller for binding one row's quote action and refreshing its visibility.
  * @example
  * ```ts
  * const quoteAction = createPortfolioHistoryQuoteAction((index, observationId) => {
  *     portfolioHistoryManagement.handleInputQuantityOrMarketPrice(index, observationId);
  * });
- * quoteAction.init();
+ * quoteAction.bindRow(row);
  * quoteAction.updateButtonVisibility(row);
  * ```
  * @author GPT-6 Luna
@@ -95,7 +99,19 @@ export function createPortfolioHistoryQuoteAction(
         allocationIndex: number;
     };
 
-    const quoteRequestSnapshots = new WeakMap<HTMLButtonElement, QuoteRequestSnapshot>();
+    /** Associates the exact HTMX request and row snapshot with its initiating quote button.
+     *
+     * @author GPT-6 Luna
+     */
+    type ActiveQuoteRequest = {
+        snapshot: QuoteRequestSnapshot;
+        requestConfig: RequestConfigEventDetail;
+        xhr?: XMLHttpRequest;
+        sent: boolean;
+    };
+
+    const activeQuoteRequests = new WeakMap<HTMLButtonElement, ActiveQuoteRequest>();
+    const boundQuoteButtons = new WeakSet<HTMLButtonElement>();
 
     /** Reads only this row's persisted asset ID, enabled first-provider keys, and selection generation.
      *
@@ -231,52 +247,85 @@ export function createPortfolioHistoryQuoteAction(
      *
      * @author GPT-6 Luna
      */
-    function releaseQuoteRequest(quoteButton: HTMLButtonElement): void {
-        quoteRequestSnapshots.delete(quoteButton);
+    function releaseQuoteRequest(quoteButton: HTMLButtonElement, request: ActiveQuoteRequest): void {
+        if(activeQuoteRequests.get(quoteButton) !== request) {
+            return;
+        }
+
+        activeQuoteRequests.delete(quoteButton);
         restoreLoadingState(quoteButton);
     }
 
-    /** Releases a quote request that HTMX halted during validation or beforeRequest.
+    /** Releases only the exact quote request that HTMX halted during validation or path verification.
      *
      * @author GPT-6 Luna
      */
-    function releaseUnsentQuoteRequest(event: Event): void {
+    function releaseUnsentQuoteRequest(event: Event, quoteButton: HTMLButtonElement): void {
         const detail = (event as CustomEvent<RequestConfigEventDetail>).detail;
-        const quoteButton = detail?.elt;
+        const request = activeQuoteRequests.get(quoteButton);
 
-        if(quoteButton instanceof HTMLButtonElement && quoteButton.matches(QUOTE_ACTION_SELECTOR)) {
-            releaseQuoteRequest(quoteButton);
+        if(request?.requestConfig && detail === request.requestConfig) {
+            releaseQuoteRequest(quoteButton, request);
         }
     }
 
-    /** Releases a quote request canceled by another beforeRequest listener.
+    /** Confirms an afterRequest event belongs to the request currently tracked for this quote button.
      *
      * @author GPT-6 Luna
      */
-    function handleBeforeRequest(event: Event): void {
+    function isOwnedAfterRequest(
+        request: ActiveQuoteRequest | undefined,
+        detail: AfterRequestEventDetail,
+    ): request is ActiveQuoteRequest {
+        if(!request?.requestConfig || detail.requestConfig !== request.requestConfig) {
+            return false;
+        }
+
+        return !request.xhr || detail.xhr === request.xhr;
+    }
+
+    /** Marks the exact quote request sent and activates its loading indicators.
+     *
+     * @author GPT-6 Luna
+     */
+    function handleBeforeSend(event: Event, quoteButton: HTMLButtonElement): void {
         const detail = (event as CustomEvent<AfterRequestEventDetail>).detail;
+        const request = activeQuoteRequests.get(quoteButton);
 
-        if(event.defaultPrevented && detail?.requestConfig?.elt instanceof HTMLButtonElement) {
-            releaseQuoteRequest(detail.requestConfig.elt);
+        if(!detail || !request?.requestConfig || detail.requestConfig !== request.requestConfig) {
+            return;
+        }
+
+        request.sent = true;
+        request.xhr = detail.xhr;
+        quoteButton.setAttribute("aria-busy", "true");
+
+        const icon = quoteButton.querySelector<HTMLElement>(QUOTE_ICON_SELECTOR);
+        const spinner = quoteButton.querySelector<HTMLElement>(QUOTE_SPINNER_SELECTOR);
+
+        if(icon) {
+            icon.hidden = true;
+        }
+
+        if(spinner) {
+            spinner.hidden = false;
         }
     }
 
-    /** Sets the latest-close endpoint and immutable selection snapshot before HTMX issues the GET.
+    /** Sets the quote endpoint and captures ownership before HTMX issues the GET.
      *
      * @author GPT-6 Luna
      */
-    function handleRequestConfiguration(event: Event): void {
+    function handleRequestConfiguration(event: Event, quoteButton: HTMLButtonElement): void {
         const requestConfig = (event as CustomEvent<RequestConfigEventDetail>).detail;
-        const quoteButton = event.target;
 
-        if(!(quoteButton instanceof HTMLButtonElement)
-            || !quoteButton.matches(QUOTE_ACTION_SELECTOR)
+        if(event.target !== quoteButton
             || requestConfig?.elt !== quoteButton
             || requestConfig.verb.toLowerCase() !== "get") {
             return;
         }
 
-        if(quoteRequestSnapshots.has(quoteButton)) {
+        if(activeQuoteRequests.has(quoteButton)) {
             event.preventDefault();
             return;
         }
@@ -306,34 +355,17 @@ export function createPortfolioHistoryQuoteAction(
             return;
         }
 
-        quoteRequestSnapshots.set(quoteButton, snapshot);
+        const request: ActiveQuoteRequest = { snapshot, requestConfig, sent: false };
+        activeQuoteRequests.set(quoteButton, request);
         requestConfig.path = requestPath;
-    }
 
-    /** Marks the triggering button busy immediately before HTMX sends the request.
-     *
-     * @author GPT-6 Luna
-     */
-    function handleBeforeSend(event: Event): void {
-        const detail = (event as CustomEvent<AfterRequestEventDetail>).detail;
-        const quoteButton = detail?.requestConfig?.elt;
-
-        if(!(quoteButton instanceof HTMLButtonElement) || !quoteRequestSnapshots.has(quoteButton)) {
-            return;
-        }
-
-        quoteButton.setAttribute("aria-busy", "true");
-
-        const icon = quoteButton.querySelector<HTMLElement>(QUOTE_ICON_SELECTOR);
-        const spinner = quoteButton.querySelector<HTMLElement>(QUOTE_SPINNER_SELECTOR);
-
-        if(icon) {
-            icon.hidden = true;
-        }
-
-        if(spinner) {
-            spinner.hidden = false;
-        }
+        // HTMX completes configuration, beforeRequest, and beforeSend synchronously. If any later listener
+        // cancels the request, this checkpoint releases its prepared state without depending on listener order.
+        queueMicrotask(() => {
+            if(activeQuoteRequests.get(quoteButton) === request && !request.sent) {
+                releaseQuoteRequest(quoteButton, request);
+            }
+        });
     }
 
     /** Validates the entire response before returning a finite non-negative decimal quote.
@@ -438,26 +470,21 @@ export function createPortfolioHistoryQuoteAction(
      *
      * @author GPT-6 Luna
      */
-    function handleAfterRequest(event: Event): void {
+    function handleAfterRequest(event: Event, quoteButton: HTMLButtonElement): void {
         const detail = (event as CustomEvent<AfterRequestEventDetail>).detail;
-        const quoteButton = detail?.requestConfig?.elt;
+        const request = activeQuoteRequests.get(quoteButton);
 
-        if(!(quoteButton instanceof HTMLButtonElement) || !quoteButton.matches(QUOTE_ACTION_SELECTOR)) {
+        if(!detail || !isOwnedAfterRequest(request, detail)) {
             return;
         }
 
-        const snapshot = quoteRequestSnapshots.get(quoteButton);
-
-        if(!snapshot) {
-            return;
-        }
-
+        const { snapshot } = request;
         const isCurrent = isSnapshotCurrent(quoteButton, snapshot);
 
         try {
             if(!detail.successful) {
                 if(!isCurrent) {
-                    event.stopPropagation();
+                    HtmxInfra.suppressAfterRequestErrorNotification(detail.xhr);
                 }
 
                 return;
@@ -477,22 +504,36 @@ export function createPortfolioHistoryQuoteAction(
             }
         }
         finally {
-            releaseQuoteRequest(quoteButton);
+            releaseQuoteRequest(quoteButton, request);
         }
     }
 
+    /** Binds one row's quote button once, keeping events isolated from other HTMX components.
+     *
+     * @author GPT-6 Luna
+     */
+    function bindRow(row: HTMLTableRowElement): void {
+        const quoteButton = row.querySelector<HTMLButtonElement>(QUOTE_ACTION_SELECTOR);
+
+        if(!quoteButton || boundQuoteButtons.has(quoteButton)) {
+            return;
+        }
+
+        boundQuoteButtons.add(quoteButton);
+        quoteButton.addEventListener("htmx:configRequest", event => handleRequestConfiguration(event, quoteButton));
+        quoteButton.addEventListener("htmx:beforeSend", event => handleBeforeSend(event, quoteButton));
+        quoteButton.addEventListener("htmx:validation:halted", event => releaseUnsentQuoteRequest(event, quoteButton));
+        quoteButton.addEventListener("htmx:invalidPath", event => releaseUnsentQuoteRequest(event, quoteButton));
+        quoteButton.addEventListener("htmx:afterRequest", event => handleAfterRequest(event, quoteButton));
+    }
+
     return {
-        /** Installs stable, idempotent listeners for quote request configuration and completion.
+        /** Binds stable, idempotent lifecycle listeners to the quote button in one row.
          *
          * @author GPT-6 Luna
          */
-        init(): void {
-            document.addEventListener("htmx:configRequest", handleRequestConfiguration, true);
-            document.addEventListener("htmx:beforeSend", handleBeforeSend, true);
-            document.addEventListener("htmx:beforeRequest", handleBeforeRequest);
-            document.addEventListener("htmx:validation:halted", releaseUnsentQuoteRequest, true);
-            document.addEventListener("htmx:invalidPath", releaseUnsentQuoteRequest, true);
-            document.addEventListener("htmx:afterRequest", handleAfterRequest, true);
+        bindRow(row: HTMLTableRowElement): void {
+            bindRow(row);
         },
 
         /** Updates only the quote action inside the supplied allocation row.
