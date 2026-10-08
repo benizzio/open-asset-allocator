@@ -92,7 +92,7 @@ export function validateAssetRowsForPost(form: HTMLFormElement, reportFeedback: 
 
 let assetFormValidationGuardsInstalled = false;
 
-/** Installs one-time guards for native submits and HTMX requests with unresolved asset rows.
+/** Installs one-time guards for native submits and HTMX write requests with unresolved asset rows.
  *
  * @author GPT-6 Luna
  */
@@ -115,9 +115,17 @@ export function installAssetFormValidationGuards(): void {
     }, true);
 
     document.addEventListener("htmx:beforeRequest", event => {
-        const htmxEvent = event as CustomEvent<{ elt?: Element }>;
+        const htmxEvent = event as CustomEvent<{
+            requestConfig?: { elt?: Element; verb?: string };
+            elt?: Element;
+        }>;
 
-        const requestElement = htmxEvent.detail?.elt
+        if(htmxEvent.detail?.requestConfig?.verb?.toLowerCase() === "get") {
+            return;
+        }
+
+        const requestElement = htmxEvent.detail?.requestConfig?.elt
+            ?? htmxEvent.detail?.elt
             ?? (event.target instanceof Element ? event.target : null);
 
         const form = requestElement instanceof HTMLFormElement

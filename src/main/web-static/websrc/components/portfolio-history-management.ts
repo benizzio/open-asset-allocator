@@ -1,9 +1,21 @@
+/**
+ * Manages portfolio-history observation forms and synchronizes each row's first external-asset association.
+ *
+ * @example `portfolioHistoryManagement.init()`
+ * @author GPT-6 Luna
+ * @author benizzio
+ */
+
 import htmx from "htmx.org";
 import { BigNumber } from "bignumber.js";
 import { AfterRequestEventDetail, HtmxInfra } from "../infra/htmx";
 import { ObservationTimestamp } from "../domain/portfolio-allocation";
 import Router from "../infra/routing";
-import AssetComposedColumnsInput from "./asset-composed-columns-input";
+import { createPortfolioHistoryQuoteAction } from "./portfolio-history-quote";
+import AssetComposedColumnsInput, {
+    ASSET_ROW_SELECTION_CHANGE_EVENT,
+    type AssetRowSelectionChangeEvent,
+} from "./asset-composed-columns-input";
 import { toInt } from "../utils/lang";
 import type { TemplateDelegate } from "handlebars";
 import notifications from "./notifications";
@@ -12,6 +24,143 @@ import { NotificationType } from "../infra/infra-types";
 const PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER = "accordion-portfolio-history-management";
 const PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX = "portfolio-history-management-form-";
 const PORTFOLIO_ALLOCATION_MANAGEMENT_TBODY_PREFIX = "portfolio-history-management-form-tbody-";
+const EXTERNAL_ASSET_KEYS_SELECTOR = "[data-external-asset-keys]";
+const EXTERNAL_ASSET_SOURCE_SELECTOR = "[data-external-asset-key=\"source\"]";
+const EXTERNAL_ASSET_EXCHANGE_ID_SELECTOR = "[data-external-asset-key=\"exchangeId\"]";
+const EXTERNAL_ASSET_TICKER_SELECTOR = "[data-external-asset-key=\"ticker\"]";
+
+/** Returns trimmed, complete provider keys or `null` when at least one identifier is invalid.
+ *
+ * @author GPT-6 Luna
+ */
+function getTrimmedExternalAssetKeys(values: {
+    source?: unknown;
+    exchangeId?: unknown;
+    ticker?: unknown;
+} | undefined): { source: string; exchangeId: string; ticker: string } | null {
+    if(!values
+        || typeof values.source !== "string"
+        || typeof values.exchangeId !== "string"
+        || typeof values.ticker !== "string") {
+        return null;
+    }
+
+    const source = values.source.trim();
+    const exchangeId = values.exchangeId.trim();
+    const ticker = values.ticker.trim();
+
+    if(!source || !exchangeId || !ticker) {
+        return null;
+    }
+
+    return { source, exchangeId, ticker };
+}
+
+/** Writes a complete key set atomically, or clears and disables the row's entire association group.
+ *
+ * @author GPT-6 Luna
+ */
+function synchronizeExternalAssetKeyGroup(
+    fieldset: HTMLFieldSetElement,
+    values: { source?: unknown; exchangeId?: unknown; ticker?: unknown } | undefined,
+): void {
+    const sourceInput = fieldset.querySelector<HTMLInputElement>(EXTERNAL_ASSET_SOURCE_SELECTOR);
+    const exchangeIdInput = fieldset.querySelector<HTMLInputElement>(EXTERNAL_ASSET_EXCHANGE_ID_SELECTOR);
+    const tickerInput = fieldset.querySelector<HTMLInputElement>(EXTERNAL_ASSET_TICKER_SELECTOR);
+    const keys = getTrimmedExternalAssetKeys(values);
+
+    if(!sourceInput || !exchangeIdInput || !tickerInput || !keys) {
+        [sourceInput, exchangeIdInput, tickerInput].forEach(input => {
+            if(input) {
+                input.value = "";
+            }
+        });
+        fieldset.disabled = true;
+        return;
+    }
+
+    sourceInput.value = keys.source;
+    exchangeIdInput.value = keys.exchangeId;
+    tickerInput.value = keys.ticker;
+    fieldset.disabled = false;
+}
+
+/** Normalizes one server-rendered row without replacing valid first-provider values.
+ *
+ * @author GPT-6 Luna
+ */
+function normalizePortfolioHistoryRow(row: HTMLTableRowElement): void {
+    const generation = Number(row.dataset.assetSelectionGeneration);
+
+    if(!Number.isSafeInteger(generation) || generation < 0) {
+        row.dataset.assetSelectionGeneration = "0";
+    }
+
+    const fieldset = row.querySelector<HTMLFieldSetElement>(EXTERNAL_ASSET_KEYS_SELECTOR);
+
+    if(fieldset) {
+        synchronizeExternalAssetKeyGroup(fieldset, {
+            source: fieldset.querySelector<HTMLInputElement>(EXTERNAL_ASSET_SOURCE_SELECTOR)?.value,
+            exchangeId: fieldset.querySelector<HTMLInputElement>(EXTERNAL_ASSET_EXCHANGE_ID_SELECTOR)?.value,
+            ticker: fieldset.querySelector<HTMLInputElement>(EXTERNAL_ASSET_TICKER_SELECTOR)?.value,
+        });
+    }
+
+    portfolioHistoryQuoteAction.updateButtonVisibility(row);
+}
+
+/** Applies one bubbling asset-selection event only to its owning portfolio-history row.
+ *
+ * @author GPT-6 Luna
+ */
+function handleAssetRowSelectionChange(event: Event): void {
+    if(!(event instanceof CustomEvent)) {
+        return;
+    }
+
+    const row = event.target;
+
+    if(!(row instanceof HTMLTableRowElement)
+        || !row.id.startsWith(PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX)) {
+        return;
+    }
+
+    const fieldset = row.querySelector<HTMLFieldSetElement>(EXTERNAL_ASSET_KEYS_SELECTOR);
+    const detail = (event as AssetRowSelectionChangeEvent).detail;
+
+    if(!detail
+        || !Number.isSafeInteger(detail.generation)
+        || row.dataset.assetSelectionGeneration !== String(detail.generation)) {
+        return;
+    }
+
+    if(detail.state === "existing") {
+        if(fieldset) {
+            synchronizeExternalAssetKeyGroup(fieldset, detail.asset.externalData?.data?.[0]);
+        }
+    }
+    else if(detail.state === "new" || detail.state === "search") {
+        if(fieldset) {
+            synchronizeExternalAssetKeyGroup(fieldset, undefined);
+        }
+    }
+
+    portfolioHistoryQuoteAction.updateButtonVisibility(row);
+}
+
+/** Normalizes history rows within one HTMX swap target, including a target that is itself a row.
+ *
+ * @author GPT-6 Luna
+ */
+function normalizePortfolioHistoryRowsWithin(element: Element): void {
+    const rowSelector = `tr[id^="${ PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX }"]`;
+
+    if(element.matches(rowSelector) && element instanceof HTMLTableRowElement) {
+        normalizePortfolioHistoryRow(element);
+    }
+
+    element.querySelectorAll<HTMLTableRowElement>(rowSelector).forEach(normalizePortfolioHistoryRow);
+}
 
 class FormRowValueElements {
 
@@ -114,16 +263,43 @@ const portfolioHistoryManagement = {
     handlebarsPortfolioHistoryManagementRowTemplate: null as TemplateDelegate,
     handlebarsPortfolioHistoryManagementContainerTemplate: null as TemplateDelegate,
 
+    /** Initializes this component on its own settle and normalizes rows inserted by nested history requests.
+     *
+     * @param event - HTMX settle event from this component or a nested allocation-row swap.
+     * @param element - The portfolio-history management container receiving the settle event.
+     * @example `portfolioHistoryManagement.handleAfterSettle(event, this)`
+     * @author GPT-6 Luna
+     * @author benizzio
+     */
     handleAfterSettle(event: CustomEvent, element: HTMLElement) {
 
         if(event.target !== element) {
+            if(event.target instanceof Element && element.contains(event.target)) {
+                normalizePortfolioHistoryRowsWithin(event.target);
+            }
+
             return;
         }
 
         this.init();
     },
 
+    /** Initializes templates and row-scoped selection synchronization after the management view settles.
+     *
+     * @example `portfolioHistoryManagement.init()`
+     * @author GPT-6 Luna
+     * @author benizzio
+     */
     init() {
+
+        // Repeated init calls use the same callback, so the document keeps one delegated listener.
+        document.addEventListener(ASSET_ROW_SELECTION_CHANGE_EVENT, handleAssetRowSelectionChange);
+        portfolioHistoryQuoteAction.init();
+        const managementContainer = document.getElementById(PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER);
+
+        managementContainer
+            ?.querySelectorAll<HTMLTableRowElement>(`tr[id^="${ PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX }"]`)
+            .forEach(normalizePortfolioHistoryRow);
 
         HtmxInfra.htmxTransformResponse.registerTransformResponseFunction(
             "addObservationZero",
@@ -142,6 +318,13 @@ const portfolioHistoryManagement = {
         );
     },
 
+    /** Adds one blank allocation row to the requested observation.
+     *
+     * @param observationTimestampId - Observation whose allocation table receives the row.
+     * @example `portfolioHistoryManagement.addPortfolioHistoryManagementRow(12)`
+     * @author GPT-6 Luna
+     * @author benizzio
+     */
     addPortfolioHistoryManagementRow(observationTimestampId: number) {
 
         const tbodyId = PORTFOLIO_ALLOCATION_MANAGEMENT_TBODY_PREFIX + observationTimestampId;
@@ -155,6 +338,10 @@ const portfolioHistoryManagement = {
         tbody.insertAdjacentHTML("beforeend", newRowHtml);
 
         const newRow = tbody.lastElementChild as HTMLElement;
+
+        if(newRow instanceof HTMLTableRowElement) {
+            normalizePortfolioHistoryRow(newRow);
+        }
 
         focusOnNewLine(newRow);
         // Process the newly added row with htmx to enable bindings
@@ -209,11 +396,24 @@ const portfolioHistoryManagement = {
         observationTimeTagInput.value = newTimeTagInput.value;
     },
 
+    /** Reloads the observation only after a successful POST dispatched by that exact observation form.
+     *
+     * @param event - HTMX after-request event bubbled through the observation form.
+     * @param observationTimestampId - Observation whose exact form issued the POST.
+     * @example `portfolioHistoryManagement.handleAfterPostObservationHistory(event, 12)`
+     * @author GPT-6 Luna
+     * @author benizzio
+     */
     handleAfterPostObservationHistory(event: CustomEvent, observationTimestampId: number) {
 
         const eventDetail = event.detail as AfterRequestEventDetail;
+        const formId = `${ PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX }${ observationTimestampId }`;
+        const form = document.getElementById(formId);
 
-        if(!eventDetail.successful) {
+        if(!eventDetail.successful
+            || eventDetail.requestConfig.verb.toLowerCase() !== "post"
+            || !(form instanceof HTMLFormElement)
+            || eventDetail.requestConfig.elt !== form) {
             return;
         }
 
@@ -232,5 +432,15 @@ const portfolioHistoryManagement = {
         Router.navigateTo(`/portfolio/${ portfolioId }/history`);
     },
 };
+
+/** Reuses the existing portfolio-history row calculation after a quote changes Market Price.
+ *
+ * @author GPT-6 Luna
+ */
+function recalculatePortfolioHistoryAllocation(allocationIndex: number, observationTimestampId: number): void {
+    portfolioHistoryManagement.handleInputQuantityOrMarketPrice(allocationIndex, String(observationTimestampId));
+}
+
+const portfolioHistoryQuoteAction = createPortfolioHistoryQuoteAction(recalculatePortfolioHistoryAllocation);
 
 export default portfolioHistoryManagement;

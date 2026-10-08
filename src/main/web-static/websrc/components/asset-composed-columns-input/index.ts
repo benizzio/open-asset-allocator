@@ -21,6 +21,11 @@ import {
 import { installAssetFormValidationGuards, invalidateSelectedAsset, validateAssetRowsForPost } from "./form-validation";
 
 export { AssetSelectionState } from "./constants";
+export { ASSET_ROW_SELECTION_CHANGE_EVENT } from "./selection-events";
+export type {
+    AssetRowSelectionChangeDetail,
+    AssetRowSelectionChangeEvent,
+} from "./selection-events";
 
 /** Resolves an option's owning row and starts the same ticker lookup used by its action button.
  *

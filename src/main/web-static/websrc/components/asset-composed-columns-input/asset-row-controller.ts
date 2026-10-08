@@ -7,6 +7,11 @@
 import { Asset } from "../../domain/asset";
 import api from "../../api/api";
 import notifications from "../notifications";
+import { ASSET_ROW_SELECTION_CHANGE_EVENT } from "./selection-events";
+import type {
+    AssetRowSelectionChangeDetail,
+    AssetRowSelectionChangePayload,
+} from "./selection-events";
 import {
     ASSET_ACTION_BUTTON_IDENTITIES,
     ASSET_ACTION_BUTTON_SELECTOR,
@@ -75,6 +80,7 @@ export class AssetRowController {
         }
 
         this.container = container;
+        this.ensureSelectionGeneration();
         this.autocompleteWrapper = container.querySelector<HTMLElement>(`[${ ASSET_SEARCH_AUTOCOMPLETE_ATTRIBUTE }]`);
         this.assetSearchInput = container.querySelector<HTMLInputElement>(`[${ ASSET_SEARCH_INPUT_ATTRIBUTE }]`);
         this.assetIdInput = container.querySelector<HTMLInputElement>(`[name='${ assetIdHiddenFieldName }']`);
@@ -158,6 +164,7 @@ export class AssetRowController {
         this.assetIdInput.value = asset.id?.toString() ?? "";
         this.newAssetTickerMessage.style.display = "none";
         this.clearSearchErrorFeedback();
+        this.publishSelectionChange({ state: "existing", asset });
     }
 
     /** Changes the row to require a name for an asset that is not yet stored.
@@ -191,6 +198,7 @@ export class AssetRowController {
         this.newAssetTickerMessage.style.display = "";
         this.clearSearchErrorFeedback();
         this.assetNameInput.focus();
+        this.publishSelectionChange({ state: "new" });
     }
 
     /** Clears the committed asset and restores editable search mode.
@@ -236,6 +244,43 @@ export class AssetRowController {
 
         this.assetSearchInput.focus();
         this.autocomplete.open(this.assetSearchInput);
+        this.publishSelectionChange({ state: "search" });
+    }
+
+    /** Initializes a missing or invalid generation without resetting a valid row's history.
+     *
+     * @author GPT-6 Luna
+     */
+    private ensureSelectionGeneration(): number {
+        const currentGeneration = Number(this.container.dataset.assetSelectionGeneration);
+
+        if(!Number.isSafeInteger(currentGeneration) || currentGeneration < 0) {
+            this.container.dataset.assetSelectionGeneration = "0";
+            return 0;
+        }
+
+        return currentGeneration;
+    }
+
+    /** Increments the row generation and publishes its completed selection transition.
+     *
+     * @author GPT-6 Luna
+     */
+    private publishSelectionChange(selection: AssetRowSelectionChangePayload): void {
+        const currentGeneration = this.ensureSelectionGeneration();
+
+        if(currentGeneration === Number.MAX_SAFE_INTEGER) {
+            throw new Error("Asset row selection generation has reached its maximum safe integer.");
+        }
+
+        const generation = currentGeneration + 1;
+        this.container.dataset.assetSelectionGeneration = String(generation);
+        const detail: AssetRowSelectionChangeDetail = { ...selection, generation };
+
+        this.container.dispatchEvent(new CustomEvent<AssetRowSelectionChangeDetail>(
+            ASSET_ROW_SELECTION_CHANGE_EVENT,
+            { bubbles: true, detail },
+        ));
     }
 
     /** Clears search validation feedback before a new lookup attempt.
