@@ -12,7 +12,7 @@
     "validate:playwright": "node scripts/validate-playwright-version.mjs"
   },
   "devDependencies": {
-    "@playwright/test": "1.63.0",
+    "@playwright/test": "1.64.0",
     "@types/node": "24.19.1",
     "@types/pg": "8.23.1",
     "pg": "8.23.1",
