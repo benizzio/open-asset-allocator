@@ -1,5 +1,5 @@
 /**
- * Validates composed asset rows and installs native-submit and HTMX form guards.
+ * Validates composed asset rows and binds native-submit and HTMX guards to owning forms.
  *
  * @author GPT-6 Luna
  * @author GPT-6 Sol
@@ -90,23 +90,23 @@ export function validateAssetRowsForPost(form: HTMLFormElement, reportFeedback: 
     return isValid;
 }
 
-let assetFormValidationGuardsInstalled = false;
+const guardedAssetForms = new WeakSet<HTMLFormElement>();
 
-/** Installs one-time guards for native submits and HTMX write requests with unresolved asset rows.
+/** Binds idempotent native-submit and HTMX write guards to one asset management form.
  *
- * @author GPT-6 Luna
+ * @param form - The form whose editable asset rows must be committed before a write.
+ * @example `bindAssetFormValidationGuards(managementForm);`
+ * @author GPT-6 Sol
  */
-export function installAssetFormValidationGuards(): void {
-    if(assetFormValidationGuardsInstalled) {
+export function bindAssetFormValidationGuards(form: HTMLFormElement): void {
+    if(guardedAssetForms.has(form)) {
         return;
     }
 
-    assetFormValidationGuardsInstalled = true;
+    guardedAssetForms.add(form);
 
-    document.addEventListener("submit", event => {
-        const form = event.target;
-
-        if(!(form instanceof HTMLFormElement) || validateAssetRowsForPost(form, true)) {
+    form.addEventListener("submit", event => {
+        if(event.target !== form || validateAssetRowsForPost(form, true)) {
             return;
         }
 
@@ -114,13 +114,15 @@ export function installAssetFormValidationGuards(): void {
         event.stopImmediatePropagation();
     }, true);
 
-    document.addEventListener("htmx:beforeRequest", event => {
+    form.addEventListener("htmx:beforeRequest", event => {
         const htmxEvent = event as CustomEvent<{
             requestConfig?: { elt?: Element; verb?: string };
             elt?: Element;
         }>;
 
-        if(htmxEvent.detail?.requestConfig?.verb?.toLowerCase() === "get") {
+        const verb = htmxEvent.detail?.requestConfig?.verb?.toLowerCase();
+
+        if(!verb || verb === "get") {
             return;
         }
 
@@ -128,11 +130,11 @@ export function installAssetFormValidationGuards(): void {
             ?? htmxEvent.detail?.elt
             ?? (event.target instanceof Element ? event.target : null);
 
-        const form = requestElement instanceof HTMLFormElement
+        const requestForm = requestElement instanceof HTMLFormElement
             ? requestElement
             : requestElement?.closest("form");
 
-        if(form instanceof HTMLFormElement && !validateAssetRowsForPost(form, true)) {
+        if(requestForm === form && !validateAssetRowsForPost(form, true)) {
             event.preventDefault();
         }
     });

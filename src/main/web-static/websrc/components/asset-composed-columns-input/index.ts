@@ -19,7 +19,7 @@ import {
     TICKER_EXTRA_ERROR_MESSAGE_ATTRIBUTE,
     UNABLE_TO_RESOLVE_ASSET_ROW_ERROR,
 } from "./constants";
-import { installAssetFormValidationGuards, invalidateSelectedAsset, validateAssetRowsForPost } from "./form-validation";
+import { bindAssetFormValidationGuards, invalidateSelectedAsset, validateAssetRowsForPost } from "./form-validation";
 
 export { AssetSelectionState } from "./constants";
 export { ASSET_ROW_SELECTION_CHANGE_EVENT, AssetRowSelectionChangeState } from "./selection-events";
@@ -203,6 +203,14 @@ const AssetComposedColumnsInput = {
         return validateAssetRowsForPost(form, true);
     },
 
+    /** Binds native and HTMX write validation to one management form, once per form element.
+     *
+     * @param form - Allocation-plan or portfolio-history form containing composed asset rows.
+     * @example `AssetComposedColumnsInput.bindFormValidationGuards(form)`
+     * @author GPT-6 Sol
+     */
+    bindFormValidationGuards: bindAssetFormValidationGuards,
+
     /**
      * Triggers reloads for the shared class and asset datalists.
      *
@@ -222,7 +230,5 @@ const AssetComposedColumnsInput = {
      */
     invalidateSelectedAsset,
 };
-
-installAssetFormValidationGuards();
 
 export default AssetComposedColumnsInput;

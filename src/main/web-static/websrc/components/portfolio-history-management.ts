@@ -280,11 +280,12 @@ const portfolioHistoryManagement = {
         this.init();
     },
 
-    /** Initializes templates and row-scoped selection synchronization after the management view settles.
+    /** Initializes templates, row synchronization, and guards for the current management forms.
      *
      * @example `portfolioHistoryManagement.init()`
      * @author GPT-6 Luna
      * @author benizzio
+     * @author GPT-6 Sol
      */
     init() {
 
@@ -295,6 +296,10 @@ const portfolioHistoryManagement = {
         managementContainer
             ?.querySelectorAll<HTMLTableRowElement>(`tr[id^="${ PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX }"]`)
             .forEach(normalizePortfolioHistoryRow);
+
+        managementContainer
+            ?.querySelectorAll<HTMLFormElement>(`form[id^="${ PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX }"]`)
+            .forEach(form => AssetComposedColumnsInput.bindFormValidationGuards(form));
 
         HtmxInfra.htmxTransformResponse.registerTransformResponseFunction(
             "addObservationZero",
