@@ -144,11 +144,14 @@ function prepareFormData(event: CustomEvent) {
 
 }
 
-/** Returns an idempotent afterRequest wrapper that skips only explicitly suppressed request notifications.
+/** Returns a stable error-notification handler that skips afterRequest events for explicitly suppressed XHRs.
  *
  * @author GPT-6 Luna
+ * @author GPT-6 Sol
  */
-function getAfterRequestErrorEventHandler(handler: CustomEventHandler): CustomEventHandler {
+function getAfterRequestErrorNotificationHandlerSkippingSuppressedXhrs(
+    handler: CustomEventHandler,
+): CustomEventHandler {
     const cachedHandler = afterRequestErrorEventHandlers.get(handler);
 
     if(cachedHandler) {
@@ -169,6 +172,11 @@ function getAfterRequestErrorEventHandler(handler: CustomEventHandler): CustomEv
     return wrappedHandler;
 }
 
+/** Registers HTMX request and settling listeners on their respective global event targets.
+ *
+ * @author benizzio
+ * @author GPT-6 Sol
+ */
 function addEventListeners(
     domSettlingBehaviorEventHandler: CustomEventHandler,
     afterRequestErrorHandler: CustomEventHandler,
@@ -176,7 +184,10 @@ function addEventListeners(
 
     document.addEventListener("htmx:configRequest", configEnhancedRequestEventListener);
 
-    document.body.addEventListener("htmx:afterRequest", getAfterRequestErrorEventHandler(afterRequestErrorHandler));
+    document.addEventListener(
+        "htmx:afterRequest",
+        getAfterRequestErrorNotificationHandlerSkippingSuppressedXhrs(afterRequestErrorHandler),
+    );
 
     // Add settling behaviour needed for HTMX own bindings
     const afterSettleCustomEventHandler = (event: CustomEvent) => {
@@ -226,10 +237,14 @@ export const HtmxInfra = {
 
     /**
      * Initializes the htmx infrastructure of the application.
-     * All handlers will be applied to the body and be triggered in after the events of any child element.
+     * Registers request configuration and error-notification listeners on the document,
+     * and DOM settling behavior on the body. Bubbling events from child elements reach these listeners.
      *
      * @param domSettlingBehaviorEventHandler - The handler for the default DOM settling behavior event.
      * @param afterRequestErrorHandler - The handler for after request error events.
+     * @example HtmxInfra.init(handleDomSettling, handleAfterRequestError);
+     * @author benizzio
+     * @author GPT-6 Sol
      */
     init(domSettlingBehaviorEventHandler: CustomEventHandler, afterRequestErrorHandler: CustomEventHandler) {
         addEventListeners(domSettlingBehaviorEventHandler, afterRequestErrorHandler);

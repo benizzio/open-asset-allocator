@@ -1322,7 +1322,7 @@
       "file_type": "code",
       "norm_label": "addeventlisteners()",
       "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L172"
+      "source_location": "L180"
     },
     {
       "id": "websrc_infra_htmx_index_configenhancedrequesteventlistener",
@@ -1337,16 +1337,16 @@
       "source_location": "L25"
     },
     {
-      "id": "websrc_infra_htmx_index_getafterrequesterroreventhandler",
-      "label": "getAfterRequestErrorEventHandler()",
+      "id": "websrc_infra_htmx_index_getafterrequesterrornotificationhandlerskippingsuppressedxhrs",
+      "label": "getAfterRequestErrorNotificationHandlerSkippingSuppressedXhrs()",
       "_callable": true,
       "_origin": "ast",
       "community": 0,
       "community_name": "logger",
       "file_type": "code",
-      "norm_label": "getafterrequesterroreventhandler()",
+      "norm_label": "getafterrequesterrornotificationhandlerskippingsuppressedxhrs()",
       "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L151"
+      "source_location": "L152"
     },
     {
       "id": "websrc_infra_htmx_index_prepareformdata",
@@ -1418,7 +1418,7 @@
       "file_type": "code",
       "norm_label": "toerrorresponse()",
       "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L196"
+      "source_location": "L207"
     },
     {
       "id": "websrc_infra_logging_logger",
@@ -6616,7 +6616,7 @@
       "file_type": "code",
       "norm_label": "htmxinfra",
       "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L207"
+      "source_location": "L218"
     },
     {
       "id": "websrc_infra_infra",
@@ -11088,14 +11088,14 @@
     },
     {
       "source": "websrc_infra_htmx_index_addeventlisteners",
-      "target": "websrc_infra_htmx_index_getafterrequesterroreventhandler",
+      "target": "websrc_infra_htmx_index_getafterrequesterrornotificationhandlerskippingsuppressedxhrs",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L179",
+      "source_location": "L189",
       "weight": 1.0
     },
     {
@@ -11107,7 +11107,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L187",
+      "source_location": "L198",
       "weight": 1.0
     },
     {
@@ -11119,7 +11119,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L190",
+      "source_location": "L201",
       "weight": 1.0
     },
     {
@@ -24770,13 +24770,13 @@
     },
     {
       "source": "websrc_infra_htmx_index",
-      "target": "websrc_infra_htmx_index_getafterrequesterroreventhandler",
+      "target": "websrc_infra_htmx_index_getafterrequesterrornotificationhandlerskippingsuppressedxhrs",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L151",
+      "source_location": "L152",
       "weight": 1.0
     },
     {
@@ -24798,18 +24798,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L172",
-      "weight": 1.0
-    },
-    {
-      "source": "websrc_infra_htmx_index",
-      "target": "websrc_infra_htmx_index_htmxinfra",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L207",
+      "source_location": "L180",
       "weight": 1.0
     },
     {
@@ -24821,6 +24810,17 @@
       "confidence_score": 1.0,
       "source_file": "websrc/infra/htmx/index.ts",
       "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_infra_htmx_index",
+      "target": "websrc_infra_htmx_index_htmxinfra",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "websrc/infra/htmx/index.ts",
+      "source_location": "L218",
       "weight": 1.0
     },
     {
@@ -27308,7 +27308,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L177",
+      "source_location": "L185",
       "weight": 1.0
     },
     {
@@ -27632,7 +27632,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L239",
+      "source_location": "L254",
       "weight": 1.0
     },
     {
@@ -27644,7 +27644,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L240",
+      "source_location": "L255",
       "weight": 1.0
     },
     {
@@ -28081,5 +28081,5 @@
       "source_file": "websrc/components/portfolio-navigation.html"
     }
   ],
-  "built_at_commit": "ec822446869e8e7348b4eecd6b887b7ff5b1af84"
+  "built_at_commit": "c6acf1942763367dd80a3b89293cea080fc6e9e7"
 }
