@@ -40,6 +40,7 @@ const FORM_LAST_ROW_INDEX_INPUT_NAME = "last-planned-allocation-row-index";
 const FORM_FIELD_DEPENDENT_ATTRIBUTE = "data-bind-to-name";
 
 const ALLOCATION_HIERARCHY_LEVEL_MANAGING_FIELD_TEMP_PROPERTY_NAME = "currentManagingFieldName";
+const ALLOCATION_PLAN_MANAGEMENT_CONTAINER_ID = "accordion-allocation-plan-management";
 const ALLOCATION_PLAN_MANAGEMENT_FORM_PREFIX = "allocation-plan-management-form-";
 
 const ASSET_TICKER_FIELD_NAME_SUFFIX = "[asset][ticker]";
@@ -374,13 +375,35 @@ function validateDuplicateEntries(
     return containsDuplicates;
 }
 
+/** Binds validation to the forms produced by the latest allocation-plan list swap.
+ *
+ * @author GPT-6 Sol
+ */
+function bindAllocationPlanFormValidationGuards(container: Element): void {
+    container.querySelectorAll<HTMLFormElement>(`form[id^="${ ALLOCATION_PLAN_MANAGEMENT_FORM_PREFIX }"]`)
+        .forEach(form => AssetComposedColumnsInput.bindFormValidationGuards(form));
+}
+
 const allocationPlanManagement = {
 
     handlebarsAllocationPlanManagementRowTemplate: null as handlebars.TemplateDelegate,
 
+    /** Initializes the view or binds forms when its nested management list settles.
+     *
+     * @param event - HTMX settle event emitted by the view or management list.
+     * @param element - Outer management view that owns the nested list.
+     * @example `allocationPlanManagement.handleAfterSettle(event, this)`
+     * @author GPT-6 Sol
+     * @author benizzio
+     */
     handleAfterSettle(event: CustomEvent, element: HTMLElement) {
 
         if(event.target !== element) {
+            if(event.target instanceof Element
+                && event.target.id === ALLOCATION_PLAN_MANAGEMENT_CONTAINER_ID
+                && element.contains(event.target)) {
+                bindAllocationPlanFormValidationGuards(event.target);
+            }
             return;
         }
 

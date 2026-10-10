@@ -15,6 +15,7 @@
              hx-get="/api/portfolio/:portfolioId/history/observation"
              hx-include="[name='portfolioId']"
              hx-trigger="load, reload-portfolio-history-management"
+             hx-on::after-settle="portfolioHistoryManagement.handleAfterSettle(event, this)"
              handlebars-template="template-portfolio-history-management"
              data-hx-transform-response="addObservationZero"
              data-hx-transform-response-on-path-matching="^\/api\/portfolio\/.+\/history\/observation$"
@@ -144,7 +145,10 @@
 
 <script id="template-portfolio-history-management-form-tbody-row" type="text/x-handlebars-template">
 
-    <tr id="portfolio-history-management-form-{{observationTimestampId}}-row-{{allocationIndex}}">
+    <!-- Row-scoped selection generation starts at zero. Co-authored by: GPT-6 Luna and benizzio -->
+    <tr id="portfolio-history-management-form-{{observationTimestampId}}-row-{{allocationIndex}}"
+        data-asset-selection-generation="0"
+    >
 
         {{> asset-composed-columns-input
                 assetId=assetId
@@ -199,17 +203,63 @@
         </td>
 
         <td>
-            <input type="text"
-                   data-financial-input="allocations[{{allocationIndex}}][assetMarketPrice]"
-                   data-financial-input-decimals="8"
-                   placeholder="Market price"
-                   aria-label="Market price"
-                   autocomplete="off"
-                   class="form-control"
-                   value="{{assetMarketPrice}}"
-                   data-null-if-empty
-                   oninput="portfolioHistoryManagement.handleInputQuantityOrMarketPrice({{allocationIndex}}, {{observationTimestampId}})"
-            />
+            <div class="input-group portfolio-history-market-price">
+                <input type="text"
+                       data-financial-input="allocations[{{allocationIndex}}][assetMarketPrice]"
+                       data-financial-input-decimals="8"
+                       placeholder="Market price"
+                       aria-label="Market price"
+                       autocomplete="off"
+                       class="form-control"
+                       value="{{assetMarketPrice}}"
+                       data-null-if-empty
+                       oninput="portfolioHistoryManagement.handleInputQuantityOrMarketPrice({{allocationIndex}}, {{observationTimestampId}})"
+                />
+
+                <!-- Row-scoped read-only quote action. Co-authored by: GPT-6 Luna and benizzio -->
+                <button type="button"
+                        class="btn btn-secondary"
+                        title="Fetch latest closing price"
+                        aria-label="Fetch latest closing price"
+                        data-quote-action
+                        hidden
+                        hx-get="/api/asset/"
+                        hx-trigger="click queue:none"
+                        hx-params="none"
+                        hx-ext="ignore:form-json"
+                        hx-swap="none"
+                        hx-disabled-elt="this"
+                >
+                    <span class="bi bi-globe" data-quote-icon aria-hidden="true"></span>
+                    <span class="spinner-border spinner-border-sm"
+                          data-quote-spinner
+                          aria-hidden="true"
+                          hidden
+                    ></span>
+                </button>
+            </div>
+
+            <!-- Hidden first-provider keys for this allocation. Co-authored by: GPT-6 Luna, GPT-6 Sol and benizzio -->
+            <fieldset hidden
+                      data-external-asset-keys
+                      {{#unless (and externalAsset.source externalAsset.exchangeId externalAsset.ticker)}}disabled{{/unless}}
+            >
+                <input type="hidden"
+                       name="allocations[{{allocationIndex}}][externalAsset][source]"
+                       data-external-asset-key="source"
+                       value="{{#if (and externalAsset.source externalAsset.exchangeId externalAsset.ticker)}}{{externalAsset.source}}{{/if}}"
+                />
+                <input type="hidden"
+                       name="allocations[{{allocationIndex}}][externalAsset][exchangeId]"
+                       data-external-asset-key="exchangeId"
+                       value="{{#if (and externalAsset.source externalAsset.exchangeId externalAsset.ticker)}}{{externalAsset.exchangeId}}{{/if}}"
+                />
+                <input type="hidden"
+                       name="allocations[{{allocationIndex}}][externalAsset][ticker]"
+                       data-external-asset-key="ticker"
+                       value="{{#if (and externalAsset.source externalAsset.exchangeId externalAsset.ticker)}}{{externalAsset.ticker}}{{/if}}"
+                />
+            </fieldset>
         </td>
 
         <td>

@@ -69,6 +69,32 @@
   display: none !important;
 }
 
+/** Keeps the financial binder's generated wrapper and quote button aligned as one market-price input group.
+ *
+ * @author GPT-6 Luna
+ */
+.portfolio-history-market-price > [data-financial-input-container] {
+  flex: 1 1 auto;
+  width: 1%;
+  min-width: 0;
+}
+
+.portfolio-history-market-price.has-quote-action > [data-financial-input-container] > [data-financial-input] {
+  width: 100%;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.portfolio-history-market-price > [data-financial-input-container]:focus-within {
+  z-index: 5;
+}
+
+.portfolio-history-market-price [data-quote-icon][hidden],
+.portfolio-history-market-price [data-quote-action][hidden],
+.portfolio-history-market-price [data-quote-spinner][hidden] {
+  display: none !important;
+}
+
 .asset-search-autocomplete__suggestions {
   position: absolute;
   z-index: 110;

@@ -209,6 +209,23 @@ export default [
                                 "Import from the public API 'components/asset-composed-columns-input' (index.ts) only; " +
                                 "deep imports are not allowed.",
                         },
+                        // Block deep imports into the portfolio-history-quote module; use its public entry point
+                        // Authored by: GPT-6 Luna
+                        {
+                            group: [
+                                "**/portfolio-history-quote/*",
+                                "**/portfolio-history-quote/**",
+                                "portfolio-history-quote/*",
+                                "portfolio-history-quote/**",
+                                "./portfolio-history-quote/*",
+                                "./portfolio-history-quote/**",
+                                "../portfolio-history-quote/*",
+                                "../portfolio-history-quote/**",
+                            ],
+                            message:
+                                "Import from the public API 'components/portfolio-history-quote' (index.ts) only; " +
+                                "deep imports are not allowed.",
+                        },
                     ],
                 },
             ],

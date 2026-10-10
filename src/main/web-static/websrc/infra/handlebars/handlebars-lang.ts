@@ -1,3 +1,8 @@
+/** Provides general-purpose language helpers registered with the shared Handlebars instance.
+ *
+ * @module infra/handlebars/handlebars-lang
+ * @author GPT-6 Sol
+ */
 import * as handlebars from "handlebars";
 import { HelperOptions } from "handlebars";
 import { BigNumber } from "bignumber.js";
@@ -47,6 +52,28 @@ function objectHelper(this: unknown, options: { hash: Record<string, unknown> })
 function arrayHelper(...args: unknown[]): unknown[] {
     // The last argument is the Handlebars options object; exclude it.
     return args.slice(0, -1);
+}
+
+/** Returns true when every Handlebars argument is truthy, excluding helper options.
+ *
+ * @param args - Boolean operands followed by the Handlebars helper options.
+ * @returns Whether all operands are truthy (including the empty set).
+ * @example `{{#if (and asset.source asset.exchangeId asset.ticker)}}Complete{{/if}}`
+ * @author GPT-6 Sol
+ */
+function andHelper(...args: unknown[]): boolean {
+    return args.slice(0, -1).every(Boolean);
+}
+
+/** Returns true when any Handlebars argument is truthy, excluding helper options.
+ *
+ * @param args - Boolean operands followed by the Handlebars helper options.
+ * @returns Whether at least one operand is truthy.
+ * @example `{{#if (or asset.ticker asset.name)}}Named{{/if}}`
+ * @author GPT-6 Sol
+ */
+function orHelper(...args: unknown[]): boolean {
+    return args.slice(0, -1).some(Boolean);
 }
 
 /**
@@ -482,13 +509,17 @@ function comparatorHelper(a: unknown, b: unknown): number {
 /**
  * Registers custom Handlebars helpers that extend language functionality for template rendering.
  *
+ * @example `registerHandlebarsLangHelpers(); Handlebars.compile("{{#if (and a b)}}yes{{/if}}")({ a: true, b: true });`
  * @author GitHub Copilot
+ * @author GPT-6 Sol
  */
 export function registerHandlebarsLangHelpers() {
 
     // Register all helpers with their names
     handlebars.registerHelper("object", objectHelper);
     handlebars.registerHelper("array", arrayHelper);
+    handlebars.registerHelper("and", andHelper);
+    handlebars.registerHelper("or", orHelper);
     handlebars.registerHelper("stringify", stringifyHelper);
     handlebars.registerHelper("concat", concatHelper);
     handlebars.registerHelper("eachReverse", eachReverseHelper);
