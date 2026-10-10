@@ -35,19 +35,6 @@
   },
   "nodes": [
     {
-      "id": "websrc_api_api_apierror",
-      "label": "APIError",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "logger",
-      "file_type": "code",
-      "norm_label": "apierror",
-      "source_file": "websrc/api/api.ts",
-      "source_location": "L8"
-    },
-    {
       "id": "websrc_api_api_apierrorresponse",
       "label": "APIErrorResponse",
       "_callable": true,
@@ -72,19 +59,6 @@
       "norm_label": "beforeswapeventdetail",
       "source_file": "websrc/infra/htmx/index.ts",
       "source_location": "L23"
-    },
-    {
-      "id": "websrc_infra_htmx_index_eventdetail",
-      "label": "EventDetail",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "logger",
-      "file_type": "code",
-      "norm_label": "eventdetail",
-      "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L14"
     },
     {
       "id": "websrc_infra_logging_level",
@@ -126,136 +100,6 @@
       "source_location": "L4"
     },
     {
-      "id": "websrc_components_asset_composed_columns_input_autocomplete_controller_assetsearchautocompletecontroller",
-      "label": "AssetSearchAutocompleteController",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "assetsearchautocompletecontroller",
-      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-controller.ts",
-      "source_location": "L39"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_constants_assetselectionstate",
-      "label": "AssetSelectionState",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "assetselectionstate",
-      "source_file": "websrc/components/asset-composed-columns-input/constants.ts",
-      "source_location": "L51"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_selection_events_assetrowselectionchangedetail",
-      "label": "AssetRowSelectionChangeDetail",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "assetrowselectionchangedetail",
-      "source_file": "websrc/components/asset-composed-columns-input/selection-events.ts",
-      "source_location": "L58"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_selection_events_assetrowselectionchangeevent",
-      "label": "AssetRowSelectionChangeEvent",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "assetrowselectionchangeevent",
-      "source_file": "websrc/components/asset-composed-columns-input/selection-events.ts",
-      "source_location": "L76"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_selection_events_assetrowselectionchangepayload",
-      "label": "AssetRowSelectionChangePayload",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "assetrowselectionchangepayload",
-      "source_file": "websrc/components/asset-composed-columns-input/selection-events.ts",
-      "source_location": "L84"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_selection_events_assetrowselectionchangestate",
-      "label": "AssetRowSelectionChangeState",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "assetrowselectionchangestate",
-      "source_file": "websrc/components/asset-composed-columns-input/selection-events.ts",
-      "source_location": "L35"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_types_assetsearchautocompleteoption",
-      "label": "AssetSearchAutocompleteOption",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "assetsearchautocompleteoption",
-      "source_file": "websrc/components/asset-composed-columns-input/types.ts",
-      "source_location": "L11"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_types_assetsearchautocompletestate",
-      "label": "AssetSearchAutocompleteState",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "assetsearchautocompletestate",
-      "source_file": "websrc/components/asset-composed-columns-input/types.ts",
-      "source_location": "L21"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_types_assettickerselectionhandler",
-      "label": "AssetTickerSelectionHandler",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "assettickerselectionhandler",
-      "source_file": "websrc/components/asset-composed-columns-input/types.ts",
-      "source_location": "L59"
-    },
-    {
-      "id": "websrc_domain_asset_index_asset",
-      "label": "Asset",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "asset",
-      "source_file": "websrc/domain/asset/index.ts",
-      "source_location": "L21"
-    },
-    {
       "id": "websrc_application_allocation_plan_chart_fractalplannedallocationmultichartdatasource",
       "label": "FractalPlannedAllocationMultiChartDataSource",
       "_callable": true,
@@ -282,17 +126,30 @@
       "source_location": "L33"
     },
     {
-      "id": "websrc_components_portfolio_history_management_formrowvalueelements",
-      "label": "FormRowValueElements",
+      "id": "websrc_components_portfolio_history_quote_quote_action_portfoliohistoryquoteaction",
+      "label": "PortfolioHistoryQuoteAction",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 11,
       "community_name": "portfolio-history-management.ts",
       "file_type": "code",
-      "norm_label": "formrowvalueelements",
-      "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L184"
+      "norm_label": "portfoliohistoryquoteaction",
+      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
+      "source_location": "L100"
+    },
+    {
+      "id": "websrc_components_portfolio_history_quote_quote_action_recalculateportfolioallocation",
+      "label": "RecalculatePortfolioAllocation",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "recalculateportfolioallocation",
+      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
+      "source_location": "L84"
     },
     {
       "id": "websrc_infra_chart_chart_types_chartdatasource",
@@ -399,6 +256,45 @@
       "source_location": "L8"
     },
     {
+      "id": "websrc_domain_allocation_allocationhierarchylevel",
+      "label": "AllocationHierarchyLevel",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 14,
+      "community_name": "portfolio-chart.ts",
+      "file_type": "code",
+      "norm_label": "allocationhierarchylevel",
+      "source_file": "websrc/domain/allocation.ts",
+      "source_location": "L9"
+    },
+    {
+      "id": "websrc_domain_allocation_allocationstructure",
+      "label": "AllocationStructure",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 14,
+      "community_name": "portfolio-chart.ts",
+      "file_type": "code",
+      "norm_label": "allocationstructure",
+      "source_file": "websrc/domain/allocation.ts",
+      "source_location": "L15"
+    },
+    {
+      "id": "websrc_domain_portfolio_allocation_observationtimestamp",
+      "label": "ObservationTimestamp",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 14,
+      "community_name": "portfolio-chart.ts",
+      "file_type": "code",
+      "norm_label": "observationtimestamp",
+      "source_file": "websrc/domain/portfolio-allocation.ts",
+      "source_location": "L3"
+    },
+    {
       "id": "websrc_domain_portfolio_allocation_portfolioallocation",
       "label": "PortfolioAllocation",
       "_callable": true,
@@ -451,6 +347,45 @@
       "source_location": "L24"
     },
     {
+      "id": "websrc_domain_portfolio_analysis_divergenceanalysis",
+      "label": "DivergenceAnalysis",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 14,
+      "community_name": "portfolio-chart.ts",
+      "file_type": "code",
+      "norm_label": "divergenceanalysis",
+      "source_file": "websrc/domain/portfolio-analysis.ts",
+      "source_location": "L12"
+    },
+    {
+      "id": "websrc_domain_portfolio_analysis_potentialdivergence",
+      "label": "PotentialDivergence",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 14,
+      "community_name": "portfolio-chart.ts",
+      "file_type": "code",
+      "norm_label": "potentialdivergence",
+      "source_file": "websrc/domain/portfolio-analysis.ts",
+      "source_location": "L3"
+    },
+    {
+      "id": "websrc_infra_htmx_index_afterrequesteventdetail",
+      "label": "AfterRequestEventDetail",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 16,
+      "community_name": "infra.ts",
+      "file_type": "code",
+      "norm_label": "afterrequesteventdetail",
+      "source_file": "websrc/infra/htmx/index.ts",
+      "source_location": "L21"
+    },
+    {
       "id": "websrc_infra_infra_generalerrorhandler",
       "label": "GeneralErrorHandler",
       "_callable": true,
@@ -462,19 +397,6 @@
       "norm_label": "generalerrorhandler",
       "source_file": "websrc/infra/infra.ts",
       "source_location": "L12"
-    },
-    {
-      "id": "websrc_infra_infra_types_customeventhandler",
-      "label": "CustomEventHandler",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 16,
-      "community_name": "infra.ts",
-      "file_type": "code",
-      "norm_label": "customeventhandler",
-      "source_file": "websrc/infra/infra-types.ts",
-      "source_location": "L1"
     },
     {
       "id": "websrc_infra_chart_chart_types_chartdatatype",
@@ -501,6 +423,19 @@
       "norm_label": "bootstrapnotification",
       "source_file": "websrc/components/notifications.ts",
       "source_location": "L7"
+    },
+    {
+      "id": "websrc_infra_infra_types_customeventhandler",
+      "label": "CustomEventHandler",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "notifications.ts",
+      "file_type": "code",
+      "norm_label": "customeventhandler",
+      "source_file": "websrc/infra/infra-types.ts",
+      "source_location": "L1"
     },
     {
       "id": "websrc_infra_infra_types_notification",
@@ -555,32 +490,6 @@
       "source_location": "L13"
     },
     {
-      "id": "websrc_infra_chart_chart_types_measuramentunit",
-      "label": "MeasuramentUnit",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "chart.ts",
-      "file_type": "code",
-      "norm_label": "measuramentunit",
-      "source_file": "websrc/infra/chart/chart-types.ts",
-      "source_location": "L3"
-    },
-    {
-      "id": "websrc_domain_allocation_allocationhierarchylevel",
-      "label": "AllocationHierarchyLevel",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "allocation-plan.ts",
-      "file_type": "code",
-      "norm_label": "allocationhierarchylevel",
-      "source_file": "websrc/domain/allocation.ts",
-      "source_location": "L9"
-    },
-    {
       "id": "websrc_domain_allocation_allocationhierarchyleveldto",
       "label": "AllocationHierarchyLevelDTO",
       "_callable": true,
@@ -605,19 +514,6 @@
       "norm_label": "allocationplantype",
       "source_file": "websrc/domain/allocation.ts",
       "source_location": "L1"
-    },
-    {
-      "id": "websrc_domain_allocation_allocationstructure",
-      "label": "AllocationStructure",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "allocation-plan.ts",
-      "file_type": "code",
-      "norm_label": "allocationstructure",
-      "source_file": "websrc/domain/allocation.ts",
-      "source_location": "L15"
     },
     {
       "id": "websrc_domain_allocation_allocationstructuredto",
@@ -789,43 +685,69 @@
       "source_location": "L9"
     },
     {
-      "id": "websrc_components_portfolio_history_quote_quote_action_portfoliohistoryquoteaction",
-      "label": "PortfolioHistoryQuoteAction",
+      "id": "websrc_components_asset_composed_columns_input_selection_events_assetrowselectionchangedetail",
+      "label": "AssetRowSelectionChangeDetail",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 26,
-      "community_name": "quote-action.ts",
+      "community": 23,
+      "community_name": "asset-composed-columns-input/index.ts",
       "file_type": "code",
-      "norm_label": "portfoliohistoryquoteaction",
-      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L51"
+      "norm_label": "assetrowselectionchangedetail",
+      "source_file": "websrc/components/asset-composed-columns-input/selection-events.ts",
+      "source_location": "L58"
     },
     {
-      "id": "websrc_components_portfolio_history_quote_quote_action_recalculateportfolioallocation",
-      "label": "RecalculatePortfolioAllocation",
+      "id": "websrc_components_asset_composed_columns_input_selection_events_assetrowselectionchangeevent",
+      "label": "AssetRowSelectionChangeEvent",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 26,
-      "community_name": "quote-action.ts",
+      "community": 23,
+      "community_name": "asset-composed-columns-input/index.ts",
       "file_type": "code",
-      "norm_label": "recalculateportfolioallocation",
-      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
+      "norm_label": "assetrowselectionchangeevent",
+      "source_file": "websrc/components/asset-composed-columns-input/selection-events.ts",
+      "source_location": "L76"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_selection_events_assetrowselectionchangepayload",
+      "label": "AssetRowSelectionChangePayload",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "asset-composed-columns-input/index.ts",
+      "file_type": "code",
+      "norm_label": "assetrowselectionchangepayload",
+      "source_file": "websrc/components/asset-composed-columns-input/selection-events.ts",
+      "source_location": "L84"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_selection_events_assetrowselectionchangestate",
+      "label": "AssetRowSelectionChangeState",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "asset-composed-columns-input/index.ts",
+      "file_type": "code",
+      "norm_label": "assetrowselectionchangestate",
+      "source_file": "websrc/components/asset-composed-columns-input/selection-events.ts",
       "source_location": "L35"
     },
     {
-      "id": "websrc_infra_htmx_index_afterrequesteventdetail",
-      "label": "AfterRequestEventDetail",
+      "id": "websrc_infra_htmx_index_eventdetail",
+      "label": "EventDetail",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 26,
-      "community_name": "quote-action.ts",
+      "community_name": "htmx/index.ts",
       "file_type": "code",
-      "norm_label": "afterrequesteventdetail",
+      "norm_label": "eventdetail",
       "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L21"
+      "source_location": "L14"
     },
     {
       "id": "websrc_infra_htmx_index_requestconfigeventdetail",
@@ -834,7 +756,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 26,
-      "community_name": "quote-action.ts",
+      "community_name": "htmx/index.ts",
       "file_type": "code",
       "norm_label": "requestconfigeventdetail",
       "source_file": "websrc/infra/htmx/index.ts",
@@ -865,6 +787,123 @@
       "norm_label": "tointoptions",
       "source_file": "websrc/utils/lang.ts",
       "source_location": "L394"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_autocomplete_controller_assetsearchautocompletecontroller",
+      "label": "AssetSearchAutocompleteController",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "AssetSearchAutocompleteController",
+      "file_type": "code",
+      "norm_label": "assetsearchautocompletecontroller",
+      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-controller.ts",
+      "source_location": "L39"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_types_assetsearchautocompleteoption",
+      "label": "AssetSearchAutocompleteOption",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "AssetSearchAutocompleteController",
+      "file_type": "code",
+      "norm_label": "assetsearchautocompleteoption",
+      "source_file": "websrc/components/asset-composed-columns-input/types.ts",
+      "source_location": "L11"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_types_assetsearchautocompletestate",
+      "label": "AssetSearchAutocompleteState",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "AssetSearchAutocompleteController",
+      "file_type": "code",
+      "norm_label": "assetsearchautocompletestate",
+      "source_file": "websrc/components/asset-composed-columns-input/types.ts",
+      "source_location": "L21"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_types_assettickerselectionhandler",
+      "label": "AssetTickerSelectionHandler",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "AssetSearchAutocompleteController",
+      "file_type": "code",
+      "norm_label": "assettickerselectionhandler",
+      "source_file": "websrc/components/asset-composed-columns-input/types.ts",
+      "source_location": "L59"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_types_autocompletecontrolleractions",
+      "label": "AutocompleteControllerActions",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 35,
+      "community_name": "autocomplete-interactions.ts",
+      "file_type": "code",
+      "norm_label": "autocompletecontrolleractions",
+      "source_file": "websrc/components/asset-composed-columns-input/types.ts",
+      "source_location": "L40"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_constants_assetselectionstate",
+      "label": "AssetSelectionState",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 36,
+      "community_name": "AssetSelectionState",
+      "file_type": "code",
+      "norm_label": "assetselectionstate",
+      "source_file": "websrc/components/asset-composed-columns-input/constants.ts",
+      "source_location": "L51"
+    },
+    {
+      "id": "websrc_components_portfolio_history_management_formrowvalueelements",
+      "label": "FormRowValueElements",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 37,
+      "community_name": "FormRowValueElements",
+      "file_type": "code",
+      "norm_label": "formrowvalueelements",
+      "source_file": "websrc/components/portfolio-history-management.ts",
+      "source_location": "L161"
+    },
+    {
+      "id": "websrc_api_api_apierror",
+      "label": "APIError",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "asset.ts",
+      "file_type": "code",
+      "norm_label": "apierror",
+      "source_file": "websrc/api/api.ts",
+      "source_location": "L8"
+    },
+    {
+      "id": "websrc_domain_asset_index_asset",
+      "label": "Asset",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "asset.ts",
+      "file_type": "code",
+      "norm_label": "asset",
+      "source_file": "websrc/domain/asset/index.ts",
+      "source_location": "L21"
     },
     {
       "id": "websrc_domain_asset_index_externalasset",
@@ -932,45 +971,6 @@
       "source_location": "L22"
     },
     {
-      "id": "websrc_domain_portfolio_allocation_observationtimestamp",
-      "label": "ObservationTimestamp",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "binding-financial-input.ts",
-      "file_type": "code",
-      "norm_label": "observationtimestamp",
-      "source_file": "websrc/domain/portfolio-allocation.ts",
-      "source_location": "L3"
-    },
-    {
-      "id": "websrc_domain_portfolio_analysis_divergenceanalysis",
-      "label": "DivergenceAnalysis",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "binding-financial-input.ts",
-      "file_type": "code",
-      "norm_label": "divergenceanalysis",
-      "source_file": "websrc/domain/portfolio-analysis.ts",
-      "source_location": "L12"
-    },
-    {
-      "id": "websrc_domain_portfolio_analysis_potentialdivergence",
-      "label": "PotentialDivergence",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "binding-financial-input.ts",
-      "file_type": "code",
-      "norm_label": "potentialdivergence",
-      "source_file": "websrc/domain/portfolio-analysis.ts",
-      "source_location": "L3"
-    },
-    {
       "id": "websrc_components_allocation_plan_management_allocationplanninghierarchicalformentry",
       "label": "AllocationPlanningHierarchicalFormEntry",
       "_callable": true,
@@ -1023,6 +1023,19 @@
       "source_location": "L19"
     },
     {
+      "id": "websrc_infra_chart_chart_types_measuramentunit",
+      "label": "MeasuramentUnit",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "chart-utils.ts",
+      "file_type": "code",
+      "norm_label": "measuramentunit",
+      "source_file": "websrc/infra/chart/chart-types.ts",
+      "source_location": "L3"
+    },
+    {
       "id": "websrc_components_asset_composed_columns_input_asset_row_controller_assetrowcontroller",
       "label": "AssetRowController",
       "_callable": true,
@@ -1036,17 +1049,64 @@
       "source_location": "L49"
     },
     {
-      "id": "websrc_components_asset_composed_columns_input_types_autocompletecontrolleractions",
-      "label": "AutocompleteControllerActions",
+      "id": "websrc_infra_dom_binding_dom_exclusive_display_adddisplayobserver",
+      "label": "addDisplayObserver()",
       "_callable": true,
-      "_callable_class": true,
       "_origin": "ast",
-      "community": 9,
-      "community_name": "AssetRowController",
+      "community": 0,
+      "community_name": "logger",
       "file_type": "code",
-      "norm_label": "autocompletecontrolleractions",
-      "source_file": "websrc/components/asset-composed-columns-input/types.ts",
+      "norm_label": "adddisplayobserver()",
+      "source_file": "websrc/infra/dom/binding-dom-exclusive-display.ts",
+      "source_location": "L46"
+    },
+    {
+      "id": "websrc_infra_dom_binding_dom_exclusive_display_bindexclusivedisplay",
+      "label": "bindExclusiveDisplay()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "logger",
+      "file_type": "code",
+      "norm_label": "bindexclusivedisplay()",
+      "source_file": "websrc/infra/dom/binding-dom-exclusive-display.ts",
       "source_location": "L40"
+    },
+    {
+      "id": "websrc_infra_dom_binding_dom_exclusive_display_bindexclusivedisplaycontainerindescendants",
+      "label": "bindExclusiveDisplayContainerInDescendants()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "logger",
+      "file_type": "code",
+      "norm_label": "bindexclusivedisplaycontainerindescendants()",
+      "source_file": "websrc/infra/dom/binding-dom-exclusive-display.ts",
+      "source_location": "L7"
+    },
+    {
+      "id": "websrc_infra_dom_binding_dom_exclusive_display_bindexclusivedisplayindescendants",
+      "label": "bindExclusiveDisplayInDescendants()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "logger",
+      "file_type": "code",
+      "norm_label": "bindexclusivedisplayindescendants()",
+      "source_file": "websrc/infra/dom/binding-dom-exclusive-display.ts",
+      "source_location": "L14"
+    },
+    {
+      "id": "websrc_infra_dom_binding_dom_exclusive_display_hideallsiblings",
+      "label": "hideAllSiblings()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "logger",
+      "file_type": "code",
+      "norm_label": "hideallsiblings()",
+      "source_file": "websrc/infra/dom/binding-dom-exclusive-display.ts",
+      "source_location": "L60"
     },
     {
       "id": "websrc_infra_dom_binding_percentage_input_bindpercentageinput",
@@ -1143,6 +1203,78 @@
       "norm_label": "syncpercentagetodecimalincontainer()",
       "source_file": "websrc/infra/dom/binding-percentage-input.ts",
       "source_location": "L228"
+    },
+    {
+      "id": "websrc_infra_dom_dom_utils_addremoveobserver",
+      "label": "addRemoveObserver()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "logger",
+      "file_type": "code",
+      "norm_label": "addremoveobserver()",
+      "source_file": "websrc/infra/dom/dom-utils.ts",
+      "source_location": "L57"
+    },
+    {
+      "id": "websrc_infra_dom_dom_utils_ensuresharedobserver",
+      "label": "ensureSharedObserver()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "logger",
+      "file_type": "code",
+      "norm_label": "ensuresharedobserver()",
+      "source_file": "websrc/infra/dom/dom-utils.ts",
+      "source_location": "L37"
+    },
+    {
+      "id": "websrc_infra_dom_dom_utils_escapehtmlvalue",
+      "label": "escapeHtmlValue()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "logger",
+      "file_type": "code",
+      "norm_label": "escapehtmlvalue()",
+      "source_file": "websrc/infra/dom/dom-utils.ts",
+      "source_location": "L66"
+    },
+    {
+      "id": "websrc_infra_dom_dom_utils_escapehtmlvaluepreservequotes",
+      "label": "escapeHtmlValuePreserveQuotes()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "logger",
+      "file_type": "code",
+      "norm_label": "escapehtmlvaluepreservequotes()",
+      "source_file": "websrc/infra/dom/dom-utils.ts",
+      "source_location": "L75"
+    },
+    {
+      "id": "websrc_infra_dom_dom_utils_getcacheablecontextdata",
+      "label": "getCacheableContextData()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "logger",
+      "file_type": "code",
+      "norm_label": "getcacheablecontextdata()",
+      "source_file": "websrc/infra/dom/dom-utils.ts",
+      "source_location": "L15"
+    },
+    {
+      "id": "websrc_infra_dom_dom_utils_queryfirst",
+      "label": "queryFirst()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "logger",
+      "file_type": "code",
+      "norm_label": "queryfirst()",
+      "source_file": "websrc/infra/dom/dom-utils.ts",
+      "source_location": "L62"
     },
     {
       "id": "websrc_infra_htmx_binding_htmx_transform_response_bindhtmxtransformresponseelement",
@@ -1311,114 +1443,6 @@
       "norm_label": "parserequiredconditions()",
       "source_file": "websrc/infra/htmx/binding-htmx-wait-for-ready.ts",
       "source_location": "L61"
-    },
-    {
-      "id": "websrc_infra_htmx_index_addeventlisteners",
-      "label": "addEventListeners()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "logger",
-      "file_type": "code",
-      "norm_label": "addeventlisteners()",
-      "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L172"
-    },
-    {
-      "id": "websrc_infra_htmx_index_configenhancedrequesteventlistener",
-      "label": "configEnhancedRequestEventListener()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "logger",
-      "file_type": "code",
-      "norm_label": "configenhancedrequesteventlistener()",
-      "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L25"
-    },
-    {
-      "id": "websrc_infra_htmx_index_getafterrequesterroreventhandler",
-      "label": "getAfterRequestErrorEventHandler()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "logger",
-      "file_type": "code",
-      "norm_label": "getafterrequesterroreventhandler()",
-      "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L151"
-    },
-    {
-      "id": "websrc_infra_htmx_index_prepareformdata",
-      "label": "prepareFormData()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "logger",
-      "file_type": "code",
-      "norm_label": "prepareformdata()",
-      "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L128"
-    },
-    {
-      "id": "websrc_infra_htmx_index_replacerequestpathparams",
-      "label": "replaceRequestPathParams()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "logger",
-      "file_type": "code",
-      "norm_label": "replacerequestpathparams()",
-      "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L35"
-    },
-    {
-      "id": "websrc_infra_htmx_index_replacerequestpathparamsfromcurrentroute",
-      "label": "replaceRequestPathParamsFromCurrentRoute()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "logger",
-      "file_type": "code",
-      "norm_label": "replacerequestpathparamsfromcurrentroute()",
-      "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L115"
-    },
-    {
-      "id": "websrc_infra_htmx_index_replacerequestpathparamsfromeventchain",
-      "label": "replaceRequestPathParamsFromEventChain()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "logger",
-      "file_type": "code",
-      "norm_label": "replacerequestpathparamsfromeventchain()",
-      "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L55"
-    },
-    {
-      "id": "websrc_infra_htmx_index_replacerequestpathparamsfromformdata",
-      "label": "replaceRequestPathParamsFromFormData()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "logger",
-      "file_type": "code",
-      "norm_label": "replacerequestpathparamsfromformdata()",
-      "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L82"
-    },
-    {
-      "id": "websrc_infra_htmx_index_toerrorresponse",
-      "label": "toErrorResponse()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "logger",
-      "file_type": "code",
-      "norm_label": "toerrorresponse()",
-      "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L196"
     },
     {
       "id": "websrc_infra_logging_logger",
@@ -1841,150 +1865,6 @@
       "source_location": "L14"
     },
     {
-      "id": "websrc_components_asset_composed_columns_input_autocomplete_controller_assetsearchautocompletecontroller_clearhighlight",
-      "label": ".clearHighlight()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": ".clearhighlight()",
-      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-controller.ts",
-      "source_location": "L280"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_autocomplete_controller_assetsearchautocompletecontroller_close",
-      "label": ".close()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": ".close()",
-      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-controller.ts",
-      "source_location": "L137"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_autocomplete_controller_assetsearchautocompletecontroller_constructor",
-      "label": ".constructor()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": ".constructor()",
-      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-controller.ts",
-      "source_location": "L49"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_autocomplete_controller_assetsearchautocompletecontroller_createstate",
-      "label": ".createState()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": ".createstate()",
-      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-controller.ts",
-      "source_location": "L344"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_autocomplete_controller_assetsearchautocompletecontroller_ensuredatalistlifecyclelistener",
-      "label": ".ensureDatalistLifecycleListener()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": ".ensuredatalistlifecyclelistener()",
-      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-controller.ts",
-      "source_location": "L318"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_autocomplete_controller_assetsearchautocompletecontroller_ensurestate",
-      "label": ".ensureState()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": ".ensurestate()",
-      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-controller.ts",
-      "source_location": "L56"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_autocomplete_controller_assetsearchautocompletecontroller_getstate",
-      "label": ".getState()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": ".getstate()",
-      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-controller.ts",
-      "source_location": "L78"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_autocomplete_controller_assetsearchautocompletecontroller_highlight",
-      "label": ".highlight()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": ".highlight()",
-      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-controller.ts",
-      "source_location": "L244"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_autocomplete_controller_assetsearchautocompletecontroller_open",
-      "label": ".open()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": ".open()",
-      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-controller.ts",
-      "source_location": "L87"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_autocomplete_controller_assetsearchautocompletecontroller_render",
-      "label": ".render()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": ".render()",
-      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-controller.ts",
-      "source_location": "L171"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_autocomplete_controller_assetsearchautocompletecontroller_selectoption",
-      "label": ".selectOption()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": ".selectoption()",
-      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-controller.ts",
-      "source_location": "L301"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_form_validation_installassetformvalidationguards",
-      "label": "installAssetFormValidationGuards()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "installassetformvalidationguards()",
-      "source_file": "websrc/components/asset-composed-columns-input/form-validation.ts",
-      "source_location": "L99"
-    },
-    {
       "id": "websrc_components_asset_composed_columns_input_form_validation_invalidateselectedasset",
       "label": "invalidateSelectedAsset()",
       "_callable": true,
@@ -1997,42 +1877,6 @@
       "source_location": "L149"
     },
     {
-      "id": "websrc_components_asset_composed_columns_input_form_validation_validateassetrowforpost",
-      "label": "validateAssetRowForPost()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "validateassetrowforpost()",
-      "source_file": "websrc/components/asset-composed-columns-input/form-validation.ts",
-      "source_location": "L23"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_form_validation_validateassetrowsforpost",
-      "label": "validateAssetRowsForPost()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "validateassetrowsforpost()",
-      "source_file": "websrc/components/asset-composed-columns-input/form-validation.ts",
-      "source_location": "L68"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_index_loaddatalists",
-      "label": "loadDatalists()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "loaddatalists()",
-      "source_file": "websrc/components/asset-composed-columns-input/index.ts",
-      "source_location": "L61"
-    },
-    {
       "id": "websrc_application_allocation_plan_chart_chartdataselectioneventhandler",
       "label": "chartDataSelectionEventHandler()",
       "_callable": true,
@@ -2043,18 +1887,6 @@
       "norm_label": "chartdataselectioneventhandler()",
       "source_file": "websrc/application/allocation-plan-chart.ts",
       "source_location": "L99"
-    },
-    {
-      "id": "websrc_application_allocation_plan_chart_fractalplannedallocationmultichartdatasource_constructor",
-      "label": ".constructor()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 10,
-      "community_name": "allocation-plan-chart.ts",
-      "file_type": "code",
-      "norm_label": ".constructor()",
-      "source_file": "websrc/application/allocation-plan-chart.ts",
-      "source_location": "L17"
     },
     {
       "id": "websrc_application_allocation_plan_chart_fractalplannedallocationmultichartdatasource_getchartdata",
@@ -2177,18 +2009,6 @@
       "source_location": "L86"
     },
     {
-      "id": "websrc_infra_chart_chart_utils_changechartdataondatasource",
-      "label": "changeChartDataOnDatasource()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 10,
-      "community_name": "allocation-plan-chart.ts",
-      "file_type": "code",
-      "norm_label": "changechartdataondatasource()",
-      "source_file": "websrc/infra/chart/chart-utils.ts",
-      "source_location": "L50"
-    },
-    {
       "id": "websrc_components_portfolio_history_management_focusonnewline",
       "label": "focusOnNewLine()",
       "_callable": true,
@@ -2198,67 +2018,7 @@
       "file_type": "code",
       "norm_label": "focusonnewline()",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L223"
-    },
-    {
-      "id": "websrc_components_portfolio_history_management_formrowvalueelements_constructor",
-      "label": ".constructor()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "portfolio-history-management.ts",
-      "file_type": "code",
-      "norm_label": ".constructor()",
-      "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L190"
-    },
-    {
-      "id": "websrc_components_portfolio_history_management_formrowvalueelements_handleinputquantityormarketprice",
-      "label": ".handleInputQuantityOrMarketPrice()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "portfolio-history-management.ts",
-      "file_type": "code",
-      "norm_label": ".handleinputquantityormarketprice()",
-      "source_file": "websrc/components/portfolio-history-management.ts",
       "source_location": "L200"
-    },
-    {
-      "id": "websrc_components_portfolio_history_management_formrowvalueelements_handleinputtotalmarketvalue",
-      "label": ".handleInputTotalMarketValue()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "portfolio-history-management.ts",
-      "file_type": "code",
-      "norm_label": ".handleinputtotalmarketvalue()",
-      "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L217"
-    },
-    {
-      "id": "websrc_components_portfolio_history_management_getnextportfoliohistorymanagementindex",
-      "label": "getNextPortfolioHistoryManagementIndex()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "portfolio-history-management.ts",
-      "file_type": "code",
-      "norm_label": "getnextportfoliohistorymanagementindex()",
-      "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L233"
-    },
-    {
-      "id": "websrc_components_portfolio_history_management_gettrimmedexternalassetkeys",
-      "label": "getTrimmedExternalAssetKeys()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "portfolio-history-management.ts",
-      "file_type": "code",
-      "norm_label": "gettrimmedexternalassetkeys()",
-      "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L53"
     },
     {
       "id": "websrc_components_portfolio_history_management_handleassetrowselectionchange",
@@ -2270,7 +2030,7 @@
       "file_type": "code",
       "norm_label": "handleassetrowselectionchange()",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L135"
+      "source_location": "L112"
     },
     {
       "id": "websrc_components_portfolio_history_management_modifyobservationsresponse",
@@ -2282,7 +2042,7 @@
       "file_type": "code",
       "norm_label": "modifyobservationsresponse()",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L241"
+      "source_location": "L218"
     },
     {
       "id": "websrc_components_portfolio_history_management_normalizeportfoliohistoryrow",
@@ -2294,7 +2054,7 @@
       "file_type": "code",
       "norm_label": "normalizeportfoliohistoryrow()",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L109"
+      "source_location": "L86"
     },
     {
       "id": "websrc_components_portfolio_history_management_normalizeportfoliohistoryrowswithin",
@@ -2306,7 +2066,7 @@
       "file_type": "code",
       "norm_label": "normalizeportfoliohistoryrowswithin()",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L174"
+      "source_location": "L151"
     },
     {
       "id": "websrc_components_portfolio_history_management_propagaterefreshdataafterpost",
@@ -2318,19 +2078,7 @@
       "file_type": "code",
       "norm_label": "propagaterefreshdataafterpost()",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L256"
-    },
-    {
-      "id": "websrc_components_portfolio_history_management_recalculateportfoliohistoryallocation",
-      "label": "recalculatePortfolioHistoryAllocation()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "portfolio-history-management.ts",
-      "file_type": "code",
-      "norm_label": "recalculateportfoliohistoryallocation()",
-      "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L45"
+      "source_location": "L233"
     },
     {
       "id": "websrc_components_portfolio_history_management_synchronizeexternalassetkeygroup",
@@ -2342,7 +2090,19 @@
       "file_type": "code",
       "norm_label": "synchronizeexternalassetkeygroup()",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L80"
+      "source_location": "L57"
+    },
+    {
+      "id": "websrc_components_portfolio_history_quote_quote_action_readexternalassetkeys",
+      "label": "readExternalAssetKeys()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "readexternalassetkeys()",
+      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
+      "source_location": "L58"
     },
     {
       "id": "websrc_infra_chart_chart_types_chartdatasource_accept",
@@ -2499,6 +2259,30 @@
       "norm_label": ".haschartdata()",
       "source_file": "websrc/infra/chart/chart-types.ts",
       "source_location": "L51"
+    },
+    {
+      "id": "websrc_application_portfolio_analysis_getvaluelabel",
+      "label": "getValueLabel()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 14,
+      "community_name": "portfolio-chart.ts",
+      "file_type": "code",
+      "norm_label": "getvaluelabel()",
+      "source_file": "websrc/application/portfolio-analysis.ts",
+      "source_location": "L60"
+    },
+    {
+      "id": "websrc_application_portfolio_analysis_registerportfolioanalysishandlebarshelpers",
+      "label": "registerPortfolioAnalysisHandlebarsHelpers()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 14,
+      "community_name": "portfolio-chart.ts",
+      "file_type": "code",
+      "norm_label": "registerportfolioanalysishandlebarshelpers()",
+      "source_file": "websrc/application/portfolio-analysis.ts",
+      "source_location": "L14"
     },
     {
       "id": "websrc_application_portfolio_chart_portfolio_chart_changechartdata",
@@ -2693,6 +2477,30 @@
       "source_location": "L9"
     },
     {
+      "id": "websrc_domain_service_mapping_portfolio_allocation_mapping_maptoportfoliosnapshot",
+      "label": "mapToPortfolioSnapshot()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 14,
+      "community_name": "portfolio-chart.ts",
+      "file_type": "code",
+      "norm_label": "maptoportfoliosnapshot()",
+      "source_file": "websrc/domain/service/mapping/portfolio-allocation-mapping.ts",
+      "source_location": "L4"
+    },
+    {
+      "id": "websrc_infra_chart_chart_utils_changechartdataondatasource",
+      "label": "changeChartDataOnDatasource()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 14,
+      "community_name": "portfolio-chart.ts",
+      "file_type": "code",
+      "norm_label": "changechartdataondatasource()",
+      "source_file": "websrc/infra/chart/chart-utils.ts",
+      "source_location": "L50"
+    },
+    {
       "id": "websrc_infra_infra_bootrouterdebouncing",
       "label": "bootRouterDebouncing()",
       "_callable": true,
@@ -2739,6 +2547,30 @@
       "norm_label": "setupglobalerrorhandler()",
       "source_file": "websrc/infra/infra.ts",
       "source_location": "L74"
+    },
+    {
+      "id": "websrc_root_after_request_error_handler",
+      "label": "AFTER_REQUEST_ERROR_HANDLER()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 16,
+      "community_name": "infra.ts",
+      "file_type": "code",
+      "norm_label": "after_request_error_handler()",
+      "source_file": "websrc/root.ts",
+      "source_location": "L6"
+    },
+    {
+      "id": "websrc_root_general_uncaught_error_handler",
+      "label": "GENERAL_UNCAUGHT_ERROR_HANDLER()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 16,
+      "community_name": "infra.ts",
+      "file_type": "code",
+      "norm_label": "general_uncaught_error_handler()",
+      "source_file": "websrc/root.ts",
+      "source_location": "L26"
     },
     {
       "id": "websrc_application_chart_contents_tochartcontent",
@@ -2859,6 +2691,18 @@
       "norm_label": "registerhandlebarscharthelper()",
       "source_file": "websrc/infra/handlebars/handlebars-chart.ts",
       "source_location": "L35"
+    },
+    {
+      "id": "websrc_application_allocation_plan_chart_fractalplannedallocationmultichartdatasource_constructor",
+      "label": ".constructor()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "allocation-plan.ts",
+      "file_type": "code",
+      "norm_label": ".constructor()",
+      "source_file": "websrc/application/allocation-plan-chart.ts",
+      "source_location": "L17"
     },
     {
       "id": "websrc_domain_service_allocation_utils_getallocationhierarchysize",
@@ -3113,18 +2957,6 @@
       "source_location": "L12"
     },
     {
-      "id": "websrc_domain_service_mapping_portfolio_allocation_mapping_maptoportfoliosnapshot",
-      "label": "mapToPortfolioSnapshot()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "allocation-plan.ts",
-      "file_type": "code",
-      "norm_label": "maptoportfoliosnapshot()",
-      "source_file": "websrc/domain/service/mapping/portfolio-allocation-mapping.ts",
-      "source_location": "L4"
-    },
-    {
       "id": "websrc_domain_service_mapping_portfolio_mapping_maptoportfolio",
       "label": "mapToPortfolio()",
       "_callable": true,
@@ -3146,7 +2978,7 @@
       "file_type": "code",
       "norm_label": "createportfoliohistoryquoteaction()",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L84"
+      "source_location": "L133"
     },
     {
       "id": "websrc_components_portfolio_history_quote_quote_action_createportfoliohistoryquoteaction_applylatestclosingquote",
@@ -3158,7 +2990,7 @@
       "file_type": "code",
       "norm_label": "applylatestclosingquote()",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L430"
+      "source_location": "L482"
     },
     {
       "id": "websrc_components_portfolio_history_quote_quote_action_createportfoliohistoryquoteaction_bindrow",
@@ -3170,7 +3002,7 @@
       "file_type": "code",
       "norm_label": "bindrow()",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L515"
+      "source_location": "L567"
     },
     {
       "id": "websrc_components_portfolio_history_quote_quote_action_createportfoliohistoryquoteaction_getquoterequestsnapshot",
@@ -3182,7 +3014,7 @@
       "file_type": "code",
       "norm_label": "getquoterequestsnapshot()",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L120"
+      "source_location": "L170"
     },
     {
       "id": "websrc_components_portfolio_history_quote_quote_action_createportfoliohistoryquoteaction_handleafterrequest",
@@ -3194,7 +3026,7 @@
       "file_type": "code",
       "norm_label": "handleafterrequest()",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L473"
+      "source_location": "L525"
     },
     {
       "id": "websrc_components_portfolio_history_quote_quote_action_createportfoliohistoryquoteaction_handlebeforesend",
@@ -3206,7 +3038,7 @@
       "file_type": "code",
       "norm_label": "handlebeforesend()",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L291"
+      "source_location": "L343"
     },
     {
       "id": "websrc_components_portfolio_history_quote_quote_action_createportfoliohistoryquoteaction_handlerequestconfiguration",
@@ -3218,7 +3050,7 @@
       "file_type": "code",
       "norm_label": "handlerequestconfiguration()",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L319"
+      "source_location": "L371"
     },
     {
       "id": "websrc_components_portfolio_history_quote_quote_action_createportfoliohistoryquoteaction_isownedafterrequest",
@@ -3230,7 +3062,7 @@
       "file_type": "code",
       "norm_label": "isownedafterrequest()",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L276"
+      "source_location": "L328"
     },
     {
       "id": "websrc_components_portfolio_history_quote_quote_action_createportfoliohistoryquoteaction_issnapshotcurrent",
@@ -3242,7 +3074,7 @@
       "file_type": "code",
       "norm_label": "issnapshotcurrent()",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L207"
+      "source_location": "L259"
     },
     {
       "id": "websrc_components_portfolio_history_quote_quote_action_createportfoliohistoryquoteaction_parselatestclosingquote",
@@ -3254,7 +3086,7 @@
       "file_type": "code",
       "norm_label": "parselatestclosingquote()",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L375"
+      "source_location": "L427"
     },
     {
       "id": "websrc_components_portfolio_history_quote_quote_action_createportfoliohistoryquoteaction_releasequoterequest",
@@ -3266,7 +3098,7 @@
       "file_type": "code",
       "norm_label": "releasequoterequest()",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L250"
+      "source_location": "L302"
     },
     {
       "id": "websrc_components_portfolio_history_quote_quote_action_createportfoliohistoryquoteaction_releaseunsentquoterequest",
@@ -3278,7 +3110,7 @@
       "file_type": "code",
       "norm_label": "releaseunsentquoterequest()",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L263"
+      "source_location": "L315"
     },
     {
       "id": "websrc_components_portfolio_history_quote_quote_action_createportfoliohistoryquoteaction_restoreloadingstate",
@@ -3290,7 +3122,7 @@
       "file_type": "code",
       "norm_label": "restoreloadingstate()",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L231"
+      "source_location": "L283"
     },
     {
       "id": "websrc_components_portfolio_history_quote_quote_action_createportfoliohistoryquoteaction_updatebuttonvisibility",
@@ -3302,247 +3134,175 @@
       "file_type": "code",
       "norm_label": "updatebuttonvisibility()",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L189"
+      "source_location": "L241"
     },
     {
-      "id": "websrc_infra_dom_binding_dom_bootstrap_form_bindbootstrapvalidationcleaning",
-      "label": "bindBootstrapValidationCleaning()",
+      "id": "websrc_components_asset_composed_columns_input_form_validation_installassetformvalidationguards",
+      "label": "installAssetFormValidationGuards()",
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "dom/index.ts",
+      "community_name": "asset-composed-columns-input/index.ts",
       "file_type": "code",
-      "norm_label": "bindbootstrapvalidationcleaning()",
-      "source_file": "websrc/infra/dom/binding-dom-bootstrap-form.ts",
-      "source_location": "L19"
+      "norm_label": "installassetformvalidationguards()",
+      "source_file": "websrc/components/asset-composed-columns-input/form-validation.ts",
+      "source_location": "L99"
     },
     {
-      "id": "websrc_infra_dom_binding_dom_bootstrap_form_bindbootstrapvalidationonsubmit",
-      "label": "bindBootstrapValidationOnSubmit()",
+      "id": "websrc_components_asset_composed_columns_input_form_validation_validateassetrowforpost",
+      "label": "validateAssetRowForPost()",
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "dom/index.ts",
+      "community_name": "asset-composed-columns-input/index.ts",
       "file_type": "code",
-      "norm_label": "bindbootstrapvalidationonsubmit()",
-      "source_file": "websrc/infra/dom/binding-dom-bootstrap-form.ts",
-      "source_location": "L5"
+      "norm_label": "validateassetrowforpost()",
+      "source_file": "websrc/components/asset-composed-columns-input/form-validation.ts",
+      "source_location": "L23"
     },
     {
-      "id": "websrc_infra_dom_binding_dom_bootstrap_form_bindbootstrapvalidationtodefaultform",
-      "label": "bindBootstrapValidationToDefaultForm()",
+      "id": "websrc_components_asset_composed_columns_input_form_validation_validateassetrowsforpost",
+      "label": "validateAssetRowsForPost()",
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "dom/index.ts",
+      "community_name": "asset-composed-columns-input/index.ts",
       "file_type": "code",
-      "norm_label": "bindbootstrapvalidationtodefaultform()",
-      "source_file": "websrc/infra/dom/binding-dom-bootstrap-form.ts",
+      "norm_label": "validateassetrowsforpost()",
+      "source_file": "websrc/components/asset-composed-columns-input/form-validation.ts",
+      "source_location": "L68"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_index_selectassetticker",
+      "label": "selectAssetTicker()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "asset-composed-columns-input/index.ts",
+      "file_type": "code",
+      "norm_label": "selectassetticker()",
+      "source_file": "websrc/components/asset-composed-columns-input/index.ts",
+      "source_location": "L35"
+    },
+    {
+      "id": "websrc_infra_htmx_index_addeventlisteners",
+      "label": "addEventListeners()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "htmx/index.ts",
+      "file_type": "code",
+      "norm_label": "addeventlisteners()",
+      "source_file": "websrc/infra/htmx/index.ts",
+      "source_location": "L172"
+    },
+    {
+      "id": "websrc_infra_htmx_index_configenhancedrequesteventlistener",
+      "label": "configEnhancedRequestEventListener()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "htmx/index.ts",
+      "file_type": "code",
+      "norm_label": "configenhancedrequesteventlistener()",
+      "source_file": "websrc/infra/htmx/index.ts",
       "source_location": "L25"
     },
     {
-      "id": "websrc_infra_dom_binding_dom_bootstrap_form_bindformsindescendants",
-      "label": "bindFormsInDescendants()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "dom/index.ts",
-      "file_type": "code",
-      "norm_label": "bindformsindescendants()",
-      "source_file": "websrc/infra/dom/binding-dom-bootstrap-form.ts",
-      "source_location": "L31"
-    },
-    {
-      "id": "websrc_infra_dom_binding_dom_exclusive_display_adddisplayobserver",
-      "label": "addDisplayObserver()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "dom/index.ts",
-      "file_type": "code",
-      "norm_label": "adddisplayobserver()",
-      "source_file": "websrc/infra/dom/binding-dom-exclusive-display.ts",
-      "source_location": "L46"
-    },
-    {
-      "id": "websrc_infra_dom_binding_dom_exclusive_display_bindexclusivedisplay",
-      "label": "bindExclusiveDisplay()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "dom/index.ts",
-      "file_type": "code",
-      "norm_label": "bindexclusivedisplay()",
-      "source_file": "websrc/infra/dom/binding-dom-exclusive-display.ts",
-      "source_location": "L40"
-    },
-    {
-      "id": "websrc_infra_dom_binding_dom_exclusive_display_bindexclusivedisplaycontainerindescendants",
-      "label": "bindExclusiveDisplayContainerInDescendants()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "dom/index.ts",
-      "file_type": "code",
-      "norm_label": "bindexclusivedisplaycontainerindescendants()",
-      "source_file": "websrc/infra/dom/binding-dom-exclusive-display.ts",
-      "source_location": "L7"
-    },
-    {
-      "id": "websrc_infra_dom_binding_dom_exclusive_display_bindexclusivedisplayindescendants",
-      "label": "bindExclusiveDisplayInDescendants()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "dom/index.ts",
-      "file_type": "code",
-      "norm_label": "bindexclusivedisplayindescendants()",
-      "source_file": "websrc/infra/dom/binding-dom-exclusive-display.ts",
-      "source_location": "L14"
-    },
-    {
-      "id": "websrc_infra_dom_binding_dom_exclusive_display_hideallsiblings",
-      "label": "hideAllSiblings()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "dom/index.ts",
-      "file_type": "code",
-      "norm_label": "hideallsiblings()",
-      "source_file": "websrc/infra/dom/binding-dom-exclusive-display.ts",
-      "source_location": "L60"
-    },
-    {
-      "id": "websrc_infra_dom_dom_form_input_masknumberdecimalplaces",
-      "label": "maskNumberDecimalPlaces()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "dom/index.ts",
-      "file_type": "code",
-      "norm_label": "masknumberdecimalplaces()",
-      "source_file": "websrc/infra/dom/dom-form-input.ts",
-      "source_location": "L51"
-    },
-    {
-      "id": "websrc_infra_dom_dom_form_input_masktaginput",
-      "label": "maskTagInput()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "dom/index.ts",
-      "file_type": "code",
-      "norm_label": "masktaginput()",
-      "source_file": "websrc/infra/dom/dom-form-input.ts",
-      "source_location": "L9"
-    },
-    {
-      "id": "websrc_infra_dom_dom_form_input_masktickerinput",
-      "label": "maskTickerInput()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "dom/index.ts",
-      "file_type": "code",
-      "norm_label": "masktickerinput()",
-      "source_file": "websrc/infra/dom/dom-form-input.ts",
-      "source_location": "L30"
-    },
-    {
-      "id": "websrc_infra_dom_dom_utils_addremoveobserver",
-      "label": "addRemoveObserver()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "dom/index.ts",
-      "file_type": "code",
-      "norm_label": "addremoveobserver()",
-      "source_file": "websrc/infra/dom/dom-utils.ts",
-      "source_location": "L57"
-    },
-    {
-      "id": "websrc_infra_dom_dom_utils_ensuresharedobserver",
-      "label": "ensureSharedObserver()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "dom/index.ts",
-      "file_type": "code",
-      "norm_label": "ensuresharedobserver()",
-      "source_file": "websrc/infra/dom/dom-utils.ts",
-      "source_location": "L37"
-    },
-    {
-      "id": "websrc_infra_dom_dom_utils_escapehtmlvalue",
-      "label": "escapeHtmlValue()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "dom/index.ts",
-      "file_type": "code",
-      "norm_label": "escapehtmlvalue()",
-      "source_file": "websrc/infra/dom/dom-utils.ts",
-      "source_location": "L66"
-    },
-    {
-      "id": "websrc_infra_dom_dom_utils_escapehtmlvaluepreservequotes",
-      "label": "escapeHtmlValuePreserveQuotes()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "dom/index.ts",
-      "file_type": "code",
-      "norm_label": "escapehtmlvaluepreservequotes()",
-      "source_file": "websrc/infra/dom/dom-utils.ts",
-      "source_location": "L75"
-    },
-    {
-      "id": "websrc_infra_dom_dom_utils_getcacheablecontextdata",
-      "label": "getCacheableContextData()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "dom/index.ts",
-      "file_type": "code",
-      "norm_label": "getcacheablecontextdata()",
-      "source_file": "websrc/infra/dom/dom-utils.ts",
-      "source_location": "L15"
-    },
-    {
-      "id": "websrc_infra_dom_dom_utils_queryfirst",
-      "label": "queryFirst()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "dom/index.ts",
-      "file_type": "code",
-      "norm_label": "queryfirst()",
-      "source_file": "websrc/infra/dom/dom-utils.ts",
-      "source_location": "L62"
-    },
-    {
-      "id": "websrc_root_after_request_error_handler",
-      "label": "AFTER_REQUEST_ERROR_HANDLER()",
+      "id": "websrc_infra_htmx_index_getafterrequesterroreventhandler",
+      "label": "getAfterRequestErrorEventHandler()",
       "_callable": true,
       "_origin": "ast",
       "community": 26,
-      "community_name": "quote-action.ts",
+      "community_name": "htmx/index.ts",
       "file_type": "code",
-      "norm_label": "after_request_error_handler()",
-      "source_file": "websrc/root.ts",
-      "source_location": "L6"
+      "norm_label": "getafterrequesterroreventhandler()",
+      "source_file": "websrc/infra/htmx/index.ts",
+      "source_location": "L151"
     },
     {
-      "id": "websrc_root_general_uncaught_error_handler",
-      "label": "GENERAL_UNCAUGHT_ERROR_HANDLER()",
+      "id": "websrc_infra_htmx_index_prepareformdata",
+      "label": "prepareFormData()",
       "_callable": true,
       "_origin": "ast",
       "community": 26,
-      "community_name": "quote-action.ts",
+      "community_name": "htmx/index.ts",
       "file_type": "code",
-      "norm_label": "general_uncaught_error_handler()",
-      "source_file": "websrc/root.ts",
-      "source_location": "L26"
+      "norm_label": "prepareformdata()",
+      "source_file": "websrc/infra/htmx/index.ts",
+      "source_location": "L128"
+    },
+    {
+      "id": "websrc_infra_htmx_index_replacerequestpathparams",
+      "label": "replaceRequestPathParams()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "htmx/index.ts",
+      "file_type": "code",
+      "norm_label": "replacerequestpathparams()",
+      "source_file": "websrc/infra/htmx/index.ts",
+      "source_location": "L35"
+    },
+    {
+      "id": "websrc_infra_htmx_index_replacerequestpathparamsfromcurrentroute",
+      "label": "replaceRequestPathParamsFromCurrentRoute()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "htmx/index.ts",
+      "file_type": "code",
+      "norm_label": "replacerequestpathparamsfromcurrentroute()",
+      "source_file": "websrc/infra/htmx/index.ts",
+      "source_location": "L115"
+    },
+    {
+      "id": "websrc_infra_htmx_index_replacerequestpathparamsfromeventchain",
+      "label": "replaceRequestPathParamsFromEventChain()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "htmx/index.ts",
+      "file_type": "code",
+      "norm_label": "replacerequestpathparamsfromeventchain()",
+      "source_file": "websrc/infra/htmx/index.ts",
+      "source_location": "L55"
+    },
+    {
+      "id": "websrc_infra_htmx_index_replacerequestpathparamsfromformdata",
+      "label": "replaceRequestPathParamsFromFormData()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "htmx/index.ts",
+      "file_type": "code",
+      "norm_label": "replacerequestpathparamsfromformdata()",
+      "source_file": "websrc/infra/htmx/index.ts",
+      "source_location": "L82"
+    },
+    {
+      "id": "websrc_infra_htmx_index_toerrorresponse",
+      "label": "toErrorResponse()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "htmx/index.ts",
+      "file_type": "code",
+      "norm_label": "toerrorresponse()",
+      "source_file": "websrc/infra/htmx/index.ts",
+      "source_location": "L196"
+    },
+    {
+      "id": "websrc_components_portfolio_history_management_getnextportfoliohistorymanagementindex",
+      "label": "getNextPortfolioHistoryManagementIndex()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "handlebars-lang.ts",
+      "file_type": "code",
+      "norm_label": "getnextportfoliohistorymanagementindex()",
+      "source_file": "websrc/components/portfolio-history-management.ts",
+      "source_location": "L210"
     },
     {
       "id": "websrc_infra_handlebars_handlebars_dom_domjsonhelper",
@@ -4037,6 +3797,330 @@
       "source_location": "L290"
     },
     {
+      "id": "websrc_components_asset_composed_columns_input_autocomplete_controller_assetsearchautocompletecontroller_clearhighlight",
+      "label": ".clearHighlight()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "AssetSearchAutocompleteController",
+      "file_type": "code",
+      "norm_label": ".clearhighlight()",
+      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-controller.ts",
+      "source_location": "L280"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_autocomplete_controller_assetsearchautocompletecontroller_close",
+      "label": ".close()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "AssetSearchAutocompleteController",
+      "file_type": "code",
+      "norm_label": ".close()",
+      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-controller.ts",
+      "source_location": "L137"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_autocomplete_controller_assetsearchautocompletecontroller_constructor",
+      "label": ".constructor()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "AssetSearchAutocompleteController",
+      "file_type": "code",
+      "norm_label": ".constructor()",
+      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-controller.ts",
+      "source_location": "L49"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_autocomplete_controller_assetsearchautocompletecontroller_createstate",
+      "label": ".createState()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "AssetSearchAutocompleteController",
+      "file_type": "code",
+      "norm_label": ".createstate()",
+      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-controller.ts",
+      "source_location": "L344"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_autocomplete_controller_assetsearchautocompletecontroller_ensuredatalistlifecyclelistener",
+      "label": ".ensureDatalistLifecycleListener()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "AssetSearchAutocompleteController",
+      "file_type": "code",
+      "norm_label": ".ensuredatalistlifecyclelistener()",
+      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-controller.ts",
+      "source_location": "L318"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_autocomplete_controller_assetsearchautocompletecontroller_ensurestate",
+      "label": ".ensureState()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "AssetSearchAutocompleteController",
+      "file_type": "code",
+      "norm_label": ".ensurestate()",
+      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-controller.ts",
+      "source_location": "L56"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_autocomplete_controller_assetsearchautocompletecontroller_getstate",
+      "label": ".getState()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "AssetSearchAutocompleteController",
+      "file_type": "code",
+      "norm_label": ".getstate()",
+      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-controller.ts",
+      "source_location": "L78"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_autocomplete_controller_assetsearchautocompletecontroller_highlight",
+      "label": ".highlight()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "AssetSearchAutocompleteController",
+      "file_type": "code",
+      "norm_label": ".highlight()",
+      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-controller.ts",
+      "source_location": "L244"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_autocomplete_controller_assetsearchautocompletecontroller_open",
+      "label": ".open()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "AssetSearchAutocompleteController",
+      "file_type": "code",
+      "norm_label": ".open()",
+      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-controller.ts",
+      "source_location": "L87"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_autocomplete_controller_assetsearchautocompletecontroller_render",
+      "label": ".render()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "AssetSearchAutocompleteController",
+      "file_type": "code",
+      "norm_label": ".render()",
+      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-controller.ts",
+      "source_location": "L171"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_autocomplete_controller_assetsearchautocompletecontroller_selectoption",
+      "label": ".selectOption()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "AssetSearchAutocompleteController",
+      "file_type": "code",
+      "norm_label": ".selectoption()",
+      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-controller.ts",
+      "source_location": "L301"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_index_loaddatalists",
+      "label": "loadDatalists()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "AssetSearchAutocompleteController",
+      "file_type": "code",
+      "norm_label": "loaddatalists()",
+      "source_file": "websrc/components/asset-composed-columns-input/index.ts",
+      "source_location": "L61"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_asset_row_controller_assetrowcontroller_beginassetlookup",
+      "label": ".beginAssetLookup()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 35,
+      "community_name": "autocomplete-interactions.ts",
+      "file_type": "code",
+      "norm_label": ".beginassetlookup()",
+      "source_file": "websrc/components/asset-composed-columns-input/asset-row-controller.ts",
+      "source_location": "L390"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_autocomplete_interactions_handleassetsearchkeydown",
+      "label": "handleAssetSearchKeydown()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 35,
+      "community_name": "autocomplete-interactions.ts",
+      "file_type": "code",
+      "norm_label": "handleassetsearchkeydown()",
+      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-interactions.ts",
+      "source_location": "L149"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_autocomplete_interactions_navigateassetsearchoptions",
+      "label": "navigateAssetSearchOptions()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 35,
+      "community_name": "autocomplete-interactions.ts",
+      "file_type": "code",
+      "norm_label": "navigateassetsearchoptions()",
+      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-interactions.ts",
+      "source_location": "L188"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_autocomplete_interactions_registerautocompleteinteractions",
+      "label": "registerAutocompleteInteractions()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 35,
+      "community_name": "autocomplete-interactions.ts",
+      "file_type": "code",
+      "norm_label": "registerautocompleteinteractions()",
+      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-interactions.ts",
+      "source_location": "L20"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_autocomplete_interactions_submitassetsearchlookup",
+      "label": "submitAssetSearchLookup()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 35,
+      "community_name": "autocomplete-interactions.ts",
+      "file_type": "code",
+      "norm_label": "submitassetsearchlookup()",
+      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-interactions.ts",
+      "source_location": "L220"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_types_autocompletecontrolleractions_clearhighlight",
+      "label": ".clearHighlight()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 35,
+      "community_name": "autocomplete-interactions.ts",
+      "file_type": "code",
+      "norm_label": ".clearhighlight()",
+      "source_file": "websrc/components/asset-composed-columns-input/types.ts",
+      "source_location": "L51"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_types_autocompletecontrolleractions_close",
+      "label": ".close()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 35,
+      "community_name": "autocomplete-interactions.ts",
+      "file_type": "code",
+      "norm_label": ".close()",
+      "source_file": "websrc/components/asset-composed-columns-input/types.ts",
+      "source_location": "L44"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_types_autocompletecontrolleractions_ensurestate",
+      "label": ".ensureState()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 35,
+      "community_name": "autocomplete-interactions.ts",
+      "file_type": "code",
+      "norm_label": ".ensurestate()",
+      "source_file": "websrc/components/asset-composed-columns-input/types.ts",
+      "source_location": "L41"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_types_autocompletecontrolleractions_highlight",
+      "label": ".highlight()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 35,
+      "community_name": "autocomplete-interactions.ts",
+      "file_type": "code",
+      "norm_label": ".highlight()",
+      "source_file": "websrc/components/asset-composed-columns-input/types.ts",
+      "source_location": "L45"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_types_autocompletecontrolleractions_open",
+      "label": ".open()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 35,
+      "community_name": "autocomplete-interactions.ts",
+      "file_type": "code",
+      "norm_label": ".open()",
+      "source_file": "websrc/components/asset-composed-columns-input/types.ts",
+      "source_location": "L43"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_types_autocompletecontrolleractions_selectoption",
+      "label": ".selectOption()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 35,
+      "community_name": "autocomplete-interactions.ts",
+      "file_type": "code",
+      "norm_label": ".selectoption()",
+      "source_file": "websrc/components/asset-composed-columns-input/types.ts",
+      "source_location": "L52"
+    },
+    {
+      "id": "websrc_components_portfolio_history_management_formrowvalueelements_constructor",
+      "label": ".constructor()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 37,
+      "community_name": "FormRowValueElements",
+      "file_type": "code",
+      "norm_label": ".constructor()",
+      "source_file": "websrc/components/portfolio-history-management.ts",
+      "source_location": "L167"
+    },
+    {
+      "id": "websrc_components_portfolio_history_management_formrowvalueelements_handleinputquantityormarketprice",
+      "label": ".handleInputQuantityOrMarketPrice()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 37,
+      "community_name": "FormRowValueElements",
+      "file_type": "code",
+      "norm_label": ".handleinputquantityormarketprice()",
+      "source_file": "websrc/components/portfolio-history-management.ts",
+      "source_location": "L177"
+    },
+    {
+      "id": "websrc_components_portfolio_history_management_formrowvalueelements_handleinputtotalmarketvalue",
+      "label": ".handleInputTotalMarketValue()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 37,
+      "community_name": "FormRowValueElements",
+      "file_type": "code",
+      "norm_label": ".handleinputtotalmarketvalue()",
+      "source_file": "websrc/components/portfolio-history-management.ts",
+      "source_location": "L194"
+    },
+    {
+      "id": "websrc_components_portfolio_history_management_recalculateportfoliohistoryallocation",
+      "label": "recalculatePortfolioHistoryAllocation()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 37,
+      "community_name": "FormRowValueElements",
+      "file_type": "code",
+      "norm_label": "recalculateportfoliohistoryallocation()",
+      "source_file": "websrc/components/portfolio-history-management.ts",
+      "source_location": "L48"
+    },
+    {
       "id": "websrc_pages_asset_external_addexternalasset",
       "label": "addExternalAsset()",
       "_callable": true,
@@ -4373,28 +4457,52 @@
       "source_location": "L45"
     },
     {
-      "id": "websrc_application_portfolio_analysis_getvaluelabel",
-      "label": "getValueLabel()",
+      "id": "websrc_infra_dom_binding_dom_bootstrap_form_bindbootstrapvalidationcleaning",
+      "label": "bindBootstrapValidationCleaning()",
       "_callable": true,
       "_origin": "ast",
       "community": 5,
       "community_name": "binding-financial-input.ts",
       "file_type": "code",
-      "norm_label": "getvaluelabel()",
-      "source_file": "websrc/application/portfolio-analysis.ts",
-      "source_location": "L60"
+      "norm_label": "bindbootstrapvalidationcleaning()",
+      "source_file": "websrc/infra/dom/binding-dom-bootstrap-form.ts",
+      "source_location": "L19"
     },
     {
-      "id": "websrc_application_portfolio_analysis_registerportfolioanalysishandlebarshelpers",
-      "label": "registerPortfolioAnalysisHandlebarsHelpers()",
+      "id": "websrc_infra_dom_binding_dom_bootstrap_form_bindbootstrapvalidationonsubmit",
+      "label": "bindBootstrapValidationOnSubmit()",
       "_callable": true,
       "_origin": "ast",
       "community": 5,
       "community_name": "binding-financial-input.ts",
       "file_type": "code",
-      "norm_label": "registerportfolioanalysishandlebarshelpers()",
-      "source_file": "websrc/application/portfolio-analysis.ts",
-      "source_location": "L14"
+      "norm_label": "bindbootstrapvalidationonsubmit()",
+      "source_file": "websrc/infra/dom/binding-dom-bootstrap-form.ts",
+      "source_location": "L5"
+    },
+    {
+      "id": "websrc_infra_dom_binding_dom_bootstrap_form_bindbootstrapvalidationtodefaultform",
+      "label": "bindBootstrapValidationToDefaultForm()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "binding-financial-input.ts",
+      "file_type": "code",
+      "norm_label": "bindbootstrapvalidationtodefaultform()",
+      "source_file": "websrc/infra/dom/binding-dom-bootstrap-form.ts",
+      "source_location": "L25"
+    },
+    {
+      "id": "websrc_infra_dom_binding_dom_bootstrap_form_bindformsindescendants",
+      "label": "bindFormsInDescendants()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "binding-financial-input.ts",
+      "file_type": "code",
+      "norm_label": "bindformsindescendants()",
+      "source_file": "websrc/infra/dom/binding-dom-bootstrap-form.ts",
+      "source_location": "L31"
     },
     {
       "id": "websrc_infra_dom_binding_financial_input_bindfinancialinput",
@@ -4575,6 +4683,42 @@
       "norm_label": "triggerinputeventonhiddenfield()",
       "source_file": "websrc/infra/dom/binding-financial-input.ts",
       "source_location": "L390"
+    },
+    {
+      "id": "websrc_infra_dom_dom_form_input_masknumberdecimalplaces",
+      "label": "maskNumberDecimalPlaces()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "binding-financial-input.ts",
+      "file_type": "code",
+      "norm_label": "masknumberdecimalplaces()",
+      "source_file": "websrc/infra/dom/dom-form-input.ts",
+      "source_location": "L51"
+    },
+    {
+      "id": "websrc_infra_dom_dom_form_input_masktaginput",
+      "label": "maskTagInput()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "binding-financial-input.ts",
+      "file_type": "code",
+      "norm_label": "masktaginput()",
+      "source_file": "websrc/infra/dom/dom-form-input.ts",
+      "source_location": "L9"
+    },
+    {
+      "id": "websrc_infra_dom_dom_form_input_masktickerinput",
+      "label": "maskTickerInput()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "binding-financial-input.ts",
+      "file_type": "code",
+      "norm_label": "masktickerinput()",
+      "source_file": "websrc/infra/dom/dom-form-input.ts",
+      "source_location": "L30"
     },
     {
       "id": "websrc_utils_lang_parseintordefault",
@@ -4841,18 +4985,6 @@
       "source_location": "L177"
     },
     {
-      "id": "websrc_components_asset_composed_columns_input_asset_row_controller_assetrowcontroller_beginassetlookup",
-      "label": ".beginAssetLookup()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "AssetRowController",
-      "file_type": "code",
-      "norm_label": ".beginassetlookup()",
-      "source_file": "websrc/components/asset-composed-columns-input/asset-row-controller.ts",
-      "source_location": "L390"
-    },
-    {
       "id": "websrc_components_asset_composed_columns_input_asset_row_controller_assetrowcontroller_clearsearcherrorfeedback",
       "label": ".clearSearchErrorFeedback()",
       "_callable": true,
@@ -5033,102 +5165,6 @@
       "source_location": "L301"
     },
     {
-      "id": "websrc_components_asset_composed_columns_input_autocomplete_interactions_handleassetsearchkeydown",
-      "label": "handleAssetSearchKeydown()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "AssetRowController",
-      "file_type": "code",
-      "norm_label": "handleassetsearchkeydown()",
-      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-interactions.ts",
-      "source_location": "L149"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_autocomplete_interactions_navigateassetsearchoptions",
-      "label": "navigateAssetSearchOptions()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "AssetRowController",
-      "file_type": "code",
-      "norm_label": "navigateassetsearchoptions()",
-      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-interactions.ts",
-      "source_location": "L188"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_autocomplete_interactions_registerautocompleteinteractions",
-      "label": "registerAutocompleteInteractions()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "AssetRowController",
-      "file_type": "code",
-      "norm_label": "registerautocompleteinteractions()",
-      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-interactions.ts",
-      "source_location": "L20"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_autocomplete_interactions_submitassetsearchlookup",
-      "label": "submitAssetSearchLookup()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "AssetRowController",
-      "file_type": "code",
-      "norm_label": "submitassetsearchlookup()",
-      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-interactions.ts",
-      "source_location": "L220"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_index_selectassetticker",
-      "label": "selectAssetTicker()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "AssetRowController",
-      "file_type": "code",
-      "norm_label": "selectassetticker()",
-      "source_file": "websrc/components/asset-composed-columns-input/index.ts",
-      "source_location": "L35"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_types_autocompletecontrolleractions_clearhighlight",
-      "label": ".clearHighlight()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "AssetRowController",
-      "file_type": "code",
-      "norm_label": ".clearhighlight()",
-      "source_file": "websrc/components/asset-composed-columns-input/types.ts",
-      "source_location": "L51"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_types_autocompletecontrolleractions_close",
-      "label": ".close()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "AssetRowController",
-      "file_type": "code",
-      "norm_label": ".close()",
-      "source_file": "websrc/components/asset-composed-columns-input/types.ts",
-      "source_location": "L44"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_types_autocompletecontrolleractions_ensurestate",
-      "label": ".ensureState()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "AssetRowController",
-      "file_type": "code",
-      "norm_label": ".ensurestate()",
-      "source_file": "websrc/components/asset-composed-columns-input/types.ts",
-      "source_location": "L41"
-    },
-    {
       "id": "websrc_components_asset_composed_columns_input_types_autocompletecontrolleractions_getstate",
       "label": ".getState()",
       "_callable": true,
@@ -5141,62 +5177,15 @@
       "source_location": "L42"
     },
     {
-      "id": "websrc_components_asset_composed_columns_input_types_autocompletecontrolleractions_highlight",
-      "label": ".highlight()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "AssetRowController",
-      "file_type": "code",
-      "norm_label": ".highlight()",
-      "source_file": "websrc/components/asset-composed-columns-input/types.ts",
-      "source_location": "L45"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_types_autocompletecontrolleractions_open",
-      "label": ".open()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "AssetRowController",
-      "file_type": "code",
-      "norm_label": ".open()",
-      "source_file": "websrc/components/asset-composed-columns-input/types.ts",
-      "source_location": "L43"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_types_autocompletecontrolleractions_selectoption",
-      "label": ".selectOption()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "AssetRowController",
-      "file_type": "code",
-      "norm_label": ".selectoption()",
-      "source_file": "websrc/components/asset-composed-columns-input/types.ts",
-      "source_location": "L52"
-    },
-    {
-      "id": "websrc_api_api",
-      "label": "api.ts",
+      "id": "websrc_infra_dom_binding_dom_exclusive_display",
+      "label": "binding-dom-exclusive-display.ts",
       "_origin": "ast",
       "community": 0,
       "community_name": "logger",
       "file_type": "code",
-      "norm_label": "api.ts",
-      "source_file": "websrc/api/api.ts",
+      "norm_label": "binding-dom-exclusive-display.ts",
+      "source_file": "websrc/infra/dom/binding-dom-exclusive-display.ts",
       "source_location": "L1"
-    },
-    {
-      "id": "websrc_api_api_api",
-      "label": "api",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "logger",
-      "file_type": "code",
-      "norm_label": "api",
-      "source_file": "websrc/api/api.ts",
-      "source_location": "L12"
     },
     {
       "id": "websrc_infra_dom_binding_percentage_input",
@@ -5208,6 +5197,39 @@
       "norm_label": "binding-percentage-input.ts",
       "source_file": "websrc/infra/dom/binding-percentage-input.ts",
       "source_location": "L1"
+    },
+    {
+      "id": "websrc_infra_dom_dom_utils",
+      "label": "dom-utils.ts",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "logger",
+      "file_type": "code",
+      "norm_label": "dom-utils.ts",
+      "source_file": "websrc/infra/dom/dom-utils.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "websrc_infra_dom_dom_utils_contextdatacache",
+      "label": "contextDataCache",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "logger",
+      "file_type": "code",
+      "norm_label": "contextdatacache",
+      "source_file": "websrc/infra/dom/dom-utils.ts",
+      "source_location": "L10"
+    },
+    {
+      "id": "websrc_infra_dom_dom_utils_observedelements",
+      "label": "observedElements",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "logger",
+      "file_type": "code",
+      "norm_label": "observedelements",
+      "source_file": "websrc/infra/dom/dom-utils.ts",
+      "source_location": "L12"
     },
     {
       "id": "websrc_infra_htmx_binding_htmx_transform_response",
@@ -5252,39 +5274,6 @@
       "norm_label": "binding-htmx-wait-for-ready.ts",
       "source_file": "websrc/infra/htmx/binding-htmx-wait-for-ready.ts",
       "source_location": "L1"
-    },
-    {
-      "id": "websrc_infra_htmx_index",
-      "label": "htmx/index.ts",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "logger",
-      "file_type": "code",
-      "norm_label": "htmx/index.ts",
-      "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "websrc_infra_htmx_index_afterrequesterroreventhandlers",
-      "label": "afterRequestErrorEventHandlers",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "logger",
-      "file_type": "code",
-      "norm_label": "afterrequesterroreventhandlers",
-      "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L12"
-    },
-    {
-      "id": "websrc_infra_htmx_index_suppressedafterrequesterrornotifications",
-      "label": "suppressedAfterRequestErrorNotifications",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "logger",
-      "file_type": "code",
-      "norm_label": "suppressedafterrequesterrornotifications",
-      "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L11"
     },
     {
       "id": "websrc_infra_infra_types_utils",
@@ -5463,17 +5452,6 @@
       "source_location": "L1"
     },
     {
-      "id": "websrc_components_asset_composed_columns_input_autocomplete_interactions",
-      "label": "autocomplete-interactions.ts",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "autocomplete-interactions.ts",
-      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-interactions.ts",
-      "source_location": "L1"
-    },
-    {
       "id": "websrc_components_asset_composed_columns_input_constants",
       "label": "asset-composed-columns-input/constants.ts",
       "_origin": "ast",
@@ -5551,17 +5529,6 @@
       "source_location": "L17"
     },
     {
-      "id": "websrc_components_asset_composed_columns_input_constants_asset_id_input_selector",
-      "label": "ASSET_ID_INPUT_SELECTOR",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "asset_id_input_selector",
-      "source_file": "websrc/components/asset-composed-columns-input/constants.ts",
-      "source_location": "L20"
-    },
-    {
       "id": "websrc_components_asset_composed_columns_input_constants_asset_lookup_pending_error_message",
       "label": "ASSET_LOOKUP_PENDING_ERROR_MESSAGE",
       "_origin": "ast",
@@ -5571,17 +5538,6 @@
       "norm_label": "asset_lookup_pending_error_message",
       "source_file": "websrc/components/asset-composed-columns-input/constants.ts",
       "source_location": "L32"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_constants_asset_name_input_selector",
-      "label": "ASSET_NAME_INPUT_SELECTOR",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "asset_name_input_selector",
-      "source_file": "websrc/components/asset-composed-columns-input/constants.ts",
-      "source_location": "L19"
     },
     {
       "id": "websrc_components_asset_composed_columns_input_constants_asset_not_found_error_message",
@@ -5694,50 +5650,6 @@
       "source_location": "L15"
     },
     {
-      "id": "websrc_components_asset_composed_columns_input_constants_assetselectionstate_existing",
-      "label": "EXISTING",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "existing",
-      "source_file": "websrc/components/asset-composed-columns-input/constants.ts",
-      "source_location": "L54"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_constants_assetselectionstate_new",
-      "label": "NEW",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "new",
-      "source_file": "websrc/components/asset-composed-columns-input/constants.ts",
-      "source_location": "L55"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_constants_assetselectionstate_pending",
-      "label": "PENDING",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "pending",
-      "source_file": "websrc/components/asset-composed-columns-input/constants.ts",
-      "source_location": "L53"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_constants_assetselectionstate_search",
-      "label": "SEARCH",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "search",
-      "source_file": "websrc/components/asset-composed-columns-input/constants.ts",
-      "source_location": "L52"
-    },
-    {
       "id": "websrc_components_asset_composed_columns_input_constants_failed_to_fetch_asset_error_prefix",
       "label": "FAILED_TO_FETCH_ASSET_ERROR_PREFIX",
       "_origin": "ast",
@@ -5826,17 +5738,6 @@
       "source_location": "L34"
     },
     {
-      "id": "websrc_components_asset_composed_columns_input_constants_unable_to_resolve_asset_row_error",
-      "label": "UNABLE_TO_RESOLVE_ASSET_ROW_ERROR",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "unable_to_resolve_asset_row_error",
-      "source_file": "websrc/components/asset-composed-columns-input/constants.ts",
-      "source_location": "L38"
-    },
-    {
       "id": "websrc_components_asset_composed_columns_input_constants_visually_hidden_class",
       "label": "VISUALLY_HIDDEN_CLASS",
       "_origin": "ast",
@@ -5857,138 +5758,6 @@
       "norm_label": "form-validation.ts",
       "source_file": "websrc/components/asset-composed-columns-input/form-validation.ts",
       "source_location": "L1"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_index",
-      "label": "asset-composed-columns-input/index.ts",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "asset-composed-columns-input/index.ts",
-      "source_file": "websrc/components/asset-composed-columns-input/index.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_index_autocompletecontroller",
-      "label": "autocompleteController",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "autocompletecontroller",
-      "source_file": "websrc/components/asset-composed-columns-input/index.ts",
-      "source_location": "L55"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_selection_events",
-      "label": "selection-events.ts",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "selection-events.ts",
-      "source_file": "websrc/components/asset-composed-columns-input/selection-events.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_selection_events_asset_row_selection_change_event",
-      "label": "ASSET_ROW_SELECTION_CHANGE_EVENT",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "asset_row_selection_change_event",
-      "source_file": "websrc/components/asset-composed-columns-input/selection-events.ts",
-      "source_location": "L25"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_selection_events_assetrowselectionchangestate_existing",
-      "label": "EXISTING",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "existing",
-      "source_file": "websrc/components/asset-composed-columns-input/selection-events.ts",
-      "source_location": "L36"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_selection_events_assetrowselectionchangestate_new",
-      "label": "NEW",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "new",
-      "source_file": "websrc/components/asset-composed-columns-input/selection-events.ts",
-      "source_location": "L37"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_selection_events_assetrowselectionchangestate_search",
-      "label": "SEARCH",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "search",
-      "source_file": "websrc/components/asset-composed-columns-input/selection-events.ts",
-      "source_location": "L38"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_types",
-      "label": "types.ts",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "types.ts",
-      "source_file": "websrc/components/asset-composed-columns-input/types.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "websrc_domain_asset_index",
-      "label": "asset/index.ts",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "asset/index.ts",
-      "source_file": "websrc/domain/asset/index.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "websrc_infra_bootstrap_constants",
-      "label": "bootstrap/constants.ts",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "bootstrap/constants.ts",
-      "source_file": "websrc/infra/bootstrap/constants.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "websrc_infra_bootstrap_constants_bootstrapclasses",
-      "label": "BootstrapClasses",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "bootstrapclasses",
-      "source_file": "websrc/infra/bootstrap/constants.ts",
-      "source_location": "L9"
-    },
-    {
-      "id": "websrc_infra_bootstrap_constants_bootstrapiconclasses",
-      "label": "BootstrapIconClasses",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "bootstrapiconclasses",
-      "source_file": "websrc/infra/bootstrap/constants.ts",
-      "source_location": "L19"
     },
     {
       "id": "websrc_application_allocation_plan_chart",
@@ -6021,17 +5790,94 @@
       "file_type": "code",
       "norm_label": "portfoliohistoryquoteaction",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L38"
+      "source_location": "L41"
     },
     {
-      "id": "ref_htmx_org",
-      "label": "htmx.org",
+      "id": "websrc_components_portfolio_history_quote_index",
+      "label": "portfolio-history-quote/index.ts",
       "_origin": "ast",
       "community": 11,
       "community_name": "portfolio-history-management.ts",
-      "file_type": "concept",
-      "norm_label": "htmx.org",
-      "source_file": "package.json",
+      "file_type": "code",
+      "norm_label": "portfolio-history-quote/index.ts",
+      "source_file": "websrc/components/portfolio-history-quote/index.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "websrc_components_portfolio_history_quote_quote_action",
+      "label": "quote-action.ts",
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "quote-action.ts",
+      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "websrc_components_portfolio_history_quote_quote_action_external_asset_exchange_id_selector",
+      "label": "EXTERNAL_ASSET_EXCHANGE_ID_SELECTOR",
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "external_asset_exchange_id_selector",
+      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
+      "source_location": "L24"
+    },
+    {
+      "id": "websrc_components_portfolio_history_quote_quote_action_external_asset_keys_selector",
+      "label": "EXTERNAL_ASSET_KEYS_SELECTOR",
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "external_asset_keys_selector",
+      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
+      "source_location": "L16"
+    },
+    {
+      "id": "websrc_components_portfolio_history_quote_quote_action_external_asset_source_selector",
+      "label": "EXTERNAL_ASSET_SOURCE_SELECTOR",
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "external_asset_source_selector",
+      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
+      "source_location": "L20"
+    },
+    {
+      "id": "websrc_components_portfolio_history_quote_quote_action_external_asset_ticker_selector",
+      "label": "EXTERNAL_ASSET_TICKER_SELECTOR",
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "external_asset_ticker_selector",
+      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
+      "source_location": "L28"
+    },
+    {
+      "id": "websrc_components_portfolio_history_quote_quote_action_history_row_id_pattern",
+      "label": "HISTORY_ROW_ID_PATTERN",
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "history_row_id_pattern",
+      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
+      "source_location": "L36"
+    },
+    {
+      "id": "websrc_components_portfolio_history_quote_quote_action_portfolio_allocation_management_form_prefix",
+      "label": "PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX",
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "portfolio_allocation_management_form_prefix",
+      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
       "source_location": "L33"
     },
     {
@@ -6211,6 +6057,17 @@
       "source_location": "L9"
     },
     {
+      "id": "websrc_application_portfolio_analysis",
+      "label": "application/portfolio-analysis.ts",
+      "_origin": "ast",
+      "community": 14,
+      "community_name": "portfolio-chart.ts",
+      "file_type": "code",
+      "norm_label": "application/portfolio-analysis.ts",
+      "source_file": "websrc/application/portfolio-analysis.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "websrc_application_portfolio_chart_portfolio_chart",
       "label": "portfolio-chart.ts",
       "_origin": "ast",
@@ -6266,6 +6123,17 @@
       "source_location": "L1"
     },
     {
+      "id": "websrc_domain_portfolio_analysis",
+      "label": "domain/portfolio-analysis.ts",
+      "_origin": "ast",
+      "community": 14,
+      "community_name": "portfolio-chart.ts",
+      "file_type": "code",
+      "norm_label": "domain/portfolio-analysis.ts",
+      "source_file": "websrc/domain/portfolio-analysis.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "websrc_domain_service_index_domainservice",
       "label": "DomainService",
       "_origin": "ast",
@@ -6297,17 +6165,6 @@
       "norm_label": "bignumber.js",
       "source_file": "package.json",
       "source_location": "L23"
-    },
-    {
-      "id": "ref_chart_js",
-      "label": "chart.js",
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "portfolio-chart.ts",
-      "file_type": "concept",
-      "norm_label": "chart.js",
-      "source_file": "package.json",
-      "source_location": "L27"
     },
     {
       "id": "package_dependencies",
@@ -6464,6 +6321,39 @@
       "source_location": "L35"
     },
     {
+      "id": "websrc_application_index_application",
+      "label": "Application",
+      "_origin": "ast",
+      "community": 16,
+      "community_name": "infra.ts",
+      "file_type": "code",
+      "norm_label": "application",
+      "source_file": "websrc/application/index.ts",
+      "source_location": "L17"
+    },
+    {
+      "id": "websrc_infra_handlebars_index_handlebarsinfra",
+      "label": "handlebarsInfra",
+      "_origin": "ast",
+      "community": 16,
+      "community_name": "infra.ts",
+      "file_type": "code",
+      "norm_label": "handlebarsinfra",
+      "source_file": "websrc/infra/handlebars/index.ts",
+      "source_location": "L30"
+    },
+    {
+      "id": "websrc_infra_htmx_index_htmxinfra",
+      "label": "HtmxInfra",
+      "_origin": "ast",
+      "community": 16,
+      "community_name": "infra.ts",
+      "file_type": "code",
+      "norm_label": "htmxinfra",
+      "source_file": "websrc/infra/htmx/index.ts",
+      "source_location": "L207"
+    },
+    {
       "id": "websrc_infra_infra",
       "label": "infra.ts",
       "_origin": "ast",
@@ -6475,15 +6365,26 @@
       "source_location": "L1"
     },
     {
-      "id": "websrc_infra_routing_index_router",
-      "label": "Router",
+      "id": "websrc_infra_infra_infra",
+      "label": "Infra",
       "_origin": "ast",
       "community": 16,
       "community_name": "infra.ts",
       "file_type": "code",
-      "norm_label": "router",
-      "source_file": "websrc/infra/routing/index.ts",
-      "source_location": "L12"
+      "norm_label": "infra",
+      "source_file": "websrc/infra/infra.ts",
+      "source_location": "L93"
+    },
+    {
+      "id": "websrc_root",
+      "label": "root.ts",
+      "_origin": "ast",
+      "community": 16,
+      "community_name": "infra.ts",
+      "file_type": "code",
+      "norm_label": "root.ts",
+      "source_file": "websrc/root.ts",
+      "source_location": "L1"
     },
     {
       "id": "ref_bootstrap",
@@ -6572,6 +6473,17 @@
       "norm_label": "notification_type_bootstrap_classes",
       "source_file": "websrc/components/notifications.ts",
       "source_location": "L11"
+    },
+    {
+      "id": "websrc_components_notifications_notifications",
+      "label": "notifications",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "notifications.ts",
+      "file_type": "code",
+      "norm_label": "notifications",
+      "source_file": "websrc/components/notifications.ts",
+      "source_location": "L46"
     },
     {
       "id": "websrc_infra_infra_types",
@@ -6695,28 +6607,6 @@
       "source_location": "L16"
     },
     {
-      "id": "websrc_infra_chart_chart_types_measuramentunit_currency",
-      "label": "CURRENCY",
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "chart.ts",
-      "file_type": "code",
-      "norm_label": "currency",
-      "source_file": "websrc/infra/chart/chart-types.ts",
-      "source_location": "L4"
-    },
-    {
-      "id": "websrc_infra_chart_chart_types_measuramentunit_percentage",
-      "label": "PERCENTAGE",
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "chart.ts",
-      "file_type": "code",
-      "norm_label": "percentage",
-      "source_file": "websrc/infra/chart/chart-types.ts",
-      "source_location": "L5"
-    },
-    {
       "id": "websrc_infra_dom_dom_utils_domutils",
       "label": "DomUtils",
       "_origin": "ast",
@@ -6737,6 +6627,17 @@
       "norm_label": "handlebars-chart.ts",
       "source_file": "websrc/infra/handlebars/handlebars-chart.ts",
       "source_location": "L1"
+    },
+    {
+      "id": "ref_chart_js",
+      "label": "chart.js",
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "chart.ts",
+      "file_type": "concept",
+      "norm_label": "chart.js",
+      "source_file": "package.json",
+      "source_location": "L27"
     },
     {
       "id": "websrc_domain_allocation",
@@ -6937,17 +6838,6 @@
       "source_location": "L1"
     },
     {
-      "id": "websrc_pages_portfolio",
-      "label": "pages/portfolio.ts",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "allocation-plan.ts",
-      "file_type": "code",
-      "norm_label": "pages/portfolio.ts",
-      "source_file": "websrc/pages/portfolio.ts",
-      "source_location": "L1"
-    },
-    {
       "id": "tsconfig",
       "label": "tsconfig.json",
       "_origin": "ast",
@@ -7080,92 +6970,114 @@
       "source_location": "L13"
     },
     {
-      "id": "websrc_infra_dom_binding_dom_bootstrap_form",
-      "label": "binding-dom-bootstrap-form.ts",
+      "id": "websrc_components_asset_composed_columns_input_constants_asset_id_input_selector",
+      "label": "ASSET_ID_INPUT_SELECTOR",
       "_origin": "ast",
       "community": 23,
-      "community_name": "dom/index.ts",
+      "community_name": "asset-composed-columns-input/index.ts",
       "file_type": "code",
-      "norm_label": "binding-dom-bootstrap-form.ts",
-      "source_file": "websrc/infra/dom/binding-dom-bootstrap-form.ts",
+      "norm_label": "asset_id_input_selector",
+      "source_file": "websrc/components/asset-composed-columns-input/constants.ts",
+      "source_location": "L20"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_constants_asset_name_input_selector",
+      "label": "ASSET_NAME_INPUT_SELECTOR",
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "asset-composed-columns-input/index.ts",
+      "file_type": "code",
+      "norm_label": "asset_name_input_selector",
+      "source_file": "websrc/components/asset-composed-columns-input/constants.ts",
+      "source_location": "L19"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_constants_unable_to_resolve_asset_row_error",
+      "label": "UNABLE_TO_RESOLVE_ASSET_ROW_ERROR",
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "asset-composed-columns-input/index.ts",
+      "file_type": "code",
+      "norm_label": "unable_to_resolve_asset_row_error",
+      "source_file": "websrc/components/asset-composed-columns-input/constants.ts",
+      "source_location": "L38"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_index",
+      "label": "asset-composed-columns-input/index.ts",
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "asset-composed-columns-input/index.ts",
+      "file_type": "code",
+      "norm_label": "asset-composed-columns-input/index.ts",
+      "source_file": "websrc/components/asset-composed-columns-input/index.ts",
       "source_location": "L1"
     },
     {
-      "id": "websrc_infra_dom_binding_dom_exclusive_display",
-      "label": "binding-dom-exclusive-display.ts",
+      "id": "websrc_components_asset_composed_columns_input_index_autocompletecontroller",
+      "label": "autocompleteController",
       "_origin": "ast",
       "community": 23,
-      "community_name": "dom/index.ts",
+      "community_name": "asset-composed-columns-input/index.ts",
       "file_type": "code",
-      "norm_label": "binding-dom-exclusive-display.ts",
-      "source_file": "websrc/infra/dom/binding-dom-exclusive-display.ts",
+      "norm_label": "autocompletecontroller",
+      "source_file": "websrc/components/asset-composed-columns-input/index.ts",
+      "source_location": "L55"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_selection_events",
+      "label": "selection-events.ts",
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "asset-composed-columns-input/index.ts",
+      "file_type": "code",
+      "norm_label": "selection-events.ts",
+      "source_file": "websrc/components/asset-composed-columns-input/selection-events.ts",
       "source_location": "L1"
     },
     {
-      "id": "websrc_infra_dom_dom_form_input",
-      "label": "dom-form-input.ts",
+      "id": "websrc_components_asset_composed_columns_input_selection_events_asset_row_selection_change_event",
+      "label": "ASSET_ROW_SELECTION_CHANGE_EVENT",
       "_origin": "ast",
       "community": 23,
-      "community_name": "dom/index.ts",
+      "community_name": "asset-composed-columns-input/index.ts",
       "file_type": "code",
-      "norm_label": "dom-form-input.ts",
-      "source_file": "websrc/infra/dom/dom-form-input.ts",
-      "source_location": "L1"
+      "norm_label": "asset_row_selection_change_event",
+      "source_file": "websrc/components/asset-composed-columns-input/selection-events.ts",
+      "source_location": "L25"
     },
     {
-      "id": "websrc_infra_dom_dom_utils",
-      "label": "dom-utils.ts",
+      "id": "websrc_components_asset_composed_columns_input_selection_events_assetrowselectionchangestate_existing",
+      "label": "EXISTING",
       "_origin": "ast",
       "community": 23,
-      "community_name": "dom/index.ts",
+      "community_name": "asset-composed-columns-input/index.ts",
       "file_type": "code",
-      "norm_label": "dom-utils.ts",
-      "source_file": "websrc/infra/dom/dom-utils.ts",
-      "source_location": "L1"
+      "norm_label": "existing",
+      "source_file": "websrc/components/asset-composed-columns-input/selection-events.ts",
+      "source_location": "L36"
     },
     {
-      "id": "websrc_infra_dom_dom_utils_contextdatacache",
-      "label": "contextDataCache",
+      "id": "websrc_components_asset_composed_columns_input_selection_events_assetrowselectionchangestate_new",
+      "label": "NEW",
       "_origin": "ast",
       "community": 23,
-      "community_name": "dom/index.ts",
+      "community_name": "asset-composed-columns-input/index.ts",
       "file_type": "code",
-      "norm_label": "contextdatacache",
-      "source_file": "websrc/infra/dom/dom-utils.ts",
-      "source_location": "L10"
+      "norm_label": "new",
+      "source_file": "websrc/components/asset-composed-columns-input/selection-events.ts",
+      "source_location": "L37"
     },
     {
-      "id": "websrc_infra_dom_dom_utils_observedelements",
-      "label": "observedElements",
+      "id": "websrc_components_asset_composed_columns_input_selection_events_assetrowselectionchangestate_search",
+      "label": "SEARCH",
       "_origin": "ast",
       "community": 23,
-      "community_name": "dom/index.ts",
+      "community_name": "asset-composed-columns-input/index.ts",
       "file_type": "code",
-      "norm_label": "observedelements",
-      "source_file": "websrc/infra/dom/dom-utils.ts",
-      "source_location": "L12"
-    },
-    {
-      "id": "websrc_infra_dom_index",
-      "label": "dom/index.ts",
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "dom/index.ts",
-      "file_type": "code",
-      "norm_label": "dom/index.ts",
-      "source_file": "websrc/infra/dom/index.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "websrc_infra_dom_index_dominfra",
-      "label": "DomInfra",
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "dom/index.ts",
-      "file_type": "code",
-      "norm_label": "dominfra",
-      "source_file": "websrc/infra/dom/index.ts",
-      "source_location": "L8"
+      "norm_label": "search",
+      "source_file": "websrc/components/asset-composed-columns-input/selection-events.ts",
+      "source_location": "L38"
     },
     {
       "id": "proxyrc",
@@ -7223,81 +7135,37 @@
       "source_location": "L13"
     },
     {
-      "id": "websrc_application_index_application",
-      "label": "Application",
+      "id": "websrc_infra_htmx_index",
+      "label": "htmx/index.ts",
       "_origin": "ast",
       "community": 26,
-      "community_name": "quote-action.ts",
+      "community_name": "htmx/index.ts",
       "file_type": "code",
-      "norm_label": "application",
-      "source_file": "websrc/application/index.ts",
-      "source_location": "L17"
-    },
-    {
-      "id": "websrc_components_notifications_notifications",
-      "label": "notifications",
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "quote-action.ts",
-      "file_type": "code",
-      "norm_label": "notifications",
-      "source_file": "websrc/components/notifications.ts",
-      "source_location": "L46"
-    },
-    {
-      "id": "websrc_components_portfolio_history_quote_index",
-      "label": "portfolio-history-quote/index.ts",
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "quote-action.ts",
-      "file_type": "code",
-      "norm_label": "portfolio-history-quote/index.ts",
-      "source_file": "websrc/components/portfolio-history-quote/index.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "websrc_components_portfolio_history_quote_quote_action",
-      "label": "quote-action.ts",
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "quote-action.ts",
-      "file_type": "code",
-      "norm_label": "quote-action.ts",
-      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "websrc_infra_htmx_index_htmxinfra",
-      "label": "HtmxInfra",
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "quote-action.ts",
-      "file_type": "code",
-      "norm_label": "htmxinfra",
+      "norm_label": "htmx/index.ts",
       "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L207"
-    },
-    {
-      "id": "websrc_infra_infra_infra",
-      "label": "Infra",
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "quote-action.ts",
-      "file_type": "code",
-      "norm_label": "infra",
-      "source_file": "websrc/infra/infra.ts",
-      "source_location": "L93"
-    },
-    {
-      "id": "websrc_root",
-      "label": "root.ts",
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "quote-action.ts",
-      "file_type": "code",
-      "norm_label": "root.ts",
-      "source_file": "websrc/root.ts",
       "source_location": "L1"
+    },
+    {
+      "id": "websrc_infra_htmx_index_afterrequesterroreventhandlers",
+      "label": "afterRequestErrorEventHandlers",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "htmx/index.ts",
+      "file_type": "code",
+      "norm_label": "afterrequesterroreventhandlers",
+      "source_file": "websrc/infra/htmx/index.ts",
+      "source_location": "L12"
+    },
+    {
+      "id": "websrc_infra_htmx_index_suppressedafterrequesterrornotifications",
+      "label": "suppressedAfterRequestErrorNotifications",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "htmx/index.ts",
+      "file_type": "code",
+      "norm_label": "suppressedafterrequesterrornotifications",
+      "source_file": "websrc/infra/htmx/index.ts",
+      "source_location": "L11"
     },
     {
       "id": "package_scripts",
@@ -7454,17 +7322,6 @@
       "source_location": "L1"
     },
     {
-      "id": "websrc_infra_handlebars_index_handlebarsinfra",
-      "label": "handlebarsInfra",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "handlebars-lang.ts",
-      "file_type": "code",
-      "norm_label": "handlebarsinfra",
-      "source_file": "websrc/infra/handlebars/index.ts",
-      "source_location": "L30"
-    },
-    {
       "id": "websrc_utils_lang",
       "label": "lang.ts",
       "_origin": "ast",
@@ -7485,6 +7342,105 @@
       "norm_label": "handlebars",
       "source_file": "package.json",
       "source_location": "L30"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_types",
+      "label": "types.ts",
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "AssetSearchAutocompleteController",
+      "file_type": "code",
+      "norm_label": "types.ts",
+      "source_file": "websrc/components/asset-composed-columns-input/types.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_autocomplete_interactions",
+      "label": "autocomplete-interactions.ts",
+      "_origin": "ast",
+      "community": 35,
+      "community_name": "autocomplete-interactions.ts",
+      "file_type": "code",
+      "norm_label": "autocomplete-interactions.ts",
+      "source_file": "websrc/components/asset-composed-columns-input/autocomplete-interactions.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_constants_assetselectionstate_existing",
+      "label": "EXISTING",
+      "_origin": "ast",
+      "community": 36,
+      "community_name": "AssetSelectionState",
+      "file_type": "code",
+      "norm_label": "existing",
+      "source_file": "websrc/components/asset-composed-columns-input/constants.ts",
+      "source_location": "L54"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_constants_assetselectionstate_new",
+      "label": "NEW",
+      "_origin": "ast",
+      "community": 36,
+      "community_name": "AssetSelectionState",
+      "file_type": "code",
+      "norm_label": "new",
+      "source_file": "websrc/components/asset-composed-columns-input/constants.ts",
+      "source_location": "L55"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_constants_assetselectionstate_pending",
+      "label": "PENDING",
+      "_origin": "ast",
+      "community": 36,
+      "community_name": "AssetSelectionState",
+      "file_type": "code",
+      "norm_label": "pending",
+      "source_file": "websrc/components/asset-composed-columns-input/constants.ts",
+      "source_location": "L53"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_constants_assetselectionstate_search",
+      "label": "SEARCH",
+      "_origin": "ast",
+      "community": 36,
+      "community_name": "AssetSelectionState",
+      "file_type": "code",
+      "norm_label": "search",
+      "source_file": "websrc/components/asset-composed-columns-input/constants.ts",
+      "source_location": "L52"
+    },
+    {
+      "id": "websrc_api_api",
+      "label": "api.ts",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "asset.ts",
+      "file_type": "code",
+      "norm_label": "api.ts",
+      "source_file": "websrc/api/api.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "websrc_api_api_api",
+      "label": "api",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "asset.ts",
+      "file_type": "code",
+      "norm_label": "api",
+      "source_file": "websrc/api/api.ts",
+      "source_location": "L12"
+    },
+    {
+      "id": "websrc_domain_asset_index",
+      "label": "asset/index.ts",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "asset.ts",
+      "file_type": "code",
+      "norm_label": "asset/index.ts",
+      "source_file": "websrc/domain/asset/index.ts",
+      "source_location": "L1"
     },
     {
       "id": "websrc_pages_asset",
@@ -7531,25 +7487,47 @@
       "source_location": "L25"
     },
     {
-      "id": "websrc_application_portfolio_analysis",
-      "label": "application/portfolio-analysis.ts",
+      "id": "websrc_infra_bootstrap_constants",
+      "label": "bootstrap/constants.ts",
       "_origin": "ast",
       "community": 5,
       "community_name": "binding-financial-input.ts",
       "file_type": "code",
-      "norm_label": "application/portfolio-analysis.ts",
-      "source_file": "websrc/application/portfolio-analysis.ts",
+      "norm_label": "bootstrap/constants.ts",
+      "source_file": "websrc/infra/bootstrap/constants.ts",
       "source_location": "L1"
     },
     {
-      "id": "websrc_domain_portfolio_analysis",
-      "label": "domain/portfolio-analysis.ts",
+      "id": "websrc_infra_bootstrap_constants_bootstrapclasses",
+      "label": "BootstrapClasses",
       "_origin": "ast",
       "community": 5,
       "community_name": "binding-financial-input.ts",
       "file_type": "code",
-      "norm_label": "domain/portfolio-analysis.ts",
-      "source_file": "websrc/domain/portfolio-analysis.ts",
+      "norm_label": "bootstrapclasses",
+      "source_file": "websrc/infra/bootstrap/constants.ts",
+      "source_location": "L9"
+    },
+    {
+      "id": "websrc_infra_bootstrap_constants_bootstrapiconclasses",
+      "label": "BootstrapIconClasses",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "binding-financial-input.ts",
+      "file_type": "code",
+      "norm_label": "bootstrapiconclasses",
+      "source_file": "websrc/infra/bootstrap/constants.ts",
+      "source_location": "L19"
+    },
+    {
+      "id": "websrc_infra_dom_binding_dom_bootstrap_form",
+      "label": "binding-dom-bootstrap-form.ts",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "binding-financial-input.ts",
+      "file_type": "code",
+      "norm_label": "binding-dom-bootstrap-form.ts",
+      "source_file": "websrc/infra/dom/binding-dom-bootstrap-form.ts",
       "source_location": "L1"
     },
     {
@@ -7564,26 +7542,37 @@
       "source_location": "L1"
     },
     {
-      "id": "websrc_infra_format",
-      "label": "format.ts",
+      "id": "websrc_infra_dom_dom_form_input",
+      "label": "dom-form-input.ts",
       "_origin": "ast",
       "community": 5,
       "community_name": "binding-financial-input.ts",
       "file_type": "code",
-      "norm_label": "format.ts",
-      "source_file": "websrc/infra/format.ts",
+      "norm_label": "dom-form-input.ts",
+      "source_file": "websrc/infra/dom/dom-form-input.ts",
       "source_location": "L1"
     },
     {
-      "id": "websrc_infra_format_format",
-      "label": "Format",
+      "id": "websrc_infra_dom_index",
+      "label": "dom/index.ts",
       "_origin": "ast",
       "community": 5,
       "community_name": "binding-financial-input.ts",
       "file_type": "code",
-      "norm_label": "format",
-      "source_file": "websrc/infra/format.ts",
-      "source_location": "L7"
+      "norm_label": "dom/index.ts",
+      "source_file": "websrc/infra/dom/index.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "websrc_infra_dom_index_dominfra",
+      "label": "DomInfra",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "binding-financial-input.ts",
+      "file_type": "code",
+      "norm_label": "dominfra",
+      "source_file": "websrc/infra/dom/index.ts",
+      "source_location": "L8"
     },
     {
       "id": "websrc_application_index",
@@ -7638,7 +7627,18 @@
       "file_type": "code",
       "norm_label": "portfoliohistorymanagement",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L280"
+      "source_location": "L257"
+    },
+    {
+      "id": "websrc_infra_routing_index_router",
+      "label": "Router",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "allocation-plan-management.ts",
+      "file_type": "code",
+      "norm_label": "router",
+      "source_file": "websrc/infra/routing/index.ts",
+      "source_location": "L12"
     },
     {
       "id": "websrc_pages_asset_assetpage",
@@ -7663,6 +7663,17 @@
       "source_location": "L1"
     },
     {
+      "id": "websrc_pages_portfolio",
+      "label": "pages/portfolio.ts",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "allocation-plan-management.ts",
+      "file_type": "code",
+      "norm_label": "pages/portfolio.ts",
+      "source_file": "websrc/pages/portfolio.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "websrc_pages_portfolio_portfoliopage",
       "label": "PortfolioPage",
       "_origin": "ast",
@@ -7672,6 +7683,17 @@
       "norm_label": "portfoliopage",
       "source_file": "websrc/pages/portfolio.ts",
       "source_location": "L6"
+    },
+    {
+      "id": "ref_htmx_org",
+      "label": "htmx.org",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "allocation-plan-management.ts",
+      "file_type": "concept",
+      "norm_label": "htmx.org",
+      "source_file": "package.json",
+      "source_location": "L33"
     },
     {
       "id": "websrc_infra_chart_chart_options",
@@ -7694,6 +7716,28 @@
       "norm_label": "pie_doughnut_chart_options",
       "source_file": "websrc/infra/chart/chart-options.ts",
       "source_location": "L8"
+    },
+    {
+      "id": "websrc_infra_chart_chart_types_measuramentunit_currency",
+      "label": "CURRENCY",
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "chart-utils.ts",
+      "file_type": "code",
+      "norm_label": "currency",
+      "source_file": "websrc/infra/chart/chart-types.ts",
+      "source_location": "L4"
+    },
+    {
+      "id": "websrc_infra_chart_chart_types_measuramentunit_percentage",
+      "label": "PERCENTAGE",
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "chart-utils.ts",
+      "file_type": "code",
+      "norm_label": "percentage",
+      "source_file": "websrc/infra/chart/chart-types.ts",
+      "source_location": "L5"
     },
     {
       "id": "websrc_infra_chart_chart_types_unidimensional_dataset_sum_field",
@@ -7760,6 +7804,28 @@
       "norm_label": "paul_tol_palette",
       "source_file": "websrc/infra/color.ts",
       "source_location": "L1"
+    },
+    {
+      "id": "websrc_infra_format",
+      "label": "format.ts",
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "chart-utils.ts",
+      "file_type": "code",
+      "norm_label": "format.ts",
+      "source_file": "websrc/infra/format.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "websrc_infra_format_format",
+      "label": "Format",
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "chart-utils.ts",
+      "file_type": "code",
+      "norm_label": "format",
+      "source_file": "websrc/infra/format.ts",
+      "source_location": "L7"
     },
     {
       "id": "ref_chartjs_plugin_datalabels",
@@ -9482,7 +9548,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L238",
+      "source_location": "L215",
       "weight": 1.0
     },
     {
@@ -9494,7 +9560,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L158",
+      "source_location": "L135",
       "weight": 1.0
     },
     {
@@ -9506,7 +9572,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L119",
+      "source_location": "L96",
       "weight": 1.0
     },
     {
@@ -9518,7 +9584,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L178",
+      "source_location": "L155",
       "weight": 1.0
     },
     {
@@ -9530,19 +9596,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L46",
+      "source_location": "L49",
       "weight": 1.0
     },
     {
       "source": "websrc_components_portfolio_history_management_synchronizeexternalassetkeygroup",
-      "target": "websrc_components_portfolio_history_management_gettrimmedexternalassetkeys",
+      "target": "websrc_components_portfolio_history_quote_quote_action_readexternalassetkeys",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L87",
+      "source_location": "L64",
       "weight": 1.0
     },
     {
@@ -9554,7 +9620,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L435",
+      "source_location": "L487",
       "weight": 1.0
     },
     {
@@ -9566,7 +9632,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L523",
+      "source_location": "L575",
       "weight": 1.0
     },
     {
@@ -9578,7 +9644,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L524",
+      "source_location": "L576",
       "weight": 1.0
     },
     {
@@ -9590,7 +9656,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L525",
+      "source_location": "L577",
       "weight": 1.0
     },
     {
@@ -9602,7 +9668,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L527",
+      "source_location": "L579",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_portfolio_history_quote_quote_action_createportfoliohistoryquoteaction_getquoterequestsnapshot",
+      "target": "websrc_components_portfolio_history_quote_quote_action_readexternalassetkeys",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
+      "source_location": "L197",
       "weight": 1.0
     },
     {
@@ -9614,7 +9692,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L477",
+      "source_location": "L529",
       "weight": 1.0
     },
     {
@@ -9626,7 +9704,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L482",
+      "source_location": "L534",
       "weight": 1.0
     },
     {
@@ -9638,7 +9716,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L497",
+      "source_location": "L549",
       "weight": 1.0
     },
     {
@@ -9650,7 +9728,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L502",
+      "source_location": "L554",
       "weight": 1.0
     },
     {
@@ -9662,7 +9740,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L507",
+      "source_location": "L559",
       "weight": 1.0
     },
     {
@@ -9674,7 +9752,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L334",
+      "source_location": "L386",
       "weight": 1.0
     },
     {
@@ -9686,7 +9764,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L338",
+      "source_location": "L390",
       "weight": 1.0
     },
     {
@@ -9698,7 +9776,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L366",
+      "source_location": "L418",
       "weight": 1.0
     },
     {
@@ -9710,7 +9788,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L208",
+      "source_location": "L260",
       "weight": 1.0
     },
     {
@@ -9722,7 +9800,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L256",
+      "source_location": "L308",
       "weight": 1.0
     },
     {
@@ -9734,7 +9812,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L268",
+      "source_location": "L320",
       "weight": 1.0
     },
     {
@@ -9746,7 +9824,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L196",
+      "source_location": "L248",
       "weight": 1.0
     },
     {
@@ -12015,7 +12093,7 @@
       "confidence_score": 1.0,
       "context": "export",
       "source_file": "websrc/components/portfolio-history-quote/index.ts",
-      "source_location": "L14",
+      "source_location": "L15",
       "type_only": true,
       "weight": 1.0
     },
@@ -14181,6 +14259,78 @@
     },
     {
       "source": "websrc_components_portfolio_history_management",
+      "target": "websrc_components_portfolio_history_quote_quote_action_external_asset_exchange_id_selector",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "websrc/components/portfolio-history-management.ts",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_portfolio_history_management",
+      "target": "websrc_components_portfolio_history_quote_quote_action_external_asset_keys_selector",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "websrc/components/portfolio-history-management.ts",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_portfolio_history_management",
+      "target": "websrc_components_portfolio_history_quote_quote_action_external_asset_source_selector",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "websrc/components/portfolio-history-management.ts",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_portfolio_history_management",
+      "target": "websrc_components_portfolio_history_quote_quote_action_external_asset_ticker_selector",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "websrc/components/portfolio-history-management.ts",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_portfolio_history_management",
+      "target": "websrc_components_portfolio_history_quote_quote_action_portfolio_allocation_management_form_prefix",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "websrc/components/portfolio-history-management.ts",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_portfolio_history_management",
+      "target": "websrc_components_portfolio_history_quote_quote_action_readexternalassetkeys",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "websrc/components/portfolio-history-management.ts",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_portfolio_history_management",
       "target": "websrc_components_asset_composed_columns_input_index_assetcomposedcolumnsinput",
       "relation": "imports",
       "_origin": "ast",
@@ -14188,7 +14338,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L16",
+      "source_location": "L24",
       "weight": 1.0
     },
     {
@@ -14200,7 +14350,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L16",
+      "source_location": "L24",
       "weight": 1.0
     },
     {
@@ -14212,7 +14362,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L16",
+      "source_location": "L24",
       "weight": 1.0
     },
     {
@@ -14224,7 +14374,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L16",
+      "source_location": "L24",
       "weight": 1.0
     },
     {
@@ -14236,7 +14386,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L21",
+      "source_location": "L29",
       "weight": 1.0
     },
     {
@@ -14248,7 +14398,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L23",
+      "source_location": "L31",
       "weight": 1.0
     },
     {
@@ -14260,31 +14410,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L24",
-      "weight": 1.0
-    },
-    {
-      "source": "websrc_components_portfolio_history_quote_quote_action",
-      "target": "websrc_components_notifications_notifications",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L10",
-      "weight": 1.0
-    },
-    {
-      "source": "websrc_components_portfolio_history_quote_quote_action",
-      "target": "websrc_infra_htmx_index_htmxinfra",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L8",
+      "source_location": "L32",
       "weight": 1.0
     },
     {
@@ -14296,12 +14422,36 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L9",
+      "source_location": "L10",
       "weight": 1.0
     },
     {
       "source": "websrc_components_portfolio_history_quote_quote_action",
       "target": "websrc_infra_htmx_index_requestconfigeventdetail",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_portfolio_history_quote_quote_action",
+      "target": "websrc_components_notifications_notifications",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_portfolio_history_quote_quote_action",
+      "target": "websrc_infra_htmx_index_htmxinfra",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -17865,7 +18015,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L16",
+      "source_location": "L24",
       "weight": 1.0
     },
     {
@@ -17877,7 +18027,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L21",
+      "source_location": "L29",
       "weight": 1.0
     },
     {
@@ -17889,7 +18039,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L22",
+      "source_location": "L30",
       "type_only": true,
       "weight": 1.0
     },
@@ -17902,7 +18052,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L23",
+      "source_location": "L31",
       "weight": 1.0
     },
     {
@@ -17914,31 +18064,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L24",
-      "weight": 1.0
-    },
-    {
-      "source": "websrc_components_portfolio_history_quote_quote_action",
-      "target": "websrc_components_notifications",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L10",
-      "weight": 1.0
-    },
-    {
-      "source": "websrc_components_portfolio_history_quote_quote_action",
-      "target": "ref_bignumber_js",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L7",
+      "source_location": "L32",
       "weight": 1.0
     },
     {
@@ -17950,8 +18076,32 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L9",
+      "source_location": "L10",
       "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_portfolio_history_quote_quote_action",
+      "target": "websrc_components_notifications",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_portfolio_history_quote_quote_action",
+      "target": "ref_bignumber_js",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
+      "source_location": "L8",
       "weight": 1.0
     },
     {
@@ -20127,7 +20277,79 @@
       "confidence_score": 1.0,
       "context": "re-export",
       "source_file": "websrc/components/portfolio-history-quote/index.ts",
-      "source_location": "L14",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_portfolio_history_quote_index",
+      "target": "websrc_components_portfolio_history_quote_quote_action_external_asset_exchange_id_selector",
+      "relation": "re_exports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "re-export",
+      "source_file": "websrc/components/portfolio-history-quote/index.ts",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_portfolio_history_quote_index",
+      "target": "websrc_components_portfolio_history_quote_quote_action_external_asset_keys_selector",
+      "relation": "re_exports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "re-export",
+      "source_file": "websrc/components/portfolio-history-quote/index.ts",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_portfolio_history_quote_index",
+      "target": "websrc_components_portfolio_history_quote_quote_action_external_asset_source_selector",
+      "relation": "re_exports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "re-export",
+      "source_file": "websrc/components/portfolio-history-quote/index.ts",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_portfolio_history_quote_index",
+      "target": "websrc_components_portfolio_history_quote_quote_action_external_asset_ticker_selector",
+      "relation": "re_exports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "re-export",
+      "source_file": "websrc/components/portfolio-history-quote/index.ts",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_portfolio_history_quote_index",
+      "target": "websrc_components_portfolio_history_quote_quote_action_portfolio_allocation_management_form_prefix",
+      "relation": "re_exports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "re-export",
+      "source_file": "websrc/components/portfolio-history-quote/index.ts",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_portfolio_history_quote_index",
+      "target": "websrc_components_portfolio_history_quote_quote_action_readexternalassetkeys",
+      "relation": "re_exports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "re-export",
+      "source_file": "websrc/components/portfolio-history-quote/index.ts",
+      "source_location": "L15",
       "weight": 1.0
     },
     {
@@ -20139,7 +20361,7 @@
       "confidence_score": 1.0,
       "context": "re-export",
       "source_file": "websrc/components/portfolio-history-quote/index.ts",
-      "source_location": "L15",
+      "source_location": "L24",
       "type_only": true,
       "weight": 1.0
     },
@@ -20152,7 +20374,7 @@
       "confidence_score": 1.0,
       "context": "re-export",
       "source_file": "websrc/components/portfolio-history-quote/index.ts",
-      "source_location": "L15",
+      "source_location": "L24",
       "type_only": true,
       "weight": 1.0
     },
@@ -22117,24 +22339,13 @@
     },
     {
       "source": "websrc_components_portfolio_history_management",
-      "target": "websrc_components_portfolio_history_management_normalizeportfoliohistoryrow",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L109",
-      "weight": 1.0
-    },
-    {
-      "source": "websrc_components_portfolio_history_management",
       "target": "websrc_components_portfolio_history_management_handleassetrowselectionchange",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L135",
+      "source_location": "L112",
       "weight": 1.0
     },
     {
@@ -22145,7 +22356,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L174",
+      "source_location": "L151",
       "weight": 1.0
     },
     {
@@ -22156,7 +22367,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L184",
+      "source_location": "L161",
       "weight": 1.0
     },
     {
@@ -22167,7 +22378,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L223",
+      "source_location": "L200",
       "weight": 1.0
     },
     {
@@ -22178,7 +22389,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L233",
+      "source_location": "L210",
       "weight": 1.0
     },
     {
@@ -22189,7 +22400,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L241",
+      "source_location": "L218",
       "weight": 1.0
     },
     {
@@ -22200,7 +22411,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L256",
+      "source_location": "L233",
       "weight": 1.0
     },
     {
@@ -22211,7 +22422,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L280",
+      "source_location": "L257",
       "weight": 1.0
     },
     {
@@ -22222,18 +22433,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L38",
-      "weight": 1.0
-    },
-    {
-      "source": "websrc_components_portfolio_history_management",
-      "target": "websrc_components_portfolio_history_management_gettrimmedexternalassetkeys",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L53",
+      "source_location": "L41",
       "weight": 1.0
     },
     {
@@ -22244,18 +22444,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L80",
+      "source_location": "L57",
       "weight": 1.0
     },
     {
-      "source": "websrc_components_portfolio_history_quote_quote_action",
-      "target": "websrc_components_portfolio_history_quote_quote_action_recalculateportfolioallocation",
+      "source": "websrc_components_portfolio_history_management",
+      "target": "websrc_components_portfolio_history_management_normalizeportfoliohistoryrow",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L35",
+      "source_file": "websrc/components/portfolio-history-management.ts",
+      "source_location": "L86",
       "weight": 1.0
     },
     {
@@ -22266,12 +22466,100 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L51",
+      "source_location": "L100",
       "weight": 1.0
     },
     {
       "source": "websrc_components_portfolio_history_quote_quote_action",
       "target": "websrc_components_portfolio_history_quote_quote_action_createportfoliohistoryquoteaction",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
+      "source_location": "L133",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_portfolio_history_quote_quote_action",
+      "target": "websrc_components_portfolio_history_quote_quote_action_external_asset_keys_selector",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_portfolio_history_quote_quote_action",
+      "target": "websrc_components_portfolio_history_quote_quote_action_external_asset_source_selector",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
+      "source_location": "L20",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_portfolio_history_quote_quote_action",
+      "target": "websrc_components_portfolio_history_quote_quote_action_external_asset_exchange_id_selector",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_portfolio_history_quote_quote_action",
+      "target": "websrc_components_portfolio_history_quote_quote_action_external_asset_ticker_selector",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_portfolio_history_quote_quote_action",
+      "target": "websrc_components_portfolio_history_quote_quote_action_portfolio_allocation_management_form_prefix",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
+      "source_location": "L33",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_portfolio_history_quote_quote_action",
+      "target": "websrc_components_portfolio_history_quote_quote_action_history_row_id_pattern",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
+      "source_location": "L36",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_portfolio_history_quote_quote_action",
+      "target": "websrc_components_portfolio_history_quote_quote_action_readexternalassetkeys",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
+      "source_location": "L58",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_portfolio_history_quote_quote_action",
+      "target": "websrc_components_portfolio_history_quote_quote_action_recalculateportfolioallocation",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -22288,7 +22576,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L120",
+      "source_location": "L170",
       "weight": 1.0
     },
     {
@@ -22299,7 +22587,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L189",
+      "source_location": "L241",
       "weight": 1.0
     },
     {
@@ -22310,7 +22598,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L207",
+      "source_location": "L259",
       "weight": 1.0
     },
     {
@@ -22321,7 +22609,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L231",
+      "source_location": "L283",
       "weight": 1.0
     },
     {
@@ -22332,7 +22620,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L250",
+      "source_location": "L302",
       "weight": 1.0
     },
     {
@@ -22343,7 +22631,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L263",
+      "source_location": "L315",
       "weight": 1.0
     },
     {
@@ -22354,7 +22642,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L276",
+      "source_location": "L328",
       "weight": 1.0
     },
     {
@@ -22365,7 +22653,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L291",
+      "source_location": "L343",
       "weight": 1.0
     },
     {
@@ -22376,7 +22664,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L319",
+      "source_location": "L371",
       "weight": 1.0
     },
     {
@@ -22387,7 +22675,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L375",
+      "source_location": "L427",
       "weight": 1.0
     },
     {
@@ -22398,7 +22686,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L430",
+      "source_location": "L482",
       "weight": 1.0
     },
     {
@@ -22409,7 +22697,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L473",
+      "source_location": "L525",
       "weight": 1.0
     },
     {
@@ -22420,7 +22708,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-quote/quote-action.ts",
-      "source_location": "L515",
+      "source_location": "L567",
       "weight": 1.0
     },
     {
@@ -26270,7 +26558,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L190",
+      "source_location": "L167",
       "weight": 1.0
     },
     {
@@ -26281,7 +26569,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L200",
+      "source_location": "L177",
       "weight": 1.0
     },
     {
@@ -26292,7 +26580,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L217",
+      "source_location": "L194",
       "weight": 1.0
     },
     {
@@ -26699,7 +26987,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L38",
+      "source_location": "L41",
       "weight": 1.0
     },
     {
@@ -27748,5 +28036,5 @@
       "source_file": "websrc/components/portfolio-navigation.html"
     }
   ],
-  "built_at_commit": "039bbce1ad930863b5ec7d919020b0a2c8fb04ca"
+  "built_at_commit": "74ba533c64e95a0aaafd4f6aee4af1aa71d911c1"
 }

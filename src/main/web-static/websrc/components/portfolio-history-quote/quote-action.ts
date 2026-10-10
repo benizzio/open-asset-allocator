@@ -2,6 +2,7 @@
  * Owns the row-scoped HTMX lifecycle for fetching and applying a portfolio-history closing quote.
  *
  * @author GPT-6 Luna
+ * @author GPT-6 Sol
  */
 
 import { BigNumber } from "bignumber.js";
@@ -9,10 +10,30 @@ import { HtmxInfra } from "../../infra/htmx";
 import type { AfterRequestEventDetail, RequestConfigEventDetail } from "../../infra/htmx";
 import notifications from "../notifications";
 
-const EXTERNAL_ASSET_KEYS_SELECTOR = "[data-external-asset-keys]";
-const EXTERNAL_ASSET_SOURCE_SELECTOR = "[data-external-asset-key=\"source\"]";
-const EXTERNAL_ASSET_EXCHANGE_ID_SELECTOR = "[data-external-asset-key=\"exchangeId\"]";
-const EXTERNAL_ASSET_TICKER_SELECTOR = "[data-external-asset-key=\"ticker\"]";
+/** Locates the hidden association fieldset. Example: `row.querySelector(EXTERNAL_ASSET_KEYS_SELECTOR)`.
+ * @author GPT-6 Sol
+ */
+export const EXTERNAL_ASSET_KEYS_SELECTOR = "[data-external-asset-keys]";
+/** Locates its source input. Example: `fieldset.querySelector(EXTERNAL_ASSET_SOURCE_SELECTOR)`.
+ * @author GPT-6 Sol
+ */
+export const EXTERNAL_ASSET_SOURCE_SELECTOR = "[data-external-asset-key=\"source\"]";
+/** Locates its exchange ID input. Example: `fieldset.querySelector(EXTERNAL_ASSET_EXCHANGE_ID_SELECTOR)`.
+ * @author GPT-6 Sol
+ */
+export const EXTERNAL_ASSET_EXCHANGE_ID_SELECTOR = "[data-external-asset-key=\"exchangeId\"]";
+/** Locates its ticker input. Example: `fieldset.querySelector(EXTERNAL_ASSET_TICKER_SELECTOR)`.
+ * @author GPT-6 Sol
+ */
+export const EXTERNAL_ASSET_TICKER_SELECTOR = "[data-external-asset-key=\"ticker\"]";
+/** Prefix shared by observation forms and their allocation row IDs.
+ * @example `const rowId = PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX + "12-row-0";`
+ * @author GPT-6 Sol
+ */
+export const PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX = "portfolio-history-management-form-";
+/** Matches observation and allocation coordinates in a history row ID.
+ * @author GPT-6 Sol */
+const HISTORY_ROW_ID_PATTERN = new RegExp(`^${ PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX }(\\d+)-row-(\\d+)$`);
 const QUOTE_INPUT_GROUP_SELECTOR = ".portfolio-history-market-price";
 const QUOTE_ACTION_SELECTOR = "[data-quote-action]";
 const QUOTE_ICON_SELECTOR = "[data-quote-icon]";
@@ -24,6 +45,34 @@ const QUOTE_TOTAL_MARKET_VALUE_RAW_SELECTOR = "input[type=\"hidden\"][name$=\"[t
 const QUOTE_RESPONSE_ERROR_MESSAGE = "The latest closing price response was invalid.";
 const QUOTE_INPUT_ERROR_MESSAGE = "The market price input is unavailable.";
 const QUOTE_PATH_ERROR_MESSAGE = "The selected external-asset identifiers could not be encoded.";
+
+/** Reads a complete provider key triplet from untrusted values, trimming each identifier before use.
+ *
+ * Missing or whitespace-only identifiers invalidate the association. When reading persisted inputs, callers
+ * must also check that the fieldset is enabled and its values already equal the trimmed keys.
+ * @param values - External-asset identifiers from a provider selection or hidden row inputs.
+ * @returns Trimmed keys when all three identifiers are present, otherwise `null`.
+ * @example `const keys = readExternalAssetKeys({ source: " provider ", exchangeId: " X ", ticker: " ABC " });`
+ * @author GPT-6 Sol
+ */
+export function readExternalAssetKeys(values: {
+    source?: unknown;
+    exchangeId?: unknown;
+    ticker?: unknown;
+} | undefined): { source: string; exchangeId: string; ticker: string } | null {
+    if(!values
+        || typeof values.source !== "string"
+        || typeof values.exchangeId !== "string"
+        || typeof values.ticker !== "string") {
+        return null;
+    }
+
+    const source = values.source.trim();
+    const exchangeId = values.exchangeId.trim();
+    const ticker = values.ticker.trim();
+
+    return source && exchangeId && ticker ? { source, exchangeId, ticker } : null;
+}
 
 /** Recalculates the existing quantity × market-price total for one allocation row.
  *
@@ -116,6 +165,7 @@ export function createPortfolioHistoryQuoteAction(
     /** Reads only this row's persisted asset ID, enabled first-provider keys, and selection generation.
      *
      * @author GPT-6 Luna
+     * @author GPT-6 Sol
      */
     function getQuoteRequestSnapshot(row: HTMLTableRowElement): QuoteRequestSnapshot | null {
         const assetIdInput = row.querySelector<HTMLInputElement>("input[type=\"hidden\"][name$=\"[assetId]\"]");
@@ -123,7 +173,7 @@ export function createPortfolioHistoryQuoteAction(
         const sourceInput = fieldset?.querySelector<HTMLInputElement>(EXTERNAL_ASSET_SOURCE_SELECTOR);
         const exchangeIdInput = fieldset?.querySelector<HTMLInputElement>(EXTERNAL_ASSET_EXCHANGE_ID_SELECTOR);
         const tickerInput = fieldset?.querySelector<HTMLInputElement>(EXTERNAL_ASSET_TICKER_SELECTOR);
-        const allocationCoordinates = /^portfolio-history-management-form-(\d+)-row-(\d+)$/.exec(row.id);
+        const allocationCoordinates = HISTORY_ROW_ID_PATTERN.exec(row.id);
         const generation = Number(row.dataset.assetSelectionGeneration);
 
         if(!assetIdInput) {
@@ -144,15 +194,19 @@ export function createPortfolioHistoryQuoteAction(
             return null;
         }
 
-        const source = sourceInput.value.trim();
-        const exchangeId = exchangeIdInput.value.trim();
-        const ticker = tickerInput.value.trim();
+        const keys = readExternalAssetKeys({
+            source: sourceInput.value,
+            exchangeId: exchangeIdInput.value,
+            ticker: tickerInput.value,
+        });
 
-        if(!source || !exchangeId || !ticker) {
+        if(!keys) {
             return null;
         }
 
-        if(sourceInput.value !== source || exchangeIdInput.value !== exchangeId || tickerInput.value !== ticker) {
+        if(sourceInput.value !== keys.source
+            || exchangeIdInput.value !== keys.exchangeId
+            || tickerInput.value !== keys.ticker) {
             return null;
         }
 
@@ -173,9 +227,7 @@ export function createPortfolioHistoryQuoteAction(
         return {
             row,
             assetId,
-            source,
-            exchangeId,
-            ticker,
+            ...keys,
             generation,
             observationTimestampId,
             allocationIndex,

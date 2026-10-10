@@ -12,7 +12,15 @@ import { BigNumber } from "bignumber.js";
 import { AfterRequestEventDetail, HtmxInfra } from "../infra/htmx";
 import { ObservationTimestamp } from "../domain/portfolio-allocation";
 import Router from "../infra/routing";
-import { createPortfolioHistoryQuoteAction } from "./portfolio-history-quote";
+import {
+    createPortfolioHistoryQuoteAction,
+    readExternalAssetKeys,
+    EXTERNAL_ASSET_KEYS_SELECTOR,
+    EXTERNAL_ASSET_SOURCE_SELECTOR,
+    EXTERNAL_ASSET_EXCHANGE_ID_SELECTOR,
+    EXTERNAL_ASSET_TICKER_SELECTOR,
+    PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX,
+} from "./portfolio-history-quote";
 import AssetComposedColumnsInput, {
     ASSET_ROW_SELECTION_CHANGE_EVENT,
     AssetRowSelectionChangeState,
@@ -24,12 +32,7 @@ import notifications from "./notifications";
 import { NotificationType } from "../infra/infra-types";
 
 const PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER = "accordion-portfolio-history-management";
-const PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX = "portfolio-history-management-form-";
 const PORTFOLIO_ALLOCATION_MANAGEMENT_TBODY_PREFIX = "portfolio-history-management-form-tbody-";
-const EXTERNAL_ASSET_KEYS_SELECTOR = "[data-external-asset-keys]";
-const EXTERNAL_ASSET_SOURCE_SELECTOR = "[data-external-asset-key=\"source\"]";
-const EXTERNAL_ASSET_EXCHANGE_ID_SELECTOR = "[data-external-asset-key=\"exchangeId\"]";
-const EXTERNAL_ASSET_TICKER_SELECTOR = "[data-external-asset-key=\"ticker\"]";
 
 /** Creates the row-scoped quote action before its first use in row normalization.
  *
@@ -46,36 +49,10 @@ function recalculatePortfolioHistoryAllocation(allocationIndex: number, observat
     portfolioHistoryManagement.handleInputQuantityOrMarketPrice(allocationIndex, String(observationTimestampId));
 }
 
-/** Returns trimmed, complete provider keys or `null` when at least one identifier is invalid.
- *
- * @author GPT-6 Luna
- */
-function getTrimmedExternalAssetKeys(values: {
-    source?: unknown;
-    exchangeId?: unknown;
-    ticker?: unknown;
-} | undefined): { source: string; exchangeId: string; ticker: string } | null {
-    if(!values
-        || typeof values.source !== "string"
-        || typeof values.exchangeId !== "string"
-        || typeof values.ticker !== "string") {
-        return null;
-    }
-
-    const source = values.source.trim();
-    const exchangeId = values.exchangeId.trim();
-    const ticker = values.ticker.trim();
-
-    if(!source || !exchangeId || !ticker) {
-        return null;
-    }
-
-    return { source, exchangeId, ticker };
-}
-
 /** Writes a complete key set atomically, or clears and disables the row's entire association group.
  *
  * @author GPT-6 Luna
+ * @author GPT-6 Sol
  */
 function synchronizeExternalAssetKeyGroup(
     fieldset: HTMLFieldSetElement,
@@ -84,7 +61,7 @@ function synchronizeExternalAssetKeyGroup(
     const sourceInput = fieldset.querySelector<HTMLInputElement>(EXTERNAL_ASSET_SOURCE_SELECTOR);
     const exchangeIdInput = fieldset.querySelector<HTMLInputElement>(EXTERNAL_ASSET_EXCHANGE_ID_SELECTOR);
     const tickerInput = fieldset.querySelector<HTMLInputElement>(EXTERNAL_ASSET_TICKER_SELECTOR);
-    const keys = getTrimmedExternalAssetKeys(values);
+    const keys = readExternalAssetKeys(values);
 
     if(!sourceInput || !exchangeIdInput || !tickerInput || !keys) {
         [sourceInput, exchangeIdInput, tickerInput].forEach(input => {
