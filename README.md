@@ -170,8 +170,7 @@ assessing portfolio vs. plan situation through time, helping re-balancing decisi
         - [ ] show total market value for entire form
     - [x] market prices from external source (e.g. Yahoo Finance)
         - [ ] associate external source on Portfolio Allocation Management page
-    - [ ] Portfolio Allocation Management and Allocation Plan Management - allow past observations and clone an
-      observation
+    - [ ] allow past observations and clone an observation
         - [ ] block external source market price for past observations
     - [ ] template data from plan
     - [ ] no content message
@@ -179,6 +178,7 @@ assessing portfolio vs. plan situation through time, helping re-balancing decisi
     - [ ] Line chart with portfolio total market value over time - history progress chart and performance
 - Allocation Plan
     - [x] add form based data input (beginner-user-friendly)
+    - [ ] allow past plans and clone a plan
     - [ ] copy data from other plans
     - [ ] no content message
 - Allocation map:
