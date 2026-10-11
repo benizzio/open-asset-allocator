@@ -104,7 +104,8 @@ frontend state; `make destroy` removes the container and clears that state. Deve
 `target/postgres-dev-data`.
 
 Host Node.js is optional for the containerized workflow. When it is needed for editor integration or direct frontend
-commands, run `nvm install` and `nvm use` from the repository. The exact version in `.nvmrc` is also used by the frontend
+commands, run `nvm install` and `nvm use` from the repository. The exact version in `.nvmrc` is also used by the
+frontend
 development and monolith build images. Run `make validate-node-version` to verify those runtime references.
 
 Renovate owns coordinated Node.js runtime, Playwright toolchain, Node.js type, and NVM installer updates. Application
@@ -118,17 +119,17 @@ The Playwright E2E workflow requires Docker Engine, Docker Compose, and `make`. 
 Playwright browsers, or npm dependencies on the host. Host Node.js tooling is optional for editor integration; the
 containerized commands are the supported test environment.
 
-| Command | Purpose |
-|---|---|
-| `make e2e` | Run Chromium and Firefox against the source-mounted frontend and standalone backend. |
-| `make e2e-ci` | Run Chromium and Firefox against the immutable production monolith used in CI. |
-| `make e2e-chromium` | Run the local topology with Chromium only. |
-| `make e2e-firefox` | Run the local topology with Firefox only. |
-| `make e2e-ui` | Start Playwright UI Mode at [http://localhost:9324](http://localhost:9324). |
-| `make e2e-headed` | Start a headed browser through noVNC at [http://localhost:7900](http://localhost:7900). |
-| `make e2e-report` | Serve the latest HTML report at [http://localhost:9323](http://localhost:9323). |
-| `make e2e-logs` | Follow logs for an active E2E stack. |
-| `make e2e-clean` | Recover resources left by an interrupted E2E command while preserving artifacts. |
+| Command             | Purpose                                                                                 |
+|---------------------|-----------------------------------------------------------------------------------------|
+| `make e2e`          | Run Chromium and Firefox against the source-mounted frontend and standalone backend.    |
+| `make e2e-ci`       | Run Chromium and Firefox against the immutable production monolith used in CI.          |
+| `make e2e-chromium` | Run the local topology with Chromium only.                                              |
+| `make e2e-firefox`  | Run the local topology with Firefox only.                                               |
+| `make e2e-ui`       | Start Playwright UI Mode at [http://localhost:9324](http://localhost:9324).             |
+| `make e2e-headed`   | Start a headed browser through noVNC at [http://localhost:7900](http://localhost:7900). |
+| `make e2e-report`   | Serve the latest HTML report at [http://localhost:9323](http://localhost:9323).         |
+| `make e2e-logs`     | Follow logs for an active E2E stack.                                                    |
+| `make e2e-clean`    | Recover resources left by an interrupted E2E command while preserving artifacts.        |
 
 Pass Playwright file, title, or project filters through `E2E_ARGS`. For example:
 
@@ -146,7 +147,7 @@ isolation, artifacts, dependency updates, and troubleshooting.
 > Current pre-alpha version requires data ingestion or manual data insertion on the PostgreSQL database.
 > To access the stored portfolio go to `http://localhost:8000/portfolio/<portfolio id>`.
 
-## Roadmap(ish)
+## Roadmap (ish)
 
 #### Backlog - Not planned yet
 
@@ -170,7 +171,8 @@ assessing portfolio vs. plan situation through time, helping re-balancing decisi
     - [ ] copy data from different obsevation timestamps
     - [ ] template data from plan
     - [ ] no content message
-    - [ ] market prices from external source (e.g. Yahoo Finance)
+    - [x] market prices from external source (e.g. Yahoo Finance)
+        - [ ] associate external source on Portfolio Allocation Management page
     - [ ] improve chart navigation
     - [ ] Line chart with portfolio total market value over time - history progress chart and performance
 - Allocation Plan
