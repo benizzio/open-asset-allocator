@@ -168,11 +168,13 @@ assessing portfolio vs. plan situation through time, helping re-balancing decisi
 - Portfolio history
     - [x] add form based data input (beginner-user-friendly)
         - [ ] show total market value for entire form
-    - [ ] copy data from different obsevation timestamps
-    - [ ] template data from plan
-    - [ ] no content message
     - [x] market prices from external source (e.g. Yahoo Finance)
         - [ ] associate external source on Portfolio Allocation Management page
+    - [ ] Portfolio Allocation Management and Allocation Plan Management - allow past observations and clone an
+      observation
+        - [ ] block external source market price for past observations
+    - [ ] template data from plan
+    - [ ] no content message
     - [ ] improve chart navigation
     - [ ] Line chart with portfolio total market value over time - history progress chart and performance
 - Allocation Plan
