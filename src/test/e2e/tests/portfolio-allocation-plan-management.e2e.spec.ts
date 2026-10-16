@@ -8,9 +8,11 @@
  * verifies the resulting charts and PostgreSQL persistence.
  *
  * @author OpenCode
+ * @author GPT-6 Astra
  */
 import type { Locator, Page, Request } from '@playwright/test';
 import { expect, test } from '../support/fixtures';
+import { chartDiagnosticTest } from '../support/chart-diagnostics';
 import type { E2eDatabase } from '../support/database';
 import {
   clickCanvasPoint,
@@ -253,7 +255,11 @@ test.describe('portfolio allocation plan management', () => {
     await exerciseAllocationPlanChart(page, persistedPlan.id);
   });
 
-  test('scenario 6: modifies an allocation plan and creates a second plan', async ({ database, page }) => {
+  /** Retains chart lifecycle diagnostics when the management-to-viewing flow fails.
+   * @author OpenCode
+   * @author GPT-6 Astra
+   */
+  chartDiagnosticTest('scenario 6: modifies an allocation plan and creates a second plan', async ({ database, page }) => {
     test.setTimeout(60_000);
     const seededData = await seedAllocationPlanManagementData(database);
     await installCanvasTextRecorder(page);
