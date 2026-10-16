@@ -133,7 +133,8 @@ export function registerAutocompleteInteractions(
     wrapper.addEventListener("focusout", event => {
         const focusEvent = event as FocusEvent;
 
-        if(focusEvent.relatedTarget && wrapper.contains(focusEvent.relatedTarget as Node)) {
+        if((focusEvent.relatedTarget && wrapper.contains(focusEvent.relatedTarget as Node))
+            || state.outsidePointerPending) {
             return;
         }
 

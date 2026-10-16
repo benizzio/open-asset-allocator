@@ -23,6 +23,7 @@ import type {
     AssetTickerSelectionHandler,
     AutocompleteControllerActions,
 } from "./types";
+import { bindOutsidePointerDismissal, clearOutsidePointerDismissal } from "./outside-pointer-dismissal";
 
 /**
  * Manages a single active asset-search autocomplete while retaining state for each input.
@@ -106,12 +107,7 @@ export class AssetSearchAutocompleteController implements AutocompleteController
         state.suggestions.hidden = false;
         input.setAttribute(ARIA_EXPANDED_ATTRIBUTE, "true");
 
-        state.outsidePointerHandler = event => {
-            if(!state.wrapper.contains(event.target as Node)) {
-                this.close(input);
-            }
-        };
-        document.addEventListener("pointerdown", state.outsidePointerHandler, true);
+        bindOutsidePointerDismissal(state, () => this.close(input));
 
         state.removalObserver = new MutationObserver(() => {
             if(!input.isConnected || input.getClientRects().length === 0) {
@@ -150,10 +146,7 @@ export class AssetSearchAutocompleteController implements AutocompleteController
         input.setAttribute(ARIA_EXPANDED_ATTRIBUTE, "false");
         input.removeAttribute(ARIA_ACTIVE_DESCENDANT_ATTRIBUTE);
 
-        if(state.outsidePointerHandler) {
-            document.removeEventListener("pointerdown", state.outsidePointerHandler, true);
-        }
-        state.outsidePointerHandler = undefined;
+        clearOutsidePointerDismissal(state);
         state.removalObserver?.disconnect();
         state.removalObserver = undefined;
 
@@ -365,6 +358,7 @@ export class AssetSearchAutocompleteController implements AutocompleteController
             activeOptionSource: null,
             isOpen: false,
             isLookupPending: false,
+            outsidePointerPending: false,
         };
 
         status.classList.add(VISUALLY_HIDDEN_CLASS);
