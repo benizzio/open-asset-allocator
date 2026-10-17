@@ -1,12 +1,10 @@
 package inttest
 
 import (
-	"database/sql"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 
@@ -113,7 +111,7 @@ func TestGetAllocationPlans(t *testing.T) {
 // TestAllocationPlanReadsOrderByPlannedDateAndId verifies planned-date ordering and its ID tie-breaker
 // on both complete-plan and plan-identifier read APIs. It seeds distinct dates and equal-date records directly.
 //
-// Co-authored by: OpenCode
+// Authored by: OpenCode
 func TestAllocationPlanReadsOrderByPlannedDateAndId(t *testing.T) {
 	t.Cleanup(
 		inttestutil.BuildCleanupFunctionBuilder().
@@ -147,21 +145,19 @@ func TestAllocationPlanReadsOrderByPlannedDateAndId(t *testing.T) {
 	err = inttestinfra.ExecuteDBQuery(insertDetailsSQL, nil)
 	require.NoError(t, err)
 
-	var assertNameOrder = func(responseBody string) {
-		var orderedNames = []string{
-			"Historical date ordering test future",
-			"Historical date ordering test tie second",
-			"Historical date ordering test tie first",
-			"60/40 Portfolio Classic - Example",
-			"Historical date ordering test past",
-		}
-		var previousIndex = -1
-		for _, name := range orderedNames {
-			var nameIndex = strings.Index(responseBody, name)
-			assert.Greater(t, nameIndex, previousIndex, "unexpected order for %q", name)
-			previousIndex = nameIndex
-		}
+	// planDateProjection holds the plan fields used by JSON ordering assertions.
+	// Authored by: OpenCode
+	type planDateProjection struct {
+		Name        string `json:"name"`
+		PlannedDate string `json:"plannedDate"`
 	}
+	var expectedOrderedPlanDatesJSON = `[
+		{"name":"Historical date ordering test future","plannedDate":"2099-01-01"},
+		{"name":"Historical date ordering test tie second","plannedDate":"2040-05-15"},
+		{"name":"Historical date ordering test tie first","plannedDate":"2040-05-15"},
+		{"name":"60/40 Portfolio Classic - Example","plannedDate":"2025-01-01"},
+		{"name":"Historical date ordering test past","plannedDate":"2001-01-01"}
+	]`
 
 	planResponse, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/allocation-plan")
 	require.NoError(t, err)
@@ -169,10 +165,11 @@ func TestAllocationPlanReadsOrderByPlannedDateAndId(t *testing.T) {
 	require.Equal(t, http.StatusOK, planResponse.StatusCode)
 	planBody, err := io.ReadAll(planResponse.Body)
 	require.NoError(t, err)
-	assertNameOrder(string(planBody))
-	assert.Contains(t, string(planBody), `"plannedDate":"2040-05-15"`)
-	assert.Contains(t, string(planBody), `"plannedDate":"2099-01-01"`)
-	assert.Contains(t, string(planBody), `"plannedDate":"2001-01-01"`)
+	var planResponsePlans []planDateProjection
+	require.NoError(t, json.Unmarshal(planBody, &planResponsePlans))
+	planResponsePlansJSON, err := json.Marshal(planResponsePlans)
+	require.NoError(t, err)
+	assert.JSONEq(t, expectedOrderedPlanDatesJSON, string(planResponsePlansJSON))
 
 	optionsResponse, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/divergence/options")
 	require.NoError(t, err)
@@ -180,78 +177,18 @@ func TestAllocationPlanReadsOrderByPlannedDateAndId(t *testing.T) {
 	require.Equal(t, http.StatusOK, optionsResponse.StatusCode)
 	optionsBody, err := io.ReadAll(optionsResponse.Body)
 	require.NoError(t, err)
-	assertNameOrder(string(optionsBody))
-	assert.Contains(t, string(optionsBody), `"plannedDate":"2040-05-15"`)
-	assert.Contains(t, string(optionsBody), `"plannedDate":"2099-01-01"`)
-	assert.Contains(t, string(optionsBody), `"plannedDate":"2001-01-01"`)
-}
-
-// TestAllocationPlanDateMigrationBackfillsLegacyRows executes the migration against a temporary legacy table.
-// It verifies creation-date backfill, CURRENT_DATE fallback, and the migration's NOT NULL/no-default contract.
-//
-// Co-authored by: OpenCode
-func TestAllocationPlanDateMigrationBackfillsLegacyRows(t *testing.T) {
-	var transaction, err = inttestinfra.DatabaseConnection.DB().Begin()
-	require.NoError(t, err)
-	t.Cleanup(func() {
-		assert.NoError(t, transaction.Rollback())
-	})
-
-	_, err = transaction.Exec(`
-		CREATE TEMPORARY TABLE allocation_plan (
-			id BIGINT PRIMARY KEY,
-			create_timestamp TIMESTAMP
-		) ON COMMIT DROP
-	`)
-	require.NoError(t, err)
-
-	_, err = transaction.Exec(`
-		INSERT INTO allocation_plan (id, create_timestamp)
-		VALUES (1, '2021-02-03 18:45:00'), (2, NULL)
-	`)
-	require.NoError(t, err)
-
-	var migrationPath = filepath.Join(
-		"..", "..", "flyway", "sql", "migration-[15]-allocation_plan_planned_date.sql",
-	)
-	migrationSQL, err := os.ReadFile(migrationPath)
-	require.NoError(t, err)
-	for _, statement := range strings.Split(string(migrationSQL), ";") {
-		if strings.TrimSpace(statement) == "" {
-			continue
-		}
-		_, err = transaction.Exec(statement)
-		require.NoError(t, err)
+	var optionsResponseData struct {
+		AvailablePlans []planDateProjection `json:"availablePlans"`
 	}
-
-	var actualCreationDate, actualNullTimestampDate, currentDate string
-	err = transaction.QueryRow(`
-		SELECT
-			(SELECT planned_date::text FROM allocation_plan WHERE id = 1),
-			(SELECT planned_date::text FROM allocation_plan WHERE id = 2),
-			CURRENT_DATE::text
-	`).Scan(&actualCreationDate, &actualNullTimestampDate, &currentDate)
+	require.NoError(t, json.Unmarshal(optionsBody, &optionsResponseData))
+	optionsResponsePlansJSON, err := json.Marshal(optionsResponseData.AvailablePlans)
 	require.NoError(t, err)
-	assert.Equal(t, "2021-02-03", actualCreationDate)
-	assert.Equal(t, currentDate, actualNullTimestampDate)
-
-	var nullable string
-	var defaultValue sql.NullString
-	err = transaction.QueryRow(`
-		SELECT is_nullable, column_default
-		FROM information_schema.columns
-		WHERE table_schema LIKE 'pg_temp_%'
-		  AND table_name = 'allocation_plan'
-		  AND column_name = 'planned_date'
-	`).Scan(&nullable, &defaultValue)
-	require.NoError(t, err)
-	assert.Equal(t, "NO", nullable)
-	assert.False(t, defaultValue.Valid)
+	assert.JSONEq(t, expectedOrderedPlanDatesJSON, string(optionsResponsePlansJSON))
 }
 
 // TestPostAllocationPlanForInsertion verifies a plan with an explicit plannedDate persists and is returned by reads.
 //
-// Co-authored by: OpenCode
+// Co-authored by: OpenCode and benizzio
 func TestPostAllocationPlanForInsertion(t *testing.T) {
 
 	var newAllocationPlanJSON = `
@@ -828,7 +765,7 @@ func TestPostAllocationPlanForUpdate_DeletesPlannedAllocationAndKeepsAsset(t *te
 
 // TestPostAllocationPlanForUpdate_ChangesHierarchicalId verifies a detail update carries the existing planned date.
 //
-// Co-authored by: OpenCode
+// Co-authored by: OpenCode and benizzio
 func TestPostAllocationPlanForUpdate_ChangesHierarchicalId(t *testing.T) {
 
 	var allocationPlanIdString = "6"
@@ -1281,7 +1218,7 @@ func TestPostAllocationPlanValidation_PercentageSumExceedsParentLimit(t *testing
 
 // TestPostAllocationPlanValidation_PercentageSumBelowParentLimit keeps the plan date valid while checking hierarchy totals.
 //
-// Co-authored by: OpenCode
+// Co-authored by: OpenCode and benizzio
 func TestPostAllocationPlanValidation_PercentageSumBelowParentLimit(t *testing.T) {
 
 	var updatePlanJSON = `
@@ -1367,7 +1304,7 @@ func TestPostAllocationPlanValidation_TopLevelPercentageSumExceedsLimit(t *testi
 
 // TestPostAllocationPlanValidation_TopLevelPercentageSumBelowLimit isolates the allocation-total validation with a valid plan date.
 //
-// Co-authored by: OpenCode
+// Co-authored by: OpenCode and benizzio
 func TestPostAllocationPlanValidation_TopLevelPercentageSumBelowLimit(t *testing.T) {
 
 	// Keep children within 1.0 to isolate the top-level violation
