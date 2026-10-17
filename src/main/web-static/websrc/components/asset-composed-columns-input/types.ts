@@ -28,8 +28,15 @@ export interface AssetSearchAutocompleteState {
     activeOptionSource: "keyboard" | "pointer" | null;
     isOpen: boolean;
     isLookupPending: boolean;
+    outsidePointerPending: boolean;
+    outsidePointerId?: number;
     pointerSelection?: { optionIndex: number; pointerId: number; x: number; y: number; isCancelled: boolean };
     outsidePointerHandler?: (event: PointerEvent) => void;
+    outsideClickHandler?: (event: MouseEvent) => void;
+    outsidePointerUpHandler?: (event: PointerEvent) => void;
+    outsidePointerCancelHandler?: (event: PointerEvent) => void;
+    outsidePointerBlurHandler?: () => void;
+    outsidePointerTimeout?: number;
     removalObserver?: MutationObserver;
 }
 
