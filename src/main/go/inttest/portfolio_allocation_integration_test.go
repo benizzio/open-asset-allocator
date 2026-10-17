@@ -1267,6 +1267,13 @@ func TestPostPortfolioAllocationRequiresExplicitTimestamp(t *testing.T) {
 			}`, observationId, invalidTimestamp.property, tag, recordClass)
 			var responseBody = postPortfolioAllocationForValidationFailure(t, requestBody)
 			assert.NotEmpty(t, responseBody)
+			if invalidTimestamp.name == "malformed" {
+				assert.JSONEq(
+					t,
+					`{"errorMessage":"Validation failed","details":["Field 'observationTimestamp.timestamp' failed validation: must be a valid RFC3339 timestamp"]}`,
+					string(responseBody),
+				)
+			}
 
 			inttestutil.AssertDBWithQueryMultipleRows(
 				t,

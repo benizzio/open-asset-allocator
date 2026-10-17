@@ -109,7 +109,7 @@ func (service *PortfolioAllocationDomService) MergePortfolioAllocationsInTransac
 // InsertObservationTimestampInTransaction persists an observation with its explicitly supplied timestamp.
 // For example, callers must pass the instant selected by the client rather than relying on a server-side default.
 //
-// Co-authored by: OpenCode
+// Co-authored by: OpenCode and benizzio
 func (service *PortfolioAllocationDomService) InsertObservationTimestampInTransaction(
 	transContext context.Context,
 	observationTimestamp *domain.PortfolioObservationTimestamp,
