@@ -1,9 +1,11 @@
 package rest
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -122,6 +124,9 @@ func (controller *PortfolioAllocationRESTController) getAvailableHistoryObservat
 	context.JSON(http.StatusOK, availableTimestampsDTS)
 }
 
+// postPortfolioAllocationHistory validates and persists a portfolio snapshot with the submitted observation instant.
+//
+// Co-authored by: OpenCode and benizzio
 func (controller *PortfolioAllocationRESTController) postPortfolioAllocationHistory(context *gin.Context) {
 
 	var portfolioIdParamValue = context.Param(portfolioIdParam)
@@ -132,6 +137,25 @@ func (controller *PortfolioAllocationRESTController) postPortfolioAllocationHist
 
 	var portfolioSnapshotDTS model.PortfolioSnapshotDTS
 	valid, err := gininfra.BindAndValidateJSONWithInvalidResponse(context, &portfolioSnapshotDTS)
+	if err != nil {
+		var timestampParseError *time.ParseError
+		if errors.As(err, &timestampParseError) {
+			var validationErrorsBuilder = validation.BuildCustomValidationErrorsBuilder()
+			validationErrorsBuilder.CustomValidationErrorFullNamespace(
+				&portfolioSnapshotDTS,
+				"observationTimestamp.timestamp",
+				"custom",
+				"must be a valid RFC3339 timestamp",
+				timestampParseError.Value,
+			)
+			gininfra.RespondWithCustomValidationErrors(
+				context,
+				validationErrorsBuilder.Build(),
+				&portfolioSnapshotDTS,
+			)
+			return
+		}
+	}
 	if gininfra.HandleAPIError(context, bindPortfolioSnapshotErrorMessage, err) || !valid {
 		return
 	}
@@ -145,7 +169,9 @@ func (controller *PortfolioAllocationRESTController) postPortfolioAllocationHist
 		int64(portfolioSnapshotDTS.ObservationTimestamp.Id),
 	)
 
-	var observationTimestamp = model.MapToPortfolioObservationTimestamp(portfolioSnapshotDTS.ObservationTimestamp)
+	var observationTimestamp = model.MapToPortfolioObservationTimestamp(
+		portfolioSnapshotDTS.ObservationTimestamp,
+	)
 
 	err = controller.portfolioAllocationManagementAppService.MergePortfolioAllocations(
 		portfolioId,
@@ -160,6 +186,9 @@ func (controller *PortfolioAllocationRESTController) postPortfolioAllocationHist
 	context.Status(http.StatusNoContent)
 }
 
+// validateCleanPortfolioAllocationHistory rejects zero timestamps and invalid allocation fields before persistence.
+//
+// Co-authored by: OpenCode and benizzio
 func (controller *PortfolioAllocationRESTController) validateCleanPortfolioAllocationHistory(
 	context *gin.Context,
 	portfolioSnapshotDTS *model.PortfolioSnapshotDTS,
@@ -168,6 +197,16 @@ func (controller *PortfolioAllocationRESTController) validateCleanPortfolioAlloc
 	cleanNilAllocations(portfolioSnapshotDTS)
 
 	var validationErrorsBuilder = validation.BuildCustomValidationErrorsBuilder()
+	if portfolioSnapshotDTS.ObservationTimestamp.Timestamp.IsZero() {
+		validationErrorsBuilder.CustomValidationErrorFullNamespace(
+			portfolioSnapshotDTS,
+			"observationTimestamp.timestamp",
+			"custom",
+			"must not be the zero timestamp",
+			portfolioSnapshotDTS.ObservationTimestamp.Timestamp,
+		)
+	}
+
 	for index, allocation := range portfolioSnapshotDTS.Allocations {
 		validateAssetIdentification(validationErrorsBuilder, allocation, portfolioSnapshotDTS, index)
 	}

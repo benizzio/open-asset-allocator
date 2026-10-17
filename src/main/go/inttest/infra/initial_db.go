@@ -1,5 +1,6 @@
 package infra
 
+// Co-authored by: OpenCode
 const initialStateSQL = `
 	INSERT INTO portfolio (id, "name", allocation_structure)
 	VALUES (
@@ -178,8 +179,8 @@ const initialStateSQL = `
 	-- ###################################################################
 	-- ALLOCATION PLAN TABLE
 	-- ###################################################################
-	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, portfolio_id)
-	VALUES (1, '60/40 Portfolio Classic - Example', 'ALLOCATION_PLAN', NULL, 1)
+	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, planned_date, portfolio_id)
+	VALUES (1, '60/40 Portfolio Classic - Example', 'ALLOCATION_PLAN', NULL, '2025-01-01', 1)
 	;
 	
 	-- ###################################################################
@@ -253,8 +254,8 @@ const initialStateSQL = `
 	;
 	
 	-- Add allocation plan with classes: BONDS, STOCKS, COMMODITIES
-	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, portfolio_id)
-	VALUES (8, 'Portfolio 4 Test Plan', 'ALLOCATION_PLAN', NULL, 4)
+	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, planned_date, portfolio_id)
+	VALUES (8, 'Portfolio 4 Test Plan', 'ALLOCATION_PLAN', NULL, '2025-08-01', 4)
 	;
 	
 	INSERT INTO planned_allocation
@@ -327,8 +328,8 @@ const initialStateSQL = `
 	;
 
 	-- Dual bond and single stock portfolio allocation plan
-	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, portfolio_id)
-	VALUES (2, 'Dual bond single stock plan', 'ALLOCATION_PLAN', NULL, 3)
+	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, planned_date, portfolio_id)
+	VALUES (2, 'Dual bond single stock plan', 'ALLOCATION_PLAN', NULL, '2025-02-01', 3)
 	;
 
 	INSERT INTO planned_allocation
@@ -436,8 +437,8 @@ const initialStateSQL = `
 
 
 	-- Single bond and single stock portfolio allocation plan
-	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, portfolio_id)
-	VALUES (3, 'Single bond single stock plan', 'ALLOCATION_PLAN', NULL, 3)
+	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, planned_date, portfolio_id)
+	VALUES (3, 'Single bond single stock plan', 'ALLOCATION_PLAN', NULL, '2025-03-01', 3)
 	;
 
 	INSERT INTO planned_allocation
@@ -460,8 +461,8 @@ const initialStateSQL = `
 	;
 
 	-- Single bond and no stock portfolio allocation plan
-	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, portfolio_id)
-	VALUES (4, 'Single bond no stock plan', 'ALLOCATION_PLAN', NULL, 3)
+	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, planned_date, portfolio_id)
+	VALUES (4, 'Single bond no stock plan', 'ALLOCATION_PLAN', NULL, '2025-04-01', 3)
 	;
 
 	INSERT INTO planned_allocation
@@ -477,8 +478,8 @@ const initialStateSQL = `
 	;
 
 	-- Single bond for total divergence test
-	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, portfolio_id)
-	VALUES (5, 'Single bond total divergence test', 'ALLOCATION_PLAN', NULL, 3)
+	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, planned_date, portfolio_id)
+	VALUES (5, 'Single bond total divergence test', 'ALLOCATION_PLAN', NULL, '2025-05-01', 3)
 	;
 
 	INSERT INTO planned_allocation
@@ -509,8 +510,8 @@ const initialStateSQL = `
 	;
 
 	-- Pre-seeded allocation plan specifically for update tests
-	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, portfolio_id)
-	VALUES (6, 'Update Allocation Plan Fixture', 'ALLOCATION_PLAN', NULL, 5)
+	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, planned_date, portfolio_id)
+	VALUES (6, 'Update Allocation Plan Fixture', 'ALLOCATION_PLAN', NULL, '2025-06-01', 5)
 	;
 
 	-- Top-level categories
