@@ -2,6 +2,7 @@ package model
 
 import (
 	"sort"
+	"time"
 
 	"github.com/shopspring/decimal"
 
@@ -113,6 +114,9 @@ func mapToPortfolioAllocationDTS(portfolioAllocation *domain.PortfolioAllocation
 	}
 }
 
+// buildHistoryDTS maps grouped history snapshots and sorts them by their RFC3339 timestamp.
+//
+// Co-authored by: OpenCode
 func buildHistoryDTS(
 	portfolioAllocationsPerObservationTimestamp portfolioAllocationsPerObservationTimestamp,
 ) []*PortfolioSnapshotDTS {
@@ -129,9 +133,15 @@ func buildHistoryDTS(
 	// Sort the aggregated portfolio history by observation timestamp, in descending order
 	sort.Slice(
 		aggregatedPortfoliohistory, func(i, j int) bool {
-			return aggregatedPortfoliohistory[i].ObservationTimestamp.Timestamp.After(
+			firstTimestamp, firstErr := time.Parse(
+				time.RFC3339Nano,
+				aggregatedPortfoliohistory[i].ObservationTimestamp.Timestamp,
+			)
+			secondTimestamp, secondErr := time.Parse(
+				time.RFC3339Nano,
 				aggregatedPortfoliohistory[j].ObservationTimestamp.Timestamp,
 			)
+			return firstErr == nil && secondErr == nil && firstTimestamp.After(secondTimestamp)
 		},
 	)
 
@@ -167,19 +177,27 @@ func mapToObservationTimestampDTS(
 	var observationTimestampDTS = &PortfolioObservationTimestampDTS{
 		Id:        langext.ParseableInt64(observationTimestamp.Id),
 		TimeTag:   observationTimestamp.TimeTag,
-		Timestamp: observationTimestamp.Timestamp,
+		Timestamp: observationTimestamp.Timestamp.Format(time.RFC3339Nano),
 	}
 	return observationTimestampDTS
 }
 
+// MapToPortfolioObservationTimestamp converts a validated RFC3339 observation timestamp into the domain model.
+// For example, `2026-10-17T00:00:00+02:00` maps to the equivalent instant without changing its value.
+//
+// Co-authored by: OpenCode
 func MapToPortfolioObservationTimestamp(
 	observationTimestampDTS *PortfolioObservationTimestampDTS,
-) *domain.PortfolioObservationTimestamp {
+) (*domain.PortfolioObservationTimestamp, error) {
+	timestamp, err := time.Parse(time.RFC3339Nano, observationTimestampDTS.Timestamp)
+	if err != nil {
+		return nil, err
+	}
 	return &domain.PortfolioObservationTimestamp{
 		Id:        int64(observationTimestampDTS.Id),
 		TimeTag:   observationTimestampDTS.TimeTag,
-		Timestamp: observationTimestampDTS.Timestamp,
-	}
+		Timestamp: timestamp,
+	}, nil
 }
 
 func MapToPortfolioAllocations(
@@ -290,10 +308,14 @@ func mapToAllocationPlanIdentifierDTSs(plans []*domain.AllocationPlanIdentifier)
 	return plansDTS
 }
 
+// mapToAllocationPlanIdentifierDTS maps a domain plan identifier and date into the REST summary model.
+//
+// Co-authored by: OpenCode
 func mapToAllocationPlanIdentifierDTS(plan *domain.AllocationPlanIdentifier) *AllocationPlanIdentifierDTS {
 	return &AllocationPlanIdentifierDTS{
-		Id:   plan.Id,
-		Name: plan.Name,
+		Id:          plan.Id,
+		Name:        plan.Name,
+		PlannedDate: newAllocationPlanDate(plan.PlannedDate),
 	}
 }
 

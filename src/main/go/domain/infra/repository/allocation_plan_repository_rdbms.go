@@ -10,18 +10,20 @@ import (
 	"github.com/benizzio/open-asset-allocator/langext"
 )
 
+// Co-authored by: OpenCode
 const (
 	allocationPlanIdentifierSQL = `
-		SELECT ap.id, ap.name
+		SELECT ap.id, ap.name, ap.planned_date
 		FROM allocation_plan ap
 	` + rdbms.WhereClausePlaceholder + `
-		ORDER BY ap.create_timestamp DESC
+		ORDER BY ap.planned_date DESC, ap.id DESC
 	`
 	allocationPlanSQL = `
 		SELECT 
 		    ap.id AS allocation_plan_id,
 		    ap.name, 
 		    ap.type, 
+		    ap.planned_date,
 		    ap.planned_execution_date,
 		    pa.id AS planned_allocation_id,
 		    pa.hierarchical_id, 
@@ -34,16 +36,16 @@ const (
 		JOIN allocation_plan ap ON pa.allocation_plan_id = ap.id
 		LEFT JOIN asset ass ON ass.id = pa.asset_id
 	` + rdbms.WhereClausePlaceholder + `
-		ORDER BY ap.create_timestamp DESC, pa.cash_reserve DESC, pa.slice_size_percentage DESC
+		ORDER BY ap.planned_date DESC, ap.id DESC, pa.cash_reserve DESC, pa.slice_size_percentage DESC
 	`
 	allocationPlanInsertSQL = `
-		INSERT INTO allocation_plan (portfolio_id, name, type)
-		VALUES ($1, $2, $3) RETURNING id
+		INSERT INTO allocation_plan (portfolio_id, name, type, planned_date)
+		VALUES ($1, $2, $3, $4) RETURNING id
     `
 	allocationPlanUpdateSQL = `
 		UPDATE allocation_plan 
-		SET name = $1
-		WHERE id = $2
+		SET name = $1, planned_date = $2
+		WHERE id = $3
 	`
 	plannedAllocationTempTableName   = "planned_allocation_merge_temp"
 	plannedAllocationTempTableDDLSQL = `
@@ -165,7 +167,7 @@ func (repository *AllocationPlanRDBMSRepository) InsertAllocationPlanInTransacti
 	}
 
 	id, err := rdbms.BuildQueryInTransaction[int64](transactionalContext, allocationPlanInsertSQL).
-		AddParams(plan.PortfolioId, plan.Name, plan.PlanType.String()).
+		AddParams(plan.PortfolioId, plan.Name, plan.PlanType.String(), plan.PlannedDate).
 		Build().
 		Get(rdbms.ReturningIntIdSingleRowScanner)
 	if err != nil {
@@ -192,6 +194,7 @@ func (repository *AllocationPlanRDBMSRepository) UpdateAllocationPlanInTransacti
 		transactionalContext,
 		allocationPlanUpdateSQL,
 		plan.Name,
+		plan.PlannedDate,
 		plan.Id,
 	)
 	if err != nil {

@@ -1,8 +1,6 @@
 package model
 
 import (
-	"time"
-
 	"github.com/shopspring/decimal"
 
 	"github.com/benizzio/open-asset-allocator/langext"
@@ -68,15 +66,24 @@ func (aggregationMap portfolioAllocationsPerObservationTimestamp) getAggregatedM
 	return &totalMarketValue
 }
 
+// AllocationPlanIdentifierDTS is the plan-summary REST model returned by analysis-option reads.
+// Each plan includes its YYYY-MM-DD plannedDate, for example `{"id":1,"name":"Balanced","plannedDate":"2026-10-17"}`.
+//
+// Co-authored by: OpenCode
 type AllocationPlanIdentifierDTS struct {
-	Id   int64  `json:"id"`
-	Name string `json:"name" validate:"max=100"`
+	Id          int64              `json:"id"`
+	Name        string             `json:"name" validate:"max=100"`
+	PlannedDate AllocationPlanDate `json:"plannedDate"`
 }
 
+// PortfolioObservationTimestampDTS carries the observation identifier, tag, and required timestamp.
+// Create and update requests must provide an RFC3339 timestamp, such as `2026-10-17T00:00:00Z`.
+//
+// Co-authored by: OpenCode
 type PortfolioObservationTimestampDTS struct {
 	Id        langext.ParseableInt64 `json:"id"`
 	TimeTag   string                 `json:"timeTag" validate:"max=100"`
-	Timestamp time.Time              `json:"timestamp"`
+	Timestamp string                 `json:"timestamp" validate:"required,datetime=2006-01-02T15:04:05Z07:00"`
 }
 
 type AnalysisOptionsDTS struct {

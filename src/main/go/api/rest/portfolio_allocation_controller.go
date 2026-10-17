@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -122,6 +123,9 @@ func (controller *PortfolioAllocationRESTController) getAvailableHistoryObservat
 	context.JSON(http.StatusOK, availableTimestampsDTS)
 }
 
+// postPortfolioAllocationHistory validates and persists a portfolio snapshot with the submitted observation instant.
+//
+// Co-authored by: OpenCode
 func (controller *PortfolioAllocationRESTController) postPortfolioAllocationHistory(context *gin.Context) {
 
 	var portfolioIdParamValue = context.Param(portfolioIdParam)
@@ -145,7 +149,10 @@ func (controller *PortfolioAllocationRESTController) postPortfolioAllocationHist
 		int64(portfolioSnapshotDTS.ObservationTimestamp.Id),
 	)
 
-	var observationTimestamp = model.MapToPortfolioObservationTimestamp(portfolioSnapshotDTS.ObservationTimestamp)
+	observationTimestamp, err := model.MapToPortfolioObservationTimestamp(portfolioSnapshotDTS.ObservationTimestamp)
+	if gininfra.HandleAPIError(context, "Error mapping observation timestamp", err) {
+		return
+	}
 
 	err = controller.portfolioAllocationManagementAppService.MergePortfolioAllocations(
 		portfolioId,
@@ -160,6 +167,9 @@ func (controller *PortfolioAllocationRESTController) postPortfolioAllocationHist
 	context.Status(http.StatusNoContent)
 }
 
+// validateCleanPortfolioAllocationHistory rejects zero timestamps and invalid allocation fields before persistence.
+//
+// Co-authored by: OpenCode
 func (controller *PortfolioAllocationRESTController) validateCleanPortfolioAllocationHistory(
 	context *gin.Context,
 	portfolioSnapshotDTS *model.PortfolioSnapshotDTS,
@@ -168,6 +178,20 @@ func (controller *PortfolioAllocationRESTController) validateCleanPortfolioAlloc
 	cleanNilAllocations(portfolioSnapshotDTS)
 
 	var validationErrorsBuilder = validation.BuildCustomValidationErrorsBuilder()
+	observationTimestamp, timestampError := time.Parse(
+		time.RFC3339Nano,
+		portfolioSnapshotDTS.ObservationTimestamp.Timestamp,
+	)
+	if timestampError == nil && observationTimestamp.IsZero() {
+		validationErrorsBuilder.CustomValidationErrorFullNamespace(
+			portfolioSnapshotDTS,
+			"observationTimestamp.timestamp",
+			"custom",
+			"must not be the zero timestamp",
+			portfolioSnapshotDTS.ObservationTimestamp.Timestamp,
+		)
+	}
+
 	for index, allocation := range portfolioSnapshotDTS.Allocations {
 		validateAssetIdentification(validationErrorsBuilder, allocation, portfolioSnapshotDTS, index)
 	}

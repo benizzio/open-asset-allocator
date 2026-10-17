@@ -523,17 +523,17 @@ func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 	inttestutil.AssertDBWithQueryMultipleRows(t, allocationHistoryQuery, expectedRecords)
 }
 
-// TestPostPortfolioAllocationHistoryInsertEmptyZeroTimestamp verifies that a
-// zero observation timestamp id creates a new observation timestamp and
-// persists the posted allocation snapshot.
+// TestPostPortfolioAllocationHistoryInsertExplicitTimestamp verifies that an explicit offset-bearing
+// observation timestamp is persisted as the same UTC instant.
 //
-// Co-authored by: OpenCode and Igor Benicio de Mesquita
-func TestPostPortfolioAllocationHistoryInsertEmptyZeroTimestamp(t *testing.T) {
+// Co-authored by: OpenCode
+func TestPostPortfolioAllocationHistoryInsertExplicitTimestamp(t *testing.T) {
 
 	var postPortfolioSnapshotJSON = `
 		{
 			"observationTimestamp": {
-				"id": 0
+				"id": 0,
+				"timestamp": "2025-05-01T02:00:00+02:00"
 			},
 			"allocations": [
 				{
@@ -549,7 +549,6 @@ func TestPostPortfolioAllocationHistoryInsertEmptyZeroTimestamp(t *testing.T) {
 		}
 	`
 
-	var testTime = time.Now()
 	response, err := http.Post(
 		inttestinfra.TestAPIURLPrefix+"/portfolio/1/history",
 		"application/json",
@@ -599,16 +598,14 @@ func TestPostPortfolioAllocationHistoryInsertEmptyZeroTimestamp(t *testing.T) {
 			"observation_time_id": inttestutil.NotNullAssertableNullString(),
 			"observation_time_tag": inttestutil.ToAssertableNullStringWithAssertion(
 				func(t *testing.T, actual sql.NullString) {
-					dateTime, dateErr := time.Parse(time.RFC3339, actual.String)
-					assert.NoError(t, dateErr)
-					assert.WithinDuration(t, testTime, dateTime, time.Second)
+					assert.Equal(t, "2025-05-01T02:00:00+02:00", actual.String)
 				},
 			),
 			"observation_timestamp": inttestutil.ToAssertableNullStringWithAssertion(
 				func(t *testing.T, actual sql.NullString) {
 					dateTime, dateErr := time.Parse(time.RFC3339Nano, actual.String)
 					assert.NoError(t, dateErr)
-					assert.WithinDuration(t, testTime, dateTime, time.Second)
+					assert.Equal(t, "2025-05-01T00:00:00Z", dateTime.Format(time.RFC3339))
 				},
 			),
 		},
@@ -703,7 +700,8 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 	var postPortfolioSnapshotJSON = `
 		{
 			"observationTimestamp": {
-				"id": "3"
+				"id": "3",
+				"timestamp": "2025-04-01T00:00:00Z"
 			},
 			"allocations": [
 				{
@@ -994,6 +992,9 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 
 }
 
+// TestPostPortfolioAllocationValidations verifies existing portfolio snapshot validation cases with explicit timestamps.
+//
+// Co-authored by: OpenCode
 func TestPostPortfolioAllocationValidations(t *testing.T) {
 
 	t.Run(
@@ -1037,7 +1038,8 @@ func TestPostPortfolioAllocationValidations(t *testing.T) {
 			var postPortfolioSnapshotJSON = `
 				{
 					"observationTimestamp": {
-						"id": "3"
+						"id": "3",
+						"timestamp": "2025-04-01T00:00:00Z"
 					},
 					"allocations": [
 						{
@@ -1074,7 +1076,8 @@ func TestPostPortfolioAllocationValidations(t *testing.T) {
 			var postPortfolioSnapshotJSON = `
 				{
 					"observationTimestamp": {
-						"id": "3"
+						"id": "3",
+						"timestamp": "2025-04-01T00:00:00Z"
 					},
 					"allocations": [
 						{
@@ -1149,7 +1152,8 @@ func TestPostPortfolioAllocationValidations(t *testing.T) {
 			var postPortfolioSnapshotJSON = `
 				{
 					"observationTimestamp": {
-						"id": "3"
+						"id": "3",
+						"timestamp": "2025-04-01T00:00:00Z"
 					}
 				}
 			`
@@ -1180,7 +1184,8 @@ func TestPostPortfolioAllocationValidations(t *testing.T) {
 			var postPortfolioSnapshotJSON = `
 				{
 					"observationTimestamp": {
-						"id": "3"
+						"id": "3",
+						"timestamp": "2025-04-01T00:00:00Z"
 					},
 					"allocations": []
 				}
@@ -1204,6 +1209,90 @@ func TestPostPortfolioAllocationValidations(t *testing.T) {
 			assert.JSONEq(t, expectedResponseJSON, actualResponseJSONNullFields)
 		},
 	)
+}
+
+// TestPostPortfolioAllocationRequiresExplicitTimestamp rejects missing and invalid observation timestamps on creates and updates.
+// It asserts directly against the database that no observation or allocation is partially persisted.
+//
+// Co-authored by: OpenCode
+func TestPostPortfolioAllocationRequiresExplicitTimestamp(t *testing.T) {
+	t.Cleanup(
+		inttestutil.BuildCleanupFunctionBuilder().
+			AddCleanupQuery(
+				`DELETE FROM portfolio_allocation_fact WHERE class = 'INVALID_TIMESTAMP_TEST' OR observation_time_id IN (SELECT id FROM portfolio_allocation_obs_time WHERE observation_time_tag LIKE 'invalid-observation-date-create-%')`,
+				nil,
+			).
+			AddCleanupQuery(
+				`UPDATE portfolio_allocation_obs_time
+				 SET observation_time_tag = '202503', observation_timestamp = '2025-03-01 00:00:00'
+				 WHERE id = 2`,
+				nil,
+			).
+			AddCleanupQuery(`DELETE FROM portfolio_allocation_obs_time WHERE observation_time_tag LIKE 'invalid-observation-date-create-%'`, nil).
+			Build(t),
+	)
+
+	var invalidTimestamps = []struct {
+		name     string
+		property string
+	}{
+		{name: "missing"},
+		{name: "null", property: `"timestamp":null,`},
+		{name: "empty", property: `"timestamp":"",`},
+		{name: "malformed", property: `"timestamp":"not-a-timestamp",`},
+		{name: "zero", property: `"timestamp":"0001-01-01T00:00:00Z",`},
+	}
+
+	for _, invalidTimestamp := range invalidTimestamps {
+		for _, update := range []bool{false, true} {
+			var observationId = 0
+			var recordClass = "INVALID_TIMESTAMP_TEST"
+			var tag = "invalid-observation-date-create-" + invalidTimestamp.name
+			if update {
+				observationId = 2
+				tag = "invalid-observation-date-update-" + invalidTimestamp.name
+			}
+
+			var requestBody = fmt.Sprintf(`{
+				"observationTimestamp": {
+					"id":%d,
+					%s"timeTag":%q
+				},
+				"allocations":[{
+					"assetId":1,
+					"class":%q,
+					"cashReserve":false,
+					"totalMarketValue":"123"
+				}]
+			}`, observationId, invalidTimestamp.property, tag, recordClass)
+			responseBody := postPortfolioAllocationForValidationFailure(t, requestBody)
+			assert.NotEmpty(t, responseBody)
+
+			inttestutil.AssertDBWithQueryMultipleRows(
+				t,
+				`SELECT count(*) AS fact_count FROM portfolio_allocation_fact WHERE class = 'INVALID_TIMESTAMP_TEST'`,
+				[]inttestutil.AssertableNullStringMap{{"fact_count": inttestutil.ToAssertableNullString("0")}},
+			)
+			inttestutil.AssertDBWithQueryMultipleRows(
+				t,
+				`SELECT count(*) AS observation_count FROM portfolio_allocation_obs_time WHERE observation_time_tag LIKE 'invalid-observation-date-create-%'`,
+				[]inttestutil.AssertableNullStringMap{{"observation_count": inttestutil.ToAssertableNullString("0")}},
+			)
+			if update {
+				inttestutil.AssertDBWithQueryMultipleRows(
+					t,
+					`SELECT observation_time_tag,
+					        to_char(observation_timestamp, 'YYYY-MM-DD"T"HH24:MI:SS') AS observation_timestamp
+					 FROM portfolio_allocation_obs_time
+					 WHERE id = 2`,
+					[]inttestutil.AssertableNullStringMap{{
+						"observation_time_tag":  inttestutil.ToAssertableNullString("202503"),
+						"observation_timestamp": inttestutil.ToAssertableNullString("2025-03-01T00:00:00"),
+					}},
+				)
+			}
+		}
+	}
 }
 
 func postPortfolioAllocationForValidationFailure(t *testing.T, postPortfolioJSON string) []byte {
@@ -1620,7 +1709,8 @@ func TestPostPortfolioAllocationHistoryDoesNotOverwriteExistingAssetExternalData
 	var postPortfolioSnapshotJSON = `
 		{
 			"observationTimestamp": {
-				"id": "3"
+				"id": "3",
+				"timestamp": "2025-04-01T00:00:00Z"
 			},
 			"allocations": [
 				{
@@ -1670,7 +1760,8 @@ func TestPostPortfolioAllocationHistoryValidation_InvalidExternalAssetFields(t *
 	var postPortfolioSnapshotJSON = `
 		{
 			"observationTimestamp": {
-				"id": "3"
+				"id": "3",
+				"timestamp": "2025-04-01T00:00:00Z"
 			},
 			"allocations": [
 				{

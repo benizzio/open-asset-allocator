@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"time"
+
 	"github.com/shopspring/decimal"
 
 	"github.com/benizzio/open-asset-allocator/domain"
@@ -12,6 +14,7 @@ import (
 type plannedAllocationJoinedRowDTS struct {
 	AllocationPlanId     int64
 	Name                 string
+	PlannedDate          time.Time
 	Type                 allocation.PlanType
 	PlannedExecutionDate sqlext.NullTime
 	PlannedAllocationId  int64
@@ -73,6 +76,9 @@ func buildPlannedAllocationFromRow(rowDTS *plannedAllocationJoinedRowDTS) *domai
 	}
 }
 
+// buildAllocationPlanFromRow maps a joined database row to a domain plan, including its planned date.
+//
+// Co-authored by: OpenCode
 func buildAllocationPlanFromRow(
 	rowDTS *plannedAllocationJoinedRowDTS,
 	plannedAllocation *domain.PlannedAllocation,
@@ -80,8 +86,9 @@ func buildAllocationPlanFromRow(
 
 	var allocationPlan = domain.AllocationPlan{
 		AllocationPlanIdentifier: domain.AllocationPlanIdentifier{
-			Id:   rowDTS.AllocationPlanId,
-			Name: rowDTS.Name,
+			Id:          rowDTS.AllocationPlanId,
+			Name:        rowDTS.Name,
+			PlannedDate: rowDTS.PlannedDate,
 		},
 		PlanType:             rowDTS.Type,
 		PlannedExecutionDate: rowDTS.PlannedExecutionDate.ToTimeReference(),

@@ -668,9 +668,9 @@ async function seedAllocationPlanManagementData(
 
   const assets = Object.fromEntries(assetRows.map((asset) => [asset.ticker, asset])) as Record<string, SeededAsset>;
   const allocationPlanRows = await database.query<PersistedAllocationPlan>(
-    `INSERT INTO public.allocation_plan
-       (portfolio_id, name, type, planned_execution_date, create_timestamp)
-     VALUES ($1, $2, 'ALLOCATION_PLAN', NULL, $3::timestamp)
+     `INSERT INTO public.allocation_plan
+       (portfolio_id, name, type, planned_execution_date, planned_date, create_timestamp)
+     VALUES ($1, $2, 'ALLOCATION_PLAN', NULL, $3::timestamp::date, $3::timestamp)
      RETURNING id, name, type, planned_execution_date, create_timestamp, portfolio_id`,
     [portfolioRows[0].id, ALLOCATION_PLAN_NAME, FIXED_ALLOCATION_PLAN_TIMESTAMP],
   );

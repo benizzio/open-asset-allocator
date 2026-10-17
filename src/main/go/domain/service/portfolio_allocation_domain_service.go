@@ -106,13 +106,16 @@ func (service *PortfolioAllocationDomService) MergePortfolioAllocationsInTransac
 	)
 }
 
+// InsertObservationTimestampInTransaction persists an observation with its explicitly supplied timestamp.
+// For example, callers must pass the instant selected by the client rather than relying on a server-side default.
+//
+// Co-authored by: OpenCode
 func (service *PortfolioAllocationDomService) InsertObservationTimestampInTransaction(
 	transContext context.Context,
 	observationTimestamp *domain.PortfolioObservationTimestamp,
 ) (*domain.PortfolioObservationTimestamp, error) {
-
 	if langext.IsZeroValue(observationTimestamp.Timestamp) {
-		observationTimestamp.Timestamp = time.Now()
+		return nil, infra.BuildAppError("Observation timestamp is required and must not be zero", service)
 	}
 
 	if langext.IsZeroValue(observationTimestamp.TimeTag) {
