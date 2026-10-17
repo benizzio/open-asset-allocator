@@ -1,7 +1,7 @@
 # Graph Report - go  (2026-10-17)
 
 ## Corpus Check
-- 119 files · ~59,697 words
+- 119 files · ~59,691 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 2 file(s) not represented in the graph (top: .toml 1, (none) 1)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `04895648`
+- Built from commit: `abc8ab8c`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -289,7 +289,7 @@ Nodes (5): mapToAllocationPlanIdentifierDTS(), mapToAllocationPlanIdentifierDTSs
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `App` connect `App` to `.buildAppComponents`, `reflect.Type`, `portfolio_allocation_controller.go`, `GinServer`, `infra_db.go`, `Configuration`, `go_pkg_fmt`, `go_pkg_github_com_golang_glog`, `go_pkg_github_com_benizzio_open_asset_allocator_langext`, `Adapter`, `AllocationPlan`?**
-  _High betweenness centrality (0.055) - this node is a cross-community bridge._
+  _High betweenness centrality (0.056) - this node is a cross-community bridge._
 - **Why does `Asset` connect `Asset` to `allocation_plan_domain_service.go`, `PropagateAsAppErrorWithNewMessage`, `allocation_plan_rest_model.go`, `asset_rest_model.go`, `rdbms_query.go`, `PortfolioAllocationRDBMSRepository`, `PortfolioAllocation`, `ExecuteDBQuery`, `.InsertAsset`, `AllocationPlan`?**
   _High betweenness centrality (0.045) - this node is a cross-community bridge._
 - **Why does `PlannedAllocation` connect `AllocationPlan` to `allocation_plan_domain_service.go`, `PropagateAsAppErrorWithNewMessage`, `context.Context`, `allocation_plan_rest_model.go`, `Asset`, `ExternalAsset`, `AllocationStructure`?**
