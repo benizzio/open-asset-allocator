@@ -300,7 +300,7 @@ func mapToAllocationPlanIdentifierDTSs(plans []*domain.AllocationPlanIdentifier)
 
 // mapToAllocationPlanIdentifierDTS maps a domain plan identifier and date into the REST summary model.
 //
-// Co-authored by: OpenCode
+// Co-authored by: OpenCode and benizzio
 func mapToAllocationPlanIdentifierDTS(plan *domain.AllocationPlanIdentifier) *AllocationPlanIdentifierDTS {
 	return &AllocationPlanIdentifierDTS{
 		Id:          plan.Id,

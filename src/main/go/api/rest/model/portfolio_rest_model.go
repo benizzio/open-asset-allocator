@@ -71,7 +71,7 @@ func (aggregationMap portfolioAllocationsPerObservationTimestamp) getAggregatedM
 // AllocationPlanIdentifierDTS is the plan-summary REST model returned by analysis-option reads.
 // Each plan includes its YYYY-MM-DD plannedDate, for example `{"id":1,"name":"Balanced","plannedDate":"2026-10-17"}`.
 //
-// Co-authored by: OpenCode
+// Co-authored by: OpenCode and benizzio
 type AllocationPlanIdentifierDTS struct {
 	Id          int64              `json:"id"`
 	Name        string             `json:"name" validate:"max=100"`
