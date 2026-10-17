@@ -312,11 +312,11 @@ async function seedAllocationMapData(database: E2eDatabase): Promise<SeededAlloc
   );
 
   const planRows = await database.query<{ create_timestamp: string; id: number; name: string }>(
-    `INSERT INTO public.allocation_plan
-       (portfolio_id, name, type, planned_execution_date, create_timestamp)
+     `INSERT INTO public.allocation_plan
+       (portfolio_id, name, type, planned_execution_date, planned_date, create_timestamp)
      VALUES
-       ($1, $2, 'ALLOCATION_PLAN', NULL, $3::timestamp),
-       ($1, $4, 'ALLOCATION_PLAN', NULL, $5::timestamp)
+       ($1, $2, 'ALLOCATION_PLAN', NULL, $3::timestamp::date, $3::timestamp),
+       ($1, $4, 'ALLOCATION_PLAN', NULL, $5::timestamp::date, $5::timestamp)
      RETURNING id, name, to_char(create_timestamp, 'YYYY-MM-DD HH24:MI:SS.US') AS create_timestamp`,
     [
       portfolioRows[0].id,

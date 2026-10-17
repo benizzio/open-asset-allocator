@@ -1,15 +1,15 @@
-# Graph Report - oaa-stack-tip-e2e  (2026-11-05)
+# Graph Report - open-asset-allocator  (2026-10-17)
 
 ## Corpus Check
 - cluster-only mode — file stats not available
 
 ## Summary
-- 846 nodes · 1193 edges · 97 communities (53 shown, 44 thin omitted)
+- 848 nodes · 1193 edges · 99 communities (53 shown, 46 thin omitted)
 - Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 52 edges (avg confidence: 0.88)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `e26ffb26`
+- Built from commit: `f7071086`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -17,17 +17,17 @@
 - portfolio-allocation-history-management.e2e.spec.ts
 - generate_report.py
 - portfolio-allocation-map.e2e.spec.ts
-- Containerized Playwright E2E Tests
+- Open Asset Allocator
 - portfolio-history-external-quote.e2e.spec.ts
 - portfolio-allocation-plan-management.e2e.spec.ts
 - package.json
 - Allocation Map View
 - e2e.sh
+- asset
 - portfolio-visualization.e2e.spec.ts
 - Three-Scope Graph Selection
 - Portfolio Holdings Editor
 - Comparative E2E Framework Research
-- asset
 - portfolio-editing.e2e.spec.ts
 - prune-sql-stubs.py
 - asset-management.e2e.spec.ts
@@ -78,6 +78,7 @@
 - expectDraftAllocationRow
 - start.sh
 - Property Graph Exports
+- E2E Diagnostics Artifact
 - Full Backend Cognitive Complexity Check
 - build.sh
 - go-dependency-graph.sh
@@ -155,7 +156,7 @@
 - **Portfolio Observation Holding Fields** — docs_images_portfolio_history_management_asset_identity, docs_images_portfolio_history_management_asset_classification, docs_images_portfolio_history_management_cash_reserve_designation, docs_images_portfolio_history_management_position_quantity, docs_images_portfolio_history_management_market_price, docs_images_portfolio_history_management_total_market_value [EXTRACTED 1.00]
 - **Containerized E2E Execution Topology** — src_main_docker_docker_compose_e2e_e2e_database, src_main_docker_docker_compose_e2e_e2e_migration_engine, src_main_docker_docker_compose_e2e_playwright_runner, src_main_docker_docker_compose_e2e_ci_immutable_monolith, _github_workflows_e2e_e2e_tests_workflow [INFERRED 0.95]
 
-## Communities (97 total, 44 thin omitted)
+## Communities (99 total, 46 thin omitted)
 
 ### Community 0 - "portfolio-allocation-history-management.e2e.spec.ts"
 Cohesion: 0.06
@@ -169,9 +170,9 @@ Nodes (55): Any, _anchor(), _base_result_name(), _build_output_mapping(), _categ
 Cohesion: 0.08
 Nodes (33): ASSET_DATA, DatabaseSnapshot, DEFAULT_ALLOCATION_STRUCTURE, expandRootAndAssertChildren(), expectAllocationMapShell(), expectAnalysisTable(), ExpectedDivergenceNode, expectNodeRow() (+25 more)
 
-### Community 3 - "Containerized Playwright E2E Tests"
-Cohesion: 0.07
-Nodes (34): Dependabot Dependency Updates, Renovate Runtime Coordination, E2E Diagnostics Artifact, E2E Tests Workflow, Go and Air Image Version Coordination, Application Node.js LTS Runtime Coordination, Playwright and E2E Node Type Major Alignment, Runtime Version Coordination (+26 more)
+### Community 3 - "Open Asset Allocator"
+Cohesion: 0.08
+Nodes (31): Dependabot Dependency Updates, Renovate Runtime Coordination, Go and Air Image Version Coordination, Application Node.js LTS Runtime Coordination, Playwright and E2E Node Type Major Alignment, Runtime Version Coordination, Portfolio History Form TODOs, Allocation Planning (+23 more)
 
 ### Community 4 - "portfolio-history-external-quote.e2e.spec.ts"
 Cohesion: 0.07
@@ -193,25 +194,25 @@ Nodes (20): $60,000 Total Market Value, 60/40 Portfolio Classic - Example - 2026
 Cohesion: 0.24
 Nodes (17): build_images(), capture_logs(), cleanup_stack(), compose(), compose_all(), compose_debug(), fail(), main() (+9 more)
 
-### Community 9 - "portfolio-visualization.e2e.spec.ts"
+### Community 9 - "asset"
+Cohesion: 0.18
+Nodes (15): asset_price_last_market_data, asset_ticker_market_data_source, planned_date backfill: COALESCE(create_timestamp::date, CURRENT_DATE), allocation_plan.planned_date DATE NOT NULL with no database default, allocation_plan, allocation_plan_unit, asset, asset_value_fact (+7 more)
+
+### Community 10 - "portfolio-visualization.e2e.spec.ts"
 Cohesion: 0.20
 Nodes (19): DEFAULT_ALLOCATION_STRUCTURE, EMPTY_PORTFOLIO_NAMES, expectAllocationMap(), expectAllocationPlan(), expectPortfolioHistory(), expectPortfolioList(), expectPortfolioNavigation(), expectPortfolioShell() (+11 more)
 
-### Community 10 - "Three-Scope Graph Selection"
+### Community 11 - "Three-Scope Graph Selection"
 Cohesion: 0.12
 Nodes (19): CodeRabbit Review Path Filters, Graphify Build Manifest Inclusion Patterns, Graphify Output Directory Exclusion Patterns, Vendored Graphify Skill Exclusion Pattern, Backend Graph Corpus, Disconnected Flyway SQL Stubs after Root Update, Frontend Graph Corpus, Graphify-First Codebase Navigation (+11 more)
 
-### Community 11 - "Portfolio Holdings Editor"
+### Community 12 - "Portfolio Holdings Editor"
 Cohesion: 0.12
 Nodes (19): Manage Portfolio Allocation Data Panel, Allocation Map Tab, Allocation Plan Tab, Asset Classification, Asset Identity and Description, Bonds Asset Class, Cash Reserve Designation, Add and Remove Holding Controls (+11 more)
 
-### Community 12 - "Comparative E2E Framework Research"
+### Community 13 - "Comparative E2E Framework Research"
 Cohesion: 0.11
 Nodes (18): Open Asset Allocator Application Fit, E2E Framework Evaluation Framework, E2E Tool Candidate Research, Fourteen E2E Candidate Set, chromedp with Go Testing, CodeceptJS, Comparative E2E Framework Research, Cucumber.js with Playwright or Playwright-BDD (+10 more)
-
-### Community 13 - "asset"
-Cohesion: 0.21
-Nodes (13): asset_price_last_market_data, asset_ticker_market_data_source, allocation_plan, allocation_plan_unit, asset, asset_value_fact, asset_market_data_source, asset_price_last_market_data (+5 more)
 
 ### Community 14 - "portfolio-editing.e2e.spec.ts"
 Cohesion: 0.16
@@ -370,21 +371,21 @@ Cohesion: 0.67
 Nodes (3): expectDraftAllocationRow(), expectDraftAllocationRows(), expectScenario6DraftRows()
 
 ## Knowledge Gaps
-- **259 isolated node(s):** `CanvasPoint`, `CanvasTextRecorder`, `ExpectedObservationRow`, `NavigationOptionName`, `PersistedAllocation` (+254 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 409 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **44 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **261 isolated node(s):** `CanvasPoint`, `CanvasTextRecorder`, `ExpectedObservationRow`, `NavigationOptionName`, `PersistedAllocation` (+256 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 412 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **46 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `@playwright/test` connect `@playwright/test` to `portfolio-allocation-history-management.e2e.spec.ts`, `portfolio-allocation-map.e2e.spec.ts`, `portfolio-history-external-quote.e2e.spec.ts`, `portfolio-allocation-plan-management.e2e.spec.ts`, `package.json`, `portfolio-visualization.e2e.spec.ts`, `asset-external-management.e2e.spec.ts`, `portfolio-editing.e2e.spec.ts`, `asset-management.e2e.spec.ts`, `fixtures.ts`?**
+- **Why does `@playwright/test` connect `@playwright/test` to `portfolio-allocation-history-management.e2e.spec.ts`, `portfolio-allocation-map.e2e.spec.ts`, `portfolio-history-external-quote.e2e.spec.ts`, `portfolio-allocation-plan-management.e2e.spec.ts`, `package.json`, `asset-external-management.e2e.spec.ts`, `portfolio-visualization.e2e.spec.ts`, `portfolio-editing.e2e.spec.ts`, `asset-management.e2e.spec.ts`, `fixtures.ts`?**
   _High betweenness centrality (0.050) - this node is a cross-community bridge._
-- **Why does `E2eDatabase` connect `database.ts` to `.query`, `portfolio-allocation-history-management.e2e.spec.ts`, `portfolio-allocation-map.e2e.spec.ts`, `portfolio-history-external-quote.e2e.spec.ts`, `portfolio-allocation-plan-management.e2e.spec.ts`, `portfolio-visualization.e2e.spec.ts`, `asset-external-management.e2e.spec.ts`, `portfolio-editing.e2e.spec.ts`, `asset-management.e2e.spec.ts`, `fixtures.ts`?**
+- **Why does `E2eDatabase` connect `database.ts` to `.query`, `portfolio-allocation-history-management.e2e.spec.ts`, `portfolio-allocation-map.e2e.spec.ts`, `portfolio-history-external-quote.e2e.spec.ts`, `portfolio-allocation-plan-management.e2e.spec.ts`, `asset-external-management.e2e.spec.ts`, `portfolio-visualization.e2e.spec.ts`, `portfolio-editing.e2e.spec.ts`, `asset-management.e2e.spec.ts`, `fixtures.ts`?**
   _High betweenness centrality (0.017) - this node is a cross-community bridge._
-- **Why does `test` connect `fixtures.ts` to `portfolio-allocation-history-management.e2e.spec.ts`, `portfolio-allocation-map.e2e.spec.ts`, `portfolio-history-external-quote.e2e.spec.ts`, `portfolio-allocation-plan-management.e2e.spec.ts`, `portfolio-visualization.e2e.spec.ts`, `asset-external-management.e2e.spec.ts`, `portfolio-editing.e2e.spec.ts`, `asset-management.e2e.spec.ts`, `@playwright/test`, `database.ts`?**
+- **Why does `test` connect `fixtures.ts` to `portfolio-allocation-history-management.e2e.spec.ts`, `portfolio-allocation-map.e2e.spec.ts`, `portfolio-history-external-quote.e2e.spec.ts`, `portfolio-allocation-plan-management.e2e.spec.ts`, `asset-external-management.e2e.spec.ts`, `portfolio-visualization.e2e.spec.ts`, `portfolio-editing.e2e.spec.ts`, `asset-management.e2e.spec.ts`, `@playwright/test`, `database.ts`?**
   _High betweenness centrality (0.014) - this node is a cross-community bridge._
 - **What connects `CanvasPoint`, `CanvasTextRecorder`, `ExpectedObservationRow` to the rest of the system?**
-  _259 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _261 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `portfolio-allocation-history-management.e2e.spec.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.05754385964912281 - nodes in this community are weakly interconnected._
 - **Should `generate_report.py` be split into smaller, more focused modules?**

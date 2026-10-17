@@ -144,11 +144,13 @@ BEGIN
     END IF;
 
     -- Allocation plan
-    INSERT INTO allocation_plan ("name", "type", planned_execution_date, portfolio_id)
+    -- Co-authored by: OpenCode
+    INSERT INTO allocation_plan ("name", "type", planned_execution_date, planned_date, portfolio_id)
     VALUES (
         v_plan_name,
         'ALLOCATION_PLAN',
         NULL,
+        '2025-01-01',
         v_portfolio_id
     )
     RETURNING id INTO v_plan_id;
@@ -241,4 +243,3 @@ BEGIN
     ;
 
 END $$;
-

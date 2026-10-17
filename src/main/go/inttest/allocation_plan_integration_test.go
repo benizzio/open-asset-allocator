@@ -1,9 +1,12 @@
 package inttest
 
 import (
+	"database/sql"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -36,6 +39,7 @@ func TestGetAllocationPlans(t *testing.T) {
 				"id":1,
 				"name":"60/40 Portfolio Classic - Example",
 				"type":"ALLOCATION_PLAN",
+				"plannedDate":"2025-01-01",
 				"details":[
 					{
 						"id":7,
@@ -106,11 +110,154 @@ func TestGetAllocationPlans(t *testing.T) {
 	assert.JSONEq(t, expectedResponseJSON, string(body))
 }
 
+// TestAllocationPlanReadsOrderByPlannedDateAndId verifies planned-date ordering and its ID tie-breaker
+// on both complete-plan and plan-identifier read APIs. It seeds distinct dates and equal-date records directly.
+//
+// Co-authored by: OpenCode
+func TestAllocationPlanReadsOrderByPlannedDateAndId(t *testing.T) {
+	t.Cleanup(
+		inttestutil.BuildCleanupFunctionBuilder().
+			AddCleanupQuery(
+				`DELETE FROM planned_allocation WHERE allocation_plan_id IN (SELECT id FROM allocation_plan WHERE name LIKE 'Historical date ordering test%')`,
+				nil,
+			).
+			AddCleanupQuery(`DELETE FROM allocation_plan WHERE name LIKE 'Historical date ordering test%'`, nil).
+			Build(t),
+	)
+
+	var insertPlansSQL = `
+		INSERT INTO allocation_plan (portfolio_id, name, type, planned_date)
+		VALUES
+			(1, 'Historical date ordering test future', 'ALLOCATION_PLAN', '2099-01-01'),
+			(1, 'Historical date ordering test tie first', 'ALLOCATION_PLAN', '2040-05-15'),
+			(1, 'Historical date ordering test tie second', 'ALLOCATION_PLAN', '2040-05-15'),
+			(1, 'Historical date ordering test past', 'ALLOCATION_PLAN', '2001-01-01')
+	`
+	err := inttestinfra.ExecuteDBQuery(insertPlansSQL, nil)
+	require.NoError(t, err)
+
+	var insertDetailsSQL = `
+		INSERT INTO planned_allocation (
+			allocation_plan_id, hierarchical_id, asset_id, cash_reserve, slice_size_percentage, total_market_value
+		)
+		SELECT id, '{NULL, "BONDS"}', NULL, FALSE, 1, NULL
+		FROM allocation_plan
+		WHERE name LIKE 'Historical date ordering test%'
+	`
+	err = inttestinfra.ExecuteDBQuery(insertDetailsSQL, nil)
+	require.NoError(t, err)
+
+	var assertNameOrder = func(responseBody string) {
+		var orderedNames = []string{
+			"Historical date ordering test future",
+			"Historical date ordering test tie second",
+			"Historical date ordering test tie first",
+			"60/40 Portfolio Classic - Example",
+			"Historical date ordering test past",
+		}
+		var previousIndex = -1
+		for _, name := range orderedNames {
+			var nameIndex = strings.Index(responseBody, name)
+			assert.Greater(t, nameIndex, previousIndex, "unexpected order for %q", name)
+			previousIndex = nameIndex
+		}
+	}
+
+	planResponse, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/allocation-plan")
+	require.NoError(t, err)
+	defer deferCloseResponseBody(planResponse)
+	require.Equal(t, http.StatusOK, planResponse.StatusCode)
+	planBody, err := io.ReadAll(planResponse.Body)
+	require.NoError(t, err)
+	assertNameOrder(string(planBody))
+	assert.Contains(t, string(planBody), `"plannedDate":"2040-05-15"`)
+	assert.Contains(t, string(planBody), `"plannedDate":"2099-01-01"`)
+	assert.Contains(t, string(planBody), `"plannedDate":"2001-01-01"`)
+
+	optionsResponse, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/divergence/options")
+	require.NoError(t, err)
+	defer deferCloseResponseBody(optionsResponse)
+	require.Equal(t, http.StatusOK, optionsResponse.StatusCode)
+	optionsBody, err := io.ReadAll(optionsResponse.Body)
+	require.NoError(t, err)
+	assertNameOrder(string(optionsBody))
+	assert.Contains(t, string(optionsBody), `"plannedDate":"2040-05-15"`)
+	assert.Contains(t, string(optionsBody), `"plannedDate":"2099-01-01"`)
+	assert.Contains(t, string(optionsBody), `"plannedDate":"2001-01-01"`)
+}
+
+// TestAllocationPlanDateMigrationBackfillsLegacyRows executes the migration against a temporary legacy table.
+// It verifies creation-date backfill, CURRENT_DATE fallback, and the migration's NOT NULL/no-default contract.
+//
+// Co-authored by: OpenCode
+func TestAllocationPlanDateMigrationBackfillsLegacyRows(t *testing.T) {
+	var transaction, err = inttestinfra.DatabaseConnection.DB().Begin()
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		assert.NoError(t, transaction.Rollback())
+	})
+
+	_, err = transaction.Exec(`
+		CREATE TEMPORARY TABLE allocation_plan (
+			id BIGINT PRIMARY KEY,
+			create_timestamp TIMESTAMP
+		) ON COMMIT DROP
+	`)
+	require.NoError(t, err)
+
+	_, err = transaction.Exec(`
+		INSERT INTO allocation_plan (id, create_timestamp)
+		VALUES (1, '2021-02-03 18:45:00'), (2, NULL)
+	`)
+	require.NoError(t, err)
+
+	var migrationPath = filepath.Join(
+		"..", "..", "flyway", "sql", "migration-[15]-allocation_plan_planned_date.sql",
+	)
+	migrationSQL, err := os.ReadFile(migrationPath)
+	require.NoError(t, err)
+	for _, statement := range strings.Split(string(migrationSQL), ";") {
+		if strings.TrimSpace(statement) == "" {
+			continue
+		}
+		_, err = transaction.Exec(statement)
+		require.NoError(t, err)
+	}
+
+	var actualCreationDate, actualNullTimestampDate, currentDate string
+	err = transaction.QueryRow(`
+		SELECT
+			(SELECT planned_date::text FROM allocation_plan WHERE id = 1),
+			(SELECT planned_date::text FROM allocation_plan WHERE id = 2),
+			CURRENT_DATE::text
+	`).Scan(&actualCreationDate, &actualNullTimestampDate, &currentDate)
+	require.NoError(t, err)
+	assert.Equal(t, "2021-02-03", actualCreationDate)
+	assert.Equal(t, currentDate, actualNullTimestampDate)
+
+	var nullable string
+	var defaultValue sql.NullString
+	err = transaction.QueryRow(`
+		SELECT is_nullable, column_default
+		FROM information_schema.columns
+		WHERE table_schema LIKE 'pg_temp_%'
+		  AND table_name = 'allocation_plan'
+		  AND column_name = 'planned_date'
+	`).Scan(&nullable, &defaultValue)
+	require.NoError(t, err)
+	assert.Equal(t, "NO", nullable)
+	assert.False(t, defaultValue.Valid)
+}
+
+// TestPostAllocationPlanForInsertion verifies a plan with an explicit plannedDate persists and is returned by reads.
+//
+// Co-authored by: OpenCode
 func TestPostAllocationPlanForInsertion(t *testing.T) {
 
 	var newAllocationPlanJSON = `
 		{
 			"name":"New Allocation Plan Test DELETE",
+			"plannedDate":"2025-08-19",
 			"details":[
 				{
 					"hierarchicalId":[null,"STOCKS"],
@@ -151,6 +298,20 @@ func TestPostAllocationPlanForInsertion(t *testing.T) {
 		}
 	`
 
+	t.Cleanup(
+		inttestutil.BuildCleanupFunctionBuilder().
+			AddCleanupQuery(
+				`
+				DELETE FROM planned_allocation
+				WHERE allocation_plan_id IN (SELECT id FROM allocation_plan WHERE name LIKE '%DELETE')
+				`,
+				nil,
+			).
+			AddCleanupQuery(`DELETE FROM allocation_plan WHERE name LIKE '%DELETE'`, nil).
+			AddCleanupQuery(`DELETE FROM asset WHERE name LIKE '%DELETE'`, nil).
+			Build(t),
+	)
+
 	response, err := http.Post(
 		inttestinfra.TestAPIURLPrefix+"/portfolio/1/allocation-plan",
 		"application/json",
@@ -160,19 +321,12 @@ func TestPostAllocationPlanForInsertion(t *testing.T) {
 	defer deferCloseResponseBody(response)
 	assert.Equal(t, http.StatusNoContent, response.StatusCode)
 
-	t.Cleanup(
-		inttestutil.BuildCleanupFunctionBuilder().
-			AddCleanupQuery(
-				`
-				DELETE FROM planned_allocation 
-				WHERE allocation_plan_id IN (SELECT id FROM allocation_plan WHERE name LIKE '%DELETE')
-				`,
-				nil,
-			).
-			AddCleanupQuery(`DELETE FROM allocation_plan WHERE name LIKE '%DELETE'`, nil).
-			AddCleanupQuery(`DELETE FROM asset WHERE name LIKE '%DELETE'`, nil).
-			Build(t),
-	)
+	readResponse, readErr := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/allocation-plan")
+	assert.NoError(t, readErr)
+	defer deferCloseResponseBody(readResponse)
+	readBody, readErr := io.ReadAll(readResponse.Body)
+	assert.NoError(t, readErr)
+	assert.Contains(t, string(readBody), `"plannedDate":"2025-08-19"`)
 
 	body, err := io.ReadAll(response.Body)
 	assert.NoError(t, err)
@@ -184,6 +338,7 @@ func TestPostAllocationPlanForInsertion(t *testing.T) {
 		    ap.name,
 		    ap.type,
 		    ap.planned_execution_date,
+	    ap.planned_date::text AS planned_date,
 		    ap.portfolio_id
 		FROM allocation_plan ap
 		WHERE ap.name LIKE '%DELETE'
@@ -197,6 +352,7 @@ func TestPostAllocationPlanForInsertion(t *testing.T) {
 			"name":                   inttestutil.ToAssertableNullString("New Allocation Plan Test DELETE"),
 			"type":                   inttestutil.ToAssertableNullString("ALLOCATION_PLAN"),
 			"planned_execution_date": inttestutil.NullAssertableNullString(),
+			"planned_date":           inttestutil.ToAssertableNullString("2025-08-19"),
 			"portfolio_id":           inttestutil.ToAssertableNullString("1"),
 		},
 	}
@@ -299,6 +455,7 @@ func TestPostAllocationPlanForInsertion(t *testing.T) {
 // and verifies the rename works, then cleans up to restore the original fixture state.
 //
 // Co-authored by: GitHub Copilot
+// Co-authored by: OpenCode
 func TestPostAllocationPlanForUpdate_DoesNotOverwriteExistingAssetName(t *testing.T) {
 
 	// 1) Fetch the pre-seeded plan id
@@ -362,7 +519,7 @@ func TestPostAllocationPlanForUpdate_DoesNotOverwriteExistingAssetName(t *testin
 			AddCleanupQuery(`UPDATE planned_allocation SET slice_size_percentage = 0.5 WHERE id = {:id}`, dbx.Params{"id": idBondsTop}).
 			AddCleanupQuery(`UPDATE planned_allocation SET slice_size_percentage = 0.5 WHERE id = {:id}`, dbx.Params{"id": idStocksTop}).
 			AddCleanupQuery(
-				`UPDATE allocation_plan SET name = 'Update Allocation Plan Fixture' WHERE id = {:id}`,
+				`UPDATE allocation_plan SET name = 'Update Allocation Plan Fixture', planned_date = '2025-06-01' WHERE id = {:id}`,
 				dbx.Params{"id": allocationPlanIdString},
 			).
 			AddCleanupQuery(`DELETE FROM asset WHERE name LIKE '%DELETE'`, nil).
@@ -376,6 +533,7 @@ func TestPostAllocationPlanForUpdate_DoesNotOverwriteExistingAssetName(t *testin
 		`{
 			"id": %s,
 			"name":"%s",
+			"plannedDate":"2041-06-15",
 			"details":[
 				{ "id": %s, "hierarchicalId":[null,"BONDS"],  "sliceSizePercentage":"0.4" },
 				{ "id": %s, "hierarchicalId":[null,"STOCKS"], "sliceSizePercentage":"0.6" },
@@ -431,18 +589,27 @@ func TestPostAllocationPlanForUpdate_DoesNotOverwriteExistingAssetName(t *testin
 
 	// 5) Assert the plan name was updated
 	var planAssertSQL = `
-		SELECT ap.id, ap.name FROM allocation_plan ap WHERE ap.id = ` + allocationPlanIdString + `
+		SELECT ap.id, ap.name, ap.planned_date::text AS planned_date FROM allocation_plan ap WHERE ap.id = ` + allocationPlanIdString + `
 	`
 	inttestutil.AssertDBWithQueryMultipleRows(
 		t,
 		planAssertSQL,
 		[]inttestutil.AssertableNullStringMap{
 			{
-				"id":   inttestutil.ToAssertableNullString(allocationPlanIdString),
-				"name": inttestutil.ToAssertableNullString(updatedPlanName),
+				"id":           inttestutil.ToAssertableNullString(allocationPlanIdString),
+				"name":         inttestutil.ToAssertableNullString(updatedPlanName),
+				"planned_date": inttestutil.ToAssertableNullString("2041-06-15"),
 			},
 		},
 	)
+	var updatedPlanResponse, getPlanError = http.Get(
+		inttestinfra.TestAPIURLPrefix + "/portfolio/5/allocation-plan",
+	)
+	require.NoError(t, getPlanError)
+	defer deferCloseResponseBody(updatedPlanResponse)
+	var updatedPlanBody, readPlanError = io.ReadAll(updatedPlanResponse.Body)
+	require.NoError(t, readPlanError)
+	assert.Contains(t, string(updatedPlanBody), `"plannedDate":"2041-06-15"`)
 
 	// 6) Assert planned allocation rows reflect the update and insertion
 	var plannedAllocationsAssertSQL = `
@@ -510,6 +677,7 @@ func TestPostAllocationPlanForUpdate_DoesNotOverwriteExistingAssetName(t *testin
 // and verifies the rename works, then cleans up to restore the original fixture state.
 //
 // Co-authored by: GitHub Copilot
+// Co-authored by: OpenCode
 func TestPostAllocationPlanForUpdate_DeletesPlannedAllocationAndKeepsAsset(t *testing.T) {
 
 	// 1) Fetch the pre-seeded plan id
@@ -589,6 +757,7 @@ func TestPostAllocationPlanForUpdate_DeletesPlannedAllocationAndKeepsAsset(t *te
 		`{
 			"id": %s,
 			"name":"Update Allocation Plan Fixture",
+			"plannedDate":"2025-06-01",
 			"details":[
 				{ "id": %s, "hierarchicalId":[null,"BONDS"],  "sliceSizePercentage":"0.5" },
 				{ "id": %s, "hierarchicalId":[null,"STOCKS"], "sliceSizePercentage":"0.5" },
@@ -657,6 +826,9 @@ func TestPostAllocationPlanForUpdate_DeletesPlannedAllocationAndKeepsAsset(t *te
 	)
 }
 
+// TestPostAllocationPlanForUpdate_ChangesHierarchicalId verifies a detail update carries the existing planned date.
+//
+// Co-authored by: OpenCode
 func TestPostAllocationPlanForUpdate_ChangesHierarchicalId(t *testing.T) {
 
 	var allocationPlanIdString = "6"
@@ -722,6 +894,7 @@ func TestPostAllocationPlanForUpdate_ChangesHierarchicalId(t *testing.T) {
 		`{
 			"id": %s,
 			"name":"%s",
+			"plannedDate":"2025-06-01",
 			"details":[
 				{ "id": %s, "hierarchicalId":[null,"BONDS2"],  "sliceSizePercentage":"0.4" },
 				{ "id": %s, "hierarchicalId":[null,"STOCKS"], "sliceSizePercentage":"0.6" },
@@ -854,9 +1027,11 @@ func TestPostAllocationPlanForUpdate_ChangesHierarchicalId(t *testing.T) {
 // Expects 400 with message "Field 'name' failed validation: is required"
 //
 // Authored by: GitHub Copilot
+// Co-authored by: OpenCode
 func TestPostAllocationPlanValidation_MissingName(t *testing.T) {
 
 	var payload = `{
+		"plannedDate": "2025-01-01",
 		"details": [
 			{ "hierarchicalId": [null, "BONDS"], "sliceSizePercentage": "1.0" }
 		]
@@ -885,10 +1060,12 @@ func TestPostAllocationPlanValidation_MissingName(t *testing.T) {
 // Expects 400 with message "Field 'details' failed validation: is required"
 //
 // Authored by: GitHub Copilot
+// Co-authored by: OpenCode
 func TestPostAllocationPlanValidation_MissingDetails(t *testing.T) {
 
 	var payload = `{
-		"name": "Plan without details"
+		"name": "Plan without details",
+		"plannedDate": "2025-01-01"
 	}`
 
 	response, err := http.Post(
@@ -914,10 +1091,12 @@ func TestPostAllocationPlanValidation_MissingDetails(t *testing.T) {
 // Expects 400 with message "Field 'details' failed validation: must be at least 1"
 //
 // Authored by: GitHub Copilot
+// Co-authored by: OpenCode
 func TestPostAllocationPlanValidation_EmptyDetails(t *testing.T) {
 
 	var payload = `{
 		"name": "Plan with empty details",
+		"plannedDate": "2025-01-01",
 		"details": []
 	}`
 
@@ -944,10 +1123,12 @@ func TestPostAllocationPlanValidation_EmptyDetails(t *testing.T) {
 // Expects 400 with message "Field 'details[0].hierarchicalId' failed validation: is required"
 //
 // Authored by: GitHub Copilot
+// Co-authored by: OpenCode
 func TestPostAllocationPlanValidation_MissingHierarchicalId(t *testing.T) {
 
 	var payload = `{
 		"name": "Plan with invalid detail",
+		"plannedDate": "2025-01-01",
 		"details": [
 			{ "sliceSizePercentage": "1.0" }
 		]
@@ -976,10 +1157,12 @@ func TestPostAllocationPlanValidation_MissingHierarchicalId(t *testing.T) {
 // Expects 400 with message "Field 'details[0].hierarchicalId' failed validation: must be at least 1"
 //
 // Authored by: GitHub Copilot
+// Co-authored by: OpenCode
 func TestPostAllocationPlanValidation_EmptyHierarchicalId(t *testing.T) {
 
 	var payload = `{
 		"name": "Plan with empty hierarchical id",
+		"plannedDate": "2025-01-01",
 		"details": [
 			{ "hierarchicalId": [], "sliceSizePercentage": "1.0" }
 		]
@@ -1010,6 +1193,7 @@ func TestPostAllocationPlanValidation_EmptyHierarchicalId(t *testing.T) {
 // listing the duplicated hierarchical IDs found in the request.
 //
 // Co-authored by: GitHub Copilot
+// Co-authored by: OpenCode
 func TestPostAllocationPlanValidation_DuplicateHierarchicalIds(t *testing.T) {
 
 	// Top-level sums: 0.5 BONDS + 0.5 STOCKS = 1.0
@@ -1019,6 +1203,7 @@ func TestPostAllocationPlanValidation_DuplicateHierarchicalIds(t *testing.T) {
 		{
 			"id":6,
 			"name":"Update Allocation Plan Fixture",
+			"plannedDate":"2025-06-01",
 			"details":[
 				{ "id": 30, "hierarchicalId":[null,"BONDS"],  "sliceSizePercentage":"0.5" },
 				{ "id": 31, "hierarchicalId":[null,"STOCKS"], "sliceSizePercentage":"0.5" },
@@ -1051,12 +1236,14 @@ func TestPostAllocationPlanValidation_DuplicateHierarchicalIds(t *testing.T) {
 // Test validation (domain): child slice sizes within a parent must not exceed 100%.
 //
 // Co-authored by: GitHub Copilot
+// Co-authored by: OpenCode
 func TestPostAllocationPlanValidation_PercentageSumExceedsParentLimit(t *testing.T) {
 
 	var updatePlanJSON = `
 		{
             "id":6,
             "name":"Update Allocation Plan Fixture",
+            "plannedDate":"2025-06-01",
             "details":[
                 { "id": 30, "hierarchicalId":[null,"BONDS"],  "sliceSizePercentage":"0.5" },
                 { "id": 31, "hierarchicalId":[null,"STOCKS"], "sliceSizePercentage":"0.5" },
@@ -1092,12 +1279,16 @@ func TestPostAllocationPlanValidation_PercentageSumExceedsParentLimit(t *testing
 	assert.JSONEq(t, expected, string(body))
 }
 
+// TestPostAllocationPlanValidation_PercentageSumBelowParentLimit keeps the plan date valid while checking hierarchy totals.
+//
+// Co-authored by: OpenCode
 func TestPostAllocationPlanValidation_PercentageSumBelowParentLimit(t *testing.T) {
 
 	var updatePlanJSON = `
 		{
             "id":6,
             "name":"Update Allocation Plan Fixture",
+            "plannedDate":"2025-06-01",
             "details":[
                 { "id": 30, "hierarchicalId":[null,"BONDS"],  "sliceSizePercentage":"0.5" },
                 { "id": 31, "hierarchicalId":[null,"STOCKS"], "sliceSizePercentage":"0.5" },
@@ -1136,6 +1327,7 @@ func TestPostAllocationPlanValidation_PercentageSumBelowParentLimit(t *testing.T
 // Test validation (domain): top-level slice sizes must not exceed 100%.
 //
 // Co-authored by: GitHub Copilot
+// Co-authored by: OpenCode
 func TestPostAllocationPlanValidation_TopLevelPercentageSumExceedsLimit(t *testing.T) {
 
 	// Keep children within 1.0 to isolate the top-level violation
@@ -1143,6 +1335,7 @@ func TestPostAllocationPlanValidation_TopLevelPercentageSumExceedsLimit(t *testi
 		{
             "id":6,
             "name":"Update Allocation Plan Fixture",
+            "plannedDate":"2025-06-01",
             "details":[
                 { "id": 30, "hierarchicalId":[null,"BONDS"],  "sliceSizePercentage":"0.7" },
                 { "id": 31, "hierarchicalId":[null,"STOCKS"], "sliceSizePercentage":"0.6" },
@@ -1172,6 +1365,9 @@ func TestPostAllocationPlanValidation_TopLevelPercentageSumExceedsLimit(t *testi
 	assert.JSONEq(t, expected, string(body))
 }
 
+// TestPostAllocationPlanValidation_TopLevelPercentageSumBelowLimit isolates the allocation-total validation with a valid plan date.
+//
+// Co-authored by: OpenCode
 func TestPostAllocationPlanValidation_TopLevelPercentageSumBelowLimit(t *testing.T) {
 
 	// Keep children within 1.0 to isolate the top-level violation
@@ -1179,6 +1375,7 @@ func TestPostAllocationPlanValidation_TopLevelPercentageSumBelowLimit(t *testing
 		{
             "id":6,
             "name":"Update Allocation Plan Fixture",
+            "plannedDate":"2025-06-01",
             "details":[
                 { "id": 30, "hierarchicalId":[null,"BONDS"],  "sliceSizePercentage":"0.7" },
                 { "id": 31, "hierarchicalId":[null,"STOCKS"], "sliceSizePercentage":"0.1" },
@@ -1212,12 +1409,14 @@ func TestPostAllocationPlanValidation_TopLevelPercentageSumBelowLimit(t *testing
 // with a name exceeding the max length (100 characters) returns a validation error.
 //
 // Authored by: GitHub Copilot
+// Co-authored by: OpenCode
 func TestPostAllocationPlanValidation_NameExceedsMaxLength(t *testing.T) {
 
 	var longName = strings.Repeat("a", 101) // 101 characters exceeds max=100
 
 	var payload = `{
 		"name": "` + longName + `",
+		"plannedDate": "2025-01-01",
 		"details": [
 			{ "hierarchicalId": [null, "TEST"], "sliceSizePercentage": "1.0" }
 		]
@@ -1246,6 +1445,7 @@ func TestPostAllocationPlanValidation_NameExceedsMaxLength(t *testing.T) {
 // with a type exceeding the max length (50 characters) returns a validation error.
 //
 // Authored by: GitHub Copilot
+// Co-authored by: OpenCode
 func TestPostAllocationPlanValidation_TypeExceedsMaxLength(t *testing.T) {
 
 	var longType = strings.Repeat("T", 51) // 51 characters exceeds max=50
@@ -1253,6 +1453,7 @@ func TestPostAllocationPlanValidation_TypeExceedsMaxLength(t *testing.T) {
 	var payload = `{
 		"name": "Test Plan",
 		"type": "` + longType + `",
+		"plannedDate": "2025-01-01",
 		"details": [
 			{ "hierarchicalId": [null, "TEST"], "sliceSizePercentage": "1.0" }
 		]
@@ -1282,6 +1483,7 @@ func TestPostAllocationPlanValidation_TypeExceedsMaxLength(t *testing.T) {
 // returns a validation error.
 //
 // Authored by: GitHub Copilot
+// Co-authored by: OpenCode
 func TestPostAllocationPlanValidation_InvalidSizeHierarchyBranches(t *testing.T) {
 
 	// Portfolio 5 has a 2-level hierarchy: Classes -> Assets
@@ -1290,6 +1492,7 @@ func TestPostAllocationPlanValidation_InvalidSizeHierarchyBranches(t *testing.T)
 		{
             "id":6,
             "name":"Update Allocation Plan Fixture",
+            "plannedDate":"2025-06-01",
             "details":[
                 { "id": 30, "hierarchicalId":[null,"BONDS"],  "sliceSizePercentage":"0.5" },
                 { "id": 31, "hierarchicalId":[null,"STOCKS"], "sliceSizePercentage":"0.5" },
@@ -1325,6 +1528,7 @@ func TestPostAllocationPlanValidation_InvalidSizeHierarchyBranches(t *testing.T)
 // returns a validation error.
 //
 // Authored by: GitHub Copilot
+// Co-authored by: OpenCode
 func TestPostAllocationPlanValidation_MissingParentHierarchyBranches(t *testing.T) {
 
 	// Portfolio 5 has a 2-level hierarchy: Classes -> Assets
@@ -1335,6 +1539,7 @@ func TestPostAllocationPlanValidation_MissingParentHierarchyBranches(t *testing.
 		{
             "id":6,
             "name":"Update Allocation Plan Fixture",
+            "plannedDate":"2025-06-01",
             "details":[
                 { "id": 30, "hierarchicalId":[null,"BONDS"],  "sliceSizePercentage":"1.0" },
                 { "id": 32, "hierarchicalId":["ARCA:BIL","BONDS"], "sliceSizePercentage":"1.0", "cashReserve":false },
@@ -1368,6 +1573,7 @@ func TestPostAllocationPlanValidation_MissingParentHierarchyBranches(t *testing.
 // returns a validation error.
 //
 // Authored by: GitHub Copilot
+// Co-authored by: OpenCode
 func TestPostAllocationPlanValidation_ChildlessHierarchyBranches(t *testing.T) {
 
 	// Portfolio 5 has a 2-level hierarchy: Classes -> Assets
@@ -1376,6 +1582,7 @@ func TestPostAllocationPlanValidation_ChildlessHierarchyBranches(t *testing.T) {
 		{
             "id":6,
             "name":"Update Allocation Plan Fixture",
+            "plannedDate":"2025-06-01",
             "details":[
                 { "id": 30, "hierarchicalId":[null,"BONDS"],  "sliceSizePercentage":"0.5" },
                 { "id": 31, "hierarchicalId":[null,"STOCKS"], "sliceSizePercentage":"0.5" },
@@ -1409,6 +1616,7 @@ func TestPostAllocationPlanValidation_ChildlessHierarchyBranches(t *testing.T) {
 // returns a validation error listing all incomplete branches.
 //
 // Authored by: GitHub Copilot
+// Co-authored by: OpenCode
 func TestPostAllocationPlanValidation_MultipleChildlessHierarchyBranches(t *testing.T) {
 
 	// Portfolio 5 has a 2-level hierarchy: Classes -> Assets
@@ -1417,6 +1625,7 @@ func TestPostAllocationPlanValidation_MultipleChildlessHierarchyBranches(t *test
 		{
             "id":6,
             "name":"Update Allocation Plan Fixture",
+            "plannedDate":"2025-06-01",
             "details":[
                 { "id": 30, "hierarchicalId":[null,"BONDS"],  "sliceSizePercentage":"0.5" },
                 { "id": 31, "hierarchicalId":[null,"STOCKS"], "sliceSizePercentage":"0.5" }
@@ -1443,4 +1652,111 @@ func TestPostAllocationPlanValidation_MultipleChildlessHierarchyBranches(t *test
         "details": ["Planned allocations contain hierarchy branches with missing child levels: \nBONDS\nSTOCKS\n for portfolio hierarchy: Classes -> Assets"]
     }`
 	assert.JSONEq(t, expected, string(body))
+}
+
+// TestPostAllocationPlanRequiresExplicitValidPlannedDate rejects missing and invalid dates on both creates and updates.
+// It also verifies rejected requests leave existing plans unchanged and create no plan rows.
+//
+// Co-authored by: OpenCode
+func TestPostAllocationPlanRequiresExplicitValidPlannedDate(t *testing.T) {
+	t.Cleanup(
+		inttestutil.BuildCleanupFunctionBuilder().
+			AddCleanupQuery(`DELETE FROM planned_allocation WHERE allocation_plan_id IN (SELECT id FROM allocation_plan WHERE name LIKE 'Invalid planned date create%')`, nil).
+			AddCleanupQuery(`DELETE FROM allocation_plan WHERE name LIKE 'Invalid planned date create%'`, nil).
+			AddCleanupQuery(`UPDATE planned_allocation SET slice_size_percentage = 0.5 WHERE allocation_plan_id = 6`, nil).
+			AddCleanupQuery(`UPDATE allocation_plan SET name = 'Update Allocation Plan Fixture', planned_date = '2025-06-01' WHERE id = 6`, nil).
+			Build(t),
+	)
+
+	var columnContract = `
+		SELECT data_type, is_nullable, column_default
+		FROM information_schema.columns
+		WHERE table_name = 'allocation_plan' AND column_name = 'planned_date'
+	`
+	inttestutil.AssertDBWithQueryMultipleRows(
+		t,
+		columnContract,
+		[]inttestutil.AssertableNullStringMap{{
+			"data_type":      inttestutil.ToAssertableNullString("date"),
+			"is_nullable":    inttestutil.ToAssertableNullString("NO"),
+			"column_default": inttestutil.NullAssertableNullString(),
+		}},
+	)
+
+	var invalidDates = []struct {
+		name     string
+		property string
+	}{
+		{name: "missing"},
+		{name: "null", property: `"plannedDate":null`},
+		{name: "empty", property: `"plannedDate":""`},
+		{name: "malformed", property: `"plannedDate":"17/10/2026"`},
+		{name: "zero", property: `"plannedDate":"0001-01-01"`},
+		{name: "year-zero", property: `"plannedDate":"0000-01-01"`},
+	}
+
+	for _, invalidDate := range invalidDates {
+		for _, update := range []bool{false, true} {
+			var dateProperty = ""
+			if invalidDate.property != "" {
+				dateProperty = invalidDate.property + ","
+			}
+
+			var requestURL = inttestinfra.TestAPIURLPrefix + "/portfolio/1/allocation-plan"
+			var requestBody string
+			if update {
+				requestURL = inttestinfra.TestAPIURLPrefix + "/portfolio/5/allocation-plan"
+				requestBody = fmt.Sprintf(`{
+					"id":6,
+					"name":"Invalid planned date update %s",
+					%s
+					"details":[
+						{"id":30,"hierarchicalId":[null,"BONDS"],"sliceSizePercentage":"0.4"},
+						{"id":31,"hierarchicalId":[null,"STOCKS"],"sliceSizePercentage":"0.6"},
+						{"id":32,"hierarchicalId":["ARCA:BIL","BONDS"],"sliceSizePercentage":"0.5"},
+						{"id":33,"hierarchicalId":["ARCA:SPY","STOCKS"],"sliceSizePercentage":"0.5"}
+					]
+				}`, invalidDate.name, dateProperty)
+			} else {
+				requestBody = fmt.Sprintf(`{
+					"name":"Invalid planned date create %s",
+					%s
+					"details":[{"hierarchicalId":[null,"BONDS"],"sliceSizePercentage":"1.0"}]
+				}`, invalidDate.name, dateProperty)
+			}
+
+			response, err := http.Post(requestURL, "application/json", strings.NewReader(requestBody))
+			assert.NoError(t, err)
+			if response != nil {
+				defer deferCloseResponseBody(response)
+				assert.Equal(t, http.StatusBadRequest, response.StatusCode, "%s update=%t", invalidDate.name, update)
+			}
+
+			if !update {
+				inttestutil.AssertDBWithQueryMultipleRows(
+					t,
+					`SELECT count(*) AS plan_count FROM allocation_plan WHERE name LIKE 'Invalid planned date create%'`,
+					[]inttestutil.AssertableNullStringMap{{"plan_count": inttestutil.ToAssertableNullString("0")}},
+				)
+			} else {
+				inttestutil.AssertDBWithQueryMultipleRows(
+					t,
+					`SELECT name, planned_date::text AS planned_date FROM allocation_plan WHERE id = 6`,
+					[]inttestutil.AssertableNullStringMap{{
+						"name":         inttestutil.ToAssertableNullString("Update Allocation Plan Fixture"),
+						"planned_date": inttestutil.ToAssertableNullString("2025-06-01"),
+					}},
+				)
+				inttestutil.AssertDBWithQueryMultipleRows(
+					t,
+					`SELECT count(*) AS unchanged_detail_count
+					 FROM planned_allocation
+					 WHERE allocation_plan_id = 6 AND slice_size_percentage = 0.5`,
+					[]inttestutil.AssertableNullStringMap{{
+						"unchanged_detail_count": inttestutil.ToAssertableNullString("4"),
+					}},
+				)
+			}
+		}
+	}
 }

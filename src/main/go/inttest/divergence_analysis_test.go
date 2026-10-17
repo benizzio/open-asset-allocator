@@ -10,6 +10,9 @@ import (
 	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
 )
 
+// TestGetDivergenceAnalysisOptions verifies plan summaries include their persisted planned dates.
+//
+// Co-authored by: OpenCode
 func TestGetDivergenceAnalysisOptions(t *testing.T) {
 
 	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/divergence/options")
@@ -32,7 +35,8 @@ func TestGetDivergenceAnalysisOptions(t *testing.T) {
 			"availablePlans":[
 				{
 					"id":1,
-					"name":"60/40 Portfolio Classic - Example"
+					"name":"60/40 Portfolio Classic - Example",
+					"plannedDate":"2025-01-01"
 				}
 			]
 		}

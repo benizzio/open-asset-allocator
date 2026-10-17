@@ -28,9 +28,15 @@ type PlannedAllocation struct {
 	Asset               *Asset
 }
 
+// AllocationPlanIdentifier identifies an allocation plan and carries its required calendar date for list reads.
+// For example, a repository identifier can be mapped to an API object with id, name, and plannedDate.
+//
+// Co-authored by: OpenCode
 type AllocationPlanIdentifier struct {
 	Id   int64
 	Name string
+	// PlannedDate is the plan's calendar date, represented at midnight and stored by PostgreSQL as DATE.
+	PlannedDate time.Time
 }
 
 type AllocationPlan struct {
