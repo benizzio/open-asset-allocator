@@ -78,7 +78,7 @@ func buildPlannedAllocationFromRow(rowDTS *plannedAllocationJoinedRowDTS) *domai
 
 // buildAllocationPlanFromRow maps a joined database row to a domain plan, including its planned date.
 //
-// Co-authored by: OpenCode
+// Co-authored by: OpenCode and benizzio
 func buildAllocationPlanFromRow(
 	rowDTS *plannedAllocationJoinedRowDTS,
 	plannedAllocation *domain.PlannedAllocation,

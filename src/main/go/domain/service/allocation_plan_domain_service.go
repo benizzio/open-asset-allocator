@@ -104,7 +104,7 @@ func (validationData *levelSliceSizeValidationData) describeLevel(
 
 // validateAllocationPlan validates the required planned date and plan hierarchy before persistence.
 //
-// Co-authored by: OpenCode
+// Co-authored by: OpenCode and benizzio
 // TODO validate plan before persisting
 // - hierarchical ids with asset match asset ticker from reference
 func (service *AllocationPlanDomService) validateAllocationPlan(
