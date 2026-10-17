@@ -175,7 +175,8 @@ func mapToObservationTimestampDTS(
 	return observationTimestampDTS
 }
 
-// MapToPortfolioObservationTimestamp converts a successfully bound and validated REST timestamp DTO into the domain model.
+// MapToPortfolioObservationTimestamp converts a successfully bound and validated REST timestamp DTO
+// into the domain model.
 // For example, `model.MapToPortfolioObservationTimestamp(timestampDTS)` preserves the instant represented by
 // `2026-10-17T00:00:00+02:00` without reparsing the timestamp.
 //
