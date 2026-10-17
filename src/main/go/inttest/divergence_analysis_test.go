@@ -12,7 +12,7 @@ import (
 
 // TestGetDivergenceAnalysisOptions verifies plan summaries include their persisted planned dates.
 //
-// Co-authored by: OpenCode
+// Co-authored by: OpenCode and benizzio
 func TestGetDivergenceAnalysisOptions(t *testing.T) {
 
 	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/divergence/options")
