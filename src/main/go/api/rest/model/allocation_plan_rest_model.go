@@ -1,7 +1,6 @@
 package model
 
 import (
-	"errors"
 	"time"
 
 	"github.com/shopspring/decimal"
@@ -37,7 +36,7 @@ type PlannedAllocationDTS struct {
 // Create and update requests must include plannedDate in YYYY-MM-DD format, for example:
 // `{"name":"Long-term allocation","plannedDate":"2026-10-17","details":[...]}`.
 //
-// Co-authored by: OpenCode
+// Co-authored by: OpenCode and benizzio
 type AllocationPlanDTS struct {
 	Id                   *langext.ParseableInt64 `json:"id,omitempty"`
 	Name                 string                  `json:"name,omitempty" validate:"required,max=100"`
@@ -74,7 +73,7 @@ func MapToAllocationPlanDTSs(allocationPlans []*domain.AllocationPlan) []*Alloca
 
 // mapToAllocationPlanDTS maps a domain allocation plan to the REST representation, preserving its calendar date.
 //
-// Co-authored by: OpenCode
+// Co-authored by: OpenCode and benizzio
 func mapToAllocationPlanDTS(allocationPlan *domain.AllocationPlan) *AllocationPlanDTS {
 	var allocations = mapToPlannedAllocationDTSs(allocationPlan)
 	var allocationPlanId = langext.ParseableInt64(allocationPlan.Id)
@@ -116,7 +115,7 @@ func mapToPlannedAllocationDTS(allocation *domain.PlannedAllocation) *PlannedAll
 // A request must provide plannedDate as YYYY-MM-DD; for example, `{"plannedDate":"2026-10-17"}`
 // maps to a UTC-midnight value that persists as a SQL DATE without timezone conversion.
 //
-// Co-authored by: OpenCode
+// Co-authored by: OpenCode and benizzio
 func MapToAllocationPlan(
 	allocationPlanDTS *AllocationPlanDTS,
 	portfolioId int64,
@@ -127,8 +126,8 @@ func MapToAllocationPlan(
 		return nil, nil
 	}
 	plannedDate, err := time.Parse(time.DateOnly, string(allocationPlanDTS.PlannedDate))
-	if err != nil || plannedDate.IsZero() || plannedDate.Year() == 0 {
-		return nil, errors.New("plannedDate is required and must be a non-zero YYYY-MM-DD date")
+	if err != nil {
+		return nil, err
 	}
 
 	var allocations = mapToPlannedAllocations(allocationPlanDTS.Details)

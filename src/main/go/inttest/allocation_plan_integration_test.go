@@ -1693,6 +1693,7 @@ func TestPostAllocationPlanRequiresExplicitValidPlannedDate(t *testing.T) {
 		{name: "malformed", property: `"plannedDate":"17/10/2026"`},
 		{name: "zero", property: `"plannedDate":"0001-01-01"`},
 		{name: "year-zero", property: `"plannedDate":"0000-01-01"`},
+		{name: "year-zero-non-zero-month", property: `"plannedDate":"0000-02-15"`},
 	}
 
 	for _, invalidDate := range invalidDates {
@@ -1730,6 +1731,15 @@ func TestPostAllocationPlanRequiresExplicitValidPlannedDate(t *testing.T) {
 			if response != nil {
 				defer deferCloseResponseBody(response)
 				assert.Equal(t, http.StatusBadRequest, response.StatusCode, "%s update=%t", invalidDate.name, update)
+				body, err := io.ReadAll(response.Body)
+				assert.NoError(t, err)
+				if invalidDate.name == "year-zero-non-zero-month" {
+					var expectedResponse = `{
+						"errorMessage": "Validation failed",
+						"details": ["Field 'plannedDate' failed validation: must be a valid non-zero YYYY-MM-DD date"]
+					}`
+					assert.JSONEq(t, expectedResponse, string(body))
+				}
 			}
 
 			if !update {
