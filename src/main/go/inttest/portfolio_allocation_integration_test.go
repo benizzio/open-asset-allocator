@@ -526,7 +526,7 @@ func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 // TestPostPortfolioAllocationHistoryInsertExplicitTimestamp verifies that an explicit offset-bearing
 // observation timestamp is persisted as the same UTC instant.
 //
-// Co-authored by: OpenCode
+// Co-authored by: OpenCode and Igor Benicio de Mesquita
 func TestPostPortfolioAllocationHistoryInsertExplicitTimestamp(t *testing.T) {
 
 	var postPortfolioSnapshotJSON = `
@@ -994,7 +994,7 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 
 // TestPostPortfolioAllocationValidations verifies existing portfolio snapshot validation cases with explicit timestamps.
 //
-// Co-authored by: OpenCode
+// Co-authored by: OpenCode and benizzio
 func TestPostPortfolioAllocationValidations(t *testing.T) {
 
 	t.Run(
@@ -1265,7 +1265,7 @@ func TestPostPortfolioAllocationRequiresExplicitTimestamp(t *testing.T) {
 					"totalMarketValue":"123"
 				}]
 			}`, observationId, invalidTimestamp.property, tag, recordClass)
-			responseBody := postPortfolioAllocationForValidationFailure(t, requestBody)
+			var responseBody = postPortfolioAllocationForValidationFailure(t, requestBody)
 			assert.NotEmpty(t, responseBody)
 
 			inttestutil.AssertDBWithQueryMultipleRows(
