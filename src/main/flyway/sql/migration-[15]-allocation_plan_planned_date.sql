@@ -11,4 +11,4 @@ ALTER TABLE allocation_plan
     ALTER COLUMN planned_date SET NOT NULL
 ;
 
-COMMENT ON COLUMN allocation_plan.planned_date IS E'Calendar date assigned to the allocation plan';
+COMMENT ON COLUMN allocation_plan.planned_date IS E'Calendar date of when the plan was conceived';
