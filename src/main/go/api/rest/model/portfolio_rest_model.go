@@ -1,6 +1,8 @@
 package model
 
 import (
+	"time"
+
 	"github.com/shopspring/decimal"
 
 	"github.com/benizzio/open-asset-allocator/langext"
@@ -79,11 +81,11 @@ type AllocationPlanIdentifierDTS struct {
 // PortfolioObservationTimestampDTS carries the observation identifier, tag, and required timestamp.
 // Create and update requests must provide an RFC3339 timestamp, such as `2026-10-17T00:00:00Z`.
 //
-// Co-authored by: OpenCode
+// Co-authored by: OpenCode and benizzio
 type PortfolioObservationTimestampDTS struct {
 	Id        langext.ParseableInt64 `json:"id"`
 	TimeTag   string                 `json:"timeTag" validate:"max=100"`
-	Timestamp string                 `json:"timestamp" validate:"required,datetime=2006-01-02T15:04:05Z07:00"`
+	Timestamp time.Time              `json:"timestamp" validate:"required"`
 }
 
 type AnalysisOptionsDTS struct {

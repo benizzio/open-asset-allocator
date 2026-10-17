@@ -1,17 +1,17 @@
 # Graph Report - go  (2026-10-17)
 
 ## Corpus Check
-- 119 files · ~59,669 words
+- 119 files · ~59,697 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 2 file(s) not represented in the graph (top: .toml 1, (none) 1)
 
 ## Summary
-- 1074 nodes · 3197 edges · 58 communities (46 shown, 12 thin omitted)
+- 1074 nodes · 3201 edges · 57 communities (45 shown, 12 thin omitted)
 - Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 236 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `5649b834`
+- Built from commit: `04895648`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -31,7 +31,7 @@
 - golang_ext_tree_test.go
 - go_pkg_testing
 - BuildCleanupFunctionBuilder
-- asset_integration_service_yahoo.go
+- go_pkg_fmt
 - NewOrderedMapIterator
 - testing.T
 - PortfolioAllocation
@@ -62,11 +62,10 @@
 - rdbms_adapter.go
 - rdbms_query.go
 - PortfolioAllocationRDBMSRepository
-- go_pkg_fmt
+- go_pkg_github_com_golang_glog
 - portfolio_allocation_integration_test.go
 - T
 - hierarchical_id_test.go
-- http_client.go
 - manage_db.go
 - QueryExecutor[T]
 - AllocationPlanIdentifier
@@ -99,7 +98,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (58 total, 12 thin omitted)
+## Communities (57 total, 12 thin omitted)
 
 ### Community 0 - "github.com/gin-gonic/gin.Context"
 Cohesion: 0.08
@@ -126,16 +125,16 @@ Cohesion: 0.06
 Nodes (42): go_pkg_github_com_benizzio_open_asset_allocator_infra_json, go_pkg_github_com_go_playground_universal_translator, go_pkg_reflect, github.com/go-playground/universal-translator.Translator, reflect.Kind, reflect.StructField, reflect.Type, reflect.Value (+34 more)
 
 ### Community 6 - "context.Context"
-Cohesion: 0.09
-Nodes (37): allocationIterationMappingContextValue, contextKey, divergenceAnalysisContextValue, buildAllocationIterationContext(), buildDivergenceAnalysisContext(), buildHierarchySubIterationContext(), buildPotentialDivergenceMapContext(), getAllocationIterationContextValue() (+29 more)
+Cohesion: 0.07
+Nodes (44): allocationIterationMappingContextValue, contextKey, divergenceAnalysisContextValue, buildAllocationIterationContext(), buildDivergenceAnalysisContext(), buildHierarchySubIterationContext(), buildPotentialDivergenceMapContext(), getAllocationIterationContextValue() (+36 more)
 
 ### Community 7 - "deferCloseResponseBody"
 Cohesion: 0.14
 Nodes (25): TestAllocationPlanReadsOrderByPlannedDateAndId(), TestGetAllocationPlans(), TestPostAllocationPlanValidation_ChildlessHierarchyBranches(), TestPostAllocationPlanValidation_DuplicateHierarchicalIds(), TestPostAllocationPlanValidation_EmptyDetails(), TestPostAllocationPlanValidation_EmptyHierarchicalId(), TestPostAllocationPlanValidation_InvalidSizeHierarchyBranches(), TestPostAllocationPlanValidation_MissingDetails() (+17 more)
 
 ### Community 8 - "GinServer"
-Cohesion: 0.23
-Nodes (4): github.com/gin-gonic/gin.Engine, net/http.Server, GinServer, GinServerRESTController
+Cohesion: 0.18
+Nodes (6): go_pkg_net, go_pkg_path_filepath, github.com/gin-gonic/gin.Engine, net/http.Server, GinServer, GinServerRESTController
 
 ### Community 9 - "portfolio_rest_mapping.go"
 Cohesion: 0.18
@@ -161,9 +160,9 @@ Nodes (26): TestGetKnownAssetsRejectsExcessSearchTerms(), TestGetKnownAssetsRetu
 Cohesion: 0.23
 Nodes (28): github.com/go-ozzo/ozzo-dbx.NullStringMap, TestPostAllocationPlanForInsertion(), TestPostAllocationPlanForUpdate_ChangesHierarchicalId(), TestPostAllocationPlanForUpdate_DeletesPlannedAllocationAndKeepsAsset(), TestPostAllocationPlanForUpdate_DoesNotOverwriteExistingAssetName(), TestPostAllocationPlanRequiresExplicitValidPlannedDate(), TestPostAsset(), assertPersistedAssetWithExternalData() (+20 more)
 
-### Community 15 - "asset_integration_service_yahoo.go"
-Cohesion: 0.14
-Nodes (18): YahooFinanceAssetIntegrationService, BuildYahooFinanceAssetIntegrationService(), mapToExternalAsset(), mapToExternalAssets(), buildQuoteAssetLastClosePriceURL(), buildSearchAssetsURL(), YahooFinanceAssetIntegrationClient, YahooFinanceChartResponseDTS (+10 more)
+### Community 15 - "go_pkg_fmt"
+Cohesion: 0.13
+Nodes (19): YahooFinanceAssetIntegrationService, BuildYahooFinanceAssetIntegrationService(), mapToExternalAsset(), mapToExternalAssets(), buildQuoteAssetLastClosePriceURL(), buildSearchAssetsURL(), YahooFinanceAssetIntegrationClient, YahooFinanceChartResponseDTS (+11 more)
 
 ### Community 16 - "NewOrderedMapIterator"
 Cohesion: 0.14
@@ -257,9 +256,9 @@ Nodes (9): assetRowScanner(), database/sql.Row, database/sql.Rows, BuildILikeSub
 Cohesion: 0.29
 Nodes (6): buildSelectedExternalAsset(), mapPortfolioAllocationRow(), mapPortfolioAllocationRows(), preparePortfolioAllocationTempInserts(), portfolioAllocationJoinedRowDTS, PortfolioAllocationRDBMSRepository
 
-### Community 49 - "go_pkg_fmt"
-Cohesion: 0.18
-Nodes (8): go_pkg_flag, go_pkg_fmt, go_pkg_github_com_benizzio_open_asset_allocator_root, go_pkg_github_com_golang_glog, go_pkg_net, go_pkg_path_filepath, ConfigLogger(), main()
+### Community 49 - "go_pkg_github_com_golang_glog"
+Cohesion: 0.29
+Nodes (5): go_pkg_flag, go_pkg_github_com_benizzio_open_asset_allocator_root, go_pkg_github_com_golang_glog, ConfigLogger(), main()
 
 ### Community 50 - "portfolio_allocation_integration_test.go"
 Cohesion: 0.20
@@ -272,10 +271,6 @@ Nodes (6): github.com/go-ozzo/ozzo-dbx.Query, T, withParams(), QueryBuilder, Que
 ### Community 52 - "hierarchical_id_test.go"
 Cohesion: 0.27
 Nodes (8): TestHierarchicalIdIsTopLevel_Empty(), TestHierarchicalIdParentLevelId_Empty(), TestHierarchicalIdValue_AllNonNil(), TestHierarchicalIdValue_WithNilLevels(), database/sql.NullString, StringPointerToNullString(), StringToNullString(), ValueToString()
-
-### Community 53 - "http_client.go"
-Cohesion: 0.43
-Nodes (7): RequestOption, CloseResponseBody(), DecodeJSONResponse(), ExecuteGet(), ExecuteGetJSON(), T, WithHeader()
 
 ### Community 54 - "manage_db.go"
 Cohesion: 0.48
@@ -293,8 +288,8 @@ Nodes (5): mapToAllocationPlanIdentifierDTS(), mapToAllocationPlanIdentifierDTSs
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `App` connect `App` to `.buildAppComponents`, `reflect.Type`, `portfolio_allocation_controller.go`, `GinServer`, `infra_db.go`, `Configuration`, `asset_integration_service_yahoo.go`, `go_pkg_fmt`, `go_pkg_github_com_benizzio_open_asset_allocator_langext`, `Adapter`, `AllocationPlan`?**
-  _High betweenness centrality (0.057) - this node is a cross-community bridge._
+- **Why does `App` connect `App` to `.buildAppComponents`, `reflect.Type`, `portfolio_allocation_controller.go`, `GinServer`, `infra_db.go`, `Configuration`, `go_pkg_fmt`, `go_pkg_github_com_golang_glog`, `go_pkg_github_com_benizzio_open_asset_allocator_langext`, `Adapter`, `AllocationPlan`?**
+  _High betweenness centrality (0.055) - this node is a cross-community bridge._
 - **Why does `Asset` connect `Asset` to `allocation_plan_domain_service.go`, `PropagateAsAppErrorWithNewMessage`, `allocation_plan_rest_model.go`, `asset_rest_model.go`, `rdbms_query.go`, `PortfolioAllocationRDBMSRepository`, `PortfolioAllocation`, `ExecuteDBQuery`, `.InsertAsset`, `AllocationPlan`?**
   _High betweenness centrality (0.045) - this node is a cross-community bridge._
 - **Why does `PlannedAllocation` connect `AllocationPlan` to `allocation_plan_domain_service.go`, `PropagateAsAppErrorWithNewMessage`, `context.Context`, `allocation_plan_rest_model.go`, `Asset`, `ExternalAsset`, `AllocationStructure`?**
@@ -304,6 +299,6 @@ _Questions this graph is uniquely positioned to answer:_
 - **What connects `AssetSearchQueryDTS`, `ExternalAssetSearchQueryDTS`, `ErrorResponse` to the rest of the system?**
   _15 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `github.com/gin-gonic/gin.Context` be split into smaller, more focused modules?**
-  _Cohesion score 0.07731694828469023 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07834101382488479 - nodes in this community are weakly interconnected._
 - **Should `allocation_plan_domain_service.go` be split into smaller, more focused modules?**
   _Cohesion score 0.06775956284153005 - nodes in this community are weakly interconnected._
