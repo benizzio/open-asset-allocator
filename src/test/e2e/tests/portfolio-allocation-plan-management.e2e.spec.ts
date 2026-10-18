@@ -6,6 +6,8 @@
  * allocation-plan routes with direct browser URLs without changing persisted data.
  * Scenario 6 modifies an existing allocation plan, creates a second plan, and
  * verifies the resulting charts, planned-date preservation, and PostgreSQL persistence.
+ * Scenarios 4.6 and 4.7 verify repeated header-field interactions before and after
+ * a successful management-list refresh.
  *
  * @author OpenCode
  * @author GPT-6 Astra
@@ -13,6 +15,7 @@
  * @author GPT-6 Sol
  */
 import type { Browser, Locator, Page, Request, Route } from '@playwright/test';
+import { exerciseAccordionFieldInteractions } from '../support/accordion-field-interactions';
 import { expect, test } from '../support/fixtures';
 import { chartDiagnosticTest } from '../support/chart-diagnostics';
 import type { E2eDatabase } from '../support/database';
@@ -891,6 +894,208 @@ test.describe('portfolio allocation plan management', () => {
     await expect(panel).not.toHaveClass(/\bcollapsing\b/);
     await expect(panel).not.toHaveClass(/\bshow\b/);
     await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  /** Repeats pointer, text, date, and keyboard interaction without closing the new-plan panel.
+   * @author GPT-6 Luna
+   */
+  test('scenario 4.6: keeps the new-plan panel open through repeated field interactions', async ({
+    database,
+    page,
+  }) => {
+    const seededData = await seedAllocationPlanData(database);
+    await page.goto('/');
+    await expectRootShell(page);
+    await page.goto(`/portfolio/${seededData.portfolio.id}/allocation/manage`);
+    await expectAllocationPlanManagement(page, seededData.portfolio);
+
+    const item = page.locator('#allocation-plan-management-container-0');
+    await exerciseAccordionFieldInteractions(page, {
+      dateInput: item.getByLabel('Planned date'),
+      expectedDate: '2026-04-20',
+      expectedText: 'E2E_PLAN_FIELD_46',
+      panel: item.locator('#allocation-plan-management-0'),
+      textInput: item.getByRole('textbox', { name: 'New allocation plan name' }),
+      toggle: item.getByRole('button', { name: 'New allocation plan details' }),
+    });
+
+    await expect(database.query(
+      'SELECT id FROM public.allocation_plan WHERE portfolio_id = $1',
+      [seededData.portfolio.id],
+    )).resolves.toEqual([]);
+  });
+
+  /** Creates a plan, verifies PostgreSQL persistence, then tests refreshed field and group behavior.
+   * @author GPT-6 Luna
+   */
+  test('scenario 4.7: preserves accordion interactions after successful allocation-plan refresh', async ({
+    database,
+    page,
+  }) => {
+    test.setTimeout(60_000);
+    const seededData = await seedAllocationPlanData(database);
+    await page.goto('/');
+    await expectRootShell(page);
+    await page.goto(`/portfolio/${seededData.portfolio.id}/allocation/manage`);
+    await expectAllocationPlanManagement(page, seededData.portfolio);
+
+    const initialNewItem = page.locator('#allocation-plan-management-container-0');
+    const initialName = initialNewItem.getByRole('textbox', { name: 'New allocation plan name' });
+    await initialName.fill(ALLOCATION_PLAN_NAME);
+    const plannedDate = '2026-02-10';
+    await initialNewItem.getByLabel('Planned date').fill(plannedDate);
+    const initialForm = page.locator('#allocation-plan-management-form-0');
+    const initialFormHandle = await initialForm.elementHandle();
+    if(!initialFormHandle) {
+      throw new Error('The new allocation-plan form was not rendered.');
+    }
+
+    const classRow = await addClassAllocationRow(page, initialForm, 1);
+    await fillClassAllocation(classRow, 1, 'BONDS', '100', '1');
+    const assetRow = await addAssetAllocationRow(page, classRow, 2, 1);
+    await fillExistingAssetAllocation(
+      page,
+      assetRow,
+      seededData.assets[EXISTING_BOND_TICKER],
+      2,
+      'BONDS',
+      '100',
+      '1',
+      false,
+    );
+
+    const saveResponsePromise = page.waitForResponse((response) => {
+      return response.request().method() === 'POST'
+        && new URL(response.url()).pathname === `/api/portfolio/${seededData.portfolio.id}/allocation-plan`;
+    });
+    await initialForm.locator('tfoot button.btn-primary[type="button"]').click();
+    expect((await saveResponsePromise).status()).toBe(204);
+
+    const persistedPlans = await database.query<PersistedAllocationPlan>(
+      `SELECT id, name, type, planned_execution_date, planned_date::text AS planned_date,
+              create_timestamp, portfolio_id
+       FROM public.allocation_plan
+       WHERE portfolio_id = $1`,
+      [seededData.portfolio.id],
+    );
+    expect(persistedPlans).toHaveLength(1);
+    const persistedPlan = persistedPlans[0];
+    expect(persistedPlan).toEqual(expect.objectContaining({
+      id: expect.any(Number),
+      name: ALLOCATION_PLAN_NAME,
+      planned_execution_date: null,
+      planned_date: plannedDate,
+      portfolio_id: seededData.portfolio.id,
+      type: 'ALLOCATION_PLAN',
+    }));
+    expect(persistedPlan.create_timestamp).toBeInstanceOf(Date);
+
+    const persistedAllocations = await database.query<PersistedPlannedAllocation>(
+      `SELECT pa.hierarchical_id,
+              pa.asset_id,
+              a.name AS asset_name,
+              a.ticker AS asset_ticker,
+              pa.cash_reserve,
+              pa.slice_size_percentage::numeric(6,5)::text AS slice_size_percentage,
+              pa.total_market_value::text AS total_market_value
+       FROM public.planned_allocation pa
+       LEFT JOIN public.asset a ON a.id = pa.asset_id
+       WHERE pa.allocation_plan_id = $1
+       ORDER BY pa.hierarchical_id[2] ASC, pa.hierarchical_id[1] NULLS FIRST`,
+      [persistedPlan.id],
+    );
+    expect(persistedAllocations).toEqual([
+      {
+        asset_id: null,
+        asset_name: null,
+        asset_ticker: null,
+        cash_reserve: false,
+        hierarchical_id: [null, 'BONDS'],
+        slice_size_percentage: '1.00000',
+        total_market_value: null,
+      },
+      {
+        asset_id: seededData.assets[EXISTING_BOND_TICKER].id,
+        asset_name: EXISTING_BOND_NAME,
+        asset_ticker: EXISTING_BOND_TICKER,
+        cash_reserve: false,
+        hierarchical_id: [EXISTING_BOND_TICKER, 'BONDS'],
+        slice_size_percentage: '1.00000',
+        total_market_value: null,
+      },
+    ]);
+
+    await expectAllocationPlanSuccessNotification(page);
+    await expectReloadedManagementItems(page, persistedPlan.id);
+    await page.waitForLoadState('networkidle');
+    expect(await initialFormHandle.evaluate((element) => element.isConnected)).toBe(false);
+    await initialFormHandle.dispose();
+
+    const refreshedNewItem = page.locator('#allocation-plan-management-container-0');
+    const refreshedName = refreshedNewItem.getByRole('textbox', { name: 'New allocation plan name' });
+    const refreshedDate = refreshedNewItem.getByLabel('Planned date');
+    const refreshedForm = page.locator('#allocation-plan-management-form-0');
+    await expect(refreshedName).toHaveValue('');
+    await expect(refreshedDate).toHaveValue(FIXED_ALLOCATION_PLAN_DATE);
+
+    await refreshedName.focus();
+    await expect(refreshedNewItem.locator('#allocation-plan-management-0')).toHaveClass(/\bshow\b/);
+    const draftClassRow = await addClassAllocationRow(page, refreshedForm, 1);
+    await fillClassAllocation(draftClassRow, 1, 'STOCKS', '100', '1');
+    const draftAssetRow = await addAssetAllocationRow(page, draftClassRow, 2, 1);
+    await fillExistingAssetAllocation(
+      page,
+      draftAssetRow,
+      seededData.assets[EXISTING_STOCK_TICKER],
+      2,
+      'STOCKS',
+      '100',
+      '1',
+      false,
+    );
+
+    const newPlanToggle = refreshedNewItem.getByRole('button', { name: 'New allocation plan details' });
+    await newPlanToggle.click();
+    await expect(newPlanToggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(refreshedNewItem.locator('#allocation-plan-management-0')).not.toHaveClass(/\bshow\b/);
+
+    await exerciseAccordionFieldInteractions(page, {
+      dateInput: refreshedDate,
+      expectedDate: '2026-04-21',
+      expectedText: 'E2E_PLAN_FIELD_47',
+      panel: refreshedNewItem.locator('#allocation-plan-management-0'),
+      textInput: refreshedName,
+      toggle: newPlanToggle,
+    });
+    await expect(refreshedForm.locator('input[name="name"]')).toHaveValue('E2E_PLAN_FIELD_47');
+    await expect(draftClassRow.getByRole('combobox', { name: 'Class' })).toHaveValue('STOCKS');
+    await expect(draftAssetRow.getByRole('textbox', { name: 'Asset ticker', exact: true }))
+      .toHaveValue(EXISTING_STOCK_TICKER);
+    await expect(draftAssetRow.getByRole('spinbutton', { name: 'Slice size percentage' })).toHaveValue('100');
+
+    const savedPlanItem = page.locator(`#allocation-plan-management-container-${persistedPlan.id}`);
+    const savedPlanToggle = savedPlanItem.getByRole('button', { name: ALLOCATION_PLAN_NAME, exact: true });
+    const savedPlanPanel = savedPlanItem.locator(`#allocation-plan-management-${persistedPlan.id}`);
+    await savedPlanToggle.click();
+    await expect(savedPlanPanel).toHaveClass(/\bshow\b/);
+    await expect(refreshedNewItem.locator('#allocation-plan-management-0')).not.toHaveClass(/\bshow\b/);
+    await expect(page.locator(`#allocation-plan-management-form-${persistedPlan.id} tbody tr`)).toHaveCount(2);
+
+    await exerciseAccordionFieldInteractions(page, {
+      dateInput: refreshedDate,
+      expectedDate: '2026-04-21',
+      expectedText: 'E2E_PLAN_FIELD_47',
+      panel: refreshedNewItem.locator('#allocation-plan-management-0'),
+      textInput: refreshedName,
+      toggle: newPlanToggle,
+    });
+    await expect(savedPlanPanel).not.toHaveClass(/\bshow\b/);
+    await expect(draftClassRow.getByRole('combobox', { name: 'Class' })).toHaveValue('STOCKS');
+    await expect(draftAssetRow.getByRole('spinbutton', { name: 'Slice size percentage' })).toHaveValue('100');
+    await expect(database.query(
+      'SELECT id FROM public.allocation_plan WHERE portfolio_id = $1',
+      [seededData.portfolio.id],
+    )).resolves.toHaveLength(1);
   });
 
   /** Verifies the shared create-new ticker action works in an allocation-plan form.
