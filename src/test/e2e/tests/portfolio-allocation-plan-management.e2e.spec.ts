@@ -164,10 +164,11 @@ test.describe('portfolio allocation plan management', () => {
     await expect(newPlanItem.locator('#allocation-plan-management-form-0 input[name="name"]')).toHaveValue(
       ALLOCATION_PLAN_NAME,
     );
-    await newPlanItem.locator('#allocation-plan-management-trigger-0 > button').click();
 
     const newPlanForm = page.locator('#allocation-plan-management-form-0');
     await expect(newPlanItem.locator('#allocation-plan-management-0')).toHaveClass(/\bshow\b/);
+    await expect(newPlanItem.getByRole('button', { name: 'New allocation plan details' }))
+      .toHaveAttribute('aria-expanded', 'true');
     await expect(newPlanForm).toBeVisible();
     await expectAllocationPlanManagementForm(newPlanForm, 0);
 
@@ -298,8 +299,12 @@ test.describe('portfolio allocation plan management', () => {
     await expectReloadedManagementItems(page, persistedPlan.id);
     await expect(page.locator(`#allocation-plan-management-form-${persistedPlan.id} input[name="plannedDate"]`))
       .toHaveValue(CREATED_ALLOCATION_PLAN_DATE);
-    await expect(page.locator('#allocation-plan-management-container-0').getByLabel('Planned date'))
-      .toHaveValue(await browserLocalCalendarDate(page));
+    const refreshedNewPlanItem = page.locator('#allocation-plan-management-container-0');
+    const refreshedNewPlanNameInput = refreshedNewPlanItem.getByRole('textbox', { name: 'New allocation plan name' });
+    await expect(refreshedNewPlanItem.getByLabel('Planned date')).toHaveValue(await browserLocalCalendarDate(page));
+    await refreshedNewPlanNameInput.focus();
+    await expect(refreshedNewPlanNameInput).toBeFocused();
+    await expect(refreshedNewPlanItem.locator('#allocation-plan-management-0')).toHaveClass(/\bshow\b/);
 
     const savedPlanItem = page.locator(`#allocation-plan-management-container-${persistedPlan.id}`);
     await savedPlanItem.getByRole('button', { name: ALLOCATION_PLAN_NAME, exact: true }).click();
@@ -466,7 +471,7 @@ test.describe('portfolio allocation plan management', () => {
     await secondPlannedDateInput.fill(SECOND_ALLOCATION_PLAN_DATE);
     await expect(newPlanItem.locator('#allocation-plan-management-form-0 input[name="name"]'))
       .toHaveValue(SECOND_ALLOCATION_PLAN_NAME);
-    await newPlanItem.locator('#allocation-plan-management-trigger-0 > button').click();
+    await expect(newPlanItem.locator('#allocation-plan-management-0')).toHaveClass(/\bshow\b/);
 
     const secondPlanForm = page.locator('#allocation-plan-management-form-0');
     await expect(secondPlanForm).toBeVisible();
@@ -639,6 +644,245 @@ test.describe('portfolio allocation plan management', () => {
     }]);
   });
 
+  /** Checks the new-plan header geometry and wrapping at desktop and narrow viewports.
+   * @author GPT-6 Luna
+   */
+  test('scenario 4.2: keeps allocation-plan fields grouped beside a separate toggle', async ({ database, page }) => {
+    const seededData = await seedAllocationPlanData(database);
+    await page.goto('/');
+    await expectRootShell(page);
+    await page.setViewportSize({ width: 1024, height: 900 });
+    await page.goto(`/portfolio/${seededData.portfolio.id}/allocation/manage`);
+    await expectAllocationPlanManagement(page, seededData.portfolio);
+
+    const newPlanItem = page.locator('#allocation-plan-management-container-0');
+    const header = newPlanItem.locator('h2');
+    const readHeaderLayout = async () => header.evaluate(element => {
+      const fields = element.querySelector<HTMLElement>('[data-accordion-field-focus]');
+      const name = element.querySelector<HTMLInputElement>('[aria-label="New allocation plan name"]');
+      const date = element.querySelector<HTMLInputElement>('[aria-label="Planned date"]');
+      const toggle = element.querySelector<HTMLButtonElement>('.accordion-button');
+
+      if(!fields || !name || !date || !toggle) {
+        throw new Error('The new allocation-plan header is missing a field group, field, or toggle.');
+      }
+
+      const fieldsBounds = fields.getBoundingClientRect();
+      const nameBounds = name.getBoundingClientRect();
+      const dateBounds = date.getBoundingClientRect();
+      const toggleBounds = toggle.getBoundingClientRect();
+
+      return {
+        date: {
+          bottom: dateBounds.bottom,
+          left: dateBounds.left,
+          right: dateBounds.right,
+          top: dateBounds.top,
+          width: dateBounds.width,
+        },
+        fieldsFollowedByToggle: Boolean(fields.compareDocumentPosition(toggle) & Node.DOCUMENT_POSITION_FOLLOWING),
+        fieldsBounds: { bottom: fieldsBounds.bottom, left: fieldsBounds.left, right: fieldsBounds.right },
+        headerBottom: element.getBoundingClientRect().bottom,
+        headerClientWidth: element.clientWidth,
+        headerRight: element.getBoundingClientRect().right,
+        headerScrollWidth: element.scrollWidth,
+        name: {
+          left: nameBounds.left,
+          right: nameBounds.right,
+          top: nameBounds.top,
+          width: nameBounds.width,
+        },
+        nameAndDateOutsideToggle: !toggle.contains(name) && !toggle.contains(date),
+        toggle: { left: toggleBounds.left, right: toggleBounds.right, top: toggleBounds.top },
+      };
+    });
+
+    const expectSideBySide = async (): Promise<void> => {
+      const layout = await readHeaderLayout();
+      expect(layout.nameAndDateOutsideToggle).toBe(true);
+      expect(layout.fieldsFollowedByToggle).toBe(true);
+      expect(Math.abs(layout.name.top - layout.date.top)).toBeLessThan(2);
+      expect(layout.date.left).toBeGreaterThanOrEqual(layout.name.right);
+      expect(layout.toggle.left).toBeGreaterThanOrEqual(layout.date.right);
+      expect(layout.name.width).toBeGreaterThan(layout.date.width);
+      expect(layout.headerScrollWidth).toBeLessThanOrEqual(layout.headerClientWidth);
+    };
+
+    await expectSideBySide();
+    await test.info().attach('allocation-plan-header-1024px', {
+      body: await page.screenshot(),
+      contentType: 'image/png',
+    });
+
+    await page.setViewportSize({ width: 718, height: 900 });
+    await expectSideBySide();
+
+    const expectFieldsToWrap = async (): Promise<void> => {
+      const layout = await readHeaderLayout();
+      expect(layout.nameAndDateOutsideToggle).toBe(true);
+      expect(layout.fieldsFollowedByToggle).toBe(true);
+      expect(layout.date.top).toBeGreaterThan(layout.name.top);
+      expect(layout.date.bottom).toBeLessThanOrEqual(layout.headerBottom);
+      expect(layout.fieldsBounds.left).toBeLessThanOrEqual(layout.name.left);
+      expect(layout.fieldsBounds.right).toBeGreaterThanOrEqual(layout.date.right);
+      expect(layout.toggle.top).toBeGreaterThanOrEqual(layout.fieldsBounds.bottom);
+      expect(layout.toggle.right).toBeLessThanOrEqual(layout.headerRight);
+      expect(layout.headerScrollWidth).toBeLessThanOrEqual(layout.headerClientWidth);
+    };
+
+    await page.setViewportSize({ width: 375, height: 812 });
+    await expectFieldsToWrap();
+    await test.info().attach('allocation-plan-header-375px', {
+      body: await page.screenshot(),
+      contentType: 'image/png',
+    });
+    await page.setViewportSize({ width: 320, height: 740 });
+    await expectFieldsToWrap();
+    await test.info().attach('allocation-plan-header-320px', {
+      body: await page.screenshot(),
+      contentType: 'image/png',
+    });
+  });
+
+  /** Verifies either new-plan field opens the panel while preserving focus and explicit toggle behavior.
+   * @author GPT-6 Luna
+   */
+  test('scenario 4.3: opens the new-plan panel when either header field receives focus', async ({ database, page }) => {
+    const seededData = await seedAllocationPlanData(database);
+    await page.goto('/');
+    await expectRootShell(page);
+    await page.goto(`/portfolio/${seededData.portfolio.id}/allocation/manage`);
+    await expectAllocationPlanManagement(page, seededData.portfolio);
+
+    const item = page.locator('#allocation-plan-management-container-0');
+    const name = item.getByRole('textbox', { name: 'New allocation plan name' });
+    const date = item.getByLabel('Planned date');
+    const toggle = item.getByRole('button', { name: 'New allocation plan details' });
+    const panel = item.locator('#allocation-plan-management-0');
+
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(panel).not.toHaveClass(/\bshow\b/);
+    await name.focus();
+    await expect(name).toBeFocused();
+    await expect(panel).toHaveClass(/\bshow\b/);
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+
+    await toggle.click();
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(panel).not.toHaveClass(/\bshow\b/);
+
+    await date.focus();
+    await expect(date).toBeFocused();
+    await expect(panel).toHaveClass(/\bshow\b/);
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    await date.click();
+    await expect(panel).toHaveClass(/\bshow\b/);
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  /** Verifies keyboard movement between header fields retains their values and leaves the toggle operable.
+   * @author GPT-6 Luna
+   */
+  test('scenario 4.4: keeps the panel open during keyboard navigation across new-plan fields', async ({
+    database,
+    page,
+  }) => {
+    const seededData = await seedAllocationPlanData(database);
+    await page.goto('/');
+    await expectRootShell(page);
+    await page.goto(`/portfolio/${seededData.portfolio.id}/allocation/manage`);
+    await expectAllocationPlanManagement(page, seededData.portfolio);
+
+    const item = page.locator('#allocation-plan-management-container-0');
+    const name = item.getByRole('textbox', { name: 'New allocation plan name' });
+    const date = item.getByLabel('Planned date');
+    const toggle = item.getByRole('button', { name: 'New allocation plan details' });
+    const panel = item.locator('#allocation-plan-management-0');
+    const selectedDate = '2034-05-17';
+
+    await name.focus();
+    await name.fill('E2E Keyboard Plan');
+    await page.keyboard.press('Tab');
+    await expect(date).toBeFocused();
+    await date.fill(selectedDate);
+    await page.keyboard.press('Shift+Tab');
+    await expect(name).toBeFocused();
+    await expect(name).toHaveValue('E2E Keyboard Plan');
+    await expect(date).toHaveValue(selectedDate);
+    await expect(panel).toHaveClass(/\bshow\b/);
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+
+    await toggle.focus();
+    await page.keyboard.press('Enter');
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(panel).not.toHaveClass(/\bshow\b/);
+  });
+
+  /** Covers pending focus-open behavior during a collapse transition and cancellation after blur.
+   * @author GPT-6 Luna
+   */
+  test('scenario 4.5: retries focus opening after collapse and cancels it when focus leaves', async ({
+    database,
+    page,
+  }) => {
+    const seededData = await seedAllocationPlanData(database);
+    await page.goto('/');
+    await expectRootShell(page);
+    await page.goto(`/portfolio/${seededData.portfolio.id}/allocation/manage`);
+    await expectAllocationPlanManagement(page, seededData.portfolio);
+
+    const item = page.locator('#allocation-plan-management-container-0');
+    const name = item.getByRole('textbox', { name: 'New allocation plan name' });
+    const toggle = item.getByRole('button', { name: 'New allocation plan details' });
+    const panel = item.locator('#allocation-plan-management-0');
+
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await name.focus();
+    await expect(panel).toHaveClass(/\bshow\b/);
+    const focusDuringCollapseStarted = await page.evaluate(() => {
+      const item = document.querySelector<HTMLElement>('#allocation-plan-management-container-0');
+      const toggle = item?.querySelector<HTMLButtonElement>('.allocation-plan-management-new-toggle');
+      const name = item?.querySelector<HTMLInputElement>('[aria-label="New allocation plan name"]');
+      const panel = item?.querySelector<HTMLElement>('#allocation-plan-management-0');
+
+      if(!toggle || !name || !panel) {
+        throw new Error('The new allocation-plan header is missing its toggle, field, or panel.');
+      }
+
+      toggle.focus();
+      toggle.click();
+      const transitionStarted = panel.classList.contains('collapsing');
+      name.focus();
+      return transitionStarted;
+    });
+    expect(focusDuringCollapseStarted).toBe(true);
+    await expect(name).toBeFocused();
+    await expect(panel).toHaveClass(/\bshow\b/);
+    await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+
+    const focusLeavingDuringCollapseStarted = await page.evaluate(() => {
+      const item = document.querySelector<HTMLElement>('#allocation-plan-management-container-0');
+      const toggle = item?.querySelector<HTMLButtonElement>('.allocation-plan-management-new-toggle');
+      const name = item?.querySelector<HTMLInputElement>('[aria-label="New allocation plan name"]');
+      const panel = item?.querySelector<HTMLElement>('#allocation-plan-management-0');
+
+      if(!toggle || !name || !panel) {
+        throw new Error('The new allocation-plan header is missing its toggle, field, or panel.');
+      }
+
+      toggle.focus();
+      toggle.click();
+      const transitionStarted = panel.classList.contains('collapsing');
+      name.focus();
+      name.blur();
+      return transitionStarted;
+    });
+    expect(focusLeavingDuringCollapseStarted).toBe(true);
+    await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+    await expect(panel).not.toHaveClass(/\bshow\b/);
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  });
+
   /** Verifies the shared create-new ticker action works in an allocation-plan form.
    *
    * @author GPT-6 Luna
@@ -654,7 +898,7 @@ test.describe('portfolio allocation plan management', () => {
 
     const newPlanItem = page.locator('#allocation-plan-management-container-0');
     await newPlanItem.getByRole('textbox', { name: 'New allocation plan name' }).fill('E2E Autocomplete Plan');
-    await newPlanItem.locator('#allocation-plan-management-trigger-0 > button').click();
+    await expect(newPlanItem.locator('#allocation-plan-management-0')).toHaveClass(/\bshow\b/);
 
     const form = page.locator('#allocation-plan-management-form-0');
     const classRow = await addClassAllocationRow(page, form, 1);
@@ -929,7 +1173,9 @@ async function expectAllocationPlanManagement(
   await expect(managementAccordion.locator(':scope > .accordion-item')).toHaveCount(1 + persistedPlanCount);
 
   const newPlanItem = page.locator('#allocation-plan-management-container-0');
-  await expect(newPlanItem.locator('#allocation-plan-management-trigger-0 > button')).toHaveClass(/collapsed/);
+  const newPlanToggle = newPlanItem.getByRole('button', { name: 'New allocation plan details' });
+  await expect(newPlanToggle).toHaveClass(/collapsed/);
+  await expect(newPlanToggle).toHaveAttribute('aria-expanded', 'false');
   await expect(newPlanItem.getByRole('textbox', { name: 'New allocation plan name' })).toBeVisible();
   await expect(newPlanItem.getByLabel('Planned date')).toHaveValue(await browserLocalCalendarDate(page));
 }
@@ -965,7 +1211,9 @@ async function expectAllocationPlanManagementOrder(
   await expect(managementAccordion.locator(':scope > .accordion-item')).toHaveCount(1 + plans.length);
 
   const newPlanItem = page.locator('#allocation-plan-management-container-0');
-  await expect(newPlanItem.locator('#allocation-plan-management-trigger-0 > button')).toHaveClass(/collapsed/);
+  const newPlanToggle = newPlanItem.getByRole('button', { name: 'New allocation plan details' });
+  await expect(newPlanToggle).toHaveClass(/collapsed/);
+  await expect(newPlanToggle).toHaveAttribute('aria-expanded', 'false');
   await expect(newPlanItem.getByRole('textbox', { name: 'New allocation plan name' })).toBeVisible();
   await expect(newPlanItem.getByLabel('Planned date')).toHaveValue(await browserLocalCalendarDate(page));
 
@@ -1430,7 +1678,9 @@ async function expectReloadedManagementItems(page: Page, allocationPlanId: numbe
   await expect(managementAccordion.locator(':scope > .accordion-item')).toHaveCount(2);
 
   const newPlanItem = page.locator('#allocation-plan-management-container-0');
-  await expect(newPlanItem.locator('#allocation-plan-management-trigger-0 > button')).toHaveClass(/collapsed/);
+  const newPlanToggle = newPlanItem.getByRole('button', { name: 'New allocation plan details' });
+  await expect(newPlanToggle).toHaveClass(/collapsed/);
+  await expect(newPlanToggle).toHaveAttribute('aria-expanded', 'false');
   await expect(newPlanItem.getByRole('textbox', { name: 'New allocation plan name' })).toBeVisible();
   await expect(newPlanItem.getByLabel('Planned date')).toHaveValue(await browserLocalCalendarDate(page));
 
@@ -2155,7 +2405,7 @@ async function verifyPlannedDateSubmissionInNegativeUtcOffset(
     await expect(dateInput).toHaveValue(await browserLocalCalendarDate(page));
     await dateInput.fill(plannedDate);
     await newPlanItem.getByRole('textbox', { name: 'New allocation plan name' }).fill('E2E Timezone Probe');
-    await newPlanItem.locator('#allocation-plan-management-trigger-0 > button').click();
+    await expect(newPlanItem.locator('#allocation-plan-management-0')).toHaveClass(/\bshow\b/);
 
     const form = page.locator('#allocation-plan-management-form-0');
     const failSave = async (route: Route): Promise<void> => {
