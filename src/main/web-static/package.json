@@ -22,7 +22,7 @@
   "dependencies": {
     "bignumber.js": "^11.1.5",
     "bootstrap": "^5.3.8",
-    "bootstrap-icons": "^1.13.1",
+    "bootstrap-icons": "^1.13.2",
     "bootswatch": "^5.3.8",
     "chart.js": "^4.5.1",
     "chartjs-plugin-datalabels": "^2.2.0",
