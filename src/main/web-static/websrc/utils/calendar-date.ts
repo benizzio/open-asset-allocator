@@ -1,13 +1,15 @@
 /**
- * Provides browser-local calendar-date formatting and observation timestamp conversion.
- * Use these helpers when an observation is selected by date: serialize its local midnight as a UTC instant.
+ * Provides browser-local calendar-date formatting and UTC timestamp conversion.
+ * Use these helpers to serialize a selected calendar date's local midnight as a UTC instant.
  * @author GPT-6 Luna
+ * @author GPT-6 Sol
  */
 
 /**
  * Returns the browser's current local calendar date in the native date-input format.
  * @example `getBrowserLocalCalendarDate()` returns a value such as `2026-10-18`.
  * @author GPT-6 Luna
+ * @author GPT-6 Sol
  */
 export function getBrowserLocalCalendarDate(): string {
     const today = new Date();
@@ -23,12 +25,13 @@ export function getBrowserLocalCalendarDate(): string {
  * @param calendarDate - A native date-input value such as `2026-10-18`.
  * @example `calendarDateToUtcTimestamp("2026-10-18")` returns that date's local midnight as an ISO UTC string.
  * @author GPT-6 Luna
+ * @author GPT-6 Sol
  */
 export function calendarDateToUtcTimestamp(calendarDate: string): string {
     const dateParts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(calendarDate);
 
     if(!dateParts) {
-        throw new RangeError("Observation date must use the YYYY-MM-DD format.");
+        throw new RangeError("Calendar date must use the YYYY-MM-DD format.");
     }
 
     const year = Number(dateParts[1]);
@@ -40,7 +43,7 @@ export function calendarDateToUtcTimestamp(calendarDate: string): string {
         || localMidnight.getFullYear() !== year
         || localMidnight.getMonth() !== month - 1
         || localMidnight.getDate() !== day) {
-        throw new RangeError("Observation date is not a valid calendar date.");
+        throw new RangeError("Invalid calendar date.");
     }
 
     return localMidnight.toISOString();

@@ -841,19 +841,6 @@
       "source_location": "L16"
     },
     {
-      "id": "websrc_infra_htmx_index_afterrequesteventdetail",
-      "label": "AfterRequestEventDetail",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 37,
-      "community_name": "infra.ts",
-      "file_type": "code",
-      "norm_label": "afterrequesteventdetail",
-      "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L21"
-    },
-    {
       "id": "websrc_infra_infra_generalerrorhandler",
       "label": "GeneralErrorHandler",
       "_callable": true,
@@ -968,7 +955,20 @@
       "file_type": "code",
       "norm_label": "formrowvalueelements",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L278"
+      "source_location": "L290"
+    },
+    {
+      "id": "websrc_infra_htmx_index_afterrequesteventdetail",
+      "label": "AfterRequestEventDetail",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "application/index.ts",
+      "file_type": "code",
+      "norm_label": "afterrequesteventdetail",
+      "source_file": "websrc/infra/htmx/index.ts",
+      "source_location": "L21"
     },
     {
       "id": "websrc_components_asset_composed_columns_input_selection_events_assetrowselectionchangepayload",
@@ -3329,6 +3329,18 @@
       "source_location": "L157"
     },
     {
+      "id": "websrc_utils_lang_parsejsonornull",
+      "label": "parseJSONOrNull()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "asset.ts",
+      "file_type": "code",
+      "norm_label": "parsejsonornull()",
+      "source_file": "websrc/utils/lang.ts",
+      "source_location": "L45"
+    },
+    {
       "id": "websrc_components_portfolio_history_management_focusonnewline",
       "label": "focusOnNewLine()",
       "_callable": true,
@@ -3338,7 +3350,7 @@
       "file_type": "code",
       "norm_label": "focusonnewline()",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L317"
+      "source_location": "L329"
     },
     {
       "id": "websrc_components_portfolio_history_management_handleassetrowselectionchange",
@@ -3350,7 +3362,7 @@
       "file_type": "code",
       "norm_label": "handleassetrowselectionchange()",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L229"
+      "source_location": "L241"
     },
     {
       "id": "websrc_components_portfolio_history_management_handlenewobservationfieldblur",
@@ -3398,7 +3410,7 @@
       "file_type": "code",
       "norm_label": "modifyobservationsresponse()",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L335"
+      "source_location": "L347"
     },
     {
       "id": "websrc_components_portfolio_history_management_normalizeportfoliohistoryrow",
@@ -3410,7 +3422,7 @@
       "file_type": "code",
       "norm_label": "normalizeportfoliohistoryrow()",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L203"
+      "source_location": "L215"
     },
     {
       "id": "websrc_components_portfolio_history_management_normalizeportfoliohistoryrowswithin",
@@ -3422,7 +3434,7 @@
       "file_type": "code",
       "norm_label": "normalizeportfoliohistoryrowswithin()",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L268"
+      "source_location": "L280"
     },
     {
       "id": "websrc_components_portfolio_history_management_propagaterefreshdataafterpost",
@@ -3434,7 +3446,7 @@
       "file_type": "code",
       "norm_label": "propagaterefreshdataafterpost()",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L350"
+      "source_location": "L362"
     },
     {
       "id": "websrc_components_portfolio_history_management_setnewobservationtimestampfromdate",
@@ -3446,7 +3458,7 @@
       "file_type": "code",
       "norm_label": "setnewobservationtimestampfromdate()",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L120"
+      "source_location": "L121"
     },
     {
       "id": "websrc_components_portfolio_history_management_showfocusedobservationpanel",
@@ -3470,7 +3482,7 @@
       "file_type": "code",
       "norm_label": "synchronizeexternalassetkeygroup()",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L174"
+      "source_location": "L186"
     },
     {
       "id": "websrc_components_portfolio_history_quote_quote_action_readexternalassetkeys",
@@ -3485,7 +3497,7 @@
       "source_location": "L58"
     },
     {
-      "id": "websrc_utils_portfolio_observation_date_calendardatetoutctimestamp",
+      "id": "websrc_utils_calendar_date_calendardatetoutctimestamp",
       "label": "calendarDateToUtcTimestamp()",
       "_callable": true,
       "_origin": "ast",
@@ -3493,11 +3505,11 @@
       "community_name": "portfolio-history-management.ts",
       "file_type": "code",
       "norm_label": "calendardatetoutctimestamp()",
-      "source_file": "websrc/utils/portfolio-observation-date.ts",
-      "source_location": "L27"
+      "source_file": "websrc/utils/calendar-date.ts",
+      "source_location": "L30"
     },
     {
-      "id": "websrc_utils_portfolio_observation_date_getbrowserlocalcalendardate",
+      "id": "websrc_utils_calendar_date_getbrowserlocalcalendardate",
       "label": "getBrowserLocalCalendarDate()",
       "_callable": true,
       "_origin": "ast",
@@ -3505,8 +3517,8 @@
       "community_name": "portfolio-history-management.ts",
       "file_type": "code",
       "norm_label": "getbrowserlocalcalendardate()",
-      "source_file": "websrc/utils/portfolio-observation-date.ts",
-      "source_location": "L12"
+      "source_file": "websrc/utils/calendar-date.ts",
+      "source_location": "L14"
     },
     {
       "id": "websrc_infra_infra_bootrouterdebouncing",
@@ -3555,30 +3567,6 @@
       "norm_label": "setupglobalerrorhandler()",
       "source_file": "websrc/infra/infra.ts",
       "source_location": "L74"
-    },
-    {
-      "id": "websrc_root_after_request_error_handler",
-      "label": "AFTER_REQUEST_ERROR_HANDLER()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 37,
-      "community_name": "infra.ts",
-      "file_type": "code",
-      "norm_label": "after_request_error_handler()",
-      "source_file": "websrc/root.ts",
-      "source_location": "L6"
-    },
-    {
-      "id": "websrc_root_general_uncaught_error_handler",
-      "label": "GENERAL_UNCAUGHT_ERROR_HANDLER()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 37,
-      "community_name": "infra.ts",
-      "file_type": "code",
-      "norm_label": "general_uncaught_error_handler()",
-      "source_file": "websrc/root.ts",
-      "source_location": "L26"
     },
     {
       "id": "websrc_components_notifications_buildbootstraperrornotification",
@@ -3713,18 +3701,6 @@
       "source_location": "L180"
     },
     {
-      "id": "websrc_components_allocation_plan_management_sethierarchicalidfromparentrow",
-      "label": "setHierarchicalIdFromParentRow()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "handlebars-lang.ts",
-      "file_type": "code",
-      "norm_label": "sethierarchicalidfromparentrow()",
-      "source_file": "websrc/components/allocation-plan-management.ts",
-      "source_location": "L150"
-    },
-    {
       "id": "websrc_components_portfolio_history_management_getnextportfoliohistorymanagementindex",
       "label": "getNextPortfolioHistoryManagementIndex()",
       "_callable": true,
@@ -3734,7 +3710,7 @@
       "file_type": "code",
       "norm_label": "getnextportfoliohistorymanagementindex()",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L327"
+      "source_location": "L339"
     },
     {
       "id": "websrc_infra_handlebars_handlebars_dom_domjsonhelper",
@@ -4167,18 +4143,6 @@
       "norm_label": "isnullish()",
       "source_file": "websrc/utils/lang.ts",
       "source_location": "L580"
-    },
-    {
-      "id": "websrc_utils_lang_parsejsonornull",
-      "label": "parseJSONOrNull()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "handlebars-lang.ts",
-      "file_type": "code",
-      "norm_label": "parsejsonornull()",
-      "source_file": "websrc/utils/lang.ts",
-      "source_location": "L45"
     },
     {
       "id": "websrc_utils_lang_reporttointcoercion",
@@ -4694,7 +4658,7 @@
       "file_type": "code",
       "norm_label": ".constructor()",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L284"
+      "source_location": "L296"
     },
     {
       "id": "websrc_components_portfolio_history_management_formrowvalueelements_handleinputquantityormarketprice",
@@ -4706,7 +4670,7 @@
       "file_type": "code",
       "norm_label": ".handleinputquantityormarketprice()",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L294"
+      "source_location": "L306"
     },
     {
       "id": "websrc_components_portfolio_history_management_formrowvalueelements_handleinputtotalmarketvalue",
@@ -4718,7 +4682,7 @@
       "file_type": "code",
       "norm_label": ".handleinputtotalmarketvalue()",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L311"
+      "source_location": "L323"
     },
     {
       "id": "websrc_components_portfolio_history_management_recalculateportfoliohistoryallocation",
@@ -4730,7 +4694,31 @@
       "file_type": "code",
       "norm_label": "recalculateportfoliohistoryallocation()",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L165"
+      "source_location": "L177"
+    },
+    {
+      "id": "websrc_root_after_request_error_handler",
+      "label": "AFTER_REQUEST_ERROR_HANDLER()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "application/index.ts",
+      "file_type": "code",
+      "norm_label": "after_request_error_handler()",
+      "source_file": "websrc/root.ts",
+      "source_location": "L6"
+    },
+    {
+      "id": "websrc_root_general_uncaught_error_handler",
+      "label": "GENERAL_UNCAUGHT_ERROR_HANDLER()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "application/index.ts",
+      "file_type": "code",
+      "norm_label": "general_uncaught_error_handler()",
+      "source_file": "websrc/root.ts",
+      "source_location": "L26"
     },
     {
       "id": "websrc_infra_dom_binding_dom_bootstrap_form_bindbootstrapvalidationcleaning",
@@ -5127,6 +5115,18 @@
       "norm_label": "mapplannedallocationformentriesperhierarchicalkey()",
       "source_file": "websrc/components/allocation-plan-management.ts",
       "source_location": "L310"
+    },
+    {
+      "id": "websrc_components_allocation_plan_management_sethierarchicalidfromparentrow",
+      "label": "setHierarchicalIdFromParentRow()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "allocation-plan-management.ts",
+      "file_type": "code",
+      "norm_label": "sethierarchicalidfromparentrow()",
+      "source_file": "websrc/components/allocation-plan-management.ts",
+      "source_location": "L150"
     },
     {
       "id": "websrc_components_allocation_plan_management_validateduplicateentries",
@@ -7066,7 +7066,7 @@
       "file_type": "code",
       "norm_label": "portfoliohistoryquoteaction",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L158"
+      "source_location": "L170"
     },
     {
       "id": "websrc_components_portfolio_history_quote_index",
@@ -7157,37 +7157,15 @@
       "source_location": "L33"
     },
     {
-      "id": "websrc_utils_portfolio_observation_date",
-      "label": "portfolio-observation-date.ts",
+      "id": "websrc_utils_calendar_date",
+      "label": "calendar-date.ts",
       "_origin": "ast",
       "community": 36,
       "community_name": "portfolio-history-management.ts",
       "file_type": "code",
-      "norm_label": "portfolio-observation-date.ts",
-      "source_file": "websrc/utils/portfolio-observation-date.ts",
+      "norm_label": "calendar-date.ts",
+      "source_file": "websrc/utils/calendar-date.ts",
       "source_location": "L1"
-    },
-    {
-      "id": "websrc_application_index_application",
-      "label": "Application",
-      "_origin": "ast",
-      "community": 37,
-      "community_name": "infra.ts",
-      "file_type": "code",
-      "norm_label": "application",
-      "source_file": "websrc/application/index.ts",
-      "source_location": "L17"
-    },
-    {
-      "id": "websrc_components_notifications_notifications",
-      "label": "notifications",
-      "_origin": "ast",
-      "community": 37,
-      "community_name": "infra.ts",
-      "file_type": "code",
-      "norm_label": "notifications",
-      "source_file": "websrc/components/notifications.ts",
-      "source_location": "L46"
     },
     {
       "id": "websrc_infra_htmx_index_htmxinfra",
@@ -7221,17 +7199,6 @@
       "norm_label": "infra",
       "source_file": "websrc/infra/infra.ts",
       "source_location": "L93"
-    },
-    {
-      "id": "websrc_root",
-      "label": "root.ts",
-      "_origin": "ast",
-      "community": 37,
-      "community_name": "infra.ts",
-      "file_type": "code",
-      "norm_label": "root.ts",
-      "source_file": "websrc/root.ts",
-      "source_location": "L1"
     },
     {
       "id": "ref_chartjs_plugin_datalabels",
@@ -7595,6 +7562,94 @@
       "norm_label": "bignumber.js",
       "source_file": "package.json",
       "source_location": "L20"
+    },
+    {
+      "id": "websrc_application_index",
+      "label": "application/index.ts",
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "application/index.ts",
+      "file_type": "code",
+      "norm_label": "application/index.ts",
+      "source_file": "websrc/application/index.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "websrc_application_index_application",
+      "label": "Application",
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "application/index.ts",
+      "file_type": "code",
+      "norm_label": "application",
+      "source_file": "websrc/application/index.ts",
+      "source_location": "L17"
+    },
+    {
+      "id": "websrc_components_allocation_plan_management_allocationplanmanagement",
+      "label": "allocationPlanManagement",
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "application/index.ts",
+      "file_type": "code",
+      "norm_label": "allocationplanmanagement",
+      "source_file": "websrc/components/allocation-plan-management.ts",
+      "source_location": "L387"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_index_assetcomposedcolumnsinput",
+      "label": "AssetComposedColumnsInput",
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "application/index.ts",
+      "file_type": "code",
+      "norm_label": "assetcomposedcolumnsinput",
+      "source_file": "websrc/components/asset-composed-columns-input/index.ts",
+      "source_location": "L86"
+    },
+    {
+      "id": "websrc_components_notifications_notifications",
+      "label": "notifications",
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "application/index.ts",
+      "file_type": "code",
+      "norm_label": "notifications",
+      "source_file": "websrc/components/notifications.ts",
+      "source_location": "L46"
+    },
+    {
+      "id": "websrc_components_portfolio_history_management_portfoliohistorymanagement",
+      "label": "portfolioHistoryManagement",
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "application/index.ts",
+      "file_type": "code",
+      "norm_label": "portfoliohistorymanagement",
+      "source_file": "websrc/components/portfolio-history-management.ts",
+      "source_location": "L386"
+    },
+    {
+      "id": "websrc_pages_asset_assetpage",
+      "label": "AssetPage",
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "application/index.ts",
+      "file_type": "code",
+      "norm_label": "assetpage",
+      "source_file": "websrc/pages/asset.ts",
+      "source_location": "L223"
+    },
+    {
+      "id": "websrc_root",
+      "label": "root.ts",
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "application/index.ts",
+      "file_type": "code",
+      "norm_label": "root.ts",
+      "source_file": "websrc/root.ts",
+      "source_location": "L1"
     },
     {
       "id": "websrc_infra_dom_binding_dom_bootstrap_form",
@@ -8004,17 +8059,6 @@
       "source_location": "L19"
     },
     {
-      "id": "websrc_application_index",
-      "label": "application/index.ts",
-      "_origin": "ast",
-      "community": 7,
-      "community_name": "allocation-plan-management.ts",
-      "file_type": "code",
-      "norm_label": "application/index.ts",
-      "source_file": "websrc/application/index.ts",
-      "source_location": "L1"
-    },
-    {
       "id": "websrc_components_allocation_plan_management",
       "label": "allocation-plan-management.ts",
       "_origin": "ast",
@@ -8026,39 +8070,6 @@
       "source_location": "L1"
     },
     {
-      "id": "websrc_components_allocation_plan_management_allocationplanmanagement",
-      "label": "allocationPlanManagement",
-      "_origin": "ast",
-      "community": 7,
-      "community_name": "allocation-plan-management.ts",
-      "file_type": "code",
-      "norm_label": "allocationplanmanagement",
-      "source_file": "websrc/components/allocation-plan-management.ts",
-      "source_location": "L387"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_index_assetcomposedcolumnsinput",
-      "label": "AssetComposedColumnsInput",
-      "_origin": "ast",
-      "community": 7,
-      "community_name": "allocation-plan-management.ts",
-      "file_type": "code",
-      "norm_label": "assetcomposedcolumnsinput",
-      "source_file": "websrc/components/asset-composed-columns-input/index.ts",
-      "source_location": "L86"
-    },
-    {
-      "id": "websrc_components_portfolio_history_management_portfoliohistorymanagement",
-      "label": "portfolioHistoryManagement",
-      "_origin": "ast",
-      "community": 7,
-      "community_name": "allocation-plan-management.ts",
-      "file_type": "code",
-      "norm_label": "portfoliohistorymanagement",
-      "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L374"
-    },
-    {
       "id": "websrc_infra_routing_index_router",
       "label": "Router",
       "_origin": "ast",
@@ -8068,17 +8079,6 @@
       "norm_label": "router",
       "source_file": "websrc/infra/routing/index.ts",
       "source_location": "L12"
-    },
-    {
-      "id": "websrc_pages_asset_assetpage",
-      "label": "AssetPage",
-      "_origin": "ast",
-      "community": 7,
-      "community_name": "allocation-plan-management.ts",
-      "file_type": "code",
-      "norm_label": "assetpage",
-      "source_file": "websrc/pages/asset.ts",
-      "source_location": "L223"
     },
     {
       "id": "websrc_pages_index",
@@ -8833,8 +8833,8 @@
       "id": "websrc_pages_index_assetpage",
       "label": "websrc_pages_index_assetpage",
       "_origin": "semantic",
-      "community": 7,
-      "community_name": "allocation-plan-management.ts",
+      "community": 47,
+      "community_name": "application/index.ts",
       "external": true,
       "file_type": "concept",
       "norm_label": "websrc_pages_index_assetpage",
@@ -8845,8 +8845,8 @@
       "id": "websrc_pages_index_portfoliopage",
       "label": "websrc_pages_index_portfoliopage",
       "_origin": "semantic",
-      "community": 7,
-      "community_name": "allocation-plan-management.ts",
+      "community": 47,
+      "community_name": "application/index.ts",
       "external": true,
       "file_type": "concept",
       "norm_label": "websrc_pages_index_portfoliopage",
@@ -9776,7 +9776,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L332",
+      "source_location": "L344",
       "weight": 1.0
     },
     {
@@ -9788,7 +9788,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L252",
+      "source_location": "L264",
       "weight": 1.0
     },
     {
@@ -9824,7 +9824,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L213",
+      "source_location": "L225",
       "weight": 1.0
     },
     {
@@ -9836,7 +9836,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L272",
+      "source_location": "L284",
       "weight": 1.0
     },
     {
@@ -9848,19 +9848,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L166",
+      "source_location": "L178",
       "weight": 1.0
     },
     {
       "source": "websrc_components_portfolio_history_management_setnewobservationtimestampfromdate",
-      "target": "websrc_utils_portfolio_observation_date_calendardatetoutctimestamp",
+      "target": "websrc_utils_calendar_date_calendardatetoutctimestamp",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L149",
+      "source_location": "L151",
       "weight": 1.0
     },
     {
@@ -9872,7 +9872,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L181",
+      "source_location": "L193",
       "weight": 1.0
     },
     {
@@ -14715,7 +14715,7 @@
     },
     {
       "source": "websrc_components_portfolio_history_management",
-      "target": "websrc_utils_portfolio_observation_date_calendardatetoutctimestamp",
+      "target": "websrc_utils_calendar_date_calendardatetoutctimestamp",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -14727,7 +14727,7 @@
     },
     {
       "source": "websrc_components_portfolio_history_management",
-      "target": "websrc_utils_portfolio_observation_date_getbrowserlocalcalendardate",
+      "target": "websrc_utils_calendar_date_getbrowserlocalcalendardate",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -18430,7 +18430,7 @@
     },
     {
       "source": "websrc_components_portfolio_history_management",
-      "target": "websrc_utils_portfolio_observation_date",
+      "target": "websrc_utils_calendar_date",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -22773,7 +22773,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L120",
+      "source_location": "L121",
       "weight": 1.0
     },
     {
@@ -22784,7 +22784,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L158",
+      "source_location": "L170",
       "weight": 1.0
     },
     {
@@ -22795,7 +22795,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L174",
+      "source_location": "L186",
       "weight": 1.0
     },
     {
@@ -22806,7 +22806,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L203",
+      "source_location": "L215",
       "weight": 1.0
     },
     {
@@ -22817,7 +22817,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L229",
+      "source_location": "L241",
       "weight": 1.0
     },
     {
@@ -22828,7 +22828,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L268",
+      "source_location": "L280",
       "weight": 1.0
     },
     {
@@ -22839,7 +22839,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L278",
+      "source_location": "L290",
       "weight": 1.0
     },
     {
@@ -22850,7 +22850,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L317",
+      "source_location": "L329",
       "weight": 1.0
     },
     {
@@ -22861,7 +22861,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L327",
+      "source_location": "L339",
       "weight": 1.0
     },
     {
@@ -22872,7 +22872,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L335",
+      "source_location": "L347",
       "weight": 1.0
     },
     {
@@ -22883,7 +22883,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L350",
+      "source_location": "L362",
       "weight": 1.0
     },
     {
@@ -22894,7 +22894,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L374",
+      "source_location": "L386",
       "weight": 1.0
     },
     {
@@ -26308,6 +26308,28 @@
       "weight": 1.0
     },
     {
+      "source": "websrc_utils_calendar_date",
+      "target": "websrc_utils_calendar_date_getbrowserlocalcalendardate",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "websrc/utils/calendar-date.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_utils_calendar_date",
+      "target": "websrc_utils_calendar_date_calendardatetoutctimestamp",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "websrc/utils/calendar-date.ts",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
       "source": "websrc_utils_lang",
       "target": "websrc_utils_lang_assignatpathoptions",
       "relation": "contains",
@@ -26481,28 +26503,6 @@
       "confidence_score": 1.0,
       "source_file": "websrc/utils/lang.ts",
       "source_location": "L81",
-      "weight": 1.0
-    },
-    {
-      "source": "websrc_utils_portfolio_observation_date",
-      "target": "websrc_utils_portfolio_observation_date_getbrowserlocalcalendardate",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "websrc/utils/portfolio-observation-date.ts",
-      "source_location": "L12",
-      "weight": 1.0
-    },
-    {
-      "source": "websrc_utils_portfolio_observation_date",
-      "target": "websrc_utils_portfolio_observation_date_calendardatetoutctimestamp",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "websrc/utils/portfolio-observation-date.ts",
-      "source_location": "L27",
       "weight": 1.0
     },
     {
@@ -27063,7 +27063,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L284",
+      "source_location": "L296",
       "weight": 1.0
     },
     {
@@ -27074,7 +27074,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L294",
+      "source_location": "L306",
       "weight": 1.0
     },
     {
@@ -27085,7 +27085,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L311",
+      "source_location": "L323",
       "weight": 1.0
     },
     {
@@ -27492,7 +27492,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L158",
+      "source_location": "L170",
       "weight": 1.0
     },
     {
@@ -28564,5 +28564,5 @@
       "source_file": "websrc/components/portfolio-navigation.html"
     }
   ],
-  "built_at_commit": "1a4097265d4f5b96ce9cc1a5f1f1f1cea2c39235"
+  "built_at_commit": "b58ae2726d2bab7c9b62e9469cb9a0d50e384d8c"
 }
