@@ -7,8 +7,8 @@
  * changing persisted data.
  * Scenario 5 modifies a seeded observation, creates a second observation, and
  * verifies both browser state and PostgreSQL persistence, including the stored timestamp.
- * Scenario 17 verifies required observation dates, failed-save draft retention, UTC offsets,
- * daylight-saving transitions, responsive observation-header layout, and focus-driven expansion.
+ * Scenario 17 verifies required and unsupported observation dates, failed-save draft retention,
+ * UTC offsets, daylight-saving transitions, responsive observation-header layout, and focus-driven expansion.
  *
  * @author OpenCode
  * @author GPT-6 Sol
@@ -1576,6 +1576,78 @@ test.describe('portfolio allocation history management', () => {
     await expect(observationDate).toHaveValue(selectedDate);
     await expect(panel).toHaveClass(/\bshow\b/);
     await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  /** Rejects a browser-valid date outside the supported year format without submitting a stale timestamp.
+   *
+   * @author GPT-6 Sol
+   */
+  test('scenario 17.7: cancels an unsupported observation date and allows a corrected date', async ({
+    database,
+    page,
+  }) => {
+    const seededData = await seedPortfolioHistoryData(database);
+    await page.goto('/');
+    await expectRootShell(page);
+    await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+    await expectPortfolioHistoryManagement(page, seededData.portfolio);
+
+    const newObservationItem = page.locator('#portfolio-history-management-container-0');
+    const form = page.locator('#portfolio-history-management-form-0');
+    const dateInput = newObservationItem.getByLabel('Observation date');
+    const timestampInput = form.locator('input[name="observationTimestamp.timestamp"]');
+    const staleTimestamp = '2020-01-01T00:00:00.000Z';
+    const savePath = `/api/portfolio/${seededData.portfolio.id}/history`;
+    const saveRequests: Request[] = [];
+    const trackSaveRequest = (request: Request): void => {
+      if(request.method() === 'POST' && new URL(request.url()).pathname === savePath) {
+        saveRequests.push(request);
+      }
+    };
+    const failSave = async (route: Route): Promise<void> => {
+      await route.fulfill({ status: 400, contentType: 'application/json', body: '{}' });
+    };
+
+    await newObservationItem.getByRole('textbox', { name: 'Time tag' }).fill('E2E_UNSUPPORTED_DATE');
+    await timestampInput.evaluate((element, value) => {
+      (element as HTMLInputElement).value = value;
+    }, staleTimestamp);
+    await dateInput.evaluate(element => {
+      const input = element as HTMLInputElement;
+      input.value = '10000-01-01';
+      input.addEventListener('invalid', () => {
+        input.dataset.reportedValidationMessage = input.validationMessage;
+      });
+    });
+    await expect(dateInput).toHaveValue('10000-01-01');
+    expect(await dateInput.evaluate(element => (element as HTMLInputElement).checkValidity())).toBe(true);
+
+    page.on('request', trackSaveRequest);
+    try {
+      await page.route(`**${savePath}`, failSave);
+      await form.locator('tfoot button.btn-primary[type="submit"]').click();
+      await expect(dateInput).toHaveAttribute('data-reported-validation-message', 'Observation date is not valid.');
+      expect(saveRequests).toHaveLength(0);
+      await expect(timestampInput).toHaveValue(staleTimestamp);
+
+      await dateInput.fill('2026-04-20');
+      const failedSaveResponse = page.waitForResponse(response => {
+        return response.request().method() === 'POST' && new URL(response.url()).pathname === savePath;
+      });
+      await form.locator('tfoot button.btn-primary[type="submit"]').click();
+      expect((await failedSaveResponse).status()).toBe(400);
+      expect(saveRequests).toHaveLength(1);
+      const payload = JSON.parse(saveRequests[0].postData() ?? 'null') as {
+        observationTimestamp?: { timestamp?: string };
+      };
+      const expectedTimestamp = await page.evaluate(() => new Date('2026-04-20T00:00:00').toISOString());
+      expect(payload.observationTimestamp?.timestamp).toBe(expectedTimestamp);
+      await expect(timestampInput).toHaveValue(expectedTimestamp);
+      await expect(database.query('SELECT id FROM public.portfolio_allocation_obs_time')).resolves.toEqual([]);
+    } finally {
+      page.off('request', trackSaveRequest);
+      await page.unroute(`**${savePath}`, failSave);
+    }
   });
 });
 

@@ -1,17 +1,17 @@
 # Graph Report - web-static  (2026-10-18)
 
 ## Corpus Check
-- 88 files · ~38,504 words
+- 88 files · ~38,533 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 3 file(s) not represented in the graph (top: (none) 2, .scss 1)
 
 ## Summary
-- 742 nodes · 1689 edges · 47 communities (41 shown, 6 thin omitted)
+- 742 nodes · 1689 edges · 48 communities (42 shown, 6 thin omitted)
 - Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 83 edges (avg confidence: 0.84)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `1a409726`
+- Built from commit: `b58ae272`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -63,6 +63,7 @@
 - binding-dom-exclusive-display.ts
 - FormRowValueElements
 - alias
+- application/index.ts
 
 ## God Nodes (most connected - your core abstractions)
 1. `logger()` - 43 edges
@@ -77,6 +78,8 @@
 10. `AutocompleteControllerActions` - 13 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `setHierarchicalIdFromParentRow()` --calls--> `toInt()`  [EXTRACTED]
+  websrc/components/allocation-plan-management.ts → websrc/utils/lang.ts
 - `selectAssetTicker()` --calls--> `AssetRowController`  [EXTRACTED]
   websrc/components/asset-composed-columns-input/index.ts → websrc/components/asset-composed-columns-input/asset-row-controller.ts
 - `registerTransformResponseFunction()` --calls--> `logger()`  [EXTRACTED]
@@ -85,8 +88,6 @@
   root.html → websrc/pages/portfolio.html
 - `Portfolios Route Container` --references--> `Portfolio List Page`  [EXTRACTED]
   root.html → websrc/pages/portfolios.html
-- `FractalPlannedAllocationMultiChartDataSource` --inherits--> `MultiChartDataSource`  [EXTRACTED]
-  websrc/application/allocation-plan-chart.ts → websrc/infra/chart/chart-types.ts
 
 ## Import Cycles
 - 3-file cycle: `websrc/infra/htmx/index.ts -> websrc/infra/routing/index.ts -> websrc/infra/routing/binding-htmx-trigger-on-route.ts -> websrc/infra/htmx/index.ts`
@@ -95,7 +96,7 @@
 - **Portfolio HTMX Route Flow** — src_main_web_static_root_htmx_lazy_route_loading, src_main_web_static_websrc_pages_portfolios_portfolio_list_page, src_main_web_static_websrc_pages_portfolio_portfolio_detail_page [EXTRACTED 1.00]
 - **Portfolio Allocation User Interface Flow** — src_main_web_static_websrc_components_portfolio_navigation_portfolio_section_navigation, src_main_web_static_websrc_components_portfolio_history_portfolio_history_viewer, src_main_web_static_websrc_components_allocation_plan_allocation_plan_viewer, src_main_web_static_websrc_components_allocation_map_allocation_map, src_main_web_static_websrc_components_asset_composed_columns_input_asset_composed_columns_input [INFERRED 0.85]
 
-## Communities (47 total, 6 thin omitted)
+## Communities (48 total, 6 thin omitted)
 
 ### Community 0 - "routing/index.ts"
 Cohesion: 0.32
@@ -111,11 +112,11 @@ Nodes (25): APIErrorResponse, bindHTMXTransformResponseElement(), bindHTMXTransf
 
 ### Community 3 - "asset.ts"
 Cohesion: 0.09
-Nodes (32): api, APIError, Asset, ExternalAsset, AssetBeforeSwapEvent, AssetRequestEvent, addExternalAsset(), clearSearch() (+24 more)
+Nodes (33): api, APIError, Asset, ExternalAsset, AssetBeforeSwapEvent, AssetRequestEvent, addExternalAsset(), clearSearch() (+25 more)
 
 ### Community 4 - "handlebars-lang.ts"
 Cohesion: 0.07
-Nodes (51): handlebars, addPlannedAllocationRow(), setHierarchicalIdFromParentRow(), getNextPortfolioHistoryManagementIndex(), domJSONHelper(), registerHandlebarsDOMHelpers(), handlebarsFormatCurrency(), registerHandlebarsFormatHelper() (+43 more)
+Nodes (49): handlebars, addPlannedAllocationRow(), getNextPortfolioHistoryManagementIndex(), domJSONHelper(), registerHandlebarsDOMHelpers(), handlebarsFormatCurrency(), registerHandlebarsFormatHelper(), andHelper() (+41 more)
 
 ### Community 5 - "binding-financial-input.ts"
 Cohesion: 0.13
@@ -126,8 +127,8 @@ Cohesion: 0.12
 Nodes (29): ARIA_ACTIVE_DESCENDANT_ATTRIBUTE, ARIA_CONTROLS_ATTRIBUTE, ARIA_EXPANDED_ATTRIBUTE, ARIA_SELECTED_ATTRIBUTE, ASSET_LOOKUP_PENDING_ERROR_MESSAGE, ASSET_NOT_FOUND_ERROR_MESSAGE, ASSET_SEARCH_AUTOCOMPLETE_ATTRIBUTE, ASSET_SEARCH_INPUT_ATTRIBUTE (+21 more)
 
 ### Community 7 - "allocation-plan-management.ts"
-Cohesion: 0.11
-Nodes (15): htmx.org, allocationPlanManagement, AllocationPlanningHierarchicalFormEntry, FormRowHierarchicalStructure, getHierarchicalFieldForValidation(), mapFormRowHierarchicalStructure(), mapPlannedAllocationFormEntriesPerHierarchicalKey(), AssetComposedColumnsInput (+7 more)
+Cohesion: 0.13
+Nodes (10): htmx.org, AllocationPlanningHierarchicalFormEntry, FormRowHierarchicalStructure, getHierarchicalFieldForValidation(), mapFormRowHierarchicalStructure(), mapPlannedAllocationFormEntriesPerHierarchicalKey(), setHierarchicalIdFromParentRow(), Portfolio (+2 more)
 
 ### Community 8 - "chart-utils.ts"
 Cohesion: 0.15
@@ -230,8 +231,8 @@ Cohesion: 0.13
 Nodes (21): handleAssetRowSelectionChange(), handleNewObservationFieldFocus(), handleObservationAccordionTransition(), normalizePortfolioHistoryRow(), normalizePortfolioHistoryRowsWithin(), portfolioHistoryQuoteAction, setNewObservationTimestampFromDate(), showFocusedObservationPanel() (+13 more)
 
 ### Community 37 - "infra.ts"
-Cohesion: 0.17
-Nodes (11): chartjs-plugin-datalabels, Application, notifications, AfterRequestEventDetail, HtmxInfra, bootRouterDebouncing(), DOM_SETTLING_BEHAVIOR_EVENT_HANDLER(), GeneralErrorHandler (+3 more)
+Cohesion: 0.28
+Nodes (8): chartjs-plugin-datalabels, HtmxInfra, bootRouterDebouncing(), DOM_SETTLING_BEHAVIOR_EVENT_HANDLER(), GeneralErrorHandler, handleError(), Infra, setupGlobalErrorHandler()
 
 ### Community 38 - "notifications.ts"
 Cohesion: 0.16
@@ -260,6 +261,10 @@ Nodes (8): addDisplayOnRouteRemovalObserver(), bindDisplayOnRoute(), bindDisplay
 ### Community 44 - "binding-dom-exclusive-display.ts"
 Cohesion: 0.60
 Nodes (5): addDisplayObserver(), bindExclusiveDisplay(), bindExclusiveDisplayContainerInDescendants(), bindExclusiveDisplayInDescendants(), hideAllSiblings()
+
+### Community 47 - "application/index.ts"
+Cohesion: 0.18
+Nodes (9): Application, allocationPlanManagement, AssetComposedColumnsInput, notifications, portfolioHistoryManagement, AfterRequestEventDetail, AssetPage, websrc_pages_index_assetpage (+1 more)
 
 ## Knowledge Gaps
 - **130 isolated node(s):** `{ createProxyMiddleware }`, `fs`, `path`, `@eslint/js`, `@parcel/transformer-raw` (+125 more)

@@ -31,7 +31,7 @@ import { toInt } from "../utils/lang";
 import type { TemplateDelegate } from "handlebars";
 import notifications from "./notifications";
 import { NotificationType } from "../infra/infra-types";
-import { calendarDateToUtcTimestamp, getBrowserLocalCalendarDate } from "../utils/portfolio-observation-date";
+import { calendarDateToUtcTimestamp, getBrowserLocalCalendarDate } from "../utils/calendar-date";
 
 const PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER = "accordion-portfolio-history-management";
 const PORTFOLIO_ALLOCATION_MANAGEMENT_TBODY_PREFIX = "portfolio-history-management-form-tbody-";
@@ -116,6 +116,7 @@ function showFocusedObservationPanel(panel: HTMLElement): void {
 /** Supplies a new observation's timestamp from its selected browser-local date before form JSON encoding.
  *
  * @author GPT-6 Luna
+ * @author GPT-6 Sol
  */
 function setNewObservationTimestampFromDate(event: Event): void {
     const requestEvent = event as CustomEvent<RequestConfigEventDetail>;
@@ -146,9 +147,20 @@ function setNewObservationTimestampFromDate(event: Event): void {
         return;
     }
 
-    const timestamp = calendarDateToUtcTimestamp(dateInput.value);
-    timestampInput.value = timestamp;
-    request.formData.set(timestampInput.name, timestamp);
+    try {
+        const timestamp = calendarDateToUtcTimestamp(dateInput.value);
+        timestampInput.value = timestamp;
+        request.formData.set(timestampInput.name, timestamp);
+    } catch(error) {
+        if(!(error instanceof RangeError)) {
+            throw error;
+        }
+
+        event.preventDefault();
+        dateInput.setCustomValidity("Observation date is not valid.");
+        dateInput.reportValidity();
+        dateInput.setCustomValidity("");
+    }
 }
 
 /** Creates the row-scoped quote action before its first use in row normalization.
