@@ -41,40 +41,40 @@
             <h2 id="allocation-plan-management-trigger-{{allocationPlan.id}}"
                 class="accordion-header {{#unless allocationPlan.id}}allocation-plan-management-new-header{{/unless}}"
             >
-                <button class="accordion-button collapsed {{#unless allocationPlan.id}}allocation-plan-management-new-toggle{{/unless}}"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#allocation-plan-management-{{allocationPlan.id}}"
-                        aria-expanded="true"
-                        aria-controls="allocation-plan-management-{{allocationPlan.id}}"
-                >
-                    {{#if allocationPlan.id}}
-                        {{allocationPlan.name}}
-                    {{else}}
+                {{#unless allocationPlan.id}}
+                    <!-- Co-authored by: GPT-6 Luna and benizzio -->
+                    <span class="allocation-plan-management-new-fields" data-accordion-field-focus>
                         <input type="text"
                                placeholder="New allocation plan *"
                                aria-label="New allocation plan name"
                                autocomplete="off"
-                               class="form-control me-3"
+                               class="form-control allocation-plan-management-new-name"
                                oninput="allocationPlanManagement.handleInputAllocationPlanName(this, {{allocationPlan.id}})"
                                onkeyup="event.preventDefault()"
                                maxlength="100"
                         />
-                    {{/if}}
-                </button>
-                {{#unless allocationPlan.id}}
-                    <!-- Authored by: GPT-6 Luna -->
-                    <input id="allocation-plan-management-planned-date"
-                           type="date"
-                           name="plannedDate"
-                           form="allocation-plan-management-form-{{allocationPlan.id}}"
-                           aria-label="Planned date"
-                           autocomplete="off"
-                           class="form-control allocation-plan-management-new-date"
-                           value="{{allocationPlan.plannedDate}}"
-                           required
-                    />
+                        <input id="allocation-plan-management-planned-date"
+                               type="date"
+                               name="plannedDate"
+                               form="allocation-plan-management-form-{{allocationPlan.id}}"
+                               aria-label="Planned date"
+                               autocomplete="off"
+                               class="form-control allocation-plan-management-new-date"
+                               value="{{allocationPlan.plannedDate}}"
+                               required
+                        />
+                    </span>
                 {{/unless}}
+                <button class="accordion-button collapsed {{#unless allocationPlan.id}}w-auto flex-shrink-0 allocation-plan-management-new-toggle{{/unless}}"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#allocation-plan-management-{{allocationPlan.id}}"
+                        aria-expanded="false"
+                        aria-controls="allocation-plan-management-{{allocationPlan.id}}"
+                        {{#unless allocationPlan.id}}aria-label="New allocation plan details"{{/unless}}
+                >
+                    {{#if allocationPlan.id}}{{allocationPlan.name}}{{/if}}
+                </button>
             </h2>
 
             <div id="allocation-plan-management-{{allocationPlan.id}}"

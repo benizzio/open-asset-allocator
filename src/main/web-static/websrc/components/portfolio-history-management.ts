@@ -9,7 +9,6 @@
 
 import htmx from "htmx.org";
 import { BigNumber } from "bignumber.js";
-import { Collapse } from "bootstrap";
 import { AfterRequestEventDetail, HtmxInfra, RequestConfigEventDetail } from "../infra/htmx";
 import { ObservationTimestamp } from "../domain/portfolio-allocation";
 import Router from "../infra/routing";
@@ -37,81 +36,6 @@ const PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER = "accordion-portfolio-hi
 const PORTFOLIO_ALLOCATION_MANAGEMENT_TBODY_PREFIX = "portfolio-history-management-form-tbody-";
 const NEW_OBSERVATION_FORM_ID = `${ PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX }0`;
 const NEW_OBSERVATION_DATE_INPUT_ID = "portfolio-history-management-observation-date";
-const NEW_OBSERVATION_FIELDS_SELECTOR = ".portfolio-history-management-new-fields";
-const ACCORDION_ITEM_SELECTOR = ".accordion-item";
-const ACCORDION_COLLAPSE_SELECTOR = ".accordion-collapse";
-
-let pendingFocusedObservationPanel: HTMLElement | undefined;
-
-/** Opens the new-observation panel when one of its header fields receives focus.
- *
- * @author GPT-6 Luna
- */
-function handleNewObservationFieldFocus(event: FocusEvent): void {
-    if(!(event.target instanceof Element)) {
-        return;
-    }
-
-    const fields = event.target.closest<HTMLElement>(NEW_OBSERVATION_FIELDS_SELECTOR);
-    const panel = fields?.closest(ACCORDION_ITEM_SELECTOR)?.querySelector<HTMLElement>(ACCORDION_COLLAPSE_SELECTOR);
-
-    if(!panel) {
-        return;
-    }
-
-    pendingFocusedObservationPanel = panel;
-    showFocusedObservationPanel(panel);
-}
-
-/** Cancels a deferred open when focus leaves the new-observation fields.
- *
- * @author GPT-6 Luna
- */
-function handleNewObservationFieldBlur(event: FocusEvent): void {
-    const panel = pendingFocusedObservationPanel;
-    const fields = panel?.closest(ACCORDION_ITEM_SELECTOR)?.querySelector<HTMLElement>(NEW_OBSERVATION_FIELDS_SELECTOR);
-
-    if(!fields || !(event.relatedTarget instanceof Node) || !fields.contains(event.relatedTarget)) {
-        pendingFocusedObservationPanel = undefined;
-    }
-}
-
-/** Retries a deferred open after an accordion transition releases Bootstrap's collapse instance.
- *
- * @author GPT-6 Luna
- */
-function handleObservationAccordionTransition(): void {
-    if(pendingFocusedObservationPanel) {
-        showFocusedObservationPanel(pendingFocusedObservationPanel);
-    }
-}
-
-/** Shows the requested panel if focus remains within its header fields.
- *
- * @param panel - New-observation collapse panel requested by a field focus event.
- * @author GPT-6 Luna
- */
-function showFocusedObservationPanel(panel: HTMLElement): void {
-    const fields = panel.closest(ACCORDION_ITEM_SELECTOR)?.querySelector<HTMLElement>(NEW_OBSERVATION_FIELDS_SELECTOR);
-
-    if(!panel.isConnected || !fields?.contains(document.activeElement)) {
-        if(pendingFocusedObservationPanel === panel) {
-            pendingFocusedObservationPanel = undefined;
-        }
-
-        return;
-    }
-
-    if(panel.classList.contains("show")) {
-        if(pendingFocusedObservationPanel === panel) {
-            pendingFocusedObservationPanel = undefined;
-        }
-
-        return;
-    }
-
-    Collapse.getOrCreateInstance(panel, { toggle: false }).show();
-}
 
 /** Supplies a new observation's timestamp from its selected browser-local date before form JSON encoding.
  *
@@ -422,10 +346,6 @@ const portfolioHistoryManagement = {
         document.addEventListener(ASSET_ROW_SELECTION_CHANGE_EVENT, handleAssetRowSelectionChange);
         const managementContainer = document.getElementById(PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER);
         managementContainer?.addEventListener("htmx:configRequest", setNewObservationTimestampFromDate);
-        managementContainer?.addEventListener("focusin", handleNewObservationFieldFocus);
-        managementContainer?.addEventListener("focusout", handleNewObservationFieldBlur);
-        managementContainer?.addEventListener("shown.bs.collapse", handleObservationAccordionTransition);
-        managementContainer?.addEventListener("hidden.bs.collapse", handleObservationAccordionTransition);
 
         const newObservationDateInput = managementContainer?.querySelector<HTMLInputElement>(
             `#${ NEW_OBSERVATION_DATE_INPUT_ID }`,
