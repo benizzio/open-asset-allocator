@@ -9,7 +9,7 @@
 
 import htmx from "htmx.org";
 import { BigNumber } from "bignumber.js";
-import { AfterRequestEventDetail, HtmxInfra } from "../infra/htmx";
+import { AfterRequestEventDetail, HtmxInfra, RequestConfigEventDetail } from "../infra/htmx";
 import { ObservationTimestamp } from "../domain/portfolio-allocation";
 import Router from "../infra/routing";
 import {
@@ -30,9 +30,50 @@ import { toInt } from "../utils/lang";
 import type { TemplateDelegate } from "handlebars";
 import notifications from "./notifications";
 import { NotificationType } from "../infra/infra-types";
+import { calendarDateToUtcTimestamp, getBrowserLocalCalendarDate } from "../utils/portfolio-observation-date";
 
 const PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER = "accordion-portfolio-history-management";
 const PORTFOLIO_ALLOCATION_MANAGEMENT_TBODY_PREFIX = "portfolio-history-management-form-tbody-";
+const NEW_OBSERVATION_FORM_ID = `${ PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX }0`;
+const NEW_OBSERVATION_DATE_INPUT_ID = "portfolio-history-management-observation-date";
+
+/** Supplies a new observation's timestamp from its selected browser-local date before form JSON encoding.
+ *
+ * @author GPT-6 Luna
+ */
+function setNewObservationTimestampFromDate(event: Event): void {
+    const requestEvent = event as CustomEvent<RequestConfigEventDetail>;
+    const request = requestEvent.detail;
+
+    if(request.verb.toLowerCase() !== "post") {
+        return;
+    }
+
+    const form = request.elt instanceof HTMLFormElement ? request.elt : request.elt.closest("form");
+
+    if(!(form instanceof HTMLFormElement) || form.id !== NEW_OBSERVATION_FORM_ID) {
+        return;
+    }
+
+    const dateInput = document.getElementById(NEW_OBSERVATION_DATE_INPUT_ID);
+    const timestampInput = form.elements.namedItem("observationTimestamp.timestamp");
+
+    if(!(dateInput instanceof HTMLInputElement)
+        || !(timestampInput instanceof HTMLInputElement)
+        || !dateInput.value) {
+        event.preventDefault();
+
+        if(dateInput instanceof HTMLInputElement) {
+            dateInput.reportValidity();
+        }
+
+        return;
+    }
+
+    const timestamp = calendarDateToUtcTimestamp(dateInput.value);
+    timestampInput.value = timestamp;
+    request.formData.set(timestampInput.name, timestamp);
+}
 
 /** Creates the row-scoped quote action before its first use in row normalization.
  *
@@ -291,7 +332,16 @@ const portfolioHistoryManagement = {
 
         // Repeated init calls use the same callback, so the document keeps one delegated listener.
         document.addEventListener(ASSET_ROW_SELECTION_CHANGE_EVENT, handleAssetRowSelectionChange);
+        document.addEventListener("htmx:configRequest", setNewObservationTimestampFromDate);
         const managementContainer = document.getElementById(PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER);
+
+        const newObservationDateInput = managementContainer?.querySelector<HTMLInputElement>(
+            `#${ NEW_OBSERVATION_DATE_INPUT_ID }`,
+        );
+
+        if(newObservationDateInput && !newObservationDateInput.value) {
+            newObservationDateInput.value = getBrowserLocalCalendarDate();
+        }
 
         managementContainer
             ?.querySelectorAll<HTMLTableRowElement>(`tr[id^="${ PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX }"]`)

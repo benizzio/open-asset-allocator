@@ -132,7 +132,10 @@ test.describe('scenario 16: external asset quote action and submission contract'
 
     const newObservationItem = page.locator('#portfolio-history-management-container-0');
     const timeTagInput = newObservationItem.getByRole('textbox', { name: 'Time tag' });
+    const observationDateInput = newObservationItem.getByLabel('Observation date');
     await timeTagInput.fill(EXTERNAL_QUOTE_TIME_TAG);
+    const selectedDate = await observationDateInput.inputValue();
+    const expectedTimestamp = await localMidnightTimestamp(page, selectedDate);
     await newObservationItem.locator('#portfolio-history-management-trigger-0 > button').click();
 
     const form = page.locator('#portfolio-history-management-form-0');
@@ -277,8 +280,10 @@ test.describe('scenario 16: external asset quote action and submission contract'
     const saveResponse = await saveResponsePromise;
     expect(saveResponse.status()).toBe(204);
     const savePayload = JSON.parse(saveRequest.postData() ?? 'null') as {
+      observationTimestamp?: { timestamp?: string };
       allocations?: Array<{ externalAsset?: unknown }>;
     };
+    expect(savePayload.observationTimestamp?.timestamp).toBe(expectedTimestamp);
     expect(savePayload.allocations).toHaveLength(1);
     expect(savePayload.allocations?.[0]?.externalAsset).toEqual(firstExternalAsset);
 
@@ -1392,6 +1397,31 @@ async function expectPortfolioHistoryManagement(
   await expect(newObservationItem.getByRole('button')).toHaveClass(/collapsed/);
   await expect(newObservationItem.getByRole('textbox', { name: 'Time tag' }))
     .toBeVisible();
+  const observationDateInput = newObservationItem.getByLabel('Observation date');
+  await expect(observationDateInput).toHaveAttribute('required', '');
+  await expect(observationDateInput).toHaveAttribute('form', 'portfolio-history-management-form-0');
+  await expect(observationDateInput).toHaveValue(await browserLocalCalendarDate(page));
+}
+
+/** Returns the browser's current calendar date in its configured local timezone.
+ *
+ * @author GPT-6 Luna
+ */
+async function browserLocalCalendarDate(page: Page): Promise<string> {
+  return page.evaluate(() => {
+    const today = new Date();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${today.getFullYear()}-${month}-${day}`;
+  });
+}
+
+/** Computes the expected UTC instant for browser-local midnight on a supplied date.
+ *
+ * @author GPT-6 Luna
+ */
+async function localMidnightTimestamp(page: Page, calendarDate: string): Promise<string> {
+  return page.evaluate(date => new Date(`${date}T00:00:00`).toISOString(), calendarDate);
 }
 
 /** Adds one allocation row to the new-observation form and waits for its financial inputs.

@@ -46,7 +46,7 @@
                 handlebars-template="template-portfolio-history-management-form-tbody"
                 hx-get="/api/portfolio/:portfolioId/history?observationTimestampId={{id}}"
             >
-            <button class="accordion-button collapsed"
+            <button class="accordion-button collapsed {{#unless id}}w-auto flex-grow-1{{/unless}}"
                     type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#portfolio-history-management-{{id}}"
@@ -67,6 +67,16 @@
                     />
                 {{/if}}
             </button>
+            {{#unless id}}
+                <input id="portfolio-history-management-observation-date"
+                       type="date"
+                       form="portfolio-history-management-form-{{id}}"
+                       aria-label="Observation date"
+                       autocomplete="off"
+                       class="form-control ms-3 w-auto flex-shrink-0"
+                       required
+                />
+            {{/unless}}
             </h2>
 
             <div id="portfolio-history-management-{{id}}"
@@ -83,6 +93,7 @@
                     >
 
                         <input type="hidden" name="observationTimestamp.id" value="{{id}}" />
+                        <input type="hidden" name="observationTimestamp.timestamp" value="{{timestamp}}" />
                         {{#unless id}}<input type="hidden" name="observationTimestamp.timeTag" /> {{/unless}}
 
                         <table class="table table-striped">
