@@ -5,10 +5,10 @@
  * form, verifies the rendered history chart, and checks PostgreSQL persistence.
  * Scenario 3.1 verifies the history routes with direct browser URLs without
  * changing persisted data.
+ * Scenarios 3.2–3.10 cover date validation and conversion, responsive layout,
+ * focus-driven accordion behavior, repeated field interactions, and behavior after refresh.
  * Scenario 5 modifies a seeded observation, creates a second observation, and
  * verifies both browser state and PostgreSQL persistence, including the stored timestamp.
- * Scenario 17 verifies required and unsupported observation dates, failed-save draft retention,
- * UTC offsets, daylight-saving transitions, responsive observation-header layout, and focus-driven expansion.
  *
  * @author OpenCode
  * @author GPT-6 Sol
@@ -16,6 +16,7 @@
  * @author benizzio
  */
 import type { Browser, Locator, Page, Request, Route } from '@playwright/test';
+import { exerciseAccordionFieldInteractions } from '../support/accordion-field-interactions';
 import { expect, test } from '../support/fixtures';
 import type { E2eDatabase } from '../support/database';
 import {
@@ -1312,7 +1313,7 @@ test.describe('portfolio allocation history management', () => {
     await expect(database.query('SELECT asset_id FROM public.portfolio_allocation_fact')).resolves.toEqual([]);
   });
 
-  test('scenario 17.1: requires an observation date and keeps the selected date after a failed save', async ({
+  test('scenario 3.2: requires an observation date and keeps the selected date after a failed save', async ({
     database,
     page,
   }) => {
@@ -1371,7 +1372,7 @@ test.describe('portfolio allocation history management', () => {
     }
   });
 
-  test.describe('scenario 17.2: serializes past and future dates in a positive UTC offset', () => {
+  test.describe('scenario 3.3: serializes past and future dates in a positive UTC offset', () => {
     test.use({ timezoneId: 'Asia/Tokyo' });
 
     test('persists each selected date at Tokyo local midnight', async ({ database, page }) => {
@@ -1402,7 +1403,7 @@ test.describe('portfolio allocation history management', () => {
     });
   });
 
-  test.describe('scenario 17.3: applies the selected date timezone offset across daylight-saving transitions', () => {
+  test.describe('scenario 3.4: applies the selected date timezone offset across daylight-saving transitions', () => {
     test.use({ timezoneId: 'America/Los_Angeles' });
 
     test('persists local midnight before and after both 2026 transitions', async ({ database, page }) => {
@@ -1434,7 +1435,7 @@ test.describe('portfolio allocation history management', () => {
     });
   });
 
-  test('scenario 17.4: keeps the observation fields beside the toggle until the header needs to wrap', async ({
+  test('scenario 3.5: keeps the observation fields beside the toggle until the header needs to wrap', async ({
     database,
     page,
   }) => {
@@ -1518,7 +1519,7 @@ test.describe('portfolio allocation history management', () => {
     await expect(accordionToggle).toHaveAttribute('aria-expanded', 'false');
   });
 
-  test('scenario 17.5: focusing either new-observation field opens the accordion item', async ({ database, page }) => {
+  test('scenario 3.6: focusing either new-observation field opens the accordion item', async ({ database, page }) => {
     const seededData = await seedPortfolioHistoryData(database);
     await page.goto('/');
     await expectRootShell(page);
@@ -1548,7 +1549,7 @@ test.describe('portfolio allocation history management', () => {
     await expect(toggle).toHaveAttribute('aria-expanded', 'true');
   });
 
-  test('scenario 17.6: keeps the item open while keyboard focus moves between header fields', async ({
+  test('scenario 3.7: keeps the item open while keyboard focus moves between header fields', async ({
     database,
     page,
   }) => {
@@ -1582,7 +1583,7 @@ test.describe('portfolio allocation history management', () => {
    *
    * @author GPT-6 Sol
    */
-  test('scenario 17.7: cancels an unsupported observation date and allows a corrected date', async ({
+  test('scenario 3.8: cancels an unsupported observation date and allows a corrected date', async ({
     database,
     page,
   }) => {
@@ -1648,6 +1649,192 @@ test.describe('portfolio allocation history management', () => {
       page.off('request', trackSaveRequest);
       await page.unroute(`**${savePath}`, failSave);
     }
+  });
+
+  /** Repeats pointer, text, date, and keyboard interaction without closing the new-observation panel.
+   * @author GPT-6 Luna
+   */
+  test('scenario 3.9: keeps the new-observation panel open through repeated field interactions', async ({
+    database,
+    page,
+  }) => {
+    const seededData = await seedPortfolioHistoryData(database);
+    await page.goto('/');
+    await expectRootShell(page);
+    await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+    await expectPortfolioHistoryManagement(page, seededData.portfolio);
+
+    const item = page.locator('#portfolio-history-management-container-0');
+    await exerciseAccordionFieldInteractions(page, {
+      dateInput: item.getByLabel('Observation date'),
+      expectedDate: '2026-04-20',
+      expectedText: 'E2E_OBS_FIELD_39',
+      panel: item.locator('#portfolio-history-management-0'),
+      textInput: item.getByRole('textbox', { name: 'Time tag' }),
+      toggle: item.getByRole('button', { name: 'New observation details' }),
+    });
+
+    await expect(database.query('SELECT id FROM public.portfolio_allocation_obs_time')).resolves.toEqual([]);
+    await expect(database.query('SELECT observation_time_id FROM public.portfolio_allocation_fact')).resolves.toEqual([]);
+  });
+
+  /** Creates an observation, checks PostgreSQL persistence, then repeats header interactions after refresh.
+   * @author GPT-6 Luna
+   */
+  test('scenario 3.10: preserves accordion interactions after successful observation refresh', async ({
+    database,
+    page,
+  }) => {
+    test.setTimeout(60_000);
+    const seededData = await seedPortfolioHistoryData(database);
+    await page.goto('/');
+    await expectRootShell(page);
+    await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+    await expectPortfolioHistoryManagement(page, seededData.portfolio);
+
+    const initialNewItem = page.locator('#portfolio-history-management-container-0');
+    const initialTimeTag = initialNewItem.getByRole('textbox', { name: 'Time tag' });
+    await initialTimeTag.focus();
+    await expect(initialNewItem.locator('#portfolio-history-management-0')).toHaveClass(/\bshow\b/);
+    const initialDate = initialNewItem.getByLabel('Observation date');
+    const savedDate = '2026-04-20';
+    await initialDate.fill(savedDate);
+
+    const initialForm = page.locator('#portfolio-history-management-form-0');
+    const initialFormHandle = await initialForm.elementHandle();
+    if(!initialFormHandle) {
+      throw new Error('The new-observation form was not rendered.');
+    }
+    const row = await addAllocationRow(page, initialForm, 0);
+    await fillExistingAssetAllocation(
+      page,
+      row,
+      seededData.assets[EXISTING_BOND_TICKER],
+      'BONDS',
+      '2',
+      '100',
+      '200.00',
+    );
+
+    const timeTag = 'E2E_OBS_AFTER_REFRESH';
+    await initialTimeTag.fill(timeTag);
+    const expectedTimestamp = await localMidnightTimestamp(page, savedDate);
+    const saveResponsePromise = page.waitForResponse((response) => {
+      return response.request().method() === 'POST'
+        && new URL(response.url()).pathname === `/api/portfolio/${seededData.portfolio.id}/history`;
+    });
+    await initialForm.locator('tfoot button.btn-primary[type="submit"]').click();
+    expect((await saveResponsePromise).status()).toBe(204);
+
+    const persistedObservation = await findObservationByTag(database, seededData.portfolio, timeTag);
+    expect(persistedObservation.observation_timestamp).toEqual(new Date(expectedTimestamp));
+    const persistedAllocations = await database.query<PersistedAllocation>(
+      `SELECT paf.asset_id,
+              COALESCE(paf.asset_market_price, 0)::numeric(18,8)::text AS asset_market_price,
+              COALESCE(paf.asset_quantity, 0)::numeric(18,8)::text AS asset_quantity,
+              paf.cash_reserve,
+              paf.class,
+              a.name,
+              paf.observation_time_id,
+              a.ticker,
+              paf.total_market_value::text AS total_market_value
+       FROM public.portfolio_allocation_fact paf
+       JOIN public.asset a ON a.id = paf.asset_id
+       WHERE paf.portfolio_id = $1
+         AND paf.observation_time_id = $2`,
+      [seededData.portfolio.id, persistedObservation.id],
+    );
+    expect(persistedAllocations).toEqual([{
+      asset_id: seededData.assets[EXISTING_BOND_TICKER].id,
+      asset_market_price: '100.00000000',
+      asset_quantity: '2.00000000',
+      cash_reserve: false,
+      class: 'BONDS',
+      name: EXISTING_BOND_NAME,
+      observation_time_id: persistedObservation.id,
+      ticker: EXISTING_BOND_TICKER,
+      total_market_value: '200',
+    }]);
+
+    await expectSuccessNotification(page);
+    await expectReloadedManagementItems(page, persistedObservation.id, timeTag);
+    await page.waitForLoadState('networkidle');
+    expect(await initialFormHandle.evaluate((element) => element.isConnected)).toBe(false);
+    await initialFormHandle.dispose();
+
+    const refreshedNewItem = page.locator('#portfolio-history-management-container-0');
+    const refreshedTimeTag = refreshedNewItem.getByRole('textbox', { name: 'Time tag' });
+    const refreshedForm = page.locator('#portfolio-history-management-form-0');
+    await expect(refreshedTimeTag).toHaveValue('');
+    await expect(refreshedNewItem.getByLabel('Observation date')).toHaveValue(await browserLocalCalendarDate(page));
+
+    await refreshedTimeTag.focus();
+    await expect(refreshedNewItem.locator('#portfolio-history-management-0')).toHaveClass(/\bshow\b/);
+    const draftRow = await addAllocationRow(page, refreshedForm, 0);
+    await fillExistingAssetDirectValueAllocation(
+      page,
+      draftRow,
+      seededData.assets[EXISTING_STOCK_TICKER],
+      'STOCKS',
+      '750.00',
+    );
+    await expect(draftRow.getByRole('textbox', { name: 'Total market value' })).toHaveValue('750.00');
+
+    const newObservationToggle = refreshedNewItem.getByRole('button', { name: 'New observation details' });
+    await newObservationToggle.click();
+    await expect(newObservationToggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(refreshedNewItem.locator('#portfolio-history-management-0')).not.toHaveClass(/\bshow\b/);
+
+    await exerciseAccordionFieldInteractions(page, {
+      dateInput: refreshedNewItem.getByLabel('Observation date'),
+      expectedDate: '2026-04-21',
+      expectedText: 'E2E_OBS_FIELD_310',
+      panel: refreshedNewItem.locator('#portfolio-history-management-0'),
+      textInput: refreshedTimeTag,
+      toggle: newObservationToggle,
+    });
+    await expect(refreshedForm.locator('[name="observationTimestamp.timeTag"]')).toHaveValue('E2E_OBS_FIELD_310');
+    await expect(draftRow.getByRole('textbox', { name: 'Total market value' })).toHaveValue('750.00');
+
+    const savedObservationItem = page.locator(`#portfolio-history-management-container-${persistedObservation.id}`);
+    const savedObservationToggle = savedObservationItem.getByRole('button', { name: timeTag, exact: true });
+    const savedObservationPanel = savedObservationItem.locator(`#portfolio-history-management-${persistedObservation.id}`);
+    const detailRequests: string[] = [];
+    const trackDetailRequest = (request: Request): void => {
+      const requestUrl = new URL(request.url());
+      if(request.method() === 'GET'
+        && requestUrl.pathname === `/api/portfolio/${seededData.portfolio.id}/history`
+        && requestUrl.searchParams.get('observationTimestampId') === String(persistedObservation.id)) {
+        detailRequests.push(request.url());
+      }
+    };
+    page.on('request', trackDetailRequest);
+    try {
+      const detailResponsePromise = page.waitForResponse((response) => {
+        const requestUrl = new URL(response.url());
+        return response.request().method() === 'GET'
+          && requestUrl.pathname === `/api/portfolio/${seededData.portfolio.id}/history`
+          && requestUrl.searchParams.get('observationTimestampId') === String(persistedObservation.id);
+      });
+      await savedObservationToggle.click();
+      expect((await detailResponsePromise).status()).toBe(200);
+      await expect(savedObservationPanel).toHaveClass(/\bshow\b/);
+      await expect(refreshedNewItem.locator('#portfolio-history-management-0')).not.toHaveClass(/\bshow\b/);
+      expect(detailRequests).toHaveLength(1);
+    } finally {
+      page.off('request', trackDetailRequest);
+    }
+
+    await exerciseAccordionFieldInteractions(page, {
+      dateInput: refreshedNewItem.getByLabel('Observation date'),
+      expectedDate: '2026-04-21',
+      expectedText: 'E2E_OBS_FIELD_310',
+      panel: refreshedNewItem.locator('#portfolio-history-management-0'),
+      textInput: refreshedTimeTag,
+      toggle: newObservationToggle,
+    });
+    await expect(savedObservationPanel).not.toHaveClass(/\bshow\b/);
+    await expect(draftRow.getByRole('textbox', { name: 'Total market value' })).toHaveValue('750.00');
   });
 });
 
@@ -2434,7 +2621,11 @@ async function expectReadOnlyObservationRows(
 }
 
 /** Verifies the management list refresh and collapsed new and persisted observation items. */
-async function expectReloadedManagementItems(page: Page, observationId: number): Promise<void> {
+async function expectReloadedManagementItems(
+  page: Page,
+  observationId: number,
+  observationTimeTag = OBSERVATION_TIME_TAG,
+): Promise<void> {
   const managementAccordion = page.locator('#accordion-portfolio-history-management');
   await expect(managementAccordion.locator(':scope > .accordion-item')).toHaveCount(2);
 
@@ -2444,7 +2635,7 @@ async function expectReloadedManagementItems(page: Page, observationId: number):
   await expect(newObservationItem.getByLabel('Observation date')).toHaveValue(await browserLocalCalendarDate(page));
 
   const observationItem = page.locator(`#portfolio-history-management-container-${observationId}`);
-  const observationButton = observationItem.getByRole('button', { name: OBSERVATION_TIME_TAG, exact: true });
+  const observationButton = observationItem.getByRole('button', { name: observationTimeTag, exact: true });
   await expect(observationButton).toBeVisible();
   await expect(observationButton).toHaveClass(/collapsed/);
   await expect(observationItem.locator(`#portfolio-history-management-${observationId}`)).not.toHaveClass(/\bshow\b/);
