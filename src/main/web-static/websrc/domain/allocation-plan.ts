@@ -1,3 +1,7 @@
+/** Allocation-plan domain and transport types used by management and viewing components.
+ * @author GPT-6 Luna
+ * @author benizzio
+ */
 import { BigNumber } from "bignumber.js";
 import { AllocationHierarchyLevel, AllocationPlanType } from "./allocation";
 import { Portfolio } from "./portfolio";
@@ -14,6 +18,8 @@ export type AllocationPlan = {
     id: number;
     name: string;
     type: AllocationPlanType;
+    /** Planned calendar date serialized as YYYY-MM-DD without timezone conversion. */
+    plannedDate: string;
     plannedExecutionDate?: Date,
     details: PlannedAllocation[],
 };
