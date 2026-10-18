@@ -68,15 +68,24 @@ func (aggregationMap portfolioAllocationsPerObservationTimestamp) getAggregatedM
 	return &totalMarketValue
 }
 
+// AllocationPlanIdentifierDTS is the plan-summary REST model returned by analysis-option reads.
+// Each plan includes its YYYY-MM-DD plannedDate, for example `{"id":1,"name":"Balanced","plannedDate":"2026-10-17"}`.
+//
+// Co-authored by: OpenCode and benizzio
 type AllocationPlanIdentifierDTS struct {
-	Id   int64  `json:"id"`
-	Name string `json:"name" validate:"max=100"`
+	Id          int64              `json:"id"`
+	Name        string             `json:"name" validate:"max=100"`
+	PlannedDate AllocationPlanDate `json:"plannedDate"`
 }
 
+// PortfolioObservationTimestampDTS carries the observation identifier, tag, and required timestamp.
+// Create and update requests must provide an RFC3339 timestamp, such as `2026-10-17T00:00:00Z`.
+//
+// Co-authored by: OpenCode and benizzio
 type PortfolioObservationTimestampDTS struct {
 	Id        langext.ParseableInt64 `json:"id"`
 	TimeTag   string                 `json:"timeTag" validate:"max=100"`
-	Timestamp time.Time              `json:"timestamp"`
+	Timestamp time.Time              `json:"timestamp" validate:"required"`
 }
 
 type AnalysisOptionsDTS struct {

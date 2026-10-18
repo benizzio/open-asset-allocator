@@ -113,6 +113,9 @@ func mapToPortfolioAllocationDTS(portfolioAllocation *domain.PortfolioAllocation
 	}
 }
 
+// buildHistoryDTS maps grouped history snapshots and sorts them by their observation timestamp.
+//
+// Co-authored by: OpenCode and benizzio
 func buildHistoryDTS(
 	portfolioAllocationsPerObservationTimestamp portfolioAllocationsPerObservationTimestamp,
 ) []*PortfolioSnapshotDTS {
@@ -172,6 +175,12 @@ func mapToObservationTimestampDTS(
 	return observationTimestampDTS
 }
 
+// MapToPortfolioObservationTimestamp converts a successfully bound and validated REST timestamp DTO
+// into the domain model.
+// For example, `model.MapToPortfolioObservationTimestamp(timestampDTS)` preserves the instant represented by
+// `2026-10-17T00:00:00+02:00` without reparsing the timestamp.
+//
+// Co-authored by: OpenCode and benizzio
 func MapToPortfolioObservationTimestamp(
 	observationTimestampDTS *PortfolioObservationTimestampDTS,
 ) *domain.PortfolioObservationTimestamp {
@@ -290,10 +299,14 @@ func mapToAllocationPlanIdentifierDTSs(plans []*domain.AllocationPlanIdentifier)
 	return plansDTS
 }
 
+// mapToAllocationPlanIdentifierDTS maps a domain plan identifier and date into the REST summary model.
+//
+// Co-authored by: OpenCode and benizzio
 func mapToAllocationPlanIdentifierDTS(plan *domain.AllocationPlanIdentifier) *AllocationPlanIdentifierDTS {
 	return &AllocationPlanIdentifierDTS{
-		Id:   plan.Id,
-		Name: plan.Name,
+		Id:          plan.Id,
+		Name:        plan.Name,
+		PlannedDate: newAllocationPlanDate(plan.PlannedDate),
 	}
 }
 

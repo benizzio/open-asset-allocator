@@ -102,12 +102,20 @@ func (validationData *levelSliceSizeValidationData) describeLevel(
 	return hierarchyLevels[validationData.levelIndex].Name + " = " + levelId
 }
 
+// validateAllocationPlan validates the required planned date and plan hierarchy before persistence.
+//
+// Co-authored by: OpenCode and benizzio
 // TODO validate plan before persisting
 // - hierarchical ids with asset match asset ticker from reference
 func (service *AllocationPlanDomService) validateAllocationPlan(
 	plan *domain.AllocationPlan,
 	allocationStructure *domain.AllocationStructure,
 ) []*infra.AppError {
+	if plan.PlannedDate.IsZero() {
+		return []*infra.AppError{
+			infra.BuildAppErrorFormattedUnconverted(service, "Planned date is required and must not be zero"),
+		}
+	}
 
 	var hierarchyLevels = allocationStructure.Hierarchy
 

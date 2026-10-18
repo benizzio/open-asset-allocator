@@ -2,6 +2,7 @@ package rest
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/infra"
 	gininfra "github.com/benizzio/open-asset-allocator/infra/gin"
+	"github.com/benizzio/open-asset-allocator/infra/validation"
 	"github.com/benizzio/open-asset-allocator/langext"
 )
 
@@ -56,6 +58,9 @@ func (controller *AllocationPlanRESTController) getAllocationPlans(context *gin.
 	context.JSON(http.StatusOK, allocationPlansDTS)
 }
 
+// postAssetAllocationPlan validates the required plan date and persists the supplied plan details.
+//
+// Co-authored by: OpenCode and benizzio
 func (controller *AllocationPlanRESTController) postAssetAllocationPlan(context *gin.Context) {
 
 	var portfolioIdParamValue = context.Param(portfolioIdParam)
@@ -67,6 +72,9 @@ func (controller *AllocationPlanRESTController) postAssetAllocationPlan(context 
 	var allocationPlanDTS model.AllocationPlanDTS
 	valid, err := gininfra.BindAndValidateJSONWithInvalidResponse(context, &allocationPlanDTS)
 	if gininfra.HandleAPIError(context, "Error binding allocation plan", err) || !valid {
+		return
+	}
+	if !validateAllocationPlanPlannedDate(context, &allocationPlanDTS) {
 		return
 	}
 
@@ -84,6 +92,31 @@ func (controller *AllocationPlanRESTController) postAssetAllocationPlan(context 
 	}
 
 	context.Status(http.StatusNoContent)
+}
+
+// validateAllocationPlanPlannedDate rejects dates that cannot represent a planned calendar date.
+//
+// Authored by: OpenCode
+func validateAllocationPlanPlannedDate(
+	context *gin.Context,
+	allocationPlanDTS *model.AllocationPlanDTS,
+) bool {
+	plannedDate, err := time.Parse(time.DateOnly, string(allocationPlanDTS.PlannedDate))
+	if err == nil && !plannedDate.IsZero() && plannedDate.Year() >= 1 {
+		return true
+	}
+
+	var validationErrorsBuilder = validation.BuildCustomValidationErrorsBuilder()
+	validationErrorsBuilder.CustomValidationError(
+		allocationPlanDTS,
+		"PlannedDate",
+		"custom",
+		"must be a valid non-zero YYYY-MM-DD date",
+		allocationPlanDTS.PlannedDate,
+	)
+	var validationErrors = validationErrorsBuilder.Build()
+	gininfra.RespondWithCustomValidationErrors(context, validationErrors, allocationPlanDTS)
+	return false
 }
 
 func BuildAllocationPlanRESTController(
