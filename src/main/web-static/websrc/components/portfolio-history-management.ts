@@ -418,10 +418,10 @@ const portfolioHistoryManagement = {
      */
     init() {
 
-        // Repeated init calls use the same callback, so the document keeps one delegated listener.
+        // Repeated init calls keep one delegated asset-row listener on the document.
         document.addEventListener(ASSET_ROW_SELECTION_CHANGE_EVENT, handleAssetRowSelectionChange);
-        document.addEventListener("htmx:configRequest", setNewObservationTimestampFromDate);
         const managementContainer = document.getElementById(PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER);
+        managementContainer?.addEventListener("htmx:configRequest", setNewObservationTimestampFromDate);
         managementContainer?.addEventListener("focusin", handleNewObservationFieldFocus);
         managementContainer?.addEventListener("focusout", handleNewObservationFieldBlur);
         managementContainer?.addEventListener("shown.bs.collapse", handleObservationAccordionTransition);
