@@ -124,6 +124,36 @@ func (controller *PortfolioAllocationRESTController) getAvailableHistoryObservat
 	context.JSON(http.StatusOK, availableTimestampsDTS)
 }
 
+// bindAndValidatePortfolioSnapshot binds a snapshot and responds to malformed RFC3339 timestamps.
+// Authored by: OpenCode
+func bindAndValidatePortfolioSnapshot(
+	context *gin.Context,
+	portfolioSnapshotDTS *model.PortfolioSnapshotDTS,
+) (bool, error) {
+	var valid, err = gininfra.BindAndValidateJSONWithInvalidResponse(context, portfolioSnapshotDTS)
+	if err != nil {
+		var timestampParseError *time.ParseError
+		if errors.As(err, &timestampParseError) {
+			var validationErrorsBuilder = validation.BuildCustomValidationErrorsBuilder()
+			validationErrorsBuilder.CustomValidationErrorFullNamespace(
+				portfolioSnapshotDTS,
+				"observationTimestamp.timestamp",
+				"custom",
+				"must be a valid RFC3339 timestamp",
+				timestampParseError.Value,
+			)
+			gininfra.RespondWithCustomValidationErrors(
+				context,
+				validationErrorsBuilder.Build(),
+				portfolioSnapshotDTS,
+			)
+			return false, nil
+		}
+	}
+
+	return valid, err
+}
+
 // postPortfolioAllocationHistory validates and persists a portfolio snapshot with the submitted observation instant.
 //
 // Co-authored by: OpenCode and benizzio
@@ -136,26 +166,7 @@ func (controller *PortfolioAllocationRESTController) postPortfolioAllocationHist
 	}
 
 	var portfolioSnapshotDTS model.PortfolioSnapshotDTS
-	valid, err := gininfra.BindAndValidateJSONWithInvalidResponse(context, &portfolioSnapshotDTS)
-	if err != nil {
-		var timestampParseError *time.ParseError
-		if errors.As(err, &timestampParseError) {
-			var validationErrorsBuilder = validation.BuildCustomValidationErrorsBuilder()
-			validationErrorsBuilder.CustomValidationErrorFullNamespace(
-				&portfolioSnapshotDTS,
-				"observationTimestamp.timestamp",
-				"custom",
-				"must be a valid RFC3339 timestamp",
-				timestampParseError.Value,
-			)
-			gininfra.RespondWithCustomValidationErrors(
-				context,
-				validationErrorsBuilder.Build(),
-				&portfolioSnapshotDTS,
-			)
-			return
-		}
-	}
+	valid, err := bindAndValidatePortfolioSnapshot(context, &portfolioSnapshotDTS)
 	if gininfra.HandleAPIError(context, bindPortfolioSnapshotErrorMessage, err) || !valid {
 		return
 	}
