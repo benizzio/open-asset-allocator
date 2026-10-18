@@ -8,7 +8,7 @@
  * Scenario 5 modifies a seeded observation, creates a second observation, and
  * verifies both browser state and PostgreSQL persistence, including the stored timestamp.
  * Scenario 17 verifies required observation dates, failed-save draft retention, UTC offsets,
- * daylight-saving transitions, refreshed date defaults, and responsive observation-header layout.
+ * daylight-saving transitions, responsive observation-header layout, and focus-driven expansion.
  *
  * @author OpenCode
  * @author GPT-6 Sol
@@ -850,7 +850,7 @@ test.describe('portfolio allocation history management', () => {
     const newObservationTimeTag = newObservationItem.getByRole('textbox', { name: 'Time tag' });
     await newObservationTimeTag.fill(OBSERVATION_TIME_TAG);
     await expect(newObservationTimeTag).toHaveValue(OBSERVATION_TIME_TAG);
-    await newObservationItem.getByRole('button').click();
+    await expect(newObservationItem.locator('#portfolio-history-management-0')).toHaveClass(/\bshow\b/);
 
     const newObservationForm = page.locator('#portfolio-history-management-form-0');
     await expect(newObservationForm).toBeVisible();
@@ -1167,7 +1167,7 @@ test.describe('portfolio allocation history management', () => {
     const newObservationTimeTag = newObservationItem.getByRole('textbox', { name: 'Time tag' });
     await newObservationTimeTag.fill(SECOND_OBSERVATION_TIME_TAG);
     await expect(newObservationTimeTag).toHaveValue(SECOND_OBSERVATION_TIME_TAG);
-    await newObservationItem.locator('#portfolio-history-management-trigger-0 > button').click();
+    await expect(newObservationItem.locator('#portfolio-history-management-0')).toHaveClass(/\bshow\b/);
 
     const newObservationForm = page.locator('#portfolio-history-management-form-0');
     await expect(newObservationForm).toBeVisible();
@@ -1329,10 +1329,8 @@ test.describe('portfolio allocation history management', () => {
 
     await timeTagInput.click();
     await timeTagInput.fill('E2E_OBS_FAILED_DATE');
-    await expect(accordionToggle).toHaveClass(/collapsed/);
+    await expect(accordionToggle).toHaveAttribute('aria-expanded', 'true');
     await observationDateInput.click();
-    await expect(accordionToggle).toHaveClass(/collapsed/);
-    await accordionToggle.click();
     await expect(accordionToggle).toHaveAttribute('aria-expanded', 'true');
 
     const form = page.locator('#portfolio-history-management-form-0');
@@ -1519,6 +1517,66 @@ test.describe('portfolio allocation history management', () => {
 
     await expect(accordionToggle).toHaveAttribute('aria-expanded', 'false');
   });
+
+  test('scenario 17.5: focusing either new-observation field opens the accordion item', async ({ database, page }) => {
+    const seededData = await seedPortfolioHistoryData(database);
+    await page.goto('/');
+    await expectRootShell(page);
+    await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+    await expectPortfolioHistoryManagement(page, seededData.portfolio);
+
+    const item = page.locator('#portfolio-history-management-container-0');
+    const timeTag = item.getByRole('textbox', { name: 'Time tag' });
+    const observationDate = item.getByLabel('Observation date');
+    const toggle = item.getByRole('button', { name: 'New observation details' });
+    const panel = item.locator('#portfolio-history-management-0');
+
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await timeTag.focus();
+    await expect(timeTag).toBeFocused();
+    await expect(panel).toHaveClass(/\bshow\b/);
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+
+    await toggle.click();
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+    await expect(panel).not.toHaveClass(/\bshow\b/);
+
+    await observationDate.focus();
+    await expect(observationDate).toBeFocused();
+    await expect(panel).toHaveClass(/\bshow\b/);
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  test('scenario 17.6: keeps the item open while keyboard focus moves between header fields', async ({
+    database,
+    page,
+  }) => {
+    const seededData = await seedPortfolioHistoryData(database);
+    await page.goto('/');
+    await expectRootShell(page);
+    await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+    await expectPortfolioHistoryManagement(page, seededData.portfolio);
+
+    const item = page.locator('#portfolio-history-management-container-0');
+    const timeTag = item.getByRole('textbox', { name: 'Time tag' });
+    const observationDate = item.getByLabel('Observation date');
+    const toggle = item.getByRole('button', { name: 'New observation details' });
+    const panel = item.locator('#portfolio-history-management-0');
+    const selectedDate = '2026-04-20';
+
+    await timeTag.focus();
+    await timeTag.fill('E2E_FOCUS_NAVIGATION');
+    await page.keyboard.press('Tab');
+    await expect(observationDate).toBeFocused();
+    await observationDate.fill(selectedDate);
+    await page.keyboard.press('Shift+Tab');
+    await expect(timeTag).toBeFocused();
+    await expect(timeTag).toHaveValue('E2E_FOCUS_NAVIGATION');
+    await expect(observationDate).toHaveValue(selectedDate);
+    await expect(panel).toHaveClass(/\bshow\b/);
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  });
 });
 
 /** Creates a minimal observation for one calendar date and verifies the request and PostgreSQL timestamp.
@@ -1537,7 +1595,7 @@ async function submitObservationForDate(
   const newObservationItem = page.locator('#portfolio-history-management-container-0');
   await newObservationItem.getByRole('textbox', { name: 'Time tag' }).fill(timeTag);
   await newObservationItem.getByLabel('Observation date').fill(calendarDate);
-  await newObservationItem.locator('#portfolio-history-management-trigger-0 > button').click();
+  await expect(newObservationItem.locator('#portfolio-history-management-0')).toHaveClass(/\bshow\b/);
 
   const form = page.locator('#portfolio-history-management-form-0');
   const row = await addAllocationRow(page, form, 0);
@@ -1635,7 +1693,6 @@ async function prepareAssetSearchAutocompleteRow(database: E2eDatabase, page: Pa
 
   const newObservationItem = page.locator('#portfolio-history-management-container-0');
   await newObservationItem.getByRole('textbox', { name: 'Time tag' }).fill('AUTOCOMPLETE');
-  await newObservationItem.locator('#portfolio-history-management-trigger-0 > button').click();
   const accordionBody = newObservationItem.locator('#portfolio-history-management-0');
   await expect(accordionBody).toHaveClass(/\bshow\b/);
   await expect(accordionBody).not.toHaveClass(/\bcollapsing\b/);
