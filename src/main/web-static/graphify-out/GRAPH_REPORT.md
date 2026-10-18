@@ -1,22 +1,24 @@
 # Graph Report - web-static  (2026-10-18)
 
 ## Corpus Check
-- cluster-only mode — file stats not available
+- 88 files · ~38,504 words
+- Verdict: corpus is large enough that graph structure adds value.
+- Unclassified: 3 file(s) not represented in the graph (top: (none) 2, .scss 1)
 
 ## Summary
-- 738 nodes · 1682 edges · 36 communities (32 shown, 4 thin omitted)
+- 742 nodes · 1689 edges · 47 communities (41 shown, 6 thin omitted)
 - Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 83 edges (avg confidence: 0.84)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `aa4d0dc1`
+- Built from commit: `1a409726`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- logger
+- routing/index.ts
 - allocation-plan.ts
-- portfolio-history-management.ts
+- htmx/index.ts
 - asset.ts
 - handlebars-lang.ts
 - binding-financial-input.ts
@@ -33,14 +35,14 @@
 - devDependencies
 - dependencies
 - portfolio-chart.ts
-- portfolio-allocation.ts
+- application/portfolio-analysis.ts
 - createPortfolioHistoryQuoteAction
 - Portfolio Detail Page
 - autocomplete-interactions.ts
 - compilerOptions
 - FractalPortfolioMultiChartDataSource
 - Asset Search Autocomplete
-- chart-contents.ts
+- allocation-plan-chart.ts
 - .proxyrc.js
 - scripts
 - AssetSelectionState
@@ -50,6 +52,17 @@
 - Hierarchical Divergence Analysis
 - Allocation Plan Management
 - Toast Notification
+- portfolio-history-management.ts
+- infra.ts
+- notifications.ts
+- binding-htmx-trigger-on-route.ts
+- logger
+- binding-dom-attribute-on-route.ts
+- binding-htmx-wait-for-ready.ts
+- binding-dom-display-on-route.ts
+- binding-dom-exclusive-display.ts
+- FormRowValueElements
+- alias
 
 ## God Nodes (most connected - your core abstractions)
 1. `logger()` - 43 edges
@@ -57,11 +70,11 @@
 3. `registerHandlebarsLangHelpers()` - 18 edges
 4. `createPortfolioHistoryQuoteAction()` - 16 edges
 5. `LogLevel` - 15 edges
-6. `AssetSearchAutocompleteController` - 14 edges
-7. `bignumber.js` - 14 edges
-8. `handlebars` - 14 edges
-9. `AutocompleteControllerActions` - 13 edges
-10. `FractalPortfolioMultiChartDataSource` - 13 edges
+6. `bignumber.js` - 14 edges
+7. `handlebars` - 14 edges
+8. `AssetSearchAutocompleteController` - 14 edges
+9. `FractalPortfolioMultiChartDataSource` - 13 edges
+10. `AutocompleteControllerActions` - 13 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `selectAssetTicker()` --calls--> `AssetRowController`  [EXTRACTED]
@@ -82,63 +95,63 @@
 - **Portfolio HTMX Route Flow** — src_main_web_static_root_htmx_lazy_route_loading, src_main_web_static_websrc_pages_portfolios_portfolio_list_page, src_main_web_static_websrc_pages_portfolio_portfolio_detail_page [EXTRACTED 1.00]
 - **Portfolio Allocation User Interface Flow** — src_main_web_static_websrc_components_portfolio_navigation_portfolio_section_navigation, src_main_web_static_websrc_components_portfolio_history_portfolio_history_viewer, src_main_web_static_websrc_components_allocation_plan_allocation_plan_viewer, src_main_web_static_websrc_components_allocation_map_allocation_map, src_main_web_static_websrc_components_asset_composed_columns_input_asset_composed_columns_input [INFERRED 0.85]
 
-## Communities (36 total, 4 thin omitted)
+## Communities (47 total, 6 thin omitted)
 
-### Community 0 - "logger"
-Cohesion: 0.07
-Nodes (67): navigo, bindPercentageInput(), bindPercentageInputElements(), bindPercentageInputsInDescendants(), configurePercentageInputAttributes(), createHiddenDecimalField(), initializePercentageDisplay(), syncPercentageToDecimal() (+59 more)
+### Community 0 - "routing/index.ts"
+Cohesion: 0.32
+Nodes (12): bindCLickNavigation(), bindKeypressNavigation(), bindNavigateToElements(), bindNavigateToInDescendants(), buildDestinationPath(), navigate(), bootNavigoRouter(), buildParameterizedDestinationPathFromCurrentLocationContext() (+4 more)
 
 ### Community 1 - "allocation-plan.ts"
-Cohesion: 0.07
-Nodes (51): htmx.org, chartDataSelectionEventHandler(), FractalPlannedAllocationMultiChartDataSource, getChartContent(), getSelectedDataKey(), interactionObserverCallback(), mapChildDatasets(), mapDataset() (+43 more)
+Cohesion: 0.08
+Nodes (45): FractalPlannedAllocationMultiChartDataSource, getSelectedDataKey(), interactionObserverCallback(), AllocationHierarchyLevel, AllocationHierarchyLevelDTO, AllocationPlanType, ASSET_ALLOCATION_PLAN, BALANCING_EXECUTION_PLAN (+37 more)
 
-### Community 2 - "portfolio-history-management.ts"
-Cohesion: 0.05
-Nodes (49): api, APIError, APIErrorResponse, Application, notifications, FormRowValueElements, handleAssetRowSelectionChange(), normalizePortfolioHistoryRow() (+41 more)
+### Community 2 - "htmx/index.ts"
+Cohesion: 0.12
+Nodes (25): APIErrorResponse, bindHTMXTransformResponseElement(), bindHTMXTransformResponseElements(), bindHTMXTransformResponseInDescendants(), extractPathRegExpForTransform(), htmxTransformResponse, registerTransformResponseFunction(), TRANSFORM_RESPONSE_FUNCTION_MAP (+17 more)
 
 ### Community 3 - "asset.ts"
-Cohesion: 0.07
-Nodes (40): bootstrap, BootstrapNotification, NOTIFICATION_TYPE_BOOTSTRAP_CLASSES, DomInfra, CustomEventHandler, Notification, NotificationType, ERROR (+32 more)
+Cohesion: 0.09
+Nodes (32): api, APIError, Asset, ExternalAsset, AssetBeforeSwapEvent, AssetRequestEvent, addExternalAsset(), clearSearch() (+24 more)
 
 ### Community 4 - "handlebars-lang.ts"
-Cohesion: 0.09
-Nodes (42): bignumber.js, addPlannedAllocationRow(), setHierarchicalIdFromParentRow(), getNextPortfolioHistoryManagementIndex(), andHelper(), arrayHelper(), comparatorHelper(), concatHelper() (+34 more)
+Cohesion: 0.07
+Nodes (51): handlebars, addPlannedAllocationRow(), setHierarchicalIdFromParentRow(), getNextPortfolioHistoryManagementIndex(), domJSONHelper(), registerHandlebarsDOMHelpers(), handlebarsFormatCurrency(), registerHandlebarsFormatHelper() (+43 more)
 
 ### Community 5 - "binding-financial-input.ts"
-Cohesion: 0.10
-Nodes (30): BootstrapClasses, BootstrapIconClasses, bindBootstrapValidationCleaning(), bindBootstrapValidationOnSubmit(), bindBootstrapValidationToDefaultForm(), bindFormsInDescendants(), addDisplayObserver(), bindExclusiveDisplay() (+22 more)
+Cohesion: 0.13
+Nodes (24): bindBootstrapValidationCleaning(), bindBootstrapValidationOnSubmit(), bindBootstrapValidationToDefaultForm(), bindFormsInDescendants(), bindFinancialInput(), bindFinancialInputElements(), bindFinancialInputsInDescendants(), configureFinancialInputAttributes() (+16 more)
 
 ### Community 6 - "asset-composed-columns-input/constants.ts"
-Cohesion: 0.13
-Nodes (27): ARIA_ACTIVE_DESCENDANT_ATTRIBUTE, ARIA_CONTROLS_ATTRIBUTE, ARIA_EXPANDED_ATTRIBUTE, ARIA_SELECTED_ATTRIBUTE, ASSET_LOOKUP_PENDING_ERROR_MESSAGE, ASSET_NOT_FOUND_ERROR_MESSAGE, ASSET_SEARCH_AUTOCOMPLETE_ATTRIBUTE, ASSET_SEARCH_INPUT_ATTRIBUTE (+19 more)
+Cohesion: 0.12
+Nodes (29): ARIA_ACTIVE_DESCENDANT_ATTRIBUTE, ARIA_CONTROLS_ATTRIBUTE, ARIA_EXPANDED_ATTRIBUTE, ARIA_SELECTED_ATTRIBUTE, ASSET_LOOKUP_PENDING_ERROR_MESSAGE, ASSET_NOT_FOUND_ERROR_MESSAGE, ASSET_SEARCH_AUTOCOMPLETE_ATTRIBUTE, ASSET_SEARCH_INPUT_ATTRIBUTE (+21 more)
 
 ### Community 7 - "allocation-plan-management.ts"
-Cohesion: 0.10
-Nodes (15): allocationPlanManagement, AllocationPlanningHierarchicalFormEntry, FormRowHierarchicalStructure, getHierarchicalFieldForValidation(), mapFormRowHierarchicalStructure(), mapPlannedAllocationFormEntriesPerHierarchicalKey(), AssetComposedColumnsInput, portfolioHistoryManagement (+7 more)
+Cohesion: 0.11
+Nodes (15): htmx.org, allocationPlanManagement, AllocationPlanningHierarchicalFormEntry, FormRowHierarchicalStructure, getHierarchicalFieldForValidation(), mapFormRowHierarchicalStructure(), mapPlannedAllocationFormEntriesPerHierarchicalKey(), AssetComposedColumnsInput (+7 more)
 
 ### Community 8 - "chart-utils.ts"
-Cohesion: 0.13
-Nodes (18): chartjs-plugin-datalabels, chroma-js, patternomaly, buildChartInteractions(), buildChartOptions(), getPieDoughnutChartOptions(), PIE_DOUGHNUT_CHART_OPTIONS, ChartInteraction (+10 more)
+Cohesion: 0.15
+Nodes (16): bignumber.js, buildChartInteractions(), buildChartOptions(), getPieDoughnutChartOptions(), PIE_DOUGHNUT_CHART_OPTIONS, ChartInteraction, ChartInteractions, UNIDIMENSIONAL_DATASET_SUM_FIELD (+8 more)
 
 ### Community 9 - "dom-utils.ts"
-Cohesion: 0.14
-Nodes (14): handlebars, addRemoveObserver(), contextDataCache, DomUtils, ensureSharedObserver(), getCacheableContextData(), observedElements, domJSONHelper() (+6 more)
+Cohesion: 0.28
+Nodes (5): addRemoveObserver(), contextDataCache, ensureSharedObserver(), getCacheableContextData(), observedElements
 
 ### Community 10 - "package.json"
 Cohesion: 0.11
-Nodes (20): alias, bignumber.js, bootstrap-icons, bootswatch, eslint, @eslint/js, eslint-plugin-sonarjs, globals (+12 more)
+Nodes (20): bootstrap-icons, bootswatch, chroma-js, eslint, @eslint/js, eslint-plugin-sonarjs, globals, htmx-ext-client-side-templates (+12 more)
 
 ### Community 12 - "AssetSearchAutocompleteController"
 Cohesion: 0.17
 Nodes (8): AssetSearchAutocompleteController, loadDatalists(), bindOutsidePointerDismissal(), clearOutsidePointerDismissal(), clearPendingOutsidePointer(), AssetSearchAutocompleteOption, AssetSearchAutocompleteState, AssetTickerSelectionHandler
 
 ### Community 13 - "asset-composed-columns-input/index.ts"
-Cohesion: 0.13
-Nodes (17): ASSET_ID_INPUT_SELECTOR, ASSET_NAME_INPUT_SELECTOR, UNABLE_TO_RESOLVE_ASSET_ROW_ERROR, bindAssetFormValidationGuards(), validateAssetRowForPost(), validateAssetRowsForPost(), autocompleteController, selectAssetTicker() (+9 more)
+Cohesion: 0.15
+Nodes (15): ASSET_ID_INPUT_SELECTOR, ASSET_NAME_INPUT_SELECTOR, UNABLE_TO_RESOLVE_ASSET_ROW_ERROR, bindAssetFormValidationGuards(), validateAssetRowForPost(), validateAssetRowsForPost(), autocompleteController, selectAssetTicker() (+7 more)
 
 ### Community 14 - "chart.ts"
-Cohesion: 0.21
-Nodes (13): chartContentRepo, getChartContent(), getChartContentFromChart(), loadChart(), CHART_ATTRIBUTE, CHART_OPTIONS_JSON_ELEMENT_ID, ChartContent, LocalChartOptions (+5 more)
+Cohesion: 0.19
+Nodes (15): chart, chartContentRepo, getChartContent(), getChartContentFromChart(), loadChart(), CHART_ATTRIBUTE, CHART_OPTIONS_JSON_ELEMENT_ID, ChartContent (+7 more)
 
 ### Community 15 - "MultiChartDataSource"
 Cohesion: 0.12
@@ -153,12 +166,12 @@ Cohesion: 0.14
 Nodes (14): dependencies, bignumber.js, bootstrap, bootstrap-icons, bootswatch, chart.js, chartjs-plugin-datalabels, chroma-js (+6 more)
 
 ### Community 18 - "portfolio-chart.ts"
-Cohesion: 0.26
-Nodes (11): chart.js, changeChartData(), chartDataSelectionEventHandler(), getChartContent(), interactionObserverCallback(), getAccumulatedAllocationsPerProperty(), mapChartData(), ReducedAllocation (+3 more)
-
-### Community 19 - "portfolio-allocation.ts"
 Cohesion: 0.20
-Nodes (10): getValueLabel(), registerPortfolioAnalysisHandlebarsHelpers(), ObservationTimestamp, PortfolioAllocation, PortfolioAllocationDTO, PortfolioSnapshot, PortfolioSnapshotDTO, DivergenceAnalysis (+2 more)
+Nodes (15): chart.js, generateDataKey(), getChartContent(), interactionObserverCallback(), getAccumulatedAllocationsPerProperty(), mapChartData(), ReducedAllocation, AppliedAllocationHierarchyLevel (+7 more)
+
+### Community 19 - "application/portfolio-analysis.ts"
+Cohesion: 0.38
+Nodes (5): getValueLabel(), registerPortfolioAnalysisHandlebarsHelpers(), ObservationTimestamp, DivergenceAnalysis, PotentialDivergence
 
 ### Community 20 - "createPortfolioHistoryQuoteAction"
 Cohesion: 0.33
@@ -177,16 +190,16 @@ Cohesion: 0.17
 Nodes (11): compilerOptions, esModuleInterop, isolatedModules, lib, module, moduleResolution, noEmit, skipLibCheck (+3 more)
 
 ### Community 24 - "FractalPortfolioMultiChartDataSource"
-Cohesion: 0.29
-Nodes (3): FractalPortfolioMultiChartDataSource, generateDataKey(), AppliedAllocationHierarchyLevel
+Cohesion: 0.27
+Nodes (3): changeChartData(), chartDataSelectionEventHandler(), FractalPortfolioMultiChartDataSource
 
 ### Community 25 - "Asset Search Autocomplete"
 Cohesion: 0.36
 Nodes (8): Recursive Planned Allocation Rows, Asset Composed Columns Input, Asset Search Autocomplete, Unnamed Asset Search Field (filters the complete ticker-and-name label), Named Committed Ticker Control (submits only the canonical ticker), Asset Search Datalist, Asset Search Option Label (ticker - asset name), Canonical Asset Ticker (datalist option value)
 
-### Community 26 - "chart-contents.ts"
-Cohesion: 0.29
-Nodes (7): allocationPlanChart, toChartContent(), toUnidimensionalMultiChartContent(), portfolioChart, ChartDataType, ASSET_ALLOCATION_PLAN_1D, PORTFOLIO_HISTORY_1D
+### Community 26 - "allocation-plan-chart.ts"
+Cohesion: 0.19
+Nodes (14): allocationPlanChart, chartDataSelectionEventHandler(), getChartContent(), mapChildDatasets(), mapDataset(), toChartDataMap(), toChartContent(), toUnidimensionalMultiChartContent() (+6 more)
 
 ### Community 27 - ".proxyrc.js"
 Cohesion: 0.29
@@ -212,25 +225,61 @@ Nodes (4): External Asset Quote Action, Observation Date Picker, Observation Edi
 Cohesion: 0.67
 Nodes (3): Frontend Module Architecture, HTMX-First API Calls, index.ts Module API Boundaries
 
+### Community 36 - "portfolio-history-management.ts"
+Cohesion: 0.13
+Nodes (21): handleAssetRowSelectionChange(), handleNewObservationFieldFocus(), handleObservationAccordionTransition(), normalizePortfolioHistoryRow(), normalizePortfolioHistoryRowsWithin(), portfolioHistoryQuoteAction, setNewObservationTimestampFromDate(), showFocusedObservationPanel() (+13 more)
+
+### Community 37 - "infra.ts"
+Cohesion: 0.17
+Nodes (11): chartjs-plugin-datalabels, Application, notifications, AfterRequestEventDetail, HtmxInfra, bootRouterDebouncing(), DOM_SETTLING_BEHAVIOR_EVENT_HANDLER(), GeneralErrorHandler (+3 more)
+
+### Community 38 - "notifications.ts"
+Cohesion: 0.16
+Nodes (10): bootstrap, BootstrapNotification, NOTIFICATION_TYPE_BOOTSTRAP_CLASSES, CustomEventHandler, Notification, NotificationType, ERROR, INFO (+2 more)
+
+### Community 39 - "binding-htmx-trigger-on-route.ts"
+Cohesion: 0.27
+Nodes (11): navigo, addDisableRouteRemovalObserver(), bindCleanOnExitRouteBehaviourOnElement(), bindHTMXTriggerOnRouteInDescendants(), bindRouteToHTMXEventOnElements(), bindRouteToHTMXTriggerOnElement(), CLEAN_ON_EXIT_HTMX_EVENT_HANDLERS, executeImmediatelyIfOnRoute() (+3 more)
+
+### Community 40 - "logger"
+Cohesion: 0.44
+Nodes (9): bindPercentageInput(), bindPercentageInputElements(), bindPercentageInputsInDescendants(), configurePercentageInputAttributes(), createHiddenDecimalField(), initializePercentageDisplay(), syncPercentageToDecimal(), syncPercentageToDecimalInContainer() (+1 more)
+
+### Community 41 - "binding-dom-attribute-on-route.ts"
+Cohesion: 0.40
+Nodes (9): addAttributes(), addRouterHooks(), bindAttributeOnRoute(), bindAttributeOnRouteElements(), bindAttributeOnRouteInDescendants(), executeImmediatelyIfOnRoute(), extractBindingData(), removeAttributes() (+1 more)
+
+### Community 42 - "binding-htmx-wait-for-ready.ts"
+Cohesion: 0.50
+Nodes (8): addReadyConditionToWaitingElement(), addReadyFlagObserverOnElement(), areAllConditionsReady(), bindConfirmGateOnElement(), bindHTMXWaitForReadyInDescendants(), bindWaitForReadyOnElements(), parseCommaSeparatedSet(), parseRequiredConditions()
+
+### Community 43 - "binding-dom-display-on-route.ts"
+Cohesion: 0.42
+Nodes (8): addDisplayOnRouteRemovalObserver(), bindDisplayOnRoute(), bindDisplayOnRouteElements(), bindDisplayOnRouteInDescendants(), changeElementDisplay(), configDisplayOnRouteHooks(), executeImmediatelyIfOnRoute(), navigoRouter
+
+### Community 44 - "binding-dom-exclusive-display.ts"
+Cohesion: 0.60
+Nodes (5): addDisplayObserver(), bindExclusiveDisplay(), bindExclusiveDisplayContainerInDescendants(), bindExclusiveDisplayInDescendants(), hideAllSiblings()
+
 ## Knowledge Gaps
-- **130 isolated node(s):** `GeneralErrorHandler`, `Level`, `Levels`, `AllocationHierarchyLevelDTO`, `PlannedAllocationDTO` (+125 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 175 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **4 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **130 isolated node(s):** `{ createProxyMiddleware }`, `fs`, `path`, `@eslint/js`, `@parcel/transformer-raw` (+125 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 176 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **6 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `bignumber.js` connect `handlebars-lang.ts` to `logger`, `allocation-plan.ts`, `portfolio-history-management.ts`, `allocation-plan-management.ts`, `chart-utils.ts`, `package.json`, `portfolio-allocation.ts`?**
+- **Why does `bignumber.js` connect `chart-utils.ts` to `allocation-plan.ts`, `portfolio-history-management.ts`, `handlebars-lang.ts`, `allocation-plan-management.ts`, `logger`, `package.json`, `portfolio-chart.ts`, `application/portfolio-analysis.ts`?**
   _High betweenness centrality (0.090) - this node is a cross-community bridge._
-- **Why does `htmx.org` connect `allocation-plan.ts` to `logger`, `portfolio-history-management.ts`, `asset.ts`, `allocation-plan-management.ts`, `package.json`, `asset-composed-columns-input/index.ts`?**
-  _High betweenness centrality (0.064) - this node is a cross-community bridge._
-- **Why does `handlebars` connect `dom-utils.ts` to `portfolio-history-management.ts`, `asset.ts`, `handlebars-lang.ts`, `allocation-plan-management.ts`, `package.json`, `chart.ts`, `portfolio-allocation.ts`?**
-  _High betweenness centrality (0.061) - this node is a cross-community bridge._
+- **Why does `htmx.org` connect `allocation-plan-management.ts` to `htmx/index.ts`, `asset.ts`, `portfolio-history-management.ts`, `binding-htmx-trigger-on-route.ts`, `package.json`, `asset-composed-columns-input/index.ts`?**
+  _High betweenness centrality (0.063) - this node is a cross-community bridge._
+- **Why does `handlebars` connect `handlebars-lang.ts` to `asset.ts`, `portfolio-history-management.ts`, `notifications.ts`, `allocation-plan-management.ts`, `package.json`, `chart.ts`, `application/portfolio-analysis.ts`?**
+  _High betweenness centrality (0.060) - this node is a cross-community bridge._
 - **Are the 16 inferred relationships involving `registerHandlebarsLangHelpers()` (e.g. with `andHelper()` and `arrayHelper()`) actually correct?**
   _`registerHandlebarsLangHelpers()` has 16 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `GeneralErrorHandler`, `Level`, `Levels` to the rest of the system?**
+- **What connects `{ createProxyMiddleware }`, `fs`, `path` to the rest of the system?**
   _130 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `logger` be split into smaller, more focused modules?**
-  _Cohesion score 0.06596035543403965 - nodes in this community are weakly interconnected._
 - **Should `allocation-plan.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.0745814307458143 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07731694828469023 - nodes in this community are weakly interconnected._
+- **Should `htmx/index.ts` be split into smaller, more focused modules?**
+  _Cohesion score 0.11724137931034483 - nodes in this community are weakly interconnected._

@@ -136,7 +136,7 @@ test.describe('scenario 16: external asset quote action and submission contract'
     await timeTagInput.fill(EXTERNAL_QUOTE_TIME_TAG);
     const selectedDate = await observationDateInput.inputValue();
     const expectedTimestamp = await localMidnightTimestamp(page, selectedDate);
-    await newObservationItem.locator('#portfolio-history-management-trigger-0 > button').click();
+    await expect(newObservationItem.locator('#portfolio-history-management-0')).toHaveClass(/\bshow\b/);
 
     const form = page.locator('#portfolio-history-management-form-0');
     const row = await addAllocationRow(page, form, 0);
@@ -1239,7 +1239,6 @@ async function openNewExternalQuoteForm(
 
   const newObservationItem = page.locator('#portfolio-history-management-container-0');
   await newObservationItem.getByRole('textbox', { name: 'Time tag' }).fill(timeTag);
-  await newObservationItem.locator('#portfolio-history-management-trigger-0 > button').click();
 
   const form = page.locator('#portfolio-history-management-form-0');
   await expect(form).toBeVisible();
