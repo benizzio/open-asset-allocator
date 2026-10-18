@@ -1758,7 +1758,6 @@ test.describe('portfolio allocation history management', () => {
 
     await expectSuccessNotification(page);
     await expectReloadedManagementItems(page, persistedObservation.id, timeTag);
-    await page.waitForLoadState('networkidle');
     expect(await initialFormHandle.evaluate((element) => element.isConnected)).toBe(false);
     await initialFormHandle.dispose();
 
