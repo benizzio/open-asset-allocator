@@ -4,6 +4,7 @@
  * @author benizzio
  * @author GPT-6.1 Sol
  * @author GPT-6 Sol
+ * @author GPT-6 Luna
  */
 import { PortfolioPage } from "../pages";
 import {
@@ -25,6 +26,7 @@ import htmx from "htmx.org";
 import Router from "../infra/routing";
 import notifications from "./notifications";
 import { NotificationType } from "../infra/infra-types";
+import { getBrowserLocalCalendarDate } from "../utils/calendar-date";
 
 type AllocationPlanningHierarchicalFormEntry = {
     occurrences: number;
@@ -45,6 +47,10 @@ const ALLOCATION_PLAN_MANAGEMENT_FORM_PREFIX = "allocation-plan-management-form-
 
 const ASSET_TICKER_FIELD_NAME_SUFFIX = "[asset][ticker]";
 
+/** Adds a new-plan draft initialized with the browser's local calendar date.
+ * @author GPT-6 Luna
+ * @author benizzio
+ */
 function mapForAllocationPlanManagement(originalServerResponseJSON: string): string {
 
     const portfolioDTO = PortfolioPage.getContextPortfolio();
@@ -64,6 +70,7 @@ function mapForAllocationPlanManagement(originalServerResponseJSON: string): str
             id: 0,
             name: "",
             type: AllocationPlanType.ASSET_ALLOCATION_PLAN,
+            plannedDate: getBrowserLocalCalendarDate(),
             details: [],
         },
         fractalHierarchicalPlan: {
