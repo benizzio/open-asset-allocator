@@ -121,6 +121,13 @@ type ExpectedManagedAllocationRow = ExpectedAllocationRow & {
 };
 
 test.describe('portfolio allocation plan management', () => {
+  /** Pins the new-plan default date before any scenario navigates to the application.
+   * @author GPT-6 Sol
+   */
+  test.beforeEach(async ({ page }) => {
+    await page.clock.install({ time: new Date(FIXED_ALLOCATION_PLAN_TIMESTAMP) });
+  });
+
   test('scenario 4: creates and explores a portfolio allocation plan', async ({ database, page }) => {
     test.setTimeout(60_000);
     const seededData = await seedAllocationPlanData(database);
@@ -160,7 +167,7 @@ test.describe('portfolio allocation plan management', () => {
     const newPlanItem = page.locator('#allocation-plan-management-container-0');
     const newPlanNameInput = newPlanItem.getByRole('textbox', { name: 'New allocation plan name' });
     const plannedDateInput = newPlanItem.getByLabel('Planned date');
-    await expect(plannedDateInput).toHaveValue(await browserLocalCalendarDate(page));
+    await expect(plannedDateInput).toHaveValue(FIXED_ALLOCATION_PLAN_DATE);
     await newPlanNameInput.fill(ALLOCATION_PLAN_NAME);
     await expect(newPlanItem.locator('#allocation-plan-management-form-0 input[name="name"]')).toHaveValue(
       ALLOCATION_PLAN_NAME,
@@ -303,7 +310,7 @@ test.describe('portfolio allocation plan management', () => {
       .toHaveValue(CREATED_ALLOCATION_PLAN_DATE);
     const refreshedNewPlanItem = page.locator('#allocation-plan-management-container-0');
     const refreshedNewPlanNameInput = refreshedNewPlanItem.getByRole('textbox', { name: 'New allocation plan name' });
-    await expect(refreshedNewPlanItem.getByLabel('Planned date')).toHaveValue(await browserLocalCalendarDate(page));
+    await expect(refreshedNewPlanItem.getByLabel('Planned date')).toHaveValue(FIXED_ALLOCATION_PLAN_DATE);
     await refreshedNewPlanNameInput.focus();
     await expect(refreshedNewPlanNameInput).toBeFocused();
     await expect(refreshedNewPlanItem.locator('#allocation-plan-management-0')).toHaveClass(/\bshow\b/);
@@ -332,6 +339,7 @@ test.describe('portfolio allocation plan management', () => {
   /** Retains chart lifecycle diagnostics when the management-to-viewing flow fails.
    * @author OpenCode
    * @author GPT-6 Astra
+   * @author GPT-6 Sol
    */
   chartDiagnosticTest('scenario 6: modifies an allocation plan and creates a second plan', async ({ browser, database, page }) => {
     test.setTimeout(60_000);
@@ -468,7 +476,7 @@ test.describe('portfolio allocation plan management', () => {
     const newPlanItem = page.locator('#allocation-plan-management-container-0');
     const newPlanNameInput = newPlanItem.getByRole('textbox', { name: 'New allocation plan name' });
     const secondPlannedDateInput = newPlanItem.getByLabel('Planned date');
-    await expect(secondPlannedDateInput).toHaveValue(await browserLocalCalendarDate(page));
+    await expect(secondPlannedDateInput).toHaveValue(FIXED_ALLOCATION_PLAN_DATE);
     await newPlanNameInput.fill(SECOND_ALLOCATION_PLAN_NAME);
     await secondPlannedDateInput.fill(SECOND_ALLOCATION_PLAN_DATE);
     await expect(newPlanItem.locator('#allocation-plan-management-form-0 input[name="name"]'))
@@ -1150,7 +1158,9 @@ async function expectAllocationPlan(
   await expect(managementButton.locator('.bi-database-gear')).toBeVisible();
 }
 
-/** Asserts the allocation-plan management shell and its collapsed plan items. */
+/** Asserts the allocation-plan management shell and its collapsed plan items.
+ * @author GPT-6 Sol
+ */
 async function expectAllocationPlanManagement(
   page: Page,
   portfolio: SeededPortfolio,
@@ -1179,7 +1189,7 @@ async function expectAllocationPlanManagement(
   await expect(newPlanToggle).toHaveClass(/collapsed/);
   await expect(newPlanToggle).toHaveAttribute('aria-expanded', 'false');
   await expect(newPlanItem.getByRole('textbox', { name: 'New allocation plan name' })).toBeVisible();
-  await expect(newPlanItem.getByLabel('Planned date')).toHaveValue(await browserLocalCalendarDate(page));
+  await expect(newPlanItem.getByLabel('Planned date')).toHaveValue(FIXED_ALLOCATION_PLAN_DATE);
 }
 
 /** Asserts the allocation-plan management table headers, row count, and icon controls. */
@@ -1204,7 +1214,9 @@ async function expectAllocationPlanManagementForm(
   await expect(saveButton.locator('.bi-save-fill')).toBeVisible();
 }
 
-/** Verifies the refreshed management accordion order and collapsed state. */
+/** Verifies the refreshed management accordion order and collapsed state.
+ * @author GPT-6 Sol
+ */
 async function expectAllocationPlanManagementOrder(
   page: Page,
   plans: readonly PersistedAllocationPlan[],
@@ -1217,7 +1229,7 @@ async function expectAllocationPlanManagementOrder(
   await expect(newPlanToggle).toHaveClass(/collapsed/);
   await expect(newPlanToggle).toHaveAttribute('aria-expanded', 'false');
   await expect(newPlanItem.getByRole('textbox', { name: 'New allocation plan name' })).toBeVisible();
-  await expect(newPlanItem.getByLabel('Planned date')).toHaveValue(await browserLocalCalendarDate(page));
+  await expect(newPlanItem.getByLabel('Planned date')).toHaveValue(FIXED_ALLOCATION_PLAN_DATE);
 
   for (const [index, plan] of plans.entries()) {
     const item = managementAccordion.locator(':scope > .accordion-item').nth(index + 1);
@@ -1674,7 +1686,9 @@ async function expectDraftAllocationRow(form: Locator, expected: ExpectedAllocat
   await expect(row.getByRole('textbox', { name: 'Asset name' })).toHaveValue(expected.assetName);
 }
 
-/** Verifies the refreshed management list and its collapsed new and saved items. */
+/** Verifies the refreshed management list and its collapsed new and saved items.
+ * @author GPT-6 Sol
+ */
 async function expectReloadedManagementItems(page: Page, allocationPlanId: number): Promise<void> {
   const managementAccordion = page.locator('#accordion-allocation-plan-management');
   await expect(managementAccordion.locator(':scope > .accordion-item')).toHaveCount(2);
@@ -1684,7 +1698,7 @@ async function expectReloadedManagementItems(page: Page, allocationPlanId: numbe
   await expect(newPlanToggle).toHaveClass(/collapsed/);
   await expect(newPlanToggle).toHaveAttribute('aria-expanded', 'false');
   await expect(newPlanItem.getByRole('textbox', { name: 'New allocation plan name' })).toBeVisible();
-  await expect(newPlanItem.getByLabel('Planned date')).toHaveValue(await browserLocalCalendarDate(page));
+  await expect(newPlanItem.getByLabel('Planned date')).toHaveValue(FIXED_ALLOCATION_PLAN_DATE);
 
   const savedPlanItem = page.locator(`#allocation-plan-management-container-${allocationPlanId}`);
   await expect(savedPlanItem.getByRole('button', { name: ALLOCATION_PLAN_NAME, exact: true })).toBeVisible();
@@ -2385,6 +2399,7 @@ async function clickAllocationPlanSlice(
  * The request is deliberately failed before persistence so this focused timezone check does not add a plan
  * to scenario 6's persisted-record assertions.
  * @author GPT-6 Luna
+ * @author GPT-6 Sol
  */
 async function verifyPlannedDateSubmissionInNegativeUtcOffset(
   browser: Browser,
@@ -2399,12 +2414,13 @@ async function verifyPlannedDateSubmissionInNegativeUtcOffset(
 
   try {
     const page = await context.newPage();
+    await page.clock.install({ time: new Date(FIXED_ALLOCATION_PLAN_TIMESTAMP) });
     await page.goto(managementUrl);
     await expectAllocationPlanManagement(page, portfolio, 2);
 
     const newPlanItem = page.locator('#allocation-plan-management-container-0');
     const dateInput = newPlanItem.getByLabel('Planned date');
-    await expect(dateInput).toHaveValue(await browserLocalCalendarDate(page));
+    await expect(dateInput).toHaveValue(FIXED_ALLOCATION_PLAN_DATE);
     await dateInput.fill(plannedDate);
     await newPlanItem.getByRole('textbox', { name: 'New allocation plan name' }).fill('E2E Timezone Probe');
     await expect(newPlanItem.locator('#allocation-plan-management-0')).toHaveClass(/\bshow\b/);
@@ -2443,19 +2459,6 @@ async function verifyPlannedDateSubmissionInNegativeUtcOffset(
     { planned_date: SECOND_ALLOCATION_PLAN_DATE },
     { planned_date: FIXED_ALLOCATION_PLAN_DATE },
   ]);
-}
-
-/** Returns the browser's current local calendar date in native date-input format.
- * @example `await browserLocalCalendarDate(page)` returns `YYYY-MM-DD` for that page's timezone.
- * @author GPT-6 Luna
- */
-async function browserLocalCalendarDate(page: Page): Promise<string> {
-  return page.evaluate(() => {
-    const currentDate = new Date();
-    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-    const day = String(currentDate.getDate()).padStart(2, '0');
-    return `${currentDate.getFullYear()}-${month}-${day}`;
-  });
 }
 
 /** Returns the visible label used to click a portfolio submenu option. */
