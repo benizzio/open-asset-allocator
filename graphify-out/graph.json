@@ -437,7 +437,7 @@
       "file_type": "code",
       "norm_label": "expectedallocationrow",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L107"
+      "source_location": "L108"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectedmanagedallocationrow",
@@ -450,7 +450,7 @@
       "file_type": "code",
       "norm_label": "expectedmanagedallocationrow",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L118"
+      "source_location": "L119"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_navigationoptionname",
@@ -463,7 +463,7 @@
       "file_type": "code",
       "norm_label": "navigationoptionname",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L59"
+      "source_location": "L60"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_persistedallocationplan",
@@ -476,7 +476,7 @@
       "file_type": "code",
       "norm_label": "persistedallocationplan",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L82"
+      "source_location": "L83"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_persistedplannedallocation",
@@ -489,7 +489,7 @@
       "file_type": "code",
       "norm_label": "persistedplannedallocation",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L92"
+      "source_location": "L93"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_persistedplannedallocationrecord",
@@ -502,7 +502,7 @@
       "file_type": "code",
       "norm_label": "persistedplannedallocationrecord",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L102"
+      "source_location": "L103"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_seededallocationplandata",
@@ -515,7 +515,7 @@
       "file_type": "code",
       "norm_label": "seededallocationplandata",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L77"
+      "source_location": "L78"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_seededasset",
@@ -528,7 +528,7 @@
       "file_type": "code",
       "norm_label": "seededasset",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L66"
+      "source_location": "L67"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_seededdata",
@@ -541,7 +541,7 @@
       "file_type": "code",
       "norm_label": "seededdata",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L72"
+      "source_location": "L73"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_seededportfolio",
@@ -554,7 +554,7 @@
       "file_type": "code",
       "norm_label": "seededportfolio",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L61"
+      "source_location": "L62"
     },
     {
       "id": "src_test_e2e_tests_portfolio_editing_e2e_spec_expectedportfolio",
@@ -1661,7 +1661,7 @@
       "file_type": "code",
       "norm_label": "clickallocationplanslice()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2352"
+      "source_location": "L2354"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_exerciseallocationplanchart",
@@ -1673,7 +1673,7 @@
       "file_type": "code",
       "norm_label": "exerciseallocationplanchart()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2233"
+      "source_location": "L2235"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_exercisefinalallocationplancharts",
@@ -1685,7 +1685,7 @@
       "file_type": "code",
       "norm_label": "exercisefinalallocationplancharts()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2303"
+      "source_location": "L2305"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_exerciseinitialallocationplanchart",
@@ -1697,7 +1697,7 @@
       "file_type": "code",
       "norm_label": "exerciseinitialallocationplanchart()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2276"
+      "source_location": "L2278"
     },
     {
       "id": "src_test_e2e_support_database_e2edatabase_query",
@@ -1769,7 +1769,7 @@
       "file_type": "code",
       "norm_label": "addassetallocationrow()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1413"
+      "source_location": "L1415"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_addclassallocationrow",
@@ -1781,7 +1781,7 @@
       "file_type": "code",
       "norm_label": "addclassallocationrow()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1404"
+      "source_location": "L1406"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_browserlocalcalendardate",
@@ -1793,7 +1793,7 @@
       "file_type": "code",
       "norm_label": "browserlocalcalendardate()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2450"
+      "source_location": "L2452"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectallocationplan",
@@ -1805,7 +1805,7 @@
       "file_type": "code",
       "norm_label": "expectallocationplan()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1129"
+      "source_location": "L1131"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectallocationplanmanagement",
@@ -1817,7 +1817,7 @@
       "file_type": "code",
       "norm_label": "expectallocationplanmanagement()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1152"
+      "source_location": "L1154"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectallocationplanmanagementform",
@@ -1829,7 +1829,7 @@
       "file_type": "code",
       "norm_label": "expectallocationplanmanagementform()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1184"
+      "source_location": "L1186"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectallocationplanmanagementorder",
@@ -1841,7 +1841,7 @@
       "file_type": "code",
       "norm_label": "expectallocationplanmanagementorder()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1206"
+      "source_location": "L1208"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectallocationplansuccessnotification",
@@ -1853,7 +1853,7 @@
       "file_type": "code",
       "norm_label": "expectallocationplansuccessnotification()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1693"
+      "source_location": "L1695"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectallocationplanviewingorder",
@@ -1865,7 +1865,7 @@
       "file_type": "code",
       "norm_label": "expectallocationplanviewingorder()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1231"
+      "source_location": "L1233"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectdatalistoptions",
@@ -1877,7 +1877,7 @@
       "file_type": "code",
       "norm_label": "expectdatalistoptions()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1256"
+      "source_location": "L1258"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectdraftallocationrow",
@@ -1889,7 +1889,7 @@
       "file_type": "code",
       "norm_label": "expectdraftallocationrow()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1649"
+      "source_location": "L1651"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectdraftallocationrows",
@@ -1901,7 +1901,7 @@
       "file_type": "code",
       "norm_label": "expectdraftallocationrows()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1599"
+      "source_location": "L1601"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectedplannedallocation",
@@ -1913,7 +1913,7 @@
       "file_type": "code",
       "norm_label": "expectedplannedallocation()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1974"
+      "source_location": "L1976"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectexistingasset",
@@ -1925,7 +1925,7 @@
       "file_type": "code",
       "norm_label": "expectexistingasset()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1561"
+      "source_location": "L1563"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectmanagedallocationplanform",
@@ -1937,7 +1937,7 @@
       "file_type": "code",
       "norm_label": "expectmanagedallocationplanform()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1335"
+      "source_location": "L1337"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectpercentagebinding",
@@ -1949,7 +1949,7 @@
       "file_type": "code",
       "norm_label": "expectpercentagebinding()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1434"
+      "source_location": "L1436"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectpersistedallocationplan",
@@ -1961,7 +1961,7 @@
       "file_type": "code",
       "norm_label": "expectpersistedallocationplan()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1792"
+      "source_location": "L1794"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectpersistedallocationplanmanagement",
@@ -1973,7 +1973,7 @@
       "file_type": "code",
       "norm_label": "expectpersistedallocationplanmanagement()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1996"
+      "source_location": "L1998"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectportfoliocontext",
@@ -1985,7 +1985,7 @@
       "file_type": "code",
       "norm_label": "expectportfoliocontext()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1087"
+      "source_location": "L1089"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectportfoliolist",
@@ -1997,7 +1997,7 @@
       "file_type": "code",
       "norm_label": "expectportfoliolist()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1059"
+      "source_location": "L1061"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectportfolionavigation",
@@ -2009,7 +2009,7 @@
       "file_type": "code",
       "norm_label": "expectportfolionavigation()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1097"
+      "source_location": "L1099"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectreloadedmanagementitems",
@@ -2021,7 +2021,7 @@
       "file_type": "code",
       "norm_label": "expectreloadedmanagementitems()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1676"
+      "source_location": "L1678"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectrenderedallocationplan",
@@ -2033,7 +2033,7 @@
       "file_type": "code",
       "norm_label": "expectrenderedallocationplan()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2211"
+      "source_location": "L2213"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectrootshell",
@@ -2045,7 +2045,7 @@
       "file_type": "code",
       "norm_label": "expectrootshell()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1053"
+      "source_location": "L1055"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectroute",
@@ -2057,7 +2057,7 @@
       "file_type": "code",
       "norm_label": "expectroute()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2478"
+      "source_location": "L2480"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectsavedallocationplanform",
@@ -2069,7 +2069,7 @@
       "file_type": "code",
       "norm_label": "expectsavedallocationplanform()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1704"
+      "source_location": "L1706"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectscenario6draftrows",
@@ -2081,7 +2081,7 @@
       "file_type": "code",
       "norm_label": "expectscenario6draftrows()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1386"
+      "source_location": "L1388"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_fillclassallocation",
@@ -2093,7 +2093,7 @@
       "file_type": "code",
       "norm_label": "fillclassallocation()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1442"
+      "source_location": "L1444"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_fillexistingassetallocation",
@@ -2105,7 +2105,7 @@
       "file_type": "code",
       "norm_label": "fillexistingassetallocation()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1485"
+      "source_location": "L1487"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_fillnewassetallocation",
@@ -2117,7 +2117,7 @@
       "file_type": "code",
       "norm_label": "fillnewassetallocation()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1457"
+      "source_location": "L1459"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_fillpercentage",
@@ -2129,7 +2129,7 @@
       "file_type": "code",
       "norm_label": "fillpercentage()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1573"
+      "source_location": "L1575"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_findallocationplanbyname",
@@ -2141,7 +2141,7 @@
       "file_type": "code",
       "norm_label": "findallocationplanbyname()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1957"
+      "source_location": "L1959"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_managedrow",
@@ -2153,7 +2153,7 @@
       "file_type": "code",
       "norm_label": "managedrow()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1278"
+      "source_location": "L1280"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_managedrowwithoutid",
@@ -2165,7 +2165,7 @@
       "file_type": "code",
       "norm_label": "managedrowwithoutid()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1311"
+      "source_location": "L1313"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_navigatebyclick",
@@ -2177,7 +2177,7 @@
       "file_type": "code",
       "norm_label": "navigatebyclick()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2469"
+      "source_location": "L2471"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_plannedallocationid",
@@ -2189,7 +2189,7 @@
       "file_type": "code",
       "norm_label": "plannedallocationid()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2197"
+      "source_location": "L2199"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_portfoliocardfor",
@@ -2201,7 +2201,7 @@
       "file_type": "code",
       "norm_label": "portfoliocardfor()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1082"
+      "source_location": "L1084"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_portfolionavigationlabel",
@@ -2213,7 +2213,7 @@
       "file_type": "code",
       "norm_label": "portfolionavigationlabel()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2460"
+      "source_location": "L2462"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_queryplannedallocations",
@@ -2225,7 +2225,7 @@
       "file_type": "code",
       "norm_label": "queryplannedallocations()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1030"
+      "source_location": "L1032"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_routepattern",
@@ -2237,7 +2237,7 @@
       "file_type": "code",
       "norm_label": "routepattern()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2483"
+      "source_location": "L2485"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_saveallocationplan",
@@ -2249,7 +2249,7 @@
       "file_type": "code",
       "norm_label": "saveallocationplan()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1934"
+      "source_location": "L1936"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_searchforasset",
@@ -2261,7 +2261,7 @@
       "file_type": "code",
       "norm_label": "searchforasset()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1547"
+      "source_location": "L1549"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_seedallocationplandata",
@@ -2273,7 +2273,7 @@
       "file_type": "code",
       "norm_label": "seedallocationplandata()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L931"
+      "source_location": "L933"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_seedallocationplanmanagementdata",
@@ -2285,7 +2285,7 @@
       "file_type": "code",
       "norm_label": "seedallocationplanmanagementdata()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L955"
+      "source_location": "L957"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_selectassetfromautocomplete",
@@ -2297,7 +2297,7 @@
       "file_type": "code",
       "norm_label": "selectassetfromautocomplete()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1512"
+      "source_location": "L1514"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_selectclassfromdatalist",
@@ -2309,7 +2309,7 @@
       "file_type": "code",
       "norm_label": "selectclassfromdatalist()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1268"
+      "source_location": "L1270"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_setcashreserve",
@@ -2321,7 +2321,7 @@
       "file_type": "code",
       "norm_label": "setcashreserve()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1588"
+      "source_location": "L1590"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_verifyplanneddatesubmissioninnegativeutcoffset",
@@ -2333,7 +2333,7 @@
       "file_type": "code",
       "norm_label": "verifyplanneddatesubmissioninnegativeutcoffset()",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2387"
+      "source_location": "L2389"
     },
     {
       "id": "src_test_e2e_tests_portfolio_editing_e2e_spec_expecteditportfolio",
@@ -4019,7 +4019,7 @@
       "file_type": "code",
       "norm_label": "default_allocation_structure",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L29"
+      "source_location": "L30"
     },
     {
       "id": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_portfolio_navigation_options",
@@ -4030,7 +4030,7 @@
       "file_type": "code",
       "norm_label": "portfolio_navigation_options",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L53"
+      "source_location": "L54"
     },
     {
       "id": "src_test_e2e_tests_portfolio_editing_e2e_spec",
@@ -12449,7 +12449,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2242",
+      "source_location": "L2244",
       "weight": 1.0
     },
     {
@@ -12461,7 +12461,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2282",
+      "source_location": "L2284",
       "weight": 1.0
     },
     {
@@ -12473,7 +12473,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2317",
+      "source_location": "L2319",
       "weight": 1.0
     },
     {
@@ -12485,7 +12485,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2367",
+      "source_location": "L2369",
       "weight": 1.0
     },
     {
@@ -12569,7 +12569,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2240",
+      "source_location": "L2242",
       "weight": 1.0
     },
     {
@@ -12629,7 +12629,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2238",
+      "source_location": "L2240",
       "weight": 1.0
     },
     {
@@ -12641,7 +12641,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2281",
+      "source_location": "L2283",
       "weight": 1.0
     },
     {
@@ -12653,7 +12653,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2312",
+      "source_location": "L2314",
       "weight": 1.0
     },
     {
@@ -12713,7 +12713,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2244",
+      "source_location": "L2246",
       "weight": 1.0
     },
     {
@@ -12725,7 +12725,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2284",
+      "source_location": "L2286",
       "weight": 1.0
     },
     {
@@ -12737,7 +12737,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2315",
+      "source_location": "L2317",
       "weight": 1.0
     },
     {
@@ -12809,7 +12809,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2237",
+      "source_location": "L2239",
       "weight": 1.0
     },
     {
@@ -12821,7 +12821,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2280",
+      "source_location": "L2282",
       "weight": 1.0
     },
     {
@@ -12833,7 +12833,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2311",
+      "source_location": "L2313",
       "weight": 1.0
     },
     {
@@ -12941,7 +12941,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2253",
+      "source_location": "L2255",
       "weight": 1.0
     },
     {
@@ -12953,7 +12953,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2287",
+      "source_location": "L2289",
       "weight": 1.0
     },
     {
@@ -12965,7 +12965,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2317",
+      "source_location": "L2319",
       "weight": 1.0
     },
     {
@@ -12977,7 +12977,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2374",
+      "source_location": "L2376",
       "weight": 1.0
     },
     {
@@ -13025,7 +13025,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2242",
+      "source_location": "L2244",
       "weight": 1.0
     },
     {
@@ -13037,7 +13037,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2282",
+      "source_location": "L2284",
       "weight": 1.0
     },
     {
@@ -13049,7 +13049,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2363",
+      "source_location": "L2365",
       "weight": 1.0
     },
     {
@@ -13805,7 +13805,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1429",
+      "source_location": "L1431",
       "weight": 1.0
     },
     {
@@ -13817,7 +13817,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1408",
+      "source_location": "L1410",
       "weight": 1.0
     },
     {
@@ -13829,7 +13829,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1180",
+      "source_location": "L1182",
       "weight": 1.0
     },
     {
@@ -13841,7 +13841,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1218",
+      "source_location": "L1220",
       "weight": 1.0
     },
     {
@@ -13853,7 +13853,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1685",
+      "source_location": "L1687",
       "weight": 1.0
     },
     {
@@ -13865,7 +13865,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2405",
+      "source_location": "L2407",
       "weight": 1.0
     },
     {
@@ -13877,36 +13877,12 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2313",
+      "source_location": "L2315",
       "weight": 1.0
     },
     {
       "source": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectallocationplan",
       "target": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectroute",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1134",
-      "weight": 1.0
-    },
-    {
-      "source": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectallocationplan",
-      "target": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectportfoliocontext",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1135",
-      "weight": 1.0
-    },
-    {
-      "source": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectallocationplan",
-      "target": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectportfolionavigation",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -13917,19 +13893,7 @@
       "weight": 1.0
     },
     {
-      "source": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectallocationplanmanagement",
-      "target": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectroute",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1157",
-      "weight": 1.0
-    },
-    {
-      "source": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectallocationplanmanagement",
+      "source": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectallocationplan",
       "target": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectportfoliocontext",
       "relation": "calls",
       "_origin": "ast",
@@ -13937,12 +13901,24 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1158",
+      "source_location": "L1137",
+      "weight": 1.0
+    },
+    {
+      "source": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectallocationplan",
+      "target": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectportfolionavigation",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
+      "source_location": "L1138",
       "weight": 1.0
     },
     {
       "source": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectallocationplanmanagement",
-      "target": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectportfolionavigation",
+      "target": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectroute",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -13954,6 +13930,30 @@
     },
     {
       "source": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectallocationplanmanagement",
+      "target": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectportfoliocontext",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
+      "source_location": "L1160",
+      "weight": 1.0
+    },
+    {
+      "source": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectallocationplanmanagement",
+      "target": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectportfolionavigation",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
+      "source_location": "L1161",
+      "weight": 1.0
+    },
+    {
+      "source": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_expectallocationplanmanagement",
       "target": "src_test_e2e_tests_portfolio_allocation_plan_management_e2e_spec_verifyplanneddatesubmissioninnegativeutcoffset",
       "relation": "calls",
       "_origin": "ast",
@@ -13961,7 +13961,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2401",
+      "source_location": "L2403",
       "weight": 1.0
     },
     {
@@ -13973,7 +13973,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1340",
+      "source_location": "L1342",
       "weight": 1.0
     },
     {
@@ -13985,7 +13985,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1705",
+      "source_location": "L1707",
       "weight": 1.0
     },
     {
@@ -13997,7 +13997,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1399",
+      "source_location": "L1401",
       "weight": 1.0
     },
     {
@@ -14009,7 +14009,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1644",
+      "source_location": "L1646",
       "weight": 1.0
     },
     {
@@ -14021,7 +14021,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2025",
+      "source_location": "L2027",
       "weight": 1.0
     },
     {
@@ -14033,7 +14033,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1497",
+      "source_location": "L1499",
       "weight": 1.0
     },
     {
@@ -14045,7 +14045,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2023",
+      "source_location": "L2025",
       "weight": 1.0
     },
     {
@@ -14057,7 +14057,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2027",
+      "source_location": "L2029",
       "weight": 1.0
     },
     {
@@ -14069,7 +14069,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2217",
+      "source_location": "L2219",
       "weight": 1.0
     },
     {
@@ -14081,7 +14081,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1060",
+      "source_location": "L1062",
       "weight": 1.0
     },
     {
@@ -14093,7 +14093,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1065",
+      "source_location": "L1067",
       "weight": 1.0
     },
     {
@@ -14105,7 +14105,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2218",
+      "source_location": "L2220",
       "weight": 1.0
     },
     {
@@ -14117,7 +14117,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2216",
+      "source_location": "L2218",
       "weight": 1.0
     },
     {
@@ -14129,7 +14129,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1054",
+      "source_location": "L1056",
       "weight": 1.0
     },
     {
@@ -14141,7 +14141,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1953",
+      "source_location": "L1955",
       "weight": 1.0
     },
     {
@@ -14153,7 +14153,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2479",
+      "source_location": "L2481",
       "weight": 1.0
     },
     {
@@ -14165,7 +14165,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1452",
+      "source_location": "L1454",
       "weight": 1.0
     },
     {
@@ -14177,7 +14177,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1496",
+      "source_location": "L1498",
       "weight": 1.0
     },
     {
@@ -14189,7 +14189,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1499",
+      "source_location": "L1501",
       "weight": 1.0
     },
     {
@@ -14201,7 +14201,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1500",
+      "source_location": "L1502",
       "weight": 1.0
     },
     {
@@ -14213,7 +14213,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1468",
+      "source_location": "L1470",
       "weight": 1.0
     },
     {
@@ -14225,7 +14225,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1476",
+      "source_location": "L1478",
       "weight": 1.0
     },
     {
@@ -14237,7 +14237,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1477",
+      "source_location": "L1479",
       "weight": 1.0
     },
     {
@@ -14249,7 +14249,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1321",
+      "source_location": "L1323",
       "weight": 1.0
     },
     {
@@ -14261,7 +14261,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2472",
+      "source_location": "L2474",
       "weight": 1.0
     },
     {
@@ -14273,7 +14273,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1024",
+      "source_location": "L1026",
       "weight": 1.0
     },
     {
@@ -15581,7 +15581,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1413",
+      "source_location": "L1415",
       "weight": 1.0
     },
     {
@@ -15593,7 +15593,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1404",
+      "source_location": "L1406",
       "weight": 1.0
     },
     {
@@ -15605,7 +15605,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2450",
+      "source_location": "L2452",
       "weight": 1.0
     },
     {
@@ -15617,7 +15617,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2233",
+      "source_location": "L2235",
       "weight": 1.0
     },
     {
@@ -15629,7 +15629,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2303",
+      "source_location": "L2305",
       "weight": 1.0
     },
     {
@@ -15641,7 +15641,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2276",
+      "source_location": "L2278",
       "weight": 1.0
     },
     {
@@ -15653,7 +15653,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1129",
+      "source_location": "L1131",
       "weight": 1.0
     },
     {
@@ -15665,7 +15665,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1152",
+      "source_location": "L1154",
       "weight": 1.0
     },
     {
@@ -15677,7 +15677,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1184",
+      "source_location": "L1186",
       "weight": 1.0
     },
     {
@@ -15689,7 +15689,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1206",
+      "source_location": "L1208",
       "weight": 1.0
     },
     {
@@ -15701,7 +15701,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1693",
+      "source_location": "L1695",
       "weight": 1.0
     },
     {
@@ -15713,7 +15713,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1231",
+      "source_location": "L1233",
       "weight": 1.0
     },
     {
@@ -15725,7 +15725,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1256",
+      "source_location": "L1258",
       "weight": 1.0
     },
     {
@@ -15737,7 +15737,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1599",
+      "source_location": "L1601",
       "weight": 1.0
     },
     {
@@ -15749,7 +15749,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1335",
+      "source_location": "L1337",
       "weight": 1.0
     },
     {
@@ -15761,7 +15761,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1792",
+      "source_location": "L1794",
       "weight": 1.0
     },
     {
@@ -15773,7 +15773,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1996",
+      "source_location": "L1998",
       "weight": 1.0
     },
     {
@@ -15785,7 +15785,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1087",
+      "source_location": "L1089",
       "weight": 1.0
     },
     {
@@ -15797,7 +15797,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1059",
+      "source_location": "L1061",
       "weight": 1.0
     },
     {
@@ -15809,7 +15809,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1097",
+      "source_location": "L1099",
       "weight": 1.0
     },
     {
@@ -15821,7 +15821,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1676",
+      "source_location": "L1678",
       "weight": 1.0
     },
     {
@@ -15833,7 +15833,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2211",
+      "source_location": "L2213",
       "weight": 1.0
     },
     {
@@ -15845,7 +15845,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1053",
+      "source_location": "L1055",
       "weight": 1.0
     },
     {
@@ -15857,7 +15857,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1704",
+      "source_location": "L1706",
       "weight": 1.0
     },
     {
@@ -15869,7 +15869,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1386",
+      "source_location": "L1388",
       "weight": 1.0
     },
     {
@@ -15881,7 +15881,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1442",
+      "source_location": "L1444",
       "weight": 1.0
     },
     {
@@ -15893,7 +15893,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1485",
+      "source_location": "L1487",
       "weight": 1.0
     },
     {
@@ -15905,7 +15905,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1457",
+      "source_location": "L1459",
       "weight": 1.0
     },
     {
@@ -15917,7 +15917,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1573",
+      "source_location": "L1575",
       "weight": 1.0
     },
     {
@@ -15929,7 +15929,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1957",
+      "source_location": "L1959",
       "weight": 1.0
     },
     {
@@ -15941,7 +15941,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1278",
+      "source_location": "L1280",
       "weight": 1.0
     },
     {
@@ -15953,7 +15953,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1311",
+      "source_location": "L1313",
       "weight": 1.0
     },
     {
@@ -15965,7 +15965,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2469",
+      "source_location": "L2471",
       "weight": 1.0
     },
     {
@@ -15977,7 +15977,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1082",
+      "source_location": "L1084",
       "weight": 1.0
     },
     {
@@ -15989,7 +15989,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2460",
+      "source_location": "L2462",
       "weight": 1.0
     },
     {
@@ -16001,7 +16001,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1934",
+      "source_location": "L1936",
       "weight": 1.0
     },
     {
@@ -16013,7 +16013,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L931",
+      "source_location": "L933",
       "weight": 1.0
     },
     {
@@ -16025,7 +16025,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L955",
+      "source_location": "L957",
       "weight": 1.0
     },
     {
@@ -16037,7 +16037,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1268",
+      "source_location": "L1270",
       "weight": 1.0
     },
     {
@@ -16049,7 +16049,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1588",
+      "source_location": "L1590",
       "weight": 1.0
     },
     {
@@ -16061,7 +16061,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2387",
+      "source_location": "L2389",
       "weight": 1.0
     },
     {
@@ -16757,7 +16757,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L17",
+      "source_location": "L18",
       "weight": 1.0
     },
     {
@@ -16817,7 +16817,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L18",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -16841,7 +16841,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L18",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -16865,7 +16865,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L18",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -16889,7 +16889,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L18",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -16913,7 +16913,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L18",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -16949,7 +16949,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L18",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -16973,7 +16973,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L18",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -16997,7 +16997,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L18",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -17153,7 +17153,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L15",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -17165,7 +17165,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L15",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -17177,7 +17177,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L16",
+      "source_location": "L17",
       "weight": 1.0
     },
     {
@@ -17583,7 +17583,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L18",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -17780,7 +17780,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L14",
+      "source_location": "L15",
       "type_only": true,
       "weight": 1.0
     },
@@ -17793,7 +17793,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L15",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -17805,7 +17805,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L16",
+      "source_location": "L17",
       "weight": 1.0
     },
     {
@@ -17817,7 +17817,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L17",
+      "source_location": "L18",
       "type_only": true,
       "weight": 1.0
     },
@@ -19982,7 +19982,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L29",
+      "source_location": "L30",
       "weight": 1.0
     },
     {
@@ -19993,7 +19993,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L53",
+      "source_location": "L54",
       "weight": 1.0
     },
     {
@@ -20004,7 +20004,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2352",
+      "source_location": "L2354",
       "weight": 1.0
     },
     {
@@ -20015,7 +20015,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1649",
+      "source_location": "L1651",
       "weight": 1.0
     },
     {
@@ -20026,7 +20026,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L107",
+      "source_location": "L108",
       "weight": 1.0
     },
     {
@@ -20037,7 +20037,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L118",
+      "source_location": "L119",
       "weight": 1.0
     },
     {
@@ -20048,7 +20048,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1974",
+      "source_location": "L1976",
       "weight": 1.0
     },
     {
@@ -20059,7 +20059,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1561",
+      "source_location": "L1563",
       "weight": 1.0
     },
     {
@@ -20070,7 +20070,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1434",
+      "source_location": "L1436",
       "weight": 1.0
     },
     {
@@ -20081,7 +20081,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2478",
+      "source_location": "L2480",
       "weight": 1.0
     },
     {
@@ -20092,7 +20092,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L59",
+      "source_location": "L60",
       "weight": 1.0
     },
     {
@@ -20103,7 +20103,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L82",
+      "source_location": "L83",
       "weight": 1.0
     },
     {
@@ -20114,7 +20114,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L92",
+      "source_location": "L93",
       "weight": 1.0
     },
     {
@@ -20125,7 +20125,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L102",
+      "source_location": "L103",
       "weight": 1.0
     },
     {
@@ -20136,7 +20136,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2197",
+      "source_location": "L2199",
       "weight": 1.0
     },
     {
@@ -20147,7 +20147,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1030",
+      "source_location": "L1032",
       "weight": 1.0
     },
     {
@@ -20158,7 +20158,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2483",
+      "source_location": "L2485",
       "weight": 1.0
     },
     {
@@ -20169,7 +20169,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1547",
+      "source_location": "L1549",
       "weight": 1.0
     },
     {
@@ -20180,7 +20180,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L77",
+      "source_location": "L78",
       "weight": 1.0
     },
     {
@@ -20191,7 +20191,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L66",
+      "source_location": "L67",
       "weight": 1.0
     },
     {
@@ -20202,7 +20202,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L72",
+      "source_location": "L73",
       "weight": 1.0
     },
     {
@@ -20213,7 +20213,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L61",
+      "source_location": "L62",
       "weight": 1.0
     },
     {
@@ -20224,7 +20224,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1512",
+      "source_location": "L1514",
       "weight": 1.0
     },
     {
@@ -22165,7 +22165,7 @@
       "confidence_score": 0.8,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1005",
+      "source_location": "L1007",
       "weight": 1.0
     },
     {
@@ -22177,7 +22177,7 @@
       "confidence_score": 0.8,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1034",
+      "source_location": "L1036",
       "weight": 1.0
     },
     {
@@ -22189,7 +22189,7 @@
       "confidence_score": 0.8,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L1918",
+      "source_location": "L1920",
       "weight": 1.0
     },
     {
@@ -22201,7 +22201,7 @@
       "confidence_score": 0.8,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2144",
+      "source_location": "L2146",
       "weight": 1.0
     },
     {
@@ -22213,7 +22213,7 @@
       "confidence_score": 0.8,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-plan-management.e2e.spec.ts",
-      "source_location": "L2434",
+      "source_location": "L2436",
       "weight": 1.0
     },
     {
@@ -25765,5 +25765,5 @@
       "source_file": "src/main/docker/docker-compose-e2e.yml"
     }
   ],
-  "built_at_commit": "fdadb686d15da6794e77012d6356495a840a17e9"
+  "built_at_commit": "84d7e0713231cefdf0eff2298fbfb1db219333e2"
 }

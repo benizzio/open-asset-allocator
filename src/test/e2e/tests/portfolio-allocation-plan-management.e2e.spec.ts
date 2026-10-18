@@ -10,6 +10,7 @@
  * @author OpenCode
  * @author GPT-6 Astra
  * @author GPT-6 Luna
+ * @author GPT-6 Sol
  */
 import type { Browser, Locator, Page, Request, Route } from '@playwright/test';
 import { expect, test } from '../support/fixtures';
@@ -185,6 +186,7 @@ test.describe('portfolio allocation plan management', () => {
     page.on('request', countInvalidDatePost);
     try {
       await newPlanForm.locator('tfoot button.btn-primary[type="button"]').click();
+      await page.waitForTimeout(250);
     } finally {
       page.off('request', countInvalidDatePost);
     }
