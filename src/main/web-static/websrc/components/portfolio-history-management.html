@@ -39,33 +39,44 @@
         <div id="portfolio-history-management-container-{{id}}" class="accordion-item">
 
             <h2 id="portfolio-history-management-trigger-{{id}}"
-                class="accordion-header"
+                class="accordion-header {{#unless id}}portfolio-history-management-new-header{{/unless}}"
                 hx-include="[name='portfolioId']"
                 hx-target="#portfolio-history-management-form-tbody-{{id}}"
                 hx-trigger="{{#if id}}click,{{/if}} reload-portfolio-history-management-observation"
                 handlebars-template="template-portfolio-history-management-form-tbody"
                 hx-get="/api/portfolio/:portfolioId/history?observationTimestampId={{id}}"
             >
-            <button class="accordion-button collapsed"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#portfolio-history-management-{{id}}"
-                    aria-expanded="true"
-                    aria-controls="portfolio-history-management-{{id}}"
-            >
-                {{#if id}}
-                    {{timeTag}}
-                {{else}}
+            {{#unless id}}
+                <!-- Co-authored by: GPT-6 Luna and benizzio -->
+                <span class="portfolio-history-management-new-fields">
                     <input type="text"
                            placeholder="New observation *"
                            aria-label="Time tag"
                            autocomplete="off"
-                           class="form-control me-3"
+                           class="form-control portfolio-history-management-new-time-tag"
                            oninput="maskTagInput(this); portfolioHistoryManagement.handleInputObservationTimeTag(this, {{id}})"
                            onkeyup="event.preventDefault()"
                            maxlength="100"
                     />
-                {{/if}}
+                    <input id="portfolio-history-management-observation-date"
+                           type="date"
+                           form="portfolio-history-management-form-{{id}}"
+                           aria-label="Observation date"
+                           autocomplete="off"
+                           class="form-control portfolio-history-management-new-date"
+                           required
+                    />
+                </span>
+            {{/unless}}
+            <button class="accordion-button collapsed {{#unless id}}w-auto flex-shrink-0 portfolio-history-management-new-toggle{{/unless}}"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#portfolio-history-management-{{id}}"
+                    aria-expanded="false"
+                    aria-controls="portfolio-history-management-{{id}}"
+                    {{#unless id}}aria-label="New observation details"{{/unless}}
+            >
+                {{#if id}}{{timeTag}}{{/if}}
             </button>
             </h2>
 
@@ -83,6 +94,7 @@
                     >
 
                         <input type="hidden" name="observationTimestamp.id" value="{{id}}" />
+                        <input type="hidden" name="observationTimestamp.timestamp" value="{{timestamp}}" />
                         {{#unless id}}<input type="hidden" name="observationTimestamp.timeTag" /> {{/unless}}
 
                         <table class="table table-striped">

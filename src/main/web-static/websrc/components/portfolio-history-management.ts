@@ -9,7 +9,8 @@
 
 import htmx from "htmx.org";
 import { BigNumber } from "bignumber.js";
-import { AfterRequestEventDetail, HtmxInfra } from "../infra/htmx";
+import { Collapse } from "bootstrap";
+import { AfterRequestEventDetail, HtmxInfra, RequestConfigEventDetail } from "../infra/htmx";
 import { ObservationTimestamp } from "../domain/portfolio-allocation";
 import Router from "../infra/routing";
 import {
@@ -30,9 +31,137 @@ import { toInt } from "../utils/lang";
 import type { TemplateDelegate } from "handlebars";
 import notifications from "./notifications";
 import { NotificationType } from "../infra/infra-types";
+import { calendarDateToUtcTimestamp, getBrowserLocalCalendarDate } from "../utils/calendar-date";
 
 const PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER = "accordion-portfolio-history-management";
 const PORTFOLIO_ALLOCATION_MANAGEMENT_TBODY_PREFIX = "portfolio-history-management-form-tbody-";
+const NEW_OBSERVATION_FORM_ID = `${ PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX }0`;
+const NEW_OBSERVATION_DATE_INPUT_ID = "portfolio-history-management-observation-date";
+const NEW_OBSERVATION_FIELDS_SELECTOR = ".portfolio-history-management-new-fields";
+const ACCORDION_ITEM_SELECTOR = ".accordion-item";
+const ACCORDION_COLLAPSE_SELECTOR = ".accordion-collapse";
+
+let pendingFocusedObservationPanel: HTMLElement | undefined;
+
+/** Opens the new-observation panel when one of its header fields receives focus.
+ *
+ * @author GPT-6 Luna
+ */
+function handleNewObservationFieldFocus(event: FocusEvent): void {
+    if(!(event.target instanceof Element)) {
+        return;
+    }
+
+    const fields = event.target.closest<HTMLElement>(NEW_OBSERVATION_FIELDS_SELECTOR);
+    const panel = fields?.closest(ACCORDION_ITEM_SELECTOR)?.querySelector<HTMLElement>(ACCORDION_COLLAPSE_SELECTOR);
+
+    if(!panel) {
+        return;
+    }
+
+    pendingFocusedObservationPanel = panel;
+    showFocusedObservationPanel(panel);
+}
+
+/** Cancels a deferred open when focus leaves the new-observation fields.
+ *
+ * @author GPT-6 Luna
+ */
+function handleNewObservationFieldBlur(event: FocusEvent): void {
+    const panel = pendingFocusedObservationPanel;
+    const fields = panel?.closest(ACCORDION_ITEM_SELECTOR)?.querySelector<HTMLElement>(NEW_OBSERVATION_FIELDS_SELECTOR);
+
+    if(!fields || !(event.relatedTarget instanceof Node) || !fields.contains(event.relatedTarget)) {
+        pendingFocusedObservationPanel = undefined;
+    }
+}
+
+/** Retries a deferred open after an accordion transition releases Bootstrap's collapse instance.
+ *
+ * @author GPT-6 Luna
+ */
+function handleObservationAccordionTransition(): void {
+    if(pendingFocusedObservationPanel) {
+        showFocusedObservationPanel(pendingFocusedObservationPanel);
+    }
+}
+
+/** Shows the requested panel if focus remains within its header fields.
+ *
+ * @param panel - New-observation collapse panel requested by a field focus event.
+ * @author GPT-6 Luna
+ */
+function showFocusedObservationPanel(panel: HTMLElement): void {
+    const fields = panel.closest(ACCORDION_ITEM_SELECTOR)?.querySelector<HTMLElement>(NEW_OBSERVATION_FIELDS_SELECTOR);
+
+    if(!panel.isConnected || !fields?.contains(document.activeElement)) {
+        if(pendingFocusedObservationPanel === panel) {
+            pendingFocusedObservationPanel = undefined;
+        }
+
+        return;
+    }
+
+    if(panel.classList.contains("show")) {
+        if(pendingFocusedObservationPanel === panel) {
+            pendingFocusedObservationPanel = undefined;
+        }
+
+        return;
+    }
+
+    Collapse.getOrCreateInstance(panel, { toggle: false }).show();
+}
+
+/** Supplies a new observation's timestamp from its selected browser-local date before form JSON encoding.
+ *
+ * @author GPT-6 Luna
+ * @author GPT-6 Sol
+ */
+function setNewObservationTimestampFromDate(event: Event): void {
+    const requestEvent = event as CustomEvent<RequestConfigEventDetail>;
+    const request = requestEvent.detail;
+
+    if(request.verb.toLowerCase() !== "post") {
+        return;
+    }
+
+    const form = request.elt instanceof HTMLFormElement ? request.elt : request.elt.closest("form");
+
+    if(!(form instanceof HTMLFormElement) || form.id !== NEW_OBSERVATION_FORM_ID) {
+        return;
+    }
+
+    const dateInput = document.getElementById(NEW_OBSERVATION_DATE_INPUT_ID);
+    const timestampInput = form.elements.namedItem("observationTimestamp.timestamp");
+
+    if(!(dateInput instanceof HTMLInputElement)
+        || !(timestampInput instanceof HTMLInputElement)
+        || !dateInput.value) {
+        event.preventDefault();
+
+        if(dateInput instanceof HTMLInputElement) {
+            dateInput.reportValidity();
+        }
+
+        return;
+    }
+
+    try {
+        const timestamp = calendarDateToUtcTimestamp(dateInput.value);
+        timestampInput.value = timestamp;
+        request.formData.set(timestampInput.name, timestamp);
+    } catch(error) {
+        if(!(error instanceof RangeError)) {
+            throw error;
+        }
+
+        event.preventDefault();
+        dateInput.setCustomValidity("Observation date is not valid.");
+        dateInput.reportValidity();
+        dateInput.setCustomValidity("");
+    }
+}
 
 /** Creates the row-scoped quote action before its first use in row normalization.
  *
@@ -289,9 +418,22 @@ const portfolioHistoryManagement = {
      */
     init() {
 
-        // Repeated init calls use the same callback, so the document keeps one delegated listener.
+        // Repeated init calls keep one delegated asset-row listener on the document.
         document.addEventListener(ASSET_ROW_SELECTION_CHANGE_EVENT, handleAssetRowSelectionChange);
         const managementContainer = document.getElementById(PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER);
+        managementContainer?.addEventListener("htmx:configRequest", setNewObservationTimestampFromDate);
+        managementContainer?.addEventListener("focusin", handleNewObservationFieldFocus);
+        managementContainer?.addEventListener("focusout", handleNewObservationFieldBlur);
+        managementContainer?.addEventListener("shown.bs.collapse", handleObservationAccordionTransition);
+        managementContainer?.addEventListener("hidden.bs.collapse", handleObservationAccordionTransition);
+
+        const newObservationDateInput = managementContainer?.querySelector<HTMLInputElement>(
+            `#${ NEW_OBSERVATION_DATE_INPUT_ID }`,
+        );
+
+        if(newObservationDateInput && !newObservationDateInput.value) {
+            newObservationDateInput.value = getBrowserLocalCalendarDate();
+        }
 
         managementContainer
             ?.querySelectorAll<HTMLTableRowElement>(`tr[id^="${ PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX }"]`)
