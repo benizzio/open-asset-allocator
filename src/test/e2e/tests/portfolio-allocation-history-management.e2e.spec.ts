@@ -8,11 +8,12 @@
  * Scenario 5 modifies a seeded observation, creates a second observation, and
  * verifies both browser state and PostgreSQL persistence, including the stored timestamp.
  * Scenario 17 verifies required observation dates, failed-save draft retention, UTC offsets,
- * daylight-saving transitions, and refreshed date defaults.
+ * daylight-saving transitions, refreshed date defaults, and responsive observation-header layout.
  *
  * @author OpenCode
  * @author GPT-6 Sol
  * @author GPT-6 Luna
+ * @author benizzio
  */
 import type { Browser, Locator, Page, Request, Route } from '@playwright/test';
 import { expect, test } from '../support/fixtures';
@@ -1324,8 +1325,15 @@ test.describe('portfolio allocation history management', () => {
     const newObservationItem = page.locator('#portfolio-history-management-container-0');
     const timeTagInput = newObservationItem.getByRole('textbox', { name: 'Time tag' });
     const observationDateInput = newObservationItem.getByLabel('Observation date');
+    const accordionToggle = newObservationItem.getByRole('button', { name: 'New observation details' });
+
+    await timeTagInput.click();
     await timeTagInput.fill('E2E_OBS_FAILED_DATE');
-    await newObservationItem.locator('#portfolio-history-management-trigger-0 > button').click();
+    await expect(accordionToggle).toHaveClass(/collapsed/);
+    await observationDateInput.click();
+    await expect(accordionToggle).toHaveClass(/collapsed/);
+    await accordionToggle.click();
+    await expect(accordionToggle).toHaveAttribute('aria-expanded', 'true');
 
     const form = page.locator('#portfolio-history-management-form-0');
     await observationDateInput.fill('');
@@ -1426,6 +1434,90 @@ test.describe('portfolio allocation history management', () => {
         );
       }
     });
+  });
+
+  test('scenario 17.4: keeps the observation fields beside the toggle until the header needs to wrap', async ({
+    database,
+    page,
+  }) => {
+    const seededData = await seedPortfolioHistoryData(database);
+    await page.goto('/');
+    await expectRootShell(page);
+    await page.setViewportSize({ width: 1024, height: 900 });
+    await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+    await expectPortfolioHistoryManagement(page, seededData.portfolio);
+
+    const newObservationItem = page.locator('#portfolio-history-management-container-0');
+    const timeTagInput = newObservationItem.getByRole('textbox', { name: 'Time tag' });
+    const observationDateInput = newObservationItem.getByLabel('Observation date');
+    const accordionToggle = newObservationItem.getByRole('button', { name: 'New observation details' });
+    const readHeaderLayout = async () => newObservationItem.locator('h2').evaluate(header => {
+      const timeTag = header.querySelector<HTMLInputElement>('[aria-label="Time tag"]');
+      const observationDate = header.querySelector<HTMLInputElement>('[aria-label="Observation date"]');
+      const toggle = header.querySelector<HTMLButtonElement>('.accordion-button');
+
+      if(!timeTag || !observationDate || !toggle) {
+        throw new Error('The new-observation header is missing a field or accordion toggle.');
+      }
+
+      const timeTagBounds = timeTag.getBoundingClientRect();
+      const observationDateBounds = observationDate.getBoundingClientRect();
+      const toggleBounds = toggle.getBoundingClientRect();
+
+      return {
+        headerClientWidth: header.clientWidth,
+        headerScrollWidth: header.scrollWidth,
+        timeTag: { left: timeTagBounds.left, right: timeTagBounds.right, top: timeTagBounds.top, width: timeTagBounds.width },
+        observationDate: {
+          left: observationDateBounds.left,
+          right: observationDateBounds.right,
+          top: observationDateBounds.top,
+          bottom: observationDateBounds.bottom,
+          width: observationDateBounds.width,
+        },
+        toggle: { left: toggleBounds.left, right: toggleBounds.right, top: toggleBounds.top },
+        headerBottom: header.getBoundingClientRect().bottom,
+      };
+    });
+
+    await expect(timeTagInput).toBeVisible();
+    await expect(observationDateInput).toBeVisible();
+
+    const expectSideBySide = async (): Promise<void> => {
+      const layout = await readHeaderLayout();
+      expect(Math.abs(layout.timeTag.top - layout.observationDate.top)).toBeLessThan(2);
+      expect(layout.observationDate.left).toBeGreaterThanOrEqual(layout.timeTag.right);
+      expect(layout.toggle.left).toBeGreaterThanOrEqual(layout.observationDate.right);
+      expect(layout.timeTag.width).toBeGreaterThan(layout.observationDate.width);
+      expect(layout.headerScrollWidth).toBeLessThanOrEqual(layout.headerClientWidth);
+    };
+
+    await expectSideBySide();
+    await page.setViewportSize({ width: 718, height: 900 });
+    await expectSideBySide();
+    await test.info().attach('observation-header-718px', {
+      body: await page.screenshot(),
+      contentType: 'image/png',
+    });
+
+    const expectFieldsToWrap = async (): Promise<void> => {
+      const layout = await readHeaderLayout();
+      expect(layout.observationDate.top).toBeGreaterThan(layout.timeTag.top);
+      expect(layout.observationDate.bottom).toBeLessThanOrEqual(layout.headerBottom);
+      expect(layout.toggle.left).toBeGreaterThan(layout.timeTag.left);
+      expect(layout.headerScrollWidth).toBeLessThanOrEqual(layout.headerClientWidth);
+    };
+
+    await page.setViewportSize({ width: 375, height: 812 });
+    await expectFieldsToWrap();
+    await test.info().attach('observation-header-375px', {
+      body: await page.screenshot(),
+      contentType: 'image/png',
+    });
+    await page.setViewportSize({ width: 320, height: 740 });
+    await expectFieldsToWrap();
+
+    await expect(accordionToggle).toHaveAttribute('aria-expanded', 'false');
   });
 });
 
