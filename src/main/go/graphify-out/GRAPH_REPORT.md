@@ -1,7 +1,7 @@
 # Graph Report - go  (2026-10-31)
 
 ## Corpus Check
-- 119 files · ~60,862 words
+- 119 files · ~60,871 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 2 file(s) not represented in the graph (top: .toml 1, (none) 1)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `4e321d2b`
+- Built from commit: `6ca5893a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -217,7 +217,7 @@ Nodes (10): TestHierarchicalIdIsTopLevel_Empty(), TestHierarchicalIdParentLevelI
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `App` connect `App` to `.buildAppComponents`, `reflect.Type`, `logFanOutConsumer`, `go_pkg_github_com_benizzio_open_asset_allocator_langext`, `Adapter`?**
-  _High betweenness centrality (0.053) - this node is a cross-community bridge._
+  _High betweenness centrality (0.064) - this node is a cross-community bridge._
 - **Why does `Asset` connect `PropagateAsAppErrorWithNewMessage` to `github.com/gin-gonic/gin.Context`, `allocation_plan_domain_service.go`, `portfolio_allocation_repository_model.go`, `PortfolioAllocation`, `ExecuteDBQuery`, `AssetDomService`, `Adapter`, `AllocationPlan`?**
   _High betweenness centrality (0.052) - this node is a cross-community bridge._
 - **Why does `IsZeroValue()` connect `github.com/gin-gonic/gin.Context` to `Portfolio`, `allocation_plan_domain_service.go`, `portfolio_allocation_repository_model.go`, `reflect.Type`, `golang_ext_tree_test.go`, `PortfolioAllocation`, `BuildAppError`, `AllocationPlan`?**

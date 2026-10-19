@@ -49,13 +49,13 @@ func UnifyStructPointers[T any](items []T) {
 //   - itemType: The reflect.Type of the structs in the slice
 //   - fieldIndex: The index of the field to process
 //
-// Authored by: GitHub Copilot
+// Co-authored by: OpenCode and GitHub Copilot
 func unifyPointersForField[T any](items []T, itemType reflect.Type, fieldIndex int) {
 
 	var field = itemType.Field(fieldIndex)
 
 	// Skip non-pointer fields
-	if field.Type.Kind() != reflect.Ptr {
+	if field.Type.Kind() != reflect.Pointer {
 		return
 	}
 

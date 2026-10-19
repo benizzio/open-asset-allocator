@@ -2564,7 +2564,7 @@
       "file_type": "code",
       "norm_label": "testpostportfolioallocationhistoryfullmerge()",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L855"
+      "source_location": "L856"
     },
     {
       "id": "inttest_portfolio_allocation_integration_test_testpostportfolioallocationhistoryinsertexplicittimestamp",
@@ -2575,7 +2575,7 @@
       "file_type": "code",
       "norm_label": "testpostportfolioallocationhistoryinsertexplicittimestamp()",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L738"
+      "source_location": "L739"
     },
     {
       "id": "inttest_portfolio_allocation_integration_test_testpostportfolioallocationhistoryinsertonly",
@@ -2586,7 +2586,7 @@
       "file_type": "code",
       "norm_label": "testpostportfolioallocationhistoryinsertonly()",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L583"
+      "source_location": "L584"
     },
     {
       "id": "inttest_portfolio_allocation_integration_test_testpostportfolioallocationhistoryinsertonlywithexternalasset",
@@ -2597,7 +2597,7 @@
       "file_type": "code",
       "norm_label": "testpostportfolioallocationhistoryinsertonlywithexternalasset()",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1774"
+      "source_location": "L1775"
     },
     {
       "id": "inttest_portfolio_allocation_integration_test_testpostportfolioallocationrequiresexplicittimestamp",
@@ -2608,7 +2608,7 @@
       "file_type": "code",
       "norm_label": "testpostportfolioallocationrequiresexplicittimestamp()",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1426"
+      "source_location": "L1427"
     },
     {
       "id": "inttest_util_assert_db",
@@ -4258,7 +4258,7 @@
       "file_type": "code",
       "norm_label": "testpostportfolioallocationhistorydoesnotoverwriteexistingassetexternaldata()",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1903"
+      "source_location": "L1904"
     },
     {
       "id": "api_rest_asset_controller_buildassetrestcontroller",
@@ -9848,7 +9848,7 @@
       "file_type": "code",
       "norm_label": "postportfolioallocationforvalidationfailure()",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1513"
+      "source_location": "L1514"
     },
     {
       "id": "inttest_portfolio_allocation_integration_test_testgetavailablehistoryobservations",
@@ -9903,7 +9903,7 @@
       "file_type": "code",
       "norm_label": "testgetportfolioallocationhistorywithmultipleportfoliosandmanyobservations()",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1537"
+      "source_location": "L1538"
     },
     {
       "id": "inttest_portfolio_allocation_integration_test_testpostportfolioallocationhistoryvalidation_assetnameexceedsmaxlength",
@@ -9914,7 +9914,7 @@
       "file_type": "code",
       "norm_label": "testpostportfolioallocationhistoryvalidation_assetnameexceedsmaxlength()",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1731"
+      "source_location": "L1732"
     },
     {
       "id": "inttest_portfolio_allocation_integration_test_testpostportfolioallocationhistoryvalidation_assettickerexceedsmaxlength",
@@ -9925,7 +9925,7 @@
       "file_type": "code",
       "norm_label": "testpostportfolioallocationhistoryvalidation_assettickerexceedsmaxlength()",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1689"
+      "source_location": "L1690"
     },
     {
       "id": "inttest_portfolio_allocation_integration_test_testpostportfolioallocationhistoryvalidation_classexceedsmaxlength",
@@ -9936,7 +9936,7 @@
       "file_type": "code",
       "norm_label": "testpostportfolioallocationhistoryvalidation_classexceedsmaxlength()",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1647"
+      "source_location": "L1648"
     },
     {
       "id": "inttest_portfolio_allocation_integration_test_testpostportfolioallocationhistoryvalidation_invalidexternalassetfields",
@@ -9947,7 +9947,7 @@
       "file_type": "code",
       "norm_label": "testpostportfolioallocationhistoryvalidation_invalidexternalassetfields()",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1973"
+      "source_location": "L1974"
     },
     {
       "id": "inttest_portfolio_allocation_integration_test_testpostportfolioallocationvalidations",
@@ -9958,7 +9958,7 @@
       "file_type": "code",
       "norm_label": "testpostportfolioallocationvalidations()",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1206"
+      "source_location": "L1207"
     },
     {
       "id": "langext_golang_ext_parseable_int",
@@ -15336,7 +15336,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1575",
+      "source_location": "L1576",
       "weight": 1.0
     },
     {
@@ -15348,7 +15348,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1579",
+      "source_location": "L1580",
       "weight": 1.0
     },
     {
@@ -15420,7 +15420,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1906",
+      "source_location": "L1907",
       "weight": 1.0
     },
     {
@@ -15432,7 +15432,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1914",
+      "source_location": "L1915",
       "weight": 1.0
     },
     {
@@ -15444,7 +15444,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1034",
+      "source_location": "L1035",
       "weight": 1.0
     },
     {
@@ -15456,7 +15456,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1089",
+      "source_location": "L1090",
       "weight": 1.0
     },
     {
@@ -15468,7 +15468,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L891",
+      "source_location": "L892",
       "weight": 1.0
     },
     {
@@ -15480,7 +15480,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L895",
+      "source_location": "L896",
       "weight": 1.0
     },
     {
@@ -15492,7 +15492,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L988",
+      "source_location": "L989",
       "weight": 1.0
     },
     {
@@ -15504,7 +15504,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L997",
+      "source_location": "L998",
       "weight": 1.0
     },
     {
@@ -15516,24 +15516,12 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L767",
+      "source_location": "L768",
       "weight": 1.0
     },
     {
       "source": "inttest_portfolio_allocation_integration_test_testpostportfolioallocationhistoryinsertexplicittimestamp",
       "target": "inttest_util_assert_db_toassertablenullstring",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L796",
-      "weight": 1.0
-    },
-    {
-      "source": "inttest_portfolio_allocation_integration_test_testpostportfolioallocationhistoryinsertexplicittimestamp",
-      "target": "inttest_util_assert_db_notnullassertablenullstring",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -15545,6 +15533,18 @@
     },
     {
       "source": "inttest_portfolio_allocation_integration_test_testpostportfolioallocationhistoryinsertexplicittimestamp",
+      "target": "inttest_util_assert_db_notnullassertablenullstring",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "inttest/portfolio_allocation_integration_test.go",
+      "source_location": "L798",
+      "weight": 1.0
+    },
+    {
+      "source": "inttest_portfolio_allocation_integration_test_testpostportfolioallocationhistoryinsertexplicittimestamp",
       "target": "inttest_util_assert_db_nullassertablenullstring",
       "relation": "calls",
       "_origin": "ast",
@@ -15552,7 +15552,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L805",
+      "source_location": "L806",
       "weight": 1.0
     },
     {
@@ -15564,7 +15564,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L807",
+      "source_location": "L808",
       "weight": 1.0
     },
     {
@@ -15576,7 +15576,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L847",
+      "source_location": "L848",
       "weight": 1.0
     },
     {
@@ -15588,7 +15588,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L636",
+      "source_location": "L637",
       "weight": 1.0
     },
     {
@@ -15600,24 +15600,12 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L685",
+      "source_location": "L686",
       "weight": 1.0
     },
     {
       "source": "inttest_portfolio_allocation_integration_test_testpostportfolioallocationhistoryinsertonly",
       "target": "inttest_util_assert_db_nullassertablenullstring",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L694",
-      "weight": 1.0
-    },
-    {
-      "source": "inttest_portfolio_allocation_integration_test_testpostportfolioallocationhistoryinsertonly",
-      "target": "inttest_util_assert_db_notnullassertablenullstring",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -15629,6 +15617,18 @@
     },
     {
       "source": "inttest_portfolio_allocation_integration_test_testpostportfolioallocationhistoryinsertonly",
+      "target": "inttest_util_assert_db_notnullassertablenullstring",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "inttest/portfolio_allocation_integration_test.go",
+      "source_location": "L696",
+      "weight": 1.0
+    },
+    {
+      "source": "inttest_portfolio_allocation_integration_test_testpostportfolioallocationhistoryinsertonly",
       "target": "inttest_util_assert_db_assertdbwithquerymultiplerows",
       "relation": "calls",
       "_origin": "ast",
@@ -15636,7 +15636,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L731",
+      "source_location": "L732",
       "weight": 1.0
     },
     {
@@ -15648,7 +15648,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1813",
+      "source_location": "L1814",
       "weight": 1.0
     },
     {
@@ -15660,7 +15660,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1828",
+      "source_location": "L1829",
       "weight": 1.0
     },
     {
@@ -15672,7 +15672,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1833",
+      "source_location": "L1834",
       "weight": 1.0
     },
     {
@@ -15684,7 +15684,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1834",
+      "source_location": "L1835",
       "weight": 1.0
     },
     {
@@ -15696,7 +15696,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1836",
+      "source_location": "L1837",
       "weight": 1.0
     },
     {
@@ -15708,7 +15708,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1848",
+      "source_location": "L1849",
       "weight": 1.0
     },
     {
@@ -15720,7 +15720,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1995",
+      "source_location": "L1996",
       "weight": 1.0
     },
     {
@@ -15732,7 +15732,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1428",
+      "source_location": "L1429",
       "weight": 1.0
     },
     {
@@ -15744,7 +15744,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1476",
+      "source_location": "L1477",
       "weight": 1.0
     },
     {
@@ -15756,7 +15756,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1486",
+      "source_location": "L1487",
       "weight": 1.0
     },
     {
@@ -15768,7 +15768,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1489",
+      "source_location": "L1490",
       "weight": 1.0
     },
     {
@@ -15780,7 +15780,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1222",
+      "source_location": "L1223",
       "weight": 1.0
     },
     {
@@ -31728,7 +31728,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1513",
+      "source_location": "L1514",
       "weight": 1.0
     },
     {
@@ -31800,7 +31800,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1537",
+      "source_location": "L1538",
       "weight": 1.0
     },
     {
@@ -31836,7 +31836,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1903",
+      "source_location": "L1904",
       "weight": 1.0
     },
     {
@@ -31848,7 +31848,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L855",
+      "source_location": "L856",
       "weight": 1.0
     },
     {
@@ -31860,7 +31860,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L738",
+      "source_location": "L739",
       "weight": 1.0
     },
     {
@@ -31872,7 +31872,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L583",
+      "source_location": "L584",
       "weight": 1.0
     },
     {
@@ -31884,7 +31884,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1774",
+      "source_location": "L1775",
       "weight": 1.0
     },
     {
@@ -31896,7 +31896,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1731",
+      "source_location": "L1732",
       "weight": 1.0
     },
     {
@@ -31908,7 +31908,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1689",
+      "source_location": "L1690",
       "weight": 1.0
     },
     {
@@ -31920,7 +31920,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1647",
+      "source_location": "L1648",
       "weight": 1.0
     },
     {
@@ -31932,7 +31932,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1973",
+      "source_location": "L1974",
       "weight": 1.0
     },
     {
@@ -31944,7 +31944,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1426",
+      "source_location": "L1427",
       "weight": 1.0
     },
     {
@@ -31956,7 +31956,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1206",
+      "source_location": "L1207",
       "weight": 1.0
     },
     {
@@ -42271,7 +42271,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1206",
+      "source_location": "L1207",
       "weight": 1.0
     },
     {
@@ -42282,7 +42282,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1426",
+      "source_location": "L1427",
       "weight": 1.0
     },
     {
@@ -42304,7 +42304,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1513",
+      "source_location": "L1514",
       "weight": 1.0
     },
     {
@@ -42315,7 +42315,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1537",
+      "source_location": "L1538",
       "weight": 1.0
     },
     {
@@ -42326,7 +42326,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1647",
+      "source_location": "L1648",
       "weight": 1.0
     },
     {
@@ -42337,7 +42337,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1689",
+      "source_location": "L1690",
       "weight": 1.0
     },
     {
@@ -42348,7 +42348,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1731",
+      "source_location": "L1732",
       "weight": 1.0
     },
     {
@@ -42359,7 +42359,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1774",
+      "source_location": "L1775",
       "weight": 1.0
     },
     {
@@ -42381,7 +42381,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1903",
+      "source_location": "L1904",
       "weight": 1.0
     },
     {
@@ -42392,7 +42392,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1973",
+      "source_location": "L1974",
       "weight": 1.0
     },
     {
@@ -42458,7 +42458,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L583",
+      "source_location": "L584",
       "weight": 1.0
     },
     {
@@ -42469,7 +42469,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L738",
+      "source_location": "L739",
       "weight": 1.0
     },
     {
@@ -42480,7 +42480,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L855",
+      "source_location": "L856",
       "weight": 1.0
     },
     {
@@ -48340,7 +48340,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1521",
+      "source_location": "L1522",
       "weight": 1.0
     },
     {
@@ -48436,7 +48436,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1594",
+      "source_location": "L1595",
       "weight": 1.0
     },
     {
@@ -48484,7 +48484,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L560",
+      "source_location": "L561",
       "weight": 1.0
     },
     {
@@ -48496,7 +48496,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1904",
+      "source_location": "L1905",
       "weight": 1.0
     },
     {
@@ -48508,7 +48508,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1913",
+      "source_location": "L1914",
       "weight": 1.0
     },
     {
@@ -48520,7 +48520,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1956",
+      "source_location": "L1957",
       "weight": 1.0
     },
     {
@@ -48532,7 +48532,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1959",
+      "source_location": "L1960",
       "weight": 1.0
     },
     {
@@ -48544,7 +48544,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L978",
+      "source_location": "L979",
       "weight": 1.0
     },
     {
@@ -48556,7 +48556,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L782",
+      "source_location": "L783",
       "weight": 1.0
     },
     {
@@ -48568,7 +48568,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L632",
+      "source_location": "L633",
       "weight": 1.0
     },
     {
@@ -48580,7 +48580,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1809",
+      "source_location": "L1810",
       "weight": 1.0
     },
     {
@@ -48592,7 +48592,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1756",
+      "source_location": "L1757",
       "weight": 1.0
     },
     {
@@ -48604,7 +48604,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1714",
+      "source_location": "L1715",
       "weight": 1.0
     },
     {
@@ -48616,7 +48616,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "inttest/portfolio_allocation_integration_test.go",
-      "source_location": "L1672",
+      "source_location": "L1673",
       "weight": 1.0
     },
     {
@@ -49663,5 +49663,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "4e321d2bfbca7f9c9120c2f8f6820862de5aae83"
+  "built_at_commit": "6ca5893a4269f85eede87a0bb4f7a45c2e6a5fe0"
 }
