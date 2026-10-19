@@ -444,7 +444,8 @@ func TestPortfolioHistoryOrderingIsChronologicalAndDeterministic(t *testing.T) {
 		func(rows *dbx.Rows) error {
 			var id int64
 			var tag string
-			if scanError := rows.Scan(&id, &tag); scanError != nil {
+			var scanError error
+			if scanError = rows.Scan(&id, &tag); scanError != nil {
 				return scanError
 			}
 			observationIds[tag] = id
