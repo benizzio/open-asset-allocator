@@ -525,11 +525,23 @@ const allocationPlanManagement = {
         form.requestSubmit();
     },
 
-    handleAfterRequest(event: CustomEvent) {
+    /** Refreshes allocation-plan views only after a successful POST from the owning plan form.
+     *
+     * @param event - HTMX after-request event raised for the request.
+     * @param allocationPlanId - ID of the plan form expected to have submitted the request.
+     * @example `allocationPlanManagement.handleAfterRequest(event, 12)` handles plan 12's save response.
+     * @author GPT-6 Luna
+     * @author benizzio
+     */
+    handleAfterRequest(event: CustomEvent, allocationPlanId: number) {
 
         const eventDetail = event.detail as AfterRequestEventDetail;
+        const form = document.getElementById(`${ ALLOCATION_PLAN_MANAGEMENT_FORM_PREFIX }${ allocationPlanId }`);
 
-        if(!eventDetail.successful) {
+        if(!eventDetail.successful
+            || eventDetail.requestConfig.verb.toLowerCase() !== "post"
+            || !(form instanceof HTMLFormElement)
+            || eventDetail.requestConfig.elt !== form) {
             return;
         }
 

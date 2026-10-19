@@ -76,7 +76,8 @@
                     aria-controls="portfolio-history-management-{{id}}"
                     {{#unless id}}aria-label="New observation details"{{/unless}}
             >
-                {{#if id}}{{timeTag}}{{/if}}
+                <!-- Co-authored by: GPT-6 Luna and benizzio -->
+                {{#if id}}{{timeTag}} - {{formatTimestampLocalDate timestamp}}{{/if}}
             </button>
             </h2>
 
