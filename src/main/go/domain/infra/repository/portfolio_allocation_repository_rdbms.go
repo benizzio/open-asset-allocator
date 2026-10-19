@@ -15,7 +15,7 @@ const (
 		FROM portfolio_allocation_fact pa
 		JOIN portfolio_allocation_obs_time paot ON pa.observation_time_id = paot.id
 		` + rdbms.WhereClausePlaceholder + `
-		ORDER BY paot.observation_timestamp DESC LIMIT {:observationTimestampLimit}
+		ORDER BY paot.observation_timestamp DESC, paot.id DESC LIMIT {:observationTimestampLimit}
 	`
 	availableObservationTimestampsComplement = `
 		WITH observation_timestamps
@@ -24,7 +24,7 @@ const (
 				FROM portfolio_allocation_fact pa
 				JOIN portfolio_allocation_obs_time paot ON pa.observation_time_id = paot.id
 				WHERE pa.portfolio_id = {:portfolioId}
-				ORDER BY paot.observation_timestamp DESC 
+				ORDER BY paot.observation_timestamp DESC, paot.id DESC
 				LIMIT {:observationTimestampLimit}
 			)
 	`
@@ -44,7 +44,8 @@ const (
 		JOIN asset ass ON ass.id = pa.asset_id
 		JOIN portfolio_allocation_obs_time paot ON pa.observation_time_id = paot.id 
 		` + rdbms.WhereClausePlaceholder + `
-		ORDER BY paot.observation_timestamp DESC, pa.class ASC, pa.cash_reserve DESC, pa.total_market_value DESC
+		ORDER BY paot.observation_timestamp DESC, paot.id DESC,
+			pa.class ASC, pa.cash_reserve DESC, pa.total_market_value DESC
 	`
 	portfolioAllocationsTempTableName   = `portfolio_allocation_fact_merge_temp`
 	portfolioAllocationsTempTableDDLSQL = `

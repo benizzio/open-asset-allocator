@@ -129,12 +129,15 @@ func buildHistoryDTS(
 		aggregatedPortfoliohistory = append(aggregatedPortfoliohistory, portfolioSnapshot)
 	}
 
-	// Sort the aggregated portfolio history by observation timestamp, in descending order
+	// Sort by observation timestamp and then observation ID, both in descending order.
 	sort.Slice(
 		aggregatedPortfoliohistory, func(i, j int) bool {
-			return aggregatedPortfoliohistory[i].ObservationTimestamp.Timestamp.After(
-				aggregatedPortfoliohistory[j].ObservationTimestamp.Timestamp,
-			)
+			var left = aggregatedPortfoliohistory[i].ObservationTimestamp
+			var right = aggregatedPortfoliohistory[j].ObservationTimestamp
+			if left.Timestamp.Equal(right.Timestamp) {
+				return int64(left.Id) > int64(right.Id)
+			}
+			return left.Timestamp.After(right.Timestamp)
 		},
 	)
 
