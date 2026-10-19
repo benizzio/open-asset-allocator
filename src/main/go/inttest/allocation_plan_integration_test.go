@@ -184,6 +184,32 @@ func TestAllocationPlanReadsOrderByPlannedDateAndId(t *testing.T) {
 	optionsResponsePlansJSON, err := json.Marshal(optionsResponseData.AvailablePlans)
 	require.NoError(t, err)
 	assert.JSONEq(t, expectedOrderedPlanDatesJSON, string(optionsResponsePlansJSON))
+
+	repeatedPlanResponse, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/allocation-plan")
+	require.NoError(t, err)
+	defer deferCloseResponseBody(repeatedPlanResponse)
+	require.Equal(t, http.StatusOK, repeatedPlanResponse.StatusCode)
+	repeatedPlanBody, err := io.ReadAll(repeatedPlanResponse.Body)
+	require.NoError(t, err)
+	var repeatedPlans []planDateProjection
+	require.NoError(t, json.Unmarshal(repeatedPlanBody, &repeatedPlans))
+	repeatedPlansJSON, err := json.Marshal(repeatedPlans)
+	require.NoError(t, err)
+	assert.JSONEq(t, expectedOrderedPlanDatesJSON, string(repeatedPlansJSON))
+
+	repeatedOptionsResponse, err := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/divergence/options")
+	require.NoError(t, err)
+	defer deferCloseResponseBody(repeatedOptionsResponse)
+	require.Equal(t, http.StatusOK, repeatedOptionsResponse.StatusCode)
+	repeatedOptionsBody, err := io.ReadAll(repeatedOptionsResponse.Body)
+	require.NoError(t, err)
+	var repeatedOptionsData struct {
+		AvailablePlans []planDateProjection `json:"availablePlans"`
+	}
+	require.NoError(t, json.Unmarshal(repeatedOptionsBody, &repeatedOptionsData))
+	repeatedOptionsPlansJSON, err := json.Marshal(repeatedOptionsData.AvailablePlans)
+	require.NoError(t, err)
+	assert.JSONEq(t, expectedOrderedPlanDatesJSON, string(repeatedOptionsPlansJSON))
 }
 
 // TestPostAllocationPlanForInsertion verifies a plan with an explicit plannedDate persists and is returned by reads.

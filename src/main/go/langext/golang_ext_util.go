@@ -20,14 +20,14 @@ func IsNilPointer(value any) bool {
 	}
 
 	var valueRef = reflect.ValueOf(value)
-	return valueRef.Kind() == reflect.Ptr && valueRef.IsNil()
+	return valueRef.Kind() == reflect.Pointer && valueRef.IsNil()
 }
 
 // UnwrapType removes all pointer indirection layers from a reflect.Type.
 //
 // Co-authored by: OpenCode and GitHub Copilot
 func UnwrapType(fieldType reflect.Type) reflect.Type {
-	for fieldType != nil && fieldType.Kind() == reflect.Ptr {
+	for fieldType != nil && fieldType.Kind() == reflect.Pointer {
 		fieldType = fieldType.Elem()
 	}
 
@@ -53,10 +53,10 @@ func UnwrapType(fieldType reflect.Type) reflect.Type {
 //	finalValue, isNil := DereferenceValue(reflect.ValueOf(data))
 //	// finalValue will be of type MyStruct, isNil will be false
 //
-// Authored by: GitHub Copilot
+// Co-authored by: OpenCode and GitHub Copilot
 func DereferenceValue(value reflect.Value) (reflect.Value, bool) {
 
-	for value.Kind() == reflect.Ptr {
+	for value.Kind() == reflect.Pointer {
 		if value.IsNil() {
 			return value, true
 		}

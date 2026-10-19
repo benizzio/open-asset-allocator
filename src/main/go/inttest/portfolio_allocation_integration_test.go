@@ -2,6 +2,7 @@ package inttest
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 
 	dbx "github.com/go-ozzo/ozzo-dbx"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
 	inttestutil "github.com/benizzio/open-asset-allocator/inttest/util"
@@ -362,6 +364,213 @@ func TestGetAvailableHistoryObservations(t *testing.T) {
 	`
 
 	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
+}
+
+// TestPortfolioHistoryOrderingIsChronologicalAndDeterministic verifies chronological observation ordering,
+// ID tie-breaking, limit-boundary selection, repeated-read stability, and ID-based reads outside the list limit.
+//
+// Authored by: OpenCode
+func TestPortfolioHistoryOrderingIsChronologicalAndDeterministic(t *testing.T) {
+	t.Cleanup(
+		inttestutil.BuildCleanupFunctionBuilder().
+			AddCleanupQuery(
+				`DELETE FROM portfolio_allocation_fact
+				 WHERE observation_time_id IN (
+					SELECT id FROM portfolio_allocation_obs_time WHERE observation_time_tag LIKE 'pr5-ordering-%'
+				 )`,
+				nil,
+			).
+			AddCleanupQuery(
+				`DELETE FROM portfolio_allocation_obs_time WHERE observation_time_tag LIKE 'pr5-ordering-%'`,
+				nil,
+			).
+			Build(t),
+	)
+
+	var insertObservationsSQL = `
+		INSERT INTO portfolio_allocation_obs_time (observation_time_tag, observation_timestamp)
+		VALUES
+			('pr5-ordering-march', '2040-03-01T00:00:00Z'),
+			('pr5-ordering-feb-1', '2040-02-01T00:00:00Z'),
+			('pr5-ordering-april', '2040-04-01T00:00:00Z'),
+			('pr5-ordering-feb-2', '2040-02-01T00:00:00Z'),
+			('pr5-ordering-january', '2040-01-01T00:00:00Z'),
+			('pr5-ordering-feb-3', '2040-02-01T00:00:00Z'),
+			('pr5-ordering-may', '2040-05-01T00:00:00Z'),
+			('pr5-ordering-feb-4', '2040-02-01T00:00:00Z'),
+			('pr5-ordering-june', '2040-06-01T00:00:00Z'),
+			('pr5-ordering-july', '2040-07-01T00:00:00Z'),
+			('pr5-ordering-august', '2040-08-01T00:00:00Z'),
+			('pr5-ordering-september', '2040-09-01T00:00:00Z'),
+			('pr5-ordering-october', '2040-10-01T00:00:00Z')
+	`
+	var err = inttestinfra.ExecuteDBQuery(insertObservationsSQL, nil)
+	require.NoError(t, err)
+
+	var insertAllocationsSQL = `
+		INSERT INTO portfolio_allocation_fact (
+			asset_id, "class", cash_reserve, asset_quantity, asset_market_price,
+			total_market_value, portfolio_id, observation_time_id
+		)
+		SELECT 1, 'BONDS', FALSE, 1, 100, 100, 1, id
+		FROM portfolio_allocation_obs_time
+		WHERE observation_time_tag LIKE 'pr5-ordering-%'
+	`
+	err = inttestinfra.ExecuteDBQuery(insertAllocationsSQL, nil)
+	require.NoError(t, err)
+
+	var insertAdditionalOctoberAllocationsSQL = `
+		INSERT INTO portfolio_allocation_fact (
+			asset_id, "class", cash_reserve, asset_quantity, asset_market_price,
+			total_market_value, portfolio_id, observation_time_id
+		)
+		SELECT fixture.asset_id, fixture.class, fixture.cash_reserve, 1, fixture.total_market_value,
+			fixture.total_market_value, 1, observation.id
+		FROM (VALUES
+			(2, 'STOCKS', FALSE, 200),
+			(3, 'STOCKS', TRUE, 300)
+		) AS fixture(asset_id, class, cash_reserve, total_market_value)
+		CROSS JOIN portfolio_allocation_obs_time observation
+		WHERE observation.observation_time_tag = 'pr5-ordering-october'
+	`
+	err = inttestinfra.ExecuteDBQuery(insertAdditionalOctoberAllocationsSQL, nil)
+	require.NoError(t, err)
+
+	var observationIds = make(map[string]int64)
+	err = inttestinfra.FetchWithDBQuery(
+		`SELECT id, observation_time_tag FROM portfolio_allocation_obs_time
+		 WHERE observation_time_tag LIKE 'pr5-ordering-%'`,
+		nil,
+		func(rows *dbx.Rows) error {
+			var id int64
+			var tag string
+			var scanError error
+			if scanError = rows.Scan(&id, &tag); scanError != nil {
+				return scanError
+			}
+			observationIds[tag] = id
+			return nil
+		},
+	)
+	require.NoError(t, err)
+	require.Len(t, observationIds, 13)
+
+	type observationProjection struct {
+		Id        int64  `json:"id"`
+		TimeTag   string `json:"timeTag"`
+		Timestamp string `json:"timestamp"`
+	}
+	type allocationProjection struct {
+		CashReserve      bool   `json:"cashReserve"`
+		TotalMarketValue string `json:"totalMarketValue"`
+	}
+	type snapshotProjection struct {
+		ObservationTimestamp observationProjection  `json:"observationTimestamp"`
+		Allocations          []allocationProjection `json:"allocations"`
+		TotalMarketValue     string                 `json:"totalMarketValue"`
+	}
+
+	var expectedTags = []string{
+		"pr5-ordering-october",
+		"pr5-ordering-september",
+		"pr5-ordering-august",
+		"pr5-ordering-july",
+		"pr5-ordering-june",
+		"pr5-ordering-may",
+		"pr5-ordering-april",
+		"pr5-ordering-march",
+		"pr5-ordering-feb-4",
+		"pr5-ordering-feb-3",
+	}
+	var timestampByTag = map[string]string{
+		"pr5-ordering-october":   "2040-10-01T00:00:00Z",
+		"pr5-ordering-september": "2040-09-01T00:00:00Z",
+		"pr5-ordering-august":    "2040-08-01T00:00:00Z",
+		"pr5-ordering-july":      "2040-07-01T00:00:00Z",
+		"pr5-ordering-june":      "2040-06-01T00:00:00Z",
+		"pr5-ordering-may":       "2040-05-01T00:00:00Z",
+		"pr5-ordering-april":     "2040-04-01T00:00:00Z",
+		"pr5-ordering-march":     "2040-03-01T00:00:00Z",
+		"pr5-ordering-feb-4":     "2040-02-01T00:00:00Z",
+		"pr5-ordering-feb-3":     "2040-02-01T00:00:00Z",
+		"pr5-ordering-feb-2":     "2040-02-01T00:00:00Z",
+	}
+	var expectedObservations = make([]observationProjection, 0, len(expectedTags))
+	for _, tag := range expectedTags {
+		expectedObservations = append(expectedObservations, observationProjection{
+			Id:        observationIds[tag],
+			TimeTag:   tag,
+			Timestamp: timestampByTag[tag],
+		})
+	}
+	expectedObservationsJSON, err := json.Marshal(expectedObservations)
+	require.NoError(t, err)
+
+	var readAttempt int
+	for readAttempt = 0; readAttempt < 2; readAttempt++ {
+		availableResponse, requestError := http.Get(
+			inttestinfra.TestAPIURLPrefix + "/portfolio/1/history/observation",
+		)
+		require.NoError(t, requestError)
+		availableBody, readError := io.ReadAll(availableResponse.Body)
+		closeError := availableResponse.Body.Close()
+		require.NoError(t, readError)
+		require.NoError(t, closeError)
+		require.Equal(t, http.StatusOK, availableResponse.StatusCode)
+		assert.JSONEq(t, string(expectedObservationsJSON), string(availableBody))
+
+		historyResponse, requestError := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/history")
+		require.NoError(t, requestError)
+		historyBody, readError := io.ReadAll(historyResponse.Body)
+		closeError = historyResponse.Body.Close()
+		require.NoError(t, readError)
+		require.NoError(t, closeError)
+		require.Equal(t, http.StatusOK, historyResponse.StatusCode)
+
+		var snapshots []snapshotProjection
+		require.NoError(t, json.Unmarshal(historyBody, &snapshots))
+		require.Len(t, snapshots, len(expectedObservations))
+		var actualHistoryObservations = make([]observationProjection, 0, len(snapshots))
+		for _, snapshot := range snapshots {
+			actualHistoryObservations = append(actualHistoryObservations, snapshot.ObservationTimestamp)
+			if snapshot.ObservationTimestamp.TimeTag == "pr5-ordering-october" {
+				assert.Equal(t, "600", snapshot.TotalMarketValue)
+				assert.Equal(t, []allocationProjection{
+					{CashReserve: false, TotalMarketValue: "100"},
+					{CashReserve: true, TotalMarketValue: "300"},
+					{CashReserve: false, TotalMarketValue: "200"},
+				}, snapshot.Allocations)
+			} else {
+				assert.Equal(t, "100", snapshot.TotalMarketValue)
+				assert.Equal(t, []allocationProjection{{CashReserve: false, TotalMarketValue: "100"}}, snapshot.Allocations)
+			}
+		}
+		actualHistoryObservationsJSON, marshalError := json.Marshal(actualHistoryObservations)
+		require.NoError(t, marshalError)
+		assert.JSONEq(t, string(expectedObservationsJSON), string(actualHistoryObservationsJSON))
+	}
+
+	assert.Greater(t, observationIds["pr5-ordering-feb-4"], observationIds["pr5-ordering-feb-3"])
+	assert.Greater(t, observationIds["pr5-ordering-feb-3"], observationIds["pr5-ordering-feb-2"])
+
+	var olderObservationId = observationIds["pr5-ordering-january"]
+	olderResponse, err := http.Get(
+		inttestinfra.TestAPIURLPrefix + "/portfolio/1/history?observationTimestampId=" + strconv.FormatInt(olderObservationId, 10),
+	)
+	require.NoError(t, err)
+	defer deferCloseResponseBody(olderResponse)
+	require.Equal(t, http.StatusOK, olderResponse.StatusCode)
+	olderBody, err := io.ReadAll(olderResponse.Body)
+	require.NoError(t, err)
+	var olderSnapshots []snapshotProjection
+	require.NoError(t, json.Unmarshal(olderBody, &olderSnapshots))
+	require.Len(t, olderSnapshots, 1)
+	assert.Equal(t, observationProjection{
+		Id:        olderObservationId,
+		TimeTag:   "pr5-ordering-january",
+		Timestamp: "2040-01-01T00:00:00Z",
+	}, olderSnapshots[0].ObservationTimestamp)
+	assert.Equal(t, "100", olderSnapshots[0].TotalMarketValue)
 }
 
 // TestPostPortfolioAllocationHistoryInsertOnly tests the successful creation of portfolio allocation history,
