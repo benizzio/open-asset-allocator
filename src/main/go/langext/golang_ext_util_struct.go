@@ -65,12 +65,12 @@ func StructString[T interface{}](source *T) string {
 // Returns:
 //   - The reflect.Type of the struct
 //
-// Authored by: GitHub Copilot
+// Co-authored by: OpenCode and GitHub Copilot
 func GetStructType(targetStruct interface{}) reflect.Type {
 
 	structType := reflect.TypeOf(targetStruct)
 
-	if structType.Kind() == reflect.Ptr {
+	if structType.Kind() == reflect.Pointer {
 		structType = structType.Elem()
 	}
 
