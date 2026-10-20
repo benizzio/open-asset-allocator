@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -198,9 +197,9 @@ func (controller *PortfolioAllocationRESTController) postPortfolioAllocationHist
 	context.Status(http.StatusNoContent)
 }
 
-// validateCleanPortfolioAllocationHistory rejects zero timestamps and invalid allocation fields before persistence.
+// validateCleanPortfolioAllocationHistory rejects zero timestamps, empty tags, and invalid allocation fields.
 //
-// Co-authored by: OpenCode and benizzio
+// Co-authored by: GPT-6.1 Sol, OpenCode and benizzio
 func (controller *PortfolioAllocationRESTController) validateCleanPortfolioAllocationHistory(
 	context *gin.Context,
 	portfolioSnapshotDTS *model.PortfolioSnapshotDTS,
@@ -218,8 +217,8 @@ func (controller *PortfolioAllocationRESTController) validateCleanPortfolioAlloc
 			portfolioSnapshotDTS.ObservationTimestamp.Timestamp,
 		)
 	}
-	if portfolioSnapshotDTS.ObservationTimestamp.Id == 0 &&
-		portfolioSnapshotDTS.ObservationTimestamp.TimeTag == "" {
+	if langext.IsZeroValue(portfolioSnapshotDTS.ObservationTimestamp.Id) &&
+		langext.IsZeroValue(portfolioSnapshotDTS.ObservationTimestamp.TimeTag) {
 		validationErrorsBuilder.CustomValidationErrorFullNamespace(
 			portfolioSnapshotDTS,
 			"observationTimestamp.timeTag",
@@ -228,8 +227,8 @@ func (controller *PortfolioAllocationRESTController) validateCleanPortfolioAlloc
 			portfolioSnapshotDTS.ObservationTimestamp.TimeTag,
 		)
 	}
-	if portfolioSnapshotDTS.ObservationTimestamp.TimeTag != "" &&
-		strings.TrimSpace(portfolioSnapshotDTS.ObservationTimestamp.TimeTag) == "" {
+	if !langext.IsZeroValue(portfolioSnapshotDTS.ObservationTimestamp.TimeTag) &&
+		langext.IsEmptyString(portfolioSnapshotDTS.ObservationTimestamp.TimeTag) {
 		validationErrorsBuilder.CustomValidationErrorFullNamespace(
 			portfolioSnapshotDTS,
 			"observationTimestamp.timeTag",

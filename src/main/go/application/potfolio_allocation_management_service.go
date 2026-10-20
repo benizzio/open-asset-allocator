@@ -62,7 +62,7 @@ func (service *PortfolioAllocationManagementAppService) MergePortfolioAllocation
 }
 
 // manageObservationTimestamp creates or owner-checks an observation, then attaches it to every allocation.
-// Co-authored by: OpenCode and benizzio
+// Co-authored by: GPT-6.1 Sol, OpenCode and benizzio
 func (service *PortfolioAllocationManagementAppService) manageObservationTimestamp(
 	transContext context.Context,
 	portfolioId int64,
@@ -70,11 +70,8 @@ func (service *PortfolioAllocationManagementAppService) manageObservationTimesta
 	allocations []*domain.PortfolioAllocation,
 ) (*domain.PortfolioObservationTimestamp, error) {
 
-	var managedObservationTimestamp, err = service.portfolioAllocationDomService.InsertObservationTimestampInTransaction(
-		transContext,
-		portfolioId,
-		observationTimestamp,
-	)
+	var managedObservationTimestamp, err = service.portfolioAllocationDomService.
+		InsertObservationTimestampInTransaction(transContext, portfolioId, observationTimestamp)
 	if err != nil {
 		return nil, err
 	}

@@ -33,7 +33,13 @@ type PortfolioObservationTimestamp struct {
 	Timestamp   time.Time
 }
 
+// PortfolioAllocationRepository provides persistence operations used by the portfolio allocation domain service.
+// Co-authored by: GPT-6.1 Sol and benizzio
 type PortfolioAllocationRepository interface {
+	// FindObservationTimestampInTransaction reads and locks an observation for domain ownership validation.
+	// For example, FindObservationTimestampInTransaction(ctx, 2) returns nil if observation 2 is missing.
+	// Authored by: GPT-6.1 Sol
+	FindObservationTimestampInTransaction(context.Context, int64) (*PortfolioObservationTimestamp, error)
 	FindAllPortfolioAllocationsWithinObservationTimestampsLimit(
 		id int64,
 		observationTimestampsLimit int,
