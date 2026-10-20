@@ -15,6 +15,7 @@
  * @author GPT-6 Astra
  * @author GPT-6 Luna
  * @author GPT-6 Sol
+ * @author GPT-6.1 Sol
  */
 import type { Browser, Locator, Page, Request, Route } from '@playwright/test';
 import { exerciseAccordionFieldInteractions } from '../support/accordion-field-interactions';
@@ -1256,15 +1257,21 @@ test.describe('portfolio allocation plan management', () => {
     });
   });
 
-  /** Verifies unrelated GET and child-originated POST completions do not refresh or notify.
+  /** Verifies only a form-owned POST refreshes and notifies after unrelated request completions.
    * @author GPT-6 Luna
+   * @author GPT-6.1 Sol
    */
   test('scenario 18.3: ignores unrelated successful requests in allocation-plan forms', async ({ database, page }) => {
     const seededData = await seedAllocationPlanData(database);
     const managementPath = `/api/portfolio/${seededData.portfolio.id}/allocation-plan`;
     const refreshRequests: Request[] = [];
+    /** Tracks management refreshes separately from viewing refreshes that share the same endpoint.
+     * @author GPT-6 Luna
+     * @author GPT-6.1 Sol
+     */
     const trackManagementRefresh = (request: Request): void => {
-      if(request.method() === 'GET' && new URL(request.url()).pathname === managementPath) {
+      if(request.method() === 'GET' && new URL(request.url()).pathname === managementPath
+        && request.headers()['hx-target'] === 'accordion-allocation-plan-management') {
         refreshRequests.push(request);
       }
     };
@@ -1273,23 +1280,51 @@ test.describe('portfolio allocation plan management', () => {
     await expectAllocationPlanManagement(page, seededData.portfolio);
     page.on('request', trackManagementRefresh);
     try {
-      await page.locator('#allocation-plan-management-form-0').evaluate((formElement) => {
-        const form = formElement as HTMLFormElement;
-        const child = form.querySelector('input');
-        if(!child) {
-          throw new Error('Expected a child input in the allocation-plan form.');
-        }
+      const managementRefresh = page.waitForRequest(
+        /** Identifies the positive control's management refresh before dispatching events.
+         * @author GPT-6.1 Sol
+         */
+        (request) => request.method() === 'GET' && new URL(request.url()).pathname === managementPath
+          && request.headers()['hx-target'] === 'accordion-allocation-plan-management',
+      );
+      await page.locator('#allocation-plan-management-form-0').evaluate(
+        /** Dispatches ignored completions followed by a form-owned POST as a positive control.
+         * @author GPT-6 Luna
+         * @author GPT-6.1 Sol
+         */
+        (formElement) => {
+          const form = formElement as HTMLFormElement;
+          const child = form.querySelector('input');
+          if(!child) {
+            throw new Error('Expected a child input in the allocation-plan form.');
+          }
 
-        for(const verb of ['GET', 'POST']) {
-          form.dispatchEvent(new CustomEvent('htmx:afterRequest', {
+          for(const verb of ['GET', 'POST']) {
+            // Native dispatch must match the kebab-case event bound by hx-on::after-request.
+            form.dispatchEvent(new CustomEvent('htmx:after-request', {
+              bubbles: true,
+              detail: { successful: true, requestConfig: { verb, elt: child } },
+            }));
+          }
+          form.dispatchEvent(new CustomEvent('htmx:after-request', {
             bubbles: true,
-            detail: { successful: true, requestConfig: { verb, elt: child } },
+            detail: { successful: true, requestConfig: { verb: 'post', elt: form } },
           }));
+        },
+      );
+      await managementRefresh;
+      // Iterating the live array also waits for any queued refresh observed during the window.
+      for(const refreshRequest of refreshRequests) {
+        const refreshResponse = await refreshRequest.response();
+        if(!refreshResponse) {
+          throw new Error('Expected a response to the allocation-plan management refresh.');
         }
-      });
-      await page.waitForLoadState('networkidle');
-      expect(refreshRequests).toHaveLength(0);
-      await expect(page.getByText('Allocation plan saved successfully', { exact: true })).toHaveCount(0);
+        expect(await refreshResponse.finished()).toBeNull();
+        // Keep observing after completion instead of relying on an already-satisfied networkidle state.
+        await page.waitForTimeout(500);
+      }
+      expect(refreshRequests).toHaveLength(1);
+      expect(await page.getByText('Allocation plan saved successfully', { exact: true }).count()).toBe(1);
       await expect(page.locator('#allocation-plan-management-container-0')).toBeVisible();
       await expect(database.query('SELECT id FROM public.allocation_plan WHERE portfolio_id = $1', [
         seededData.portfolio.id,
