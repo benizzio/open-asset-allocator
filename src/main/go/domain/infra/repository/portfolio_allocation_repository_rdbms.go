@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 
 	"github.com/lib/pq"
@@ -332,7 +333,7 @@ func (repository *PortfolioAllocationRDBMSRepository) mergePortfolioAllocations(
 
 // InsertObservationTimestampInTransaction creates a new portfolio-owned observation timestamp.
 // For example, `repository.InsertObservationTimestampInTransaction(ctx, 42, observation)` inserts for portfolio 42.
-// Authored by: OpenCode and benizzio
+// Co-authored by: GPT-6.1 Sol, OpenCode and benizzio
 func (repository *PortfolioAllocationRDBMSRepository) InsertObservationTimestampInTransaction(
 	transContext context.Context,
 	portfolioId int64,
@@ -353,7 +354,7 @@ func (repository *PortfolioAllocationRDBMSRepository) InsertObservationTimestamp
 		Get(rdbms.ReturningIntIdSingleRowScanner)
 
 	if err != nil {
-		if classifiedError := classifyObservationWriteError(err, repository); classifiedError != nil {
+		if classifiedError := classifyObservationWriteError(err); classifiedError != nil {
 			return nil, classifiedError
 		}
 		return nil, infra.PropagateAsAppErrorWithNewMessage(
@@ -371,10 +372,10 @@ func (repository *PortfolioAllocationRDBMSRepository) InsertObservationTimestamp
 	}, nil
 }
 
-// UpdateObservationTimestampInTransaction changes metadata only for an observation owned by the supplied portfolio.
-// A missing or foreign observation is returned as a domain validation error rather than being inserted implicitly.
+// UpdateObservationTimestampInTransaction persists metadata already validated by the domain service.
+// A guarded update affecting no rows returns a persistence error rather than inserting an observation implicitly.
 // For example, `repository.UpdateObservationTimestampInTransaction(ctx, 42, observation)` updates portfolio 42.
-// Authored by: OpenCode
+// Co-authored by: GPT-6.1 Sol and OpenCode
 func (repository *PortfolioAllocationRDBMSRepository) UpdateObservationTimestampInTransaction(
 	transContext context.Context,
 	portfolioId int64,
@@ -394,7 +395,7 @@ func (repository *PortfolioAllocationRDBMSRepository) UpdateObservationTimestamp
 		portfolioId,
 	)
 	if err != nil {
-		if classifiedError := classifyObservationWriteError(err, repository); classifiedError != nil {
+		if classifiedError := classifyObservationWriteError(err); classifiedError != nil {
 			return classifiedError
 		}
 		return infra.PropagateAsAppErrorWithNewMessage(
@@ -413,14 +414,16 @@ func (repository *PortfolioAllocationRDBMSRepository) UpdateObservationTimestamp
 		)
 	}
 	if rowsAffected != 1 {
-		return observationOwnershipValidationError(repository)
+		return &infra.UnexpectedRowsAffectedError{
+			Operation: "Update portfolio observation timestamp", Expected: 1, Actual: rowsAffected,
+		}
 	}
 	return nil
 }
 
-// classifyObservationWriteError maps observation tag conflicts and missing portfolio references to client errors.
-// Authored by: OpenCode
-func classifyObservationWriteError(err error, repository *PortfolioAllocationRDBMSRepository) error {
+// classifyObservationWriteError classifies database uniqueness and foreign-key failures at the persistence boundary.
+// Co-authored by: GPT-6.1 Sol and OpenCode
+func classifyObservationWriteError(err error) error {
 	if rdbms.IsUniqueConstraintViolation(err, observationTagUniqueConstraint) {
 		return infra.BuildUniqueConstraintViolationError(
 			observationTagUniqueConstraint,
@@ -433,34 +436,38 @@ func classifyObservationWriteError(err error, repository *PortfolioAllocationRDB
 	if errors.As(err, &postgresError) &&
 		postgresError.Code == "23503" &&
 		postgresError.Constraint == observationPortfolioConstraint {
-		return observationPortfolioValidationError(repository)
+		return &infra.ForeignKeyConstraintViolationError{ConstraintName: postgresError.Constraint, Cause: err}
 	}
 	return nil
 }
 
-// observationOwnershipValidationError reports that an observation is unknown or owned by another portfolio.
-// Authored by: OpenCode
-func observationOwnershipValidationError(origin any) error {
-	return infra.BuildDomainValidationError(
-		"Observation validation failed",
-		[]*infra.AppError{
-			infra.BuildAppErrorFormattedUnconverted(
-				origin,
-				"Observation does not exist in the requested portfolio",
-			),
-		},
-	)
-}
-
-// observationPortfolioValidationError reports a request to create an observation for an unknown portfolio.
-// Authored by: OpenCode
-func observationPortfolioValidationError(origin any) error {
-	return infra.BuildDomainValidationError(
-		"Observation validation failed",
-		[]*infra.AppError{
-			infra.BuildAppErrorFormattedUnconverted(origin, "Portfolio does not exist"),
-		},
-	)
+// FindObservationTimestampInTransaction locks and reads an observation without deciding domain ownership rules.
+// For example, repository.FindObservationTimestampInTransaction(ctx, 2) returns nil if observation 2 is missing.
+// Authored by: GPT-6.1 Sol
+func (repository *PortfolioAllocationRDBMSRepository) FindObservationTimestampInTransaction(
+	transContext context.Context,
+	observationId int64,
+) (*domain.PortfolioObservationTimestamp, error) {
+	var transactionalContext, ok = rdbms.ToSQLTransactionalContext(transContext)
+	if !ok {
+		return nil, infra.BuildAppError("Context is not a SQL transactional context", repository)
+	}
+	var observation domain.PortfolioObservationTimestamp
+	var err = transactionalContext.GetTransaction().QueryRowContext(
+		transContext,
+		`SELECT id, portfolio_id, observation_time_tag, observation_timestamp
+		 FROM portfolio_allocation_obs_time WHERE id = $1 FOR UPDATE`,
+		observationId,
+	).Scan(&observation.Id, &observation.PortfolioId, &observation.TimeTag, &observation.Timestamp)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(
+			err, "Error reading portfolio observation timestamp", repository,
+		)
+	}
+	return &observation, nil
 }
 
 func BuildPortfolioAllocationRepository(dbAdapter rdbms.RepositoryRDBMSAdapter) *PortfolioAllocationRDBMSRepository {

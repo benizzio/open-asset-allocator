@@ -50,7 +50,13 @@ func (allocationPlan *AllocationPlan) AddDetail(detail *PlannedAllocation) {
 	allocationPlan.Details = append(allocationPlan.Details, detail)
 }
 
+// AllocationPlanRepository provides persistence operations used by the allocation plan domain service.
+// Co-authored by: GPT-6.1 Sol and benizzio
 type AllocationPlanRepository interface {
+	// FindAllocationPlanOwnershipInTransaction locks a plan and reads its owner, type, and persisted detail IDs.
+	// For example, FindAllocationPlanOwnershipInTransaction(ctx, 6) returns nil if plan 6 is missing.
+	// Authored by: GPT-6.1 Sol
+	FindAllocationPlanOwnershipInTransaction(context.Context, int64) (*AllocationPlanOwnership, error)
 	GetAllAllocationPlans(portfolioId int64, planType *allocation.PlanType) ([]*AllocationPlan, error)
 	GetAllocationPlan(id int64) (*AllocationPlan, error)
 	GetAllAllocationPlanIdentifiers(
@@ -59,4 +65,13 @@ type AllocationPlanRepository interface {
 	) ([]*AllocationPlanIdentifier, error)
 	InsertAllocationPlanInTransaction(transContext context.Context, plan *AllocationPlan) error
 	UpdateAllocationPlanInTransaction(transContext context.Context, plan *AllocationPlan) error
+}
+
+// AllocationPlanOwnership contains persisted identifiers needed for domain-service write validation.
+// It is read within the write transaction, with the plan locked until commit or rollback.
+// Authored by: GPT-6.1 Sol
+type AllocationPlanOwnership struct {
+	PortfolioId int64
+	PlanType    allocation.PlanType
+	DetailIds   []int64
 }

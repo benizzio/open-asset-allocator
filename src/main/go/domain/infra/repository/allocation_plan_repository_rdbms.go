@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 
 	"github.com/lib/pq"
 
@@ -157,7 +159,7 @@ func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlanIdentifiers
 
 // InsertAllocationPlanInTransaction creates a plan and its details as one transaction.
 // For example, `repository.InsertAllocationPlanInTransaction(ctx, plan)` creates the plan for plan.PortfolioId.
-// Co-authored by: OpenCode and benizzio
+// Co-authored by: GPT-6.1 Sol, OpenCode and benizzio
 func (repository *AllocationPlanRDBMSRepository) InsertAllocationPlanInTransaction(
 	transContext context.Context,
 	plan *domain.AllocationPlan,
@@ -169,9 +171,6 @@ func (repository *AllocationPlanRDBMSRepository) InsertAllocationPlanInTransacti
 			"Context is not a SQL transactional context",
 			repository,
 		)
-	}
-	if err := rejectPersistedDetailsOnNewPlan(plan.Details, repository); err != nil {
-		return err
 	}
 
 	id, err := rdbms.BuildQueryInTransaction[int64](transactionalContext, allocationPlanInsertSQL).
@@ -185,9 +184,9 @@ func (repository *AllocationPlanRDBMSRepository) InsertAllocationPlanInTransacti
 	return repository.mergePlannedAllocationsInTransaction(transactionalContext, id, plan.Details)
 }
 
-// UpdateAllocationPlanInTransaction updates a portfolio-owned plan and validates its persisted detail IDs.
+// UpdateAllocationPlanInTransaction persists a plan already validated by the domain service.
 // For example, `repository.UpdateAllocationPlanInTransaction(ctx, plan)` updates plan.Id only in plan.PortfolioId.
-// Co-authored by: OpenCode and benizzio
+// Co-authored by: GPT-6.1 Sol, OpenCode and benizzio
 func (repository *AllocationPlanRDBMSRepository) UpdateAllocationPlanInTransaction(
 	transContext context.Context,
 	plan *domain.AllocationPlan,
@@ -218,89 +217,48 @@ func (repository *AllocationPlanRDBMSRepository) UpdateAllocationPlanInTransacti
 		return infra.PropagateAsAppErrorWithNewMessage(err, "Error checking updated allocation plan", repository)
 	}
 	if rowsAffected != 1 {
-		return allocationPlanOwnershipValidationError(repository)
-	}
-	if err := validatePlannedAllocationOwnership(
-		transContext,
-		plan.Id,
-		plan.Details,
-		repository,
-	); err != nil {
-		return err
+		return &infra.UnexpectedRowsAffectedError{
+			Operation: "Update allocation plan", Expected: 1, Actual: rowsAffected,
+		}
 	}
 
 	return repository.mergePlannedAllocationsInTransaction(transactionalContext, int64(plan.Id), plan.Details)
 }
 
-// rejectPersistedDetailsOnNewPlan prevents a create request from reusing identifiers owned by existing plans.
-// Authored by: OpenCode
-func rejectPersistedDetailsOnNewPlan(
-	plannedAllocations []*domain.PlannedAllocation,
-	origin any,
-) error {
-	for _, plannedAllocation := range plannedAllocations {
-		if plannedAllocation != nil && plannedAllocation.Id != 0 {
-			return plannedAllocationValidationError(origin, "New allocation plans cannot reuse existing detail IDs")
-		}
-	}
-	return nil
-}
-
-// validatePlannedAllocationOwnership ensures every submitted persisted detail belongs to the target plan.
-// Authored by: OpenCode
-func validatePlannedAllocationOwnership(
+// FindAllocationPlanOwnershipInTransaction locks a plan and reads its persisted ownership and detail identifiers.
+// For example, repository.FindAllocationPlanOwnershipInTransaction(ctx, 6) returns nil if plan 6 is missing.
+// Authored by: GPT-6.1 Sol
+func (repository *AllocationPlanRDBMSRepository) FindAllocationPlanOwnershipInTransaction(
 	transContext context.Context,
 	allocationPlanId int64,
-	plannedAllocations []*domain.PlannedAllocation,
-	origin any,
-) error {
-	var detailIds = make([]int64, 0, len(plannedAllocations))
-	for _, plannedAllocation := range plannedAllocations {
-		if plannedAllocation != nil && plannedAllocation.Id != 0 {
-			detailIds = append(detailIds, plannedAllocation.Id)
-		}
-	}
-	if len(detailIds) == 0 {
-		return nil
-	}
-
-	transactionalContext, ok := rdbms.ToSQLTransactionalContext(transContext)
+) (*domain.AllocationPlanOwnership, error) {
+	var transactionalContext, ok = rdbms.ToSQLTransactionalContext(transContext)
 	if !ok {
-		return infra.BuildAppError("Context is not a SQL transactional context", origin)
+		return nil, infra.BuildAppError("Context is not a SQL transactional context", repository)
 	}
-	var ownedDetailCount int
-	err := transactionalContext.GetTransaction().QueryRowContext(
+	var ownership domain.AllocationPlanOwnership
+	var err = transactionalContext.GetTransaction().QueryRowContext(
 		transContext,
-		`SELECT COUNT(*) FROM planned_allocation
-		 WHERE allocation_plan_id = $1 AND id::BIGINT = ANY($2::BIGINT[])`,
+		`SELECT portfolio_id, type FROM allocation_plan WHERE id = $1 FOR UPDATE`,
 		allocationPlanId,
-		pq.Array(detailIds),
-	).Scan(&ownedDetailCount)
-	if err != nil {
-		return infra.PropagateAsAppErrorWithNewMessage(err, "Error validating planned allocation ownership", origin)
+	).Scan(&ownership.PortfolioId, &ownership.PlanType)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
 	}
-	if ownedDetailCount != len(detailIds) {
-		return plannedAllocationValidationError(
-			origin,
-			"One or more planned allocation detail IDs do not belong to this plan",
+	if err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "Error reading allocation plan ownership", repository)
+	}
+	err = transactionalContext.GetTransaction().QueryRowContext(
+		transContext,
+		`SELECT COALESCE(array_agg(id::BIGINT), '{}'::BIGINT[]) FROM planned_allocation WHERE allocation_plan_id = $1`,
+		allocationPlanId,
+	).Scan(pq.Array(&ownership.DetailIds))
+	if err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(
+			err, "Error reading planned allocation identifiers", repository,
 		)
 	}
-	return nil
-}
-
-// allocationPlanOwnershipValidationError reports that the requested plan is unknown, foreign, or of another type.
-// Authored by: OpenCode
-func allocationPlanOwnershipValidationError(origin any) error {
-	return plannedAllocationValidationError(origin, "Allocation plan does not exist in the requested portfolio")
-}
-
-// plannedAllocationValidationError builds the existing structured client-validation response for plan writes.
-// Authored by: OpenCode
-func plannedAllocationValidationError(origin any, message string) error {
-	return infra.BuildDomainValidationError(
-		"Allocation plan validation failed",
-		[]*infra.AppError{infra.BuildAppErrorFormattedUnconverted(origin, "%s", message)},
-	)
+	return &ownership, nil
 }
 
 func (repository *AllocationPlanRDBMSRepository) mergePlannedAllocationsInTransaction(
