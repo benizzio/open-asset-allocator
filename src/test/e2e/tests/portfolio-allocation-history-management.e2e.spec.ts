@@ -2055,7 +2055,8 @@ test.describe('portfolio allocation history management', () => {
       await expect(database.query<{ count: string }>(
         `SELECT COUNT(*)::text AS count
          FROM public.portfolio_allocation_obs_time ot
-         JOIN public.portfolio_allocation_fact paf ON paf.observation_time_id = ot.id
+         JOIN public.portfolio_allocation_fact paf
+           ON paf.portfolio_id = ot.portfolio_id AND paf.observation_time_id = ot.id
          WHERE paf.portfolio_id = $1`,
         [seededData.portfolio.id],
       )).resolves.toEqual([{ count: '11' }]);
@@ -2342,7 +2343,8 @@ async function seedPortfolioHistoryData(database: E2eDatabase): Promise<{
  * @returns The observation identity and values read back from PostgreSQL.
  * @author GPT-6 Luna
  * @author benizzio
- */
+ * @author OpenCode
+  */
 async function seedManagementObservation(
   database: E2eDatabase,
   portfolio: SeededPortfolio,
@@ -2351,10 +2353,10 @@ async function seedManagementObservation(
   timestamp: string,
 ): Promise<PersistedObservation> {
   const observations = await database.query<PersistedObservation>(
-    `INSERT INTO public.portfolio_allocation_obs_time (observation_time_tag, observation_timestamp)
-     VALUES ($1, $2::timestamptz)
+    `INSERT INTO public.portfolio_allocation_obs_time (portfolio_id, observation_time_tag, observation_timestamp)
+     VALUES ($1, $2, $3::timestamptz)
      RETURNING id, observation_timestamp, observation_time_tag`,
-    [timeTag, timestamp],
+    [portfolio.id, timeTag, timestamp],
   );
   expect(observations).toHaveLength(1);
 
@@ -2370,7 +2372,10 @@ async function seedManagementObservation(
   return observation;
 }
 
-/** Seeds the fixed four-asset observation required by scenario 5. */
+/** Seeds the fixed four-asset observation required by scenario 5.
+ *
+ * @author OpenCode
+ */
 async function seedPortfolioHistoryModificationData(
   database: E2eDatabase,
 ): Promise<SeededHistoryModificationData> {
@@ -2405,10 +2410,10 @@ async function seedPortfolioHistoryModificationData(
 
   const assets = Object.fromEntries(assetRows.map((asset) => [asset.ticker, asset])) as Record<string, SeededAsset>;
   const observationRows = await database.query<PersistedObservation>(
-    `INSERT INTO public.portfolio_allocation_obs_time (observation_time_tag, observation_timestamp)
-     VALUES ($1, $2::timestamptz)
+    `INSERT INTO public.portfolio_allocation_obs_time (portfolio_id, observation_time_tag, observation_timestamp)
+     VALUES ($1, $2, $3::timestamptz)
      RETURNING id, observation_timestamp, observation_time_tag`,
-    [OBSERVATION_TIME_TAG, FIXED_OBSERVATION_TIMESTAMP],
+    [portfolioRows[0].id, OBSERVATION_TIME_TAG, FIXED_OBSERVATION_TIMESTAMP],
   );
   expect(observationRows).toHaveLength(1);
 
@@ -2968,7 +2973,10 @@ async function expectSuccessNotification(page: Page): Promise<void> {
   await expect(toast.locator('.toast-body')).toHaveText('Portfolio observation data saved successfully.');
 }
 
-/** Finds one persisted observation by its portfolio-scoped time tag. */
+/** Finds one persisted observation by its portfolio-scoped time tag.
+ *
+ * @author OpenCode
+ */
 async function findObservationByTag(
   database: E2eDatabase,
   portfolio: SeededPortfolio,
@@ -2977,7 +2985,8 @@ async function findObservationByTag(
   const observations = await database.query<PersistedObservation>(
     `SELECT DISTINCT ot.id, ot.observation_timestamp, ot.observation_time_tag
      FROM public.portfolio_allocation_obs_time ot
-     JOIN public.portfolio_allocation_fact paf ON paf.observation_time_id = ot.id
+     JOIN public.portfolio_allocation_fact paf
+       ON paf.portfolio_id = ot.portfolio_id AND paf.observation_time_id = ot.id
      WHERE paf.portfolio_id = $1
        AND ot.observation_time_tag = $2`,
     [portfolio.id, timeTag],
@@ -3011,7 +3020,10 @@ async function expectReloadedObservationRows(form: Locator, observationId: numbe
   }
 }
 
-/** Reads and verifies the observation, facts, assets, and unchanged portfolio in PostgreSQL. */
+/** Reads and verifies the observation, facts, assets, and unchanged portfolio in PostgreSQL.
+ *
+ * @author OpenCode
+ */
 async function expectPersistedPortfolioHistory(
   database: E2eDatabase,
   portfolio: SeededPortfolio,
@@ -3021,7 +3033,8 @@ async function expectPersistedPortfolioHistory(
   const observations = await database.query<PersistedObservation>(
     `SELECT DISTINCT ot.id, ot.observation_timestamp, ot.observation_time_tag
      FROM public.portfolio_allocation_obs_time ot
-     JOIN public.portfolio_allocation_fact paf ON paf.observation_time_id = ot.id
+     JOIN public.portfolio_allocation_fact paf
+       ON paf.portfolio_id = ot.portfolio_id AND paf.observation_time_id = ot.id
      WHERE paf.portfolio_id = $1
        AND ot.observation_time_tag = $2`,
     [portfolio.id, OBSERVATION_TIME_TAG],
@@ -3350,7 +3363,10 @@ async function expectModifiedObservationChart(
   })).toBe(true);
 }
 
-/** Verifies final observation identities, allocation facts, assets, portfolio, and plan absence. */
+/** Verifies final observation identities, allocation facts, assets, portfolio, and plan absence.
+ *
+ * @author OpenCode
+ */
 async function expectPersistedModifiedPortfolioHistory(
   database: E2eDatabase,
   seededData: SeededHistoryModificationData,
@@ -3359,7 +3375,8 @@ async function expectPersistedModifiedPortfolioHistory(
   const observations = await database.query<PersistedObservation>(
     `SELECT DISTINCT ot.id, ot.observation_timestamp, ot.observation_time_tag
      FROM public.portfolio_allocation_obs_time ot
-     JOIN public.portfolio_allocation_fact paf ON paf.observation_time_id = ot.id
+     JOIN public.portfolio_allocation_fact paf
+       ON paf.portfolio_id = ot.portfolio_id AND paf.observation_time_id = ot.id
      WHERE paf.portfolio_id = $1
      ORDER BY ot.observation_timestamp ASC`,
     [seededData.portfolio.id],

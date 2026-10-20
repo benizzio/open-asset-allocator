@@ -2,7 +2,8 @@ package service
 
 import (
 	"context"
-	"time"
+	"strings"
+	"unicode/utf8"
 
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra"
@@ -106,26 +107,82 @@ func (service *PortfolioAllocationDomService) MergePortfolioAllocationsInTransac
 	)
 }
 
-// InsertObservationTimestampInTransaction persists an observation with its explicitly supplied timestamp.
-// For example, callers must pass the instant selected by the client rather than relying on a server-side default.
+// InsertObservationTimestampInTransaction persists a new observation for the supplied portfolio, or updates an
+// existing observation only when it belongs to that portfolio. Callers should pass the observation selected by the
+// client, for example `InsertObservationTimestampInTransaction(ctx, 42, observation)`; its required tag and instant
+// are validated before persistence.
 //
 // Co-authored by: OpenCode and benizzio
 func (service *PortfolioAllocationDomService) InsertObservationTimestampInTransaction(
 	transContext context.Context,
+	portfolioId int64,
 	observationTimestamp *domain.PortfolioObservationTimestamp,
 ) (*domain.PortfolioObservationTimestamp, error) {
-	if langext.IsZeroValue(observationTimestamp.Timestamp) {
-		return nil, infra.BuildAppError("Observation timestamp is required and must not be zero", service)
+	validationError := service.validateObservationTimestamp(portfolioId, observationTimestamp)
+	if validationError != nil {
+		return nil, validationError
 	}
 
-	if langext.IsZeroValue(observationTimestamp.TimeTag) {
-		observationTimestamp.TimeTag = observationTimestamp.Timestamp.Format(time.RFC3339)
+	observationTimestamp.PortfolioId = portfolioId
+	if !langext.IsZeroValue(observationTimestamp.Id) {
+		err := service.portfolioAllocationRepository.UpdateObservationTimestampInTransaction(
+			transContext,
+			portfolioId,
+			observationTimestamp,
+		)
+		if err != nil {
+			return nil, err
+		}
+		return observationTimestamp, nil
 	}
 
 	return service.portfolioAllocationRepository.InsertObservationTimestampInTransaction(
 		transContext,
+		portfolioId,
 		observationTimestamp,
 	)
+}
+
+// validateObservationTimestamp rejects invalid metadata before the repository writes it.
+// Authored by: OpenCode
+func (service *PortfolioAllocationDomService) validateObservationTimestamp(
+	portfolioId int64,
+	observationTimestamp *domain.PortfolioObservationTimestamp,
+) error {
+	var causes = make([]*infra.AppError, 0)
+	if observationTimestamp == nil {
+		causes = append(causes, infra.BuildAppErrorFormattedUnconverted(service, "Observation timestamp is required"))
+	} else {
+		if portfolioId <= 0 {
+			causes = append(causes, infra.BuildAppErrorFormattedUnconverted(service, "Portfolio ID must be positive"))
+		}
+		if observationTimestamp.TimeTag == "" && observationTimestamp.Id == 0 {
+			causes = append(causes, infra.BuildAppErrorFormattedUnconverted(
+				service,
+				"Observation time tag is required for new observations",
+			))
+		} else if observationTimestamp.TimeTag != "" && strings.TrimSpace(observationTimestamp.TimeTag) == "" {
+			causes = append(causes, infra.BuildAppErrorFormattedUnconverted(
+				service,
+				"Observation time tag must not contain only whitespace",
+			))
+		} else if utf8.RuneCountInString(observationTimestamp.TimeTag) > 100 {
+			causes = append(causes, infra.BuildAppErrorFormattedUnconverted(
+				service,
+				"Observation time tag must not exceed 100 characters",
+			))
+		}
+		if langext.IsZeroValue(observationTimestamp.Timestamp) {
+			causes = append(causes, infra.BuildAppErrorFormattedUnconverted(
+				service,
+				"Observation timestamp is required and must not be zero",
+			))
+		}
+	}
+	if len(causes) == 0 {
+		return nil
+	}
+	return infra.BuildDomainValidationError("Observation timestamp validation failed", causes)
 }
 
 func BuildPortfolioAllocationDomService(

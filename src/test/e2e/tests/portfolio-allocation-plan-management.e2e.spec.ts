@@ -2395,7 +2395,8 @@ async function expectPersistedAllocationPlan(
   await expect(database.query(
     `SELECT DISTINCT ot.id
      FROM public.portfolio_allocation_obs_time ot
-     JOIN public.portfolio_allocation_fact paf ON paf.observation_time_id = ot.id
+     JOIN public.portfolio_allocation_fact paf
+       ON paf.portfolio_id = ot.portfolio_id AND paf.observation_time_id = ot.id
      WHERE paf.portfolio_id = $1`,
     [seededData.portfolio.id],
   )).resolves.toEqual([]);
@@ -2469,7 +2470,10 @@ function expectedPlannedAllocation(
   };
 }
 
-/** Verifies scenario 6 plan identities, details, unchanged assets, and absent history data. */
+/** Verifies scenario 6 plan identities, details, unchanged assets, and absent history data.
+ *
+ * @author OpenCode
+ */
 async function expectPersistedAllocationPlanManagement(
   database: E2eDatabase,
   seededData: SeededAllocationPlanData,

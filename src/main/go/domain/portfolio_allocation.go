@@ -23,10 +23,14 @@ type PortfolioAllocation struct {
 	AssetMarketPrice      decimal.Decimal
 }
 
+// PortfolioObservationTimestamp identifies a portfolio-owned observation and its editable metadata.
+//
+// Co-authored by: OpenCode and benizzio
 type PortfolioObservationTimestamp struct {
-	Id        int64
-	TimeTag   string
-	Timestamp time.Time
+	Id          int64
+	PortfolioId int64
+	TimeTag     string
+	Timestamp   time.Time
 }
 
 type PortfolioAllocationRepository interface {
@@ -50,6 +54,15 @@ type PortfolioAllocationRepository interface {
 	) error
 	InsertObservationTimestampInTransaction(
 		transContext context.Context,
+		portfolioId int64,
 		observationTimestamp *PortfolioObservationTimestamp,
 	) (*PortfolioObservationTimestamp, error)
+	// UpdateObservationTimestampInTransaction changes metadata for an observation already owned by the portfolio.
+	// For example, `repository.UpdateObservationTimestampInTransaction(ctx, 42, observation)` updates portfolio 42.
+	// Authored by: OpenCode
+	UpdateObservationTimestampInTransaction(
+		transContext context.Context,
+		portfolioId int64,
+		observationTimestamp *PortfolioObservationTimestamp,
+	) error
 }

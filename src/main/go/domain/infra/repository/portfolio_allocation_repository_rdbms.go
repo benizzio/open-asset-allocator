@@ -2,6 +2,9 @@ package repository
 
 import (
 	"context"
+	"errors"
+
+	"github.com/lib/pq"
 
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra"
@@ -11,9 +14,11 @@ import (
 
 const (
 	availableObservationTimestampsSQL = `
-		SELECT DISTINCT paot.id, paot.observation_time_tag AS time_tag, paot.observation_timestamp AS "timestamp"
+		SELECT DISTINCT paot.id, paot.portfolio_id, paot.observation_time_tag AS time_tag,
+			paot.observation_timestamp AS "timestamp"
 		FROM portfolio_allocation_fact pa
-		JOIN portfolio_allocation_obs_time paot ON pa.observation_time_id = paot.id
+		JOIN portfolio_allocation_obs_time paot
+		  ON pa.portfolio_id = paot.portfolio_id AND pa.observation_time_id = paot.id
 		` + rdbms.WhereClausePlaceholder + `
 		ORDER BY paot.observation_timestamp DESC, paot.id DESC LIMIT {:observationTimestampLimit}
 	`
@@ -22,27 +27,30 @@ const (
 			AS (
 				SELECT DISTINCT paot.*
 				FROM portfolio_allocation_fact pa
-				JOIN portfolio_allocation_obs_time paot ON pa.observation_time_id = paot.id
+				JOIN portfolio_allocation_obs_time paot
+				  ON pa.portfolio_id = paot.portfolio_id AND pa.observation_time_id = paot.id
 				WHERE pa.portfolio_id = {:portfolioId}
 				ORDER BY paot.observation_timestamp DESC, paot.id DESC
 				LIMIT {:observationTimestampLimit}
 			)
 	`
 	portfolioAllocationsSQL = `
-		SELECT 
-		    pa.*, 
-		    ass.id AS "asset.id", 
-		    ass.ticker AS "asset.ticker", 
-		    coalesce(ass.name, '') AS "asset.name", 
+		SELECT
+		    pa.*,
+		    ass.id AS "asset.id",
+		    ass.ticker AS "asset.ticker",
+		    coalesce(ass.name, '') AS "asset.name",
 		    coalesce(ass.external_data #>> '{data,0,source}', '') AS selected_external_asset_source,
 		    coalesce(ass.external_data #>> '{data,0,ticker}', '') AS selected_external_asset_ticker,
 		    coalesce(ass.external_data #>> '{data,0,exchangeId}', '') AS selected_external_asset_exchange_id,
 		    paot.id AS "observation_timestamp.id",
+		    paot.portfolio_id AS "observation_timestamp.portfolio_id",
 		    coalesce(paot.observation_time_tag, '') AS "observation_timestamp.time_tag",
 		    paot.observation_timestamp AS "observation_timestamp.timestamp"
 		FROM portfolio_allocation_fact pa
 		JOIN asset ass ON ass.id = pa.asset_id
-		JOIN portfolio_allocation_obs_time paot ON pa.observation_time_id = paot.id 
+		JOIN portfolio_allocation_obs_time paot
+		  ON pa.portfolio_id = paot.portfolio_id AND pa.observation_time_id = paot.id
 		` + rdbms.WhereClausePlaceholder + `
 		ORDER BY paot.observation_timestamp DESC, paot.id DESC,
 			pa.class ASC, pa.cash_reserve DESC, pa.total_market_value DESC
@@ -50,13 +58,13 @@ const (
 	portfolioAllocationsTempTableName   = `portfolio_allocation_fact_merge_temp`
 	portfolioAllocationsTempTableDDLSQL = `
 		CREATE TEMPORARY TABLE ` + portfolioAllocationsTempTableName + `
-		(LIKE portfolio_allocation_fact INCLUDING DEFAULTS) 
+		(LIKE portfolio_allocation_fact INCLUDING DEFAULTS)
 		ON COMMIT DROP
 	`
 	portfolioAllocationsMergeSQL = `
 		MERGE INTO portfolio_allocation_fact paf
 		USING ` + portfolioAllocationsTempTableName + ` temp
-		ON 
+		ON
 			paf.asset_id = temp.asset_id
 			AND paf."class" = temp."class"
 			AND paf.cash_reserve = temp.cash_reserve
@@ -64,23 +72,23 @@ const (
 			AND paf.observation_time_id = temp.observation_time_id
 		WHEN NOT MATCHED BY TARGET THEN
     		INSERT (
-				asset_id, 
-				"class", 
-				cash_reserve, 
-				asset_quantity, 
-				asset_market_price, 
-				total_market_value, 
-				portfolio_id, 
+				asset_id,
+				"class",
+				cash_reserve,
+				asset_quantity,
+				asset_market_price,
+				total_market_value,
+				portfolio_id,
 				observation_time_id
 			)
 			VALUES (
-				temp.asset_id, 
-				temp."class", 
-				temp.cash_reserve, 
-				temp.asset_quantity, 
-				temp.asset_market_price, 
-				temp.total_market_value, 
-				temp.portfolio_id, 
+				temp.asset_id,
+				temp."class",
+				temp.cash_reserve,
+				temp.asset_quantity,
+				temp.asset_market_price,
+				temp.total_market_value,
+				temp.portfolio_id,
 				temp.observation_time_id
 			)
 		WHEN MATCHED AND (
@@ -88,7 +96,7 @@ const (
 				OR paf.asset_market_price != temp.asset_market_price
 				OR paf.total_market_value != temp.total_market_value
 			) THEN
-				UPDATE SET 
+				UPDATE SET
 					asset_quantity = temp.asset_quantity,
 					asset_market_price = temp.asset_market_price,
 					total_market_value = temp.total_market_value
@@ -99,10 +107,16 @@ const (
     			DELETE
 	`
 	observationTimestampInsertSQL = `
-		INSERT INTO portfolio_allocation_obs_time (observation_time_tag, observation_timestamp)
-		VALUES ($1, $2)
+		INSERT INTO portfolio_allocation_obs_time (portfolio_id, observation_time_tag, observation_timestamp)
+		VALUES ($1, $2, $3)
 		RETURNING id
     `
+	observationTimestampUpdateSQL = `
+		UPDATE portfolio_allocation_obs_time
+		SET observation_time_tag = CASE WHEN $1 = '' THEN observation_time_tag ELSE $1 END,
+		    observation_timestamp = $2
+		WHERE id = $3 AND portfolio_id = $4
+	`
 )
 
 const (
@@ -112,6 +126,8 @@ const (
 const (
 	queryAllocationsError           = "Error querying portfolio allocations"
 	queryObservationTimestampsError = "Error querying observation timestamps"
+	observationTagUniqueConstraint  = "portfolio_allocation_obs_time_portfolio_tag_uk"
+	observationPortfolioConstraint  = "portfolio_allocation_obs_time_portfolio_fk"
 )
 
 type PortfolioAllocationRDBMSRepository struct {
@@ -314,8 +330,12 @@ func (repository *PortfolioAllocationRDBMSRepository) mergePortfolioAllocations(
 	)
 }
 
+// InsertObservationTimestampInTransaction creates a new portfolio-owned observation timestamp.
+// For example, `repository.InsertObservationTimestampInTransaction(ctx, 42, observation)` inserts for portfolio 42.
+// Authored by: OpenCode and benizzio
 func (repository *PortfolioAllocationRDBMSRepository) InsertObservationTimestampInTransaction(
 	transContext context.Context,
+	portfolioId int64,
 	observationTimestamp *domain.PortfolioObservationTimestamp,
 ) (*domain.PortfolioObservationTimestamp, error) {
 
@@ -328,11 +348,14 @@ func (repository *PortfolioAllocationRDBMSRepository) InsertObservationTimestamp
 	}
 
 	id, err := rdbms.BuildQueryInTransaction[int64](transactionalContext, observationTimestampInsertSQL).
-		AddParams(observationTimestamp.TimeTag, observationTimestamp.Timestamp).
+		AddParams(portfolioId, observationTimestamp.TimeTag, observationTimestamp.Timestamp).
 		Build().
 		Get(rdbms.ReturningIntIdSingleRowScanner)
 
 	if err != nil {
+		if classifiedError := classifyObservationWriteError(err, repository); classifiedError != nil {
+			return nil, classifiedError
+		}
 		return nil, infra.PropagateAsAppErrorWithNewMessage(
 			err,
 			"Error inserting portfolio observation timestamp",
@@ -341,10 +364,103 @@ func (repository *PortfolioAllocationRDBMSRepository) InsertObservationTimestamp
 	}
 
 	return &domain.PortfolioObservationTimestamp{
-		Id:        id,
-		TimeTag:   observationTimestamp.TimeTag,
-		Timestamp: observationTimestamp.Timestamp,
+		Id:          id,
+		PortfolioId: portfolioId,
+		TimeTag:     observationTimestamp.TimeTag,
+		Timestamp:   observationTimestamp.Timestamp,
 	}, nil
+}
+
+// UpdateObservationTimestampInTransaction changes metadata only for an observation owned by the supplied portfolio.
+// A missing or foreign observation is returned as a domain validation error rather than being inserted implicitly.
+// For example, `repository.UpdateObservationTimestampInTransaction(ctx, 42, observation)` updates portfolio 42.
+// Authored by: OpenCode
+func (repository *PortfolioAllocationRDBMSRepository) UpdateObservationTimestampInTransaction(
+	transContext context.Context,
+	portfolioId int64,
+	observationTimestamp *domain.PortfolioObservationTimestamp,
+) error {
+	var transactionalContext, ok = rdbms.ToSQLTransactionalContext(transContext)
+	if !ok {
+		return infra.BuildAppError("Context is not a SQL transactional context", repository)
+	}
+
+	result, err := repository.dbAdapter.ExecuteInTransaction(
+		transactionalContext,
+		observationTimestampUpdateSQL,
+		observationTimestamp.TimeTag,
+		observationTimestamp.Timestamp,
+		observationTimestamp.Id,
+		portfolioId,
+	)
+	if err != nil {
+		if classifiedError := classifyObservationWriteError(err, repository); classifiedError != nil {
+			return classifiedError
+		}
+		return infra.PropagateAsAppErrorWithNewMessage(
+			err,
+			"Error updating portfolio observation timestamp",
+			repository,
+		)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return infra.PropagateAsAppErrorWithNewMessage(
+			err,
+			"Error checking updated portfolio observation timestamp",
+			repository,
+		)
+	}
+	if rowsAffected != 1 {
+		return observationOwnershipValidationError(repository)
+	}
+	return nil
+}
+
+// classifyObservationWriteError maps observation tag conflicts and missing portfolio references to client errors.
+// Authored by: OpenCode
+func classifyObservationWriteError(err error, repository *PortfolioAllocationRDBMSRepository) error {
+	if rdbms.IsUniqueConstraintViolation(err, observationTagUniqueConstraint) {
+		return infra.BuildUniqueConstraintViolationError(
+			observationTagUniqueConstraint,
+			"Observation tag already exists in this portfolio.",
+			[]string{"Choose a different observationTimestamp.timeTag."},
+		)
+	}
+
+	var postgresError *pq.Error
+	if errors.As(err, &postgresError) &&
+		postgresError.Code == "23503" &&
+		postgresError.Constraint == observationPortfolioConstraint {
+		return observationPortfolioValidationError(repository)
+	}
+	return nil
+}
+
+// observationOwnershipValidationError reports that an observation is unknown or owned by another portfolio.
+// Authored by: OpenCode
+func observationOwnershipValidationError(origin any) error {
+	return infra.BuildDomainValidationError(
+		"Observation validation failed",
+		[]*infra.AppError{
+			infra.BuildAppErrorFormattedUnconverted(
+				origin,
+				"Observation does not exist in the requested portfolio",
+			),
+		},
+	)
+}
+
+// observationPortfolioValidationError reports a request to create an observation for an unknown portfolio.
+// Authored by: OpenCode
+func observationPortfolioValidationError(origin any) error {
+	return infra.BuildDomainValidationError(
+		"Observation validation failed",
+		[]*infra.AppError{
+			infra.BuildAppErrorFormattedUnconverted(origin, "Portfolio does not exist"),
+		},
+	)
 }
 
 func BuildPortfolioAllocationRepository(dbAdapter rdbms.RepositoryRDBMSAdapter) *PortfolioAllocationRDBMSRepository {
