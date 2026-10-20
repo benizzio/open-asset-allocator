@@ -158,7 +158,7 @@ func (service *PortfolioAllocationDomService) validateObservationOwnership(
 	transContext context.Context,
 	portfolioId, observationId int64,
 ) error {
-	observation, err := service.portfolioAllocationRepository.FindObservationTimestampInTransaction(
+	observation, err := service.portfolioAllocationRepository.FindAndLockObservationTimestampInTransaction(
 		transContext, observationId,
 	)
 	if err != nil {

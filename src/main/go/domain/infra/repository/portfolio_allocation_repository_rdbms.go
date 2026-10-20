@@ -441,10 +441,10 @@ func classifyObservationWriteError(err error) error {
 	return nil
 }
 
-// FindObservationTimestampInTransaction locks and reads an observation without deciding domain ownership rules.
-// For example, repository.FindObservationTimestampInTransaction(ctx, 2) returns nil if observation 2 is missing.
+// FindAndLockObservationTimestampInTransaction locks and reads an observation without deciding domain ownership rules.
+// For example, repository.FindAndLockObservationTimestampInTransaction(ctx, 2) returns nil if observation 2 is missing.
 // Authored by: GPT-6.1 Sol
-func (repository *PortfolioAllocationRDBMSRepository) FindObservationTimestampInTransaction(
+func (repository *PortfolioAllocationRDBMSRepository) FindAndLockObservationTimestampInTransaction(
 	transContext context.Context,
 	observationId int64,
 ) (*domain.PortfolioObservationTimestamp, error) {
