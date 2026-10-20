@@ -53,10 +53,10 @@ func (allocationPlan *AllocationPlan) AddDetail(detail *PlannedAllocation) {
 // AllocationPlanRepository provides persistence operations used by the allocation plan domain service.
 // Co-authored by: GPT-6.1 Sol and benizzio
 type AllocationPlanRepository interface {
-	// FindAllocationPlanOwnershipInTransaction locks a plan and reads its owner, type, and persisted detail IDs.
-	// For example, FindAllocationPlanOwnershipInTransaction(ctx, 6) returns nil if plan 6 is missing.
+	// FindAndLockAllocationPlanOwnershipInTransaction locks a plan and reads its owner, type, and persisted detail IDs.
+	// For example, FindAndLockAllocationPlanOwnershipInTransaction(ctx, 6) returns nil if plan 6 is missing.
 	// Authored by: GPT-6.1 Sol
-	FindAllocationPlanOwnershipInTransaction(context.Context, int64) (*AllocationPlanOwnership, error)
+	FindAndLockAllocationPlanOwnershipInTransaction(context.Context, int64) (*AllocationPlanOwnership, error)
 	GetAllAllocationPlans(portfolioId int64, planType *allocation.PlanType) ([]*AllocationPlan, error)
 	GetAllocationPlan(id int64) (*AllocationPlan, error)
 	GetAllAllocationPlanIdentifiers(

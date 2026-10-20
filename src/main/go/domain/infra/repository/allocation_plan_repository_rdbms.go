@@ -225,10 +225,10 @@ func (repository *AllocationPlanRDBMSRepository) UpdateAllocationPlanInTransacti
 	return repository.mergePlannedAllocationsInTransaction(transactionalContext, int64(plan.Id), plan.Details)
 }
 
-// FindAllocationPlanOwnershipInTransaction locks a plan and reads its persisted ownership and detail identifiers.
-// For example, repository.FindAllocationPlanOwnershipInTransaction(ctx, 6) returns nil if plan 6 is missing.
+// FindAndLockAllocationPlanOwnershipInTransaction locks a plan and reads its ownership and detail identifiers.
+// For example, repository.FindAndLockAllocationPlanOwnershipInTransaction(ctx, 6) returns nil if plan 6 is missing.
 // Authored by: GPT-6.1 Sol
-func (repository *AllocationPlanRDBMSRepository) FindAllocationPlanOwnershipInTransaction(
+func (repository *AllocationPlanRDBMSRepository) FindAndLockAllocationPlanOwnershipInTransaction(
 	transContext context.Context,
 	allocationPlanId int64,
 ) (*domain.AllocationPlanOwnership, error) {
