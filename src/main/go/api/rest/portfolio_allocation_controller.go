@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -215,6 +216,26 @@ func (controller *PortfolioAllocationRESTController) validateCleanPortfolioAlloc
 			"custom",
 			"must not be the zero timestamp",
 			portfolioSnapshotDTS.ObservationTimestamp.Timestamp,
+		)
+	}
+	if portfolioSnapshotDTS.ObservationTimestamp.Id == 0 &&
+		portfolioSnapshotDTS.ObservationTimestamp.TimeTag == "" {
+		validationErrorsBuilder.CustomValidationErrorFullNamespace(
+			portfolioSnapshotDTS,
+			"observationTimestamp.timeTag",
+			"custom",
+			"is required for a new observation",
+			portfolioSnapshotDTS.ObservationTimestamp.TimeTag,
+		)
+	}
+	if portfolioSnapshotDTS.ObservationTimestamp.TimeTag != "" &&
+		strings.TrimSpace(portfolioSnapshotDTS.ObservationTimestamp.TimeTag) == "" {
+		validationErrorsBuilder.CustomValidationErrorFullNamespace(
+			portfolioSnapshotDTS,
+			"observationTimestamp.timeTag",
+			"custom",
+			"must not contain only whitespace",
+			portfolioSnapshotDTS.ObservationTimestamp.TimeTag,
 		)
 	}
 

@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/shopspring/decimal"
 
@@ -111,6 +112,16 @@ func (service *AllocationPlanDomService) validateAllocationPlan(
 	plan *domain.AllocationPlan,
 	allocationStructure *domain.AllocationStructure,
 ) []*infra.AppError {
+	if strings.TrimSpace(plan.Name) == "" {
+		return []*infra.AppError{
+			infra.BuildAppErrorFormattedUnconverted(service, "Allocation plan name is required and must not be blank"),
+		}
+	}
+	if utf8.RuneCountInString(plan.Name) > 100 {
+		return []*infra.AppError{
+			infra.BuildAppErrorFormattedUnconverted(service, "Allocation plan name must not exceed 100 characters"),
+		}
+	}
 	if plan.PlannedDate.IsZero() {
 		return []*infra.AppError{
 			infra.BuildAppErrorFormattedUnconverted(service, "Planned date is required and must not be zero"),

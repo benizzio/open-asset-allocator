@@ -313,7 +313,8 @@ test.describe('scenario 16: external asset quote action and submission contract'
               paf.total_market_value::text AS total_market_value
        FROM public.portfolio_allocation_fact paf
        JOIN public.asset a ON a.id = paf.asset_id
-       JOIN public.portfolio_allocation_obs_time ot ON ot.id = paf.observation_time_id
+       JOIN public.portfolio_allocation_obs_time ot
+         ON ot.portfolio_id = paf.portfolio_id AND ot.id = paf.observation_time_id
        WHERE paf.portfolio_id = $1
          AND ot.id = $2`,
       [seededData.portfolio.id, persistedObservation.id],
@@ -411,7 +412,8 @@ test.describe('scenario 16: external asset quote action and submission contract'
               ot.observation_time_tag,
               paf.total_market_value::text AS total_market_value
        FROM public.portfolio_allocation_fact paf
-       JOIN public.portfolio_allocation_obs_time ot ON ot.id = paf.observation_time_id
+       JOIN public.portfolio_allocation_obs_time ot
+         ON ot.portfolio_id = paf.portfolio_id AND ot.id = paf.observation_time_id
        WHERE paf.portfolio_id = $1`,
       [seededData.portfolio.id],
     );
@@ -1110,6 +1112,7 @@ async function seedExternalAssetQuoteData(database: E2eDatabase): Promise<{
  * @returns The portfolio, both assets, and the persisted observation used to render a loaded row.
  *
  * @author GPT-6 Luna
+ * @author OpenCode
  */
 async function seedExternalQuoteLoadedHistory(database: E2eDatabase): Promise<{
   assetWithoutExternalData: SeededAsset;
@@ -1142,10 +1145,10 @@ async function seedExternalQuoteLoadedHistory(database: E2eDatabase): Promise<{
     assetRows.map((asset) => [asset.ticker, asset]),
   ) as Record<string, SeededAsset>;
   const observationRows = await database.query<PersistedObservation>(
-    `INSERT INTO public.portfolio_allocation_obs_time (observation_time_tag, observation_timestamp)
-     VALUES ($1, CURRENT_TIMESTAMP)
+    `INSERT INTO public.portfolio_allocation_obs_time (portfolio_id, observation_time_tag, observation_timestamp)
+     VALUES ($1, $2, CURRENT_TIMESTAMP)
      RETURNING id, observation_timestamp, observation_time_tag`,
-    [EXTERNAL_QUOTE_LOADED_OBSERVATION_TAG],
+    [portfolioRows[0].id, EXTERNAL_QUOTE_LOADED_OBSERVATION_TAG],
   );
   expect(observationRows).toHaveLength(1);
 
@@ -1575,6 +1578,7 @@ async function expectSuccessNotification(page: Page): Promise<void> {
  * @returns The matching persisted observation.
  *
  * @author GPT-6 Luna
+ * @author OpenCode
  */
 async function findObservationByTag(
   database: E2eDatabase,
@@ -1584,7 +1588,8 @@ async function findObservationByTag(
   const observations = await database.query<PersistedObservation>(
     `SELECT DISTINCT ot.id, ot.observation_timestamp, ot.observation_time_tag
      FROM public.portfolio_allocation_obs_time ot
-     JOIN public.portfolio_allocation_fact paf ON paf.observation_time_id = ot.id
+     JOIN public.portfolio_allocation_fact paf
+       ON paf.portfolio_id = ot.portfolio_id AND paf.observation_time_id = ot.id
      WHERE paf.portfolio_id = $1 AND ot.observation_time_tag = $2`,
     [portfolio.id, timeTag],
   );

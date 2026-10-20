@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"errors"
 
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/domain/service"
@@ -16,6 +17,9 @@ type PortfolioAllocationManagementAppService struct {
 	assetDomService               *service.AssetDomService
 }
 
+// MergePortfolioAllocations updates observation metadata and merges its asset allocations atomically.
+// For example, `service.MergePortfolioAllocations(42, observation, allocations)` writes to portfolio 42.
+// Co-authored by: OpenCode and benizzio
 func (service *PortfolioAllocationManagementAppService) MergePortfolioAllocations(
 	portfolioId int64,
 	observationTimestamp *domain.PortfolioObservationTimestamp,
@@ -27,6 +31,7 @@ func (service *PortfolioAllocationManagementAppService) MergePortfolioAllocation
 
 			managedObservationTimestamp, err := service.manageObservationTimestamp(
 				transContext,
+				portfolioId,
 				observationTimestamp,
 				allocations,
 			)
@@ -48,34 +53,35 @@ func (service *PortfolioAllocationManagementAppService) MergePortfolioAllocation
 		},
 	)
 
+	var validationError *infra.DomainValidationError
+	var uniqueConstraintError *infra.UniqueConstraintViolationError
+	if errors.As(err, &validationError) || errors.As(err, &uniqueConstraintError) {
+		return err
+	}
 	return infra.PropagateAsAppErrorWithNewMessage(err, "Failed to merge portfolio allocations", service)
 }
 
+// manageObservationTimestamp creates or owner-checks an observation, then attaches it to every allocation.
+// Co-authored by: OpenCode and benizzio
 func (service *PortfolioAllocationManagementAppService) manageObservationTimestamp(
 	transContext context.Context,
+	portfolioId int64,
 	observationTimestamp *domain.PortfolioObservationTimestamp,
 	allocations []*domain.PortfolioAllocation,
 ) (*domain.PortfolioObservationTimestamp, error) {
 
-	var managedObservationTimestamp = observationTimestamp
-	var err error
-
-	if langext.IsZeroValue(observationTimestamp.Id) {
-
-		managedObservationTimestamp, err = service.portfolioAllocationDomService.
-			InsertObservationTimestampInTransaction(
-				transContext,
-				observationTimestamp,
-			)
-		if err != nil {
-			return nil, err
-		}
-
-		for _, allocation := range allocations {
-			allocation.ObservationTimestamp = managedObservationTimestamp
-		}
+	var managedObservationTimestamp, err = service.portfolioAllocationDomService.InsertObservationTimestampInTransaction(
+		transContext,
+		portfolioId,
+		observationTimestamp,
+	)
+	if err != nil {
+		return nil, err
 	}
 
+	for _, allocation := range allocations {
+		allocation.ObservationTimestamp = managedObservationTimestamp
+	}
 	return managedObservationTimestamp, nil
 }
 

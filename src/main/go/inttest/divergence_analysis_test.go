@@ -145,7 +145,7 @@ func TestGetDivergenceAnalysisV2(t *testing.T) {
 
 func TestGetDivergenceAnalysisV2WhenPlanLowestLevelHasDifferentRanges(t *testing.T) {
 
-	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/v2/portfolio/3/divergence/2/allocation-plan/2")
+	response, err := http.Get(inttestinfra.TestAPIURLPrefix + "/v2/portfolio/3/divergence/7/allocation-plan/2")
 	assert.NoError(t, err)
 	defer deferCloseResponseBody(response)
 
@@ -160,7 +160,7 @@ func TestGetDivergenceAnalysisV2WhenPlanLowestLevelHasDifferentRanges(t *testing
 		{
 			"portfolioId":3,
 			"observationTimestamp":  {
-				"id": 2,
+				"id": 7,
 				"timeTag": "202503",
 				"timestamp": "2025-03-01T00:00:00Z"
 			},

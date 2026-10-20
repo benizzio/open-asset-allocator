@@ -44,13 +44,12 @@ const initialStateSQL = `
 	-- ###################################################################
 	-- ALLOCATION OBSERVATION TIME TABLE
 	-- ###################################################################
-	INSERT INTO portfolio_allocation_obs_time (id, observation_time_tag, observation_timestamp)
+	INSERT INTO portfolio_allocation_obs_time (id, portfolio_id, observation_time_tag, observation_timestamp)
 	VALUES 
-	    (1, '202501', '2025-01-01 00:00:00'::TIMESTAMP),
-		(2, '202503', '2025-03-01 00:00:00'::TIMESTAMP),
-		(3, '202504', '2025-04-01 00:00:00'::TIMESTAMP),
-		(4, '202506', '2025-06-01 00:00:00'::TIMESTAMP),
-		(5, '202507', '2025-07-01 00:00:00'::TIMESTAMP) 
+	    (1, 1, '202501', '2025-01-01 00:00:00'::TIMESTAMP),
+		(2, 1, '202503', '2025-03-01 00:00:00'::TIMESTAMP),
+		(8, 2, '202504', '2025-04-01 00:00:00'::TIMESTAMP),
+		(9, 1, '202504', '2025-04-01 00:00:00'::TIMESTAMP)
 	;
 
 	-- ###################################################################
@@ -236,8 +235,8 @@ const initialStateSQL = `
 	;
 	
 	-- Add observation time for portfolio 4
-	INSERT INTO portfolio_allocation_obs_time (id, observation_time_tag, observation_timestamp)
-	VALUES (6, '202508', '2025-08-01 00:00:00'::TIMESTAMP)
+	INSERT INTO portfolio_allocation_obs_time (id, portfolio_id, observation_time_tag, observation_timestamp)
+	VALUES (6, 4, '202508', '2025-08-01 00:00:00'::TIMESTAMP)
 	;
 	
 	-- Add classes in portfolio_allocation_fact: BONDS, STOCKS, REALESTATE
@@ -270,19 +269,28 @@ const initialStateSQL = `
 		(27, 8, '{NULL, "COMMODITIES"}', NULL, FALSE, 0.2, NULL)
 	;
 
+	INSERT INTO portfolio (id, "name", allocation_structure)
+	VALUES (
+		3,
+		'Set difference test portfolio',
+		'{"hierarchy": [{"name": "Assets", "field": "assetTicker"}, {"name": "Classes", "field": "class"}]}'::jsonb
+	)
+	ON CONFLICT (id) DO UPDATE set "name" = EXCLUDED."name", allocation_structure = EXCLUDED.allocation_structure
+	;
+
+	INSERT INTO portfolio_allocation_obs_time (id, portfolio_id, observation_time_tag, observation_timestamp)
+	VALUES
+		(3, 3, '202504', '2025-04-01 00:00:00'::TIMESTAMP),
+		(4, 3, '202506', '2025-06-01 00:00:00'::TIMESTAMP),
+		(5, 3, '202507', '2025-07-01 00:00:00'::TIMESTAMP),
+		(7, 3, '202503', '2025-03-01 00:00:00'::TIMESTAMP)
+	;
+
 	-- ###################################################################
 	-- *******************************************************************
 	-- DIVERGENCE ANALYSIS SET DIFFERENCE TESTS
 	-- *******************************************************************
 	-- ###################################################################
-	
-	INSERT INTO portfolio (id, "name", allocation_structure)
-	VALUES (
-	    3,
-	   	'Set difference test portfolio',
-	   	'{"hierarchy": [{"name": "Assets", "field": "assetTicker"}, {"name": "Classes", "field": "class"}]}'::jsonb
-	)
-	;
 	
 	-- ==================================================================
 	-- Lower level set difference tests
@@ -307,7 +315,7 @@ const initialStateSQL = `
 			 100,
 			 5000,
 			 3,
-			 2
+			   7
 		),
 		(
 			6, --'ARCA:EWZ'
@@ -317,7 +325,7 @@ const initialStateSQL = `
 			 100,
 			 2500,
 			 3,
-			 2
+			   7
 		),
 		(
 			7, --'ARCA:SPY'
@@ -327,7 +335,7 @@ const initialStateSQL = `
 			 100,
 			 2500,
 			 3,
-			 2
+			   7
 		)
 	;
 
