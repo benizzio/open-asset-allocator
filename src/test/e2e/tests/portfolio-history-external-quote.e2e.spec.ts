@@ -356,7 +356,7 @@ test.describe('scenario 16: external asset quote action and submission contract'
       `#portfolio-history-management-container-${seededData.observation.id}`,
     );
     await loadedObservationItem.getByRole('button', {
-      name: EXTERNAL_QUOTE_LOADED_OBSERVATION_TAG,
+      name: await expectedManagementObservationHeader(page, seededData.observation),
       exact: true,
     }).click();
     const loadedRow = page.locator(
@@ -931,7 +931,7 @@ test.describe('scenario 16: external asset quote action and submission contract'
         && url.searchParams.get('observationTimestampId') === String(seededData.observation.id);
     });
     await observationItem.getByRole('button', {
-      name: EXTERNAL_QUOTE_LOADED_OBSERVATION_TAG,
+      name: await expectedManagementObservationHeader(page, seededData.observation),
       exact: true,
     }).click();
     expect((await initialObservationResponsePromise).status()).toBe(200);
@@ -1016,7 +1016,7 @@ test.describe('scenario 16: external asset quote action and submission contract'
           && url.searchParams.get('observationTimestampId') === String(seededData.observation.id);
       });
       await reloadedObservationItem.getByRole('button', {
-        name: EXTERNAL_QUOTE_LOADED_OBSERVATION_TAG,
+        name: await expectedManagementObservationHeader(page, seededData.observation),
         exact: true,
       }).click();
       expect((await reloadedObservationResponsePromise).status()).toBe(200);
@@ -1592,6 +1592,28 @@ async function findObservationByTag(
   return observations[0];
 }
 
+/** Builds the exact management header using the browser's local timezone.
+ *
+ * @param page - Browser page with the timezone used to display the header.
+ * @param observation - Persisted observation providing its timestamp and tag.
+ * @returns The exact `<tag> - <YYYY-MM-DD>` accessible name.
+ * @author GPT-6 Luna
+ */
+async function expectedManagementObservationHeader(
+  page: Page,
+  observation: PersistedObservation,
+): Promise<string> {
+  const localDate = await page.evaluate((timestamp) => {
+    const date = new Date(timestamp);
+    const year = String(date.getFullYear()).padStart(4, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }, observation.observation_timestamp.toISOString());
+
+  return `${observation.observation_time_tag} - ${localDate}`;
+}
+
 /** Verifies the new item followed by saved observation items in their displayed order.
  *
  * @param page - Browser page showing the management accordion.
@@ -1610,7 +1632,10 @@ async function expectManagementObservationOrder(
   for (const [index, observation] of observations.entries()) {
     const item = accordion.locator(':scope > .accordion-item').nth(index + 1);
     await expect(item).toHaveAttribute('id', `portfolio-history-management-container-${observation.id}`);
-    const button = item.getByRole('button', { name: observation.observation_time_tag, exact: true });
+    const button = item.getByRole('button', {
+      name: await expectedManagementObservationHeader(page, observation),
+      exact: true,
+    });
     await expect(button).toBeVisible();
     await expect(button).toHaveClass(/collapsed/);
     await expect(item.locator(`#portfolio-history-management-${observation.id}`)).not.toHaveClass(/\bshow\b/);

@@ -73,7 +73,8 @@
                         aria-controls="allocation-plan-management-{{allocationPlan.id}}"
                         {{#unless allocationPlan.id}}aria-label="New allocation plan details"{{/unless}}
                 >
-                    {{#if allocationPlan.id}}{{allocationPlan.name}}{{/if}}
+                    <!-- Co-authored by: GPT-6 Luna and benizzio -->
+                    {{#if allocationPlan.id}}{{allocationPlan.name}} - {{allocationPlan.plannedDate}}{{/if}}
                 </button>
             </h2>
 
@@ -87,7 +88,7 @@
                           class="needs-validation"
                           hx-post="/api/portfolio/:portfolioId/allocation-plan"
                           hx-ext="form-json"
-                          hx-on::after-request="allocationPlanManagement.handleAfterRequest(event)"
+                          hx-on::after-request="allocationPlanManagement.handleAfterRequest(event, {{allocationPlan.id}})"
                     >
 
                         <input type="hidden" name="id" value="{{allocationPlan.id}}" />
