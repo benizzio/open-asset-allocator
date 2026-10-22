@@ -1429,7 +1429,7 @@ func TestPostPortfolioAllocationValidations(t *testing.T) {
 // TestPostPortfolioAllocationRequiresExplicitTimestamp rejects missing and invalid observation timestamps on creates and updates.
 // It asserts directly against the database that no observation or allocation is partially persisted.
 //
-// Co-authored by: OpenCode
+// Co-authored by: GPT-6 Luna and OpenCode
 func TestPostPortfolioAllocationRequiresExplicitTimestamp(t *testing.T) {
 	t.Cleanup(
 		inttestutil.BuildCleanupFunctionBuilder().
@@ -1516,14 +1516,14 @@ func TestPostPortfolioAllocationRequiresExplicitTimestamp(t *testing.T) {
 		}
 	}
 
-	var missingNewObservationTag = postPortfolioAllocationForValidationFailure(t, `{
+	var missingObservationTag = postPortfolioAllocationForValidationFailure(t, `{
 		"observationTimestamp":{"id":0,"timestamp":"2025-03-05T00:00:00Z"},
 		"allocations":[{"assetId":1,"class":"INVALID_TIMESTAMP_TEST","cashReserve":false,"totalMarketValue":"123"}]
 	}`)
 	assert.JSONEq(
 		t,
-		`{"errorMessage":"Validation failed","details":["Field 'observationTimestamp.timeTag' failed validation: is required for a new observation"]}`,
-		string(missingNewObservationTag),
+		`{"errorMessage":"Validation failed","details":["Field 'observationTimestamp.timeTag' failed validation: is required"]}`,
+		string(missingObservationTag),
 	)
 }
 
@@ -2027,8 +2027,8 @@ func TestPostPortfolioAllocationHistoryValidation_InvalidExternalAssetFields(t *
 }
 
 // TestPostPortfolioAllocationHistoryUpdatesObservationMetadata verifies metadata updates retain the observation and
-// allocation identities while persisting tag and timestamp changes in the owning portfolio.
-// Authored by: OpenCode
+// allocation identities while persisting explicit tag and timestamp changes in the owning portfolio.
+// Co-authored by: GPT-6 Luna, OpenCode and benizzio
 func TestPostPortfolioAllocationHistoryUpdatesObservationMetadata(t *testing.T) {
 	registerObservationFixtureRestore(t, 2, 1, "202503", "2025-03-01 00:00:00")
 
@@ -2052,17 +2052,6 @@ func TestPostPortfolioAllocationHistoryUpdatesObservationMetadata(t *testing.T) 
 		`{"assetId":1,"class":"BONDS","cashReserve":false,"assetQuantity":"100.00009","assetMarketPrice":"100","totalMarketValue":"10000"}`,
 	)
 	response, err = postPortfolioHistoryRequest(1, timestampUpdate)
-	require.NoError(t, err)
-	defer deferCloseResponseBody(response)
-	require.Equal(t, http.StatusNoContent, response.StatusCode)
-	assertPersistedObservationMetadata(t, 2, 1, "202503-edited", "2025-03-02T12:34:56.123456")
-	assertPersistedObservationAllocation(t, 2, 1)
-
-	var omittedTagUpdate = `{
-		"observationTimestamp":{"id":2,"timestamp":"2025-03-02T12:34:56.123456Z"},
-		"allocations":[{"assetId":1,"class":"BONDS","cashReserve":false,"assetQuantity":"100.00009","assetMarketPrice":"100","totalMarketValue":"10000"}]
-	}`
-	response, err = postPortfolioHistoryRequest(1, omittedTagUpdate)
 	require.NoError(t, err)
 	defer deferCloseResponseBody(response)
 	require.Equal(t, http.StatusNoContent, response.StatusCode)
@@ -2249,12 +2238,15 @@ func assertPersistedObservationMetadata(
 }
 
 // assertPersistedObservationAllocation checks that a metadata-only edit leaves the portfolio facts unchanged.
-// Authored by: OpenCode
+// Co-authored by: GPT-6 Luna and OpenCode
 func assertPersistedObservationAllocation(t *testing.T, observationId, portfolioId int64) {
 	t.Helper()
 	inttestutil.AssertDBWithQueryMultipleRows(
 		t,
 		`SELECT COUNT(*)::text AS fact_count,
+		        MIN(asset_id)::text AS asset_id,
+		        MIN(class) AS class,
+		        BOOL_OR(cash_reserve)::text AS cash_reserve,
 		        SUM(asset_quantity)::numeric(18,8)::text AS asset_quantity,
 		        SUM(asset_market_price)::numeric(18,8)::text AS asset_market_price,
 		        SUM(total_market_value)::text AS total_market_value
@@ -2263,6 +2255,9 @@ func assertPersistedObservationAllocation(t *testing.T, observationId, portfolio
 			` AND portfolio_id = `+strconv.FormatInt(portfolioId, 10),
 		[]inttestutil.AssertableNullStringMap{{
 			"fact_count":         inttestutil.ToAssertableNullString("1"),
+			"asset_id":           inttestutil.ToAssertableNullString("1"),
+			"class":              inttestutil.ToAssertableNullString("BONDS"),
+			"cash_reserve":       inttestutil.ToAssertableNullString("false"),
 			"asset_quantity":     inttestutil.ToAssertableNullString("100.00009000"),
 			"asset_market_price": inttestutil.ToAssertableNullString("100.00000000"),
 			"total_market_value": inttestutil.ToAssertableNullString("10000"),

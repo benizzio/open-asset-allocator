@@ -11,6 +11,7 @@ import (
 	"github.com/benizzio/open-asset-allocator/langext"
 )
 
+// Co-authored by: GPT-6 Luna and benizzio
 const (
 	availableObservationTimestampsSQL = `
 		SELECT DISTINCT paot.id, paot.portfolio_id, paot.observation_time_tag AS time_tag,
@@ -112,7 +113,7 @@ const (
     `
 	observationTimestampUpdateSQL = `
 		UPDATE portfolio_allocation_obs_time
-		SET observation_time_tag = CASE WHEN $1 = '' THEN observation_time_tag ELSE $1 END,
+		SET observation_time_tag = $1,
 		    observation_timestamp = $2
 		WHERE id = $3 AND portfolio_id = $4
 	`

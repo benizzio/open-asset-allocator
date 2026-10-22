@@ -78,13 +78,14 @@ type AllocationPlanIdentifierDTS struct {
 	PlannedDate AllocationPlanDate `json:"plannedDate"`
 }
 
-// PortfolioObservationTimestampDTS carries the observation identifier, tag, and required timestamp.
-// Create and update requests must provide an RFC3339 timestamp, such as `2026-10-17T00:00:00Z`.
+// PortfolioObservationTimestampDTS carries the observation identifier, required nonblank tag, and timestamp.
+// Create and update requests provide a tag of at most 100 characters and an RFC3339 timestamp, for example
+// `{"id":7,"timeTag":"Quarter-end","timestamp":"2026-10-17T00:00:00Z"}`.
 //
-// Co-authored by: OpenCode and benizzio
+// Co-authored by: GPT-6 Luna and benizzio
 type PortfolioObservationTimestampDTS struct {
 	Id        langext.ParseableInt64 `json:"id"`
-	TimeTag   string                 `json:"timeTag" validate:"max=100"`
+	TimeTag   string                 `json:"timeTag" validate:"required,max=100"`
 	Timestamp time.Time              `json:"timestamp" validate:"required"`
 }
 
