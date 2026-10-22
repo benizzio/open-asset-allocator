@@ -200,7 +200,7 @@ func (repository *AllocationPlanRDBMSRepository) UpdateAllocationPlanInTransacti
 		)
 	}
 
-	result, err := repository.dbAdapter.ExecuteInTransaction(
+	var result, err = repository.dbAdapter.ExecuteInTransaction(
 		transactionalContext,
 		allocationPlanUpdateSQL,
 		plan.Name,
