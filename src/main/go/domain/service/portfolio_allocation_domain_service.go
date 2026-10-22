@@ -107,39 +107,60 @@ func (service *PortfolioAllocationDomService) MergePortfolioAllocationsInTransac
 	)
 }
 
-// InsertObservationTimestampInTransaction persists a new observation for the supplied portfolio, or updates an
+// PersistObservationTimestampInTransaction persists a new observation for the supplied portfolio, or updates an
 // existing observation only when it belongs to that portfolio. Callers should pass the observation selected by the
-// client, for example `InsertObservationTimestampInTransaction(ctx, 42, observation)`. New observations require a tag;
+// client, for example `PersistObservationTimestampInTransaction(ctx, 42, observation)`. New observations require a tag;
 // updates may omit it to preserve the stored tag. Metadata and ownership are validated before persistence.
 //
 // Co-authored by: GPT-6.1 Sol, OpenCode and benizzio
-func (service *PortfolioAllocationDomService) InsertObservationTimestampInTransaction(
+func (service *PortfolioAllocationDomService) PersistObservationTimestampInTransaction(
 	transContext context.Context,
 	portfolioId int64,
 	observationTimestamp *domain.PortfolioObservationTimestamp,
 ) (*domain.PortfolioObservationTimestamp, error) {
-	validationError := service.validateObservationTimestamp(portfolioId, observationTimestamp)
+	var validationError = service.validateObservationTimestamp(portfolioId, observationTimestamp)
 	if validationError != nil {
 		return nil, validationError
 	}
 
 	observationTimestamp.PortfolioId = portfolioId
 	if !langext.IsZeroValue(observationTimestamp.Id) {
-		if err := service.validateObservationOwnership(transContext, portfolioId, observationTimestamp.Id); err != nil {
-			return nil, err
-		}
-		err := service.portfolioAllocationRepository.UpdateObservationTimestampInTransaction(
-			transContext,
-			portfolioId,
-			observationTimestamp,
-		)
-		if err != nil {
-			return nil, err
-		}
-		return observationTimestamp, nil
+		return service.updateObservationTimestampInTransaction(transContext, portfolioId, observationTimestamp)
 	}
 
-	persistedObservation, err := service.portfolioAllocationRepository.InsertObservationTimestampInTransaction(
+	return service.createObservationTimestampInTransaction(transContext, portfolioId, observationTimestamp)
+}
+
+// updateObservationTimestampInTransaction validates ownership under lock before updating observation metadata.
+// Authored by: GPT-6.1 Sol
+func (service *PortfolioAllocationDomService) updateObservationTimestampInTransaction(
+	transContext context.Context,
+	portfolioId int64,
+	observationTimestamp *domain.PortfolioObservationTimestamp,
+) (*domain.PortfolioObservationTimestamp, error) {
+	var err = service.validateObservationOwnership(transContext, portfolioId, observationTimestamp.Id)
+	if err != nil {
+		return nil, err
+	}
+	err = service.portfolioAllocationRepository.UpdateObservationTimestampInTransaction(
+		transContext,
+		portfolioId,
+		observationTimestamp,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return observationTimestamp, nil
+}
+
+// createObservationTimestampInTransaction inserts an observation and translates a missing portfolio into validation.
+// Authored by: GPT-6.1 Sol
+func (service *PortfolioAllocationDomService) createObservationTimestampInTransaction(
+	transContext context.Context,
+	portfolioId int64,
+	observationTimestamp *domain.PortfolioObservationTimestamp,
+) (*domain.PortfolioObservationTimestamp, error) {
+	var persistedObservation, err = service.portfolioAllocationRepository.InsertObservationTimestampInTransaction(
 		transContext,
 		portfolioId,
 		observationTimestamp,
