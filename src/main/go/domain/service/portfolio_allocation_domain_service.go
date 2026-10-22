@@ -2,7 +2,8 @@ package service
 
 import (
 	"context"
-	"time"
+	"errors"
+	"unicode/utf8"
 
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra"
@@ -106,26 +107,141 @@ func (service *PortfolioAllocationDomService) MergePortfolioAllocationsInTransac
 	)
 }
 
-// InsertObservationTimestampInTransaction persists an observation with its explicitly supplied timestamp.
-// For example, callers must pass the instant selected by the client rather than relying on a server-side default.
+// PersistObservationTimestampInTransaction persists a new observation for the supplied portfolio, or updates an
+// existing observation only when it belongs to that portfolio. Both operations require a nonblank tag of at most 100
+// characters and a nonzero timestamp. For example, callers can pass
+// `PersistObservationTimestampInTransaction(ctx, 42, observation)` with the selected observation's current tag
+// included in the update. Metadata and ownership are validated before persistence.
 //
-// Co-authored by: OpenCode and benizzio
-func (service *PortfolioAllocationDomService) InsertObservationTimestampInTransaction(
+// Co-authored by: GPT-6 Luna, GPT-6.1 Sol, OpenCode and benizzio
+func (service *PortfolioAllocationDomService) PersistObservationTimestampInTransaction(
 	transContext context.Context,
+	portfolioId int64,
 	observationTimestamp *domain.PortfolioObservationTimestamp,
 ) (*domain.PortfolioObservationTimestamp, error) {
-	if langext.IsZeroValue(observationTimestamp.Timestamp) {
-		return nil, infra.BuildAppError("Observation timestamp is required and must not be zero", service)
+	var validationError = service.validateObservationTimestamp(portfolioId, observationTimestamp)
+	if validationError != nil {
+		return nil, validationError
 	}
 
-	if langext.IsZeroValue(observationTimestamp.TimeTag) {
-		observationTimestamp.TimeTag = observationTimestamp.Timestamp.Format(time.RFC3339)
+	observationTimestamp.PortfolioId = portfolioId
+	if !langext.IsZeroValue(observationTimestamp.Id) {
+		return service.updateObservationTimestampInTransaction(transContext, portfolioId, observationTimestamp)
 	}
 
-	return service.portfolioAllocationRepository.InsertObservationTimestampInTransaction(
+	return service.createObservationTimestampInTransaction(transContext, portfolioId, observationTimestamp)
+}
+
+// updateObservationTimestampInTransaction validates ownership under lock before updating observation metadata.
+// Authored by: GPT-6.1 Sol
+func (service *PortfolioAllocationDomService) updateObservationTimestampInTransaction(
+	transContext context.Context,
+	portfolioId int64,
+	observationTimestamp *domain.PortfolioObservationTimestamp,
+) (*domain.PortfolioObservationTimestamp, error) {
+	var err = service.validateObservationOwnership(transContext, portfolioId, observationTimestamp.Id)
+	if err != nil {
+		return nil, err
+	}
+	err = service.portfolioAllocationRepository.UpdateObservationTimestampInTransaction(
 		transContext,
+		portfolioId,
 		observationTimestamp,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return observationTimestamp, nil
+}
+
+// createObservationTimestampInTransaction inserts an observation and translates a missing portfolio into validation.
+// Authored by: GPT-6.1 Sol
+func (service *PortfolioAllocationDomService) createObservationTimestampInTransaction(
+	transContext context.Context,
+	portfolioId int64,
+	observationTimestamp *domain.PortfolioObservationTimestamp,
+) (*domain.PortfolioObservationTimestamp, error) {
+	var persistedObservation, err = service.portfolioAllocationRepository.InsertObservationTimestampInTransaction(
+		transContext,
+		portfolioId,
+		observationTimestamp,
+	)
+	var foreignKeyError *infra.ForeignKeyConstraintViolationError
+	if errors.As(err, &foreignKeyError) &&
+		foreignKeyError.ConstraintName == "portfolio_allocation_obs_time_portfolio_fk" {
+		return nil, service.observationValidationError("Portfolio does not exist")
+	}
+	return persistedObservation, err
+}
+
+// validateObservationOwnership checks the locked persisted observation before metadata is written.
+// Authored by: GPT-6.1 Sol
+func (service *PortfolioAllocationDomService) validateObservationOwnership(
+	transContext context.Context,
+	portfolioId, observationId int64,
+) error {
+	observation, err := service.portfolioAllocationRepository.FindAndLockObservationTimestampInTransaction(
+		transContext, observationId,
+	)
+	if err != nil {
+		return err
+	}
+	if observation == nil || observation.PortfolioId != portfolioId {
+		return service.observationValidationError("Observation does not exist in the requested portfolio")
+	}
+	return nil
+}
+
+// observationValidationError builds a domain validation failure for observation persistence rules.
+// Authored by: GPT-6.1 Sol
+func (service *PortfolioAllocationDomService) observationValidationError(message string) error {
+	return infra.BuildDomainValidationError(
+		"Observation validation failed",
+		[]*infra.AppError{infra.BuildAppErrorFormattedUnconverted(service, "%s", message)},
+	)
+}
+
+// validateObservationTimestamp rejects invalid metadata before the repository writes it.
+// Co-authored by: GPT-6 Luna, GPT-6.1 Sol and OpenCode
+func (service *PortfolioAllocationDomService) validateObservationTimestamp(
+	portfolioId int64,
+	observationTimestamp *domain.PortfolioObservationTimestamp,
+) error {
+	var causes = make([]*infra.AppError, 0)
+	if observationTimestamp == nil {
+		causes = append(causes, infra.BuildAppErrorFormattedUnconverted(service, "Observation timestamp is required"))
+	} else {
+		if portfolioId <= 0 {
+			causes = append(causes, infra.BuildAppErrorFormattedUnconverted(service, "Portfolio ID must be positive"))
+		}
+		if langext.IsZeroValue(observationTimestamp.TimeTag) {
+			causes = append(causes, infra.BuildAppErrorFormattedUnconverted(
+				service,
+				"Observation time tag is required",
+			))
+		} else if !langext.IsZeroValue(observationTimestamp.TimeTag) &&
+			langext.IsEmptyString(observationTimestamp.TimeTag) {
+			causes = append(causes, infra.BuildAppErrorFormattedUnconverted(
+				service,
+				"Observation time tag must not contain only whitespace",
+			))
+		} else if utf8.RuneCountInString(observationTimestamp.TimeTag) > 100 {
+			causes = append(causes, infra.BuildAppErrorFormattedUnconverted(
+				service,
+				"Observation time tag must not exceed 100 characters",
+			))
+		}
+		if langext.IsZeroValue(observationTimestamp.Timestamp) {
+			causes = append(causes, infra.BuildAppErrorFormattedUnconverted(
+				service,
+				"Observation timestamp is required and must not be zero",
+			))
+		}
+	}
+	if len(causes) == 0 {
+		return nil
+	}
+	return infra.BuildDomainValidationError("Observation timestamp validation failed", causes)
 }
 
 func BuildPortfolioAllocationDomService(

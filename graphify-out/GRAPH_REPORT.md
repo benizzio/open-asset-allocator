@@ -4,25 +4,26 @@
 - cluster-only mode — file stats not available
 
 ## Summary
-- 869 nodes · 1240 edges · 104 communities (58 shown, 46 thin omitted)
+- 873 nodes · 1244 edges · 104 communities (58 shown, 46 thin omitted)
 - Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 55 edges (avg confidence: 0.88)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `c3d3181b`
+- Built from commit: `d462dbce`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- portfolio-allocation-plan-management.e2e.spec.ts
+- portfolio-allocation-history-management.e2e.spec.ts
 - portfolio-allocation-map.e2e.spec.ts
+- portfolio-allocation-plan-management.e2e.spec.ts
 - portfolio-history-external-quote.e2e.spec.ts
 - Open Asset Allocator
-- portfolio-allocation-history-management.e2e.spec.ts
+- asset
 - package.json
+- doughnut-chart.ts
 - Allocation Map View
 - e2e.sh
-- asset
 - portfolio-visualization.e2e.spec.ts
 - Three-Scope Graph Selection
 - Portfolio Holdings Editor
@@ -35,8 +36,9 @@
 - validate-playwright-version.mjs
 - Asset Allocation Donut Chart
 - generate_report.py
-- expectPortfolioHistoryManagement
+- expectRoute
 - compilerOptions
+- .query
 - asset-external-management.e2e.spec.ts
 - Asset Allocation Donut Chart
 - Portfolio History Detail View
@@ -49,18 +51,16 @@
 - _format_value
 - @playwright/test
 - accordion-field-interactions.ts
-- fillExistingAssetAllocation
 - Any
 - migration-[5]-allocation_plan_improvements.sql
-- .query
 - fixtures.ts
 - _find_nested_field
+- fillExistingAssetAllocation
 - Graphify Pipeline
 - Verify Assets Against Planned Allocation Percentages
 - Asset Class Allocation
 - portfolio_allocation_fact_insertion
 - portfolio_allocation_fact_insertion
-- submitObservationForDate
 - Repository Scope Routing
 - migration-[2]-initial_fixes.sql
 - _contains_defined_field
@@ -77,8 +77,8 @@
 - dev.sh
 - duckdb-cli.sh
 - arch-provisioning.sh
+- move-portfolio-id.sql
 - migration-[11]-portfolio_allocation_fact_time_frame_tag_substitution.sql
-- portfolio_allocation_obs_time
 - migration-[9]-portfolio_allocation_timestamp_dimension_adjustments.sql
 - Specific agent instructions for End to End Test Scripts
 - start.sh
@@ -89,11 +89,11 @@
 - go-dependency-graph.sh
 - migrate.sh
 - delete-portfolio.sql
-- move-portfolio-id.sql
 - duckdb-cli-build.sh
 - migration-[10]-portfolio_allocation_obs_time_tag_unique.sql
 - migration-[12]-planned_allocation_structural_id_renaming.sql
 - migration-[14]-asset_external_data.sql
+- migration-[16]-portfolio_observation_ownership.sql
 - init-db.sh
 - graphify-integration.sh
 - test.sh
@@ -122,7 +122,7 @@
 7. `getDoughnutSlicePoint()` - 12 edges
 8. `expectLatestCanvasTextSet()` - 11 edges
 9. `compilerOptions` - 11 edges
-10. `clickCanvasPoint()` - 10 edges
+10. `runEmptyPortfolioVisualizationScenario()` - 10 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `Allocation Planning` --semantically_similar_to--> `Allocation Plan`  [INFERRED] [semantically similar]
@@ -163,161 +163,161 @@
 
 ## Communities (104 total, 46 thin omitted)
 
-### Community 0 - "portfolio-allocation-plan-management.e2e.spec.ts"
-Cohesion: 0.05
-Nodes (73): CanvasPoint, CanvasTextRecorder, clickCanvasPoint(), expectChartTooltip(), expectLatestCanvasPatternState(), expectLatestCanvasTextContains(), expectLatestCanvasTextSet(), findDoughnutSlicePointByTooltip() (+65 more)
+### Community 0 - "portfolio-allocation-history-management.e2e.spec.ts"
+Cohesion: 0.06
+Nodes (43): addAllocationRow(), browserLocalCalendarDate(), DEFAULT_ALLOCATION_STRUCTURE, expectEditableObservationRows(), expectedObservationHeaderName(), ExpectedObservationRow, expectExistingAsset(), expectManagementObservationOrder() (+35 more)
 
 ### Community 1 - "portfolio-allocation-map.e2e.spec.ts"
 Cohesion: 0.08
 Nodes (33): ASSET_DATA, DatabaseSnapshot, DEFAULT_ALLOCATION_STRUCTURE, expandRootAndAssertChildren(), expectAllocationMapShell(), expectAnalysisTable(), ExpectedDivergenceNode, expectNodeRow() (+25 more)
 
-### Community 2 - "portfolio-history-external-quote.e2e.spec.ts"
+### Community 2 - "portfolio-allocation-plan-management.e2e.spec.ts"
+Cohesion: 0.07
+Nodes (27): installCanvasTextRecorder(), addAssetAllocationRow(), addClassAllocationRow(), allocationPlanManagementHeader(), DEFAULT_ALLOCATION_STRUCTURE, expectAllocationPlanManagementForm(), expectAllocationPlanManagementOrder(), expectDraftAllocationRow() (+19 more)
+
+### Community 3 - "portfolio-history-external-quote.e2e.spec.ts"
 Cohesion: 0.07
 Nodes (14): browserLocalCalendarDate(), DEFAULT_ALLOCATION_STRUCTURE, expectedManagementObservationHeader(), expectManagementObservationOrder(), expectPortfolioHistoryManagement(), expectRootShell(), EXTERNAL_QUOTE_ASSOCIATIONS, EXTERNAL_QUOTE_ISOLATION_ASSETS (+6 more)
 
-### Community 3 - "Open Asset Allocator"
+### Community 4 - "Open Asset Allocator"
 Cohesion: 0.08
 Nodes (31): Dependabot Dependency Updates, Renovate Runtime Coordination, Go and Air Image Version Coordination, Application Node.js LTS Runtime Coordination, Playwright and E2E Node Type Major Alignment, Runtime Version Coordination, Portfolio History Form TODOs, Allocation Planning (+23 more)
 
-### Community 4 - "portfolio-allocation-history-management.e2e.spec.ts"
-Cohesion: 0.08
-Nodes (11): DEFAULT_ALLOCATION_STRUCTURE, expectEditableObservationRows(), ExpectedObservationRow, expectNewObservationRows(), NavigationOptionName, PersistedAllocation, PersistedObservation, PORTFOLIO_NAVIGATION_OPTIONS (+3 more)
+### Community 5 - "asset"
+Cohesion: 0.14
+Nodes (18): asset_price_last_market_data, asset_ticker_market_data_source, planned_date backfill: COALESCE(create_timestamp::date, CURRENT_DATE), allocation_plan.planned_date DATE NOT NULL with no database default, portfolio_allocation_fact, allocation_plan, allocation_plan_unit, asset (+10 more)
 
-### Community 5 - "package.json"
+### Community 6 - "package.json"
 Cohesion: 0.09
 Nodes (21): pg, @types/node, @types/pg, typescript, author, devDependencies, pg, @playwright/test (+13 more)
 
-### Community 6 - "Allocation Map View"
+### Community 7 - "doughnut-chart.ts"
+Cohesion: 0.32
+Nodes (20): CanvasPoint, CanvasTextRecorder, clickCanvasPoint(), expectChartTooltip(), expectLatestCanvasPatternState(), expectLatestCanvasTextContains(), expectLatestCanvasTextSet(), findDoughnutSlicePointByTooltip() (+12 more)
+
+### Community 8 - "Allocation Map View"
 Cohesion: 0.12
 Nodes (20): $60,000 Total Market Value, 60/40 Portfolio Classic - Example - 20260210-230012, Actual vs Planned Market Value Comparison, Allocation Map View, Allocation Plan Selector, BIL Underweight: -$800 (-2.96%), Bonds Underweight: -$9,000 (-15%), Directional Divergence Bars (+12 more)
 
-### Community 7 - "e2e.sh"
+### Community 9 - "e2e.sh"
 Cohesion: 0.24
 Nodes (17): build_images(), capture_logs(), cleanup_stack(), compose(), compose_all(), compose_debug(), fail(), main() (+9 more)
 
-### Community 8 - "asset"
-Cohesion: 0.18
-Nodes (15): asset_price_last_market_data, asset_ticker_market_data_source, planned_date backfill: COALESCE(create_timestamp::date, CURRENT_DATE), allocation_plan.planned_date DATE NOT NULL with no database default, allocation_plan, allocation_plan_unit, asset, asset_value_fact (+7 more)
-
-### Community 9 - "portfolio-visualization.e2e.spec.ts"
+### Community 10 - "portfolio-visualization.e2e.spec.ts"
 Cohesion: 0.20
 Nodes (19): DEFAULT_ALLOCATION_STRUCTURE, EMPTY_PORTFOLIO_NAMES, expectAllocationMap(), expectAllocationPlan(), expectPortfolioHistory(), expectPortfolioList(), expectPortfolioNavigation(), expectPortfolioShell() (+11 more)
 
-### Community 10 - "Three-Scope Graph Selection"
+### Community 11 - "Three-Scope Graph Selection"
 Cohesion: 0.12
 Nodes (19): CodeRabbit Review Path Filters, Graphify Build Manifest Inclusion Patterns, Graphify Output Directory Exclusion Patterns, Vendored Graphify Skill Exclusion Pattern, Backend Graph Corpus, Disconnected Flyway SQL Stubs after Root Update, Frontend Graph Corpus, Graphify-First Codebase Navigation (+11 more)
 
-### Community 11 - "Portfolio Holdings Editor"
+### Community 12 - "Portfolio Holdings Editor"
 Cohesion: 0.12
 Nodes (19): Manage Portfolio Allocation Data Panel, Allocation Map Tab, Allocation Plan Tab, Asset Classification, Asset Identity and Description, Bonds Asset Class, Cash Reserve Designation, Add and Remove Holding Controls (+11 more)
 
-### Community 12 - "Comparative E2E Framework Research"
+### Community 13 - "Comparative E2E Framework Research"
 Cohesion: 0.11
 Nodes (18): Open Asset Allocator Application Fit, E2E Framework Evaluation Framework, E2E Tool Candidate Research, Fourteen E2E Candidate Set, chromedp with Go Testing, CodeceptJS, Comparative E2E Framework Research, Cucumber.js with Playwright or Playwright-BDD (+10 more)
 
-### Community 13 - "portfolio-editing.e2e.spec.ts"
+### Community 14 - "portfolio-editing.e2e.spec.ts"
 Cohesion: 0.16
 Nodes (15): DEFAULT_ALLOCATION_STRUCTURE, expectEditPortfolio(), ExpectedPortfolio, expectPortfolioList(), expectPortfolioNavigation(), expectPortfolioShell(), expectRootShell(), expectRoute() (+7 more)
 
-### Community 14 - "prune-sql-stubs.py"
+### Community 15 - "prune-sql-stubs.py"
 Cohesion: 0.13
 Nodes (15): graphify_cluster, graphify_export, json, networkx_readwrite, pathlib, re, _main(), Remove disconnected Flyway SQL parser stubs from the remainder graph. Graphify… (+7 more)
 
-### Community 15 - "asset-management.e2e.spec.ts"
+### Community 16 - "asset-management.e2e.spec.ts"
 Cohesion: 0.16
 Nodes (8): Asset, AssetRow, expectAssetEditor(), expectIconOnlyButton(), expectNewAssetForm(), expectSupersededAssetResponseIgnored(), navigateWithinApp(), PERSISTED_EXTERNAL_DATA
 
-### Community 16 - "Native scoped Graphify AST updates"
+### Community 17 - "Native scoped Graphify AST updates"
 Cohesion: 0.16
 Nodes (15): Absolute module scan paths, Backend Graphify graph, Code-only graph bootstrap, Operator-configured Graphify semantic backend, Narrow fail-closed Flyway SQL stub repair, Frontend Graphify graph, Native scoped Graphify AST updates, OpenCode host-agent semantic refresh (+7 more)
 
-### Community 17 - "BONDS (60% slice)"
+### Community 18 - "BONDS (60% slice)"
 Cohesion: 0.14
 Nodes (15): 60/40 Portfolio Classic - Example - 20260210-230012, Allocation Plan Management Interface, ARCA:BIL - SPDR Bloomberg 1-3 Month T-Bill ETF (40%), ARCA:EWZ - iShares MSCI Brazil ETF (5%), ARCA:SPY - SPDR S&P 500 ETF Trust (45%), ARCA:STIP - iShares 0-5 Year TIPS Bond ETF (10%), BONDS (60% slice), Cash Reserve Designation (+7 more)
 
-### Community 18 - "validate-playwright-version.mjs"
+### Community 19 - "validate-playwright-version.mjs"
 Cohesion: 0.16
 Nodes (13): ref_node_fs, argumentsByName, assertEqual(), assertNodeMajor(), defaultDockerfile, fail(), nodeTypeVersions, packageDirectory (+5 more)
 
-### Community 19 - "Asset Allocation Donut Chart"
+### Community 20 - "Asset Allocation Donut Chart"
 Cohesion: 0.15
 Nodes (14): Allocation Map Tab, Allocation Plan Tab, ARCA:EWZ Allocation 4.55%, ARCA:SPY Allocation 68.18%, Asset Allocation Donut Chart, Assets for STOCKS Level, February 2026 Portfolio Snapshot, My Portfolio Example (+6 more)
 
-### Community 20 - "generate_report.py"
+### Community 21 - "generate_report.py"
 Cohesion: 0.18
 Nodes (12): _anchor(), _compact_summary(), _escape_inline(), Create a stable ASCII Markdown anchor component., Escape Markdown table-of-contents separators and flatten whitespace., Produce a concise first-sentence summary for a TOC entry., Generate a Markdown report from the structured E2E research results. The…, Create unique anchors while preserving item order. (+4 more)
 
-### Community 21 - "expectPortfolioHistoryManagement"
-Cohesion: 0.19
-Nodes (13): expectPortfolioContext(), expectPortfolioHistory(), expectPortfolioHistoryManagement(), expectPortfolioList(), expectPortfolioNavigation(), expectRootShell(), expectRoute(), navigateByClick() (+5 more)
+### Community 22 - "expectRoute"
+Cohesion: 0.21
+Nodes (13): expectAllocationPlan(), expectAllocationPlanManagement(), expectPortfolioContext(), expectPortfolioList(), expectPortfolioNavigation(), expectRenderedAllocationPlan(), expectRootShell(), expectRoute() (+5 more)
 
-### Community 22 - "compilerOptions"
+### Community 23 - "compilerOptions"
 Cohesion: 0.15
 Nodes (12): compilerOptions, allowImportingTsExtensions, esModuleInterop, forceConsistentCasingInFileNames, lib, module, moduleResolution, noEmit (+4 more)
 
-### Community 23 - "asset-external-management.e2e.spec.ts"
+### Community 24 - ".query"
+Cohesion: 0.20
+Nodes (11): seedManagementObservation(), seedPortfolioHistoryModificationData(), readDatabaseSnapshot(), seedAllocationMapData(), expectedPlannedAllocation(), expectPersistedAllocationPlan(), expectPersistedAllocationPlanManagement(), plannedAllocationId() (+3 more)
+
+### Community 25 - "asset-external-management.e2e.spec.ts"
 Cohesion: 0.17
 Nodes (6): src_test_e2e_support_fixtures_expect, FIRST, SECOND, DEFAULT_ALLOCATION_STRUCTURE, Portfolio, PortfolioRow
 
-### Community 24 - "Asset Allocation Donut Chart"
+### Community 26 - "Asset Allocation Donut Chart"
 Cohesion: 0.22
 Nodes (11): 60/40 Portfolio Classic - Example - 20260210-230012, Allocation Map Tab, Allocation Plan Tab, Asset Allocation Donut Chart, Asset Classes Level, Bonds 60 Percent Allocation, Edit Portfolio Action, My Portfolio Example - 20260210-230012 (+3 more)
 
-### Community 25 - "Portfolio History Detail View"
+### Community 27 - "Portfolio History Detail View"
 Cohesion: 0.22
 Nodes (11): Active Portfolio Tab, Allocation Map Tab, Allocation Plan Tab, Bonds: 45%, Class-Level Asset Allocation Donut Chart, Edit Portfolio Control, Expanded 202602 History Panel, My Portfolio Example - 20260210-230012 (+3 more)
 
-### Community 26 - "main"
+### Community 28 - "main"
 Cohesion: 0.24
 Nodes (11): _base_result_name(), _build_output_mapping(), _load_field_categories(), _load_mapping(), main(), Path, Derive the authoritative base result filename from an item name., Build collision-safe output paths using the deep-research rules. (+3 more)
 
-### Community 27 - "ingest-ghostfolio-activity.sql"
+### Community 29 - "ingest-ghostfolio-activity.sql"
 Cohesion: 0.31
 Nodes (10): pgsql.asset_market_data_source, asset_dimension_mapping, asset_insertion, asset_market_data_source_insertion, ghostf_activity, ghostf_symbol_aggegation, pgsql.asset, yahoo_asset_list (+2 more)
 
-### Community 28 - "Base Application Service"
+### Community 30 - "Base Application Service"
 Cohesion: 0.27
 Nodes (11): Base Application Service, Base Migration Engine, Base PostgreSQL Service, CI E2E Overlay, Immutable E2E Monolith, E2E PostgreSQL Service, E2E Migration Engine, Containerized Playwright Runner (+3 more)
 
-### Community 29 - "database.ts"
+### Community 31 - "database.ts"
 Cohesion: 0.27
 Nodes (6): createE2eDatabase(), E2eDatabase, FLYWAY_HISTORY_TABLES, parsePort(), quoteIdentifier(), requiredEnvironment()
 
-### Community 30 - "Open Asset Allocator Architecture"
+### Community 32 - "Open Asset Allocator Architecture"
 Cohesion: 0.22
 Nodes (9): Root AGENTS Instructions for Copilot, Fractal Long-Term Asset Allocation Strategies, Backend Serves Frontend Static Assets in Production, Go Gin Backend, Hybrid HTMX Lazy-Loading SPA Frontend, Open Asset Allocator Architecture, PostgreSQL Flyway and DuckDB Data Layer, Graphify scopes (+1 more)
 
-### Community 31 - "Portfolio Card Grid"
+### Community 33 - "Portfolio Card Grid"
 Cohesion: 0.22
 Nodes (10): Dark Theme, Global All Assets Portfolio, My Portfolio Example, My Portfolio Example - 20260210-230012, New Portfolio Action, New Portfolio Focus State, Open Asset Allocator Brand, Portfolio Card Grid (+2 more)
 
-### Community 32 - "_format_value"
+### Community 34 - "_format_value"
 Cohesion: 0.24
 Nodes (10): _format_value(), _humanize(), _inline_value(), _long_text(), Convert a machine field name into a readable heading., Format long prose as a readable Markdown block quote., Format a value for one compact Markdown line., Format scalar and complex values as readable Markdown lines. (+2 more)
 
-### Community 33 - "@playwright/test"
+### Community 35 - "@playwright/test"
 Cohesion: 0.22
 Nodes (8): ref_node_path, ref_node_url, @playwright/test, defaultArtifactsDirectory, packageDirectory, chartDiagnosticTest, ChartDiagnosticWindow, installChartDiagnostics()
 
-### Community 34 - "accordion-field-interactions.ts"
+### Community 36 - "accordion-field-interactions.ts"
 Cohesion: 0.29
 Nodes (9): AccordionFieldControls, AccordionTestWindow, CollapseEventCounts, CollapseEventRecorder, exerciseAccordionFieldInteractions(), expectPanelExpanded(), installCollapseEventRecorder(), readCollapseEventCounts() (+1 more)
 
-### Community 35 - "fillExistingAssetAllocation"
-Cohesion: 0.24
-Nodes (10): expectExistingAsset(), fillCalculatedValues(), fillDirectTotalMarketValue(), fillExistingAssetAllocation(), fillExistingAssetDirectValueAllocation(), fillNewAssetAllocation(), fillNewAssetCalculatedAllocation(), searchForAsset() (+2 more)
-
-### Community 36 - "Any"
+### Community 37 - "Any"
 Cohesion: 0.28
 Nodes (9): Any, _contains_uncertain(), _is_empty(), _is_visible(), Return whether a value contains the reserved uncertainty marker., Return whether a value should be treated as absent., Return whether a field is safe and meaningful to render., Validate the persisted canonical directory against its parent path. (+1 more)
 
-### Community 37 - "migration-[5]-allocation_plan_improvements.sql"
+### Community 38 - "migration-[5]-allocation_plan_improvements.sql"
 Cohesion: 0.28
 Nodes (7): allocation_plan.create_timestamp TIMESTAMP DEFAULT now() IF NOT EXISTS, allocation_plan.structure JSONB USING structure::jsonb, allocation_plan_unit.slice renamed slice_size_percentage NUMERIC(5,2), allocation_plan_unit.structural_id text[] USING structural_id::text[], slice_percentage_ck CHECK slice_size_percentage between 0 and 100, allocation_plan_unit.slice_size_percentage NUMERIC(10,5) then divide by 100 then NUMERIC(6,5), slice_percentage_ck replaced with CHECK slice_size_percentage between 0 and 1
-
-### Community 38 - ".query"
-Cohesion: 0.22
-Nodes (8): expectPersistedAllocations(), expectPersistedModifiedPortfolioHistory(), seedManagementObservation(), seedPortfolioHistoryModificationData(), readDatabaseSnapshot(), seedAllocationMapData(), expectPersistedAllocationPlan(), seedAdditionalAllocationPlan()
 
 ### Community 39 - "fixtures.ts"
 Cohesion: 0.36
@@ -327,29 +327,29 @@ Nodes (7): test, TestFixtures, WorkerFixtures, delay(), hasSuccessfulResponse(),
 Cohesion: 0.25
 Nodes (8): _category_aliases(), _find_nested_field(), _lookup_field(), Return bidirectional configured and derived aliases for a category., Find the first matching field while traversing nested dictionaries., Look up a field at top level, by category alias, then recursively., Convert a category label to its common snake-case key., _slug_key()
 
-### Community 41 - "Graphify Pipeline"
+### Community 41 - "fillExistingAssetAllocation"
+Cohesion: 0.29
+Nodes (8): expectExistingAsset(), fillClassAllocation(), fillExistingAssetAllocation(), fillNewAssetAllocation(), fillPercentage(), searchForAsset(), selectAssetFromAutocomplete(), setCashReserve()
+
+### Community 42 - "Graphify Pipeline"
 Cohesion: 0.29
 Nodes (7): Existing Graph Fast Path, Graph Health Diagnostics, Graphify Pipeline, Graphify Honesty Rules, Graph Query, Path, and Explain, Semantic Subagent Extraction, Structural AST Extraction
 
-### Community 42 - "Verify Assets Against Planned Allocation Percentages"
+### Community 43 - "Verify Assets Against Planned Allocation Percentages"
 Cohesion: 0.43
 Nodes (7): Create or Modify Allocation Plan, External Cash Inflow, Big or Disruptive Market Fluctuations?, Verify Assets Against Planned Allocation Percentages, Wait for Planned Interval, Move Resources to Fit the Allocation Plan, Scenario Changed?
 
-### Community 43 - "Asset Class Allocation"
+### Community 44 - "Asset Class Allocation"
 Cohesion: 0.33
 Nodes (7): Asset Class Allocation, Bonds Allocation 45 Percent, Monthly Portfolio Snapshot 202602, Portfolio Detail Screen, Portfolio Workspace Navigation, Stocks Allocation 55 Percent, Total Market Value 60000
-
-### Community 44 - "portfolio_allocation_fact_insertion"
-Cohesion: 0.48
-Nodes (6): asset_dimension_mapping, asset_insertion, portfolio_allocation_fact_insertion, pgsql.asset, pgsql.portfolio_allocation_obs_time, sws_summary
 
 ### Community 45 - "portfolio_allocation_fact_insertion"
 Cohesion: 0.48
 Nodes (6): asset_dimension_mapping, asset_insertion, portfolio_allocation_fact_insertion, pgsql.asset, pgsql.portfolio_allocation_obs_time, sws_summary
 
-### Community 46 - "submitObservationForDate"
-Cohesion: 0.29
-Nodes (7): addAllocationRow(), browserLocalCalendarDate(), expectedObservationHeaderName(), expectManagementObservationOrder(), expectReloadedManagementItems(), findObservationByTag(), submitObservationForDate()
+### Community 46 - "portfolio_allocation_fact_insertion"
+Cohesion: 0.48
+Nodes (6): asset_dimension_mapping, asset_insertion, portfolio_allocation_fact_insertion, pgsql.asset, pgsql.portfolio_allocation_obs_time, sws_summary
 
 ### Community 47 - "Repository Scope Routing"
 Cohesion: 0.33
@@ -396,24 +396,24 @@ Cohesion: 1.00
 Nodes (3): Go External Integration Tests, Go Test Workflow, Go Unit Tests
 
 ## Knowledge Gaps
-- **265 isolated node(s):** `CanvasPoint`, `CanvasTextRecorder`, `ExpectedAllocationRow`, `ExpectedManagedAllocationRow`, `NavigationOptionName` (+260 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 412 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **267 isolated node(s):** `ExpectedObservationRow`, `NavigationOptionName`, `PersistedAllocation`, `PersistedObservation`, `SeededAsset` (+262 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 415 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **46 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `@playwright/test` connect `@playwright/test` to `portfolio-allocation-plan-management.e2e.spec.ts`, `portfolio-allocation-map.e2e.spec.ts`, `accordion-field-interactions.ts`, `portfolio-history-external-quote.e2e.spec.ts`, `portfolio-allocation-history-management.e2e.spec.ts`, `package.json`, `fixtures.ts`, `portfolio-visualization.e2e.spec.ts`, `portfolio-editing.e2e.spec.ts`, `asset-management.e2e.spec.ts`, `asset-external-management.e2e.spec.ts`?**
-  _High betweenness centrality (0.052) - this node is a cross-community bridge._
-- **Why does `E2eDatabase` connect `database.ts` to `portfolio-allocation-plan-management.e2e.spec.ts`, `portfolio-allocation-map.e2e.spec.ts`, `portfolio-history-external-quote.e2e.spec.ts`, `portfolio-allocation-history-management.e2e.spec.ts`, `.query`, `fixtures.ts`, `portfolio-visualization.e2e.spec.ts`, `portfolio-editing.e2e.spec.ts`, `asset-management.e2e.spec.ts`, `asset-external-management.e2e.spec.ts`?**
+- **Why does `@playwright/test` connect `@playwright/test` to `portfolio-allocation-history-management.e2e.spec.ts`, `portfolio-allocation-map.e2e.spec.ts`, `portfolio-allocation-plan-management.e2e.spec.ts`, `portfolio-history-external-quote.e2e.spec.ts`, `accordion-field-interactions.ts`, `package.json`, `fixtures.ts`, `doughnut-chart.ts`, `portfolio-visualization.e2e.spec.ts`, `portfolio-editing.e2e.spec.ts`, `asset-management.e2e.spec.ts`, `asset-external-management.e2e.spec.ts`?**
+  _High betweenness centrality (0.051) - this node is a cross-community bridge._
+- **Why does `E2eDatabase` connect `database.ts` to `portfolio-allocation-history-management.e2e.spec.ts`, `portfolio-allocation-map.e2e.spec.ts`, `portfolio-allocation-plan-management.e2e.spec.ts`, `portfolio-history-external-quote.e2e.spec.ts`, `fixtures.ts`, `portfolio-visualization.e2e.spec.ts`, `portfolio-editing.e2e.spec.ts`, `asset-management.e2e.spec.ts`, `.query`, `asset-external-management.e2e.spec.ts`?**
   _High betweenness centrality (0.017) - this node is a cross-community bridge._
-- **Why does `test` connect `fixtures.ts` to `portfolio-allocation-plan-management.e2e.spec.ts`, `@playwright/test`, `portfolio-allocation-map.e2e.spec.ts`, `portfolio-history-external-quote.e2e.spec.ts`, `portfolio-allocation-history-management.e2e.spec.ts`, `portfolio-visualization.e2e.spec.ts`, `portfolio-editing.e2e.spec.ts`, `asset-management.e2e.spec.ts`, `asset-external-management.e2e.spec.ts`, `database.ts`?**
+- **Why does `test` connect `fixtures.ts` to `portfolio-allocation-history-management.e2e.spec.ts`, `portfolio-allocation-map.e2e.spec.ts`, `portfolio-allocation-plan-management.e2e.spec.ts`, `@playwright/test`, `portfolio-history-external-quote.e2e.spec.ts`, `portfolio-visualization.e2e.spec.ts`, `portfolio-editing.e2e.spec.ts`, `asset-management.e2e.spec.ts`, `asset-external-management.e2e.spec.ts`, `database.ts`?**
   _High betweenness centrality (0.014) - this node is a cross-community bridge._
-- **What connects `CanvasPoint`, `CanvasTextRecorder`, `ExpectedAllocationRow` to the rest of the system?**
-  _265 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `portfolio-allocation-plan-management.e2e.spec.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.05359831376091539 - nodes in this community are weakly interconnected._
+- **What connects `ExpectedObservationRow`, `NavigationOptionName`, `PersistedAllocation` to the rest of the system?**
+  _267 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `portfolio-allocation-history-management.e2e.spec.ts` be split into smaller, more focused modules?**
+  _Cohesion score 0.055523085914669784 - nodes in this community are weakly interconnected._
 - **Should `portfolio-allocation-map.e2e.spec.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.08108108108108109 - nodes in this community are weakly interconnected._
-- **Should `portfolio-history-external-quote.e2e.spec.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.06818181818181818 - nodes in this community are weakly interconnected._
+- **Should `portfolio-allocation-plan-management.e2e.spec.ts` be split into smaller, more focused modules?**
+  _Cohesion score 0.07226890756302522 - nodes in this community are weakly interconnected._

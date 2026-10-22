@@ -9,9 +9,10 @@
 --   1. planned_allocation (depends on allocation_plan)
 --   2. allocation_plan (references portfolio)
 --   3. portfolio_allocation_fact (references portfolio)
---   4. portfolio (the main table)
+--   4. portfolio_allocation_obs_time (owned by portfolio)
+--   5. portfolio (the main table)
 --
--- Author: Github Copilot
+-- Co-authored by: OpenCode and Github Copilot
 
 CREATE TEMP TABLE temp_vars (key text PRIMARY KEY, value text);
 
@@ -41,6 +42,10 @@ WHERE portfolio_id IN (SELECT value::integer FROM temp_vars WHERE key = 'portfol
 DELETE FROM portfolio_allocation_fact
 WHERE portfolio_id IN (SELECT value::integer FROM temp_vars WHERE key = 'portfolio_id');
 
+-- Delete owned observations after their allocation facts and before the portfolio.
+DELETE FROM portfolio_allocation_obs_time
+WHERE portfolio_id IN (SELECT value::integer FROM temp_vars WHERE key = 'portfolio_id');
+
 -- Delete the portfolio(s)
 DELETE FROM portfolio
 WHERE id IN (SELECT value::integer FROM temp_vars WHERE key = 'portfolio_id');
@@ -49,11 +54,3 @@ WHERE id IN (SELECT value::integer FROM temp_vars WHERE key = 'portfolio_id');
 SELECT 'Portfolio(s) deleted successfully. Remaining portfolios:' AS status;
 
 SELECT id, name FROM portfolio ORDER BY id;
-
-DELETE FROM portfolio_allocation_obs_time
-WHERE id NOT IN (
-    SELECT DISTINCT observation_time_id
-    FROM portfolio_allocation_fact
-    WHERE observation_time_id IS NOT NULL
-);
-

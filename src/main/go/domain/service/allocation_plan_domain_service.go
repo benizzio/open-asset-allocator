@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/shopspring/decimal"
 
@@ -55,6 +56,9 @@ func (service *AllocationPlanDomService) GetPlannedAllocationsPerHyerarchicalIdM
 	return plannedAllocationMap, nil
 }
 
+// PersistAllocationPlanInTransaction validates plan metadata, hierarchy, and ownership before persistence.
+// For example, service.PersistAllocationPlanInTransaction(ctx, plan, structure) uses ctx's transaction.
+// Co-authored by: GPT-6.1 Sol and benizzio
 func (service *AllocationPlanDomService) PersistAllocationPlanInTransaction(
 	transContext context.Context,
 	plan *domain.AllocationPlan,
@@ -65,6 +69,9 @@ func (service *AllocationPlanDomService) PersistAllocationPlanInTransaction(
 	if validationErrors != nil {
 		return infra.BuildDomainValidationError("Allocation plan validation failed", validationErrors)
 	}
+	if err := service.validateAllocationPlanOwnership(transContext, plan); err != nil {
+		return err
+	}
 
 	if langext.IsZeroValue(plan.Id) {
 		return service.allocationPlanRepository.InsertAllocationPlanInTransaction(transContext, plan)
@@ -72,6 +79,66 @@ func (service *AllocationPlanDomService) PersistAllocationPlanInTransaction(
 
 	return service.allocationPlanRepository.UpdateAllocationPlanInTransaction(transContext, plan)
 
+}
+
+// validateAllocationPlanOwnership checks persisted plan and detail ownership before any plan write.
+// Authored by: GPT-6.1 Sol
+func (service *AllocationPlanDomService) validateAllocationPlanOwnership(
+	transContext context.Context,
+	plan *domain.AllocationPlan,
+) error {
+	if langext.IsZeroValue(plan.Id) {
+		for _, detail := range plan.Details {
+			if detail != nil && !langext.IsZeroValue(detail.Id) {
+				return service.plannedAllocationValidationError("New allocation plans cannot reuse existing detail IDs")
+			}
+		}
+		return nil
+	}
+
+	var ownership, err = service.allocationPlanRepository.FindAndLockAllocationPlanOwnershipInTransaction(
+		transContext, plan.Id,
+	)
+	if err != nil {
+		return err
+	}
+	if ownership == nil || ownership.PortfolioId != plan.PortfolioId || ownership.PlanType != plan.PlanType {
+		return service.plannedAllocationValidationError("Allocation plan does not exist in the requested portfolio")
+	}
+	return service.validatePlannedAllocationOwnership(plan.Details, ownership.DetailIds)
+}
+
+// validatePlannedAllocationOwnership rejects foreign, unknown, and duplicate persisted detail IDs.
+// Authored by: GPT-6.1 Sol
+func (service *AllocationPlanDomService) validatePlannedAllocationOwnership(
+	details []*domain.PlannedAllocation,
+	persistedDetailIds []int64,
+) error {
+	var ownedDetailIds = make(map[int64]bool, len(persistedDetailIds))
+	for _, id := range persistedDetailIds {
+		ownedDetailIds[id] = true
+	}
+	for _, detail := range details {
+		if detail == nil || langext.IsZeroValue(detail.Id) {
+			continue
+		}
+		if !ownedDetailIds[detail.Id] {
+			return service.plannedAllocationValidationError(
+				"One or more planned allocation detail IDs do not belong to this plan",
+			)
+		}
+		delete(ownedDetailIds, detail.Id)
+	}
+	return nil
+}
+
+// plannedAllocationValidationError builds a domain validation failure for plan ownership rules.
+// Authored by: GPT-6.1 Sol
+func (service *AllocationPlanDomService) plannedAllocationValidationError(message string) error {
+	return infra.BuildDomainValidationError(
+		"Allocation plan validation failed",
+		[]*infra.AppError{infra.BuildAppErrorFormattedUnconverted(service, "%s", message)},
+	)
 }
 
 type allocationPlanValidationData struct {
@@ -104,13 +171,23 @@ func (validationData *levelSliceSizeValidationData) describeLevel(
 
 // validateAllocationPlan validates the required planned date and plan hierarchy before persistence.
 //
-// Co-authored by: OpenCode and benizzio
+// Co-authored by: GPT-6.1 Sol, OpenCode and benizzio
 // TODO validate plan before persisting
 // - hierarchical ids with asset match asset ticker from reference
 func (service *AllocationPlanDomService) validateAllocationPlan(
 	plan *domain.AllocationPlan,
 	allocationStructure *domain.AllocationStructure,
 ) []*infra.AppError {
+	if langext.IsEmptyString(plan.Name) {
+		return []*infra.AppError{
+			infra.BuildAppErrorFormattedUnconverted(service, "Allocation plan name is required and must not be blank"),
+		}
+	}
+	if utf8.RuneCountInString(plan.Name) > 100 {
+		return []*infra.AppError{
+			infra.BuildAppErrorFormattedUnconverted(service, "Allocation plan name must not exceed 100 characters"),
+		}
+	}
 	if plan.PlannedDate.IsZero() {
 		return []*infra.AppError{
 			infra.BuildAppErrorFormattedUnconverted(service, "Planned date is required and must not be zero"),

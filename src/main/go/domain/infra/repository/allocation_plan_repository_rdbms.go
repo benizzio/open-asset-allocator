@@ -2,6 +2,10 @@ package repository
 
 import (
 	"context"
+	"database/sql"
+	"errors"
+
+	"github.com/lib/pq"
 
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/domain/allocation"
@@ -45,7 +49,7 @@ const (
 	allocationPlanUpdateSQL = `
 		UPDATE allocation_plan 
 		SET name = $1, planned_date = $2
-		WHERE id = $3
+		WHERE id = $3 AND portfolio_id = $4 AND type = $5
 	`
 	plannedAllocationTempTableName   = "planned_allocation_merge_temp"
 	plannedAllocationTempTableDDLSQL = `
@@ -56,8 +60,8 @@ const (
 	plannedAllocationMergeSQL = `
 		MERGE INTO planned_allocation pa
 		USING ` + plannedAllocationTempTableName + ` temp
-		ON pa.id = temp.id
-		WHEN NOT MATCHED BY TARGET THEN
+		ON pa.id = temp.id AND pa.allocation_plan_id = temp.allocation_plan_id
+		WHEN NOT MATCHED BY TARGET AND temp.id = 0 THEN
 			INSERT (allocation_plan_id, hierarchical_id, cash_reserve, slice_size_percentage, asset_id)
 			VALUES (
 				temp.allocation_plan_id, 
@@ -153,6 +157,9 @@ func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlanIdentifiers
 	return langext.ToPointerSlice(queryResult), nil
 }
 
+// InsertAllocationPlanInTransaction creates a plan and its details as one transaction.
+// For example, `repository.InsertAllocationPlanInTransaction(ctx, plan)` creates the plan for plan.PortfolioId.
+// Authored by: benizzio
 func (repository *AllocationPlanRDBMSRepository) InsertAllocationPlanInTransaction(
 	transContext context.Context,
 	plan *domain.AllocationPlan,
@@ -177,6 +184,9 @@ func (repository *AllocationPlanRDBMSRepository) InsertAllocationPlanInTransacti
 	return repository.mergePlannedAllocationsInTransaction(transactionalContext, id, plan.Details)
 }
 
+// UpdateAllocationPlanInTransaction persists a plan already validated by the domain service.
+// For example, `repository.UpdateAllocationPlanInTransaction(ctx, plan)` updates plan.Id only in plan.PortfolioId.
+// Co-authored by: GPT-6.1 Sol, OpenCode and benizzio
 func (repository *AllocationPlanRDBMSRepository) UpdateAllocationPlanInTransaction(
 	transContext context.Context,
 	plan *domain.AllocationPlan,
@@ -190,18 +200,65 @@ func (repository *AllocationPlanRDBMSRepository) UpdateAllocationPlanInTransacti
 		)
 	}
 
-	_, err := repository.dbAdapter.ExecuteInTransaction(
+	var result, err = repository.dbAdapter.ExecuteInTransaction(
 		transactionalContext,
 		allocationPlanUpdateSQL,
 		plan.Name,
 		plan.PlannedDate,
 		plan.Id,
+		plan.PortfolioId,
+		plan.PlanType.String(),
 	)
 	if err != nil {
 		return infra.PropagateAsAppErrorWithNewMessage(err, "Error updating allocation plan", repository)
 	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return infra.PropagateAsAppErrorWithNewMessage(err, "Error checking updated allocation plan", repository)
+	}
+	if rowsAffected != 1 {
+		return &infra.UnexpectedRowsAffectedError{
+			Operation: "Update allocation plan", Expected: 1, Actual: rowsAffected,
+		}
+	}
 
 	return repository.mergePlannedAllocationsInTransaction(transactionalContext, int64(plan.Id), plan.Details)
+}
+
+// FindAndLockAllocationPlanOwnershipInTransaction locks a plan and reads its ownership and detail identifiers.
+// For example, repository.FindAndLockAllocationPlanOwnershipInTransaction(ctx, 6) returns nil if plan 6 is missing.
+// Authored by: GPT-6.1 Sol
+func (repository *AllocationPlanRDBMSRepository) FindAndLockAllocationPlanOwnershipInTransaction(
+	transContext context.Context,
+	allocationPlanId int64,
+) (*domain.AllocationPlanOwnership, error) {
+	var transactionalContext, ok = rdbms.ToSQLTransactionalContext(transContext)
+	if !ok {
+		return nil, infra.BuildAppError("Context is not a SQL transactional context", repository)
+	}
+	var ownership domain.AllocationPlanOwnership
+	var err = transactionalContext.GetTransaction().QueryRowContext(
+		transContext,
+		`SELECT portfolio_id, type FROM allocation_plan WHERE id = $1 FOR UPDATE`,
+		allocationPlanId,
+	).Scan(&ownership.PortfolioId, &ownership.PlanType)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "Error reading allocation plan ownership", repository)
+	}
+	err = transactionalContext.GetTransaction().QueryRowContext(
+		transContext,
+		`SELECT COALESCE(array_agg(id::BIGINT), '{}'::BIGINT[]) FROM planned_allocation WHERE allocation_plan_id = $1`,
+		allocationPlanId,
+	).Scan(pq.Array(&ownership.DetailIds))
+	if err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(
+			err, "Error reading planned allocation identifiers", repository,
+		)
+	}
+	return &ownership, nil
 }
 
 func (repository *AllocationPlanRDBMSRepository) mergePlannedAllocationsInTransaction(

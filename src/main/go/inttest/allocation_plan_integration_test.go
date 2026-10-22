@@ -986,6 +986,197 @@ func TestPostAllocationPlanForUpdate_ChangesHierarchicalId(t *testing.T) {
 	)
 }
 
+// TestPostAllocationPlanUpdatesOwnedMetadata verifies plan metadata edits preserve the plan and detail identities.
+// Authored by: OpenCode
+func TestPostAllocationPlanUpdatesOwnedMetadata(t *testing.T) {
+	registerAllocationPlanFixtureRestore(t)
+	var snapshotDetails = `[
+		{"id":30,"hierarchicalId":[null,"BONDS"],"sliceSizePercentage":"0.5"},
+		{"id":31,"hierarchicalId":[null,"STOCKS"],"sliceSizePercentage":"0.5"},
+		{"id":32,"hierarchicalId":["ARCA:BIL","BONDS"],"sliceSizePercentage":"1.0","asset":{"id":1}},
+		{"id":33,"hierarchicalId":["ARCA:SPY","STOCKS"],"sliceSizePercentage":"1.0","asset":{"id":7}}
+	]`
+
+	var nameUpdate = fmt.Sprintf(
+		`{"id":6,"name":"Updated Allocation Plan Fixture","plannedDate":"2025-06-01","details":%s}`,
+		snapshotDetails,
+	)
+	response, err := postAllocationPlanRequest(5, nameUpdate)
+	require.NoError(t, err)
+	defer deferCloseResponseBody(response)
+	require.Equal(t, http.StatusNoContent, response.StatusCode)
+	assertPersistedAllocationPlanMetadata(t, 6, "Updated Allocation Plan Fixture", "2025-06-01")
+	assertPersistedAllocationPlanDetailIds(t, 6)
+
+	var dateUpdate = fmt.Sprintf(
+		`{"id":6,"name":"Updated Allocation Plan Fixture","plannedDate":"2025-06-02","details":%s}`,
+		snapshotDetails,
+	)
+	response, err = postAllocationPlanRequest(5, dateUpdate)
+	require.NoError(t, err)
+	defer deferCloseResponseBody(response)
+	require.Equal(t, http.StatusNoContent, response.StatusCode)
+	assertPersistedAllocationPlanMetadata(t, 6, "Updated Allocation Plan Fixture", "2025-06-02")
+	assertPersistedAllocationPlanDetailIds(t, 6)
+}
+
+// TestPostAllocationPlanRejectsForeignPlanAndDetailIds verifies parent and detail identifiers are portfolio-scoped.
+// Usage: go test -count=1 -run '^TestPostAllocationPlanRejectsForeignPlanAndDetailIds$' ./inttest
+// Co-authored by: OpenCode and GPT-6.1 Sol
+func TestPostAllocationPlanRejectsForeignPlanAndDetailIds(t *testing.T) {
+	registerAllocationPlanFixtureRestore(t)
+	var foreignDetailPlanId int64
+	t.Cleanup(
+		inttestutil.BuildCleanupFunctionBuilder().
+			AddCleanupQuery(`UPDATE planned_allocation SET allocation_plan_id = 6 WHERE id = 33`, nil).
+			AddCleanupQuery(
+				`DELETE FROM allocation_plan WHERE portfolio_id = 5 AND name = 'Foreign detail fixture'`,
+				nil,
+			).
+			Build(t),
+	)
+
+	var err = inttestinfra.ExecuteDBQuery(
+		`INSERT INTO allocation_plan (portfolio_id, name, type, planned_date)
+		 VALUES (5, 'Foreign detail fixture', 'ALLOCATION_PLAN', '2025-06-03')`,
+		nil,
+	)
+	require.NoError(t, err)
+	err = inttestinfra.FetchWithDBQuery(
+		`SELECT id FROM allocation_plan WHERE portfolio_id = 5 AND name = 'Foreign detail fixture'`,
+		nil,
+		func(rows *dbx.Rows) error {
+			return rows.Scan(&foreignDetailPlanId)
+		},
+	)
+	require.NoError(t, err)
+	err = inttestinfra.ExecuteDBQuery(
+		`UPDATE planned_allocation SET allocation_plan_id = {:planId} WHERE id = 33`,
+		dbx.Params{"planId": foreignDetailPlanId},
+	)
+	require.NoError(t, err)
+
+	var foreignPlanRequest = `{
+		"id":1,"name":"Foreign plan attempt","plannedDate":"2025-06-01","details":[
+			{"hierarchicalId":[null,"BONDS"],"sliceSizePercentage":"0.5"},
+			{"hierarchicalId":[null,"STOCKS"],"sliceSizePercentage":"0.5"},
+			{"hierarchicalId":["ARCA:BIL","BONDS"],"sliceSizePercentage":"1.0","asset":{"id":1}},
+			{"hierarchicalId":["ARCA:SPY","STOCKS"],"sliceSizePercentage":"1.0","asset":{"id":7}}
+		]
+	}`
+	response, err := postAllocationPlanRequest(5, foreignPlanRequest)
+	require.NoError(t, err)
+	defer deferCloseResponseBody(response)
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+	responseBody, err := io.ReadAll(response.Body)
+	require.NoError(t, err)
+	assert.JSONEq(t, `{
+		"errorMessage":"Allocation plan validation failed",
+		"details":["Allocation plan does not exist in the requested portfolio"]
+	}`, string(responseBody))
+
+	var foreignDetailRequest = `{"id":6,"name":"Update Allocation Plan Fixture","plannedDate":"2025-06-01","details":[
+			{"id":30,"hierarchicalId":[null,"BONDS"],"sliceSizePercentage":"0.5"},
+			{"id":31,"hierarchicalId":[null,"STOCKS"],"sliceSizePercentage":"0.5"},
+			{"id":32,"hierarchicalId":["ARCA:BIL","BONDS"],"sliceSizePercentage":"1.0","asset":{"id":1}},
+			{"id":33,"hierarchicalId":["ARCA:SPY","STOCKS"],"sliceSizePercentage":"1.0","asset":{"id":7}}
+		]}`
+	response, err = postAllocationPlanRequest(5, foreignDetailRequest)
+	require.NoError(t, err)
+	defer deferCloseResponseBody(response)
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+	responseBody, err = io.ReadAll(response.Body)
+	require.NoError(t, err)
+	assert.JSONEq(t, `{
+		"errorMessage":"Allocation plan validation failed",
+		"details":["One or more planned allocation detail IDs do not belong to this plan"]
+	}`, string(responseBody))
+
+	var externalDetailRequest = strings.Replace(
+		foreignDetailRequest,
+		`"id":33,"hierarchicalId":["ARCA:SPY","STOCKS"]`,
+		`"id":25,"hierarchicalId":["ARCA:SPY","STOCKS"]`,
+		1,
+	)
+	response, err = postAllocationPlanRequest(5, externalDetailRequest)
+	require.NoError(t, err)
+	defer deferCloseResponseBody(response)
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+	responseBody, err = io.ReadAll(response.Body)
+	require.NoError(t, err)
+	assert.JSONEq(t, `{
+		"errorMessage":"Allocation plan validation failed",
+		"details":["One or more planned allocation detail IDs do not belong to this plan"]
+	}`, string(responseBody))
+
+	assertPersistedAllocationPlanMetadata(t, 6, "Update Allocation Plan Fixture", "2025-06-01")
+}
+
+// registerAllocationPlanFixtureRestore resets the seeded plan metadata after update tests.
+// Authored by: OpenCode
+func registerAllocationPlanFixtureRestore(t *testing.T) {
+	t.Helper()
+	t.Cleanup(func() {
+		var err = inttestinfra.ExecuteDBQuery(
+			`UPDATE allocation_plan SET name = 'Update Allocation Plan Fixture', planned_date = '2025-06-01' WHERE id = 6`,
+			nil,
+		)
+		assert.NoError(t, err)
+		err = inttestinfra.ExecuteDBQuery(
+			`UPDATE planned_allocation SET slice_size_percentage = 0.5 WHERE allocation_plan_id = 6`,
+			nil,
+		)
+		assert.NoError(t, err)
+	})
+}
+
+// assertPersistedAllocationPlanMetadata verifies the plan ID, name, and calendar date at the persistence layer.
+// Authored by: OpenCode
+func assertPersistedAllocationPlanMetadata(t *testing.T, planId int64, name, plannedDate string) {
+	t.Helper()
+	inttestutil.AssertDBWithQueryMultipleRows(
+		t,
+		`SELECT id::text AS id, name, planned_date::text AS planned_date FROM allocation_plan WHERE id = `+
+			fmt.Sprint(planId),
+		[]inttestutil.AssertableNullStringMap{{
+			"id":           inttestutil.ToAssertableNullString(fmt.Sprint(planId)),
+			"name":         inttestutil.ToAssertableNullString(name),
+			"planned_date": inttestutil.ToAssertableNullString(plannedDate),
+		}},
+	)
+}
+
+// assertPersistedAllocationPlanDetailIds verifies a metadata edit does not replace planned allocation identities.
+// Authored by: OpenCode
+func assertPersistedAllocationPlanDetailIds(t *testing.T, planId int64) {
+	t.Helper()
+	inttestutil.AssertDBWithQueryMultipleRows(
+		t,
+		`SELECT id::text AS id FROM planned_allocation WHERE allocation_plan_id = `+fmt.Sprint(planId)+` ORDER BY id`,
+		[]inttestutil.AssertableNullStringMap{
+			{"id": inttestutil.ToAssertableNullString("30")},
+			{"id": inttestutil.ToAssertableNullString("31")},
+			{"id": inttestutil.ToAssertableNullString("32")},
+			{"id": inttestutil.ToAssertableNullString("33")},
+		},
+	)
+}
+
+// postAllocationPlanRequest sends a JSON plan to the portfolio-scoped update endpoint.
+// Authored by: OpenCode
+func postAllocationPlanRequest(portfolioId int64, requestBody string) (*http.Response, error) {
+	var request, err = http.NewRequest(
+		http.MethodPost,
+		inttestinfra.TestAPIURLPrefix+"/portfolio/"+fmt.Sprint(portfolioId)+"/allocation-plan",
+		strings.NewReader(requestBody),
+	)
+	if err != nil {
+		return nil, err
+	}
+	request.Header.Set("Content-Type", "application/json")
+	return http.DefaultClient.Do(request)
+}
+
 // Test validation: missing required field 'name'
 // Expects 400 with message "Field 'name' failed validation: is required"
 //

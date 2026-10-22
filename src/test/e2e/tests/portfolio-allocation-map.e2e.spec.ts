@@ -249,7 +249,10 @@ test.describe('portfolio allocation map', () => {
   });
 });
 
-/** Seeds the exact portfolio, history, plans, and allocations required by Scenario 7. */
+/** Seeds the exact portfolio, history, plans, and allocations required by Scenario 7.
+ *
+ * @author OpenCode
+ */
 async function seedAllocationMapData(database: E2eDatabase): Promise<SeededAllocationMapData> {
   const portfolioRows = await database.query<SeededPortfolio>(
     `INSERT INTO public.portfolio (name, allocation_structure)
@@ -264,10 +267,11 @@ async function seedAllocationMapData(database: E2eDatabase): Promise<SeededAlloc
     ASSET_DATA.flatMap(({ ticker, name }) => [ticker, name]),
   );
   const observationRows = await database.query<{ id: number; observation_time_tag: string }>(
-    `INSERT INTO public.portfolio_allocation_obs_time (observation_time_tag, observation_timestamp)
-     VALUES ($1, $2::timestamptz), ($3, $4::timestamptz)
+    `INSERT INTO public.portfolio_allocation_obs_time (portfolio_id, observation_time_tag, observation_timestamp)
+     VALUES ($1, $2, $3::timestamptz), ($1, $4, $5::timestamptz)
      RETURNING id, observation_time_tag`,
     [
+      portfolioRows[0].id,
       HISTORY_001_NAME,
       '2040-01-01T00:00:00Z',
       HISTORY_002_NAME,
