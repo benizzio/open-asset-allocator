@@ -1021,7 +1021,8 @@ func TestPostAllocationPlanUpdatesOwnedMetadata(t *testing.T) {
 }
 
 // TestPostAllocationPlanRejectsForeignPlanAndDetailIds verifies parent and detail identifiers are portfolio-scoped.
-// Authored by: OpenCode
+// Usage: go test -count=1 -run '^TestPostAllocationPlanRejectsForeignPlanAndDetailIds$' ./inttest
+// Co-authored by: OpenCode and GPT-6.1 Sol
 func TestPostAllocationPlanRejectsForeignPlanAndDetailIds(t *testing.T) {
 	registerAllocationPlanFixtureRestore(t)
 	var foreignDetailPlanId int64
@@ -1035,7 +1036,7 @@ func TestPostAllocationPlanRejectsForeignPlanAndDetailIds(t *testing.T) {
 			Build(t),
 	)
 
-	err := inttestinfra.ExecuteDBQuery(
+	var err = inttestinfra.ExecuteDBQuery(
 		`INSERT INTO allocation_plan (portfolio_id, name, type, planned_date)
 		 VALUES (5, 'Foreign detail fixture', 'ALLOCATION_PLAN', '2025-06-03')`,
 		nil,
@@ -1067,6 +1068,12 @@ func TestPostAllocationPlanRejectsForeignPlanAndDetailIds(t *testing.T) {
 	require.NoError(t, err)
 	defer deferCloseResponseBody(response)
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+	responseBody, err := io.ReadAll(response.Body)
+	require.NoError(t, err)
+	assert.JSONEq(t, `{
+		"errorMessage":"Allocation plan validation failed",
+		"details":["Allocation plan does not exist in the requested portfolio"]
+	}`, string(responseBody))
 
 	var foreignDetailRequest = `{"id":6,"name":"Update Allocation Plan Fixture","plannedDate":"2025-06-01","details":[
 			{"id":30,"hierarchicalId":[null,"BONDS"],"sliceSizePercentage":"0.5"},
@@ -1078,6 +1085,12 @@ func TestPostAllocationPlanRejectsForeignPlanAndDetailIds(t *testing.T) {
 	require.NoError(t, err)
 	defer deferCloseResponseBody(response)
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+	responseBody, err = io.ReadAll(response.Body)
+	require.NoError(t, err)
+	assert.JSONEq(t, `{
+		"errorMessage":"Allocation plan validation failed",
+		"details":["One or more planned allocation detail IDs do not belong to this plan"]
+	}`, string(responseBody))
 
 	var externalDetailRequest = strings.Replace(
 		foreignDetailRequest,
@@ -1089,6 +1102,12 @@ func TestPostAllocationPlanRejectsForeignPlanAndDetailIds(t *testing.T) {
 	require.NoError(t, err)
 	defer deferCloseResponseBody(response)
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+	responseBody, err = io.ReadAll(response.Body)
+	require.NoError(t, err)
+	assert.JSONEq(t, `{
+		"errorMessage":"Allocation plan validation failed",
+		"details":["One or more planned allocation detail IDs do not belong to this plan"]
+	}`, string(responseBody))
 
 	assertPersistedAllocationPlanMetadata(t, 6, "Update Allocation Plan Fixture", "2025-06-01")
 }
