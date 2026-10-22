@@ -71,7 +71,7 @@ func (service *PortfolioAllocationManagementAppService) manageObservationTimesta
 ) (*domain.PortfolioObservationTimestamp, error) {
 
 	var managedObservationTimestamp, err = service.portfolioAllocationDomService.
-		InsertObservationTimestampInTransaction(transContext, portfolioId, observationTimestamp)
+		PersistObservationTimestampInTransaction(transContext, portfolioId, observationTimestamp)
 	if err != nil {
 		return nil, err
 	}
