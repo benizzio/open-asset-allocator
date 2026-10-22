@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/lib/pq"
-
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra"
 	"github.com/benizzio/open-asset-allocator/infra/rdbms"
@@ -128,7 +126,6 @@ const (
 	queryAllocationsError           = "Error querying portfolio allocations"
 	queryObservationTimestampsError = "Error querying observation timestamps"
 	observationTagUniqueConstraint  = "portfolio_allocation_obs_time_portfolio_tag_uk"
-	observationPortfolioConstraint  = "portfolio_allocation_obs_time_portfolio_fk"
 )
 
 type PortfolioAllocationRDBMSRepository struct {
@@ -432,11 +429,9 @@ func classifyObservationWriteError(err error) error {
 		)
 	}
 
-	var postgresError *pq.Error
-	if errors.As(err, &postgresError) &&
-		postgresError.Code == "23503" &&
-		postgresError.Constraint == observationPortfolioConstraint {
-		return &infra.ForeignKeyConstraintViolationError{ConstraintName: postgresError.Constraint, Cause: err}
+	var violation = rdbms.ClassifyForeignKeyViolation(err)
+	if violation != nil {
+		return violation
 	}
 	return nil
 }
