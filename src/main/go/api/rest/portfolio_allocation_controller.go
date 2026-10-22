@@ -197,9 +197,9 @@ func (controller *PortfolioAllocationRESTController) postPortfolioAllocationHist
 	context.Status(http.StatusNoContent)
 }
 
-// validateCleanPortfolioAllocationHistory rejects zero timestamps, empty tags, and invalid allocation fields.
+// validateCleanPortfolioAllocationHistory rejects zero timestamps, whitespace-only tags, and invalid allocation fields.
 //
-// Co-authored by: GPT-6.1 Sol, OpenCode and benizzio
+// Co-authored by: GPT-6 Luna, GPT-6.1 Sol, OpenCode and benizzio
 func (controller *PortfolioAllocationRESTController) validateCleanPortfolioAllocationHistory(
 	context *gin.Context,
 	portfolioSnapshotDTS *model.PortfolioSnapshotDTS,
@@ -215,16 +215,6 @@ func (controller *PortfolioAllocationRESTController) validateCleanPortfolioAlloc
 			"custom",
 			"must not be the zero timestamp",
 			portfolioSnapshotDTS.ObservationTimestamp.Timestamp,
-		)
-	}
-	if langext.IsZeroValue(portfolioSnapshotDTS.ObservationTimestamp.Id) &&
-		langext.IsZeroValue(portfolioSnapshotDTS.ObservationTimestamp.TimeTag) {
-		validationErrorsBuilder.CustomValidationErrorFullNamespace(
-			portfolioSnapshotDTS,
-			"observationTimestamp.timeTag",
-			"custom",
-			"is required for a new observation",
-			portfolioSnapshotDTS.ObservationTimestamp.TimeTag,
 		)
 	}
 	if !langext.IsZeroValue(portfolioSnapshotDTS.ObservationTimestamp.TimeTag) &&

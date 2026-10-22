@@ -108,11 +108,12 @@ func (service *PortfolioAllocationDomService) MergePortfolioAllocationsInTransac
 }
 
 // PersistObservationTimestampInTransaction persists a new observation for the supplied portfolio, or updates an
-// existing observation only when it belongs to that portfolio. Callers should pass the observation selected by the
-// client, for example `PersistObservationTimestampInTransaction(ctx, 42, observation)`. New observations require a tag;
-// updates may omit it to preserve the stored tag. Metadata and ownership are validated before persistence.
+// existing observation only when it belongs to that portfolio. Both operations require a nonblank tag of at most 100
+// characters and a nonzero timestamp. For example, callers can pass
+// `PersistObservationTimestampInTransaction(ctx, 42, observation)` with the selected observation's current tag
+// included in the update. Metadata and ownership are validated before persistence.
 //
-// Co-authored by: GPT-6.1 Sol, OpenCode and benizzio
+// Co-authored by: GPT-6 Luna, GPT-6.1 Sol, OpenCode and benizzio
 func (service *PortfolioAllocationDomService) PersistObservationTimestampInTransaction(
 	transContext context.Context,
 	portfolioId int64,
@@ -201,7 +202,7 @@ func (service *PortfolioAllocationDomService) observationValidationError(message
 }
 
 // validateObservationTimestamp rejects invalid metadata before the repository writes it.
-// Co-authored by: GPT-6.1 Sol and OpenCode
+// Co-authored by: GPT-6 Luna, GPT-6.1 Sol and OpenCode
 func (service *PortfolioAllocationDomService) validateObservationTimestamp(
 	portfolioId int64,
 	observationTimestamp *domain.PortfolioObservationTimestamp,
@@ -213,10 +214,10 @@ func (service *PortfolioAllocationDomService) validateObservationTimestamp(
 		if portfolioId <= 0 {
 			causes = append(causes, infra.BuildAppErrorFormattedUnconverted(service, "Portfolio ID must be positive"))
 		}
-		if langext.IsZeroValue(observationTimestamp.TimeTag) && langext.IsZeroValue(observationTimestamp.Id) {
+		if langext.IsZeroValue(observationTimestamp.TimeTag) {
 			causes = append(causes, infra.BuildAppErrorFormattedUnconverted(
 				service,
-				"Observation time tag is required for new observations",
+				"Observation time tag is required",
 			))
 		} else if !langext.IsZeroValue(observationTimestamp.TimeTag) &&
 			langext.IsEmptyString(observationTimestamp.TimeTag) {
