@@ -96,7 +96,7 @@ func (service *AllocationPlanDomService) validateAllocationPlanOwnership(
 		return nil
 	}
 
-	ownership, err := service.allocationPlanRepository.FindAndLockAllocationPlanOwnershipInTransaction(
+	var ownership, err = service.allocationPlanRepository.FindAndLockAllocationPlanOwnershipInTransaction(
 		transContext, plan.Id,
 	)
 	if err != nil {
