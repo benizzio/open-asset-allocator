@@ -159,7 +159,7 @@ func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlanIdentifiers
 
 // InsertAllocationPlanInTransaction creates a plan and its details as one transaction.
 // For example, `repository.InsertAllocationPlanInTransaction(ctx, plan)` creates the plan for plan.PortfolioId.
-// Co-authored by: GPT-6.1 Sol, OpenCode and benizzio
+// Authored by: benizzio
 func (repository *AllocationPlanRDBMSRepository) InsertAllocationPlanInTransaction(
 	transContext context.Context,
 	plan *domain.AllocationPlan,
