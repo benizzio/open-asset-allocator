@@ -9,7 +9,7 @@
 
 import htmx from "htmx.org";
 import { BigNumber } from "bignumber.js";
-import { AfterRequestEventDetail, HtmxInfra, RequestConfigEventDetail } from "../infra/htmx";
+import { AfterRequestEventDetail, HtmxInfra } from "../infra/htmx";
 import { ObservationTimestamp } from "../domain/portfolio-allocation";
 import Router from "../infra/routing";
 import {
@@ -30,62 +30,23 @@ import { toInt } from "../utils/lang";
 import type { TemplateDelegate } from "handlebars";
 import notifications from "./notifications";
 import { NotificationType } from "../infra/infra-types";
-import { calendarDateToUtcTimestamp, getBrowserLocalCalendarDate } from "../utils/calendar-date";
+import { getBrowserLocalCalendarDate } from "../utils/calendar-date";
+import {
+    hideManagementMetadataEditor,
+    revealManagementMetadataEditor,
+} from "./management-metadata-editor";
+import {
+    areObservationDetailsReady,
+    bindObservationDetailsLoader,
+    reloadObservationDetails,
+    retryObservationDetails,
+} from "./portfolio-history-management-observation-details";
+import { bindObservationMetadataRequest } from "./portfolio-history-management-observation-metadata";
 
 const PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER = "accordion-portfolio-history-management";
 const PORTFOLIO_ALLOCATION_MANAGEMENT_TBODY_PREFIX = "portfolio-history-management-form-tbody-";
-const NEW_OBSERVATION_FORM_ID = `${ PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX }0`;
 const NEW_OBSERVATION_DATE_INPUT_ID = "portfolio-history-management-observation-date";
-
-/** Supplies a new observation's timestamp from its selected browser-local date before form JSON encoding.
- *
- * @author GPT-6 Luna
- * @author GPT-6 Sol
- */
-function setNewObservationTimestampFromDate(event: Event): void {
-    const requestEvent = event as CustomEvent<RequestConfigEventDetail>;
-    const request = requestEvent.detail;
-
-    if(request.verb.toLowerCase() !== "post") {
-        return;
-    }
-
-    const form = request.elt instanceof HTMLFormElement ? request.elt : request.elt.closest("form");
-
-    if(!(form instanceof HTMLFormElement) || form.id !== NEW_OBSERVATION_FORM_ID) {
-        return;
-    }
-
-    const dateInput = document.getElementById(NEW_OBSERVATION_DATE_INPUT_ID);
-    const timestampInput = form.elements.namedItem("observationTimestamp.timestamp");
-
-    if(!(dateInput instanceof HTMLInputElement)
-        || !(timestampInput instanceof HTMLInputElement)
-        || !dateInput.value) {
-        event.preventDefault();
-
-        if(dateInput instanceof HTMLInputElement) {
-            dateInput.reportValidity();
-        }
-
-        return;
-    }
-
-    try {
-        const timestamp = calendarDateToUtcTimestamp(dateInput.value);
-        timestampInput.value = timestamp;
-        request.formData.set(timestampInput.name, timestamp);
-    } catch(error) {
-        if(!(error instanceof RangeError)) {
-            throw error;
-        }
-
-        event.preventDefault();
-        dateInput.setCustomValidity("Observation date is not valid.");
-        dateInput.reportValidity();
-        dateInput.setCustomValidity("");
-    }
-}
+const ACCORDION_ITEM_SELECTOR = ".accordion-item";
 
 /** Creates the row-scoped quote action before its first use in row normalization.
  *
@@ -283,26 +244,52 @@ function modifyObservationsResponse(originalServerResponseJSON: string): string 
     return JSON.stringify(modifiedServerResponse);
 }
 
-function propagateRefreshDataAfterPost(observationTimestampId: number) {
+/** Refreshes observation details or its ordered list after a successful form submission.
+ * @author GPT-6 Luna
+ */
+function propagateRefreshDataAfterPost(observationTimestampId: number, metadataChanged: boolean) {
 
-    if(observationTimestampId !== 0) {
+    const portfolioHistoryManagementContainerElement =
+        document.getElementById(PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER);
 
+    if(observationTimestampId !== 0 && !metadataChanged) {
         const formId = `${ PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX }${ observationTimestampId }`;
-        const form = window[formId] as HTMLFormElement;
-        form.reset();
+        const form = document.getElementById(formId);
+        const header = document.getElementById(`portfolio-history-management-trigger-${ observationTimestampId }`);
 
-        const observationManagementTriggerElement =
-            window[`portfolio-history-management-trigger-${ observationTimestampId }`] as HTMLElement;
-        htmx.trigger(observationManagementTriggerElement, "reload-portfolio-history-management-observation");
+        const editorFields = form?.closest<HTMLElement>(ACCORDION_ITEM_SELECTOR)
+            ?.querySelector<HTMLElement>("[data-metadata-editor-active]");
+
+        const tagInput = form?.closest<HTMLElement>(ACCORDION_ITEM_SELECTOR)
+            ?.querySelector<HTMLInputElement>("[data-observation-editor-tag]");
+
+        const dateInput = form?.closest<HTMLElement>(ACCORDION_ITEM_SELECTOR)
+            ?.querySelector<HTMLInputElement>("[data-observation-editor-date]");
+
+        if(form instanceof HTMLFormElement && header instanceof HTMLElement) {
+            form.reset();
+
+            if(editorFields && tagInput && dateInput) {
+                hideManagementMetadataEditor(editorFields, tagInput, dateInput);
+
+                editorFields.closest(".accordion-header")
+                    ?.querySelector("[data-metadata-editor-trigger]")
+                    ?.setAttribute("aria-expanded", "false");
+            }
+
+            reloadObservationDetails(header, form);
+        }
     }
-    else {
-        const portfolioHistoryManagementContainerElement =
-            window[PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER] as HTMLElement;
+
+    else if(portfolioHistoryManagementContainerElement) {
         htmx.trigger(portfolioHistoryManagementContainerElement, "reload-portfolio-history-management");
     }
 
     const portfolioHistoryViewContainerElement = window["accordion-portfolio-history"];
-    htmx.trigger(portfolioHistoryViewContainerElement, "reload-portfolio-history");
+
+    if(portfolioHistoryViewContainerElement) {
+        htmx.trigger(portfolioHistoryViewContainerElement, "reload-portfolio-history");
+    }
 
     AssetComposedColumnsInput.loadDatalists();
 }
@@ -345,7 +332,10 @@ const portfolioHistoryManagement = {
         // Repeated init calls keep one delegated asset-row listener on the document.
         document.addEventListener(ASSET_ROW_SELECTION_CHANGE_EVENT, handleAssetRowSelectionChange);
         const managementContainer = document.getElementById(PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER);
-        managementContainer?.addEventListener("htmx:configRequest", setNewObservationTimestampFromDate);
+
+        if(managementContainer) {
+            bindObservationMetadataRequest(managementContainer);
+        }
 
         const newObservationDateInput = managementContainer?.querySelector<HTMLInputElement>(
             `#${ NEW_OBSERVATION_DATE_INPUT_ID }`,
@@ -361,7 +351,21 @@ const portfolioHistoryManagement = {
 
         managementContainer
             ?.querySelectorAll<HTMLFormElement>(`form[id^="${ PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX }"]`)
-            .forEach(form => AssetComposedColumnsInput.bindFormValidationGuards(form));
+            .forEach(form => {
+                AssetComposedColumnsInput.bindFormValidationGuards(form);
+                this.bindObservationDetailsSubmissionGuard(form);
+            });
+
+        managementContainer?.querySelectorAll<HTMLElement>("[hx-trigger^='load-observation-details']")
+            .forEach(header => {
+                const item = header.closest<HTMLElement>(ACCORDION_ITEM_SELECTOR);
+                const panel = item?.querySelector<HTMLElement>(".accordion-collapse");
+                const form = item?.querySelector<HTMLFormElement>("form");
+
+                if(panel && form) {
+                    bindObservationDetailsLoader(header, panel, form);
+                }
+            });
 
         HtmxInfra.htmxTransformResponse.registerTransformResponseFunction(
             "addObservationZero",
@@ -388,6 +392,13 @@ const portfolioHistoryManagement = {
      * @author benizzio
      */
     addPortfolioHistoryManagementRow(observationTimestampId: number) {
+
+        const formId = `${ PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX }${ observationTimestampId }`;
+        const form = document.getElementById(formId);
+
+        if(!(form instanceof HTMLFormElement) || !areObservationDetailsReady(form)) {
+            return;
+        }
 
         const tbodyId = PORTFOLIO_ALLOCATION_MANAGEMENT_TBODY_PREFIX + observationTimestampId;
         const tbody: HTMLElement = window[tbodyId];
@@ -458,6 +469,64 @@ const portfolioHistoryManagement = {
         observationTimeTagInput.value = newTimeTagInput.value;
     },
 
+    /** Opens one persisted observation's metadata editor and focuses its tag field.
+     *
+     * @param button - Pencil button activated by pointer or keyboard.
+     * @param observationTimestampId - Persisted observation whose fields should be edited.
+     * @example `portfolioHistoryManagement.activateObservationEditor(button, 12)` opens observation 12's editor.
+     * @author GPT-6 Luna
+     */
+    activateObservationEditor(button: HTMLButtonElement, observationTimestampId: number) {
+        const item = document.getElementById(`portfolio-history-management-container-${ observationTimestampId }`);
+        const fields = item?.querySelector<HTMLElement>("[data-metadata-editor-active]");
+        const tagInput = item?.querySelector<HTMLInputElement>("[data-observation-editor-tag]");
+        const dateInput = item?.querySelector<HTMLInputElement>("[data-observation-editor-date]");
+
+        if(!fields || !tagInput || !dateInput) {
+            return;
+        }
+
+        button.setAttribute("aria-expanded", "true");
+        revealManagementMetadataEditor(fields, tagInput, dateInput);
+    },
+
+    /** Retries loading the requested observation's allocation rows after a failed lazy request.
+     *
+     * @param observationTimestampId - Persisted observation whose detail request should be retried.
+     * @example `portfolioHistoryManagement.retryObservationDetails(12)` retries observation 12's load.
+     * @author GPT-6 Luna
+     */
+    retryObservationDetails(observationTimestampId: number) {
+        const header = document.getElementById(`portfolio-history-management-trigger-${ observationTimestampId }`);
+
+        if(header) {
+            retryObservationDetails(header);
+        }
+    },
+
+    /** Prevents form writes until the persisted observation's allocation details have loaded.
+     *
+     * @param form - Observation form receiving native and HTMX submission guards.
+     * @example `portfolioHistoryManagement.bindObservationDetailsSubmissionGuard(form)` protects a persisted form.
+     * @author GPT-6 Luna
+     */
+    bindObservationDetailsSubmissionGuard(form: HTMLFormElement) {
+        if(form.dataset.observationDetailsGuardBound === "true") {
+            return;
+        }
+
+        form.dataset.observationDetailsGuardBound = "true";
+
+        form.addEventListener("submit", event => {
+            if(areObservationDetailsReady(form)) {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        }, true);
+    },
+
     /** Reloads the observation only after a successful POST dispatched by that exact observation form.
      *
      * @param event - HTMX after-request event bubbled through the observation form.
@@ -479,7 +548,8 @@ const portfolioHistoryManagement = {
             return;
         }
 
-        propagateRefreshDataAfterPost(observationTimestampId);
+        const metadataChanged = form.dataset.submittedMetadataChanged === "true";
+        propagateRefreshDataAfterPost(observationTimestampId, metadataChanged);
 
         notifications.notify({
             title: "Success",
