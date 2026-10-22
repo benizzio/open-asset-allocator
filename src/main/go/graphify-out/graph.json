@@ -4621,7 +4621,7 @@
       "file_type": "code",
       "norm_label": "migratedobservation",
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L26"
+      "source_location": "L29"
     },
     {
       "id": "service_assetdomservice_findassetbyuniqueidentifier",
@@ -8286,7 +8286,7 @@
       "file_type": "code",
       "norm_label": "assertexpectedmigrationfailure()",
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L279"
+      "source_location": "L283"
     },
     {
       "id": "inttest_portfolio_observation_ownership_migration_integration_test_assertmigratedobservationownership",
@@ -8297,7 +8297,7 @@
       "file_type": "code",
       "norm_label": "assertmigratedobservationownership()",
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L163"
+      "source_location": "L166"
     },
     {
       "id": "inttest_portfolio_observation_ownership_migration_integration_test_assertmigrationconstraints",
@@ -8308,7 +8308,7 @@
       "file_type": "code",
       "norm_label": "assertmigrationconstraints()",
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L235"
+      "source_location": "L239"
     },
     {
       "id": "inttest_portfolio_observation_ownership_migration_integration_test_assertobservationsequenceaftermigration",
@@ -8319,7 +8319,7 @@
       "file_type": "code",
       "norm_label": "assertobservationsequenceaftermigration()",
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L303"
+      "source_location": "L307"
     },
     {
       "id": "inttest_portfolio_observation_ownership_migration_integration_test_createlegacyobservationschema",
@@ -8330,7 +8330,7 @@
       "file_type": "code",
       "norm_label": "createlegacyobservationschema()",
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L84"
+      "source_location": "L87"
     },
     {
       "id": "inttest_portfolio_observation_ownership_migration_integration_test_seedlegacyobservations",
@@ -8341,7 +8341,7 @@
       "file_type": "code",
       "norm_label": "seedlegacyobservations()",
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L137"
+      "source_location": "L140"
     },
     {
       "id": "inttest_portfolio_observation_ownership_migration_integration_test_testportfolioobservationownershipmigration",
@@ -8352,7 +8352,7 @@
       "file_type": "code",
       "norm_label": "testportfolioobservationownershipmigration()",
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L35"
+      "source_location": "L38"
     },
     {
       "id": "rdbms_sqltransactionalcontext_gettransaction",
@@ -17085,7 +17085,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L245",
+      "source_location": "L249",
       "weight": 1.0
     },
     {
@@ -17097,7 +17097,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L60",
+      "source_location": "L63",
       "weight": 1.0
     },
     {
@@ -17109,7 +17109,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L61",
+      "source_location": "L64",
       "weight": 1.0
     },
     {
@@ -17121,7 +17121,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L77",
+      "source_location": "L80",
       "weight": 1.0
     },
     {
@@ -17133,7 +17133,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L78",
+      "source_location": "L81",
       "weight": 1.0
     },
     {
@@ -17145,7 +17145,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L79",
+      "source_location": "L82",
       "weight": 1.0
     },
     {
@@ -22113,7 +22113,7 @@
       "confidence_score": 1.0,
       "context": "field",
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L30",
+      "source_location": "L33",
       "weight": 1.0
     },
     {
@@ -34425,7 +34425,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L279",
+      "source_location": "L283",
       "weight": 1.0
     },
     {
@@ -34437,7 +34437,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L279",
+      "source_location": "L283",
       "weight": 1.0
     },
     {
@@ -34449,7 +34449,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L163",
+      "source_location": "L166",
       "weight": 1.0
     },
     {
@@ -34461,7 +34461,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L163",
+      "source_location": "L166",
       "weight": 1.0
     },
     {
@@ -34473,7 +34473,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L235",
+      "source_location": "L239",
       "weight": 1.0
     },
     {
@@ -34485,7 +34485,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L235",
+      "source_location": "L239",
       "weight": 1.0
     },
     {
@@ -34497,7 +34497,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L303",
+      "source_location": "L307",
       "weight": 1.0
     },
     {
@@ -34509,7 +34509,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L303",
+      "source_location": "L307",
       "weight": 1.0
     },
     {
@@ -34521,7 +34521,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L84",
+      "source_location": "L87",
       "weight": 1.0
     },
     {
@@ -34533,7 +34533,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L84",
+      "source_location": "L87",
       "weight": 1.0
     },
     {
@@ -34545,7 +34545,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L137",
+      "source_location": "L140",
       "weight": 1.0
     },
     {
@@ -34557,7 +34557,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L137",
+      "source_location": "L140",
       "weight": 1.0
     },
     {
@@ -34569,7 +34569,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L35",
+      "source_location": "L38",
       "weight": 1.0
     },
     {
@@ -45569,7 +45569,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L137",
+      "source_location": "L140",
       "weight": 1.0
     },
     {
@@ -45580,7 +45580,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L163",
+      "source_location": "L166",
       "weight": 1.0
     },
     {
@@ -45591,18 +45591,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L235",
-      "weight": 1.0
-    },
-    {
-      "source": "inttest_portfolio_observation_ownership_migration_integration_test",
-      "target": "inttest_migratedobservation",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L26",
+      "source_location": "L239",
       "weight": 1.0
     },
     {
@@ -45613,7 +45602,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L279",
+      "source_location": "L283",
+      "weight": 1.0
+    },
+    {
+      "source": "inttest_portfolio_observation_ownership_migration_integration_test",
+      "target": "inttest_migratedobservation",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
+      "source_location": "L29",
       "weight": 1.0
     },
     {
@@ -45624,7 +45624,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L303",
+      "source_location": "L307",
       "weight": 1.0
     },
     {
@@ -45635,7 +45635,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L35",
+      "source_location": "L38",
       "weight": 1.0
     },
     {
@@ -45646,7 +45646,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "inttest/portfolio_observation_ownership_migration_integration_test.go",
-      "source_location": "L84",
+      "source_location": "L87",
       "weight": 1.0
     },
     {
@@ -53117,5 +53117,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "30675898eb12596da91f75a8a9e66f884886e5c1"
+  "built_at_commit": "a356c3d1cdeeacadb68e2a1fb395c86f6a8a4613"
 }

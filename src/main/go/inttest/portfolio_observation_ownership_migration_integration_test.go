@@ -18,8 +18,11 @@ import (
 	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
 )
 
-// TODO temporary test to guarantee functionality of a complex migration
-// aftrer the code is consolidated it can be removed
+// Exception: direct SQL is required to construct the legacy schema, execute
+// the migration, and verify database-level ownership changes.
+// The repository owner explicitly approved this direct-SQL/white-box exception during PR #451 review.
+// TODO: remove this temporary test after the migration behavior is consolidated.
+// Co-authored by: OpenCode and GPT-6.1 Sol
 
 // migratedObservation is one persisted observation and owner returned by the migration test queries.
 // Authored by: OpenCode
@@ -159,7 +162,7 @@ func seedLegacyObservations(t *testing.T, transaction *sql.Tx) {
 }
 
 // assertMigratedObservationOwnership checks deterministic ID retention, metadata copying, orphan deletion, and fact integrity.
-// Authored by: OpenCode
+// Co-authored by: OpenCode and GPT-6.1 Sol
 func assertMigratedObservationOwnership(t *testing.T, transaction *sql.Tx) {
 	t.Helper()
 	var sharedObservations = make([]migratedObservation, 0, 3)
@@ -194,7 +197,8 @@ func assertMigratedObservationOwnership(t *testing.T, transaction *sql.Tx) {
 	assert.NotEqual(t, sharedObservations[1].id, sharedObservations[2].id)
 	for _, observation := range sharedObservations {
 		assert.Equal(t, "shared-observation", observation.tag)
-		assert.Equal(t, time.Date(2042, 1, 2, 3, 4, 5, 123456000, time.UTC), observation.timestamp)
+		assert.True(t, time.Date(2042, 1, 2, 3, 4, 5, 123456000, time.UTC).Equal(observation.timestamp),
+			"timestamp %s differs from the legacy value", observation.timestamp)
 	}
 
 	var exclusiveId int
