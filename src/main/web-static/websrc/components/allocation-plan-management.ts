@@ -27,6 +27,11 @@ import Router from "../infra/routing";
 import notifications from "./notifications";
 import { NotificationType } from "../infra/infra-types";
 import { getBrowserLocalCalendarDate } from "../utils/calendar-date";
+import {
+    activateAllocationPlanEditor,
+    bindAllocationPlanMetadataRequest,
+    handleInputAllocationPlanDate,
+} from "./allocation-plan-management-metadata";
 
 type AllocationPlanningHierarchicalFormEntry = {
     occurrences: number;
@@ -419,6 +424,12 @@ const allocationPlanManagement = {
 
     init() {
 
+        const managementContainer = document.getElementById(ALLOCATION_PLAN_MANAGEMENT_CONTAINER_ID);
+
+        if(managementContainer) {
+            bindAllocationPlanMetadataRequest(managementContainer);
+        }
+
         HtmxInfra.htmxTransformResponse.registerTransformResponseFunction(
             "mapForAllocationPlanManagement",
             mapForAllocationPlanManagement,
@@ -431,6 +442,8 @@ const allocationPlanManagement = {
 
     handleHierarchicalIdLevelChange,
     handleRemovePlannedAllocationRow,
+
+    activateAllocationPlanEditor,
 
     handleAddPlannedAllocationRow(
         allocationPlanId: number,
@@ -566,6 +579,8 @@ const allocationPlanManagement = {
         const allocationPlanNameInput = form.elements.namedItem("name") as HTMLInputElement;
         allocationPlanNameInput.value = nameInput.value;
     },
+
+    handleInputAllocationPlanDate,
 
     navigateToAllocationPlansViewing() {
         const globalPortfolioIdField = document.querySelector("[name='portfolioId']") as HTMLInputElement;

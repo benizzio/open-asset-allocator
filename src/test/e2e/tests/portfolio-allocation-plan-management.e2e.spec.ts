@@ -10,6 +10,7 @@
  * a successful management-list refresh.
  * Scenario 18 covers dated plan headers, chronological refresh, ID tie ordering,
  * timezone-independent planned dates, escaped names, and request ownership guards.
+ * Scenario 20 covers pencil-based plan metadata editing and failed-editor draft retention.
  *
  * @author OpenCode
  * @author GPT-6 Astra
@@ -1332,6 +1333,105 @@ test.describe('portfolio allocation plan management', () => {
     } finally {
       page.off('request', trackManagementRefresh);
     }
+  });
+
+  test.describe('scenario 20.1: edits allocation-plan metadata in the browser local timezone', () => {
+    test.use({ timezoneId: 'America/Los_Angeles' });
+
+    /** Saves name, calendar date, and hierarchy edits through the existing allocation-plan form.
+     * @author GPT-6 Luna
+     */
+    test('returns to read-only mode with the persisted plan identity and refreshed header', async ({ database, page }) => {
+      const seededData = await seedAllocationPlanManagementData(database);
+      const updatedName = 'E2E Allocation Plan Pencil Updated';
+      const updatedDate = '2027-08-09';
+
+      await page.goto(`/portfolio/${seededData.portfolio.id}/allocation/manage`);
+      const item = page.locator(`#allocation-plan-management-container-${seededData.allocationPlan.id}`);
+      const pencil = item.getByRole('button', {
+        name: `Edit allocation plan ${seededData.allocationPlan.name}`,
+        exact: true,
+      });
+      await pencil.focus();
+      await page.keyboard.press('Enter');
+
+      const nameInput = item.getByRole('textbox', { name: 'Allocation plan name', exact: true });
+      const dateInput = item.getByLabel('Planned date', { exact: true });
+      const form = item.locator(`#allocation-plan-management-form-${seededData.allocationPlan.id}`);
+      await expect(nameInput).toBeVisible();
+      await expect(nameInput).toBeFocused();
+      await expect(nameInput).toHaveValue(seededData.allocationPlan.name);
+      await expect(dateInput).toHaveValue(seededData.allocationPlan.planned_date);
+      await expect(item.locator(`#allocation-plan-management-${seededData.allocationPlan.id}`)).toHaveClass(/show/);
+
+      await nameInput.fill(updatedName);
+      await dateInput.fill(updatedDate);
+      const bondsParentRow = form.locator('tbody tr').nth(3);
+      await bondsParentRow.getByRole('combobox', { name: 'Class' }).fill('FIXED_INCOME');
+      await saveAllocationPlan(page, form, seededData.portfolio.id, updatedDate);
+
+      const persistedPlan = await database.query<{ id: number; name: string; planned_date: string }>(
+        `SELECT id, name, planned_date::text AS planned_date
+         FROM public.allocation_plan WHERE id = $1`,
+        [seededData.allocationPlan.id],
+      );
+      expect(persistedPlan).toEqual([{
+        id: seededData.allocationPlan.id,
+        name: updatedName,
+        planned_date: updatedDate,
+      }]);
+      const persistedRows = await queryPlannedAllocations(database, seededData.allocationPlan.id);
+      expect(persistedRows).toHaveLength(seededData.plannedAllocations.length);
+      expect(persistedRows.some(row => row.hierarchical_id[1] === 'FIXED_INCOME')).toBe(true);
+
+      const updatedHeader = page.locator(`#allocation-plan-management-container-${seededData.allocationPlan.id}`)
+        .getByRole('button', { name: allocationPlanManagementHeader(updatedName, updatedDate), exact: true });
+      await expect(updatedHeader).toBeVisible();
+      await expect(page.locator(`#allocation-plan-management-container-${seededData.allocationPlan.id} [data-metadata-editor-active]`))
+        .toBeHidden();
+      await expectAllocationPlanManagementOrder(page, [{
+        ...seededData.allocationPlan,
+        name: updatedName,
+        planned_date: updatedDate,
+      }]);
+    });
+  });
+
+  /** Keeps invalid plan metadata and other entered values available without issuing a write.
+   * @author GPT-6 Luna
+   */
+  test('scenario 20.2: retains allocation-plan editor drafts when the required name is empty', async ({
+    database,
+    page,
+  }) => {
+    const seededData = await seedAllocationPlanManagementData(database);
+    await page.goto(`/portfolio/${seededData.portfolio.id}/allocation/manage`);
+    const item = page.locator(`#allocation-plan-management-container-${seededData.allocationPlan.id}`);
+    await item.getByRole('button', {
+      name: `Edit allocation plan ${seededData.allocationPlan.name}`,
+      exact: true,
+    }).click();
+
+    const nameInput = item.getByRole('textbox', { name: 'Allocation plan name', exact: true });
+    const form = item.locator(`#allocation-plan-management-form-${seededData.allocationPlan.id}`);
+    const draftClassInput = form.locator('tbody tr').nth(3).getByRole('combobox', { name: 'Class' });
+    await expect(form.locator('tfoot button.btn-primary[type="button"]')).toBeEnabled();
+    await nameInput.fill('');
+    await draftClassInput.fill('UNSAVED_DRAFT_CLASS');
+    await form.locator('tfoot button.btn-primary[type="button"]').click();
+
+    await expect(nameInput).toBeVisible();
+    await expect(nameInput).toHaveValue('');
+    await expect(draftClassInput).toHaveValue('UNSAVED_DRAFT_CLASS');
+    await expect(database.query<{ id: number; name: string; planned_date: string }>(
+      `SELECT id, name, planned_date::text AS planned_date
+       FROM public.allocation_plan WHERE id = $1`,
+      [seededData.allocationPlan.id],
+    )).resolves.toEqual([{
+      id: seededData.allocationPlan.id,
+      name: seededData.allocationPlan.name,
+      planned_date: seededData.allocationPlan.planned_date,
+    }]);
   });
 });
 

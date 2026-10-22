@@ -39,7 +39,7 @@
         <div id="allocation-plan-management-container-{{allocationPlan.id}}" class="accordion-item">
 
             <h2 id="allocation-plan-management-trigger-{{allocationPlan.id}}"
-                class="accordion-header {{#unless allocationPlan.id}}allocation-plan-management-new-header{{/unless}}"
+                class="accordion-header {{#unless allocationPlan.id}}allocation-plan-management-new-header{{else}}allocation-plan-management-persisted-header{{/unless}}"
             >
                 {{#unless allocationPlan.id}}
                     <!-- Co-authored by: GPT-6 Luna and benizzio -->
@@ -65,6 +65,52 @@
                         />
                     </span>
                 {{/unless}}
+                {{#if allocationPlan.id}}
+                    <!-- Co-authored by: GPT-6 Luna and benizzio -->
+                    <span class="allocation-plan-management-edit-fields"
+                          id="allocation-plan-management-editor-{{allocationPlan.id}}"
+                          data-accordion-field-focus
+                          data-metadata-editor-active="false"
+                          aria-hidden="true"
+                          hidden
+                    >
+                        <input id="allocation-plan-management-name-{{allocationPlan.id}}"
+                               type="text"
+                               form="allocation-plan-management-form-{{allocationPlan.id}}"
+                               value="{{allocationPlan.name}}"
+                               aria-label="Allocation plan name"
+                               data-allocation-plan-editor-name
+                               autocomplete="off"
+                               class="form-control allocation-plan-management-edit-name"
+                               oninput="allocationPlanManagement.handleInputAllocationPlanName(this, {{allocationPlan.id}})"
+                               maxlength="100"
+                               disabled
+                               required
+                        />
+                        <input id="allocation-plan-management-date-{{allocationPlan.id}}"
+                               type="date"
+                               form="allocation-plan-management-form-{{allocationPlan.id}}"
+                               value="{{allocationPlan.plannedDate}}"
+                               aria-label="Planned date"
+                               data-allocation-plan-editor-date
+                               autocomplete="off"
+                               class="form-control allocation-plan-management-edit-date"
+                               oninput="allocationPlanManagement.handleInputAllocationPlanDate(this, {{allocationPlan.id}})"
+                               disabled
+                               required
+                        />
+                    </span>
+                    <button type="button"
+                            class="btn btn-outline-secondary btn-sm allocation-plan-management-edit-button"
+                            aria-label="Edit allocation plan {{allocationPlan.name}}"
+                            aria-controls="allocation-plan-management-editor-{{allocationPlan.id}}"
+                            aria-expanded="false"
+                            data-metadata-editor-trigger
+                            onclick="allocationPlanManagement.activateAllocationPlanEditor(this, {{allocationPlan.id}})"
+                    >
+                        <span class="bi bi-pencil" aria-hidden="true"></span>
+                    </button>
+                {{/if}}
                 <button class="accordion-button collapsed {{#unless allocationPlan.id}}w-auto flex-shrink-0 allocation-plan-management-new-toggle{{/unless}}"
                         type="button"
                         data-bs-toggle="collapse"
@@ -86,6 +132,10 @@
 
                     <form id="allocation-plan-management-form-{{allocationPlan.id}}"
                           class="needs-validation"
+                          {{#if allocationPlan.id}}
+                          data-persisted-name="{{allocationPlan.name}}"
+                          data-persisted-date="{{allocationPlan.plannedDate}}"
+                          {{/if}}
                           hx-post="/api/portfolio/:portfolioId/allocation-plan"
                           hx-ext="form-json"
                           hx-on::after-request="allocationPlanManagement.handleAfterRequest(event, {{allocationPlan.id}})"
