@@ -8,6 +8,7 @@ import (
 
 	"github.com/benizzio/open-asset-allocator/api/rest/model"
 	"github.com/benizzio/open-asset-allocator/application"
+	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/domain/allocation"
 	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/infra"
@@ -36,6 +37,8 @@ func (controller *AllocationPlanRESTController) BuildRoutes() []infra.RESTRoute 
 	}
 }
 
+// getAllocationPlans returns the legacy plan list or an opt-in complete-plan cursor page.
+// Authored by: benizzio and OpenCode
 func (controller *AllocationPlanRESTController) getAllocationPlans(context *gin.Context) {
 
 	var portfolioIdParamValue = context.Param(portfolioIdParam)
@@ -45,6 +48,38 @@ func (controller *AllocationPlanRESTController) getAllocationPlans(context *gin.
 	}
 
 	var planType = allocation.AssetAllocationPlan
+	pageCursor, isPaginated := readPaginationCursor(
+		context,
+		portfolioId,
+		allocationPlanCollection,
+		planType.String(),
+	)
+	if isPaginated {
+		if context.IsAborted() {
+			return
+		}
+		allocationPlansPage, pageError := controller.allocationPlanService.GetAllocationPlansPage(
+			portfolioId,
+			planType,
+			allocationPlanCursorFromPayload(pageCursor),
+		)
+		if gininfra.HandleAPIError(context, "Error getting paginated allocation plans", pageError) {
+			return
+		}
+		nextCursor, cursorError := encodeAllocationPlanPaginationCursor(
+			portfolioId,
+			planType.String(),
+			allocationPlansPage.NextCursor,
+		)
+		if gininfra.HandleAPIError(context, "Error encoding next allocation-plan cursor", cursorError) {
+			return
+		}
+		context.JSON(http.StatusOK, model.PaginatedResponse[*model.AllocationPlanDTS]{
+			Items:      model.MapToAllocationPlanDTSs(allocationPlansPage.Items),
+			NextCursor: nextCursor,
+		})
+		return
+	}
 	allocationPlans, err := controller.allocationPlanService.GetAllocationPlans(
 		portfolioId,
 		&planType,
@@ -56,6 +91,15 @@ func (controller *AllocationPlanRESTController) getAllocationPlans(context *gin.
 	var allocationPlansDTS = model.MapToAllocationPlanDTSs(allocationPlans)
 
 	context.JSON(http.StatusOK, allocationPlansDTS)
+}
+
+// allocationPlanCursorFromPayload converts a validated REST cursor into the allocation-plan domain boundary.
+// Authored by: OpenCode
+func allocationPlanCursorFromPayload(cursor *parsedPaginationCursor) *domain.AllocationPlanPageCursor {
+	if cursor == nil {
+		return nil
+	}
+	return &domain.AllocationPlanPageCursor{PlannedDate: cursor.PlannedDate, Id: cursor.Id}
 }
 
 // postAssetAllocationPlan validates the required plan date and persists the supplied plan details.

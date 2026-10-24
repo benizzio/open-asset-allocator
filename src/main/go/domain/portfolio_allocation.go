@@ -52,6 +52,18 @@ type PortfolioAllocationRepository interface {
 		portfolioId int64,
 		observationTimestampsLimit int,
 	) ([]*PortfolioObservationTimestamp, error)
+	// FindAvailableObservationTimestampsPage returns up to ten headers using a timestamp/ID boundary.
+	// For example, pass nil for the first page and the last response's cursor for continuation.
+	FindAvailableObservationTimestampsPage(
+		portfolioId int64,
+		cursor *ObservationPageCursor,
+	) (*PortfolioObservationPage, error)
+	// FindPortfolioAllocationHistoryPage returns complete snapshots for up to ten observations.
+	// For example, pass nil for the first page and the last response's cursor for continuation.
+	FindPortfolioAllocationHistoryPage(
+		portfolioId int64,
+		cursor *ObservationPageCursor,
+	) (*PortfolioAllocationHistoryPage, error)
 	MergePortfolioAllocationsInTransaction(
 		transContext context.Context,
 		portfolioId int64,
