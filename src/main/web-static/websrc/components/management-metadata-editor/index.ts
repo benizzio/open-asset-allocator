@@ -5,6 +5,7 @@
  * read-only label and edit control after a successful save. Example: `revealManagementMetadataEditor(fields, nameInput,
  * dateInput, editButton)` activates a persisted record's complete header editor.
  * @author GPT-6 Luna
+ * @author GPT-6.1 Sol
  */
 
 import { Collapse } from "bootstrap";
@@ -62,6 +63,34 @@ function toggleReadOnlyManagementMetadataPanel(event: MouseEvent): void {
 
     if(panel) {
         Collapse.getOrCreateInstance(panel, { toggle: false }).toggle();
+    }
+}
+
+/** Resolves one record's metadata controls and reveals its editor when every required control exists.
+ *
+ * Pass the owning record element and its text/date input selectors. A missing record, editor field group, or input
+ * leaves the editor unchanged. Complete records use the standard reveal behavior, including opening the panel and
+ * focusing the text input.
+ * @param item - Record element containing the metadata controls, or null when the record is absent.
+ * @param textInputSelector - Selector for the record's text input, scoped to the record element.
+ * @param dateInputSelector - Selector for the record's date input, scoped to the record element.
+ * @param editButton - Pencil control whose visibility and expanded state follow the editor.
+ * @example `activateManagementMetadataEditor(item, "[data-editor-text]", "[data-editor-date]", pencil)` activates the
+ * record's editor when its controls exist.
+ * @author GPT-6.1 Sol
+ */
+export function activateManagementMetadataEditor(
+    item: HTMLElement | null,
+    textInputSelector: string,
+    dateInputSelector: string,
+    editButton: HTMLButtonElement,
+): void {
+    const fields = item?.querySelector<HTMLElement>("[data-metadata-editor-active]");
+    const textInput = item?.querySelector<HTMLInputElement>(textInputSelector);
+    const dateInput = item?.querySelector<HTMLInputElement>(dateInputSelector);
+
+    if(fields && textInput && dateInput) {
+        revealManagementMetadataEditor(fields, textInput, dateInput, editButton);
     }
 }
 
