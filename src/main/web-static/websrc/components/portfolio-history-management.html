@@ -38,17 +38,22 @@
 
         <div id="portfolio-history-management-container-{{id}}" class="accordion-item">
 
+            <!-- Co-authored by: GPT-6 Luna and benizzio -->
             <h2 id="portfolio-history-management-trigger-{{id}}"
-                class="accordion-header {{#unless id}}portfolio-history-management-new-header{{/unless}}"
+                class="accordion-header management-metadata-header"
+                data-management-metadata-header
+                {{#if id}}data-metadata-editor-state="read-only"{{/if}}
                 hx-include="[name='portfolioId']"
-                hx-target="#portfolio-history-management-form-tbody-{{id}}"
-                hx-trigger="{{#if id}}click,{{/if}} reload-portfolio-history-management-observation"
-                handlebars-template="template-portfolio-history-management-form-tbody"
+                {{#if id}}
                 hx-get="/api/portfolio/:portfolioId/history?observationTimestampId={{id}}"
+                hx-target="#portfolio-history-management-form-tbody-{{id}}"
+                hx-trigger="load-observation-details queue:none"
+                handlebars-template="template-portfolio-history-management-form-tbody"
+                {{/if}}
             >
             {{#unless id}}
                 <!-- Co-authored by: GPT-6 Luna and benizzio -->
-                <span class="portfolio-history-management-new-fields" data-accordion-field-focus>
+                <span class="management-metadata-header-fields portfolio-history-management-new-fields" data-accordion-field-focus>
                     <input type="text"
                            placeholder="New observation *"
                            aria-label="Time tag"
@@ -66,18 +71,66 @@
                            class="form-control portfolio-history-management-new-date"
                            required
                     />
-                </span>
+                    </span>
             {{/unless}}
-            <button class="accordion-button collapsed {{#unless id}}w-auto flex-shrink-0 portfolio-history-management-new-toggle{{/unless}}"
+            {{#if id}}
+                <!-- Co-authored by: GPT-6 Luna and benizzio -->
+                <span class="management-metadata-header-fields portfolio-history-management-edit-fields"
+                      id="portfolio-history-management-editor-{{id}}"
+                      data-accordion-field-focus
+                      data-metadata-editor-active="false"
+                      aria-hidden="true"
+                      hidden
+                >
+                    <input id="portfolio-history-management-time-tag-{{id}}"
+                           type="text"
+                           form="portfolio-history-management-form-{{id}}"
+                           value="{{timeTag}}"
+                           aria-label="Observation tag"
+                           data-observation-editor-tag
+                           autocomplete="off"
+                           class="form-control portfolio-history-management-edit-time-tag"
+                           maxlength="100"
+                           disabled
+                           required
+                    />
+                    <input id="portfolio-history-management-observation-date-{{id}}"
+                           type="date"
+                           form="portfolio-history-management-form-{{id}}"
+                           value="{{formatTimestampLocalDate timestamp}}"
+                           aria-label="Observation date"
+                           data-observation-editor-date
+                           autocomplete="off"
+                           class="form-control portfolio-history-management-edit-date"
+                           disabled
+                           required
+                    />
+                </span>
+                <button type="button"
+                        class="btn btn-secondary btn-xs management-metadata-edit-button portfolio-history-management-edit-button"
+                        aria-label="Edit observation {{timeTag}}"
+                        aria-controls="portfolio-history-management-editor-{{id}}"
+                        aria-expanded="false"
+                        data-metadata-editor-trigger
+                        onclick="portfolioHistoryManagement.activateObservationEditor(this, {{id}})"
+                >
+                    <span class="bi bi-pencil" aria-hidden="true"></span>
+                </button>
+                <span class="management-metadata-header-label"
+                      data-metadata-editor-label
+                >{{timeTag}} - {{formatTimestampLocalDate timestamp}}</span>
+            {{/if}}
+            <button class="accordion-button collapsed w-auto flex-shrink-0 management-metadata-header-toggle"
                     type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#portfolio-history-management-{{id}}"
                     aria-expanded="false"
                     aria-controls="portfolio-history-management-{{id}}"
-                    {{#unless id}}aria-label="New observation details"{{/unless}}
+                    {{#if id}}
+                    aria-label="{{timeTag}} - {{formatTimestampLocalDate timestamp}}"
+                    data-metadata-editor-toggle
+                    {{else}}aria-label="New observation details"{{/if}}
             >
-                <!-- Co-authored by: GPT-6 Luna and benizzio -->
-                {{#if id}}{{timeTag}} - {{formatTimestampLocalDate timestamp}}{{/if}}
             </button>
             </h2>
 
@@ -85,18 +138,50 @@
                  class="accordion-collapse collapse"
                  data-bs-parent="#accordion-portfolio-history-management"
             >
+                {{#if id}}
+                <div class="portfolio-history-management-details-loading"
+                     role="status"
+                     aria-live="polite"
+                     data-observation-details-loading
+                     hidden
+                >Loading observation details…</div>
+                <div class="alert alert-danger portfolio-history-management-details-error"
+                     role="alert"
+                     data-observation-details-error
+                     hidden
+                >
+                    Observation details could not be loaded.
+                    <button type="button"
+                            class="btn btn-link p-0"
+                            onclick="portfolioHistoryManagement.retryObservationDetails({{id}})"
+                    >Retry</button>
+                </div>
+                {{/if}}
                 <div class="accordion-body row justify-content-center">
 
                     <form id="portfolio-history-management-form-{{id}}"
                           class="needs-validation"
+                          {{#if id}}
+                          data-persisted-time-tag="{{timeTag}}"
+                          data-persisted-timestamp="{{timestamp}}"
+                          data-persisted-local-date="{{formatTimestampLocalDate timestamp}}"
+                          {{/if}}
                           hx-post="/api/portfolio/:portfolioId/history"
                           hx-ext="form-json"
                           hx-on::after-request="portfolioHistoryManagement.handleAfterPostObservationHistory(event, {{id}})"
                     >
 
                         <input type="hidden" name="observationTimestamp.id" value="{{id}}" />
-                        <input type="hidden" name="observationTimestamp.timestamp" value="{{timestamp}}" />
-                        {{#unless id}}<input type="hidden" name="observationTimestamp.timeTag" /> {{/unless}}
+                        <input type="hidden"
+                               name="observationTimestamp.timestamp"
+                               value="{{timestamp}}"
+                               data-observation-timestamp-payload
+                        />
+                        <input type="hidden"
+                               name="observationTimestamp.timeTag"
+                               value="{{#if id}}{{timeTag}}{{/if}}"
+                               data-observation-tag-payload
+                        />
 
                         <table class="table table-striped">
 
@@ -123,11 +208,15 @@
                                         <button class="btn btn-secondary"
                                                 type="button"
                                                 onclick="portfolioHistoryManagement.addPortfolioHistoryManagementRow({{id}})"
+                                                {{#if id}}data-requires-observation-details disabled{{/if}}
                                         >
                                             <span class="bi bi-plus-circle h5"></span>
                                         </button>
 
-                                        <button class="btn btn-primary ms-auto" type="submit">
+                                        <button class="btn btn-primary ms-auto"
+                                                type="submit"
+                                                {{#if id}}data-requires-observation-details disabled{{/if}}
+                                        >
                                             <span class="bi bi-save-fill h5"></span>
                                         </button>
 

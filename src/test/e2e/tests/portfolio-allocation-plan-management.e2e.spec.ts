@@ -10,6 +10,8 @@
  * a successful management-list refresh.
  * Scenario 18 covers dated plan headers, chronological refresh, ID tie ordering,
  * timezone-independent planned dates, escaped names, and request ownership guards.
+ * Scenarios 20.1–20.3 cover pencil-based plan metadata editing, responsive layout, failed-editor draft retention,
+ * and read-only whole-header accordion activation.
  *
  * @author OpenCode
  * @author GPT-6 Astra
@@ -18,8 +20,17 @@
  * @author GPT-6.1 Sol
  */
 import type { Browser, Locator, Page, Request, Route } from '@playwright/test';
-import { exerciseAccordionFieldInteractions } from '../support/accordion-field-interactions';
+import {
+  exerciseAccordionFieldInteractions,
+  exerciseReadOnlyManagementHeaderToggle,
+  installAccordionTransitionCounter,
+  readAccordionTransitionCounts,
+} from '../support/accordion-field-interactions';
 import { expect, test } from '../support/fixtures';
+import {
+  expectManagementMetadataHeaderLayout,
+  expectManagementMetadataPencilAlignment,
+} from '../support/management-metadata-layout';
 import { chartDiagnosticTest } from '../support/chart-diagnostics';
 import type { E2eDatabase } from '../support/database';
 import {
@@ -134,6 +145,9 @@ test.describe('portfolio allocation plan management', () => {
     await page.clock.install({ time: new Date(FIXED_ALLOCATION_PLAN_TIMESTAMP) });
   });
 
+  /** Creates a plan and verifies its refreshed form, persistence, and rendered chart.
+   * @author GPT-6 Luna
+   */
   test('scenario 4: creates and explores a portfolio allocation plan', async ({ database, page }) => {
     test.setTimeout(60_000);
     const seededData = await seedAllocationPlanData(database);
@@ -320,6 +334,11 @@ test.describe('portfolio allocation plan management', () => {
 
     const persistedPlan = await expectPersistedAllocationPlan(database, seededData, CREATED_ALLOCATION_PLAN_DATE);
     await expectAllocationPlanSuccessNotification(page);
+    const successToast = page.locator('#toast-notification-container .toast[role="alert"]').filter({
+      hasText: 'Allocation plan saved successfully',
+    }).last();
+    await successToast.getByRole('button', { name: 'Close', exact: true }).click();
+    await expect(successToast).toBeHidden();
     await expectReloadedManagementItems(page, persistedPlan.id, ALLOCATION_PLAN_NAME, CREATED_ALLOCATION_PLAN_DATE);
     const owningManagementRefreshes = managementRefreshRequests.filter(
       request => request.headers()['hx-target'] === 'accordion-allocation-plan-management',
@@ -789,7 +808,8 @@ test.describe('portfolio allocation plan management', () => {
     });
   });
 
-  /** Verifies either new-plan field opens the panel while preserving focus and explicit toggle behavior.
+  /** Verifies either new-plan field opens the panel after HTMX binds focus handling.
+   * Preserves focus and explicit toggle behavior.
    * @author GPT-6 Luna
    */
   test('scenario 4.3: opens the new-plan panel when either header field receives focus', async ({ database, page }) => {
@@ -807,6 +827,8 @@ test.describe('portfolio allocation plan management', () => {
 
     await expect(toggle).toHaveAttribute('aria-expanded', 'false');
     await expect(panel).not.toHaveClass(/\bshow\b/);
+    await expect(item.locator('[data-accordion-field-focus]'))
+      .toHaveAttribute('data-accordion-field-focus-bound', 'true');
     await name.focus();
     await expect(name).toBeFocused();
     await expect(panel).toHaveClass(/\bshow\b/);
@@ -863,7 +885,8 @@ test.describe('portfolio allocation plan management', () => {
     await expect(panel).not.toHaveClass(/\bshow\b/);
   });
 
-  /** Covers pending focus-open behavior during a collapse transition and cancellation after blur.
+  /** Covers pending focus-open behavior during collapse and cancellation after blur.
+   * Waits for the HTMX-installed focus binding before exercising the field interaction.
    * @author GPT-6 Luna
    */
   test('scenario 4.5: retries focus opening after collapse and cancels it when focus leaves', async ({
@@ -881,12 +904,14 @@ test.describe('portfolio allocation plan management', () => {
     const toggle = item.getByRole('button', { name: 'New allocation plan details' });
     const panel = item.locator('#allocation-plan-management-0');
 
+    await expect(item.locator('[data-accordion-field-focus]'))
+      .toHaveAttribute('data-accordion-field-focus-bound', 'true');
     await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
     await name.focus();
     await expect(panel).toHaveClass(/\bshow\b/);
     const focusDuringCollapseStarted = await page.evaluate(() => {
       const item = document.querySelector<HTMLElement>('#allocation-plan-management-container-0');
-      const toggle = item?.querySelector<HTMLButtonElement>('.allocation-plan-management-new-toggle');
+      const toggle = item?.querySelector<HTMLButtonElement>('.management-metadata-header-toggle');
       const name = item?.querySelector<HTMLInputElement>('[aria-label="New allocation plan name"]');
       const panel = item?.querySelector<HTMLElement>('#allocation-plan-management-0');
 
@@ -907,7 +932,7 @@ test.describe('portfolio allocation plan management', () => {
 
     const focusLeavingDuringCollapseStarted = await page.evaluate(() => {
       const item = document.querySelector<HTMLElement>('#allocation-plan-management-container-0');
-      const toggle = item?.querySelector<HTMLButtonElement>('.allocation-plan-management-new-toggle');
+      const toggle = item?.querySelector<HTMLButtonElement>('.management-metadata-header-toggle');
       const name = item?.querySelector<HTMLInputElement>('[aria-label="New allocation plan name"]');
       const panel = item?.querySelector<HTMLElement>('#allocation-plan-management-0');
 
@@ -1242,13 +1267,18 @@ test.describe('portfolio allocation plan management', () => {
       await expectAllocationPlanManagementOrder(page, [equalDatePlan, seededData.allocationPlan]);
 
       const unsafeItem = page.locator(`#allocation-plan-management-container-${equalDatePlan.id}`);
+      const expectedHeader = allocationPlanManagementHeader(
+        unsafeName,
+        seededData.allocationPlan.planned_date,
+      );
       const unsafeHeader = unsafeItem.getByRole('button', {
-        name: allocationPlanManagementHeader(unsafeName, seededData.allocationPlan.planned_date),
+        name: expectedHeader,
         exact: true,
       });
-      await expect(unsafeHeader).toHaveText(
-        allocationPlanManagementHeader(unsafeName, seededData.allocationPlan.planned_date),
-      );
+      const unsafeLabel = unsafeItem.locator('[data-metadata-editor-label]');
+      await expect(unsafeLabel).toBeVisible();
+      await expect(unsafeLabel).toHaveText(expectedHeader);
+      await expect(unsafeHeader).toHaveAccessibleName(expectedHeader);
       await expect(unsafeItem.locator('img')).toHaveCount(0);
 
       await page.reload();
@@ -1332,6 +1362,296 @@ test.describe('portfolio allocation plan management', () => {
     } finally {
       page.off('request', trackManagementRefresh);
     }
+  });
+
+  test.describe('scenario 20.1: edits allocation-plan metadata in the browser local timezone', () => {
+    test.use({ timezoneId: 'America/Los_Angeles' });
+
+    /** Saves name, calendar date, and hierarchy edits through the existing allocation-plan form.
+     * @author GPT-6 Luna
+     */
+    test('matches the new-plan header while editing and restores read-only mode after saving', async ({ database, page }) => {
+      const seededData = await seedAllocationPlanManagementData(database);
+      const updatedName = 'E2E Allocation Plan Pencil Updated';
+      const updatedDate = '2027-08-09';
+
+      await page.goto(`/portfolio/${seededData.portfolio.id}/allocation/manage`);
+      const item = page.locator(`#allocation-plan-management-container-${seededData.allocationPlan.id}`);
+      const newItem = page.locator('#allocation-plan-management-container-0');
+      const pencil = item.getByRole('button', {
+        name: `Edit allocation plan ${seededData.allocationPlan.name}`,
+        exact: true,
+      });
+      const readOnlyLabel = item.locator('[data-metadata-editor-label]');
+      const editorTrigger = item.locator('[data-metadata-editor-trigger]');
+      const toggle = item.locator('[data-metadata-editor-toggle]');
+      const form = item.locator(`#allocation-plan-management-form-${seededData.allocationPlan.id}`);
+      const rowAddButton = form.locator('tbody button.btn-secondary.btn-xs').first();
+      await expect(readOnlyLabel).toHaveText(allocationPlanManagementHeader(
+        seededData.allocationPlan.name,
+        seededData.allocationPlan.planned_date,
+      ));
+      await expectManagementMetadataPencilAlignment(pencil, readOnlyLabel);
+      await expect(pencil).toHaveClass(/\bbtn-secondary\b/);
+      await expect(pencil).toHaveClass(/\bbtn-xs\b/);
+      const pencilBox = await pencil.boundingBox();
+      const pencilStyle = await pencil.evaluate((element) => {
+        const style = window.getComputedStyle(element);
+        return {
+          padding: style.padding,
+          fontSize: style.fontSize,
+          lineHeight: style.lineHeight,
+          background: style.getPropertyValue('--bs-btn-bg'),
+          color: style.getPropertyValue('--bs-btn-color'),
+          border: style.getPropertyValue('--bs-btn-border-color'),
+        };
+      });
+      if(!pencilBox) {
+        throw new Error('The persisted-plan pencil must have a rendered resting size.');
+      }
+
+      await pencil.focus();
+      await page.keyboard.press('Enter');
+
+      const nameInput = item.getByRole('textbox', { name: 'Allocation plan name', exact: true });
+      const dateInput = item.getByLabel('Planned date', { exact: true });
+      await expect(readOnlyLabel).toBeHidden();
+      await expect(pencil).toBeHidden();
+      await expect(editorTrigger).toHaveAttribute('aria-expanded', 'true');
+      await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+      await expect(nameInput).toBeVisible();
+      await expect(nameInput).toBeFocused();
+      await expect(nameInput).toHaveValue(seededData.allocationPlan.name);
+      await expect(dateInput).toHaveValue(seededData.allocationPlan.planned_date);
+      await expect(item.locator(`#allocation-plan-management-${seededData.allocationPlan.id}`)).toHaveClass(/show/);
+      await expect(rowAddButton).toBeVisible();
+      const rowAddButtonBox = await rowAddButton.boundingBox();
+      const rowAddButtonStyle = await rowAddButton.evaluate((element) => {
+        const style = window.getComputedStyle(element);
+        return {
+          padding: style.padding,
+          fontSize: style.fontSize,
+          lineHeight: style.lineHeight,
+          background: style.getPropertyValue('--bs-btn-bg'),
+          color: style.getPropertyValue('--bs-btn-color'),
+          border: style.getPropertyValue('--bs-btn-border-color'),
+        };
+      });
+      if(!rowAddButtonBox) {
+        throw new Error('The allocation-plan row action must have a rendered size while its panel is open.');
+      }
+      expect(pencilStyle).toEqual(rowAddButtonStyle);
+      expect(Math.abs(pencilBox.height - rowAddButtonBox.height)).toBeLessThanOrEqual(1);
+
+      const originalViewport = page.viewportSize();
+      if(!originalViewport) {
+        throw new Error('The browser viewport must be available for responsive header assertions.');
+      }
+      const persistedHeaderControls = {
+        header: item.locator('[data-management-metadata-header]'),
+        textInput: nameInput,
+        dateInput,
+        toggle,
+      };
+      const newHeaderControls = {
+        header: newItem.locator('[data-management-metadata-header]'),
+        textInput: newItem.locator('.allocation-plan-management-new-name'),
+        dateInput: newItem.locator('.allocation-plan-management-new-date'),
+        toggle: newItem.locator('.management-metadata-header-toggle'),
+      };
+      await expectManagementMetadataHeaderLayout(persistedHeaderControls, newHeaderControls);
+      await page.setViewportSize({ width: 375, height: originalViewport.height });
+      await expectManagementMetadataHeaderLayout(persistedHeaderControls, newHeaderControls);
+      await page.setViewportSize(originalViewport);
+
+      const retainedDraftName = 'E2E Allocation Plan Draft';
+      await nameInput.fill(retainedDraftName);
+      await toggle.click();
+      const planPanel = item.locator(`#allocation-plan-management-${seededData.allocationPlan.id}`);
+      await expect(planPanel).not.toHaveClass(/show/);
+      await expect(planPanel).toHaveClass(/(?:^|\s)collapse(?:\s|$)/);
+      await toggle.click();
+      await expect(planPanel).toHaveClass(/show/);
+      await expect(nameInput).toHaveValue(retainedDraftName);
+      await nameInput.fill(updatedName);
+      await dateInput.fill(updatedDate);
+      const bondsParentRow = form.locator('tbody tr').nth(3);
+      await bondsParentRow.getByRole('combobox', { name: 'Class' }).fill('FIXED_INCOME');
+      await saveAllocationPlan(page, form, seededData.portfolio.id, updatedDate);
+
+      const persistedPlan = await database.query<{ id: number; name: string; planned_date: string }>(
+        `SELECT id, name, planned_date::text AS planned_date
+         FROM public.allocation_plan WHERE id = $1`,
+        [seededData.allocationPlan.id],
+      );
+      expect(persistedPlan).toEqual([{
+        id: seededData.allocationPlan.id,
+        name: updatedName,
+        planned_date: updatedDate,
+      }]);
+      const persistedRows = await queryPlannedAllocations(database, seededData.allocationPlan.id);
+      expect(persistedRows).toHaveLength(seededData.plannedAllocations.length);
+      expect(persistedRows.some(row => row.hierarchical_id[1] === 'FIXED_INCOME')).toBe(true);
+
+      const updatedHeader = page.locator(`#allocation-plan-management-container-${seededData.allocationPlan.id}`)
+        .getByRole('button', { name: allocationPlanManagementHeader(updatedName, updatedDate), exact: true });
+      await expect(updatedHeader).toBeVisible();
+      await expect(item.locator('[data-metadata-editor-label]')).toHaveText(
+        allocationPlanManagementHeader(updatedName, updatedDate),
+      );
+      await expect(item.locator('[data-metadata-editor-label]')).toBeVisible();
+      await expect(item.locator('[data-metadata-editor-trigger]')).toBeVisible();
+      await expect(item.locator('[data-metadata-editor-trigger]')).toHaveAttribute('aria-expanded', 'false');
+      await expect(page.locator(`#allocation-plan-management-container-${seededData.allocationPlan.id} [data-metadata-editor-active]`))
+        .toBeHidden();
+      await expectAllocationPlanManagementOrder(page, [{
+        ...seededData.allocationPlan,
+        name: updatedName,
+        planned_date: updatedDate,
+      }]);
+      await exerciseReadOnlyManagementHeaderToggle(
+        item.locator('[data-management-metadata-header]'),
+        readOnlyLabel,
+        planPanel,
+      );
+      await item.locator('[data-metadata-editor-trigger]').click();
+      await expect(nameInput).toBeVisible();
+      await expect(nameInput).toHaveValue(updatedName);
+      await expect(dateInput).toHaveValue(updatedDate);
+    });
+  });
+
+  /** Keeps invalid plan metadata and other entered values available without issuing a write.
+   * @author GPT-6 Luna
+   */
+  test('scenario 20.2: retains allocation-plan editor drafts when the required name is empty', async ({
+    database,
+    page,
+  }) => {
+    const seededData = await seedAllocationPlanManagementData(database);
+    await page.goto(`/portfolio/${seededData.portfolio.id}/allocation/manage`);
+    const item = page.locator(`#allocation-plan-management-container-${seededData.allocationPlan.id}`);
+    await item.getByRole('button', {
+      name: `Edit allocation plan ${seededData.allocationPlan.name}`,
+      exact: true,
+    }).click();
+
+    const nameInput = item.getByRole('textbox', { name: 'Allocation plan name', exact: true });
+    const dateInput = item.getByLabel('Planned date', { exact: true });
+    const form = item.locator(`#allocation-plan-management-form-${seededData.allocationPlan.id}`);
+    const draftClassInput = form.locator('tbody tr').nth(3).getByRole('combobox', { name: 'Class' });
+    await expect(form.locator('tfoot button.btn-primary[type="button"]')).toBeEnabled();
+    await nameInput.fill('');
+    await dateInput.fill('2027-08-10');
+    await draftClassInput.fill('UNSAVED_DRAFT_CLASS');
+    await form.locator('tfoot button.btn-primary[type="button"]').click();
+
+    await expect(nameInput).toBeVisible();
+    await expect(nameInput).toHaveValue('');
+    await expect(dateInput).toHaveValue('2027-08-10');
+    await expect(item.locator('[data-metadata-editor-label]')).toBeHidden();
+    await expect(item.locator('[data-metadata-editor-trigger]')).toBeHidden();
+    await expect(draftClassInput).toHaveValue('UNSAVED_DRAFT_CLASS');
+    await expect(database.query<{ id: number; name: string; planned_date: string }>(
+      `SELECT id, name, planned_date::text AS planned_date
+       FROM public.allocation_plan WHERE id = $1`,
+      [seededData.allocationPlan.id],
+    )).resolves.toEqual([{
+      id: seededData.allocationPlan.id,
+      name: seededData.allocationPlan.name,
+      planned_date: seededData.allocationPlan.planned_date,
+    }]);
+  });
+
+  /** Confirms read-only labels and header background toggle once without changing the pencil or chevron behavior.
+   * @author GPT-6 Luna
+   */
+  test('scenario 20.3: toggles persisted plan panels from read-only header surfaces', async ({ database, page }) => {
+    const seededData = await seedAllocationPlanManagementData(database);
+    const secondPlan = await seedAdditionalAllocationPlan(
+      database,
+      seededData.portfolio,
+      'E2E Allocation Plan Header Toggle Second',
+      '2026-02-15',
+      seededData.assets[EXISTING_STOCK_TICKER],
+    );
+
+    await page.goto(`/portfolio/${seededData.portfolio.id}/allocation/manage`);
+    const item = page.locator(`#allocation-plan-management-container-${seededData.allocationPlan.id}`);
+    const secondItem = page.locator(`#allocation-plan-management-container-${secondPlan.id}`);
+    const header = item.locator('[data-management-metadata-header]');
+    const label = item.locator('[data-metadata-editor-label]');
+    const pencil = item.getByRole('button', {
+      name: `Edit allocation plan ${seededData.allocationPlan.name}`,
+      exact: true,
+    });
+    const toggle = item.locator('[data-metadata-editor-toggle]');
+    const panel = item.locator(`#allocation-plan-management-${seededData.allocationPlan.id}`);
+    const secondLabel = secondItem.locator('[data-metadata-editor-label]');
+    const secondPanel = secondItem.locator(`#allocation-plan-management-${secondPlan.id}`);
+    const nameInput = item.getByRole('textbox', { name: 'Allocation plan name', exact: true });
+
+    await installAccordionTransitionCounter(panel);
+    await installAccordionTransitionCounter(secondPanel);
+    await expect(header).toHaveAttribute('data-metadata-editor-state', 'read-only');
+    await expect(panel).not.toHaveClass(/\bshow\b/);
+
+    await label.click();
+    await expect(panel).toHaveClass(/\bshow\b/);
+    await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+    expect(await readAccordionTransitionCounts(panel)).toEqual({ show: 1, hide: 0 });
+
+    await header.click({ position: { x: 2, y: 10 } });
+    await expect(panel).not.toHaveClass(/\bshow\b/);
+    await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+    expect(await readAccordionTransitionCounts(panel)).toEqual({ show: 1, hide: 1 });
+
+    await header.click({ position: { x: 2, y: 10 } });
+    await expect(panel).toHaveClass(/\bshow\b/);
+    await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+    expect(await readAccordionTransitionCounts(panel)).toEqual({ show: 2, hide: 1 });
+
+    await secondLabel.click();
+    await expect(panel).not.toHaveClass(/\bshow\b/);
+    await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+    await expect(secondPanel).toHaveClass(/\bshow\b/);
+    await expect(secondPanel).not.toHaveClass(/\bcollapsing\b/);
+    expect(await readAccordionTransitionCounts(panel)).toEqual({ show: 2, hide: 2 });
+    expect(await readAccordionTransitionCounts(secondPanel)).toEqual({ show: 1, hide: 0 });
+
+    await label.click();
+    await expect(panel).toHaveClass(/\bshow\b/);
+    await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+    await expect(secondPanel).not.toHaveClass(/\bshow\b/);
+    await expect(secondPanel).not.toHaveClass(/\bcollapsing\b/);
+    expect(await readAccordionTransitionCounts(panel)).toEqual({ show: 3, hide: 2 });
+    expect(await readAccordionTransitionCounts(secondPanel)).toEqual({ show: 1, hide: 1 });
+
+    await toggle.click();
+    await expect(panel).not.toHaveClass(/\bshow\b/);
+    await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+    expect(await readAccordionTransitionCounts(panel)).toEqual({ show: 3, hide: 3 });
+    await toggle.click();
+    await expect(panel).toHaveClass(/\bshow\b/);
+    await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+    expect(await readAccordionTransitionCounts(panel)).toEqual({ show: 4, hide: 3 });
+
+    await toggle.click();
+    await expect(panel).not.toHaveClass(/\bshow\b/);
+    await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+    await pencil.click();
+    await expect(nameInput).toBeVisible();
+    await expect(nameInput).toBeFocused();
+    await expect(header).toHaveAttribute('data-metadata-editor-state', 'editing');
+    await expect(panel).toHaveClass(/\bshow\b/);
+    await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+    expect(await readAccordionTransitionCounts(panel)).toEqual({ show: 5, hide: 4 });
+
+    await header.click({ position: { x: 2, y: 10 } });
+    await expect(panel).toHaveClass(/\bshow\b/);
+    await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+    await expect(nameInput).toBeVisible();
+    expect(await readAccordionTransitionCounts(panel)).toEqual({ show: 5, hide: 4 });
   });
 });
 
