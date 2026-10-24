@@ -3,6 +3,7 @@
  * @author OpenCode
  * @author benizzio
  * @author GPT-6 Luna
+ * @author GPT-6.1 Sol
  */
 import globals from "globals";
 import pluginJs from "@eslint/js";
@@ -224,6 +225,76 @@ export default [
                             ],
                             message:
                                 "Import from the public API 'components/portfolio-history-quote' (index.ts) only; " +
+                                "deep imports are not allowed.",
+                        },
+                        // Block deep imports into the management metadata editor; use its public entry point
+                        // Authored by: GPT-6.1 Sol
+                        {
+                            group: [
+                                "**/management-metadata-editor/*",
+                                "**/management-metadata-editor/**",
+                                "management-metadata-editor/*",
+                                "management-metadata-editor/**",
+                                "./management-metadata-editor/*",
+                                "./management-metadata-editor/**",
+                                "../management-metadata-editor/*",
+                                "../management-metadata-editor/**",
+                            ],
+                            message:
+                                "Import from the public API 'components/management-metadata-editor' (index.ts) only; " +
+                                "deep imports are not allowed.",
+                        },
+                        // Block deep imports into allocation plan management metadata; use its public entry point
+                        // Authored by: GPT-6.1 Sol
+                        {
+                            group: [
+                                "**/allocation-plan-management-metadata/*",
+                                "**/allocation-plan-management-metadata/**",
+                                "allocation-plan-management-metadata/*",
+                                "allocation-plan-management-metadata/**",
+                                "./allocation-plan-management-metadata/*",
+                                "./allocation-plan-management-metadata/**",
+                                "../allocation-plan-management-metadata/*",
+                                "../allocation-plan-management-metadata/**",
+                            ],
+                            message:
+                                "Import from the public API 'components/allocation-plan-management-metadata' " +
+                                "(index.ts) only; deep imports are not allowed.",
+                        },
+                        // Block deep imports into history observation details; use its public entry point
+                        // Authored by: GPT-6.1 Sol
+                        {
+                            group: [
+                                "**/portfolio-history-management-observation-details/*",
+                                "**/portfolio-history-management-observation-details/**",
+                                "portfolio-history-management-observation-details/*",
+                                "portfolio-history-management-observation-details/**",
+                                "./portfolio-history-management-observation-details/*",
+                                "./portfolio-history-management-observation-details/**",
+                                "../portfolio-history-management-observation-details/*",
+                                "../portfolio-history-management-observation-details/**",
+                            ],
+                            message:
+                                "Import from the public API " +
+                                "'components/portfolio-history-management-observation-details' (index.ts) only; " +
+                                "deep imports are not allowed.",
+                        },
+                        // Block deep imports into history observation metadata; use its public entry point
+                        // Authored by: GPT-6.1 Sol
+                        {
+                            group: [
+                                "**/portfolio-history-management-observation-metadata/*",
+                                "**/portfolio-history-management-observation-metadata/**",
+                                "portfolio-history-management-observation-metadata/*",
+                                "portfolio-history-management-observation-metadata/**",
+                                "./portfolio-history-management-observation-metadata/*",
+                                "./portfolio-history-management-observation-metadata/**",
+                                "../portfolio-history-management-observation-metadata/*",
+                                "../portfolio-history-management-observation-metadata/**",
+                            ],
+                            message:
+                                "Import from the public API " +
+                                "'components/portfolio-history-management-observation-metadata' (index.ts) only; " +
                                 "deep imports are not allowed.",
                         },
                     ],
