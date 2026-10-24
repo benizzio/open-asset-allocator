@@ -5,6 +5,7 @@
  * @author GPT-6 Luna
  * @author benizzio
  * @author GPT-6 Sol
+ * @author GPT-6.1 Sol
  */
 
 import htmx from "htmx.org";
@@ -32,9 +33,9 @@ import notifications from "./notifications";
 import { NotificationType } from "../infra/infra-types";
 import { getBrowserLocalCalendarDate } from "../utils/calendar-date";
 import {
+    activateManagementMetadataEditor,
     bindReadOnlyManagementMetadataHeaderToggle,
     hideManagementMetadataEditor,
-    revealManagementMetadataEditor,
 } from "./management-metadata-editor";
 import {
     areObservationDetailsReady,
@@ -473,18 +474,15 @@ const portfolioHistoryManagement = {
      * @param observationTimestampId - Persisted observation whose fields should be edited.
      * @example `portfolioHistoryManagement.activateObservationEditor(button, 12)` opens observation 12's editor.
      * @author GPT-6 Luna
+     * @author GPT-6.1 Sol
      */
     activateObservationEditor(button: HTMLButtonElement, observationTimestampId: number) {
-        const item = document.getElementById(`portfolio-history-management-container-${ observationTimestampId }`);
-        const fields = item?.querySelector<HTMLElement>("[data-metadata-editor-active]");
-        const tagInput = item?.querySelector<HTMLInputElement>("[data-observation-editor-tag]");
-        const dateInput = item?.querySelector<HTMLInputElement>("[data-observation-editor-date]");
-
-        if(!fields || !tagInput || !dateInput) {
-            return;
-        }
-
-        revealManagementMetadataEditor(fields, tagInput, dateInput, button);
+        activateManagementMetadataEditor(
+            document.getElementById(`portfolio-history-management-container-${ observationTimestampId }`),
+            "[data-observation-editor-tag]",
+            "[data-observation-editor-date]",
+            button,
+        );
     },
 
     /** Retries loading the requested observation's allocation rows after a failed lazy request.

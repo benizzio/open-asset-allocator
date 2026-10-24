@@ -5,12 +5,13 @@
  * form fields immediately before HTMX serializes the request, while untouched and new-plan forms keep their values.
  * Example: `bindAllocationPlanMetadataRequest(container)` installs the idempotent request hook.
  * @author GPT-6 Luna
+ * @author GPT-6.1 Sol
  */
 
 import { RequestConfigEventDetail } from "../../infra/htmx";
 import {
+    activateManagementMetadataEditor,
     isManagementMetadataEditorActive,
-    revealManagementMetadataEditor,
 } from "../management-metadata-editor";
 
 const FORM_PREFIX = "allocation-plan-management-form-";
@@ -39,18 +40,15 @@ export function bindAllocationPlanMetadataRequest(container: HTMLElement): void 
  * @param allocationPlanId - Persisted plan whose metadata should be edited.
  * @example `activateAllocationPlanEditor(button, 12)` opens plan 12's editor.
  * @author GPT-6 Luna
+ * @author GPT-6.1 Sol
  */
 export function activateAllocationPlanEditor(button: HTMLButtonElement, allocationPlanId: number): void {
-    const item = document.getElementById(`allocation-plan-management-container-${ allocationPlanId }`);
-    const fields = item?.querySelector<HTMLElement>("[data-metadata-editor-active]");
-    const nameInput = item?.querySelector<HTMLInputElement>("[data-allocation-plan-editor-name]");
-    const dateInput = item?.querySelector<HTMLInputElement>("[data-allocation-plan-editor-date]");
-
-    if(!fields || !nameInput || !dateInput) {
-        return;
-    }
-
-    revealManagementMetadataEditor(fields, nameInput, dateInput, button);
+    activateManagementMetadataEditor(
+        document.getElementById(`allocation-plan-management-container-${ allocationPlanId }`),
+        "[data-allocation-plan-editor-name]",
+        "[data-allocation-plan-editor-date]",
+        button,
+    );
 }
 
 /** Copies one plan editor date into the hidden date field serialized by the existing form.
