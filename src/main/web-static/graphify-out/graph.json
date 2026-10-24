@@ -18332,7 +18332,7 @@
     },
     {
       "source": "eslint_config",
-      "target": "ref_stylistic_eslint_plugin",
+      "target": "ref_typescript_eslint",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -18344,7 +18344,7 @@
     },
     {
       "source": "eslint_config",
-      "target": "ref_eslint_plugin_sonarjs",
+      "target": "ref_stylistic_eslint_plugin",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -18356,19 +18356,19 @@
     },
     {
       "source": "eslint_config",
-      "target": "ref_globals",
+      "target": "ref_eslint_plugin_sonarjs",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "eslint.config.mjs",
-      "source_location": "L7",
+      "source_location": "L12",
       "weight": 1.0
     },
     {
       "source": "eslint_config",
-      "target": "ref_eslint_js",
+      "target": "ref_globals",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -18380,7 +18380,7 @@
     },
     {
       "source": "eslint_config",
-      "target": "ref_typescript_eslint",
+      "target": "ref_eslint_js",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -30772,5 +30772,5 @@
       "source_file": "websrc/components/portfolio-navigation.html"
     }
   ],
-  "built_at_commit": "06571c7e0bf60475af3e73aec706c5909aa6aa1b"
+  "built_at_commit": "20d52e55f9f3ad84ef67a6f23215a60f4c5a54dc"
 }
