@@ -50,6 +50,22 @@ func (allocationPlan *AllocationPlan) AddDetail(detail *PlannedAllocation) {
 	allocationPlan.Details = append(allocationPlan.Details, detail)
 }
 
+// AllocationPlanPage contains complete plans and the boundary for the next descending planned-date/ID page.
+// For example, an empty Items slice and nil NextCursor represents a terminal empty page.
+// Co-authored by: GPT-6.1 Sol and OpenCode
+type AllocationPlanPage struct {
+	Items      []*AllocationPlan
+	NextCursor *AllocationPlanPageCursor
+}
+
+// AllocationPlanPageCursor identifies the last emitted plan in a descending planned-date/ID traversal.
+// For example, a repository can use `AllocationPlanPageCursor{PlannedDate: date, Id: 9}` as a keyset boundary.
+// Co-authored by: GPT-6.1 Sol and OpenCode
+type AllocationPlanPageCursor struct {
+	PlannedDate time.Time
+	Id          int64
+}
+
 // AllocationPlanRepository provides persistence operations used by the allocation plan domain service.
 // Co-authored by: GPT-6.1 Sol and benizzio
 type AllocationPlanRepository interface {

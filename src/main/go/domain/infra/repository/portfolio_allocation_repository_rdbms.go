@@ -11,8 +11,23 @@ import (
 	"github.com/benizzio/open-asset-allocator/langext"
 )
 
-// Co-authored by: GPT-6 Luna and benizzio
+// Co-authored by: GPT-6.1 Sol, GPT-6 Luna and benizzio
 const (
+	// portfolioAllocationProjectionSQL standardizes joined rows using pa, ass and paot aliases.
+	// Authored by: GPT-6.1 Sol
+	portfolioAllocationProjectionSQL = `
+		    pa.*,
+		    ass.id AS "asset.id",
+		    ass.ticker AS "asset.ticker",
+		    coalesce(ass.name, '') AS "asset.name",
+		    coalesce(ass.external_data #>> '{data,0,source}', '') AS selected_external_asset_source,
+		    coalesce(ass.external_data #>> '{data,0,ticker}', '') AS selected_external_asset_ticker,
+		    coalesce(ass.external_data #>> '{data,0,exchangeId}', '') AS selected_external_asset_exchange_id,
+		    paot.id AS "observation_timestamp.id",
+		    paot.portfolio_id AS "observation_timestamp.portfolio_id",
+		    coalesce(paot.observation_time_tag, '') AS "observation_timestamp.time_tag",
+		    paot.observation_timestamp AS "observation_timestamp.timestamp"
+	`
 	historicalReadPageSize       = 10
 	historicalReadLookaheadLimit = historicalReadPageSize + 1
 	availableObservationPageSQL  = `
@@ -46,24 +61,13 @@ const (
 			ORDER BY paot.observation_timestamp DESC, paot.id DESC
 			LIMIT {:pageLimit}
 		)
-		SELECT
-		    pa.*,
-		    ass.id AS "asset.id",
-		    ass.ticker AS "asset.ticker",
-		    coalesce(ass.name, '') AS "asset.name",
-		    coalesce(ass.external_data #>> '{data,0,source}', '') AS selected_external_asset_source,
-		    coalesce(ass.external_data #>> '{data,0,ticker}', '') AS selected_external_asset_ticker,
-		    coalesce(ass.external_data #>> '{data,0,exchangeId}', '') AS selected_external_asset_exchange_id,
-		    observation.id AS "observation_timestamp.id",
-		    observation.portfolio_id AS "observation_timestamp.portfolio_id",
-		    coalesce(observation.observation_time_tag, '') AS "observation_timestamp.time_tag",
-		    observation.observation_timestamp AS "observation_timestamp.timestamp"
-		FROM observation_page observation
+		SELECT ` + portfolioAllocationProjectionSQL + `
+		FROM observation_page paot
 		JOIN portfolio_allocation_fact pa
-		  ON pa.portfolio_id = observation.portfolio_id
-		 AND pa.observation_time_id = observation.id
+		  ON pa.portfolio_id = paot.portfolio_id
+		 AND pa.observation_time_id = paot.id
 		JOIN asset ass ON ass.id = pa.asset_id
-		ORDER BY observation.observation_timestamp DESC, observation.id DESC,
+		ORDER BY paot.observation_timestamp DESC, paot.id DESC,
 			pa.class ASC, pa.cash_reserve DESC, pa.total_market_value DESC
 	`
 	availableObservationTimestampsSQL = `
@@ -88,18 +92,7 @@ const (
 			)
 	`
 	portfolioAllocationsSQL = `
-		SELECT
-		    pa.*,
-		    ass.id AS "asset.id",
-		    ass.ticker AS "asset.ticker",
-		    coalesce(ass.name, '') AS "asset.name",
-		    coalesce(ass.external_data #>> '{data,0,source}', '') AS selected_external_asset_source,
-		    coalesce(ass.external_data #>> '{data,0,ticker}', '') AS selected_external_asset_ticker,
-		    coalesce(ass.external_data #>> '{data,0,exchangeId}', '') AS selected_external_asset_exchange_id,
-		    paot.id AS "observation_timestamp.id",
-		    paot.portfolio_id AS "observation_timestamp.portfolio_id",
-		    coalesce(paot.observation_time_tag, '') AS "observation_timestamp.time_tag",
-		    paot.observation_timestamp AS "observation_timestamp.timestamp"
+		SELECT ` + portfolioAllocationProjectionSQL + `
 		FROM portfolio_allocation_fact pa
 		JOIN asset ass ON ass.id = pa.asset_id
 		JOIN portfolio_allocation_obs_time paot
@@ -271,11 +264,24 @@ func (repository *PortfolioAllocationRDBMSRepository) FindAvailableObservationTi
 
 // FindAvailableObservationTimestampsPage reads up to ten eligible observation headers in stable keyset order.
 // For example, `repository.FindAvailableObservationTimestampsPage(42, nil)` returns the first page for portfolio 42.
-// Authored by: OpenCode
+// Co-authored by: GPT-6.1 Sol and OpenCode
 func (repository *PortfolioAllocationRDBMSRepository) FindAvailableObservationTimestampsPage(
 	portfolioId int64,
 	cursor *domain.ObservationPageCursor,
 ) (*domain.PortfolioObservationPage, error) {
+	var observations, err = repository.queryAvailableObservationTimestampsPage(portfolioId, cursor)
+	if err != nil {
+		return nil, err
+	}
+	return buildPortfolioObservationPage(observations), nil
+}
+
+// queryAvailableObservationTimestampsPage reads eligible headers including one look-ahead observation.
+// Authored by: GPT-6.1 Sol
+func (repository *PortfolioAllocationRDBMSRepository) queryAvailableObservationTimestampsPage(
+	portfolioId int64,
+	cursor *domain.ObservationPageCursor,
+) ([]domain.PortfolioObservationTimestamp, error) {
 	var queryBuilder = rdbms.BuildQuery[domain.PortfolioObservationTimestamp](
 		repository.dbAdapter,
 		availableObservationPageSQL,
@@ -297,21 +303,29 @@ func (repository *PortfolioAllocationRDBMSRepository) FindAvailableObservationTi
 		)
 	}
 
-	var hasMore = len(queryResult) > historicalReadPageSize
+	return queryResult, nil
+}
+
+// buildPortfolioObservationPage removes the look-ahead header and derives the last emitted boundary.
+// Authored by: GPT-6.1 Sol
+func buildPortfolioObservationPage(
+	observations []domain.PortfolioObservationTimestamp,
+) *domain.PortfolioObservationPage {
+	var hasMore = len(observations) > historicalReadPageSize
 	if hasMore {
-		queryResult = queryResult[:historicalReadPageSize]
+		observations = observations[:historicalReadPageSize]
 	}
 	var page = &domain.PortfolioObservationPage{
-		Items: langext.ToPointerSlice(queryResult),
+		Items: langext.ToPointerSlice(observations),
 	}
 	if hasMore {
-		var lastObservation = queryResult[len(queryResult)-1]
+		var lastObservation = observations[len(observations)-1]
 		page.NextCursor = &domain.ObservationPageCursor{
 			Timestamp: lastObservation.Timestamp,
 			Id:        lastObservation.Id,
 		}
 	}
-	return page, nil
+	return page
 }
 
 // FindPortfolioAllocationHistoryPage reads complete allocation rows for up to ten eligible observations.

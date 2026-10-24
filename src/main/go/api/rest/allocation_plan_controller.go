@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -38,7 +39,7 @@ func (controller *AllocationPlanRESTController) BuildRoutes() []infra.RESTRoute 
 }
 
 // getAllocationPlans returns the legacy plan list or an opt-in complete-plan cursor page.
-// Authored by: benizzio and OpenCode
+// Co-authored by: GPT-6.1 Sol, benizzio and OpenCode
 func (controller *AllocationPlanRESTController) getAllocationPlans(context *gin.Context) {
 
 	var portfolioIdParamValue = context.Param(portfolioIdParam)
@@ -47,50 +48,69 @@ func (controller *AllocationPlanRESTController) getAllocationPlans(context *gin.
 		return
 	}
 
+	response, err := controller.buildAllocationPlansResponse(context, portfolioId)
+	if context.IsAborted() || gininfra.HandleAPIError(context, "Error getting allocation plans", err) {
+		return
+	}
+	context.JSON(http.StatusOK, response)
+}
+
+// buildAllocationPlansResponse selects the requested read mode without writing a successful response.
+// Authored by: GPT-6.1 Sol
+func (controller *AllocationPlanRESTController) buildAllocationPlansResponse(
+	context *gin.Context,
+	portfolioId int64,
+) (any, error) {
 	var planType = allocation.AssetAllocationPlan
-	pageCursor, isPaginated := readPaginationCursor(
+	var pageCursor, isPaginated = readPaginationCursor(
 		context,
 		portfolioId,
 		allocationPlanCollection,
 		planType.String(),
 	)
+	if context.IsAborted() {
+		return nil, nil
+	}
 	if isPaginated {
-		if context.IsAborted() {
-			return
-		}
-		allocationPlansPage, pageError := controller.allocationPlanService.GetAllocationPlansPage(
-			portfolioId,
-			planType,
-			allocationPlanCursorFromPayload(pageCursor),
-		)
-		if gininfra.HandleAPIError(context, "Error getting paginated allocation plans", pageError) {
-			return
-		}
-		nextCursor, cursorError := encodeAllocationPlanPaginationCursor(
-			portfolioId,
-			planType.String(),
-			allocationPlansPage.NextCursor,
-		)
-		if gininfra.HandleAPIError(context, "Error encoding next allocation-plan cursor", cursorError) {
-			return
-		}
-		context.JSON(http.StatusOK, model.PaginatedResponse[*model.AllocationPlanDTS]{
-			Items:      model.MapToAllocationPlanDTSs(allocationPlansPage.Items),
-			NextCursor: nextCursor,
-		})
-		return
+		return controller.buildPaginatedAllocationPlansResponse(portfolioId, planType, pageCursor)
 	}
-	allocationPlans, err := controller.allocationPlanService.GetAllocationPlans(
-		portfolioId,
-		&planType,
+	return controller.buildAllocationPlansListResponse(portfolioId, planType)
+}
+
+// buildAllocationPlansListResponse loads and maps the legacy unpaginated plan list.
+// Authored by: GPT-6.1 Sol
+func (controller *AllocationPlanRESTController) buildAllocationPlansListResponse(
+	portfolioId int64,
+	planType allocation.PlanType,
+) ([]*model.AllocationPlanDTS, error) {
+	var plans, err = controller.allocationPlanService.GetAllocationPlans(portfolioId, &planType)
+	if err != nil {
+		return nil, err
+	}
+	return model.MapToAllocationPlanDTSs(plans), nil
+}
+
+// buildPaginatedAllocationPlansResponse loads complete plans and maps their continuation boundary.
+// Authored by: GPT-6.1 Sol
+func (controller *AllocationPlanRESTController) buildPaginatedAllocationPlansResponse(
+	portfolioId int64,
+	planType allocation.PlanType,
+	cursor *parsedPaginationCursor,
+) (*model.PaginatedResponse[*model.AllocationPlanDTS], error) {
+	var page, err = controller.allocationPlanService.GetAllocationPlansPage(
+		portfolioId, planType, allocationPlanCursorFromPayload(cursor),
 	)
-	if gininfra.HandleAPIError(context, "Error getting allocation plans", err) {
-		return
+	if err != nil {
+		return nil, fmt.Errorf("getting paginated allocation plans: %w", err)
 	}
-
-	var allocationPlansDTS = model.MapToAllocationPlanDTSs(allocationPlans)
-
-	context.JSON(http.StatusOK, allocationPlansDTS)
+	nextCursor, err := encodeAllocationPlanPaginationCursor(portfolioId, planType.String(), page.NextCursor)
+	if err != nil {
+		return nil, fmt.Errorf("encoding next allocation-plan cursor: %w", err)
+	}
+	return &model.PaginatedResponse[*model.AllocationPlanDTS]{
+		Items:      model.MapToAllocationPlanDTSs(page.Items),
+		NextCursor: nextCursor,
+	}, nil
 }
 
 // allocationPlanCursorFromPayload converts a validated REST cursor into the allocation-plan domain boundary.

@@ -14,21 +14,11 @@ import (
 	"github.com/benizzio/open-asset-allocator/langext"
 )
 
-// Co-authored by: OpenCode
+// Co-authored by: GPT-6.1 Sol and OpenCode
 const (
-	allocationPlanPageSQL = `
-		WITH allocation_plan_page AS (
-			SELECT ap.id, ap.planned_date
-			FROM allocation_plan ap
-			` + rdbms.WhereClausePlaceholder + `
-			AND EXISTS (
-				SELECT 1 FROM planned_allocation eligible_detail
-				WHERE eligible_detail.allocation_plan_id = ap.id
-			)
-			ORDER BY ap.planned_date DESC, ap.id DESC
-			LIMIT {:pageLimit}
-		)
-		SELECT
+	// allocationPlanProjectionSQL keeps paginated and legacy joined read models aligned.
+	// Authored by: GPT-6.1 Sol
+	allocationPlanProjectionSQL = `
 		    ap.id AS allocation_plan_id,
 		    ap.name,
 		    ap.type,
@@ -41,6 +31,20 @@ const (
 		    coalesce(ass.id, 0) AS "asset.id",
 		    coalesce(ass.ticker, '') AS "asset.ticker",
 		    coalesce(ass.name, '') AS "asset.name"
+	`
+	allocationPlanPageSQL = `
+		WITH allocation_plan_page AS (
+			SELECT ap.id, ap.planned_date
+			FROM allocation_plan ap
+			` + rdbms.WhereClausePlaceholder + `
+			AND EXISTS (
+				SELECT 1 FROM planned_allocation eligible_detail
+				WHERE eligible_detail.allocation_plan_id = ap.id
+			)
+			ORDER BY ap.planned_date DESC, ap.id DESC
+			LIMIT {:pageLimit}
+		)
+		SELECT ` + allocationPlanProjectionSQL + `
 		FROM allocation_plan_page page
 		JOIN allocation_plan ap ON ap.id = page.id
 		JOIN planned_allocation pa ON pa.allocation_plan_id = ap.id
@@ -55,19 +59,7 @@ const (
 		ORDER BY ap.planned_date DESC, ap.id DESC
 	`
 	allocationPlanSQL = `
-		SELECT 
-		    ap.id AS allocation_plan_id,
-		    ap.name, 
-		    ap.type, 
-		    ap.planned_date,
-		    ap.planned_execution_date,
-		    pa.id AS planned_allocation_id,
-		    pa.hierarchical_id, 
-		    pa.cash_reserve, 
-		    pa.slice_size_percentage,
-		    coalesce(ass.id, 0) AS "asset.id", 
-		    coalesce(ass.ticker, '') AS "asset.ticker", 
-		    coalesce(ass.name, '') AS "asset.name"
+		SELECT ` + allocationPlanProjectionSQL + `
 		FROM planned_allocation pa 
 		JOIN allocation_plan ap ON pa.allocation_plan_id = ap.id
 		LEFT JOIN asset ass ON ass.id = pa.asset_id
@@ -140,12 +132,30 @@ func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlans(
 
 // GetAllocationPlansPage reads up to ten complete plans of the requested type in stable keyset order.
 // For example, `repository.GetAllocationPlansPage(42, allocation.AssetAllocationPlan, nil)` returns the first page.
-// Authored by: OpenCode
+// Co-authored by: GPT-6.1 Sol and OpenCode
 func (repository *AllocationPlanRDBMSRepository) GetAllocationPlansPage(
 	portfolioId int64,
 	planType allocation.PlanType,
 	cursor *domain.AllocationPlanPageCursor,
 ) (*domain.AllocationPlanPage, error) {
+	var rows, err = repository.queryAllocationPlansPage(portfolioId, planType, cursor)
+	if err != nil {
+		return nil, err
+	}
+	plans, err := mapPlannedAllocationRows(rows)
+	if err != nil {
+		return nil, err
+	}
+	return buildAllocationPlanPage(plans), nil
+}
+
+// queryAllocationPlansPage retrieves complete joined rows for the parent page and one look-ahead plan.
+// Authored by: GPT-6.1 Sol
+func (repository *AllocationPlanRDBMSRepository) queryAllocationPlansPage(
+	portfolioId int64,
+	planType allocation.PlanType,
+	cursor *domain.AllocationPlanPageCursor,
+) ([]plannedAllocationJoinedRowDTS, error) {
 	var queryBuilder = rdbms.BuildQuery[plannedAllocationJoinedRowDTS](
 		repository.dbAdapter,
 		allocationPlanPageSQL,
@@ -168,10 +178,12 @@ func (repository *AllocationPlanRDBMSRepository) GetAllocationPlansPage(
 		)
 	}
 
-	var allocationPlans, err = mapPlannedAllocationRows(queryResult)
-	if err != nil {
-		return nil, err
-	}
+	return queryResult, nil
+}
+
+// buildAllocationPlanPage removes the look-ahead plan and derives the last emitted plan's boundary.
+// Authored by: GPT-6.1 Sol
+func buildAllocationPlanPage(allocationPlans []*domain.AllocationPlan) *domain.AllocationPlanPage {
 	var hasMore = len(allocationPlans) > historicalReadPageSize
 	if hasMore {
 		allocationPlans = allocationPlans[:historicalReadPageSize]
@@ -184,7 +196,7 @@ func (repository *AllocationPlanRDBMSRepository) GetAllocationPlansPage(
 			Id:          lastPlan.Id,
 		}
 	}
-	return page, nil
+	return page
 }
 
 func (repository *AllocationPlanRDBMSRepository) GetAllocationPlan(id int64) (*domain.AllocationPlan, error) {
