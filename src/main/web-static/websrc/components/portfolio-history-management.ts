@@ -32,6 +32,7 @@ import notifications from "./notifications";
 import { NotificationType } from "../infra/infra-types";
 import { getBrowserLocalCalendarDate } from "../utils/calendar-date";
 import {
+    bindReadOnlyManagementMetadataHeaderToggle,
     hideManagementMetadataEditor,
     revealManagementMetadataEditor,
 } from "./management-metadata-editor";
@@ -330,6 +331,7 @@ const portfolioHistoryManagement = {
         const managementContainer = document.getElementById(PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER);
 
         if(managementContainer) {
+            bindReadOnlyManagementMetadataHeaderToggle(managementContainer);
             bindObservationMetadataRequest(managementContainer);
         }
 

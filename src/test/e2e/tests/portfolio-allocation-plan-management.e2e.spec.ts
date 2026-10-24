@@ -10,7 +10,8 @@
  * a successful management-list refresh.
  * Scenario 18 covers dated plan headers, chronological refresh, ID tie ordering,
  * timezone-independent planned dates, escaped names, and request ownership guards.
- * Scenario 20 covers pencil-based plan metadata editing, responsive header layout, and failed-editor draft retention.
+ * Scenarios 20.1–20.3 cover pencil-based plan metadata editing, responsive layout, failed-editor draft retention,
+ * and read-only whole-header accordion activation.
  *
  * @author OpenCode
  * @author GPT-6 Astra
@@ -19,7 +20,12 @@
  * @author GPT-6.1 Sol
  */
 import type { Browser, Locator, Page, Request, Route } from '@playwright/test';
-import { exerciseAccordionFieldInteractions } from '../support/accordion-field-interactions';
+import {
+  exerciseAccordionFieldInteractions,
+  exerciseReadOnlyManagementHeaderToggle,
+  installAccordionTransitionCounter,
+  readAccordionTransitionCounts,
+} from '../support/accordion-field-interactions';
 import { expect, test } from '../support/fixtures';
 import {
   expectManagementMetadataHeaderLayout,
@@ -1484,6 +1490,11 @@ test.describe('portfolio allocation plan management', () => {
         name: updatedName,
         planned_date: updatedDate,
       }]);
+      await exerciseReadOnlyManagementHeaderToggle(
+        item.locator('[data-management-metadata-header]'),
+        readOnlyLabel,
+        planPanel,
+      );
       await item.locator('[data-metadata-editor-trigger]').click();
       await expect(nameInput).toBeVisible();
       await expect(nameInput).toHaveValue(updatedName);
@@ -1531,6 +1542,97 @@ test.describe('portfolio allocation plan management', () => {
       name: seededData.allocationPlan.name,
       planned_date: seededData.allocationPlan.planned_date,
     }]);
+  });
+
+  /** Confirms read-only labels and header background toggle once without changing the pencil or chevron behavior.
+   * @author GPT-6 Luna
+   */
+  test('scenario 20.3: toggles persisted plan panels from read-only header surfaces', async ({ database, page }) => {
+    const seededData = await seedAllocationPlanManagementData(database);
+    const secondPlan = await seedAdditionalAllocationPlan(
+      database,
+      seededData.portfolio,
+      'E2E Allocation Plan Header Toggle Second',
+      '2026-02-15',
+      seededData.assets[EXISTING_STOCK_TICKER],
+    );
+
+    await page.goto(`/portfolio/${seededData.portfolio.id}/allocation/manage`);
+    const item = page.locator(`#allocation-plan-management-container-${seededData.allocationPlan.id}`);
+    const secondItem = page.locator(`#allocation-plan-management-container-${secondPlan.id}`);
+    const header = item.locator('[data-management-metadata-header]');
+    const label = item.locator('[data-metadata-editor-label]');
+    const pencil = item.getByRole('button', {
+      name: `Edit allocation plan ${seededData.allocationPlan.name}`,
+      exact: true,
+    });
+    const toggle = item.locator('[data-metadata-editor-toggle]');
+    const panel = item.locator(`#allocation-plan-management-${seededData.allocationPlan.id}`);
+    const secondLabel = secondItem.locator('[data-metadata-editor-label]');
+    const secondPanel = secondItem.locator(`#allocation-plan-management-${secondPlan.id}`);
+    const nameInput = item.getByRole('textbox', { name: 'Allocation plan name', exact: true });
+
+    await installAccordionTransitionCounter(panel);
+    await installAccordionTransitionCounter(secondPanel);
+    await expect(header).toHaveAttribute('data-metadata-editor-state', 'read-only');
+    await expect(panel).not.toHaveClass(/\bshow\b/);
+
+    await label.click();
+    await expect(panel).toHaveClass(/\bshow\b/);
+    await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+    expect(await readAccordionTransitionCounts(panel)).toEqual({ show: 1, hide: 0 });
+
+    await header.click({ position: { x: 2, y: 10 } });
+    await expect(panel).not.toHaveClass(/\bshow\b/);
+    await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+    expect(await readAccordionTransitionCounts(panel)).toEqual({ show: 1, hide: 1 });
+
+    await header.click({ position: { x: 2, y: 10 } });
+    await expect(panel).toHaveClass(/\bshow\b/);
+    await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+    expect(await readAccordionTransitionCounts(panel)).toEqual({ show: 2, hide: 1 });
+
+    await secondLabel.click();
+    await expect(panel).not.toHaveClass(/\bshow\b/);
+    await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+    await expect(secondPanel).toHaveClass(/\bshow\b/);
+    await expect(secondPanel).not.toHaveClass(/\bcollapsing\b/);
+    expect(await readAccordionTransitionCounts(panel)).toEqual({ show: 2, hide: 2 });
+    expect(await readAccordionTransitionCounts(secondPanel)).toEqual({ show: 1, hide: 0 });
+
+    await label.click();
+    await expect(panel).toHaveClass(/\bshow\b/);
+    await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+    await expect(secondPanel).not.toHaveClass(/\bshow\b/);
+    await expect(secondPanel).not.toHaveClass(/\bcollapsing\b/);
+    expect(await readAccordionTransitionCounts(panel)).toEqual({ show: 3, hide: 2 });
+    expect(await readAccordionTransitionCounts(secondPanel)).toEqual({ show: 1, hide: 1 });
+
+    await toggle.click();
+    await expect(panel).not.toHaveClass(/\bshow\b/);
+    await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+    expect(await readAccordionTransitionCounts(panel)).toEqual({ show: 3, hide: 3 });
+    await toggle.click();
+    await expect(panel).toHaveClass(/\bshow\b/);
+    await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+    expect(await readAccordionTransitionCounts(panel)).toEqual({ show: 4, hide: 3 });
+
+    await toggle.click();
+    await expect(panel).not.toHaveClass(/\bshow\b/);
+    await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+    await pencil.click();
+    await expect(nameInput).toBeVisible();
+    await expect(nameInput).toBeFocused();
+    await expect(header).toHaveAttribute('data-metadata-editor-state', 'editing');
+    await expect(panel).toHaveClass(/\bshow\b/);
+    await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+    expect(await readAccordionTransitionCounts(panel)).toEqual({ show: 5, hide: 4 });
+
+    await header.click({ position: { x: 2, y: 10 } });
+    await expect(panel).toHaveClass(/\bshow\b/);
+    await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+    await expect(nameInput).toBeVisible();
+    expect(await readAccordionTransitionCounts(panel)).toEqual({ show: 5, hide: 4 });
   });
 });
 

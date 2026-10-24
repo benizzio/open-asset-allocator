@@ -27,6 +27,7 @@ import Router from "../infra/routing";
 import notifications from "./notifications";
 import { NotificationType } from "../infra/infra-types";
 import { getBrowserLocalCalendarDate } from "../utils/calendar-date";
+import { bindReadOnlyManagementMetadataHeaderToggle } from "./management-metadata-editor";
 import {
     activateAllocationPlanEditor,
     bindAllocationPlanMetadataRequest,
@@ -427,6 +428,7 @@ const allocationPlanManagement = {
         const managementContainer = document.getElementById(ALLOCATION_PLAN_MANAGEMENT_CONTAINER_ID);
 
         if(managementContainer) {
+            bindReadOnlyManagementMetadataHeaderToggle(managementContainer);
             bindAllocationPlanMetadataRequest(managementContainer);
         }
 

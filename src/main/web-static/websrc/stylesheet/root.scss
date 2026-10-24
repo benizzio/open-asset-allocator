@@ -144,6 +144,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  // The existing header flex gap plus this margin matches the allocation-row `ms-2` gap and inline whitespace.
+  margin-right: 0.5rem;
 }
 
 .management-metadata-header-toggle {

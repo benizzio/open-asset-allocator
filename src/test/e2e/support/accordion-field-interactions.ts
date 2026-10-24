@@ -26,6 +26,11 @@ type CollapseEventCounts = {
   show: number;
 };
 
+/** Counts the Bootstrap collapse transitions observed for one accordion panel.
+ * @author GPT-6 Luna
+ */
+export type AccordionTransitionCounts = CollapseEventCounts;
+
 /** Holds transition listeners and their counts until the interaction test finishes.
  * @author GPT-6 Luna
  */
@@ -43,6 +48,85 @@ type AccordionTestWindow = Window & {
 };
 
 let recorderSequence = 0;
+
+/** Installs counters for the next Bootstrap show and hide events on one panel.
+ *
+ * Use before exercising an accordion header to detect duplicate toggles that could be hidden by checking only its final
+ * state. Example: `await installAccordionTransitionCounter(panel)` starts counting that panel's transitions.
+ * @param panel - Accordion collapse panel whose Bootstrap events should be counted.
+ * @author GPT-6 Luna
+ */
+export async function installAccordionTransitionCounter(panel: Locator): Promise<void> {
+  await panel.evaluate((element) => {
+    element.dataset.e2eCollapseShowCount = '0';
+    element.dataset.e2eCollapseHideCount = '0';
+    element.addEventListener('show.bs.collapse', () => {
+      element.dataset.e2eCollapseShowCount = String(Number(element.dataset.e2eCollapseShowCount) + 1);
+    });
+    element.addEventListener('hide.bs.collapse', () => {
+      element.dataset.e2eCollapseHideCount = String(Number(element.dataset.e2eCollapseHideCount) + 1);
+    });
+  });
+}
+
+/** Reads Bootstrap show/hide event totals recorded on one panel.
+ *
+ * Example: `await readAccordionTransitionCounts(panel)` returns `{ show: 1, hide: 0 }` after one opening.
+ * @param panel - Accordion collapse panel with an installed transition counter.
+ * @returns The number of show and hide events observed so far.
+ * @author GPT-6 Luna
+ */
+export async function readAccordionTransitionCounts(panel: Locator): Promise<AccordionTransitionCounts> {
+  return panel.evaluate((element) => ({
+    show: Number(element.dataset.e2eCollapseShowCount),
+    hide: Number(element.dataset.e2eCollapseHideCount),
+  }));
+}
+
+/** Verifies a read-only metadata label and its header padding each toggle the panel exactly once.
+ *
+ * The helper starts from either expanded state and returns the panel to that same state. Example:
+ * `await exerciseReadOnlyManagementHeaderToggle(header, label, panel)` checks the read-only header's click surfaces.
+ * @param header - Persisted metadata accordion header.
+ * @param label - Visible read-only label inside the header.
+ * @param panel - The header's Bootstrap collapse panel.
+ * @author GPT-6 Luna
+ */
+export async function exerciseReadOnlyManagementHeaderToggle(
+  header: Locator,
+  label: Locator,
+  panel: Locator,
+): Promise<void> {
+  await expect(header).toHaveAttribute('data-metadata-editor-state', 'read-only');
+  await expect(label).toBeVisible();
+  await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+
+  const initiallyExpanded = await panel.evaluate(element => element.classList.contains('show'));
+  await installAccordionTransitionCounter(panel);
+  await label.click();
+  if(initiallyExpanded) {
+    await expect(panel).not.toHaveClass(/\bshow\b/);
+  }
+  else {
+    await expect(panel).toHaveClass(/\bshow\b/);
+  }
+  await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+
+  const headerBounds = await header.boundingBox();
+  if(!headerBounds) {
+    throw new Error('The read-only management header must have rendered geometry.');
+  }
+
+  await header.click({ position: { x: 2, y: headerBounds.height / 2 } });
+  if(initiallyExpanded) {
+    await expect(panel).toHaveClass(/\bshow\b/);
+  }
+  else {
+    await expect(panel).not.toHaveClass(/\bshow\b/);
+  }
+  await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+  expect(await readAccordionTransitionCounts(panel)).toEqual({ show: 1, hide: 1 });
+}
 
 /**
  * Repeats pointer, text, date, and keyboard interactions while verifying that the owning panel stays expanded.
