@@ -1,17 +1,17 @@
 # Graph Report - go  (2026-11-01)
 
 ## Corpus Check
-- 131 files · ~73,942 words
+- 131 files · ~73,945 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 2 file(s) not represented in the graph (top: .toml 1, (none) 1)
 
 ## Summary
-- 1230 nodes · 3848 edges · 57 communities (44 shown, 13 thin omitted)
+- 1231 nodes · 3848 edges · 58 communities (44 shown, 14 thin omitted)
 - Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 288 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `da44dc84`
+- Built from commit: `2cd3c8e9`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -68,6 +68,7 @@
 - RESTRoute
 - joinAny
 - go_pkg_fmt
+- go_pkg_github_com_benizzio_open_asset_allocator_infra_util_urlutil
 - go_pkg_time
 - pagination_cursor.go
 
@@ -85,7 +86,7 @@
 
 ## Surprising Connections (you probably didn't know these)
 - `readPaginationCursor()` --calls--> `RawQueryHasParameter()`  [EXTRACTED]
-  api/rest/pagination_cursor.go → infra/util/urlutil/query.go
+  api/rest/pagination_cursor.go → infra/util/url/query.go
 - `ValueJsonColumn()` --calls--> `IsNilPointer()`  [EXTRACTED]
   infra/rdbms/sqlext/sqlext_utils.go → langext/golang_ext_util.go
 - `AllocationPlanRESTController` --references--> `AllocationPlanManagementAppService`  [EXTRACTED]
@@ -98,7 +99,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (57 total, 13 thin omitted)
+## Communities (58 total, 14 thin omitted)
 
 ### Community 0 - "github.com/gin-gonic/gin.Context"
 Cohesion: 0.15
@@ -278,14 +279,14 @@ Nodes (18): PaginatedResponse, T, decodePaginationCursor(), decodePaginationCurs
 
 ## Knowledge Gaps
 - **17 isolated node(s):** `AssetSearchQueryDTS`, `ExternalAssetSearchQueryDTS`, `ErrorResponse`, `paginationCursorValidationDTS`, `contextKey` (+12 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 102 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **13 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 103 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **14 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `App` connect `App` to `Adapter`, `.buildAppComponents`, `reflect.Type`, `go_pkg_github_com_benizzio_open_asset_allocator_langext`, `asset_integration_service_yahoo.go`, `go_pkg_net_http`, `go_pkg_time`, `infra.go`, `GinServer`?**
-  _High betweenness centrality (0.051) - this node is a cross-community bridge._
+  _High betweenness centrality (0.050) - this node is a cross-community bridge._
 - **Why does `Adapter` connect `Adapter` to `App`, `go_pkg_fmt`?**
   _High betweenness centrality (0.037) - this node is a cross-community bridge._
 - **Why does `GinServer` connect `GinServer` to `go_pkg_net_http`, `App`?**

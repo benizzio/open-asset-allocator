@@ -1,17 +1,17 @@
-// Package urlutil provides URL query inspection helpers that preserve parameter presence,
+// Package url provides URL query inspection helpers that preserve parameter presence,
 // including empty values and queries with malformed value encoding.
 // Authored by: GPT-6.1 Sol
-package urlutil
+package url
 
 import (
-	"net/url"
+	neturl "net/url"
 	"strings"
 )
 
 // HasQueryParameter reports parameter presence independently of whether its value is empty.
-// For example, HasQueryParameter(url.Values{"pageCursor": {""}}, "pageCursor") returns true.
+// For example, HasQueryParameter(neturl.Values{"pageCursor": {""}}, "pageCursor") returns true.
 // Co-authored by: GPT-6.1 Sol and OpenCode
-func HasQueryParameter(query url.Values, name string) bool {
+func HasQueryParameter(query neturl.Values, name string) bool {
 	var _, exists = query[name]
 	return exists
 }
@@ -23,7 +23,7 @@ func HasQueryParameter(query url.Values, name string) bool {
 func RawQueryHasParameter(rawQuery string, name string) bool {
 	for _, pair := range strings.Split(rawQuery, "&") {
 		var rawName = strings.SplitN(pair, "=", 2)[0]
-		var decodedName, err = url.QueryUnescape(rawName)
+		var decodedName, err = neturl.QueryUnescape(rawName)
 		if err == nil && decodedName == name {
 			return true
 		}
