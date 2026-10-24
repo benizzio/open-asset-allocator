@@ -33,6 +33,32 @@ type PortfolioObservationTimestamp struct {
 	Timestamp   time.Time
 }
 
+// ObservationPageCursor identifies the last emitted observation in a descending timestamp/ID traversal.
+// The timestamp and ID must be supplied together when requesting a subsequent page.
+// For example, a repository can use `ObservationPageCursor{Timestamp: timestamp, Id: 42}` as a keyset boundary.
+// Co-authored by: GPT-6.1 Sol and OpenCode
+type ObservationPageCursor struct {
+	Timestamp time.Time
+	Id        int64
+}
+
+// PortfolioObservationPage contains observation headers and the boundary for its next page, if one exists.
+// For example, an empty Items slice with a nil NextCursor represents an empty paginated result.
+// Co-authored by: GPT-6.1 Sol and OpenCode
+type PortfolioObservationPage struct {
+	Items      []*PortfolioObservationTimestamp
+	NextCursor *ObservationPageCursor
+}
+
+// PortfolioAllocationHistoryPage contains complete allocation rows for the emitted observations.
+// NextCursor is based on the last emitted observation, not the look-ahead observation.
+// For example, consumers can aggregate Allocations by observation and request the next page with NextCursor.
+// Co-authored by: GPT-6.1 Sol and OpenCode
+type PortfolioAllocationHistoryPage struct {
+	Allocations []*PortfolioAllocation
+	NextCursor  *ObservationPageCursor
+}
+
 // PortfolioAllocationRepository provides persistence operations used by the portfolio allocation domain service.
 // Co-authored by: GPT-6.1 Sol and benizzio
 type PortfolioAllocationRepository interface {

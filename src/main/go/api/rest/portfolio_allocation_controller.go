@@ -15,6 +15,7 @@ import (
 	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/infra"
 	gininfra "github.com/benizzio/open-asset-allocator/infra/gin"
+	"github.com/benizzio/open-asset-allocator/infra/util/urlutil"
 	"github.com/benizzio/open-asset-allocator/infra/validation"
 	"github.com/benizzio/open-asset-allocator/langext"
 )
@@ -45,7 +46,7 @@ func (controller *PortfolioAllocationRESTController) BuildRoutes() []infra.RESTR
 }
 
 // getPortfolioAllocationHistory returns the legacy history list or an opt-in cursor page.
-// Authored by: OpenCode
+// Co-authored by: GPT-6.1 Sol and OpenCode
 func (controller *PortfolioAllocationRESTController) getPortfolioAllocationHistory(context *gin.Context) {
 
 	var portfolioIdParamValue = context.Param(portfolioIdParam)
@@ -54,80 +55,91 @@ func (controller *PortfolioAllocationRESTController) getPortfolioAllocationHisto
 		return
 	}
 
-	var observationTimestampIdParamValue = context.Query(observationTimestampIdParam)
-	var observationTimestampId int64
-	if !langext.IsZeroValue(observationTimestampIdParamValue) {
-		observationTimestampId, err = langext.ParseInt64(observationTimestampIdParamValue)
-		if gininfra.HandleAPIError(context, getObservationTimestampIdErrorMessage, err) {
-			return
-		}
-	}
-
-	if controller.respondWithPaginatedPortfolioAllocationHistory(context, portfolioId) {
+	response, err := controller.buildPortfolioAllocationHistoryResponse(context, portfolioId)
+	if context.IsAborted() || gininfra.HandleAPIError(context, "Error getting portfolio history", err) {
 		return
 	}
-
-	portfolioHistory, err := controller.getPortfolioAllocationHistoryUpstack(
-		portfolioId,
-		observationTimestampId,
-	)
-	if err != nil {
-		var errorDetail string
-		if !langext.IsZeroValue(observationTimestampId) {
-			errorDetail = fmt.Sprintf(" for observation id %d", observationTimestampId)
-		}
-		gininfra.HandleAPIError(
-			context,
-			fmt.Sprintf("Error getting portfolio history %s", errorDetail),
-			err,
-		)
-		return
-	}
-
-	var aggregatedPortfoliohistoryDTS = model.AggregateAndMapToPortfolioHistoryDTSs(portfolioHistory)
-
-	context.JSON(http.StatusOK, aggregatedPortfoliohistoryDTS)
+	context.JSON(http.StatusOK, response)
 }
 
-// respondWithPaginatedPortfolioAllocationHistory handles opt-in keyset paging and reports whether it was selected.
-// Authored by: OpenCode
-func (controller *PortfolioAllocationRESTController) respondWithPaginatedPortfolioAllocationHistory(
+// buildPortfolioAllocationHistoryResponse validates read options and selects complete history or a cursor page.
+// Authored by: GPT-6.1 Sol
+func (controller *PortfolioAllocationRESTController) buildPortfolioAllocationHistoryResponse(
 	context *gin.Context,
 	portfolioId int64,
-) bool {
-	pageCursor, isPaginated := readPaginationCursor(
+) (any, error) {
+	var observationTimestampId, err = readHistoryObservationTimestampId(context)
+	if err != nil {
+		return nil, err
+	}
+	var pageCursor, isPaginated = readPaginationCursor(
 		context,
 		portfolioId,
 		observationCursorCollection,
 		"",
 	)
-	if !isPaginated {
-		return false
-	}
 	if context.IsAborted() {
-		return true
+		return nil, nil
 	}
-	if hasQueryParameter(context.Request.URL.Query(), observationTimestampIdParam) {
+	if !isPaginated {
+		return controller.buildPortfolioAllocationHistoryListResponse(portfolioId, observationTimestampId)
+	}
+	if urlutil.HasQueryParameter(context.Request.URL.Query(), observationTimestampIdParam) {
 		respondWithPaginationCursorValidationError(context, "cannot be combined with observationTimestampId")
-		return true
+		return nil, nil
 	}
-	portfolioHistoryPage, err := controller.portfolioAllocationDomService.
-		GetPortfolioAllocationHistoryPage(portfolioId, observationCursorFromPayload(pageCursor))
-	if gininfra.HandleAPIError(context, "Error getting paginated portfolio history", err) {
-		return true
+	return controller.buildPaginatedPortfolioAllocationHistoryResponse(portfolioId, pageCursor)
+}
+
+// readHistoryObservationTimestampId parses the optional legacy single-observation selector.
+// Authored by: GPT-6.1 Sol
+func readHistoryObservationTimestampId(context *gin.Context) (int64, error) {
+	var value = context.Query(observationTimestampIdParam)
+	if value == "" {
+		return 0, nil
 	}
-	nextCursor, err := encodeObservationPaginationCursor(portfolioId, portfolioHistoryPage.NextCursor)
-	if gininfra.HandleAPIError(context, "Error encoding next portfolio-history cursor", err) {
-		return true
+	var id, err = langext.ParseInt64(value)
+	if err != nil {
+		return 0, fmt.Errorf("%s: %w", getObservationTimestampIdErrorMessage, err)
 	}
-	var aggregatedPortfolioHistory = model.AggregateAndMapToPortfolioHistoryDTSs(
-		portfolioHistoryPage.Allocations,
-	)
-	context.JSON(http.StatusOK, model.PaginatedResponse[*model.PortfolioSnapshotDTS]{
-		Items:      aggregatedPortfolioHistory,
+	return id, nil
+}
+
+// buildPortfolioAllocationHistoryListResponse loads and aggregates the legacy history selection.
+// Authored by: GPT-6.1 Sol
+func (controller *PortfolioAllocationRESTController) buildPortfolioAllocationHistoryListResponse(
+	portfolioId int64,
+	observationTimestampId int64,
+) ([]*model.PortfolioSnapshotDTS, error) {
+	var history, err = controller.getPortfolioAllocationHistoryUpstack(portfolioId, observationTimestampId)
+	if err != nil {
+		if observationTimestampId != 0 {
+			return nil, fmt.Errorf("getting portfolio history for observation id %d: %w", observationTimestampId, err)
+		}
+		return nil, err
+	}
+	return model.AggregateAndMapToPortfolioHistoryDTSs(history), nil
+}
+
+// buildPaginatedPortfolioAllocationHistoryResponse maps complete snapshots and their continuation boundary.
+// Co-authored by: GPT-6.1 Sol and OpenCode
+func (controller *PortfolioAllocationRESTController) buildPaginatedPortfolioAllocationHistoryResponse(
+	portfolioId int64,
+	cursor *parsedPaginationCursor,
+) (*model.PaginatedResponse[*model.PortfolioSnapshotDTS], error) {
+	var page, err = controller.portfolioAllocationDomService.
+		GetPortfolioAllocationHistoryPage(portfolioId, observationCursorFromPayload(cursor))
+	if err != nil {
+		return nil, fmt.Errorf("getting paginated portfolio history: %w", err)
+	}
+	nextCursor, err := encodeObservationPaginationCursor(portfolioId, page.NextCursor)
+	if err != nil {
+		return nil, fmt.Errorf("encoding next portfolio-history cursor: %w", err)
+	}
+	return &model.PaginatedResponse[*model.PortfolioSnapshotDTS]{
+		Items:      model.AggregateAndMapToPortfolioHistoryDTSs(page.Allocations),
 		NextCursor: nextCursor,
-	})
-	return true
+	}, nil
 }
 
 func (controller *PortfolioAllocationRESTController) getPortfolioAllocationHistoryUpstack(
@@ -160,7 +172,7 @@ func observationCursorFromPayload(cursor *parsedPaginationCursor) *domain.Observ
 }
 
 // getAvailableHistoryObservations returns the legacy summary list or an opt-in cursor page.
-// Authored by: OpenCode
+// Co-authored by: GPT-6.1 Sol and OpenCode
 func (controller *PortfolioAllocationRESTController) getAvailableHistoryObservations(context *gin.Context) {
 
 	var portfolioIdParamValue = context.Param(portfolioIdParam)
@@ -168,43 +180,68 @@ func (controller *PortfolioAllocationRESTController) getAvailableHistoryObservat
 	if gininfra.HandleAPIError(context, getPortfolioIdErrorMessage, err) {
 		return
 	}
-	pageCursor, isPaginated := readPaginationCursor(
+	response, err := controller.buildAvailableHistoryObservationsResponse(context, portfolioId)
+	if context.IsAborted() || gininfra.HandleAPIError(context, "Error getting available observation timestamps", err) {
+		return
+	}
+	context.JSON(http.StatusOK, response)
+}
+
+// buildAvailableHistoryObservationsResponse selects legacy observation summaries or an opt-in page.
+// Authored by: GPT-6.1 Sol
+func (controller *PortfolioAllocationRESTController) buildAvailableHistoryObservationsResponse(
+	context *gin.Context,
+	portfolioId int64,
+) (any, error) {
+	var pageCursor, isPaginated = readPaginationCursor(
 		context,
 		portfolioId,
 		observationCursorCollection,
 		"",
 	)
-	if isPaginated {
-		if context.IsAborted() {
-			return
-		}
-		availableTimestampsPage, pageError := controller.portfolioAllocationDomService.
-			GetAvailableObservationTimestampsPage(portfolioId, observationCursorFromPayload(pageCursor))
-		if gininfra.HandleAPIError(context, "Error getting paginated observation timestamps", pageError) {
-			return
-		}
-		nextCursor, cursorError := encodeObservationPaginationCursor(portfolioId, availableTimestampsPage.NextCursor)
-		if gininfra.HandleAPIError(context, "Error encoding next observation cursor", cursorError) {
-			return
-		}
-		context.JSON(http.StatusOK, model.PaginatedResponse[*model.PortfolioObservationTimestampDTS]{
-			Items:      model.MapToPortfolioObservationTimestampDTSs(availableTimestampsPage.Items),
-			NextCursor: nextCursor,
-		})
-		return
+	if context.IsAborted() {
+		return nil, nil
 	}
+	if isPaginated {
+		return controller.buildPaginatedHistoryObservationsResponse(portfolioId, pageCursor)
+	}
+	return controller.buildHistoryObservationsListResponse(portfolioId)
+}
 
-	availableTimestamps, err := controller.portfolioAllocationDomService.GetAvailableObservationTimestamps(
+// buildHistoryObservationsListResponse loads and maps the legacy ten most recent observation headers.
+// Authored by: GPT-6.1 Sol
+func (controller *PortfolioAllocationRESTController) buildHistoryObservationsListResponse(
+	portfolioId int64,
+) ([]*model.PortfolioObservationTimestampDTS, error) {
+	var availableTimestamps, err = controller.portfolioAllocationDomService.GetAvailableObservationTimestamps(
 		portfolioId,
 		10,
 	)
-	if gininfra.HandleAPIError(context, "Error getting available observation timestamps", err) {
-		return
+	if err != nil {
+		return nil, err
 	}
+	return model.MapToPortfolioObservationTimestampDTSs(availableTimestamps), nil
+}
 
-	var availableTimestampsDTS = model.MapToPortfolioObservationTimestampDTSs(availableTimestamps)
-
-	context.JSON(http.StatusOK, availableTimestampsDTS)
+// buildPaginatedHistoryObservationsResponse maps observation headers and their continuation boundary.
+// Authored by: GPT-6.1 Sol
+func (controller *PortfolioAllocationRESTController) buildPaginatedHistoryObservationsResponse(
+	portfolioId int64,
+	cursor *parsedPaginationCursor,
+) (*model.PaginatedResponse[*model.PortfolioObservationTimestampDTS], error) {
+	var page, err = controller.portfolioAllocationDomService.
+		GetAvailableObservationTimestampsPage(portfolioId, observationCursorFromPayload(cursor))
+	if err != nil {
+		return nil, fmt.Errorf("getting paginated observation timestamps: %w", err)
+	}
+	nextCursor, err := encodeObservationPaginationCursor(portfolioId, page.NextCursor)
+	if err != nil {
+		return nil, fmt.Errorf("encoding next observation cursor: %w", err)
+	}
+	return &model.PaginatedResponse[*model.PortfolioObservationTimestampDTS]{
+		Items:      model.MapToPortfolioObservationTimestampDTSs(page.Items),
+		NextCursor: nextCursor,
+	}, nil
 }
 
 // bindAndValidatePortfolioSnapshot binds a snapshot and responds to malformed RFC3339 timestamps.

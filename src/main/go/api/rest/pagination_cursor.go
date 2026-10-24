@@ -8,13 +8,13 @@ import (
 	"fmt"
 	"io"
 	"net/url"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/benizzio/open-asset-allocator/domain"
 	gininfra "github.com/benizzio/open-asset-allocator/infra/gin"
+	"github.com/benizzio/open-asset-allocator/infra/util/urlutil"
 	"github.com/benizzio/open-asset-allocator/infra/validation"
 )
 
@@ -55,7 +55,7 @@ type parsedPaginationCursor struct {
 // readPaginationCursor detects parameter presence, decodes a continuation token, and responds with HTTP 400 on error.
 // A present empty value represents the first page; an absent parameter leaves the legacy endpoint path untouched.
 // For example, `?pageCursor=` returns (nil, true), while a missing parameter returns (nil, false).
-// Authored by: OpenCode
+// Co-authored by: GPT-6.1 Sol and OpenCode
 func readPaginationCursor(
 	context *gin.Context,
 	portfolioId int64,
@@ -64,7 +64,7 @@ func readPaginationCursor(
 ) (*parsedPaginationCursor, bool) {
 	valuesByKey, queryError := url.ParseQuery(context.Request.URL.RawQuery)
 	values, present := valuesByKey[paginationCursorQueryKey]
-	if queryError != nil && rawQueryHasParameter(context.Request.URL.RawQuery, paginationCursorQueryKey) {
+	if queryError != nil && urlutil.RawQueryHasParameter(context.Request.URL.RawQuery, paginationCursorQueryKey) {
 		respondWithPaginationCursorValidationError(context, "must be URL-encoded")
 		return nil, true
 	}
@@ -246,24 +246,4 @@ func respondWithPaginationCursorValidationError(context *gin.Context, message st
 		Build()
 	gininfra.RespondWithCustomValidationErrors(context, validationErrors, &target)
 	context.Abort()
-}
-
-// hasQueryParameter reports parameter presence independently of whether its value is empty.
-// Authored by: OpenCode
-func hasQueryParameter(query url.Values, name string) bool {
-	_, exists := query[name]
-	return exists
-}
-
-// rawQueryHasParameter detects an encoded query key when ParseQuery reports a malformed value.
-// Authored by: OpenCode
-func rawQueryHasParameter(rawQuery string, name string) bool {
-	for _, pair := range strings.Split(rawQuery, "&") {
-		rawName := strings.SplitN(pair, "=", 2)[0]
-		decodedName, err := url.QueryUnescape(rawName)
-		if err == nil && decodedName == name {
-			return true
-		}
-	}
-	return false
 }
