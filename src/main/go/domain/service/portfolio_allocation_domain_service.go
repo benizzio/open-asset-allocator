@@ -43,6 +43,26 @@ func (service *PortfolioAllocationDomService) GetAvailableObservationTimestamps(
 	)
 }
 
+// GetAvailableObservationTimestampsPage returns one cursor page of observation headers for a portfolio.
+// For example, pass nil for cursor to read the first page and the returned boundary for continuation.
+// Authored by: OpenCode
+func (service *PortfolioAllocationDomService) GetAvailableObservationTimestampsPage(
+	portfolioId int64,
+	cursor *domain.ObservationPageCursor,
+) (*domain.PortfolioObservationPage, error) {
+	return service.portfolioAllocationRepository.FindAvailableObservationTimestampsPage(portfolioId, cursor)
+}
+
+// GetPortfolioAllocationHistoryPage returns complete observation snapshots for one cursor page.
+// For example, pass nil for cursor to read the first page and the returned boundary for continuation.
+// Authored by: OpenCode
+func (service *PortfolioAllocationDomService) GetPortfolioAllocationHistoryPage(
+	portfolioId int64,
+	cursor *domain.ObservationPageCursor,
+) (*domain.PortfolioAllocationHistoryPage, error) {
+	return service.portfolioAllocationRepository.FindPortfolioAllocationHistoryPage(portfolioId, cursor)
+}
+
 func (service *PortfolioAllocationDomService) GenerateHierarchicalId(
 	allocation *domain.PortfolioAllocation,
 	hierarchy domain.AllocationHierarchy,

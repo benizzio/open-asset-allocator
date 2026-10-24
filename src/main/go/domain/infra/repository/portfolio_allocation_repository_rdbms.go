@@ -13,6 +13,59 @@ import (
 
 // Co-authored by: GPT-6 Luna and benizzio
 const (
+	historicalReadPageSize       = 10
+	historicalReadLookaheadLimit = historicalReadPageSize + 1
+	availableObservationPageSQL  = `
+		WITH observation_page AS (
+			SELECT paot.id, paot.portfolio_id, paot.observation_time_tag AS time_tag,
+				paot.observation_timestamp AS "timestamp"
+			FROM portfolio_allocation_obs_time paot
+			` + rdbms.WhereClausePlaceholder + `
+			AND EXISTS (
+				SELECT 1 FROM portfolio_allocation_fact pa
+				WHERE pa.portfolio_id = paot.portfolio_id
+				  AND pa.observation_time_id = paot.id
+			)
+			ORDER BY paot.observation_timestamp DESC, paot.id DESC
+			LIMIT {:pageLimit}
+		)
+		SELECT id, portfolio_id, time_tag, "timestamp"
+		FROM observation_page
+		ORDER BY "timestamp" DESC, id DESC
+	`
+	portfolioAllocationHistoryPageSQL = `
+		WITH observation_page AS (
+			SELECT paot.id, paot.portfolio_id, paot.observation_time_tag, paot.observation_timestamp
+			FROM portfolio_allocation_obs_time paot
+			` + rdbms.WhereClausePlaceholder + `
+			AND EXISTS (
+				SELECT 1 FROM portfolio_allocation_fact eligible_fact
+				WHERE eligible_fact.portfolio_id = paot.portfolio_id
+				  AND eligible_fact.observation_time_id = paot.id
+			)
+			ORDER BY paot.observation_timestamp DESC, paot.id DESC
+			LIMIT {:pageLimit}
+		)
+		SELECT
+		    pa.*,
+		    ass.id AS "asset.id",
+		    ass.ticker AS "asset.ticker",
+		    coalesce(ass.name, '') AS "asset.name",
+		    coalesce(ass.external_data #>> '{data,0,source}', '') AS selected_external_asset_source,
+		    coalesce(ass.external_data #>> '{data,0,ticker}', '') AS selected_external_asset_ticker,
+		    coalesce(ass.external_data #>> '{data,0,exchangeId}', '') AS selected_external_asset_exchange_id,
+		    observation.id AS "observation_timestamp.id",
+		    observation.portfolio_id AS "observation_timestamp.portfolio_id",
+		    coalesce(observation.observation_time_tag, '') AS "observation_timestamp.time_tag",
+		    observation.observation_timestamp AS "observation_timestamp.timestamp"
+		FROM observation_page observation
+		JOIN portfolio_allocation_fact pa
+		  ON pa.portfolio_id = observation.portfolio_id
+		 AND pa.observation_time_id = observation.id
+		JOIN asset ass ON ass.id = pa.asset_id
+		ORDER BY observation.observation_timestamp DESC, observation.id DESC,
+			pa.class ASC, pa.cash_reserve DESC, pa.total_market_value DESC
+	`
 	availableObservationTimestampsSQL = `
 		SELECT DISTINCT paot.id, paot.portfolio_id, paot.observation_time_tag AS time_tag,
 			paot.observation_timestamp AS "timestamp"
@@ -214,6 +267,116 @@ func (repository *PortfolioAllocationRDBMSRepository) FindAvailableObservationTi
 	var result = langext.ToPointerSlice(queryResult)
 
 	return result, nil
+}
+
+// FindAvailableObservationTimestampsPage reads up to ten eligible observation headers in stable keyset order.
+// For example, `repository.FindAvailableObservationTimestampsPage(42, nil)` returns the first page for portfolio 42.
+// Authored by: OpenCode
+func (repository *PortfolioAllocationRDBMSRepository) FindAvailableObservationTimestampsPage(
+	portfolioId int64,
+	cursor *domain.ObservationPageCursor,
+) (*domain.PortfolioObservationPage, error) {
+	var queryBuilder = rdbms.BuildQuery[domain.PortfolioObservationTimestamp](
+		repository.dbAdapter,
+		availableObservationPageSQL,
+	).
+		AddWhereClauseAndParam("AND paot.portfolio_id = {:portfolioId}", "portfolioId", portfolioId).
+		AddParam("pageLimit", historicalReadLookaheadLimit)
+	if cursor != nil {
+		queryBuilder.AddWhereClause(
+			"AND (paot.observation_timestamp, paot.id) < ({:cursorTimestamp}, {:cursorId})",
+		).AddParam("cursorTimestamp", cursor.Timestamp).AddParam("cursorId", cursor.Id)
+	}
+
+	var queryResult []domain.PortfolioObservationTimestamp
+	if err := queryBuilder.Build().FindInto(&queryResult); err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(
+			err,
+			queryObservationTimestampsError,
+			repository,
+		)
+	}
+
+	var hasMore = len(queryResult) > historicalReadPageSize
+	if hasMore {
+		queryResult = queryResult[:historicalReadPageSize]
+	}
+	var page = &domain.PortfolioObservationPage{
+		Items: langext.ToPointerSlice(queryResult),
+	}
+	if hasMore {
+		var lastObservation = queryResult[len(queryResult)-1]
+		page.NextCursor = &domain.ObservationPageCursor{
+			Timestamp: lastObservation.Timestamp,
+			Id:        lastObservation.Id,
+		}
+	}
+	return page, nil
+}
+
+// FindPortfolioAllocationHistoryPage reads complete allocation rows for up to ten eligible observations.
+// For example, `repository.FindPortfolioAllocationHistoryPage(42, nil)` returns complete snapshots for the first page.
+// Authored by: OpenCode
+func (repository *PortfolioAllocationRDBMSRepository) FindPortfolioAllocationHistoryPage(
+	portfolioId int64,
+	cursor *domain.ObservationPageCursor,
+) (*domain.PortfolioAllocationHistoryPage, error) {
+	var queryBuilder = rdbms.BuildQuery[portfolioAllocationJoinedRowDTS](
+		repository.dbAdapter,
+		portfolioAllocationHistoryPageSQL,
+	).
+		AddWhereClauseAndParam("AND paot.portfolio_id = {:portfolioId}", "portfolioId", portfolioId).
+		AddParam("pageLimit", historicalReadLookaheadLimit)
+	if cursor != nil {
+		queryBuilder.AddWhereClause(
+			"AND (paot.observation_timestamp, paot.id) < ({:cursorTimestamp}, {:cursorId})",
+		).AddParam("cursorTimestamp", cursor.Timestamp).AddParam("cursorId", cursor.Id)
+	}
+
+	var queryResult []portfolioAllocationJoinedRowDTS
+	if err := queryBuilder.Build().FindInto(&queryResult); err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(err, queryAllocationsError, repository)
+	}
+
+	var allocations = mapPortfolioAllocationRows(queryResult)
+	var page = buildPortfolioAllocationHistoryPage(allocations)
+	return page, nil
+}
+
+// buildPortfolioAllocationHistoryPage removes the complete look-ahead snapshot and uses the last emitted
+// observation as the continuation boundary.
+// Authored by: OpenCode
+func buildPortfolioAllocationHistoryPage(
+	allocations []*domain.PortfolioAllocation,
+) *domain.PortfolioAllocationHistoryPage {
+	var page = &domain.PortfolioAllocationHistoryPage{
+		Allocations: make([]*domain.PortfolioAllocation, 0, len(allocations)),
+	}
+	var lastObservationId int64
+	var observationCount int
+	var hasMore bool
+	for _, portfolioAllocation := range allocations {
+		var observation = portfolioAllocation.ObservationTimestamp
+		if observation.Id != lastObservationId {
+			if observationCount == historicalReadPageSize {
+				hasMore = true
+				break
+			}
+			observationCount++
+			lastObservationId = observation.Id
+			if observationCount == historicalReadPageSize {
+				page.NextCursor = &domain.ObservationPageCursor{
+					Timestamp: observation.Timestamp,
+					Id:        observation.Id,
+				}
+			}
+		}
+		page.Allocations = append(page.Allocations, portfolioAllocation)
+	}
+	if !hasMore {
+		page.NextCursor = nil
+	}
+	return page
 }
 
 func (repository *PortfolioAllocationRDBMSRepository) MergePortfolioAllocationsInTransaction(

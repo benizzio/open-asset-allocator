@@ -58,6 +58,13 @@ type AllocationPlanRepository interface {
 	// Authored by: GPT-6.1 Sol
 	FindAndLockAllocationPlanOwnershipInTransaction(context.Context, int64) (*AllocationPlanOwnership, error)
 	GetAllAllocationPlans(portfolioId int64, planType *allocation.PlanType) ([]*AllocationPlan, error)
+	// GetAllocationPlansPage returns complete plans of one type using a planned-date/ID boundary.
+	// For example, pass nil for the first page and the last response's cursor for continuation.
+	GetAllocationPlansPage(
+		portfolioId int64,
+		planType allocation.PlanType,
+		cursor *AllocationPlanPageCursor,
+	) (*AllocationPlanPage, error)
 	GetAllocationPlan(id int64) (*AllocationPlan, error)
 	GetAllAllocationPlanIdentifiers(
 		portfolioId int64,

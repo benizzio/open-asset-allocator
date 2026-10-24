@@ -26,6 +26,17 @@ func (service *AllocationPlanDomService) GetAllocationPlans(portfolioId int64, p
 	return service.allocationPlanRepository.GetAllAllocationPlans(portfolioId, planType)
 }
 
+// GetAllocationPlansPage returns complete plans of one type for a single keyset page.
+// For example, pass nil for cursor to read the first page and the returned boundary for continuation.
+// Authored by: OpenCode
+func (service *AllocationPlanDomService) GetAllocationPlansPage(
+	portfolioId int64,
+	planType allocation.PlanType,
+	cursor *domain.AllocationPlanPageCursor,
+) (*domain.AllocationPlanPage, error) {
+	return service.allocationPlanRepository.GetAllocationPlansPage(portfolioId, planType, cursor)
+}
+
 func (service *AllocationPlanDomService) GetAllocationPlan(id int64) (*domain.AllocationPlan, error) {
 	return service.allocationPlanRepository.GetAllocationPlan(id)
 }
