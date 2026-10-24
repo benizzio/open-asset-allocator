@@ -38,8 +38,11 @@
 
         <div id="portfolio-history-management-container-{{id}}" class="accordion-item">
 
+            <!-- Co-authored by: GPT-6 Luna and benizzio -->
             <h2 id="portfolio-history-management-trigger-{{id}}"
-                class="accordion-header {{#unless id}}portfolio-history-management-new-header{{/unless}}"
+                class="accordion-header management-metadata-header"
+                data-management-metadata-header
+                {{#if id}}data-metadata-editor-state="read-only"{{/if}}
                 hx-include="[name='portfolioId']"
                 {{#if id}}
                 hx-get="/api/portfolio/:portfolioId/history?observationTimestampId={{id}}"
@@ -50,7 +53,7 @@
             >
             {{#unless id}}
                 <!-- Co-authored by: GPT-6 Luna and benizzio -->
-                <span class="portfolio-history-management-new-fields" data-accordion-field-focus>
+                <span class="management-metadata-header-fields portfolio-history-management-new-fields" data-accordion-field-focus>
                     <input type="text"
                            placeholder="New observation *"
                            aria-label="Time tag"
@@ -72,7 +75,7 @@
             {{/unless}}
             {{#if id}}
                 <!-- Co-authored by: GPT-6 Luna and benizzio -->
-                <span class="portfolio-history-management-edit-fields"
+                <span class="management-metadata-header-fields portfolio-history-management-edit-fields"
                       id="portfolio-history-management-editor-{{id}}"
                       data-accordion-field-focus
                       data-metadata-editor-active="false"
@@ -104,7 +107,7 @@
                     />
                 </span>
                 <button type="button"
-                        class="btn btn-outline-secondary btn-sm portfolio-history-management-edit-button"
+                        class="btn btn-secondary btn-xs management-metadata-edit-button portfolio-history-management-edit-button"
                         aria-label="Edit observation {{timeTag}}"
                         aria-controls="portfolio-history-management-editor-{{id}}"
                         aria-expanded="false"
@@ -113,17 +116,21 @@
                 >
                     <span class="bi bi-pencil" aria-hidden="true"></span>
                 </button>
+                <span class="management-metadata-header-label"
+                      data-metadata-editor-label
+                >{{timeTag}} - {{formatTimestampLocalDate timestamp}}</span>
             {{/if}}
-            <button class="accordion-button collapsed {{#unless id}}w-auto flex-shrink-0 portfolio-history-management-new-toggle{{/unless}}"
+            <button class="accordion-button collapsed w-auto flex-shrink-0 management-metadata-header-toggle"
                     type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#portfolio-history-management-{{id}}"
                     aria-expanded="false"
                     aria-controls="portfolio-history-management-{{id}}"
-                    {{#unless id}}aria-label="New observation details"{{/unless}}
+                    {{#if id}}
+                    aria-label="{{timeTag}} - {{formatTimestampLocalDate timestamp}}"
+                    data-metadata-editor-toggle
+                    {{else}}aria-label="New observation details"{{/if}}
             >
-                <!-- Co-authored by: GPT-6 Luna and benizzio -->
-                {{#if id}}{{timeTag}} - {{formatTimestampLocalDate timestamp}}{{/if}}
             </button>
             </h2>
 
