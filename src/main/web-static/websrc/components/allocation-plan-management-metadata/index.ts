@@ -50,8 +50,7 @@ export function activateAllocationPlanEditor(button: HTMLButtonElement, allocati
         return;
     }
 
-    button.setAttribute("aria-expanded", "true");
-    revealManagementMetadataEditor(fields, nameInput, dateInput);
+    revealManagementMetadataEditor(fields, nameInput, dateInput, button);
 }
 
 /** Copies one plan editor date into the hidden date field serialized by the existing form.

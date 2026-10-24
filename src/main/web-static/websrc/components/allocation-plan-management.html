@@ -38,12 +38,15 @@
 
         <div id="allocation-plan-management-container-{{allocationPlan.id}}" class="accordion-item">
 
+            <!-- Co-authored by: GPT-6 Luna and benizzio -->
             <h2 id="allocation-plan-management-trigger-{{allocationPlan.id}}"
-                class="accordion-header {{#unless allocationPlan.id}}allocation-plan-management-new-header{{else}}allocation-plan-management-persisted-header{{/unless}}"
+                class="accordion-header management-metadata-header"
+                data-management-metadata-header
+                {{#if allocationPlan.id}}data-metadata-editor-state="read-only"{{/if}}
             >
                 {{#unless allocationPlan.id}}
                     <!-- Co-authored by: GPT-6 Luna and benizzio -->
-                    <span class="allocation-plan-management-new-fields" data-accordion-field-focus>
+                    <span class="management-metadata-header-fields allocation-plan-management-new-fields" data-accordion-field-focus>
                         <input type="text"
                                placeholder="New allocation plan *"
                                aria-label="New allocation plan name"
@@ -67,7 +70,7 @@
                 {{/unless}}
                 {{#if allocationPlan.id}}
                     <!-- Co-authored by: GPT-6 Luna and benizzio -->
-                    <span class="allocation-plan-management-edit-fields"
+                    <span class="management-metadata-header-fields allocation-plan-management-edit-fields"
                           id="allocation-plan-management-editor-{{allocationPlan.id}}"
                           data-accordion-field-focus
                           data-metadata-editor-active="false"
@@ -101,7 +104,7 @@
                         />
                     </span>
                     <button type="button"
-                            class="btn btn-outline-secondary btn-sm allocation-plan-management-edit-button"
+                            class="btn btn-secondary btn-xs management-metadata-edit-button allocation-plan-management-edit-button"
                             aria-label="Edit allocation plan {{allocationPlan.name}}"
                             aria-controls="allocation-plan-management-editor-{{allocationPlan.id}}"
                             aria-expanded="false"
@@ -110,17 +113,21 @@
                     >
                         <span class="bi bi-pencil" aria-hidden="true"></span>
                     </button>
+                    <span class="management-metadata-header-label"
+                          data-metadata-editor-label
+                    >{{allocationPlan.name}} - {{allocationPlan.plannedDate}}</span>
                 {{/if}}
-                <button class="accordion-button collapsed {{#unless allocationPlan.id}}w-auto flex-shrink-0 allocation-plan-management-new-toggle{{/unless}}"
+                <button class="accordion-button collapsed w-auto flex-shrink-0 management-metadata-header-toggle"
                         type="button"
                         data-bs-toggle="collapse"
                         data-bs-target="#allocation-plan-management-{{allocationPlan.id}}"
                         aria-expanded="false"
                         aria-controls="allocation-plan-management-{{allocationPlan.id}}"
-                        {{#unless allocationPlan.id}}aria-label="New allocation plan details"{{/unless}}
+                        {{#if allocationPlan.id}}
+                        aria-label="{{allocationPlan.name}} - {{allocationPlan.plannedDate}}"
+                        data-metadata-editor-toggle
+                        {{else}}aria-label="New allocation plan details"{{/if}}
                 >
-                    <!-- Co-authored by: GPT-6 Luna and benizzio -->
-                    {{#if allocationPlan.id}}{{allocationPlan.name}} - {{allocationPlan.plannedDate}}{{/if}}
                 </button>
             </h2>
 

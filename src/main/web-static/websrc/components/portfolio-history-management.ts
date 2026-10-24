@@ -271,10 +271,6 @@ function propagateRefreshDataAfterPost(observationTimestampId: number, metadataC
 
             if(editorFields && tagInput && dateInput) {
                 hideManagementMetadataEditor(editorFields, tagInput, dateInput);
-
-                editorFields.closest(".accordion-header")
-                    ?.querySelector("[data-metadata-editor-trigger]")
-                    ?.setAttribute("aria-expanded", "false");
             }
 
             reloadObservationDetails(header, form);
@@ -486,8 +482,7 @@ const portfolioHistoryManagement = {
             return;
         }
 
-        button.setAttribute("aria-expanded", "true");
-        revealManagementMetadataEditor(fields, tagInput, dateInput);
+        revealManagementMetadataEditor(fields, tagInput, dateInput, button);
     },
 
     /** Retries loading the requested observation's allocation rows after a failed lazy request.
