@@ -1905,11 +1905,15 @@ test.describe('portfolio allocation history management', () => {
     await expectManagementObservationOrder(page, [secondEqualTimestamp, firstEqualTimestamp, olderObservation]);
 
     const unsafeItem = page.locator(`#portfolio-history-management-container-${firstEqualTimestamp.id}`);
+    const expectedHeader = await expectedObservationHeaderName(page, firstEqualTimestamp);
     const unsafeHeader = unsafeItem.getByRole('button', {
-      name: await expectedObservationHeaderName(page, firstEqualTimestamp),
+      name: expectedHeader,
       exact: true,
     });
-    await expect(unsafeHeader).toHaveText(await expectedObservationHeaderName(page, firstEqualTimestamp));
+    const unsafeLabel = unsafeItem.locator('[data-metadata-editor-label]');
+    await expect(unsafeLabel).toBeVisible();
+    await expect(unsafeLabel).toHaveText(expectedHeader);
+    await expect(unsafeHeader).toHaveAccessibleName(expectedHeader);
     await expect(unsafeItem.locator('img')).toHaveCount(0);
 
     await page.reload();

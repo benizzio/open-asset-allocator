@@ -145,6 +145,9 @@ test.describe('portfolio allocation plan management', () => {
     await page.clock.install({ time: new Date(FIXED_ALLOCATION_PLAN_TIMESTAMP) });
   });
 
+  /** Creates a plan and verifies its refreshed form, persistence, and rendered chart.
+   * @author GPT-6 Luna
+   */
   test('scenario 4: creates and explores a portfolio allocation plan', async ({ database, page }) => {
     test.setTimeout(60_000);
     const seededData = await seedAllocationPlanData(database);
@@ -331,6 +334,11 @@ test.describe('portfolio allocation plan management', () => {
 
     const persistedPlan = await expectPersistedAllocationPlan(database, seededData, CREATED_ALLOCATION_PLAN_DATE);
     await expectAllocationPlanSuccessNotification(page);
+    const successToast = page.locator('#toast-notification-container .toast[role="alert"]').filter({
+      hasText: 'Allocation plan saved successfully',
+    }).last();
+    await successToast.getByRole('button', { name: 'Close', exact: true }).click();
+    await expect(successToast).toBeHidden();
     await expectReloadedManagementItems(page, persistedPlan.id, ALLOCATION_PLAN_NAME, CREATED_ALLOCATION_PLAN_DATE);
     const owningManagementRefreshes = managementRefreshRequests.filter(
       request => request.headers()['hx-target'] === 'accordion-allocation-plan-management',
@@ -800,7 +808,8 @@ test.describe('portfolio allocation plan management', () => {
     });
   });
 
-  /** Verifies either new-plan field opens the panel while preserving focus and explicit toggle behavior.
+  /** Verifies either new-plan field opens the panel after HTMX binds focus handling.
+   * Preserves focus and explicit toggle behavior.
    * @author GPT-6 Luna
    */
   test('scenario 4.3: opens the new-plan panel when either header field receives focus', async ({ database, page }) => {
@@ -818,6 +827,8 @@ test.describe('portfolio allocation plan management', () => {
 
     await expect(toggle).toHaveAttribute('aria-expanded', 'false');
     await expect(panel).not.toHaveClass(/\bshow\b/);
+    await expect(item.locator('[data-accordion-field-focus]'))
+      .toHaveAttribute('data-accordion-field-focus-bound', 'true');
     await name.focus();
     await expect(name).toBeFocused();
     await expect(panel).toHaveClass(/\bshow\b/);
@@ -874,7 +885,8 @@ test.describe('portfolio allocation plan management', () => {
     await expect(panel).not.toHaveClass(/\bshow\b/);
   });
 
-  /** Covers pending focus-open behavior during a collapse transition and cancellation after blur.
+  /** Covers pending focus-open behavior during collapse and cancellation after blur.
+   * Waits for the HTMX-installed focus binding before exercising the field interaction.
    * @author GPT-6 Luna
    */
   test('scenario 4.5: retries focus opening after collapse and cancels it when focus leaves', async ({
@@ -892,12 +904,14 @@ test.describe('portfolio allocation plan management', () => {
     const toggle = item.getByRole('button', { name: 'New allocation plan details' });
     const panel = item.locator('#allocation-plan-management-0');
 
+    await expect(item.locator('[data-accordion-field-focus]'))
+      .toHaveAttribute('data-accordion-field-focus-bound', 'true');
     await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
     await name.focus();
     await expect(panel).toHaveClass(/\bshow\b/);
     const focusDuringCollapseStarted = await page.evaluate(() => {
       const item = document.querySelector<HTMLElement>('#allocation-plan-management-container-0');
-      const toggle = item?.querySelector<HTMLButtonElement>('.allocation-plan-management-new-toggle');
+      const toggle = item?.querySelector<HTMLButtonElement>('.management-metadata-header-toggle');
       const name = item?.querySelector<HTMLInputElement>('[aria-label="New allocation plan name"]');
       const panel = item?.querySelector<HTMLElement>('#allocation-plan-management-0');
 
@@ -918,7 +932,7 @@ test.describe('portfolio allocation plan management', () => {
 
     const focusLeavingDuringCollapseStarted = await page.evaluate(() => {
       const item = document.querySelector<HTMLElement>('#allocation-plan-management-container-0');
-      const toggle = item?.querySelector<HTMLButtonElement>('.allocation-plan-management-new-toggle');
+      const toggle = item?.querySelector<HTMLButtonElement>('.management-metadata-header-toggle');
       const name = item?.querySelector<HTMLInputElement>('[aria-label="New allocation plan name"]');
       const panel = item?.querySelector<HTMLElement>('#allocation-plan-management-0');
 
@@ -1253,13 +1267,18 @@ test.describe('portfolio allocation plan management', () => {
       await expectAllocationPlanManagementOrder(page, [equalDatePlan, seededData.allocationPlan]);
 
       const unsafeItem = page.locator(`#allocation-plan-management-container-${equalDatePlan.id}`);
+      const expectedHeader = allocationPlanManagementHeader(
+        unsafeName,
+        seededData.allocationPlan.planned_date,
+      );
       const unsafeHeader = unsafeItem.getByRole('button', {
-        name: allocationPlanManagementHeader(unsafeName, seededData.allocationPlan.planned_date),
+        name: expectedHeader,
         exact: true,
       });
-      await expect(unsafeHeader).toHaveText(
-        allocationPlanManagementHeader(unsafeName, seededData.allocationPlan.planned_date),
-      );
+      const unsafeLabel = unsafeItem.locator('[data-metadata-editor-label]');
+      await expect(unsafeLabel).toBeVisible();
+      await expect(unsafeLabel).toHaveText(expectedHeader);
+      await expect(unsafeHeader).toHaveAccessibleName(expectedHeader);
       await expect(unsafeItem.locator('img')).toHaveCount(0);
 
       await page.reload();
