@@ -9,6 +9,62 @@
 
 import { Collapse } from "bootstrap";
 
+const boundHeaderToggleContainers = new WeakSet<HTMLElement>();
+
+const interactiveHeaderControlSelector = [
+    "button",
+    "a",
+    "input",
+    "select",
+    "textarea",
+    "label",
+    "summary",
+    "[role='button']",
+    "[role='link']",
+    "[contenteditable]:not([contenteditable='false'])",
+].join(", ");
+
+/** Binds read-only management headers so clicks outside interactive controls toggle their accordion panel.
+ *
+ * Bind once to a management container. Delegation also covers header markup inserted or replaced by HTMX. For example,
+ * `bindReadOnlyManagementMetadataHeaderToggle(container)` enables label and background clicks without intercepting the
+ * pencil, accordion button, or editable controls.
+ * @param container - Management-list container owning persisted metadata headers.
+ * @author GPT-6 Luna
+ */
+export function bindReadOnlyManagementMetadataHeaderToggle(container: HTMLElement): void {
+    if(boundHeaderToggleContainers.has(container)) {
+        return;
+    }
+
+    boundHeaderToggleContainers.add(container);
+    container.addEventListener("click", toggleReadOnlyManagementMetadataPanel);
+}
+
+/** Toggles the panel for a read-only header click that did not originate from an interactive control.
+ * @author GPT-6 Luna
+ */
+function toggleReadOnlyManagementMetadataPanel(event: MouseEvent): void {
+    const target = event.target;
+
+    if(!(target instanceof Element)) {
+        return;
+    }
+
+    const header = target.closest<HTMLElement>("[data-management-metadata-header]");
+
+    if(header?.dataset.metadataEditorState !== "read-only" || target.closest(interactiveHeaderControlSelector)) {
+        return;
+    }
+
+    const item = header.closest<HTMLElement>(".accordion-item");
+    const panel = item?.querySelector<HTMLElement>(":scope > .accordion-collapse");
+
+    if(panel) {
+        Collapse.getOrCreateInstance(panel, { toggle: false }).toggle();
+    }
+}
+
 /** Reveals and enables one record's metadata fields, then focuses its text input.
  *
  * @param fields - The initially hidden group containing the editable metadata controls.
