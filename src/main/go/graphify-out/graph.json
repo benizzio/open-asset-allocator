@@ -3711,14 +3711,14 @@
       "source_location": "L115"
     },
     {
-      "id": "infra_util_urlutil_query",
+      "id": "infra_util_url_query",
       "label": "query.go",
       "_origin": "ast",
       "community": 20,
       "community_name": "ExecuteDBQuery",
       "file_type": "code",
       "norm_label": "query.go",
-      "source_file": "infra/util/urlutil/query.go",
+      "source_file": "infra/util/url/query.go",
       "source_location": "L1"
     },
     {
@@ -7750,14 +7750,14 @@
       "source_location": "L167"
     },
     {
-      "id": "infra_util_urlutil_query_rawqueryhasparameter",
+      "id": "infra_util_url_query_rawqueryhasparameter",
       "label": "RawQueryHasParameter()",
       "_origin": "ast",
       "community": 43,
       "community_name": "pagination_cursor.go",
       "file_type": "code",
       "norm_label": "rawqueryhasparameter()",
-      "source_file": "infra/util/urlutil/query.go",
+      "source_file": "infra/util/url/query.go",
       "source_location": "L23"
     },
     {
@@ -11446,14 +11446,14 @@
       "source_location": ""
     },
     {
-      "id": "infra_util_urlutil_query_hasqueryparameter",
+      "id": "infra_util_url_query_hasqueryparameter",
       "label": "HasQueryParameter()",
       "_origin": "ast",
       "community": 62,
       "community_name": "PortfolioAllocationRESTController",
       "file_type": "code",
       "norm_label": "hasqueryparameter()",
-      "source_file": "infra/util/urlutil/query.go",
+      "source_file": "infra/util/url/query.go",
       "source_location": "L14"
     },
     {
@@ -13572,13 +13572,13 @@
       "type": "external"
     },
     {
-      "id": "go_pkg_github_com_benizzio_open_asset_allocator_infra_util_urlutil",
-      "label": "go_pkg_github_com_benizzio_open_asset_allocator_infra_util_urlutil",
+      "id": "go_pkg_github_com_benizzio_open_asset_allocator_infra_util_url",
+      "label": "go_pkg_github_com_benizzio_open_asset_allocator_infra_util_url",
       "community": 43,
       "community_name": "pagination_cursor.go",
       "external": true,
       "file_type": "concept",
-      "norm_label": "go_pkg_github_com_benizzio_open_asset_allocator_infra_util_urlutil",
+      "norm_label": "go_pkg_github_com_benizzio_open_asset_allocator_infra_util_url",
       "source_file": "",
       "type": "external"
     }
@@ -14210,7 +14210,7 @@
     },
     {
       "source": "api_rest_pagination_cursor_readpaginationcursor",
-      "target": "infra_util_urlutil_query_rawqueryhasparameter",
+      "target": "infra_util_url_query_rawqueryhasparameter",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -21686,7 +21686,7 @@
     },
     {
       "source": "rest_portfolioallocationrestcontroller_buildportfolioallocationhistoryresponse",
-      "target": "infra_util_urlutil_query_hasqueryparameter",
+      "target": "infra_util_url_query_hasqueryparameter",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -26390,7 +26390,7 @@
     },
     {
       "source": "api_rest_pagination_cursor",
-      "target": "go_pkg_github_com_benizzio_open_asset_allocator_infra_util_urlutil",
+      "target": "go_pkg_github_com_benizzio_open_asset_allocator_infra_util_url",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -26570,7 +26570,7 @@
     },
     {
       "source": "api_rest_portfolio_allocation_controller",
-      "target": "go_pkg_github_com_benizzio_open_asset_allocator_infra_util_urlutil",
+      "target": "go_pkg_github_com_benizzio_open_asset_allocator_infra_util_url",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -29641,26 +29641,26 @@
       "weight": 1.0
     },
     {
-      "source": "infra_util_urlutil_query",
+      "source": "infra_util_url_query",
       "target": "go_pkg_net_url",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "import",
-      "source_file": "infra/util/urlutil/query.go",
+      "source_file": "infra/util/url/query.go",
       "source_location": "L7",
       "weight": 1.0
     },
     {
-      "source": "infra_util_urlutil_query",
+      "source": "infra_util_url_query",
       "target": "go_pkg_strings",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "import",
-      "source_file": "infra/util/urlutil/query.go",
+      "source_file": "infra/util/url/query.go",
       "source_location": "L8",
       "weight": 1.0
     },
@@ -35989,14 +35989,14 @@
       "weight": 1.0
     },
     {
-      "source": "infra_util_urlutil_query_hasqueryparameter",
+      "source": "infra_util_url_query_hasqueryparameter",
       "target": "go_type_net_url_values",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "parameter_type",
-      "source_file": "infra/util/urlutil/query.go",
+      "source_file": "infra/util/url/query.go",
       "source_location": "L14",
       "weight": 1.0
     },
@@ -48434,24 +48434,24 @@
       "weight": 1.0
     },
     {
-      "source": "infra_util_urlutil_query",
-      "target": "infra_util_urlutil_query_hasqueryparameter",
+      "source": "infra_util_url_query",
+      "target": "infra_util_url_query_hasqueryparameter",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "source_file": "infra/util/urlutil/query.go",
+      "source_file": "infra/util/url/query.go",
       "source_location": "L14",
       "weight": 1.0
     },
     {
-      "source": "infra_util_urlutil_query",
-      "target": "infra_util_urlutil_query_rawqueryhasparameter",
+      "source": "infra_util_url_query",
+      "target": "infra_util_url_query_rawqueryhasparameter",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "source_file": "infra/util/urlutil/query.go",
+      "source_file": "infra/util/url/query.go",
       "source_location": "L23",
       "weight": 1.0
     },
@@ -58755,5 +58755,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "5fb65f9c4322cb2c445033196325815be559327a"
+  "built_at_commit": "bc73d295130f3b5fe214f572bb6d9cb88ee81c25"
 }

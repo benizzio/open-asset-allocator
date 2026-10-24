@@ -15,7 +15,7 @@ import (
 	"github.com/benizzio/open-asset-allocator/domain/service"
 	"github.com/benizzio/open-asset-allocator/infra"
 	gininfra "github.com/benizzio/open-asset-allocator/infra/gin"
-	"github.com/benizzio/open-asset-allocator/infra/util/urlutil"
+	urlinfra "github.com/benizzio/open-asset-allocator/infra/util/url"
 	"github.com/benizzio/open-asset-allocator/infra/validation"
 	"github.com/benizzio/open-asset-allocator/langext"
 )
@@ -84,7 +84,7 @@ func (controller *PortfolioAllocationRESTController) buildPortfolioAllocationHis
 	if !isPaginated {
 		return controller.buildPortfolioAllocationHistoryListResponse(portfolioId, observationTimestampId)
 	}
-	if urlutil.HasQueryParameter(context.Request.URL.Query(), observationTimestampIdParam) {
+	if urlinfra.HasQueryParameter(context.Request.URL.Query(), observationTimestampIdParam) {
 		respondWithPaginationCursorValidationError(context, "cannot be combined with observationTimestampId")
 		return nil, nil
 	}

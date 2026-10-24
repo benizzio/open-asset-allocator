@@ -1,9 +1,7 @@
-# Graph Report - go  (2026-10-24)
+# Graph Report - go  (2026-10-25)
 
 ## Corpus Check
-- 130 files · ~73,246 words
-- Verdict: corpus is large enough that graph structure adds value.
-- Unclassified: 2 file(s) not represented in the graph (top: .toml 1, (none) 1)
+- cluster-only mode — file stats not available
 
 ## Summary
 - 1226 nodes · 3844 edges · 64 communities (54 shown, 10 thin omitted)
@@ -11,7 +9,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `5fb65f9c`
+- Built from commit: `bc73d295`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -87,20 +85,20 @@
 6. `Asset` - 30 edges
 7. `ExecuteDBQuery()` - 29 edges
 8. `IsZeroValue()` - 29 edges
-9. `PortfolioObservationTimestamp` - 27 edges
-10. `PortfolioAllocationDomService` - 27 edges
+9. `NewMapTree()` - 27 edges
+10. `PortfolioObservationTimestamp` - 27 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `appendLevelDescription()` --references--> `CustomSlice`  [EXTRACTED]
-  domain/service/allocation_plan_domain_service.go → langext/golang_ext_custom_slice.go
 - `ValueJsonColumn()` --calls--> `IsNilPointer()`  [EXTRACTED]
   infra/rdbms/sqlext/sqlext_utils.go → langext/golang_ext_util.go
-- `AllocationPlanRESTController` --references--> `AllocationPlanManagementAppService`  [EXTRACTED]
-  api/rest/allocation_plan_controller.go → application/allocation_plan_management_service.go
-- `AllocationPlanRESTController` --references--> `AllocationPlanDomService`  [EXTRACTED]
-  api/rest/allocation_plan_controller.go → domain/service/allocation_plan_domain_service.go
+- `appendLevelDescription()` --references--> `CustomSlice`  [EXTRACTED]
+  domain/service/allocation_plan_domain_service.go → langext/golang_ext_custom_slice.go
 - `validateAllocationPlanPlannedDate()` --calls--> `BuildCustomValidationErrorsBuilder()`  [EXTRACTED]
   api/rest/allocation_plan_controller.go → infra/validation/custom_validation_error_builder.go
+- `MapToAssetDTS()` --references--> `Asset`  [EXTRACTED]
+  api/rest/model/asset_rest_model.go → domain/asset.go
+- `MapToAssetDTS()` --calls--> `ParseableInt64`  [EXTRACTED]
+  api/rest/model/asset_rest_model.go → langext/golang_ext_parseable_int64.go
 
 ## Import Cycles
 - None detected.
@@ -324,7 +322,7 @@ Cohesion: 0.47
 Nodes (4): appendAssetTextSearchPhrase(), appendAssetTextSearchTerms(), parseAssetTextSearch(), TestParseAssetTextSearch()
 
 ## Knowledge Gaps
-- **17 isolated node(s):** `AssetSearchQueryDTS`, `ExternalAssetSearchQueryDTS`, `ErrorResponse`, `paginationCursorValidationDTS`, `contextKey` (+12 more)
+- **17 isolated node(s):** `malformedQueryBindingTarget`, `MapIterator`, `contextKey`, `contextKey`, `AssetSearchQueryDTS` (+12 more)
   These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 100 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **10 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -332,14 +330,14 @@ Nodes (4): appendAssetTextSearchPhrase(), appendAssetTextSearchTerms(), parseAss
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `App` connect `App` to `Adapter`, `go_pkg_fmt`, `.buildAppComponents`, `reflect.Type`, `go_pkg_github_com_benizzio_open_asset_allocator_langext`, `Configuration`, `go_pkg_time`, `portfolio_allocation_controller.go`, `infra.go`, `GinServer`?**
-  _High betweenness centrality (0.058) - this node is a cross-community bridge._
+  _High betweenness centrality (0.056) - this node is a cross-community bridge._
+- **Why does `GinServer` connect `GinServer` to `App`, `go_pkg_fmt`, `Configuration`?**
+  _High betweenness centrality (0.034) - this node is a cross-community bridge._
 - **Why does `Asset` connect `PropagateAsAppErrorWithNewMessage` to `github.com/gin-gonic/gin.Context`, `portfolio_observation_ownership_migration_integration_test.go`, `PortfolioAllocation`, `mapPortfolioAllocationRows`, `ExecuteDBQuery`, `AllocationPlan`, `.buildAppComponents`, `error.go`, `asset_rest_model.go`, `parseAssetTextSearch`?**
-  _High betweenness centrality (0.040) - this node is a cross-community bridge._
-- **Why does `Adapter` connect `Adapter` to `context.Context`, `App`, `go_pkg_fmt`, `Configuration`?**
-  _High betweenness centrality (0.033) - this node is a cross-community bridge._
+  _High betweenness centrality (0.032) - this node is a cross-community bridge._
 - **Are the 88 inferred relationships involving `deferCloseResponseBody()` (e.g. with `TestAllocationPlanReadsOrderByPlannedDateAndId()` and `TestGetAllocationPlans()`) actually correct?**
   _`deferCloseResponseBody()` has 88 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `AssetSearchQueryDTS`, `ExternalAssetSearchQueryDTS`, `ErrorResponse` to the rest of the system?**
+- **What connects `malformedQueryBindingTarget`, `MapIterator`, `contextKey` to the rest of the system?**
   _17 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `github.com/gin-gonic/gin.Context` be split into smaller, more focused modules?**
   _Cohesion score 0.13213213213213212 - nodes in this community are weakly interconnected._

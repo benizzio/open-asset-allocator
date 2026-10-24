@@ -14,7 +14,7 @@ import (
 
 	"github.com/benizzio/open-asset-allocator/domain"
 	gininfra "github.com/benizzio/open-asset-allocator/infra/gin"
-	"github.com/benizzio/open-asset-allocator/infra/util/urlutil"
+	urlinfra "github.com/benizzio/open-asset-allocator/infra/util/url"
 	"github.com/benizzio/open-asset-allocator/infra/validation"
 )
 
@@ -64,7 +64,7 @@ func readPaginationCursor(
 ) (*parsedPaginationCursor, bool) {
 	valuesByKey, queryError := url.ParseQuery(context.Request.URL.RawQuery)
 	values, present := valuesByKey[paginationCursorQueryKey]
-	if queryError != nil && urlutil.RawQueryHasParameter(context.Request.URL.RawQuery, paginationCursorQueryKey) {
+	if queryError != nil && urlinfra.RawQueryHasParameter(context.Request.URL.RawQuery, paginationCursorQueryKey) {
 		respondWithPaginationCursorValidationError(context, "must be URL-encoded")
 		return nil, true
 	}
