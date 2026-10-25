@@ -2861,7 +2861,7 @@
       "file_type": "code",
       "norm_label": "classifyobservationwriteerror()",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L608"
+      "source_location": "L609"
     },
     {
       "id": "domain_infra_repository_portfolio_allocation_repository_rdbms_prepareportfolioallocationtempinserts",
@@ -2872,7 +2872,7 @@
       "file_type": "code",
       "norm_label": "prepareportfolioallocationtempinserts()",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L465"
+      "source_location": "L466"
     },
     {
       "id": "domain_portfolio_allocation_go_domain_portfolioobservationtimestamp",
@@ -2960,7 +2960,7 @@
       "file_type": "code",
       "norm_label": ".findandlockobservationtimestampintransaction()",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L630"
+      "source_location": "L631"
     },
     {
       "id": "repository_portfolioallocationrdbmsrepository_insertobservationtimestampintransaction",
@@ -2971,7 +2971,7 @@
       "file_type": "code",
       "norm_label": ".insertobservationtimestampintransaction()",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L519"
+      "source_location": "L520"
     },
     {
       "id": "repository_portfolioallocationrdbmsrepository_insertportfolioallocationsintemptable",
@@ -2982,7 +2982,7 @@
       "file_type": "code",
       "norm_label": ".insertportfolioallocationsintemptable()",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L430"
+      "source_location": "L431"
     },
     {
       "id": "repository_portfolioallocationrdbmsrepository_mergeportfolioallocations",
@@ -2993,7 +2993,7 @@
       "file_type": "code",
       "norm_label": ".mergeportfolioallocations()",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L498"
+      "source_location": "L499"
     },
     {
       "id": "repository_portfolioallocationrdbmsrepository_mergeportfolioallocationsintransaction",
@@ -3004,7 +3004,7 @@
       "file_type": "code",
       "norm_label": ".mergeportfolioallocationsintransaction()",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L403"
+      "source_location": "L404"
     },
     {
       "id": "repository_portfolioallocationrdbmsrepository_updateobservationtimestampintransaction",
@@ -3015,7 +3015,7 @@
       "file_type": "code",
       "norm_label": ".updateobservationtimestampintransaction()",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L561"
+      "source_location": "L562"
     },
     {
       "id": "service_portfolioallocationdomservice_createobservationtimestampintransaction",
@@ -8110,7 +8110,7 @@
       "file_type": "code",
       "norm_label": "buildportfolioallocationrepository()",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L656"
+      "source_location": "L657"
     },
     {
       "id": "domain_infra_repository_portfolio_repository_rdbms_buildportfoliorepository",
@@ -10852,15 +10852,15 @@
       "source_location": "L308"
     },
     {
-      "id": "domain_infra_repository_portfolio_allocation_repository_rdbms_buildportfolioallocationhistorypage",
-      "label": "buildPortfolioAllocationHistoryPage()",
+      "id": "domain_infra_repository_portfolio_allocation_repository_rdbms_buildportfolioallocationsbyobservationpage",
+      "label": "buildPortfolioAllocationsByObservationPage()",
       "_origin": "ast",
       "community": 57,
       "community_name": "ObservationPageCursor",
       "file_type": "code",
-      "norm_label": "buildportfolioallocationhistorypage()",
+      "norm_label": "buildportfolioallocationsbyobservationpage()",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L370"
+      "source_location": "L371"
     },
     {
       "id": "domain_infra_repository_portfolio_allocation_repository_rdbms_buildportfolioobservationpage",
@@ -10929,15 +10929,15 @@
       "source_location": "L269"
     },
     {
-      "id": "repository_portfolioallocationrdbmsrepository_findportfolioallocationhistorypage",
-      "label": ".FindPortfolioAllocationHistoryPage()",
+      "id": "repository_portfolioallocationrdbmsrepository_findportfolioallocationsbyobservationpage",
+      "label": ".FindPortfolioAllocationsByObservationPage()",
       "_origin": "ast",
       "community": 57,
       "community_name": "ObservationPageCursor",
       "file_type": "code",
-      "norm_label": ".findportfolioallocationhistorypage()",
+      "norm_label": ".findportfolioallocationsbyobservationpage()",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L345"
+      "source_location": "L346"
     },
     {
       "id": "repository_portfolioallocationrdbmsrepository_queryavailableobservationtimestampspage",
@@ -10962,13 +10962,13 @@
       "source_location": "L49"
     },
     {
-      "id": "service_portfolioallocationdomservice_getportfolioallocationhistorypage",
-      "label": ".GetPortfolioAllocationHistoryPage()",
+      "id": "service_portfolioallocationdomservice_getportfolioallocationsbyobservationpage",
+      "label": ".GetPortfolioAllocationsByObservationPage()",
       "_origin": "ast",
       "community": 57,
       "community_name": "ObservationPageCursor",
       "file_type": "code",
-      "norm_label": ".getportfolioallocationhistorypage()",
+      "norm_label": ".getportfolioallocationsbyobservationpage()",
       "source_file": "domain/service/portfolio_allocation_domain_service.go",
       "source_location": "L59"
     },
@@ -15289,7 +15289,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L609",
+      "source_location": "L610",
       "weight": 1.0
     },
     {
@@ -15301,7 +15301,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L610",
+      "source_location": "L611",
       "weight": 1.0
     },
     {
@@ -15313,7 +15313,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L617",
+      "source_location": "L618",
       "weight": 1.0
     },
     {
@@ -21025,7 +21025,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L634",
+      "source_location": "L635",
       "weight": 1.0
     },
     {
@@ -21037,7 +21037,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L636",
+      "source_location": "L637",
       "weight": 1.0
     },
     {
@@ -21049,7 +21049,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L649",
+      "source_location": "L650",
       "weight": 1.0
     },
     {
@@ -21113,7 +21113,7 @@
       "weight": 1.0
     },
     {
-      "source": "repository_portfolioallocationrdbmsrepository_findportfolioallocationhistorypage",
+      "source": "repository_portfolioallocationrdbmsrepository_findportfolioallocationsbyobservationpage",
       "target": "domain_infra_repository_portfolio_allocation_repository_rdbms_addobservationcursorfilter",
       "relation": "calls",
       "_origin": "ast",
@@ -21121,11 +21121,11 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L355",
+      "source_location": "L356",
       "weight": 1.0
     },
     {
-      "source": "repository_portfolioallocationrdbmsrepository_findportfolioallocationhistorypage",
+      "source": "repository_portfolioallocationrdbmsrepository_findportfolioallocationsbyobservationpage",
       "target": "infra_error_propagateasapperrorwithnewmessage",
       "relation": "calls",
       "_origin": "ast",
@@ -21133,19 +21133,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L359",
+      "source_location": "L360",
       "weight": 1.0
     },
     {
-      "source": "repository_portfolioallocationrdbmsrepository_findportfolioallocationhistorypage",
-      "target": "domain_infra_repository_portfolio_allocation_repository_rdbms_buildportfolioallocationhistorypage",
+      "source": "repository_portfolioallocationrdbmsrepository_findportfolioallocationsbyobservationpage",
+      "target": "domain_infra_repository_portfolio_allocation_repository_rdbms_buildportfolioallocationsbyobservationpage",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L363",
+      "source_location": "L364",
       "weight": 1.0
     },
     {
@@ -21169,7 +21169,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L525",
+      "source_location": "L526",
       "weight": 1.0
     },
     {
@@ -21181,7 +21181,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L527",
+      "source_location": "L528",
       "weight": 1.0
     },
     {
@@ -21193,7 +21193,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L539",
+      "source_location": "L540",
       "weight": 1.0
     },
     {
@@ -21205,7 +21205,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L542",
+      "source_location": "L543",
       "weight": 1.0
     },
     {
@@ -21217,7 +21217,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L439",
+      "source_location": "L440",
       "weight": 1.0
     },
     {
@@ -21229,7 +21229,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L447",
+      "source_location": "L448",
       "weight": 1.0
     },
     {
@@ -21241,7 +21241,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L509",
+      "source_location": "L510",
       "weight": 1.0
     },
     {
@@ -21253,7 +21253,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L410",
+      "source_location": "L411",
       "weight": 1.0
     },
     {
@@ -21265,7 +21265,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L412",
+      "source_location": "L413",
       "weight": 1.0
     },
     {
@@ -21277,7 +21277,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L422",
+      "source_location": "L423",
       "weight": 1.0
     },
     {
@@ -21289,7 +21289,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L427",
+      "source_location": "L428",
       "weight": 1.0
     },
     {
@@ -21337,7 +21337,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L566",
+      "source_location": "L567",
       "weight": 1.0
     },
     {
@@ -21349,7 +21349,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L568",
+      "source_location": "L569",
       "weight": 1.0
     },
     {
@@ -21361,7 +21361,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L580",
+      "source_location": "L581",
       "weight": 1.0
     },
     {
@@ -21373,7 +21373,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L583",
+      "source_location": "L584",
       "weight": 1.0
     },
     {
@@ -35765,18 +35765,6 @@
       "weight": 1.0
     },
     {
-      "source": "domain_infra_repository_portfolio_allocation_repository_rdbms_buildportfolioallocationhistorypage",
-      "target": "domain_portfolio_allocation_go_domain_portfolioallocation",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "parameter_type",
-      "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L370",
-      "weight": 1.0
-    },
-    {
       "source": "domain_infra_repository_portfolio_allocation_repository_rdbms_buildportfolioallocationrepository",
       "target": "infra_rdbms_rdbms_adapter_go_rdbms_repositoryrdbmsadapter",
       "relation": "references",
@@ -35785,7 +35773,19 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L656",
+      "source_location": "L657",
+      "weight": 1.0
+    },
+    {
+      "source": "domain_infra_repository_portfolio_allocation_repository_rdbms_buildportfolioallocationsbyobservationpage",
+      "target": "domain_portfolio_allocation_go_domain_portfolioallocation",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "parameter_type",
+      "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
+      "source_location": "L371",
       "weight": 1.0
     },
     {
@@ -35809,7 +35809,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L465",
+      "source_location": "L466",
       "weight": 1.0
     },
     {
@@ -40909,7 +40909,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L630",
+      "source_location": "L631",
       "weight": 1.0
     },
     {
@@ -40925,7 +40925,7 @@
       "weight": 1.0
     },
     {
-      "source": "repository_portfolioallocationrdbmsrepository_findportfolioallocationhistorypage",
+      "source": "repository_portfolioallocationrdbmsrepository_findportfolioallocationsbyobservationpage",
       "target": "domain_portfolio_allocation_go_domain_observationpagecursor",
       "relation": "references",
       "_origin": "ast",
@@ -40933,7 +40933,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L345",
+      "source_location": "L346",
       "weight": 1.0
     },
     {
@@ -40945,7 +40945,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L519",
+      "source_location": "L520",
       "weight": 1.0
     },
     {
@@ -40957,7 +40957,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L430",
+      "source_location": "L431",
       "weight": 1.0
     },
     {
@@ -40969,7 +40969,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L430",
+      "source_location": "L431",
       "weight": 1.0
     },
     {
@@ -40981,7 +40981,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L498",
+      "source_location": "L499",
       "weight": 1.0
     },
     {
@@ -40993,7 +40993,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L498",
+      "source_location": "L499",
       "weight": 1.0
     },
     {
@@ -41005,7 +41005,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L403",
+      "source_location": "L404",
       "weight": 1.0
     },
     {
@@ -41017,7 +41017,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L403",
+      "source_location": "L404",
       "weight": 1.0
     },
     {
@@ -41029,7 +41029,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L403",
+      "source_location": "L404",
       "weight": 1.0
     },
     {
@@ -41053,7 +41053,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L561",
+      "source_location": "L562",
       "weight": 1.0
     },
     {
@@ -41065,7 +41065,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L561",
+      "source_location": "L562",
       "weight": 1.0
     },
     {
@@ -41861,7 +41861,7 @@
       "weight": 1.0
     },
     {
-      "source": "service_portfolioallocationdomservice_getportfolioallocationhistorypage",
+      "source": "service_portfolioallocationdomservice_getportfolioallocationsbyobservationpage",
       "target": "domain_portfolio_allocation_go_domain_observationpagecursor",
       "relation": "references",
       "_origin": "ast",
@@ -43205,18 +43205,6 @@
       "weight": 1.0
     },
     {
-      "source": "domain_infra_repository_portfolio_allocation_repository_rdbms_buildportfolioallocationhistorypage",
-      "target": "domain_portfolio_allocation_go_domain_portfolioallocationhistorypage",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "return_type",
-      "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L370",
-      "weight": 1.0
-    },
-    {
       "source": "domain_infra_repository_portfolio_allocation_repository_rdbms_buildportfolioallocationrepository",
       "target": "repository_portfolioallocationrdbmsrepository",
       "relation": "references",
@@ -43225,7 +43213,19 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L656",
+      "source_location": "L657",
+      "weight": 1.0
+    },
+    {
+      "source": "domain_infra_repository_portfolio_allocation_repository_rdbms_buildportfolioallocationsbyobservationpage",
+      "target": "domain_portfolio_allocation_go_domain_portfolioallocationhistorypage",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "return_type",
+      "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
+      "source_location": "L371",
       "weight": 1.0
     },
     {
@@ -44845,7 +44845,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L630",
+      "source_location": "L631",
       "weight": 1.0
     },
     {
@@ -44873,7 +44873,7 @@
       "weight": 1.0
     },
     {
-      "source": "repository_portfolioallocationrdbmsrepository_findportfolioallocationhistorypage",
+      "source": "repository_portfolioallocationrdbmsrepository_findportfolioallocationsbyobservationpage",
       "target": "domain_portfolio_allocation_go_domain_portfolioallocationhistorypage",
       "relation": "references",
       "_origin": "ast",
@@ -44881,7 +44881,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L345",
+      "source_location": "L346",
       "weight": 1.0
     },
     {
@@ -44905,7 +44905,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L519",
+      "source_location": "L520",
       "weight": 1.0
     },
     {
@@ -45425,7 +45425,7 @@
       "weight": 1.0
     },
     {
-      "source": "service_portfolioallocationdomservice_getportfolioallocationhistorypage",
+      "source": "service_portfolioallocationdomservice_getportfolioallocationsbyobservationpage",
       "target": "domain_portfolio_allocation_go_domain_portfolioallocationhistorypage",
       "relation": "references",
       "_origin": "ast",
@@ -47771,13 +47771,13 @@
     },
     {
       "source": "domain_infra_repository_portfolio_allocation_repository_rdbms",
-      "target": "domain_infra_repository_portfolio_allocation_repository_rdbms_buildportfolioallocationhistorypage",
+      "target": "domain_infra_repository_portfolio_allocation_repository_rdbms_buildportfolioallocationsbyobservationpage",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L370",
+      "source_location": "L371",
       "weight": 1.0
     },
     {
@@ -47788,7 +47788,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L465",
+      "source_location": "L466",
       "weight": 1.0
     },
     {
@@ -47799,7 +47799,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L608",
+      "source_location": "L609",
       "weight": 1.0
     },
     {
@@ -47810,7 +47810,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L656",
+      "source_location": "L657",
       "weight": 1.0
     },
     {
@@ -54184,7 +54184,7 @@
     },
     {
       "source": "domain_service_portfolio_allocation_domain_service_go_service_portfolioallocationdomservice",
-      "target": "service_portfolioallocationdomservice_getportfolioallocationhistorypage",
+      "target": "service_portfolioallocationdomservice_getportfolioallocationsbyobservationpage",
       "relation": "method",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -55515,13 +55515,13 @@
     },
     {
       "source": "repository_portfolioallocationrdbmsrepository",
-      "target": "repository_portfolioallocationrdbmsrepository_findportfolioallocationhistorypage",
+      "target": "repository_portfolioallocationrdbmsrepository_findportfolioallocationsbyobservationpage",
       "relation": "method",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L345",
+      "source_location": "L346",
       "weight": 1.0
     },
     {
@@ -55532,7 +55532,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L403",
+      "source_location": "L404",
       "weight": 1.0
     },
     {
@@ -55543,7 +55543,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L430",
+      "source_location": "L431",
       "weight": 1.0
     },
     {
@@ -55554,7 +55554,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L498",
+      "source_location": "L499",
       "weight": 1.0
     },
     {
@@ -55565,7 +55565,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L519",
+      "source_location": "L520",
       "weight": 1.0
     },
     {
@@ -55576,7 +55576,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L561",
+      "source_location": "L562",
       "weight": 1.0
     },
     {
@@ -55587,7 +55587,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L630",
+      "source_location": "L631",
       "weight": 1.0
     },
     {
@@ -59690,7 +59690,7 @@
       "weight": 1.0
     },
     {
-      "source": "repository_portfolioallocationrdbmsrepository_findportfolioallocationhistorypage",
+      "source": "repository_portfolioallocationrdbmsrepository_findportfolioallocationsbyobservationpage",
       "target": "domain_infra_repository_portfolio_allocation_repository_model_mapportfolioallocationrows",
       "relation": "calls",
       "_origin": "ast",
@@ -59698,7 +59698,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "domain/infra/repository/portfolio_allocation_repository_rdbms.go",
-      "source_location": "L362",
+      "source_location": "L363",
       "weight": 1.0
     },
     {
@@ -59833,5 +59833,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "0916888e8adc9624aa5e0d71191b40cfb4f3a093"
+  "built_at_commit": "177bf273f80226facfb839e48d0c491ac38708bb"
 }

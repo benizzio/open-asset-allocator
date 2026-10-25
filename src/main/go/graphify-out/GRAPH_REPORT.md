@@ -1,7 +1,7 @@
 # Graph Report - go  (2026-11-01)
 
 ## Corpus Check
-- 132 files · ~74,691 words
+- 132 files · ~74,714 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 2 file(s) not represented in the graph (top: .toml 1, (none) 1)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `0916888e`
+- Built from commit: `177bf273`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -275,7 +275,7 @@ Nodes (3): ForeignKeyConstraintViolationError, ClassifyForeignKeyViolation(), Un
 
 ### Community 57 - "ObservationPageCursor"
 Cohesion: 0.30
-Nodes (7): addObservationCursorFilter(), buildPortfolioAllocationHistoryPage(), buildPortfolioObservationPage(), T, ObservationPageCursor, PortfolioAllocationHistoryPage, PortfolioObservationPage
+Nodes (7): addObservationCursorFilter(), buildPortfolioAllocationsByObservationPage(), buildPortfolioObservationPage(), T, ObservationPageCursor, PortfolioAllocationHistoryPage, PortfolioObservationPage
 
 ### Community 59 - "pagination_cursor.go"
 Cohesion: 0.15
@@ -297,10 +297,10 @@ Nodes (3): CustomSlice[T], T, joinAny()
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `App` connect `App` to `.buildAppComponents`, `reflect.Type`, `go_pkg_fmt`, `go_pkg_net_http`, `go_pkg_testing`, `go_pkg_github_com_golang_glog`, `infra.go`, `Adapter`, `go_pkg_github_com_benizzio_open_asset_allocator_langext`?**
-  _High betweenness centrality (0.057) - this node is a cross-community bridge._
 - **Why does `Adapter` connect `Adapter` to `T`, `SQLTransactionalContext`, `go_pkg_strings`, `testing.T`, `App`?**
-  _High betweenness centrality (0.056) - this node is a cross-community bridge._
+  _High betweenness centrality (0.054) - this node is a cross-community bridge._
+- **Why does `App` connect `App` to `.buildAppComponents`, `reflect.Type`, `go_pkg_fmt`, `go_pkg_net_http`, `go_pkg_testing`, `go_pkg_github_com_golang_glog`, `infra.go`, `Adapter`, `go_pkg_github_com_benizzio_open_asset_allocator_langext`?**
+  _High betweenness centrality (0.047) - this node is a cross-community bridge._
 - **Why does `Asset` connect `PropagateAsAppErrorWithNewMessage` to `IsZeroValue`, `PortfolioAllocation`, `asset_rest_model.go`, `BuildCleanupFunctionBuilder`, `AssetDomService`, `AllocationPlan`, `Adapter`?**
   _High betweenness centrality (0.035) - this node is a cross-community bridge._
 - **Are the 88 inferred relationships involving `deferCloseResponseBody()` (e.g. with `TestAllocationPlanReadsOrderByPlannedDateAndId()` and `TestGetAllocationPlans()`) actually correct?**
