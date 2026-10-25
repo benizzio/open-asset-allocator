@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -101,11 +100,11 @@ func (controller *AllocationPlanRESTController) buildPaginatedAllocationPlansRes
 		portfolioId, planType, allocationPlanCursorFromPayload(cursor),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("getting paginated allocation plans: %w", err)
+		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "getting paginated allocation plans", controller)
 	}
 	nextCursor, err := encodeAllocationPlanPaginationCursor(portfolioId, planType.String(), page.NextCursor)
 	if err != nil {
-		return nil, fmt.Errorf("encoding next allocation-plan cursor: %w", err)
+		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "encoding next allocation-plan cursor", controller)
 	}
 	return &model.PaginatedResponse[*model.AllocationPlanDTS]{
 		Items:      model.MapToAllocationPlanDTSs(page.Items),

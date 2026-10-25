@@ -2,7 +2,6 @@ package rest
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -100,7 +99,9 @@ func readHistoryObservationTimestampId(context *gin.Context) (int64, error) {
 	}
 	var id, err = langext.ParseInt64(value)
 	if err != nil {
-		return 0, fmt.Errorf("%s: %w", getObservationTimestampIdErrorMessage, err)
+		return 0, infra.PropagateAsAppErrorWithNewMessage(
+			err, getObservationTimestampIdErrorMessage, readHistoryObservationTimestampId,
+		)
 	}
 	return id, nil
 }
@@ -114,7 +115,9 @@ func (controller *PortfolioAllocationRESTController) buildPortfolioAllocationHis
 	var history, err = controller.getPortfolioAllocationHistoryUpstack(portfolioId, observationTimestampId)
 	if err != nil {
 		if observationTimestampId != 0 {
-			return nil, fmt.Errorf("getting portfolio history for observation id %d: %w", observationTimestampId, err)
+			return nil, infra.PropagateAsAppErrorWithNewMessage(
+				err, "getting portfolio history for observation id "+strconv.FormatInt(observationTimestampId, 10), controller,
+			)
 		}
 		return nil, err
 	}
@@ -130,11 +133,11 @@ func (controller *PortfolioAllocationRESTController) buildPaginatedPortfolioAllo
 	var page, err = controller.portfolioAllocationDomService.
 		GetPortfolioAllocationHistoryPage(portfolioId, observationCursorFromPayload(cursor))
 	if err != nil {
-		return nil, fmt.Errorf("getting paginated portfolio history: %w", err)
+		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "getting paginated portfolio history", controller)
 	}
 	nextCursor, err := encodeObservationPaginationCursor(portfolioId, page.NextCursor)
 	if err != nil {
-		return nil, fmt.Errorf("encoding next portfolio-history cursor: %w", err)
+		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "encoding next portfolio-history cursor", controller)
 	}
 	return &model.PaginatedResponse[*model.PortfolioSnapshotDTS]{
 		Items:      model.AggregateAndMapToPortfolioHistoryDTSs(page.Allocations),
@@ -232,11 +235,11 @@ func (controller *PortfolioAllocationRESTController) buildPaginatedHistoryObserv
 	var page, err = controller.portfolioAllocationDomService.
 		GetAvailableObservationTimestampsPage(portfolioId, observationCursorFromPayload(cursor))
 	if err != nil {
-		return nil, fmt.Errorf("getting paginated observation timestamps: %w", err)
+		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "getting paginated observation timestamps", controller)
 	}
 	nextCursor, err := encodeObservationPaginationCursor(portfolioId, page.NextCursor)
 	if err != nil {
-		return nil, fmt.Errorf("encoding next observation cursor: %w", err)
+		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "encoding next observation cursor", controller)
 	}
 	return &model.PaginatedResponse[*model.PortfolioObservationTimestampDTS]{
 		Items:      model.MapToPortfolioObservationTimestampDTSs(page.Items),
