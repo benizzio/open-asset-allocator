@@ -288,11 +288,7 @@ func (repository *PortfolioAllocationRDBMSRepository) queryAvailableObservationT
 	).
 		AddWhereClauseAndParam("AND paot.portfolio_id = {:portfolioId}", "portfolioId", portfolioId).
 		AddParam("pageLimit", historicalReadLookaheadLimit)
-	if cursor != nil {
-		queryBuilder.AddWhereClause(
-			"AND (paot.observation_timestamp, paot.id) < ({:cursorTimestamp}, {:cursorId})",
-		).AddParam("cursorTimestamp", cursor.Timestamp).AddParam("cursorId", cursor.Id)
-	}
+	addObservationCursorFilter(queryBuilder, cursor)
 
 	var queryResult []domain.PortfolioObservationTimestamp
 	if err := queryBuilder.Build().FindInto(&queryResult); err != nil {
@@ -304,6 +300,20 @@ func (repository *PortfolioAllocationRDBMSRepository) queryAvailableObservationT
 	}
 
 	return queryResult, nil
+}
+
+// addObservationCursorFilter applies the shared keyset boundary when a continuation cursor is present.
+// Authored by: GPT-6.1 Sol
+func addObservationCursorFilter[T any](
+	queryBuilder *rdbms.QueryBuilder[T],
+	cursor *domain.ObservationPageCursor,
+) {
+	if cursor == nil {
+		return
+	}
+	queryBuilder.AddWhereClause(
+		"AND (paot.observation_timestamp, paot.id) < ({:cursorTimestamp}, {:cursorId})",
+	).AddParam("cursorTimestamp", cursor.Timestamp).AddParam("cursorId", cursor.Id)
 }
 
 // buildPortfolioObservationPage removes the look-ahead header and derives the last emitted boundary.
@@ -330,7 +340,7 @@ func buildPortfolioObservationPage(
 
 // FindPortfolioAllocationHistoryPage reads complete allocation rows for up to ten eligible observations.
 // For example, `repository.FindPortfolioAllocationHistoryPage(42, nil)` returns complete snapshots for the first page.
-// Authored by: OpenCode
+// Co-authored by: GPT-6.1 Sol and OpenCode
 func (repository *PortfolioAllocationRDBMSRepository) FindPortfolioAllocationHistoryPage(
 	portfolioId int64,
 	cursor *domain.ObservationPageCursor,
@@ -341,11 +351,7 @@ func (repository *PortfolioAllocationRDBMSRepository) FindPortfolioAllocationHis
 	).
 		AddWhereClauseAndParam("AND paot.portfolio_id = {:portfolioId}", "portfolioId", portfolioId).
 		AddParam("pageLimit", historicalReadLookaheadLimit)
-	if cursor != nil {
-		queryBuilder.AddWhereClause(
-			"AND (paot.observation_timestamp, paot.id) < ({:cursorTimestamp}, {:cursorId})",
-		).AddParam("cursorTimestamp", cursor.Timestamp).AddParam("cursorId", cursor.Id)
-	}
+	addObservationCursorFilter(queryBuilder, cursor)
 
 	var queryResult []portfolioAllocationJoinedRowDTS
 	if err := queryBuilder.Build().FindInto(&queryResult); err != nil {
