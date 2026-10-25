@@ -12,7 +12,7 @@ require (
 	github.com/moby/moby/api v1.56.1
 	github.com/nhatthm/httpmock v0.8.0
 	github.com/okhomin/gohashcode v0.0.0-20240711234613-532ff59abfa6
-	github.com/shopspring/decimal v1.5.0
+	github.com/shopspring/decimal v1.6.0
 	github.com/stretchr/testify v1.12.1
 	github.com/testcontainers/testcontainers-go v0.44.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.44.0
