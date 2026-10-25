@@ -105,7 +105,7 @@ func TestHistoricalReadPaginationIndexesHaveRepresentativeQueryPlans(t *testing.
 	assert.Contains(t, observationPlan, "portfolio_allocation_obs_time_page_idx")
 	assert.Contains(t, observationPlan, "portfolio_allocation_fact_observation_page_idx")
 
-	_, err = observations.FindPortfolioAllocationHistoryPage(portfolio.Id, observationCursor)
+	_, err = observations.FindPortfolioAllocationsByObservationPage(portfolio.Id, observationCursor)
 	require.NoError(t, err)
 	var historyPlan = explainPaginationQuery(t, takePaginationQuery(t))
 	t.Logf("Allocation-history production query plan:\n%s", historyPlan)

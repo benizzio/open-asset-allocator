@@ -128,7 +128,7 @@ func (controller *PortfolioAllocationRESTController) buildPaginatedPortfolioAllo
 	cursor *domain.ObservationPageCursor,
 ) (*model.PaginatedResponse[*model.PortfolioSnapshotDTS], error) {
 	var page, err = controller.portfolioAllocationDomService.
-		GetPortfolioAllocationHistoryPage(portfolioId, cursor)
+		GetPortfolioAllocationsByObservationPage(portfolioId, cursor)
 	if err != nil {
 		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "getting paginated portfolio history", controller)
 	}

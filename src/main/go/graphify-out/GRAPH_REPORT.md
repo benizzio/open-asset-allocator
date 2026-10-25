@@ -1,7 +1,7 @@
 # Graph Report - go  (2026-10-25)
 
 ## Corpus Check
-- 131 files · ~73,995 words
+- 131 files · ~74,018 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 2 file(s) not represented in the graph (top: .toml 1, (none) 1)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `4aff0ed3`
+- Built from commit: `bc31ce2e`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -294,7 +294,7 @@ Nodes (8): decodePaginationCursorPayload(), preparePortfolioAllocationTempInsert
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `App` connect `App` to `reflect.Type`, `.buildAppComponents`, `go_pkg_github_com_benizzio_open_asset_allocator_langext`, `go_pkg_github_com_benizzio_open_asset_allocator_infra`, `Adapter`, `go_pkg_context`, `infra_db.go`, `GinServer`?**
-  _High betweenness centrality (0.053) - this node is a cross-community bridge._
+  _High betweenness centrality (0.054) - this node is a cross-community bridge._
 - **Why does `Adapter` connect `Adapter` to `go_pkg_context`, `App`, `go_pkg_testing`?**
   _High betweenness centrality (0.041) - this node is a cross-community bridge._
 - **Why does `GinServer` connect `GinServer` to `go_pkg_context`, `App`?**

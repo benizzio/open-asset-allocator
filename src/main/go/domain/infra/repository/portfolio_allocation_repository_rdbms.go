@@ -338,10 +338,11 @@ func buildPortfolioObservationPage(
 	return page
 }
 
-// FindPortfolioAllocationHistoryPage reads complete allocation rows for up to ten eligible observations.
-// For example, `repository.FindPortfolioAllocationHistoryPage(42, nil)` returns complete snapshots for the first page.
+// FindPortfolioAllocationsByObservationPage reads complete allocations for a page of up to ten eligible observations.
+// For example, `repository.FindPortfolioAllocationsByObservationPage(42, nil)` reads complete allocations
+// for the first page of observations.
 // Co-authored by: GPT-6.1 Sol and OpenCode
-func (repository *PortfolioAllocationRDBMSRepository) FindPortfolioAllocationHistoryPage(
+func (repository *PortfolioAllocationRDBMSRepository) FindPortfolioAllocationsByObservationPage(
 	portfolioId int64,
 	cursor *domain.ObservationPageCursor,
 ) (*domain.PortfolioAllocationHistoryPage, error) {
@@ -359,14 +360,14 @@ func (repository *PortfolioAllocationRDBMSRepository) FindPortfolioAllocationHis
 	}
 
 	var allocations = mapPortfolioAllocationRows(queryResult)
-	var page = buildPortfolioAllocationHistoryPage(allocations)
+	var page = buildPortfolioAllocationsByObservationPage(allocations)
 	return page, nil
 }
 
-// buildPortfolioAllocationHistoryPage removes the complete look-ahead snapshot and uses the last emitted
+// buildPortfolioAllocationsByObservationPage removes the complete look-ahead snapshot and uses the last emitted
 // observation as the continuation boundary.
-// Authored by: OpenCode
-func buildPortfolioAllocationHistoryPage(
+// Co-authored by: GPT-6.1 Sol and OpenCode
+func buildPortfolioAllocationsByObservationPage(
 	allocations []*domain.PortfolioAllocation,
 ) *domain.PortfolioAllocationHistoryPage {
 	var page = &domain.PortfolioAllocationHistoryPage{

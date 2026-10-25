@@ -84,9 +84,10 @@ type PortfolioAllocationRepository interface {
 		portfolioId int64,
 		cursor *ObservationPageCursor,
 	) (*PortfolioObservationPage, error)
-	// FindPortfolioAllocationHistoryPage returns complete snapshots for up to ten observations.
+	// FindPortfolioAllocationsByObservationPage returns complete allocations for a page of up to ten observations.
 	// For example, pass nil for the first page and the last response's cursor for continuation.
-	FindPortfolioAllocationHistoryPage(
+	// Co-authored by: GPT-6.1 Sol and OpenCode
+	FindPortfolioAllocationsByObservationPage(
 		portfolioId int64,
 		cursor *ObservationPageCursor,
 	) (*PortfolioAllocationHistoryPage, error)
