@@ -11,8 +11,65 @@ import (
 	"github.com/benizzio/open-asset-allocator/langext"
 )
 
-// Co-authored by: GPT-6 Luna and benizzio
+// Co-authored by: GPT-6.1 Sol, GPT-6 Luna and benizzio
 const (
+	// portfolioAllocationProjectionSQL standardizes joined rows using pa, ass and paot aliases.
+	// Authored by: GPT-6.1 Sol
+	portfolioAllocationProjectionSQL = `
+		    pa.*,
+		    ass.id AS "asset.id",
+		    ass.ticker AS "asset.ticker",
+		    coalesce(ass.name, '') AS "asset.name",
+		    coalesce(ass.external_data #>> '{data,0,source}', '') AS selected_external_asset_source,
+		    coalesce(ass.external_data #>> '{data,0,ticker}', '') AS selected_external_asset_ticker,
+		    coalesce(ass.external_data #>> '{data,0,exchangeId}', '') AS selected_external_asset_exchange_id,
+		    paot.id AS "observation_timestamp.id",
+		    paot.portfolio_id AS "observation_timestamp.portfolio_id",
+		    coalesce(paot.observation_time_tag, '') AS "observation_timestamp.time_tag",
+		    paot.observation_timestamp AS "observation_timestamp.timestamp"
+	`
+	historicalReadPageSize       = 10
+	historicalReadLookaheadLimit = historicalReadPageSize + 1
+	availableObservationPageSQL  = `
+		WITH observation_page AS (
+			SELECT paot.id, paot.portfolio_id, paot.observation_time_tag AS time_tag,
+				paot.observation_timestamp AS "timestamp"
+			FROM portfolio_allocation_obs_time paot
+			` + rdbms.WhereClausePlaceholder + `
+			AND EXISTS (
+				SELECT 1 FROM portfolio_allocation_fact pa
+				WHERE pa.portfolio_id = paot.portfolio_id
+				  AND pa.observation_time_id = paot.id
+			)
+			ORDER BY paot.observation_timestamp DESC, paot.id DESC
+			LIMIT {:pageLimit}
+		)
+		SELECT id, portfolio_id, time_tag, "timestamp"
+		FROM observation_page
+		ORDER BY "timestamp" DESC, id DESC
+	`
+	portfolioAllocationHistoryPageSQL = `
+		WITH observation_page AS (
+			SELECT paot.id, paot.portfolio_id, paot.observation_time_tag, paot.observation_timestamp
+			FROM portfolio_allocation_obs_time paot
+			` + rdbms.WhereClausePlaceholder + `
+			AND EXISTS (
+				SELECT 1 FROM portfolio_allocation_fact eligible_fact
+				WHERE eligible_fact.portfolio_id = paot.portfolio_id
+				  AND eligible_fact.observation_time_id = paot.id
+			)
+			ORDER BY paot.observation_timestamp DESC, paot.id DESC
+			LIMIT {:pageLimit}
+		)
+		SELECT ` + portfolioAllocationProjectionSQL + `
+		FROM observation_page paot
+		JOIN portfolio_allocation_fact pa
+		  ON pa.portfolio_id = paot.portfolio_id
+		 AND pa.observation_time_id = paot.id
+		JOIN asset ass ON ass.id = pa.asset_id
+		ORDER BY paot.observation_timestamp DESC, paot.id DESC,
+			pa.class ASC, pa.cash_reserve DESC, pa.total_market_value DESC
+	`
 	availableObservationTimestampsSQL = `
 		SELECT DISTINCT paot.id, paot.portfolio_id, paot.observation_time_tag AS time_tag,
 			paot.observation_timestamp AS "timestamp"
@@ -35,18 +92,7 @@ const (
 			)
 	`
 	portfolioAllocationsSQL = `
-		SELECT
-		    pa.*,
-		    ass.id AS "asset.id",
-		    ass.ticker AS "asset.ticker",
-		    coalesce(ass.name, '') AS "asset.name",
-		    coalesce(ass.external_data #>> '{data,0,source}', '') AS selected_external_asset_source,
-		    coalesce(ass.external_data #>> '{data,0,ticker}', '') AS selected_external_asset_ticker,
-		    coalesce(ass.external_data #>> '{data,0,exchangeId}', '') AS selected_external_asset_exchange_id,
-		    paot.id AS "observation_timestamp.id",
-		    paot.portfolio_id AS "observation_timestamp.portfolio_id",
-		    coalesce(paot.observation_time_tag, '') AS "observation_timestamp.time_tag",
-		    paot.observation_timestamp AS "observation_timestamp.timestamp"
+		SELECT ` + portfolioAllocationProjectionSQL + `
 		FROM portfolio_allocation_fact pa
 		JOIN asset ass ON ass.id = pa.asset_id
 		JOIN portfolio_allocation_obs_time paot
@@ -214,6 +260,144 @@ func (repository *PortfolioAllocationRDBMSRepository) FindAvailableObservationTi
 	var result = langext.ToPointerSlice(queryResult)
 
 	return result, nil
+}
+
+// FindAvailableObservationTimestampsPage reads up to ten eligible observation headers in stable keyset order.
+// For example, `repository.FindAvailableObservationTimestampsPage(42, nil)` returns the first page for portfolio 42.
+// Co-authored by: GPT-6.1 Sol and OpenCode
+func (repository *PortfolioAllocationRDBMSRepository) FindAvailableObservationTimestampsPage(
+	portfolioId int64,
+	cursor *domain.ObservationPageCursor,
+) (*domain.PortfolioObservationPage, error) {
+	var observations, err = repository.queryAvailableObservationTimestampsPage(portfolioId, cursor)
+	if err != nil {
+		return nil, err
+	}
+	return buildPortfolioObservationPage(observations), nil
+}
+
+// queryAvailableObservationTimestampsPage reads eligible headers including one look-ahead observation.
+// Authored by: GPT-6.1 Sol
+func (repository *PortfolioAllocationRDBMSRepository) queryAvailableObservationTimestampsPage(
+	portfolioId int64,
+	cursor *domain.ObservationPageCursor,
+) ([]domain.PortfolioObservationTimestamp, error) {
+	var queryBuilder = rdbms.BuildQuery[domain.PortfolioObservationTimestamp](
+		repository.dbAdapter,
+		availableObservationPageSQL,
+	).
+		AddWhereClauseAndParam("AND paot.portfolio_id = {:portfolioId}", "portfolioId", portfolioId).
+		AddParam("pageLimit", historicalReadLookaheadLimit)
+	addObservationCursorFilter(queryBuilder, cursor)
+
+	var queryResult []domain.PortfolioObservationTimestamp
+	if err := queryBuilder.Build().FindInto(&queryResult); err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(
+			err,
+			queryObservationTimestampsError,
+			repository,
+		)
+	}
+
+	return queryResult, nil
+}
+
+// addObservationCursorFilter applies the shared keyset boundary when a continuation cursor is present.
+// Authored by: GPT-6.1 Sol
+func addObservationCursorFilter[T any](
+	queryBuilder *rdbms.QueryBuilder[T],
+	cursor *domain.ObservationPageCursor,
+) {
+	if cursor == nil {
+		return
+	}
+	queryBuilder.AddWhereClause(
+		"AND (paot.observation_timestamp, paot.id) < ({:cursorTimestamp}, {:cursorId})",
+	).AddParam("cursorTimestamp", cursor.Timestamp).AddParam("cursorId", cursor.Id)
+}
+
+// buildPortfolioObservationPage removes the look-ahead header and derives the last emitted boundary.
+// Authored by: GPT-6.1 Sol
+func buildPortfolioObservationPage(
+	observations []domain.PortfolioObservationTimestamp,
+) *domain.PortfolioObservationPage {
+	var hasMore = len(observations) > historicalReadPageSize
+	if hasMore {
+		observations = observations[:historicalReadPageSize]
+	}
+	var page = &domain.PortfolioObservationPage{
+		Items: langext.ToPointerSlice(observations),
+	}
+	if hasMore {
+		var lastObservation = observations[len(observations)-1]
+		page.NextCursor = &domain.ObservationPageCursor{
+			Timestamp: lastObservation.Timestamp,
+			Id:        lastObservation.Id,
+		}
+	}
+	return page
+}
+
+// FindPortfolioAllocationsByObservationPage reads complete allocations for a page of up to ten eligible observations.
+// For example, `repository.FindPortfolioAllocationsByObservationPage(42, nil)` reads complete allocations
+// for the first page of observations.
+// Co-authored by: GPT-6.1 Sol and OpenCode
+func (repository *PortfolioAllocationRDBMSRepository) FindPortfolioAllocationsByObservationPage(
+	portfolioId int64,
+	cursor *domain.ObservationPageCursor,
+) (*domain.PortfolioAllocationHistoryPage, error) {
+	var queryBuilder = rdbms.BuildQuery[portfolioAllocationJoinedRowDTS](
+		repository.dbAdapter,
+		portfolioAllocationHistoryPageSQL,
+	).
+		AddWhereClauseAndParam("AND paot.portfolio_id = {:portfolioId}", "portfolioId", portfolioId).
+		AddParam("pageLimit", historicalReadLookaheadLimit)
+	addObservationCursorFilter(queryBuilder, cursor)
+
+	var queryResult []portfolioAllocationJoinedRowDTS
+	if err := queryBuilder.Build().FindInto(&queryResult); err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(err, queryAllocationsError, repository)
+	}
+
+	var allocations = mapPortfolioAllocationRows(queryResult)
+	var page = buildPortfolioAllocationsByObservationPage(allocations)
+	return page, nil
+}
+
+// buildPortfolioAllocationsByObservationPage removes the complete look-ahead snapshot and uses the last emitted
+// observation as the continuation boundary.
+// Co-authored by: GPT-6.1 Sol and OpenCode
+func buildPortfolioAllocationsByObservationPage(
+	allocations []*domain.PortfolioAllocation,
+) *domain.PortfolioAllocationHistoryPage {
+	var page = &domain.PortfolioAllocationHistoryPage{
+		Allocations: make([]*domain.PortfolioAllocation, 0, len(allocations)),
+	}
+	var lastObservationId int64
+	var observationCount int
+	var hasMore bool
+	for _, portfolioAllocation := range allocations {
+		var observation = portfolioAllocation.ObservationTimestamp
+		if observation.Id != lastObservationId {
+			if observationCount == historicalReadPageSize {
+				hasMore = true
+				break
+			}
+			observationCount++
+			lastObservationId = observation.Id
+			if observationCount == historicalReadPageSize {
+				page.NextCursor = &domain.ObservationPageCursor{
+					Timestamp: observation.Timestamp,
+					Id:        observation.Id,
+				}
+			}
+		}
+		page.Allocations = append(page.Allocations, portfolioAllocation)
+	}
+	if !hasMore {
+		page.NextCursor = nil
+	}
+	return page
 }
 
 func (repository *PortfolioAllocationRDBMSRepository) MergePortfolioAllocationsInTransaction(

@@ -50,6 +50,22 @@ func (allocationPlan *AllocationPlan) AddDetail(detail *PlannedAllocation) {
 	allocationPlan.Details = append(allocationPlan.Details, detail)
 }
 
+// AllocationPlanPage contains complete plans and the boundary for the next descending planned-date/ID page.
+// For example, an empty Items slice and nil NextCursor represents a terminal empty page.
+// Co-authored by: GPT-6.1 Sol and OpenCode
+type AllocationPlanPage struct {
+	Items      []*AllocationPlan
+	NextCursor *AllocationPlanPageCursor
+}
+
+// AllocationPlanPageCursor identifies the last emitted plan in a descending planned-date/ID traversal.
+// For example, a repository can use `AllocationPlanPageCursor{PlannedDate: date, Id: 9}` as a keyset boundary.
+// Co-authored by: GPT-6.1 Sol and OpenCode
+type AllocationPlanPageCursor struct {
+	PlannedDate time.Time
+	Id          int64
+}
+
 // AllocationPlanRepository provides persistence operations used by the allocation plan domain service.
 // Co-authored by: GPT-6.1 Sol and benizzio
 type AllocationPlanRepository interface {
@@ -58,6 +74,13 @@ type AllocationPlanRepository interface {
 	// Authored by: GPT-6.1 Sol
 	FindAndLockAllocationPlanOwnershipInTransaction(context.Context, int64) (*AllocationPlanOwnership, error)
 	GetAllAllocationPlans(portfolioId int64, planType *allocation.PlanType) ([]*AllocationPlan, error)
+	// GetAllocationPlansPage returns complete plans of one type using a planned-date/ID boundary.
+	// For example, pass nil for the first page and the last response's cursor for continuation.
+	GetAllocationPlansPage(
+		portfolioId int64,
+		planType allocation.PlanType,
+		cursor *AllocationPlanPageCursor,
+	) (*AllocationPlanPage, error)
 	GetAllocationPlan(id int64) (*AllocationPlan, error)
 	GetAllAllocationPlanIdentifiers(
 		portfolioId int64,
