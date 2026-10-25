@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"sort"
+	"strings"
 	"testing"
 	"time"
 
@@ -142,6 +143,52 @@ func TestAllocationPlanPaginationCoversCardinalitiesAndLegacyReads(t *testing.T)
 	)
 	assert.Equal(t, http.StatusBadRequest, otherPortfolioResponse.StatusCode)
 	closePaginationResponse(t, otherPortfolioResponse)
+}
+
+// TestAllocationPlanPaginationPreservesVersionOneTokensAndRejectsForeignFields verifies old flat JSON tokens
+// still select the next plan and rejects observation fields even when their values are empty or null.
+// For example, run go test ./inttest -run TestAllocationPlanPaginationPreservesVersionOneTokensAndRejectsForeignFields.
+// Authored by: GPT-6.1 Sol
+func TestAllocationPlanPaginationPreservesVersionOneTokensAndRejectsForeignFields(t *testing.T) {
+	var fixture = createAllocationPlanPaginationFixture(t, 11)
+	var boundary = fixture.ordered[9]
+	var remaining = fixture.ordered[10]
+	var legacyPayload = fmt.Sprintf(
+		`{"version":1,"portfolioId":%d,"collection":"allocation-plans","plannedDate":%q,"id":%d,"planType":"ALLOCATION_PLAN"}`,
+		fixture.portfolio.Id, boundary.plannedDate.Format(time.DateOnly), boundary.id,
+	)
+	var legacyToken = base64.RawURLEncoding.EncodeToString([]byte(legacyPayload))
+	var page = getAllocationPlanPage(t, fixture.portfolio.Id, &legacyToken)
+	require.Len(t, page.Items, 1)
+	require.Len(t, page.Items[0].Details, 2)
+	for _, detail := range page.Items[0].Details {
+		require.Len(t, detail.HierarchicalId, 1)
+		require.NotNil(t, detail.HierarchicalId[0])
+	}
+	// Detail order is outside this cursor contract; normalize the projection before comparing JSON.
+	sort.Slice(page.Items[0].Details, func(left, right int) bool {
+		return *page.Items[0].Details[left].HierarchicalId[0] < *page.Items[0].Details[right].HierarchicalId[0]
+	})
+	var pageJSON, err = json.Marshal(page)
+	require.NoError(t, err)
+	assert.JSONEq(t, fmt.Sprintf(
+		`{"items":[{"id":%d,"name":%q,"type":"ALLOCATION_PLAN","plannedDate":%q,"details":[{"hierarchicalId":[%q]},{"hierarchicalId":[%q]}]}],"nextCursor":null}`,
+		remaining.id, remaining.name, remaining.plannedDate.Format(time.DateOnly),
+		remaining.name+"-first", remaining.name+"-second",
+	), string(pageJSON))
+
+	for _, foreignField := range []string{
+		`"timestamp":"2040-01-01T00:00:00Z"`, `"timestamp":""`, `"timestamp":null`,
+	} {
+		t.Run(foreignField, func(t *testing.T) {
+			var mixedPayload = strings.TrimSuffix(legacyPayload, "}") + "," + foreignField + "}"
+			var token = base64.RawURLEncoding.EncodeToString([]byte(mixedPayload))
+			var response = getPaginationResponse(
+				t, allocationPlanEndpoint(fixture.portfolio.Id)+"?pageCursor="+url.QueryEscape(token),
+			)
+			assertPaginationValidationResponse(t, response)
+		})
+	}
 }
 
 // createAllocationPlanPaginationFixture creates one isolated portfolio and the requested plans with tied dates.

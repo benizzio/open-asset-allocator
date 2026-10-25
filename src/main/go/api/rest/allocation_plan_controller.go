@@ -61,10 +61,9 @@ func (controller *AllocationPlanRESTController) buildAllocationPlansResponse(
 	portfolioId int64,
 ) (any, error) {
 	var planType = allocation.AssetAllocationPlan
-	var pageCursor, isPaginated = readPaginationCursor(
+	var pageCursor, isPaginated = readAllocationPlanPaginationCursor(
 		context,
 		portfolioId,
-		allocationPlanCollection,
 		planType.String(),
 	)
 	if context.IsAborted() {
@@ -94,10 +93,10 @@ func (controller *AllocationPlanRESTController) buildAllocationPlansListResponse
 func (controller *AllocationPlanRESTController) buildPaginatedAllocationPlansResponse(
 	portfolioId int64,
 	planType allocation.PlanType,
-	cursor *parsedPaginationCursor,
+	cursor *domain.AllocationPlanPageCursor,
 ) (*model.PaginatedResponse[*model.AllocationPlanDTS], error) {
 	var page, err = controller.allocationPlanService.GetAllocationPlansPage(
-		portfolioId, planType, allocationPlanCursorFromPayload(cursor),
+		portfolioId, planType, cursor,
 	)
 	if err != nil {
 		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "getting paginated allocation plans", controller)
@@ -110,15 +109,6 @@ func (controller *AllocationPlanRESTController) buildPaginatedAllocationPlansRes
 		Items:      model.MapToAllocationPlanDTSs(page.Items),
 		NextCursor: nextCursor,
 	}, nil
-}
-
-// allocationPlanCursorFromPayload converts a validated REST cursor into the allocation-plan domain boundary.
-// Authored by: OpenCode
-func allocationPlanCursorFromPayload(cursor *parsedPaginationCursor) *domain.AllocationPlanPageCursor {
-	if cursor == nil {
-		return nil
-	}
-	return &domain.AllocationPlanPageCursor{PlannedDate: cursor.PlannedDate, Id: cursor.Id}
 }
 
 // postAssetAllocationPlan validates the required plan date and persists the supplied plan details.
