@@ -1,12 +1,14 @@
 package inttest
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"sort"
+	"strings"
 	"testing"
 	"time"
 
@@ -148,6 +150,59 @@ func TestPortfolioObservationPaginationCoversCardinalitiesAndLegacyReads(t *test
 		),
 	)
 	assertPaginationValidationResponse(t, conflictingResponse)
+}
+
+// TestObservationPaginationPreservesVersionOneTokensAndRejectsForeignFields verifies old flat JSON tokens
+// against both observation endpoints and rejects plan fields even when their values are empty or null.
+// For example, run go test ./inttest -run TestObservationPaginationPreservesVersionOneTokensAndRejectsForeignFields.
+// Authored by: GPT-6.1 Sol
+func TestObservationPaginationPreservesVersionOneTokensAndRejectsForeignFields(t *testing.T) {
+	var fixture = createObservationPaginationFixture(t, 11)
+	var boundary = fixture.ordered[9]
+	var remaining = fixture.ordered[10]
+	var legacyPayload = fmt.Sprintf(
+		`{"version":1,"portfolioId":%d,"collection":"observations","timestamp":%q,"id":%d}`,
+		fixture.portfolio.Id, boundary.timestamp.UTC().Format(time.RFC3339Nano), boundary.id,
+	)
+	var legacyToken = base64.RawURLEncoding.EncodeToString([]byte(legacyPayload))
+	var headers = getObservationPage(t, fixture.portfolio.Id, &legacyToken)
+	var headersJSON, err = json.Marshal(headers)
+	require.NoError(t, err)
+	assert.JSONEq(t, fmt.Sprintf(
+		`{"items":[{"id":%d,"timeTag":%q,"timestamp":%q}],"nextCursor":null}`,
+		remaining.id, remaining.tag, remaining.timestamp.UTC().Format(time.RFC3339Nano),
+	), string(headersJSON))
+	var history = getHistoryPage(t, fixture.portfolio.Id, &legacyToken)
+	var historyJSON, historyError = json.Marshal(history)
+	require.NoError(t, historyError)
+	assert.JSONEq(t, fmt.Sprintf(
+		`{"items":[{"observationTimestamp":{"id":%d,"timeTag":%q,"timestamp":%q},"allocations":[{"totalMarketValue":"100"}],"totalMarketValue":"100"}],"nextCursor":null}`,
+		remaining.id, remaining.tag, remaining.timestamp.UTC().Format(time.RFC3339Nano),
+	), string(historyJSON))
+
+	for _, suffix := range []string{"history/observation", "history"} {
+		t.Run(suffix, func(t *testing.T) {
+			var endpoint = observationEndpoint(fixture.portfolio.Id, suffix) + "?pageCursor="
+			for _, foreignField := range []string{
+				`"plannedDate":"2040-05-15"`, `"plannedDate":""`, `"plannedDate":null`,
+				`"planType":"ALLOCATION_PLAN"`, `"planType":""`, `"planType":null`,
+			} {
+				t.Run(foreignField, func(t *testing.T) {
+					var mixedPayload = strings.TrimSuffix(legacyPayload, "}") + "," + foreignField + "}"
+					var token = base64.RawURLEncoding.EncodeToString([]byte(mixedPayload))
+					assertPaginationValidationResponse(t, getPaginationResponse(t, endpoint+url.QueryEscape(token)))
+				})
+			}
+			for _, token := range []string{
+				legacyToken + "=", legacyToken + "\n", strings.Repeat("A", 1025),
+				base64.RawURLEncoding.EncodeToString([]byte(legacyPayload + `{}`)),
+				base64.RawURLEncoding.EncodeToString([]byte(strings.Replace(legacyPayload, `"version":1`, `"version":2`, 1))),
+				base64.RawURLEncoding.EncodeToString([]byte(strings.Replace(legacyPayload, boundary.timestamp.UTC().Format(time.RFC3339Nano), "invalid", 1))),
+			} {
+				assertPaginationValidationResponse(t, getPaginationResponse(t, endpoint+url.QueryEscape(token)))
+			}
+		})
+	}
 }
 
 // createObservationPaginationFixture creates one portfolio and the requested observations with deterministic timestamps.

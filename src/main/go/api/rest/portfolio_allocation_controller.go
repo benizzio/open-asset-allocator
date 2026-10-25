@@ -71,12 +71,7 @@ func (controller *PortfolioAllocationRESTController) buildPortfolioAllocationHis
 	if err != nil {
 		return nil, err
 	}
-	var pageCursor, isPaginated = readPaginationCursor(
-		context,
-		portfolioId,
-		observationCursorCollection,
-		"",
-	)
+	var pageCursor, isPaginated = readObservationPaginationCursor(context, portfolioId)
 	if context.IsAborted() {
 		return nil, nil
 	}
@@ -116,7 +111,9 @@ func (controller *PortfolioAllocationRESTController) buildPortfolioAllocationHis
 	if err != nil {
 		if observationTimestampId != 0 {
 			return nil, infra.PropagateAsAppErrorWithNewMessage(
-				err, "getting portfolio history for observation id "+strconv.FormatInt(observationTimestampId, 10), controller,
+				err,
+				"getting portfolio history for observation id "+strconv.FormatInt(observationTimestampId, 10),
+				controller,
 			)
 		}
 		return nil, err
@@ -128,10 +125,10 @@ func (controller *PortfolioAllocationRESTController) buildPortfolioAllocationHis
 // Co-authored by: GPT-6.1 Sol and OpenCode
 func (controller *PortfolioAllocationRESTController) buildPaginatedPortfolioAllocationHistoryResponse(
 	portfolioId int64,
-	cursor *parsedPaginationCursor,
+	cursor *domain.ObservationPageCursor,
 ) (*model.PaginatedResponse[*model.PortfolioSnapshotDTS], error) {
 	var page, err = controller.portfolioAllocationDomService.
-		GetPortfolioAllocationHistoryPage(portfolioId, observationCursorFromPayload(cursor))
+		GetPortfolioAllocationHistoryPage(portfolioId, cursor)
 	if err != nil {
 		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "getting paginated portfolio history", controller)
 	}
@@ -165,15 +162,6 @@ func (controller *PortfolioAllocationRESTController) getPortfolioAllocationHisto
 	return portfolioHistory, err
 }
 
-// observationCursorFromPayload converts a validated REST cursor into the observation domain boundary.
-// Authored by: OpenCode
-func observationCursorFromPayload(cursor *parsedPaginationCursor) *domain.ObservationPageCursor {
-	if cursor == nil {
-		return nil
-	}
-	return &domain.ObservationPageCursor{Timestamp: cursor.Timestamp, Id: cursor.Id}
-}
-
 // getAvailableHistoryObservations returns the legacy summary list or an opt-in cursor page.
 // Co-authored by: GPT-6.1 Sol and OpenCode
 func (controller *PortfolioAllocationRESTController) getAvailableHistoryObservations(context *gin.Context) {
@@ -196,12 +184,7 @@ func (controller *PortfolioAllocationRESTController) buildAvailableHistoryObserv
 	context *gin.Context,
 	portfolioId int64,
 ) (any, error) {
-	var pageCursor, isPaginated = readPaginationCursor(
-		context,
-		portfolioId,
-		observationCursorCollection,
-		"",
-	)
+	var pageCursor, isPaginated = readObservationPaginationCursor(context, portfolioId)
 	if context.IsAborted() {
 		return nil, nil
 	}
@@ -230,10 +213,10 @@ func (controller *PortfolioAllocationRESTController) buildHistoryObservationsLis
 // Authored by: GPT-6.1 Sol
 func (controller *PortfolioAllocationRESTController) buildPaginatedHistoryObservationsResponse(
 	portfolioId int64,
-	cursor *parsedPaginationCursor,
+	cursor *domain.ObservationPageCursor,
 ) (*model.PaginatedResponse[*model.PortfolioObservationTimestampDTS], error) {
 	var page, err = controller.portfolioAllocationDomService.
-		GetAvailableObservationTimestampsPage(portfolioId, observationCursorFromPayload(cursor))
+		GetAvailableObservationTimestampsPage(portfolioId, cursor)
 	if err != nil {
 		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "getting paginated observation timestamps", controller)
 	}
