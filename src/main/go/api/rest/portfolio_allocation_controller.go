@@ -45,7 +45,7 @@ func (controller *PortfolioAllocationRESTController) BuildRoutes() []infra.RESTR
 }
 
 // getPortfolioAllocationHistory returns the legacy history list or an opt-in cursor page.
-// Co-authored by: GPT-6.1 Sol and OpenCode
+// Co-authored by: benizzio, GPT-6.1 Sol and OpenCode
 func (controller *PortfolioAllocationRESTController) getPortfolioAllocationHistory(context *gin.Context) {
 
 	var portfolioIdParamValue = context.Param(portfolioIdParam)
