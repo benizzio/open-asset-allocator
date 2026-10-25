@@ -9,12 +9,17 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/benizzio/open-asset-allocator/domain"
+	"github.com/benizzio/open-asset-allocator/domain/allocation"
+	"github.com/benizzio/open-asset-allocator/domain/infra/repository"
 	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
 	inttestutil "github.com/benizzio/open-asset-allocator/inttest/util"
 )
 
 // TestHistoricalReadPaginationIndexesHaveRepresentativeQueryPlans seeds enough records to inspect keyset index use.
-// Authored by: OpenCode
+// Run with go test -run TestHistoricalReadPaginationIndexesHaveRepresentativeQueryPlans ./inttest.
+// TODO: Remove this temporary, explicitly approved white-box EXPLAIN test at a later date.
+// Co-authored by: GPT-6.1 Sol and OpenCode
 func TestHistoricalReadPaginationIndexesHaveRepresentativeQueryPlans(t *testing.T) {
 	var portfolio = insertTestPortfolio(t, "PR 9 pagination query plan inspection")
 	t.Cleanup(
@@ -87,66 +92,50 @@ func TestHistoricalReadPaginationIndexesHaveRepresentativeQueryPlans(t *testing.
 		require.NoError(t, err)
 	}
 
-	var observationPlan = explainPaginationQuery(t, `
-		SELECT observation.id
-		FROM portfolio_allocation_obs_time observation
-		WHERE observation.portfolio_id = {:portfolioId}
-		  AND (observation.observation_timestamp, observation.id) <
-		      ({:cursorTimestamp}, {:cursorId})
-		  AND EXISTS (
-			SELECT 1 FROM portfolio_allocation_fact fact
-			WHERE fact.portfolio_id = observation.portfolio_id
-			  AND fact.observation_time_id = observation.id
-		  )
-		ORDER BY observation.observation_timestamp DESC, observation.id DESC
-		LIMIT 11`,
-		dbx.Params{
-			"portfolioId":     portfolio.Id,
-			"cursorTimestamp": "2040-01-01 01:40:00Z",
-			"cursorId":        0,
-		},
-	)
-	var allocationPlanPlan = explainPaginationQuery(t, `
-		SELECT plan.id
-		FROM allocation_plan plan
-		WHERE plan.portfolio_id = {:portfolioId}
-		  AND plan.type = 'ALLOCATION_PLAN'
-		  AND (plan.planned_date, plan.id) < ({:cursorDate}, {:cursorId})
-		  AND EXISTS (
-			SELECT 1 FROM planned_allocation detail WHERE detail.allocation_plan_id = plan.id
-		  )
-		ORDER BY plan.planned_date DESC, plan.id DESC
-		LIMIT 11`,
-		dbx.Params{
-			"portfolioId": portfolio.Id,
-			"cursorDate":  time.Date(2040, time.April, 10, 0, 0, 0, 0, time.UTC),
-			"cursorId":    0,
-		},
-	)
-	t.Logf("Observation keyset query plan:\n%s", observationPlan)
-	t.Logf("Allocation-plan keyset query plan:\n%s", allocationPlanPlan)
+	var adapter = buildPaginationCaptureAdapter(t)
+	var observations = repository.BuildPortfolioAllocationRepository(adapter)
+	var allocationPlans = repository.BuildAllocationPlanRepository(adapter)
+	var observationCursor = &domain.ObservationPageCursor{
+		Timestamp: time.Date(2040, time.January, 1, 1, 40, 0, 0, time.UTC),
+	}
+	_, err = observations.FindAvailableObservationTimestampsPage(portfolio.Id, observationCursor)
+	require.NoError(t, err)
+	var observationPlan = explainPaginationQuery(t, takePaginationQuery(t))
+	t.Logf("Observation-header production query plan:\n%s", observationPlan)
 	assert.Contains(t, observationPlan, "portfolio_allocation_obs_time_page_idx")
 	assert.Contains(t, observationPlan, "portfolio_allocation_fact_observation_page_idx")
+
+	_, err = observations.FindPortfolioAllocationHistoryPage(portfolio.Id, observationCursor)
+	require.NoError(t, err)
+	var historyPlan = explainPaginationQuery(t, takePaginationQuery(t))
+	t.Logf("Allocation-history production query plan:\n%s", historyPlan)
+	assert.Contains(t, historyPlan, "portfolio_allocation_obs_time_page_idx")
+	assert.Contains(t, historyPlan, "portfolio_allocation_fact_observation_page_idx")
+
+	_, err = allocationPlans.GetAllocationPlansPage(portfolio.Id, allocation.AssetAllocationPlan,
+		&domain.AllocationPlanPageCursor{
+			PlannedDate: time.Date(2040, time.April, 10, 0, 0, 0, 0, time.UTC),
+		})
+	require.NoError(t, err)
+	var allocationPlanPlan = explainPaginationQuery(t, takePaginationQuery(t))
+	t.Logf("Allocation-plan production query plan:\n%s", allocationPlanPlan)
 	assert.Contains(t, allocationPlanPlan, "allocation_plan_page_idx")
 }
 
-// explainPaginationQuery returns an analyzed execution plan for one parameterized keyset query.
-// Authored by: OpenCode
-func explainPaginationQuery(t *testing.T, query string, params dbx.Params) string {
+// explainPaginationQuery analyzes the exact executable SQL and bindings captured from a production read.
+// Co-authored by: GPT-6.1 Sol and OpenCode
+func explainPaginationQuery(t *testing.T, query capturedPaginationQuery) string {
 	t.Helper()
 	var planLines = make([]string, 0)
-	var err = inttestinfra.FetchWithDBQuery(
-		"EXPLAIN (ANALYZE, BUFFERS) "+query,
-		params,
-		func(rows *dbx.Rows) error {
-			var planLine string
-			if scanError := rows.Scan(&planLine); scanError != nil {
-				return scanError
-			}
-			planLines = append(planLines, planLine)
-			return nil
-		},
-	)
+	var rows, err = inttestinfra.DatabaseConnection.DB().Query(
+		"EXPLAIN (ANALYZE, BUFFERS) "+query.sql, query.args...)
 	require.NoError(t, err)
+	defer rows.Close()
+	for rows.Next() {
+		var planLine string
+		require.NoError(t, rows.Scan(&planLine))
+		planLines = append(planLines, planLine)
+	}
+	require.NoError(t, rows.Err())
 	return strings.Join(planLines, "\n")
 }
