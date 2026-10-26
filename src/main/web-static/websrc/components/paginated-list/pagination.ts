@@ -3,6 +3,7 @@
  *
  * @module components/paginated-list
  * @author GPT-6 Luna
+ * @author GPT-6 Sol
  */
 
 import htmx from "htmx.org";
@@ -14,7 +15,17 @@ const STATUS_ATTRIBUTE = "data-paginated-list-status";
 const LOAD_MORE_EVENT = "paginated-list-more";
 const PAGE_CURSOR_PARAMETER = "pageCursor";
 
-type PaginationMode = "initial" | "append";
+/** Selects whether a list request replaces the current page or appends another page.
+ *
+ * Use `PaginationMode.Initial` for first loads and refreshes, and `PaginationMode.Append`
+ * for cursor-based continuation requests.
+ * @example `mode === PaginationMode.Initial` identifies a request that resets the list.
+ * @author GPT-6 Sol
+ */
+export enum PaginationMode {
+    Initial = "initial",
+    Append = "append",
+}
 
 type PageEnvelope<T> = {
     items: T[];
@@ -150,7 +161,10 @@ function bindRequestToXhr(event: CustomEvent): void {
     requests.set(detail.xhr, context);
 }
 
-/** Adds the explicit initial or continuation cursor to a paginated HTMX request. */
+/** Adds the explicit initial or continuation cursor to a paginated HTMX request.
+ * @author GPT-6 Luna
+ * @author GPT-6 Sol
+ */
 function configureRequest(event: CustomEvent): void {
     const requestDetail = event.detail as { elt?: Element };
     const requestElement = requestDetail.elt ?? event.target;
@@ -171,29 +185,29 @@ function configureRequest(event: CustomEvent): void {
 
     const state = getState(owner);
     const portfolioId = getPortfolioId();
-    let requestedMode = state.nextMode ?? "initial";
+    let requestedMode = state.nextMode ?? PaginationMode.Initial;
     state.nextMode = undefined;
 
     const portfolioChanged = portfolioId !== state.portfolioId;
 
     if(portfolioChanged) {
-        requestedMode = "initial";
+        requestedMode = PaginationMode.Initial;
         state.portfolioId = portfolioId;
         state.cursor = null;
         state.recordIds.clear();
         state.initialized = false;
     }
 
-    if(requestedMode === "append" && (state.loading || !state.initialized || state.cursor === null)) {
+    if(requestedMode === PaginationMode.Append && (state.loading || !state.initialized || state.cursor === null)) {
         event.preventDefault();
         return;
     }
 
-    if(portfolioChanged || requestedMode === "initial") {
+    if(portfolioChanged || requestedMode === PaginationMode.Initial) {
         state.generation++;
     }
 
-    const cursor = requestedMode === "append" ? state.cursor : "";
+    const cursor = requestedMode === PaginationMode.Append ? state.cursor : "";
 
     const context: RequestContext = {
         owner,
@@ -229,7 +243,10 @@ function finishRequest(context: RequestContext, message?: string, isError = fals
     updateControls(context.owner, state, message, isError);
 }
 
-/** Commits a validated page only after HTMX has completed its DOM swap and settle lifecycle. */
+/** Commits a validated page only after HTMX has completed its DOM swap and settle lifecycle.
+ * @author GPT-6 Luna
+ * @author GPT-6 Sol
+ */
 function commitSettledPage(event: CustomEvent): void {
     const detail = event.detail as { xhr?: XMLHttpRequest };
     const context = detail.xhr ? requests.get(detail.xhr) : undefined;
@@ -249,7 +266,7 @@ function commitSettledPage(event: CustomEvent): void {
         return;
     }
 
-    if(context.mode === "initial") {
+    if(context.mode === PaginationMode.Initial) {
         state.recordIds = new Set(context.acceptedIds);
     }
     else {
@@ -319,7 +336,10 @@ function handleRequestCompletion(event: CustomEvent): void {
     finishRequest(context, "Could not load records. Try again.", true);
 }
 
-/** Starts a continuation request or retries a failed initial/continuation request. */
+/** Starts a continuation request or retries a failed initial/continuation request.
+ * @author GPT-6 Luna
+ * @author GPT-6 Sol
+ */
 function requestNextPage(event: MouseEvent): void {
     const button = (event.target as Element | null)?.closest<HTMLButtonElement>(`[${ LOAD_MORE_ATTRIBUTE }]`);
 
@@ -339,9 +359,9 @@ function requestNextPage(event: MouseEvent): void {
         return;
     }
 
-    const mode = state.retryMode ?? "append";
+    const mode = state.retryMode ?? PaginationMode.Append;
 
-    if(mode === "append" && (!state.initialized || state.cursor === null)) {
+    if(mode === PaginationMode.Append && (!state.initialized || state.cursor === null)) {
         return;
     }
 
@@ -372,23 +392,29 @@ function invalidateRemovedList(event: CustomEvent): void {
     }
 }
 
-/** Prepares complete portfolio-history snapshots for the viewing template. */
+/** Prepares complete portfolio-history snapshots for the viewing template.
+ * @author GPT-6 Luna
+ * @author GPT-6 Sol
+ */
 function transformPortfolioHistoryView(responseBody: string, eventDetail: BeforeSwapEventDetail): string {
     return transformPageResponse<HistoryPageItem, { items: HistoryPageItem[]; initial: boolean }>(
         responseBody,
         eventDetail,
         item => item.observationTimestamp?.id,
-        (items, mode) => ({ items, initial: mode === "initial" }),
+        (items, mode) => ({ items, initial: mode === PaginationMode.Initial }),
     );
 }
 
-/** Prepares complete allocation-plan records for the viewing template. */
+/** Prepares complete allocation-plan records for the viewing template.
+ * @author GPT-6 Luna
+ * @author GPT-6 Sol
+ */
 function transformAllocationPlanView(responseBody: string, eventDetail: BeforeSwapEventDetail): string {
     return transformPageResponse<AllocationPlanPageItem, { items: AllocationPlanPageItem[]; initial: boolean }>(
         responseBody,
         eventDetail,
         item => item.id,
-        (items, mode) => ({ items, initial: mode === "initial" }),
+        (items, mode) => ({ items, initial: mode === PaginationMode.Initial }),
     );
 }
 
@@ -427,6 +453,7 @@ function init(): void {
  * @returns JSON for the template extension, or an empty list when the response is stale/invalid.
  * @example `transformPageResponse(body, event, item => item.id, items => items)` prepares a plan page.
  * @author GPT-6 Luna
+ * @author GPT-6 Sol
  */
 function transformPageResponse<T, R>(
     responseBody: string,
@@ -461,7 +488,7 @@ function transformPageResponse<T, R>(
             throw new Error("The paginated response envelope is malformed.");
         }
 
-        const seenIds = context.mode === "append"
+        const seenIds = context.mode === PaginationMode.Append
             ? new Set(states.get(context.owner)?.recordIds ?? [])
             : new Set<string>();
         const acceptedItems: T[] = [];
@@ -486,7 +513,7 @@ function transformPageResponse<T, R>(
         context.acceptedIds = acceptedIds;
         context.nextCursor = envelope.nextCursor;
         context.prepared = true;
-        eventDetail.swapOverride = context.mode === "append" ? "beforeend" : "innerHTML";
+        eventDetail.swapOverride = context.mode === PaginationMode.Append ? "beforeend" : "innerHTML";
 
         return JSON.stringify(mapItems(acceptedItems, context.mode));
     }

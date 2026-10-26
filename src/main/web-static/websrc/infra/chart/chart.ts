@@ -1,6 +1,7 @@
 /**
  * Loads, tracks, and disposes Chart.js instances attached to HTMX-managed DOM subtrees.
  * @author GPT-6 Luna
+ * @author GPT-6 Sol
  */
 
 import { Chart, ChartType } from "chart.js";
@@ -25,7 +26,10 @@ function getChartContentFromChart(chart: Chart) {
     return { chartId, chartContent };
 }
 
-/** Creates a chart once for a canvas that has registered chart content. */
+/** Creates a chart once for a canvas that has registered chart content.
+ * @author GPT-6 Luna
+ * @author GPT-6 Sol
+ */
 function loadChart(canvas: HTMLCanvasElement): void {
 
     const id = canvas.id;
@@ -56,7 +60,10 @@ function loadChart(canvas: HTMLCanvasElement): void {
     });
 }
 
-/** Destroys charts below a node before HTMX removes their canvases. */
+/** Destroys charts below a node before HTMX removes their canvases.
+ * @author GPT-6 Luna
+ * @author GPT-6 Sol
+ */
 function destroyDescendantCharts(element: HTMLElement): void {
     const canvases = Array.from(element.querySelectorAll<HTMLCanvasElement>(`canvas[${ CHART_ATTRIBUTE }]`));
 

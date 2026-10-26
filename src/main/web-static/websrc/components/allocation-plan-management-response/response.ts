@@ -1,6 +1,7 @@
 /**
  * Maps paginated allocation-plan API records into the management template context.
  * @author GPT-6 Luna
+ * @author GPT-6 Sol
  */
 
 import { AllocationPlanDTO, SerializableCompleteAllocationPlan } from "../../domain/allocation-plan";
@@ -9,7 +10,7 @@ import { DomainService } from "../../domain/service";
 import { PortfolioPage } from "../../pages";
 import { getBrowserLocalCalendarDate } from "../../utils/calendar-date";
 import { type BeforeSwapEventDetail } from "../../infra/htmx";
-import paginatedList from "../paginated-list";
+import paginatedList, { PaginationMode } from "../paginated-list";
 
 /** Maps the current plan page and adds the synthetic new-plan form only to an initial/reset page.
  *
@@ -31,8 +32,11 @@ export function mapForAllocationPlanManagement(
     );
 }
 
-/** Maps one accepted plan page to the existing allocation-plan management template context. */
-function mapPlanPage(plans: AllocationPlanDTO[], mode: "initial" | "append") {
+/** Maps one accepted plan page to the existing allocation-plan management template context.
+ * @author GPT-6 Luna
+ * @author GPT-6 Sol
+ */
+function mapPlanPage(plans: AllocationPlanDTO[], mode: PaginationMode) {
     const portfolioDTO = PortfolioPage.getContextPortfolio();
 
     const completeAllocationPlanSet = DomainService.mapping.mapToSerializablePortfolioCompleteAllocationPlanSet(
@@ -40,7 +44,7 @@ function mapPlanPage(plans: AllocationPlanDTO[], mode: "initial" | "append") {
         plans,
     );
 
-    if(mode === "initial") {
+    if(mode === PaginationMode.Initial) {
         const hierarchy = DomainService.mapping.mapToPortfolio(portfolioDTO).allocationStructure.hierarchy;
         const topHierarchyLevel = hierarchy.at(-1);
 
