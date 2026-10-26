@@ -1,3 +1,8 @@
+/**
+ * Loads, tracks, and disposes Chart.js instances attached to HTMX-managed DOM subtrees.
+ * @author GPT-6 Luna
+ */
+
 import { Chart, ChartType } from "chart.js";
 import { buildChartOptions } from "./chart-options";
 import { CHART_ATTRIBUTE, CHART_OPTIONS_JSON_ELEMENT_ID, ChartContent, LocalChartOptions } from "./chart-types";
@@ -20,10 +25,15 @@ function getChartContentFromChart(chart: Chart) {
     return { chartId, chartContent };
 }
 
+/** Creates a chart once for a canvas that has registered chart content. */
 function loadChart(canvas: HTMLCanvasElement): void {
 
     const id = canvas.id;
     const content = getChartContent(id);
+
+    if(!content || Chart.getChart(canvas)) {
+        return;
+    }
 
     const interactionObserverCallback = content.interactionObserverCallback;
     const chartInteractions = content.chartInteractions;
@@ -39,19 +49,40 @@ function loadChart(canvas: HTMLCanvasElement): void {
         interactionObserverCallback,
     );
 
-    if(content) {
-        new Chart(canvas, {
-            type: chartType as ChartType,
-            data: content.chartDataSource.getChartData(),
-            options: options,
-        });
+    new Chart(canvas, {
+        type: chartType as ChartType,
+        data: content.chartDataSource.getChartData(),
+        options: options,
+    });
+}
+
+/** Destroys charts below a node before HTMX removes their canvases. */
+function destroyDescendantCharts(element: HTMLElement): void {
+    const canvases = Array.from(element.querySelectorAll<HTMLCanvasElement>(`canvas[${ CHART_ATTRIBUTE }]`));
+
+    if(element.matches(`canvas[${ CHART_ATTRIBUTE }]`)) {
+        canvases.unshift(element as HTMLCanvasElement);
     }
+
+    canvases.forEach(canvas => {
+        const chartId = canvas.id;
+        Chart.getChart(canvas)?.destroy();
+
+        globalThis.setTimeout(() => {
+            const replacement = document.getElementById(chartId);
+
+            if(!(replacement instanceof HTMLCanvasElement && replacement.hasAttribute(CHART_ATTRIBUTE))) {
+                chartContentRepo.delete(chartId);
+            }
+        }, 0);
+    });
 }
 
 const chart = {
     saveChartContent,
     getChartContent,
     getChartContentFromChart,
+    destroyDescendantCharts,
     loadDescendantCharts(element: HTMLElement) {
         element.querySelectorAll(`canvas[${ CHART_ATTRIBUTE }]`).forEach((canvas: HTMLCanvasElement) => {
             loadChart(canvas);

@@ -1,7 +1,7 @@
 import { PortfolioDTO } from "../../domain/portfolio";
 import { ChartContent } from "../../infra/chart/chart-types";
 import { ActiveElement, Chart, ChartEvent } from "chart.js";
-import chartModule from "../../infra/chart/chart";
+import chartModule from "../../infra/chart";
 import { changeChartDataOnDatasource } from "../../infra/chart/chart-utils";
 import { FractalPortfolioMultiChartDataSource } from "./portfolio-chart-datasource";
 import { MappedChartData } from "./portfolio-chart-model";

@@ -261,6 +261,51 @@ export default [
                                 "Import from the public API 'components/allocation-plan-management-metadata' " +
                                 "(index.ts) only; deep imports are not allowed.",
                         },
+                        // Block deep imports into allocation-plan management response mapping; use its public API
+                        // Authored by: GPT-6 Luna
+                        {
+                            group: [
+                                "**/allocation-plan-management-response/*",
+                                "**/allocation-plan-management-response/**",
+                                "allocation-plan-management-response/*",
+                                "allocation-plan-management-response/**",
+                                "./allocation-plan-management-response/*",
+                                "./allocation-plan-management-response/**",
+                                "../allocation-plan-management-response/*",
+                                "../allocation-plan-management-response/**",
+                            ],
+                            message:
+                                "Import from the public API 'components/allocation-plan-management-response' " +
+                                "(index.ts) only; deep imports are not allowed.",
+                        },
+                        // Block deep imports into shared paginated-list behavior; use its public entry point
+                        // Authored by: GPT-6 Luna
+                        {
+                            group: [
+                                "**/paginated-list/*",
+                                "**/paginated-list/**",
+                                "paginated-list/*",
+                                "paginated-list/**",
+                                "./paginated-list/*",
+                                "./paginated-list/**",
+                                "../paginated-list/*",
+                                "../paginated-list/**",
+                            ],
+                            message:
+                                "Import from the public API 'components/paginated-list' (index.ts) only; " +
+                                "deep imports are not allowed.",
+                        },
+                        // Block deep imports into chart infrastructure; use its public entry point
+                        // Authored by: GPT-6 Luna
+                        {
+                            group: [
+                                "**/infra/chart/chart",
+                                "**/infra/chart/chart.ts",
+                                "./chart/chart",
+                                "./chart/chart.ts",
+                            ],
+                            message: "Import from the public API 'infra/chart' (index.ts) only; deep imports are not allowed.",
+                        },
                         // Block deep imports into history observation details; use its public entry point
                         // Authored by: GPT-6.1 Sol
                         {

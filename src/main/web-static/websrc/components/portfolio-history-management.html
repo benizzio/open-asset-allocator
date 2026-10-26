@@ -1,3 +1,4 @@
+<!-- Co-authored by: GPT-6 Luna and benizzio -->
 <button type="button"
         class="btn btn-secondary mb-2"
         onclick="portfolioHistoryManagement.navigateToPortfolioAllocationViewing()"
@@ -12,20 +13,38 @@
     <div class="card-body">
         <div id="accordion-portfolio-history-management"
              class="accordion container-fluid"
+             data-paginated-list
              hx-get="/api/portfolio/:portfolioId/history/observation"
              hx-include="[name='portfolioId']"
-             hx-trigger="load, reload-portfolio-history-management"
+             hx-trigger="load, reload-portfolio-history-management, paginated-list-more queue:none"
+             hx-sync="this:replace"
+             hx-disinherit="hx-sync"
+             hx-swap="innerHTML"
              hx-on::after-settle="portfolioHistoryManagement.handleAfterSettle(event, this)"
              handlebars-template="template-portfolio-history-management"
              data-hx-transform-response="addObservationZero"
-             data-hx-transform-response-on-path-matching="^\/api\/portfolio\/.+\/history\/observation$"
+             data-hx-transform-response-on-path-matching="^\/api\/portfolio\/.+\/history\/observation(?:\?.*)?$"
         >
             <div class="accordion-item placeholder-glow">
                 <h2 class="accordion-header placeholder col-12">placeholder</h2>
             </div>
             <div class="accordion-item placeholder-glow">
-                <h2 class="accordion-header placeholder col-12">placeholder</h2>
-            </div>
+             <h2 class="accordion-header placeholder col-12">placeholder</h2>
+         </div>
+        </div>
+        <!-- Co-authored by: GPT-6 Luna and benizzio -->
+        <div class="d-flex flex-column align-items-center gap-2 mt-2">
+            <button type="button"
+                    class="btn btn-outline-secondary"
+                    aria-controls="accordion-portfolio-history-management"
+                    data-paginated-list-more="accordion-portfolio-history-management"
+                    hidden
+            >Show more</button>
+            <span data-paginated-list-status="accordion-portfolio-history-management"
+                  role="status"
+                  aria-live="polite"
+                  tabindex="-1"
+            ></span>
         </div>
     </div>
 
@@ -36,7 +55,10 @@
 
     {{#each .}}
 
-        <div id="portfolio-history-management-container-{{id}}" class="accordion-item">
+        <div id="portfolio-history-management-container-{{id}}"
+             class="accordion-item"
+             data-paginated-record-id="{{id}}"
+        >
 
             <!-- Co-authored by: GPT-6 Luna and benizzio -->
             <h2 id="portfolio-history-management-trigger-{{id}}"
