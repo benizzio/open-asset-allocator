@@ -6,11 +6,12 @@
  * @author benizzio
  * @author GPT-6 Sol
  * @author GPT-6.1 Sol
+ * @author GPT-6 Luna
  */
 
 import htmx from "htmx.org";
 import { BigNumber } from "bignumber.js";
-import { AfterRequestEventDetail, HtmxInfra } from "../infra/htmx";
+import { AfterRequestEventDetail, HtmxInfra, type BeforeSwapEventDetail } from "../infra/htmx";
 import { ObservationTimestamp } from "../domain/portfolio-allocation";
 import Router from "../infra/routing";
 import {
@@ -44,6 +45,7 @@ import {
     retryObservationDetails,
 } from "./portfolio-history-management-observation-details";
 import { bindObservationMetadataRequest } from "./portfolio-history-management-observation-metadata";
+import paginatedList from "./paginated-list";
 
 const PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER = "accordion-portfolio-history-management";
 const PORTFOLIO_ALLOCATION_MANAGEMENT_TBODY_PREFIX = "portfolio-history-management-form-tbody-";
@@ -231,20 +233,24 @@ function getNextPortfolioHistoryManagementIndex(tbody: HTMLElement): number {
     return lastRowIdIndex ? toInt(lastRowIdIndex) + 1 : 0;
 }
 
-function modifyObservationsResponse(originalServerResponseJSON: string): string {
-
-    const originalServerResponse = JSON.parse(originalServerResponseJSON) as ObservationTimestamp[];
-
-    const modifiedServerResponse: ObservationTimestamp[] = [
-        {
-            id: 0,
-            timeTag: "New Observation *",
-        },
-        ...originalServerResponse,
-    ];
-
-    return JSON.stringify(modifiedServerResponse);
+function modifyObservationsResponse(
+    originalServerResponseJSON: string,
+    eventDetail: BeforeSwapEventDetail,
+): string {
+    return paginatedList.transformPageResponse<ObservationTimestamp, ObservationTimestamp[]>(
+        originalServerResponseJSON,
+        eventDetail,
+        observation => observation.id,
+        (observations, mode) => mode === "initial"
+            ? [{ id: 0, timeTag: "New Observation *" }, ...observations]
+            : observations,
+    );
 }
+
+HtmxInfra.htmxTransformResponse.registerTransformResponseFunction(
+    "addObservationZero",
+    modifyObservationsResponse,
+);
 
 /** Refreshes observation details or its ordered list after a successful form submission.
  * @author GPT-6 Luna
@@ -340,8 +346,12 @@ const portfolioHistoryManagement = {
             `#${ NEW_OBSERVATION_DATE_INPUT_ID }`,
         );
 
-        if(newObservationDateInput && !newObservationDateInput.value) {
-            newObservationDateInput.value = getBrowserLocalCalendarDate();
+        if(newObservationDateInput && newObservationDateInput.dataset.dateDefaultInitialized !== "true") {
+            if(!newObservationDateInput.value) {
+                newObservationDateInput.value = getBrowserLocalCalendarDate();
+            }
+
+            newObservationDateInput.dataset.dateDefaultInitialized = "true";
         }
 
         managementContainer
@@ -365,11 +375,6 @@ const portfolioHistoryManagement = {
                     bindObservationDetailsLoader(header, panel, form);
                 }
             });
-
-        HtmxInfra.htmxTransformResponse.registerTransformResponseFunction(
-            "addObservationZero",
-            modifyObservationsResponse,
-        );
 
         const managementFormRowTemplateElement = window["template-portfolio-history-management-form-tbody-row"];
         const managementTemplateElement = window["template-portfolio-history-management"];

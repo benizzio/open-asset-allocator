@@ -14,7 +14,12 @@ const HTMX_TRANSFORM_RESPONSE_ON_PATH_MATCHING_ATTRIBUTE = "data-hx-transform-re
 const HTMX_TRANSFORM_RESPONSE_ON_VERB_MATCHING_ATTRIBUTE = "data-hx-transform-response-on-verb-matching";
 const HTMX_TRANSFORM_RESPONSE_BOUND_FLAG = "data-hx-trigger-on-route-bound";
 
-const TRANSFORM_RESPONSE_FUNCTION_MAP = new Map<string, (responseBody: string) => string>();
+/** Transforms response JSON before the client-side template extension renders it.
+ * @author GPT-6 Luna
+ */
+type TransformResponseFunction = (responseBody: string, eventDetail: BeforeSwapEventDetail) => string;
+
+const TRANSFORM_RESPONSE_FUNCTION_MAP = new Map<string, TransformResponseFunction>();
 
 function extractPathRegExpForTransform(element: HTMLElement) {
     const transformResponseRouteAttribute =
@@ -33,7 +38,7 @@ function transformResponse(eventDetail: BeforeSwapEventDetail, transformFunction
         throw new Error(`No transform function found for key "${ transformFunctionKey }".`);
     }
 
-    eventDetail.serverResponse = transformFunction(originalServerResponseJSON);
+    eventDetail.serverResponse = transformFunction(originalServerResponseJSON, eventDetail);
 }
 
 function bindHTMXTransformResponseElement(element: HTMLElement) {
@@ -95,7 +100,7 @@ export function bindHTMXTransformResponseInDescendants(element: HTMLElement) {
 
 function registerTransformResponseFunction(
     functionName: string,
-    transformFunction: (responseBody: string) => string,
+    transformFunction: TransformResponseFunction,
 ) {
 
     if(TRANSFORM_RESPONSE_FUNCTION_MAP.has(functionName)) {

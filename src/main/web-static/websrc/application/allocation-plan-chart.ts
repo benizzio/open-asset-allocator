@@ -1,7 +1,7 @@
 import { ChartContent, MultiChartDataSource } from "../infra/chart/chart-types";
 import { ActiveElement, Chart, ChartData, ChartDataset, ChartEvent } from "chart.js";
 import { changeChartDataOnDatasource } from "../infra/chart/chart-utils";
-import chartModule from "../infra/chart/chart";
+import chartModule from "../infra/chart";
 import {
     AllocationPlanDTO,
     FractalHierarchicalAllocationPlan,

@@ -4,7 +4,7 @@ import { handlebarsInfra } from "./handlebars";
 import { HtmxInfra } from "./htmx";
 import Router from "./routing";
 import * as bootstrap from "bootstrap";
-import chart from "./chart/chart";
+import chart from "./chart";
 import { CustomEventHandler } from "./infra-types";
 import DomInfra from "./dom";
 import { logger, LogLevel } from "./logging";
@@ -33,6 +33,8 @@ function bootRouterDebouncing() {
  * libraries, when needed.
  *
  * @param event - The event that is triggered when the DOM settles.
+ * @author GPT-6 Luna
+ * @author benizzio
  */
 const DOM_SETTLING_BEHAVIOR_EVENT_HANDLER: CustomEventHandler = (event: CustomEvent) => {
 
@@ -104,6 +106,14 @@ export const Infra = {
 
         const onPageLoad = () => {
             HtmxInfra.init(DOM_SETTLING_BEHAVIOR_EVENT_HANDLER, afterRequestErrorHandler);
+
+            document.body.addEventListener("htmx:beforeCleanupElement", (event: CustomEvent) => {
+                const element = event.detail?.elt ?? event.target;
+
+                if(element instanceof HTMLElement) {
+                    chart.destroyDescendantCharts(element);
+                }
+            });
             Router.init();
             globalThis["HtmxInfra"] = HtmxInfra;
         };

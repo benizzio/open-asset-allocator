@@ -1,3 +1,4 @@
+<!-- Co-authored by: GPT-6 Luna and benizzio -->
 <button type="button"
         class="btn btn-secondary mb-2"
         onclick="allocationPlanManagement.navigateToAllocationPlansViewing()"
@@ -13,20 +14,38 @@
         <!-- TODO add a trigger on route to reload the allocation plans when navigating back to this component -->
         <div id="accordion-allocation-plan-management"
              class="accordion container-fluid"
+             data-paginated-list
              hx-get="/api/portfolio/:portfolioId/allocation-plan"
              hx-include="[name='portfolioId']"
-             hx-trigger="load, reload-allocation-plan-management"
+             hx-trigger="load, reload-allocation-plan-management, paginated-list-more queue:none"
+             hx-sync="this:replace"
+             hx-disinherit="hx-sync"
+             hx-swap="innerHTML"
              handlebars-template="template-allocation-plan-management"
              data-hx-transform-response="mapForAllocationPlanManagement"
-             data-hx-transform-response-on-path-matching="^\/api\/portfolio\/.+\/allocation\-plan$"
+             data-hx-transform-response-on-path-matching="^\/api\/portfolio\/.+\/allocation\-plan(?:\?.*)?$"
              data-hx-transform-response-on-verb-matching="GET"
         >
             <div class="accordion-item placeholder-glow">
                 <h2 class="accordion-header placeholder col-12">placeholder</h2>
             </div>
             <div class="accordion-item placeholder-glow">
-                <h2 class="accordion-header placeholder col-12">placeholder</h2>
-            </div>
+                 <h2 class="accordion-header placeholder col-12">placeholder</h2>
+             </div>
+        </div>
+        <!-- Co-authored by: GPT-6 Luna and benizzio -->
+        <div class="d-flex flex-column align-items-center gap-2 mt-2">
+            <button type="button"
+                    class="btn btn-outline-secondary"
+                    aria-controls="accordion-allocation-plan-management"
+                    data-paginated-list-more="accordion-allocation-plan-management"
+                    hidden
+            >Show more</button>
+            <span data-paginated-list-status="accordion-allocation-plan-management"
+                  role="status"
+                  aria-live="polite"
+                  tabindex="-1"
+            ></span>
         </div>
     </div>
 
@@ -36,7 +55,10 @@
 
     {{#each  @root.completeAllocationPlans}}
 
-        <div id="allocation-plan-management-container-{{allocationPlan.id}}" class="accordion-item">
+        <div id="allocation-plan-management-container-{{allocationPlan.id}}"
+             class="accordion-item"
+             data-paginated-record-id="{{allocationPlan.id}}"
+        >
 
             <!-- Co-authored by: GPT-6 Luna and benizzio -->
             <h2 id="allocation-plan-management-trigger-{{allocationPlan.id}}"

@@ -5,6 +5,7 @@ import allocationPlanManagement from "../components/allocation-plan-management";
 import { AssetPage, PortfolioPage } from "../pages";
 import notifications from "../components/notifications";
 import AssetComposedColumnsInput from "../components/asset-composed-columns-input";
+import paginatedList from "../components/paginated-list";
 
 /**
  * Component that represents the central application code tied to the underlying infrastructure.
@@ -13,6 +14,7 @@ import AssetComposedColumnsInput from "../components/asset-composed-columns-inpu
  *
  * @author Igor Benicio de Mesquita
  * @author OpenCode
+ * @author GPT-6 Luna
  */
 const Application = {
 
@@ -26,6 +28,7 @@ const Application = {
      */
     init() {
         registerPortfolioAnalysisHandlebarsHelpers();
+        paginatedList.init();
         globalThis["portfolioHistoryManagement"] = portfolioHistoryManagement;
         globalThis["allocationPlanManagement"] = allocationPlanManagement;
         globalThis["portfolioPage"] = PortfolioPage;
