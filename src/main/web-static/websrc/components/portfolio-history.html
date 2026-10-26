@@ -1,4 +1,4 @@
-<!-- Co-authored by: GPT-6 Luna and benizzio -->
+<!-- Co-authored by: GPT-6 Luna, GPT-6 Sol and benizzio -->
 <div data-exclusive-display-container>
 
     <div class="accordion mb-5"
@@ -77,11 +77,11 @@
         <div class="accordion-item" data-paginated-record-id="{{observationTimestamp.id}}">
 
             <h2 class="accordion-header">
-                <button class="accordion-button {{#unless @root.initial}}collapsed{{else}}{{#unless @first}}collapsed{{/unless}}{{/unless}}"
+                <button class="accordion-button {{#unless (and @root.initial @first)}}collapsed{{/unless}}"
                         type="button"
                         data-bs-toggle="collapse"
                         data-bs-target="#portfolio-allocation-{{observationTimestamp.id}}"
-                        aria-expanded="{{#if @root.initial}}{{#if @first}}true{{else}}false{{/if}}{{else}}false{{/if}}"
+                        aria-expanded="{{#if (and @root.initial @first)}}true{{else}}false{{/if}}"
                         aria-controls="portfolio-allocation-{{observationTimestamp.id}}"
                 >
                     {{observationTimestamp.timeTag}}
@@ -89,7 +89,7 @@
             </h2>
 
             <div id="portfolio-allocation-{{observationTimestamp.id}}"
-                 class="accordion-collapse collapse {{#if @root.initial}}{{#if @first}}show{{/if}}{{/if}}"
+                 class="accordion-collapse collapse {{#if (and @root.initial @first)}}show{{/if}}"
                  data-bs-parent="#accordion-portfolio-history"
             >
                 <div class="accordion-body row justify-content-center">

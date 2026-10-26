@@ -46,7 +46,7 @@ import {
     retryObservationDetails,
 } from "./portfolio-history-management-observation-details";
 import { prepareObservationMetadataForSubmit } from "./portfolio-history-management-observation-metadata";
-import paginatedList from "./paginated-list";
+import paginatedList, { PaginationMode } from "./paginated-list";
 
 const PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER = "accordion-portfolio-history-management";
 const PORTFOLIO_ALLOCATION_MANAGEMENT_TBODY_PREFIX = "portfolio-history-management-form-tbody-";
@@ -234,6 +234,10 @@ function getNextPortfolioHistoryManagementIndex(tbody: HTMLElement): number {
     return lastRowIdIndex ? toInt(lastRowIdIndex) + 1 : 0;
 }
 
+/** Maps a paginated observation response, including the new-observation form only on initial loads.
+ * @author GPT-6 Luna
+ * @author GPT-6 Sol
+ */
 function modifyObservationsResponse(
     originalServerResponseJSON: string,
     eventDetail: BeforeSwapEventDetail,
@@ -242,7 +246,7 @@ function modifyObservationsResponse(
         originalServerResponseJSON,
         eventDetail,
         observation => observation.id,
-        (observations, mode) => mode === "initial"
+        (observations, mode) => mode === PaginationMode.Initial
             ? [{ id: 0, timeTag: "New Observation *" }, ...observations]
             : observations,
     );
