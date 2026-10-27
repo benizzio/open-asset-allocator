@@ -275,6 +275,24 @@
   font-size: 0.75rem;
 }
 
+/** Keeps icon-only pagination controls steady and removes empty/hidden pagination content from layout.
+ *
+ * @author GPT-6 Luna
+ */
+.paginated-list-more-button {
+  min-width: 2.5rem;
+  min-height: 2.375rem;
+}
+
+[data-paginated-list-controls][hidden],
+[data-paginated-list-more][hidden],
+[data-paginated-list-more-icon][hidden],
+[data-paginated-list-retry-icon][hidden],
+[data-paginated-list-loading-indicator][hidden],
+[data-paginated-list-status]:empty {
+  display: none !important;
+}
+
 // Text wrapping styles for table columns with constrained field values
 
 /**

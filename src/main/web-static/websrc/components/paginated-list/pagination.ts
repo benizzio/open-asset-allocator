@@ -8,10 +8,10 @@
 
 import htmx from "htmx.org";
 import { HtmxInfra, type BeforeSwapEventDetail } from "../../infra/htmx";
+import { focusOnAcceptedRecord, renderControls } from "./controls";
 
 const PAGINATED_LIST_ATTRIBUTE = "data-paginated-list";
 const LOAD_MORE_ATTRIBUTE = "data-paginated-list-more";
-const STATUS_ATTRIBUTE = "data-paginated-list-status";
 const LOAD_MORE_EVENT = "paginated-list-more";
 const PAGE_CURSOR_PARAMETER = "pageCursor";
 
@@ -41,6 +41,8 @@ type ListState = {
     loading: boolean;
     nextMode?: PaginationMode;
     retryMode?: PaginationMode;
+    controlRequestPending: boolean;
+    pendingFocusButton?: HTMLButtonElement;
     preparingRequest?: RequestContext;
     activeRequest?: RequestContext;
 };
@@ -57,11 +59,14 @@ type RequestContext = {
     rejected: boolean;
     stale: boolean;
     committed: boolean;
+    focusButton?: HTMLButtonElement;
+    focusChanged: boolean;
     xhr?: XMLHttpRequest;
 };
 
 const states = new WeakMap<HTMLElement, ListState>();
 const requests = new WeakMap<XMLHttpRequest, RequestContext>();
+const focusTrackedRequests = new Set<RequestContext>();
 let initialized = false;
 
 type HistoryPageItem = { observationTimestamp?: { id?: number } };
@@ -79,6 +84,7 @@ function getState(owner: HTMLElement): ListState {
             recordIds: new Set<string>(),
             initialized: false,
             loading: false,
+            controlRequestPending: false,
         };
         states.set(owner, state);
     }
@@ -101,31 +107,25 @@ function getOwner(target: EventTarget | null): HTMLElement | undefined {
     return owner ?? undefined;
 }
 
-/** Updates the control associated with the list after its request state changes. */
-function updateControls(owner: HTMLElement, state: ListState, message?: string, isError = false): void {
-    const button = Array.from(document.querySelectorAll<HTMLButtonElement>(`[${ LOAD_MORE_ATTRIBUTE }]`))
-        .find(candidate => candidate.getAttribute(LOAD_MORE_ATTRIBUTE) === owner.id);
+/** Renders owner-scoped controls after a pagination state transition. */
+function updateControls(owner: HTMLElement, state: ListState, message = "", isError = false): void {
+    renderControls(owner, {
+        initialized: state.initialized,
+        cursor: state.cursor,
+        loading: state.loading,
+        retryAvailable: state.retryMode !== undefined,
+        controlRequestPending: state.controlRequestPending,
+    }, message, isError);
+}
 
-    const status = Array.from(document.querySelectorAll<HTMLElement>(`[${ STATUS_ATTRIBUTE }]`))
-        .find(candidate => candidate.getAttribute(STATUS_ATTRIBUTE) === owner.id);
+/** Marks a pending keyboard continuation abandoned when focus moves elsewhere. */
+function trackPaginationFocusChange(event: FocusEvent): void {
+    const target = event.target;
 
-    if(button) {
-        const retryAvailable = state.retryMode !== undefined;
-        button.hidden = !(retryAvailable || (state.initialized && state.cursor !== null));
-        button.disabled = state.loading;
-        button.textContent = "Show more";
-
-        if(state.loading) {
-            button.textContent = "Loading…";
+    for(const context of focusTrackedRequests) {
+        if(target !== context.focusButton && target !== document.body) {
+            context.focusChanged = true;
         }
-        else if(retryAvailable) {
-            button.textContent = "Retry";
-        }
-    }
-
-    if(status) {
-        status.textContent = message ?? "";
-        status.setAttribute("role", isError ? "alert" : "status");
     }
 }
 
@@ -158,6 +158,10 @@ function bindRequestToXhr(event: CustomEvent): void {
     context.xhr = detail.xhr;
     state.activeRequest = context;
     state.preparingRequest = undefined;
+
+    if(context.focusButton) {
+        focusTrackedRequests.add(context);
+    }
     requests.set(detail.xhr, context);
 }
 
@@ -221,8 +225,11 @@ function configureRequest(event: CustomEvent): void {
         rejected: false,
         stale: false,
         committed: false,
+        focusButton: state.pendingFocusButton,
+        focusChanged: false,
     };
 
+    state.pendingFocusButton = undefined;
     state.preparingRequest = context;
     state.loading = true;
     detail.parameters[PAGE_CURSOR_PARAMETER] = cursor;
@@ -238,8 +245,11 @@ function finishRequest(context: RequestContext, message?: string, isError = fals
     }
 
     state.loading = false;
+    state.controlRequestPending = false;
+    state.pendingFocusButton = undefined;
     state.activeRequest = undefined;
     state.preparingRequest = undefined;
+    focusTrackedRequests.delete(context);
     updateControls(context.owner, state, message, isError);
 }
 
@@ -257,6 +267,7 @@ function commitSettledPage(event: CustomEvent): void {
 
     if(!isCurrentRequest(context)) {
         context.stale = true;
+        focusTrackedRequests.delete(context);
         return;
     }
 
@@ -279,23 +290,34 @@ function commitSettledPage(event: CustomEvent): void {
     state.retryMode = undefined;
     context.committed = true;
 
-    const loadMoreButton = Array.from(document.querySelectorAll<HTMLButtonElement>(`[${ LOAD_MORE_ATTRIBUTE }]`))
-        .find(button => button.getAttribute(LOAD_MORE_ATTRIBUTE) === context.owner.id);
-    const shouldMoveFocus = context.nextCursor === null && document.activeElement === loadMoreButton;
+    const shouldMoveFocus = shouldMoveFocusAfterTerminalAppend(context);
 
     let message = "";
 
     if(context.nextCursor === null) {
-        message = state.recordIds.size === 0 ? "No records found." : "All records loaded.";
+        message = state.recordIds.size === 0 ? "No records found." : "";
     }
 
     finishRequest(context, message);
 
     if(shouldMoveFocus) {
-        const status = Array.from(document.querySelectorAll<HTMLElement>(`[${ STATUS_ATTRIBUTE }]`))
-            .find(candidate => candidate.getAttribute(STATUS_ATTRIBUTE) === context.owner.id);
-        status?.focus();
+        focusOnAcceptedRecord(context.owner, context.acceptedIds);
     }
+}
+
+/** Returns whether a terminal append should restore focus to its first persisted record. */
+function shouldMoveFocusAfterTerminalAppend(context: RequestContext): boolean {
+    if(context.mode !== PaginationMode.Append || context.nextCursor !== null) {
+        return false;
+    }
+
+    if(!context.focusButton || context.focusChanged) {
+        return false;
+    }
+
+    return document.activeElement === context.focusButton
+        || document.activeElement === document.body
+        || document.activeElement === document.documentElement;
 }
 
 /** Releases failed or malformed requests without consuming their continuation cursor. */
@@ -309,6 +331,7 @@ function handleRequestCompletion(event: CustomEvent): void {
 
     if(!isCurrentRequest(context)) {
         context.stale = true;
+        focusTrackedRequests.delete(context);
 
         if(detail.xhr && !detail.successful) {
             HtmxInfra.suppressAfterRequestErrorNotification(detail.xhr);
@@ -368,8 +391,9 @@ function requestNextPage(event: MouseEvent): void {
     event.preventDefault();
     state.nextMode = mode;
     state.retryMode = undefined;
-    button.disabled = true;
-    button.textContent = "Loading…";
+    state.controlRequestPending = true;
+    state.pendingFocusButton = document.activeElement === button ? button : undefined;
+    updateControls(owner, state);
     htmx.trigger(owner, LOAD_MORE_EVENT);
 }
 
@@ -385,8 +409,18 @@ function invalidateRemovedList(event: CustomEvent): void {
     const state = states.get(removedElement);
 
     if(state) {
+        if(state.activeRequest) {
+            focusTrackedRequests.delete(state.activeRequest);
+        }
+
+        if(state.preparingRequest) {
+            focusTrackedRequests.delete(state.preparingRequest);
+        }
+
         state.generation++;
         state.loading = false;
+        state.controlRequestPending = false;
+        state.pendingFocusButton = undefined;
         state.activeRequest = undefined;
         state.preparingRequest = undefined;
     }
@@ -441,6 +475,7 @@ function init(): void {
     document.addEventListener("htmx:afterSettle", commitSettledPage);
     document.addEventListener("htmx:afterRequest", handleRequestCompletion);
     document.addEventListener("htmx:beforeCleanupElement", invalidateRemovedList);
+    document.addEventListener("focusin", trackPaginationFocusChange);
 }
 
 /**

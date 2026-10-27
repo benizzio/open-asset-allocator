@@ -34,17 +34,27 @@
              </div>
         </div>
         <!-- Co-authored by: GPT-6 Luna and benizzio -->
-        <div class="d-flex flex-column align-items-center gap-2 mt-2">
+        <div class="text-center mt-4"
+             data-paginated-list-controls="accordion-allocation-plan-management"
+             hidden
+        >
             <button type="button"
-                    class="btn btn-outline-secondary"
+                    class="btn btn-primary paginated-list-more-button"
+                    aria-label="Show more"
+                    title="Show more"
+                    aria-busy="false"
                     aria-controls="accordion-allocation-plan-management"
                     data-paginated-list-more="accordion-allocation-plan-management"
                     hidden
-            >Show more</button>
-            <span data-paginated-list-status="accordion-allocation-plan-management"
+            >
+                <span class="bi bi-chevron-double-down" data-paginated-list-more-icon aria-hidden="true"></span>
+                <span class="bi bi-arrow-clockwise" data-paginated-list-retry-icon aria-hidden="true" hidden></span>
+                <span class="spinner-border spinner-border-sm" data-paginated-list-loading-indicator aria-hidden="true" hidden></span>
+            </button>
+            <span class="d-block"
+                  data-paginated-list-status="accordion-allocation-plan-management"
                   role="status"
                   aria-live="polite"
-                  tabindex="-1"
             ></span>
         </div>
     </div>
