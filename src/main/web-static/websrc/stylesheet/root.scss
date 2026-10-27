@@ -284,6 +284,14 @@
   min-height: 2.375rem;
 }
 
+/** Keeps a grid-gutter-sized inset below viewing accordions and their pagination controls.
+ *
+ * @author GPT-6 Luna
+ */
+.portfolio-paginated-view {
+  padding-bottom: calc(var(--bs-gutter-x, 1.5rem) * 0.5);
+}
+
 [data-paginated-list-controls][hidden],
 [data-paginated-list-more][hidden],
 [data-paginated-list-more-icon][hidden],
