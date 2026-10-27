@@ -1,41 +1,52 @@
 <!-- Co-authored by: GPT-6 Luna, GPT-6 Sol and benizzio -->
 <div data-exclusive-display-container>
 
-    <div class="accordion"
-         id="accordion-allocation-plan"
-         data-paginated-list
-         hx-get="/api/portfolio/:portfolioId/allocation-plan"
-         hx-include="[name='portfolioId']"
-         hx-trigger="load, reload-allocation-plans, paginated-list-more queue:none"
-         hx-sync="this:replace"
-         hx-disinherit="hx-sync"
-         hx-swap="innerHTML"
-         handlebars-template="template-allocation-plan-item"
-         hx-on::after-settle="initAllocationPlanHierarchyLabels()"
-         data-hx-transform-response="paginateAllocationPlanView"
-         data-hx-transform-response-on-path-matching="^\/api\/portfolio\/.+\/allocation-plan(?:\?.*)?$"
-         data-display-on-route="/portfolio/:portfolioId/allocation"
-    >
-        <div class="accordion-item placeholder-glow">
-            <h2 class="accordion-header placeholder col-12">placeholder</h2>
+    <div data-display-on-route="/portfolio/:portfolioId/allocation">
+        <div class="accordion"
+             id="accordion-allocation-plan"
+             data-paginated-list
+             hx-get="/api/portfolio/:portfolioId/allocation-plan"
+             hx-include="[name='portfolioId']"
+             hx-trigger="load, reload-allocation-plans, paginated-list-more queue:none"
+             hx-sync="this:replace"
+             hx-disinherit="hx-sync"
+             hx-swap="innerHTML"
+             handlebars-template="template-allocation-plan-item"
+             hx-on::after-settle="initAllocationPlanHierarchyLabels()"
+             data-hx-transform-response="paginateAllocationPlanView"
+             data-hx-transform-response-on-path-matching="^\/api\/portfolio\/.+\/allocation-plan(?:\?.*)?$"
+        >
+            <div class="accordion-item placeholder-glow">
+                <h2 class="accordion-header placeholder col-12">placeholder</h2>
+            </div>
+            <div class="accordion-item placeholder-glow">
+                <h2 class="accordion-header placeholder col-12">placeholder</h2>
+            </div>
         </div>
-        <div class="accordion-item placeholder-glow">
-            <h2 class="accordion-header placeholder col-12">placeholder</h2>
+        <!-- Co-authored by: GPT-6 Luna and benizzio -->
+        <div class="text-center mt-4 mb-5"
+             data-paginated-list-controls="accordion-allocation-plan"
+             hidden
+        >
+            <button type="button"
+                    class="btn btn-primary paginated-list-more-button"
+                    aria-label="Show more"
+                    title="Show more"
+                    aria-busy="false"
+                    aria-controls="accordion-allocation-plan"
+                    data-paginated-list-more="accordion-allocation-plan"
+                    hidden
+            >
+                <span class="bi bi-chevron-double-down" data-paginated-list-more-icon aria-hidden="true"></span>
+                <span class="bi bi-arrow-clockwise" data-paginated-list-retry-icon aria-hidden="true" hidden></span>
+                <span class="spinner-border spinner-border-sm" data-paginated-list-loading-indicator aria-hidden="true" hidden></span>
+            </button>
+            <span class="d-block"
+                  data-paginated-list-status="accordion-allocation-plan"
+                  role="status"
+                  aria-live="polite"
+            ></span>
         </div>
-    </div>
-    <!-- Co-authored by: GPT-6 Luna and benizzio -->
-    <div class="d-flex flex-column align-items-center gap-2 mt-2 mb-5">
-        <button type="button"
-                class="btn btn-outline-secondary"
-                aria-controls="accordion-allocation-plan"
-                data-paginated-list-more="accordion-allocation-plan"
-                hidden
-        >Show more</button>
-        <span data-paginated-list-status="accordion-allocation-plan"
-              role="status"
-              aria-live="polite"
-              tabindex="-1"
-        ></span>
     </div>
 
     <div data-hx-trigger-on-route="/portfolio/:portfolioId/allocation/manage!load-allocation-plan-management"

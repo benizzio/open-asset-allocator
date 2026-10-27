@@ -49,6 +49,19 @@ type SeededPlans = {
   records: readonly SeededPlanRecord[];
 };
 
+type LateViewResponseIsolationConfig = {
+  viewingRoute: string;
+  managementRoute: string;
+  viewingEndpoint: string;
+  managementEndpoint: string;
+  viewingOwnerId: string;
+  managementOwnerId: string;
+  viewingManagementButton: string;
+  managementViewingButton: string;
+  managementDraftSelector: string;
+  draftValue: string;
+};
+
 test('scenario 21.1: paginates portfolio history viewing with retry and preserves existing charts', async ({
   database,
   page,
@@ -72,6 +85,8 @@ test('scenario 21.1: paginates portfolio history viewing with retry and preserve
   await expect.poll(() => displayedIds(displayedRecords)).toEqual(expectedIds.slice(0, 10));
   await expect(list.locator('[onclick="navigateToPortfolioAllocationManagement()"]')).toHaveCount(1);
   await expect(moreButton).toBeVisible();
+  await expectReadyControl(page, 'accordion-portfolio-history');
+  await expectPaginationGapAtWidths(page, 'accordion-portfolio-history');
 
   const firstRecordId = expectedIds[0];
   const firstPanel = page.locator(`#portfolio-allocation-${firstRecordId}`);
@@ -80,8 +95,23 @@ test('scenario 21.1: paginates portfolio history viewing with retry and preserve
   expect(originalCanvas).not.toBeNull();
 
   let firstCursorFailure = true;
+  let holdRetryResponse = false;
+  let continuationRequestCount = 0;
+  let releaseRetryResponse: () => void = () => {};
+  let signalRetryStarted: () => void = () => {};
+  const retryResponseGate = new Promise<void>(resolve => {
+    releaseRetryResponse = resolve;
+  });
+  const retryRequestStarted = new Promise<void>(resolve => {
+    signalRetryStarted = resolve;
+  });
+
   await page.route(`**${endpoint}?*`, async route => {
     const requestUrl = new URL(route.request().url());
+
+    if(requestUrl.searchParams.get('pageCursor') === firstCursor) {
+      continuationRequestCount++;
+    }
 
     if(requestUrl.searchParams.get('pageCursor') === firstCursor && firstCursorFailure) {
       firstCursorFailure = false;
@@ -89,22 +119,55 @@ test('scenario 21.1: paginates portfolio history viewing with retry and preserve
       return;
     }
 
+    if(requestUrl.searchParams.get('pageCursor') === firstCursor && holdRetryResponse) {
+      holdRetryResponse = false;
+      signalRetryStarted();
+      await retryResponseGate;
+      await route.continue();
+      return;
+    }
+
     await route.continue();
   });
 
-  await moreButton.click();
-  await expect(status).toHaveAttribute('role', 'alert');
-  await expect(status).toHaveText('Could not load records. Try again.');
-  await expect(displayedRecords).toHaveCount(10);
+  let retryResponse: Response;
+  try {
+    await moreButton.click();
+    await expect(status).toHaveAttribute('role', 'alert');
+    await expect(status).toHaveText('Could not load records. Try again.');
+    await expect(displayedRecords).toHaveCount(10);
+    await expect(moreButton).toHaveAccessibleName('Retry loading records');
+    await expect(moreButton).toHaveAttribute('title', 'Retry loading records');
+    await expect(moreButton.locator('[data-paginated-list-retry-icon]')).toBeVisible();
+    await expect(moreButton.locator('[data-paginated-list-more-icon]')).toBeHidden();
 
-  const retryResponsePromise = waitForPageResponse(page, endpoint, firstCursor);
-  await moreButton.click();
-  const retryResponse = await retryResponsePromise;
+    holdRetryResponse = true;
+    const retryResponsePromise = waitForPageResponse(page, endpoint, firstCursor);
+    await moreButton.click();
+    await retryRequestStarted;
+    await expect(moreButton).toBeDisabled();
+    await expect(moreButton).toHaveAccessibleName('Loading records');
+    await expect(moreButton).toHaveAttribute('aria-busy', 'true');
+    await expect(moreButton.locator('[data-paginated-list-loading-indicator]')).toBeVisible();
+    await expect(moreButton.locator('[data-paginated-list-retry-icon]')).toBeHidden();
+    await expect(status).toBeEmpty();
+
+    await moreButton.evaluate(button => (button as HTMLButtonElement).click());
+    expect(continuationRequestCount).toBe(2);
+
+    releaseRetryResponse();
+    retryResponse = await retryResponsePromise;
+  } finally {
+    releaseRetryResponse();
+  }
+
   const secondPage = await readPage(retryResponse, endpoint, firstCursor);
   const secondCursor = requireContinuationCursor(secondPage);
 
   await expect(displayedRecords).toHaveCount(20);
+  await expect(status).toBeEmpty();
   await expect.poll(() => displayedIds(displayedRecords)).toEqual(expectedIds.slice(0, 20));
+  await expectReadyControl(page, 'accordion-portfolio-history');
   await expect(firstPanel).toHaveClass(/\bshow\b/);
   await expect(firstPanel.locator('canvas')).toHaveCount(1);
   expect(await firstPanel.locator('canvas').evaluate((canvas, original) => canvas === original, originalCanvas))
@@ -119,6 +182,8 @@ test('scenario 21.1: paginates portfolio history viewing with retry and preserve
   await expect(displayedRecords).toHaveCount(PAGINATION_RECORD_COUNT);
   await expect.poll(() => displayedIds(displayedRecords)).toEqual(expectedIds);
   await expect(moreButton).toBeHidden();
+  await expect(page.locator('[data-paginated-list-controls="accordion-portfolio-history"]')).toBeHidden();
+  await expect(status).toBeEmpty();
   await expect(list.locator('[onclick="navigateToPortfolioAllocationManagement()"]')).toHaveCount(1);
 });
 
@@ -146,6 +211,10 @@ test('scenario 21.2: appends history-management records without replacing drafts
   await expect(list.locator(':scope > [data-paginated-record-id="0"]')).toHaveCount(1);
   await expect(list.locator(':scope > [data-paginated-record-id]').first())
     .toHaveAttribute('data-paginated-record-id', '0');
+  await expect(page.locator('[data-paginated-list-controls="accordion-portfolio-history"]')).toBeHidden();
+  await expect(loadMoreButton(page, 'accordion-portfolio-history')).toBeHidden();
+  await expectReadyControl(page, 'accordion-portfolio-history-management');
+  await expectPaginationGapAtWidths(page, 'accordion-portfolio-history-management');
 
   const draftTag = list.locator('.portfolio-history-management-new-time-tag');
   const draftDate = list.locator('#portfolio-history-management-observation-date');
@@ -195,6 +264,9 @@ test('scenario 21.2: appends history-management records without replacing drafts
 
   await expect(displayedRecords).toHaveCount(PAGINATION_RECORD_COUNT + 1);
   await expect(moreButton).toBeHidden();
+  await expect(page.locator('[data-paginated-list-controls="accordion-portfolio-history-management"]'))
+    .toBeHidden();
+  await expect(page.locator('[data-paginated-list-status="accordion-portfolio-history-management"]')).toBeEmpty();
   await expect(list.locator('[data-paginated-record-id="0"]')).toHaveCount(1);
 });
 
@@ -219,6 +291,8 @@ test('scenario 21.3: paginates allocation-plan viewing records in backend order'
   await expect(displayedRecords).toHaveCount(10);
   await expect.poll(() => displayedIds(displayedRecords)).toEqual(expectedIds.slice(0, 10));
   await expect(list.locator('[onclick="navigateToPortfolioAllocationPlanManagement()"]')).toHaveCount(1);
+  await expectReadyControl(page, 'accordion-allocation-plan');
+  await expectPaginationGapAtWidths(page, 'accordion-allocation-plan');
 
   const firstPanel = page.locator(`#allocation-plan-${expectedIds[0]}`);
   await expect(firstPanel).toHaveClass(/\bshow\b/);
@@ -246,6 +320,8 @@ test('scenario 21.3: paginates allocation-plan viewing records in backend order'
   await expect(displayedRecords).toHaveCount(PAGINATION_RECORD_COUNT);
   await expect.poll(() => displayedIds(displayedRecords)).toEqual(expectedIds);
   await expect(moreButton).toBeHidden();
+  await expect(page.locator('[data-paginated-list-controls="accordion-allocation-plan"]')).toBeHidden();
+  await expect(page.locator('[data-paginated-list-status="accordion-allocation-plan"]')).toBeEmpty();
 });
 
 test('scenario 21.4: appends allocation-plan management records while keeping one draft form and active edits', async ({
@@ -272,6 +348,10 @@ test('scenario 21.4: appends allocation-plan management records while keeping on
   await expect(list.locator('[data-paginated-record-id="0"]')).toHaveCount(1);
   await expect(list.locator(':scope > [data-paginated-record-id]').first())
     .toHaveAttribute('data-paginated-record-id', '0');
+  await expect(page.locator('[data-paginated-list-controls="accordion-allocation-plan"]')).toBeHidden();
+  await expect(loadMoreButton(page, 'accordion-allocation-plan')).toBeHidden();
+  await expectReadyControl(page, 'accordion-allocation-plan-management');
+  await expectPaginationGapAtWidths(page, 'accordion-allocation-plan-management');
 
   const draftName = list.locator('.allocation-plan-management-new-name');
   const draftDate = list.locator('#allocation-plan-management-planned-date');
@@ -322,6 +402,9 @@ test('scenario 21.4: appends allocation-plan management records while keeping on
   await expect.poll(() => displayedIds(displayedRecords).then(ids => ids.filter(id => id !== '0')))
     .toEqual(expectedIds);
   await expect(moreButton).toBeHidden();
+  await expect(page.locator('[data-paginated-list-controls="accordion-allocation-plan-management"]'))
+    .toBeHidden();
+  await expect(page.locator('[data-paginated-list-status="accordion-allocation-plan-management"]')).toBeEmpty();
   await expect(list.locator('[data-paginated-record-id="0"]')).toHaveCount(1);
 });
 
@@ -344,8 +427,10 @@ test('scenario 21.5: handles empty history and allocation-plan lists without con
     .toHaveText('No records found.');
 
   const historyManagementEndpoint = `/api/portfolio/${emptyHistory.portfolio.id}/history/observation`;
+  const historyManagementStatus = page.locator('[data-paginated-list-status="accordion-portfolio-history-management"]');
   responsePromise = waitForPageResponse(page, historyManagementEndpoint, '');
-  await page.goto(`/portfolio/${emptyHistory.portfolio.id}/history/manage`);
+  await page.locator('#accordion-portfolio-history > button[onclick="navigateToPortfolioAllocationManagement()"]')
+    .click();
   response = await responsePromise;
   responsePage = await readPage(response, historyManagementEndpoint, '');
   expect(responsePage.items).toHaveLength(0);
@@ -355,8 +440,8 @@ test('scenario 21.5: handles empty history and allocation-plan lists without con
   await expect(page.locator('#accordion-portfolio-history-management [data-paginated-record-id="0"]'))
     .toHaveCount(1);
   await expect(loadMoreButton(page, 'accordion-portfolio-history-management')).toBeHidden();
-  await expect(page.locator('[data-paginated-list-status="accordion-portfolio-history-management"]'))
-    .toHaveText('No records found.');
+  await expect(historyManagementStatus).toHaveText('No records found.');
+  await expect(page.locator('[data-paginated-list-status="accordion-portfolio-history"]')).toBeHidden();
 
   const emptyPlans = await seedPlans(database, 0);
   const plansEndpoint = `/api/portfolio/${emptyPlans.portfolio.id}/allocation-plan`;
@@ -373,7 +458,8 @@ test('scenario 21.5: handles empty history and allocation-plan lists without con
     .toHaveText('No records found.');
 
   responsePromise = waitForPageResponse(page, plansEndpoint, '');
-  await page.goto(`/portfolio/${emptyPlans.portfolio.id}/allocation/manage`);
+  await page.locator('#accordion-allocation-plan > button[onclick="navigateToPortfolioAllocationPlanManagement()"]')
+    .click();
   response = await responsePromise;
   responsePage = await readPage(response, plansEndpoint, '');
   expect(responsePage.items).toHaveLength(0);
@@ -385,6 +471,7 @@ test('scenario 21.5: handles empty history and allocation-plan lists without con
   await expect(loadMoreButton(page, 'accordion-allocation-plan-management')).toBeHidden();
   await expect(page.locator('[data-paginated-list-status="accordion-allocation-plan-management"]'))
     .toHaveText('No records found.');
+  await expect(page.locator('[data-paginated-list-status="accordion-allocation-plan"]')).toBeHidden();
 });
 
 test('scenario 21.6: treats exactly ten records as terminal on all four lists', async ({ database, page }) => {
@@ -399,7 +486,8 @@ test('scenario 21.6: treats exactly ten records as terminal on all four lists', 
   await expect(page.locator('#accordion-portfolio-history [data-paginated-record-id]')).toHaveCount(10);
   await expect(loadMoreButton(page, 'accordion-portfolio-history')).toBeHidden();
   await expect(page.locator('[data-paginated-list-status="accordion-portfolio-history"]'))
-    .toHaveText('All records loaded.');
+    .toBeEmpty();
+  await expect(page.locator('[data-paginated-list-controls="accordion-portfolio-history"]')).toBeHidden();
 
   const historyManagementEndpoint = `/api/portfolio/${history.portfolio.id}/history/observation`;
   responsePromise = waitForPageResponse(page, historyManagementEndpoint, '');
@@ -413,7 +501,9 @@ test('scenario 21.6: treats exactly ten records as terminal on all four lists', 
     .toHaveCount(1);
   await expect(loadMoreButton(page, 'accordion-portfolio-history-management')).toBeHidden();
   await expect(page.locator('[data-paginated-list-status="accordion-portfolio-history-management"]'))
-    .toHaveText('All records loaded.');
+    .toBeEmpty();
+  await expect(page.locator('[data-paginated-list-controls="accordion-portfolio-history-management"]'))
+    .toBeHidden();
 
   const plans = await seedPlans(database, 10);
   const plansEndpoint = `/api/portfolio/${plans.portfolio.id}/allocation-plan`;
@@ -426,7 +516,8 @@ test('scenario 21.6: treats exactly ten records as terminal on all four lists', 
   await expect(page.locator('#accordion-allocation-plan [data-paginated-record-id]')).toHaveCount(10);
   await expect(loadMoreButton(page, 'accordion-allocation-plan')).toBeHidden();
   await expect(page.locator('[data-paginated-list-status="accordion-allocation-plan"]'))
-    .toHaveText('All records loaded.');
+    .toBeEmpty();
+  await expect(page.locator('[data-paginated-list-controls="accordion-allocation-plan"]')).toBeHidden();
 
   responsePromise = waitForPageResponse(page, plansEndpoint, '');
   await page.goto(`/portfolio/${plans.portfolio.id}/allocation/manage`);
@@ -439,8 +530,279 @@ test('scenario 21.6: treats exactly ten records as terminal on all four lists', 
     .toHaveCount(1);
   await expect(loadMoreButton(page, 'accordion-allocation-plan-management')).toBeHidden();
   await expect(page.locator('[data-paginated-list-status="accordion-allocation-plan-management"]'))
-    .toHaveText('All records loaded.');
+    .toBeEmpty();
+  await expect(page.locator('[data-paginated-list-controls="accordion-allocation-plan-management"]'))
+    .toBeHidden();
 });
+
+test('scenario 21.7: isolates history controls when a hidden viewing page settles late', async ({ database, page }) => {
+  const seeded = await seedHistory(database);
+
+  await verifyLateViewResponseIsolation(page, {
+    viewingRoute: `/portfolio/${seeded.portfolio.id}/history`,
+    managementRoute: `/portfolio/${seeded.portfolio.id}/history/manage`,
+    viewingEndpoint: `/api/portfolio/${seeded.portfolio.id}/history`,
+    managementEndpoint: `/api/portfolio/${seeded.portfolio.id}/history/observation`,
+    viewingOwnerId: 'accordion-portfolio-history',
+    managementOwnerId: 'accordion-portfolio-history-management',
+    viewingManagementButton: '#accordion-portfolio-history > button[onclick="navigateToPortfolioAllocationManagement()"]',
+    managementViewingButton: 'button[onclick="portfolioHistoryManagement.navigateToPortfolioAllocationViewing()"]',
+    managementDraftSelector: '.portfolio-history-management-new-time-tag',
+    draftValue: 'Late history response draft',
+  });
+});
+
+test('scenario 21.8: isolates allocation-plan controls when a hidden viewing page settles late', async ({
+  database,
+  page,
+}) => {
+  const seeded = await seedPlans(database);
+
+  await verifyLateViewResponseIsolation(page, {
+    viewingRoute: `/portfolio/${seeded.portfolio.id}/allocation`,
+    managementRoute: `/portfolio/${seeded.portfolio.id}/allocation/manage`,
+    viewingEndpoint: `/api/portfolio/${seeded.portfolio.id}/allocation-plan`,
+    managementEndpoint: `/api/portfolio/${seeded.portfolio.id}/allocation-plan`,
+    viewingOwnerId: 'accordion-allocation-plan',
+    managementOwnerId: 'accordion-allocation-plan-management',
+    viewingManagementButton: '#accordion-allocation-plan > button[onclick="navigateToPortfolioAllocationPlanManagement()"]',
+    managementViewingButton: 'button[onclick="allocationPlanManagement.navigateToAllocationPlansViewing()"]',
+    managementDraftSelector: '.allocation-plan-management-new-name',
+    draftValue: 'Late plan response draft',
+  });
+});
+
+test('scenario 21.9: moves keyboard focus to the newly appended record after terminal pagination', async ({
+  database,
+  page,
+}) => {
+  const seeded = await seedHistory(database, 20);
+  const endpoint = `/api/portfolio/${seeded.portfolio.id}/history`;
+  const initialResponsePromise = waitForPageResponse(page, endpoint, '');
+
+  await page.goto(`/portfolio/${seeded.portfolio.id}/history`);
+
+  const initialResponse = await initialResponsePromise;
+  const firstPage = await readPage(initialResponse, endpoint, '');
+  const finalCursor = requireContinuationCursor(firstPage);
+  const ownerId = 'accordion-portfolio-history';
+  const moreButton = loadMoreButton(page, ownerId);
+  await expectReadyControl(page, ownerId);
+
+  const finalResponsePromise = waitForPageResponse(page, endpoint, finalCursor);
+  await moreButton.focus();
+  await expect(moreButton).toBeFocused();
+  await page.keyboard.press('Enter');
+
+  const finalResponse = await finalResponsePromise;
+  const finalPage = await readPage(finalResponse, endpoint, finalCursor);
+  expect(finalPage.nextCursor).toBeNull();
+  await expect(page.locator(`#${ownerId} [data-paginated-record-id]`)).toHaveCount(20);
+  await expect(moreButton).toBeHidden();
+  await expect(page.locator(
+    `#${ownerId} [data-paginated-record-id="${seeded.records[10].id}"] .accordion-button`,
+  )).toBeFocused();
+  await expect(page.locator(`[data-paginated-list-controls="${ownerId}"]`)).toBeHidden();
+});
+
+test('scenario 21.10: keeps an initial-load retry visible and busy without a cursor', async ({ database, page }) => {
+  const seeded = await seedHistory(database);
+  const endpoint = `/api/portfolio/${seeded.portfolio.id}/history`;
+  const ownerId = 'accordion-portfolio-history';
+  const status = page.locator(`[data-paginated-list-status="${ownerId}"]`);
+  const moreButton = loadMoreButton(page, ownerId);
+  let failInitialRequest = true;
+  let holdRetryResponse = false;
+  let releaseRetryResponse: () => void = () => {};
+  let signalRetryStarted: () => void = () => {};
+  const retryResponseGate = new Promise<void>(resolve => {
+    releaseRetryResponse = resolve;
+  });
+  const retryRequestStarted = new Promise<void>(resolve => {
+    signalRetryStarted = resolve;
+  });
+
+  await page.route(`**${endpoint}?*`, async route => {
+    const requestUrl = new URL(route.request().url());
+
+    if(requestUrl.searchParams.get('pageCursor') !== '') {
+      await route.continue();
+      return;
+    }
+
+    if(failInitialRequest) {
+      failInitialRequest = false;
+      await route.abort();
+      return;
+    }
+
+    if(holdRetryResponse) {
+      holdRetryResponse = false;
+      signalRetryStarted();
+      await retryResponseGate;
+    }
+
+    await route.continue();
+  });
+
+  try {
+    await page.goto(`/portfolio/${seeded.portfolio.id}/history`);
+    await expect(status).toHaveAttribute('role', 'alert');
+    await expect(status).toHaveText('Could not load records. Try again.');
+    await expect(moreButton).toBeVisible();
+    await expect(moreButton).toHaveAccessibleName('Retry loading records');
+    await expect(moreButton.locator('[data-paginated-list-retry-icon]')).toBeVisible();
+
+    holdRetryResponse = true;
+    const retryResponsePromise = waitForPageResponse(page, endpoint, '');
+    await moreButton.click();
+    await retryRequestStarted;
+    await expect(moreButton).toBeVisible();
+    await expect(moreButton).toBeDisabled();
+    await expect(moreButton).toHaveAccessibleName('Loading records');
+    await expect(moreButton).toHaveAttribute('aria-busy', 'true');
+    await expect(moreButton.locator('[data-paginated-list-loading-indicator]')).toBeVisible();
+
+    releaseRetryResponse();
+    const retryResponse = await retryResponsePromise;
+    const retryPage = await readPage(retryResponse, endpoint, '');
+    expect(retryPage.nextCursor).not.toBeNull();
+    await expectReadyControl(page, ownerId);
+    await expect(status).toBeEmpty();
+    await expect(page.locator(`#${ownerId} [data-paginated-record-id]`)).toHaveCount(10);
+  } finally {
+    releaseRetryResponse();
+  }
+});
+
+/** Verifies icon-only button state, ownership, accessibility, and empty child markup. */
+async function expectReadyControl(page: Page, ownerId: string): Promise<void> {
+  const button = loadMoreButton(page, ownerId);
+  const controls = page.locator(`[data-paginated-list-controls="${ownerId}"]`);
+
+  await expect(controls).toBeVisible();
+  await expect(button).toBeVisible();
+  await expect(button).toBeEnabled();
+  await expect(button).toHaveClass(/\bbtn-primary\b/);
+  await expect(button).not.toHaveClass(/btn-outline/);
+  await expect(button).toHaveAccessibleName('Show more');
+  await expect(button).toHaveAttribute('title', 'Show more');
+  await expect(button).toHaveAttribute('aria-busy', 'false');
+  await expect(button).toBeEmpty();
+  await expect(button.locator('[data-paginated-list-more-icon]')).toBeVisible();
+  await expect(button.locator('[data-paginated-list-retry-icon]')).toBeHidden();
+  await expect(button.locator('[data-paginated-list-loading-indicator]')).toBeHidden();
+}
+
+/** Verifies the configured 1.5rem list-to-control gap at desktop and narrow widths. */
+async function expectPaginationGapAtWidths(page: Page, ownerId: string): Promise<void> {
+  const originalViewport = page.viewportSize() ?? { width: 1280, height: 900 };
+
+  try {
+    for(const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
+      await page.setViewportSize(viewport);
+      await expect.poll(async () => page.evaluate((id) => {
+        const accordion = document.getElementById(id);
+        const button = document.querySelector<HTMLElement>(`[data-paginated-list-more="${id}"]`);
+
+        if(!accordion || !button || button.getClientRects().length === 0) {
+          return Number.POSITIVE_INFINITY;
+        }
+
+        const gap = button.getBoundingClientRect().top - accordion.getBoundingClientRect().bottom;
+        const expectedGap = parseFloat(getComputedStyle(document.documentElement).fontSize) * 1.5;
+        return Math.abs(gap - expectedGap);
+      }, ownerId)).toBeLessThanOrEqual(1);
+    }
+  } finally {
+    await page.setViewportSize(originalViewport);
+  }
+}
+
+/** Exercises a delayed viewing append across route changes without leaking controls or stealing focus. */
+async function verifyLateViewResponseIsolation(
+  page: Page,
+  config: LateViewResponseIsolationConfig,
+): Promise<void> {
+  const initialResponsePromise = waitForPageResponse(page, config.viewingEndpoint, '');
+  await page.goto(config.viewingRoute);
+
+  const initialResponse = await initialResponsePromise;
+  const initialPage = await readPage(initialResponse, config.viewingEndpoint, '');
+  const continuationCursor = requireContinuationCursor(initialPage);
+  const moreButton = loadMoreButton(page, config.viewingOwnerId);
+  const viewingControls = page.locator(`[data-paginated-list-controls="${config.viewingOwnerId}"]`);
+  const managementControls = page.locator(`[data-paginated-list-controls="${config.managementOwnerId}"]`);
+  const viewingStatus = page.locator(`[data-paginated-list-status="${config.viewingOwnerId}"]`);
+  const draft = page.locator(config.managementDraftSelector);
+
+  await expectReadyControl(page, config.viewingOwnerId);
+  await expectPaginationGapAtWidths(page, config.viewingOwnerId);
+
+  let releaseDelayedResponse: () => void = () => {};
+  let signalDelayedRequest: () => void = () => {};
+  let delayContinuation = true;
+  const delayedResponseGate = new Promise<void>(resolve => {
+    releaseDelayedResponse = resolve;
+  });
+  const delayedRequestStarted = new Promise<void>(resolve => {
+    signalDelayedRequest = resolve;
+  });
+  const routePattern = `**${config.viewingEndpoint}?*`;
+
+  await page.route(routePattern, async route => {
+    const requestUrl = new URL(route.request().url());
+
+    if(delayContinuation && requestUrl.searchParams.get('pageCursor') === continuationCursor) {
+      delayContinuation = false;
+      signalDelayedRequest();
+      await delayedResponseGate;
+    }
+
+    await route.continue();
+  });
+
+  try {
+    const appendResponsePromise = waitForPageResponse(page, config.viewingEndpoint, continuationCursor);
+    await moreButton.click();
+    await delayedRequestStarted;
+
+    const managementResponsePromise = waitForPageResponse(page, config.managementEndpoint, '');
+    await page.locator(config.viewingManagementButton).click();
+    const managementResponse = await managementResponsePromise;
+    const managementPage = await readPage(managementResponse, config.managementEndpoint, '');
+    expect(managementPage.nextCursor).not.toBeNull();
+    await expect.poll(() => new URL(page.url()).pathname).toBe(config.managementRoute);
+    await expect(viewingControls).toBeHidden();
+    await expect(viewingStatus).toBeHidden();
+    await expect(managementControls).toBeVisible();
+    await expectReadyControl(page, config.managementOwnerId);
+    await expectPaginationGapAtWidths(page, config.managementOwnerId);
+
+    await draft.fill(config.draftValue);
+    const enteredDraftValue = await draft.inputValue();
+    await expect(draft).toBeFocused();
+
+    releaseDelayedResponse();
+    const appendResponse = await appendResponsePromise;
+    const appendedPage = await readPage(appendResponse, config.viewingEndpoint, continuationCursor);
+    expect(appendedPage.items).toHaveLength(10);
+    await expect(page.locator(`#${config.viewingOwnerId} [data-paginated-record-id]`)).toHaveCount(20);
+    await expect(viewingControls).toBeHidden();
+    await expect(viewingStatus).toBeHidden();
+    await expect(draft).toHaveValue(enteredDraftValue);
+    await expect(draft).toBeFocused();
+
+    await page.locator(config.managementViewingButton).click();
+    await expect.poll(() => new URL(page.url()).pathname).toBe(config.viewingRoute);
+    await expect(viewingControls).toBeVisible();
+    await expect(moreButton).toBeVisible();
+    await expect(managementControls).toBeHidden();
+  } finally {
+    releaseDelayedResponse();
+    await page.unroute(routePattern);
+  }
+}
 
 /** Seeds the requested number of observations, including a boundary timestamp tie when enough exist. */
 async function seedHistory(
