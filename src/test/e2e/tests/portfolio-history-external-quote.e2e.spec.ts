@@ -2,6 +2,7 @@
  * Covers the external quote action and its row-scoped submission contract.
  *
  * @author GPT-6 Luna
+ * @author GPT-6.1 Sol
  */
 import type { Locator, Page, Request, Route } from '@playwright/test';
 import { expect, test } from '../support/fixtures';
@@ -911,6 +912,7 @@ test.describe('scenario 16: external asset quote action and submission contract'
   /** Ignores a delayed quote after the management list reload replaces its loaded observation row.
    *
    * @author GPT-6 Luna
+   * @author GPT-6.1 Sol
    */
   test('scenario 16.8: ignores a delayed quote after the portfolio-history management reload', async ({ database, page }) => {
     test.setTimeout(60_000);
@@ -984,7 +986,7 @@ test.describe('scenario 16: external asset quote action and submission contract'
       const managementContainer = page.locator('#accordion-portfolio-history-management');
       await expect(managementContainer).toHaveAttribute(
         'hx-trigger',
-        'load, reload-portfolio-history-management',
+        /(?:^|,)\s*reload-portfolio-history-management\s*(?:,|$)/,
       );
       const observationListPath = `/api/portfolio/${seededData.portfolio.id}/history/observation`;
       const observationListResponsePromise = page.waitForResponse((response) => {

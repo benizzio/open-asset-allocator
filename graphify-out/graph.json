@@ -697,7 +697,7 @@
       "file_type": "code",
       "norm_label": "externalassetassociation",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L72"
+      "source_location": "L73"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_persistedobservation",
@@ -710,7 +710,7 @@
       "file_type": "code",
       "norm_label": "persistedobservation",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L112"
+      "source_location": "L113"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_quoteresponsegate",
@@ -723,7 +723,7 @@
       "file_type": "code",
       "norm_label": "quoteresponsegate",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L82"
+      "source_location": "L83"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_seededasset",
@@ -736,7 +736,7 @@
       "file_type": "code",
       "norm_label": "seededasset",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L102"
+      "source_location": "L103"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_seededportfolio",
@@ -749,7 +749,7 @@
       "file_type": "code",
       "norm_label": "seededportfolio",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L93"
+      "source_location": "L94"
     },
     {
       "id": "src_test_e2e_support_accordion_field_interactions_accordionfieldcontrols",
@@ -2682,7 +2682,7 @@
       "file_type": "code",
       "norm_label": "addallocationrow()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1438"
+      "source_location": "L1440"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_browserlocalcalendardate",
@@ -2694,7 +2694,7 @@
       "file_type": "code",
       "norm_label": "browserlocalcalendardate()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1412"
+      "source_location": "L1414"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_createquoteresponsegate",
@@ -2706,7 +2706,7 @@
       "file_type": "code",
       "norm_label": "createquoteresponsegate()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1656"
+      "source_location": "L1658"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_expectedmanagementobservationheader",
@@ -2718,7 +2718,7 @@
       "file_type": "code",
       "norm_label": "expectedmanagementobservationheader()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1607"
+      "source_location": "L1609"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_expectexistingasset",
@@ -2730,7 +2730,7 @@
       "file_type": "code",
       "norm_label": "expectexistingasset()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1510"
+      "source_location": "L1512"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_expectexternalquoteeligibility",
@@ -2742,7 +2742,7 @@
       "file_type": "code",
       "norm_label": "expectexternalquoteeligibility()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1258"
+      "source_location": "L1260"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_expectfinancialvalues",
@@ -2754,7 +2754,7 @@
       "file_type": "code",
       "norm_label": "expectfinancialvalues()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1334"
+      "source_location": "L1336"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_expectmanagementobservationorder",
@@ -2766,7 +2766,7 @@
       "file_type": "code",
       "norm_label": "expectmanagementobservationorder()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1629"
+      "source_location": "L1631"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_expectportfoliohistorymanagement",
@@ -2778,7 +2778,7 @@
       "file_type": "code",
       "norm_label": "expectportfoliohistorymanagement()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1377"
+      "source_location": "L1379"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_expectquoteactionidle",
@@ -2790,7 +2790,7 @@
       "file_type": "code",
       "norm_label": "expectquoteactionidle()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1351"
+      "source_location": "L1353"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_expectrootshell",
@@ -2802,7 +2802,7 @@
       "file_type": "code",
       "norm_label": "expectrootshell()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1364"
+      "source_location": "L1366"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_expectsuccessnotification",
@@ -2814,7 +2814,7 @@
       "file_type": "code",
       "norm_label": "expectsuccessnotification()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1563"
+      "source_location": "L1565"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_externalassetquotepath",
@@ -2826,7 +2826,7 @@
       "file_type": "code",
       "norm_label": "externalassetquotepath()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1290"
+      "source_location": "L1292"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_externalquoteresponse",
@@ -2838,7 +2838,7 @@
       "file_type": "code",
       "norm_label": "externalquoteresponse()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1306"
+      "source_location": "L1308"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_fillcalculatedvalues",
@@ -2850,7 +2850,7 @@
       "file_type": "code",
       "norm_label": "fillcalculatedvalues()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1529"
+      "source_location": "L1531"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_filldirecttotalmarketvalue",
@@ -2862,7 +2862,7 @@
       "file_type": "code",
       "norm_label": "filldirecttotalmarketvalue()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1550"
+      "source_location": "L1552"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_findobservationbytag",
@@ -2874,7 +2874,7 @@
       "file_type": "code",
       "norm_label": "findobservationbytag()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1583"
+      "source_location": "L1585"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_localmidnighttimestamp",
@@ -2886,7 +2886,7 @@
       "file_type": "code",
       "norm_label": "localmidnighttimestamp()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1425"
+      "source_location": "L1427"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_opennewexternalquoteform",
@@ -2898,7 +2898,7 @@
       "file_type": "code",
       "norm_label": "opennewexternalquoteform()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1232"
+      "source_location": "L1234"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_searchforasset",
@@ -2910,7 +2910,7 @@
       "file_type": "code",
       "norm_label": "searchforasset()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1493"
+      "source_location": "L1495"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_seedexternalassetquotedata",
@@ -2922,7 +2922,7 @@
       "file_type": "code",
       "norm_label": "seedexternalassetquotedata()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1077"
+      "source_location": "L1079"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_seedexternalquoteisolationdata",
@@ -2934,7 +2934,7 @@
       "file_type": "code",
       "norm_label": "seedexternalquoteisolationdata()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1181"
+      "source_location": "L1183"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_seedexternalquoteloadedhistory",
@@ -2946,7 +2946,7 @@
       "file_type": "code",
       "norm_label": "seedexternalquoteloadedhistory()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1117"
+      "source_location": "L1119"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_selectassetfromautocomplete",
@@ -2958,7 +2958,7 @@
       "file_type": "code",
       "norm_label": "selectassetfromautocomplete()",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1455"
+      "source_location": "L1457"
     },
     {
       "id": "src_test_e2e_support_accordion_field_interactions_exerciseaccordionfieldinteractions",
@@ -4830,7 +4830,7 @@
       "file_type": "code",
       "norm_label": "default_allocation_structure",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L10"
+      "source_location": "L11"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_external_quote_associations",
@@ -4841,7 +4841,7 @@
       "file_type": "code",
       "norm_label": "external_quote_associations",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L21"
+      "source_location": "L22"
     },
     {
       "id": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec_external_quote_isolation_assets",
@@ -4852,7 +4852,7 @@
       "file_type": "code",
       "norm_label": "external_quote_isolation_assets",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L50"
+      "source_location": "L51"
     },
     {
       "id": "src_test_e2e_support_accordion_field_interactions",
@@ -15149,7 +15149,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1405",
+      "source_location": "L1407",
       "weight": 1.0
     },
     {
@@ -15161,7 +15161,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1641",
+      "source_location": "L1643",
       "weight": 1.0
     },
     {
@@ -15173,7 +15173,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1241",
+      "source_location": "L1243",
       "weight": 1.0
     },
     {
@@ -15185,7 +15185,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1239",
+      "source_location": "L1241",
       "weight": 1.0
     },
     {
@@ -17093,7 +17093,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1438",
+      "source_location": "L1440",
       "weight": 1.0
     },
     {
@@ -17105,7 +17105,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1656",
+      "source_location": "L1658",
       "weight": 1.0
     },
     {
@@ -17117,7 +17117,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1607",
+      "source_location": "L1609",
       "weight": 1.0
     },
     {
@@ -17129,7 +17129,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1510",
+      "source_location": "L1512",
       "weight": 1.0
     },
     {
@@ -17141,7 +17141,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1258",
+      "source_location": "L1260",
       "weight": 1.0
     },
     {
@@ -17153,7 +17153,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1334",
+      "source_location": "L1336",
       "weight": 1.0
     },
     {
@@ -17165,7 +17165,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1629",
+      "source_location": "L1631",
       "weight": 1.0
     },
     {
@@ -17177,7 +17177,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1377",
+      "source_location": "L1379",
       "weight": 1.0
     },
     {
@@ -17189,7 +17189,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1351",
+      "source_location": "L1353",
       "weight": 1.0
     },
     {
@@ -17201,7 +17201,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1364",
+      "source_location": "L1366",
       "weight": 1.0
     },
     {
@@ -17213,7 +17213,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1563",
+      "source_location": "L1565",
       "weight": 1.0
     },
     {
@@ -17225,7 +17225,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1290",
+      "source_location": "L1292",
       "weight": 1.0
     },
     {
@@ -17237,7 +17237,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1306",
+      "source_location": "L1308",
       "weight": 1.0
     },
     {
@@ -17249,7 +17249,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1529",
+      "source_location": "L1531",
       "weight": 1.0
     },
     {
@@ -17261,7 +17261,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1550",
+      "source_location": "L1552",
       "weight": 1.0
     },
     {
@@ -17273,7 +17273,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1583",
+      "source_location": "L1585",
       "weight": 1.0
     },
     {
@@ -17285,7 +17285,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1425",
+      "source_location": "L1427",
       "weight": 1.0
     },
     {
@@ -17297,7 +17297,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1232",
+      "source_location": "L1234",
       "weight": 1.0
     },
     {
@@ -17309,7 +17309,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1493",
+      "source_location": "L1495",
       "weight": 1.0
     },
     {
@@ -17321,7 +17321,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1077",
+      "source_location": "L1079",
       "weight": 1.0
     },
     {
@@ -17333,7 +17333,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1181",
+      "source_location": "L1183",
       "weight": 1.0
     },
     {
@@ -17345,7 +17345,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1117",
+      "source_location": "L1119",
       "weight": 1.0
     },
     {
@@ -17357,7 +17357,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1455",
+      "source_location": "L1457",
       "weight": 1.0
     },
     {
@@ -17849,7 +17849,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L8",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -18106,14 +18106,14 @@
     },
     {
       "source": "src_test_e2e_support_fixtures_test",
-      "target": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec",
+      "target": "src_test_e2e_tests_portfolio_visualization_e2e_spec",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "import",
-      "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L7",
+      "source_file": "src/test/e2e/tests/portfolio-visualization.e2e.spec.ts",
+      "source_location": "L10",
       "weight": 1.0
     },
     {
@@ -18341,24 +18341,24 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L7",
+      "source_location": "L8",
       "weight": 1.0
     },
     {
-      "source": "src_test_e2e_tests_portfolio_visualization_e2e_spec",
-      "target": "src_test_e2e_support_fixtures_expect",
+      "source": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec",
+      "target": "src_test_e2e_support_fixtures_test",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "import",
-      "source_file": "src/test/e2e/tests/portfolio-visualization.e2e.spec.ts",
-      "source_location": "L10",
+      "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
+      "source_location": "L8",
       "weight": 1.0
     },
     {
       "source": "src_test_e2e_tests_portfolio_visualization_e2e_spec",
-      "target": "src_test_e2e_support_fixtures_test",
+      "target": "src_test_e2e_support_fixtures_expect",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -18456,14 +18456,14 @@
     },
     {
       "source": "ref_playwright_test",
-      "target": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec",
+      "target": "src_test_e2e_tests_portfolio_visualization_e2e_spec",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "import",
-      "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L6",
+      "source_file": "src/test/e2e/tests/portfolio-visualization.e2e.spec.ts",
+      "source_location": "L9",
       "type_only": true,
       "weight": 1.0
     },
@@ -18687,6 +18687,19 @@
       "weight": 1.0
     },
     {
+      "source": "src_test_e2e_support_database",
+      "target": "src_test_e2e_tests_portfolio_visualization_e2e_spec",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/test/e2e/tests/portfolio-visualization.e2e.spec.ts",
+      "source_location": "L11",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
       "source": "src_test_e2e_support_doughnut_chart",
       "target": "ref_playwright_test",
       "relation": "imports_from",
@@ -18797,14 +18810,14 @@
     },
     {
       "source": "src_test_e2e_support_fixtures",
-      "target": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec",
+      "target": "src_test_e2e_tests_portfolio_visualization_e2e_spec",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "import",
-      "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L7",
+      "source_file": "src/test/e2e/tests/portfolio-visualization.e2e.spec.ts",
+      "source_location": "L10",
       "weight": 1.0
     },
     {
@@ -19074,7 +19087,20 @@
     },
     {
       "source": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec",
-      "target": "src_test_e2e_support_database",
+      "target": "ref_playwright_test",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
+      "source_location": "L7",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "source": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec",
+      "target": "src_test_e2e_support_fixtures",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -19082,43 +19108,17 @@
       "context": "import",
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
       "source_location": "L8",
-      "type_only": true,
       "weight": 1.0
     },
     {
-      "source": "src_test_e2e_tests_portfolio_visualization_e2e_spec",
-      "target": "src_test_e2e_support_fixtures",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/test/e2e/tests/portfolio-visualization.e2e.spec.ts",
-      "source_location": "L10",
-      "weight": 1.0
-    },
-    {
-      "source": "src_test_e2e_tests_portfolio_visualization_e2e_spec",
+      "source": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec",
       "target": "src_test_e2e_support_database",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "import",
-      "source_file": "src/test/e2e/tests/portfolio-visualization.e2e.spec.ts",
-      "source_location": "L11",
-      "type_only": true,
-      "weight": 1.0
-    },
-    {
-      "source": "src_test_e2e_tests_portfolio_visualization_e2e_spec",
-      "target": "ref_playwright_test",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/test/e2e/tests/portfolio-visualization.e2e.spec.ts",
+      "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
       "source_location": "L9",
       "type_only": true,
       "weight": 1.0
@@ -21970,7 +21970,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L10",
+      "source_location": "L11",
       "weight": 1.0
     },
     {
@@ -21981,7 +21981,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L21",
+      "source_location": "L22",
       "weight": 1.0
     },
     {
@@ -21992,7 +21992,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L50",
+      "source_location": "L51",
       "weight": 1.0
     },
     {
@@ -22003,7 +22003,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L1412",
+      "source_location": "L1414",
       "weight": 1.0
     },
     {
@@ -22014,7 +22014,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L72",
+      "source_location": "L73",
       "weight": 1.0
     },
     {
@@ -22025,7 +22025,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L112",
+      "source_location": "L113",
       "weight": 1.0
     },
     {
@@ -22036,7 +22036,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L82",
+      "source_location": "L83",
       "weight": 1.0
     },
     {
@@ -22047,7 +22047,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L102",
+      "source_location": "L103",
       "weight": 1.0
     },
     {
@@ -22058,7 +22058,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L93",
+      "source_location": "L94",
       "weight": 1.0
     },
     {
@@ -27471,5 +27471,5 @@
       "source_file": "src/main/docker/docker-compose-e2e.yml"
     }
   ],
-  "built_at_commit": "4154ef0ffdb324170a2c3b0fe9c52ae0409a64f1"
+  "built_at_commit": "9e9b8fb6c207558590328eb06653af6c15af2bdd"
 }
