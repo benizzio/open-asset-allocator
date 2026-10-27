@@ -1,19 +1,51 @@
+<!-- Co-authored by: GPT-6 Luna, GPT-6 Sol and benizzio -->
 <div data-exclusive-display-container>
 
-    <div class="accordion mb-5"
-         id="accordion-portfolio-history"
-         hx-get="/api/portfolio/:portfolioId/history"
-         hx-include="[name='portfolioId']"
-         hx-trigger="load, reload-portfolio-history"
-         handlebars-template="template-portfolio-history"
-         hx-on::after-settle="initPortfolioHistoryHierarchyLabels()"
-         data-display-on-route="/portfolio/:portfolioId/history"
-    >
-        <div class="accordion-item placeholder-glow">
-            <h2 class="accordion-header placeholder col-12">placeholder</h2>
+    <div class="portfolio-paginated-view" data-display-on-route="/portfolio/:portfolioId/history">
+        <div class="accordion"
+             id="accordion-portfolio-history"
+             data-paginated-list
+             hx-get="/api/portfolio/:portfolioId/history"
+             hx-include="[name='portfolioId']"
+             hx-trigger="load, reload-portfolio-history, paginated-list-more queue:none"
+             hx-sync="this:replace"
+             hx-disinherit="hx-sync"
+             hx-swap="innerHTML"
+             handlebars-template="template-portfolio-history"
+             hx-on::after-settle="initPortfolioHistoryHierarchyLabels()"
+             data-hx-transform-response="paginatePortfolioHistoryView"
+             data-hx-transform-response-on-path-matching="^\/api\/portfolio\/.+\/history(?:\?.*)?$"
+        >
+            <div class="accordion-item placeholder-glow">
+                <h2 class="accordion-header placeholder col-12">placeholder</h2>
+            </div>
+            <div class="accordion-item placeholder-glow">
+                <h2 class="accordion-header placeholder col-12">placeholder</h2>
+            </div>
         </div>
-        <div class="accordion-item placeholder-glow">
-            <h2 class="accordion-header placeholder col-12">placeholder</h2>
+        <!-- Co-authored by: GPT-6 Luna and benizzio -->
+        <div class="text-center mt-4"
+             data-paginated-list-controls="accordion-portfolio-history"
+             hidden
+        >
+            <button type="button"
+                    class="btn btn-primary paginated-list-more-button"
+                    aria-label="Show more"
+                    title="Show more"
+                    aria-busy="false"
+                    aria-controls="accordion-portfolio-history"
+                    data-paginated-list-more="accordion-portfolio-history"
+                    hidden
+            >
+                <span class="bi bi-chevron-double-down" data-paginated-list-more-icon aria-hidden="true"></span>
+                <span class="bi bi-arrow-clockwise" data-paginated-list-retry-icon aria-hidden="true" hidden></span>
+                <span class="spinner-border spinner-border-sm" data-paginated-list-loading-indicator aria-hidden="true" hidden></span>
+            </button>
+            <span class="d-block"
+                  data-paginated-list-status="accordion-portfolio-history"
+                  role="status"
+                  aria-live="polite"
+            ></span>
         </div>
     </div>
 
@@ -42,23 +74,25 @@
 
 <script id="template-portfolio-history" type="text/x-handlebars-template">
 
-    <button type="button"
-            class="btn btn-outline-primary mb-2"
-            onclick="navigateToPortfolioAllocationManagement()"
-    >
-        <span class="h2 bi bi-database-gear"></span>
-    </button>
+    {{#if initial}}
+        <button type="button"
+                class="btn btn-outline-primary mb-2"
+                onclick="navigateToPortfolioAllocationManagement()"
+        >
+            <span class="h2 bi bi-database-gear"></span>
+        </button>
+    {{/if}}
 
-    {{#each .}}
+    {{#each items}}
 
-        <div class="accordion-item">
+        <div class="accordion-item" data-paginated-record-id="{{observationTimestamp.id}}">
 
             <h2 class="accordion-header">
-                <button class="accordion-button {{#unless @first}}collapsed{{/unless}}"
+                <button class="accordion-button {{#unless (and @root.initial @first)}}collapsed{{/unless}}"
                         type="button"
                         data-bs-toggle="collapse"
                         data-bs-target="#portfolio-allocation-{{observationTimestamp.id}}"
-                        aria-expanded="true"
+                        aria-expanded="{{#if (and @root.initial @first)}}true{{else}}false{{/if}}"
                         aria-controls="portfolio-allocation-{{observationTimestamp.id}}"
                 >
                     {{observationTimestamp.timeTag}}
@@ -66,7 +100,7 @@
             </h2>
 
             <div id="portfolio-allocation-{{observationTimestamp.id}}"
-                 class="accordion-collapse collapse {{#if @first}}show{{/if}}"
+                 class="accordion-collapse collapse {{#if (and @root.initial @first)}}show{{/if}}"
                  data-bs-parent="#accordion-portfolio-history"
             >
                 <div class="accordion-body row justify-content-center">
@@ -106,7 +140,14 @@
 <script type="module">
 
     globalThis.initPortfolioHistoryHierarchyLabels = () => {
-        setTextContentWithTopHierarchyName("[id^='hierarchy-level-portfolio-chart-']");
+        // Limit label initialization to blank labels emitted by the latest template render.
+        document.querySelectorAll("[id^='hierarchy-level-portfolio-chart-']")
+            .forEach(label => {
+                if(label.dataset.hierarchyLabelInitialized !== "true") {
+                    setTextContentWithTopHierarchyName(`#${ label.id }`);
+                    label.dataset.hierarchyLabelInitialized = "true";
+                }
+            });
     }
 
     globalThis.navigateToPortfolioAllocationManagement = () => {

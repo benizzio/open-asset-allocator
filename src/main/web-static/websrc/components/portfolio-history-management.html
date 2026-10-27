@@ -1,3 +1,4 @@
+<!-- Co-authored by: GPT-6 Luna and benizzio -->
 <button type="button"
         class="btn btn-secondary mb-2"
         onclick="portfolioHistoryManagement.navigateToPortfolioAllocationViewing()"
@@ -12,20 +13,48 @@
     <div class="card-body">
         <div id="accordion-portfolio-history-management"
              class="accordion container-fluid"
+             data-paginated-list
              hx-get="/api/portfolio/:portfolioId/history/observation"
              hx-include="[name='portfolioId']"
-             hx-trigger="load, reload-portfolio-history-management"
+             hx-trigger="load, reload-portfolio-history-management, paginated-list-more queue:none"
+             hx-sync="this:replace"
+             hx-disinherit="hx-sync"
+             hx-swap="innerHTML"
              hx-on::after-settle="portfolioHistoryManagement.handleAfterSettle(event, this)"
              handlebars-template="template-portfolio-history-management"
              data-hx-transform-response="addObservationZero"
-             data-hx-transform-response-on-path-matching="^\/api\/portfolio\/.+\/history\/observation$"
+             data-hx-transform-response-on-path-matching="^\/api\/portfolio\/.+\/history\/observation(?:\?.*)?$"
         >
             <div class="accordion-item placeholder-glow">
                 <h2 class="accordion-header placeholder col-12">placeholder</h2>
             </div>
             <div class="accordion-item placeholder-glow">
-                <h2 class="accordion-header placeholder col-12">placeholder</h2>
-            </div>
+             <h2 class="accordion-header placeholder col-12">placeholder</h2>
+         </div>
+        </div>
+        <!-- Co-authored by: GPT-6 Luna and benizzio -->
+        <div class="text-center mt-4"
+             data-paginated-list-controls="accordion-portfolio-history-management"
+             hidden
+        >
+            <button type="button"
+                    class="btn btn-primary paginated-list-more-button"
+                    aria-label="Show more"
+                    title="Show more"
+                    aria-busy="false"
+                    aria-controls="accordion-portfolio-history-management"
+                    data-paginated-list-more="accordion-portfolio-history-management"
+                    hidden
+            >
+                <span class="bi bi-chevron-double-down" data-paginated-list-more-icon aria-hidden="true"></span>
+                <span class="bi bi-arrow-clockwise" data-paginated-list-retry-icon aria-hidden="true" hidden></span>
+                <span class="spinner-border spinner-border-sm" data-paginated-list-loading-indicator aria-hidden="true" hidden></span>
+            </button>
+            <span class="d-block"
+                  data-paginated-list-status="accordion-portfolio-history-management"
+                  role="status"
+                  aria-live="polite"
+            ></span>
         </div>
     </div>
 
@@ -36,7 +65,10 @@
 
     {{#each .}}
 
-        <div id="portfolio-history-management-container-{{id}}" class="accordion-item">
+        <div id="portfolio-history-management-container-{{id}}"
+             class="accordion-item"
+             data-paginated-record-id="{{id}}"
+        >
 
             <!-- Co-authored by: GPT-6 Luna and benizzio -->
             <h2 id="portfolio-history-management-trigger-{{id}}"

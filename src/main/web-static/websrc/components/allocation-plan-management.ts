@@ -7,12 +7,7 @@
  * @author GPT-6 Luna
  */
 import { PortfolioPage } from "../pages";
-import {
-    AllocationPlanDTO,
-    SerializableCompleteAllocationPlan,
-    SerializableFractalPlannedAllocation,
-} from "../domain/allocation-plan";
-import { DomainService } from "../domain/service";
+import { SerializableFractalPlannedAllocation } from "../domain/allocation-plan";
 import { Asset } from "../domain/asset";
 import { AfterRequestEventDetail, HtmxInfra } from "../infra/htmx";
 import DomInfra from "../infra/dom";
@@ -20,19 +15,19 @@ import { BigNumber } from "bignumber.js";
 import * as handlebars from "handlebars";
 import { isNullish, toInt } from "../utils/lang";
 import { Portfolio } from "../domain/portfolio";
-import { AllocationHierarchyLevel, AllocationPlanType } from "../domain/allocation";
+import { AllocationHierarchyLevel } from "../domain/allocation";
 import AssetComposedColumnsInput, { AssetSelectionState } from "./asset-composed-columns-input";
 import htmx from "htmx.org";
 import Router from "../infra/routing";
 import notifications from "./notifications";
 import { NotificationType } from "../infra/infra-types";
-import { getBrowserLocalCalendarDate } from "../utils/calendar-date";
 import { bindReadOnlyManagementMetadataHeaderToggle } from "./management-metadata-editor";
 import {
     activateAllocationPlanEditor,
     bindAllocationPlanMetadataRequest,
     handleInputAllocationPlanDate,
 } from "./allocation-plan-management-metadata";
+import { mapForAllocationPlanManagement } from "./allocation-plan-management-response";
 
 type AllocationPlanningHierarchicalFormEntry = {
     occurrences: number;
@@ -53,43 +48,10 @@ const ALLOCATION_PLAN_MANAGEMENT_FORM_PREFIX = "allocation-plan-management-form-
 
 const ASSET_TICKER_FIELD_NAME_SUFFIX = "[asset][ticker]";
 
-/** Adds a new-plan draft initialized with the browser's local calendar date.
- * @author GPT-6 Luna
- * @author benizzio
- */
-function mapForAllocationPlanManagement(originalServerResponseJSON: string): string {
-
-    const portfolioDTO = PortfolioPage.getContextPortfolio();
-    const allocationPlanDTOs = JSON.parse(originalServerResponseJSON) as AllocationPlanDTO[];
-
-    const completeAllocationPlanSet = DomainService.mapping.mapToSerializablePortfolioCompleteAllocationPlanSet(
-        portfolioDTO,
-        allocationPlanDTOs,
-    );
-
-    const portfolio = DomainService.mapping.mapToPortfolio(portfolioDTO);
-    const hierarchy = portfolio.allocationStructure.hierarchy;
-    const topHierarchyLevel = hierarchy.at(-1);
-
-    const planZero: SerializableCompleteAllocationPlan = {
-        allocationPlan: {
-            id: 0,
-            name: "",
-            type: AllocationPlanType.ASSET_ALLOCATION_PLAN,
-            plannedDate: getBrowserLocalCalendarDate(),
-            details: [],
-        },
-        fractalHierarchicalPlan: {
-            subLevel: topHierarchyLevel,
-            topAllocations: [],
-        },
-        topLevelKey: topHierarchyLevel.name,
-    };
-
-    completeAllocationPlanSet.completeAllocationPlans.unshift(planZero);
-
-    return JSON.stringify(completeAllocationPlanSet);
-}
+HtmxInfra.htmxTransformResponse.registerTransformResponseFunction(
+    "mapForAllocationPlanManagement",
+    mapForAllocationPlanManagement,
+);
 
 function handleHierarchicalIdLevelChange(targetElement: HTMLInputElement) {
 
@@ -431,11 +393,6 @@ const allocationPlanManagement = {
             bindReadOnlyManagementMetadataHeaderToggle(managementContainer);
             bindAllocationPlanMetadataRequest(managementContainer);
         }
-
-        HtmxInfra.htmxTransformResponse.registerTransformResponseFunction(
-            "mapForAllocationPlanManagement",
-            mapForAllocationPlanManagement,
-        );
 
         this.handlebarsAllocationPlanManagementRowTemplate = Handlebars.compile(
             window["template-allocation-plan-management-form-tbody-row"].innerHTML,
