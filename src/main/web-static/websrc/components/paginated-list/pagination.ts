@@ -107,7 +107,10 @@ function getOwner(target: EventTarget | null): HTMLElement | undefined {
     return owner ?? undefined;
 }
 
-/** Renders owner-scoped controls after a pagination state transition. */
+/**
+ * Renders owner-scoped controls after a pagination state transition.
+ * @author GPT-6 Luna
+ */
 function updateControls(owner: HTMLElement, state: ListState, message = "", isError = false): void {
     renderControls(owner, {
         initialized: state.initialized,
@@ -118,7 +121,10 @@ function updateControls(owner: HTMLElement, state: ListState, message = "", isEr
     }, message, isError);
 }
 
-/** Marks a pending keyboard continuation abandoned when focus moves elsewhere. */
+/**
+ * Marks a pending keyboard continuation abandoned when focus moves elsewhere.
+ * @author GPT-6 Luna
+ */
 function trackPaginationFocusChange(event: FocusEvent): void {
     const target = event.target;
 
@@ -305,7 +311,10 @@ function commitSettledPage(event: CustomEvent): void {
     }
 }
 
-/** Returns whether a terminal append should restore focus to its first persisted record. */
+/**
+ * Returns whether a terminal append should restore focus to its first persisted record.
+ * @author GPT-6 Luna
+ */
 function shouldMoveFocusAfterTerminalAppend(context: RequestContext): boolean {
     if(context.mode !== PaginationMode.Append || context.nextCursor !== null) {
         return false;
@@ -320,7 +329,10 @@ function shouldMoveFocusAfterTerminalAppend(context: RequestContext): boolean {
         || document.activeElement === document.documentElement;
 }
 
-/** Releases failed or malformed requests without consuming their continuation cursor. */
+/**
+ * Releases failed or malformed requests without consuming their continuation cursor.
+ * @author GPT-6 Luna
+ */
 function handleRequestCompletion(event: CustomEvent): void {
     const detail = event.detail as { successful?: boolean; xhr?: XMLHttpRequest };
     const context = detail.xhr ? requests.get(detail.xhr) : undefined;

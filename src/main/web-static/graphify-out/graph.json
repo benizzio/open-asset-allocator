@@ -4335,7 +4335,7 @@
       "file_type": "code",
       "norm_label": "bindrequesttoxhr()",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L142"
+      "source_location": "L148"
     },
     {
       "id": "websrc_components_paginated_list_pagination_commitsettledpage",
@@ -4347,7 +4347,7 @@
       "file_type": "code",
       "norm_label": "commitsettledpage()",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L260"
+      "source_location": "L266"
     },
     {
       "id": "websrc_components_paginated_list_pagination_configurerequest",
@@ -4359,7 +4359,7 @@
       "file_type": "code",
       "norm_label": "configurerequest()",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L172"
+      "source_location": "L178"
     },
     {
       "id": "websrc_components_paginated_list_pagination_finishrequest",
@@ -4371,7 +4371,7 @@
       "file_type": "code",
       "norm_label": "finishrequest()",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L240"
+      "source_location": "L246"
     },
     {
       "id": "websrc_components_paginated_list_pagination_getowner",
@@ -4419,7 +4419,7 @@
       "file_type": "code",
       "norm_label": "handlerequestcompletion()",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L324"
+      "source_location": "L336"
     },
     {
       "id": "websrc_components_paginated_list_pagination_init",
@@ -4431,7 +4431,7 @@
       "file_type": "code",
       "norm_label": "init()",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L456"
+      "source_location": "L468"
     },
     {
       "id": "websrc_components_paginated_list_pagination_invalidateremovedlist",
@@ -4443,7 +4443,7 @@
       "file_type": "code",
       "norm_label": "invalidateremovedlist()",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L401"
+      "source_location": "L413"
     },
     {
       "id": "websrc_components_paginated_list_pagination_iscurrentrequest",
@@ -4455,7 +4455,7 @@
       "file_type": "code",
       "norm_label": "iscurrentrequest()",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L133"
+      "source_location": "L139"
     },
     {
       "id": "websrc_components_paginated_list_pagination_requestnextpage",
@@ -4467,7 +4467,7 @@
       "file_type": "code",
       "norm_label": "requestnextpage()",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L366"
+      "source_location": "L378"
     },
     {
       "id": "websrc_components_paginated_list_pagination_shouldmovefocusafterterminalappend",
@@ -4479,7 +4479,7 @@
       "file_type": "code",
       "norm_label": "shouldmovefocusafterterminalappend()",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L309"
+      "source_location": "L318"
     },
     {
       "id": "websrc_components_paginated_list_pagination_trackpaginationfocuschange",
@@ -4491,7 +4491,7 @@
       "file_type": "code",
       "norm_label": "trackpaginationfocuschange()",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L122"
+      "source_location": "L128"
     },
     {
       "id": "websrc_components_paginated_list_pagination_transformallocationplanview",
@@ -4503,7 +4503,7 @@
       "file_type": "code",
       "norm_label": "transformallocationplanview()",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L446"
+      "source_location": "L458"
     },
     {
       "id": "websrc_components_paginated_list_pagination_transformpageresponse",
@@ -4515,7 +4515,7 @@
       "file_type": "code",
       "norm_label": "transformpageresponse()",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L493"
+      "source_location": "L505"
     },
     {
       "id": "websrc_components_paginated_list_pagination_transformportfoliohistoryview",
@@ -4527,7 +4527,7 @@
       "file_type": "code",
       "norm_label": "transformportfoliohistoryview()",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L433"
+      "source_location": "L445"
     },
     {
       "id": "websrc_components_paginated_list_pagination_updatecontrols",
@@ -4539,7 +4539,7 @@
       "file_type": "code",
       "norm_label": "updatecontrols()",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L111"
+      "source_location": "L114"
     },
     {
       "id": "websrc_components_portfolio_history_management_observation_details_index_areobservationdetailsready",
@@ -7546,7 +7546,7 @@
       "file_type": "code",
       "norm_label": "paginatedlist",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L574"
+      "source_location": "L586"
     },
     {
       "id": "websrc_components_paginated_list_pagination_paginationmode_append",
@@ -11547,7 +11547,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L145",
+      "source_location": "L151",
       "weight": 1.0
     },
     {
@@ -11559,7 +11559,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L151",
+      "source_location": "L157",
       "weight": 1.0
     },
     {
@@ -11571,7 +11571,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L268",
+      "source_location": "L274",
       "weight": 1.0
     },
     {
@@ -11583,7 +11583,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L293",
+      "source_location": "L299",
       "weight": 1.0
     },
     {
@@ -11595,7 +11595,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L301",
+      "source_location": "L307",
       "weight": 1.0
     },
     {
@@ -11607,7 +11607,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L304",
+      "source_location": "L310",
       "weight": 1.0
     },
     {
@@ -11619,7 +11619,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L175",
+      "source_location": "L181",
       "weight": 1.0
     },
     {
@@ -11631,7 +11631,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L190",
+      "source_location": "L196",
       "weight": 1.0
     },
     {
@@ -11643,7 +11643,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L191",
+      "source_location": "L197",
       "weight": 1.0
     },
     {
@@ -11655,7 +11655,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L236",
+      "source_location": "L242",
       "weight": 1.0
     },
     {
@@ -11667,7 +11667,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L243",
+      "source_location": "L249",
       "weight": 1.0
     },
     {
@@ -11679,7 +11679,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L253",
+      "source_location": "L259",
       "weight": 1.0
     },
     {
@@ -11703,7 +11703,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L332",
+      "source_location": "L344",
       "weight": 1.0
     },
     {
@@ -11715,7 +11715,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L359",
+      "source_location": "L371",
       "weight": 1.0
     },
     {
@@ -11727,7 +11727,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L138",
+      "source_location": "L144",
       "weight": 1.0
     },
     {
@@ -11739,7 +11739,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L379",
+      "source_location": "L391",
       "weight": 1.0
     },
     {
@@ -11751,7 +11751,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L396",
+      "source_location": "L408",
       "weight": 1.0
     },
     {
@@ -11763,7 +11763,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L447",
+      "source_location": "L459",
       "weight": 1.0
     },
     {
@@ -11775,7 +11775,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L505",
+      "source_location": "L517",
       "weight": 1.0
     },
     {
@@ -11787,7 +11787,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L434",
+      "source_location": "L446",
       "weight": 1.0
     },
     {
@@ -11799,7 +11799,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L112",
+      "source_location": "L115",
       "weight": 1.0
     },
     {
@@ -26158,7 +26158,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L111",
+      "source_location": "L114",
       "weight": 1.0
     },
     {
@@ -26169,7 +26169,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L122",
+      "source_location": "L128",
       "weight": 1.0
     },
     {
@@ -26180,7 +26180,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L133",
+      "source_location": "L139",
       "weight": 1.0
     },
     {
@@ -26191,7 +26191,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L142",
+      "source_location": "L148",
       "weight": 1.0
     },
     {
@@ -26202,7 +26202,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L172",
+      "source_location": "L178",
       "weight": 1.0
     },
     {
@@ -26213,7 +26213,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L240",
+      "source_location": "L246",
       "weight": 1.0
     },
     {
@@ -26235,7 +26235,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L260",
+      "source_location": "L266",
       "weight": 1.0
     },
     {
@@ -26257,7 +26257,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L309",
+      "source_location": "L318",
       "weight": 1.0
     },
     {
@@ -26268,7 +26268,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L324",
+      "source_location": "L336",
       "weight": 1.0
     },
     {
@@ -26290,7 +26290,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L366",
+      "source_location": "L378",
       "weight": 1.0
     },
     {
@@ -26301,7 +26301,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L401",
+      "source_location": "L413",
       "weight": 1.0
     },
     {
@@ -26312,7 +26312,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L433",
+      "source_location": "L445",
       "weight": 1.0
     },
     {
@@ -26323,7 +26323,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L446",
+      "source_location": "L458",
       "weight": 1.0
     },
     {
@@ -26345,7 +26345,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L574",
+      "source_location": "L586",
       "weight": 1.0
     },
     {
@@ -31430,7 +31430,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L465",
+      "source_location": "L477",
       "weight": 1.0
     },
     {
@@ -31442,7 +31442,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L470",
+      "source_location": "L482",
       "weight": 1.0
     },
     {
@@ -31454,7 +31454,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L472",
+      "source_location": "L484",
       "weight": 1.0
     },
     {
@@ -31466,7 +31466,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L473",
+      "source_location": "L485",
       "weight": 1.0
     },
     {
@@ -31478,7 +31478,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L474",
+      "source_location": "L486",
       "weight": 1.0
     },
     {
@@ -31490,7 +31490,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L475",
+      "source_location": "L487",
       "weight": 1.0
     },
     {
@@ -31502,7 +31502,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L476",
+      "source_location": "L488",
       "weight": 1.0
     },
     {
@@ -31514,7 +31514,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L477",
+      "source_location": "L489",
       "weight": 1.0
     },
     {
@@ -31526,7 +31526,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L478",
+      "source_location": "L490",
       "weight": 1.0
     },
     {
@@ -32054,7 +32054,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L574",
+      "source_location": "L586",
       "weight": 1.0
     },
     {
@@ -32066,7 +32066,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L574",
+      "source_location": "L586",
       "weight": 1.0
     },
     {
@@ -33279,5 +33279,5 @@
       "source_file": "websrc/components/portfolio-navigation.html"
     }
   ],
-  "built_at_commit": "05793769933032e51ef0fe3bbdae1da2e47035e6"
+  "built_at_commit": "f8822e636c2c788aa565dffea43d8b9c2c690be2"
 }
