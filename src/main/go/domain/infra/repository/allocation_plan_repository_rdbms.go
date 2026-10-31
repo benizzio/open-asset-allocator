@@ -157,6 +157,29 @@ func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlanIdentifiers
 	return langext.ToPointerSlice(queryResult), nil
 }
 
+// InsertAllocationPlanInTransaction inserts a plan and merges its planned allocations
+// within an existing SQL transaction. transContext must be the *rdbms.SQLTransactionalContext
+// provided by the transaction manager; the caller is responsible for committing or
+// rolling back the transaction. plan and each entry in plan.Details must be non-nil.
+//
+// The plan insert uses PortfolioId, Name, PlanType and PlannedDate. The generated
+// plan ID is used for the details but is not assigned to plan.Id; PlannedExecutionDate
+// is not inserted. Each detail supplies its ID, hierarchical ID, cash reserve flag,
+// slice size and optional asset ID to the merge.
+//
+// It returns an error if the context is not a SQL transactional context, the plan
+// insert fails, or the temporary-table preparation or detail merge fails. For example,
+// given a transaction manager, repository and valid plan:
+//
+//	err := transactionManager.RunInTransaction(func(tx *rdbms.SQLTransactionalContext) error {
+//	    return repository.InsertAllocationPlanInTransaction(tx, plan)
+//	})
+//	if err != nil {
+//	    return err
+//	}
+//
+// Co-authored by: benizzio and OpenCode
+// Co-authored by: GPT-6.1 Terra
 func (repository *AllocationPlanRDBMSRepository) InsertAllocationPlanInTransaction(
 	transContext context.Context,
 	plan *domain.AllocationPlan,
