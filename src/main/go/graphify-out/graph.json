@@ -2256,7 +2256,7 @@
       "file_type": "code",
       "norm_label": "buildallocationplanrepository()",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L372"
+      "source_location": "L422"
     },
     {
       "id": "domain_infra_repository_allocation_repository_rdbms_buildallocationrepository",
@@ -2663,7 +2663,7 @@
       "file_type": "code",
       "norm_label": "initializedbstate()",
       "source_file": "inttest/infra/initial_db.go",
-      "source_location": "L553"
+      "source_location": "L557"
     },
     {
       "id": "langext_golang_ext_util_slice_topointerslice",
@@ -2685,7 +2685,7 @@
       "file_type": "code",
       "norm_label": "allocationplanrdbmsrepository",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L83"
+      "source_location": "L87"
     },
     {
       "id": "repository_allocationplanrdbmsrepository_findandlockallocationplanownershipintransaction",
@@ -2696,7 +2696,7 @@
       "file_type": "code",
       "norm_label": ".findandlockallocationplanownershipintransaction()",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L231"
+      "source_location": "L281"
     },
     {
       "id": "repository_allocationplanrdbmsrepository_getallallocationplanidentifiers",
@@ -2707,7 +2707,7 @@
       "file_type": "code",
       "norm_label": ".getallallocationplanidentifiers()",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L132"
+      "source_location": "L136"
     },
     {
       "id": "repository_allocationplanrdbmsrepository_getallallocationplans",
@@ -2718,7 +2718,7 @@
       "file_type": "code",
       "norm_label": ".getallallocationplans()",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L87"
+      "source_location": "L91"
     },
     {
       "id": "repository_allocationplanrdbmsrepository_getallocationplan",
@@ -2729,7 +2729,7 @@
       "file_type": "code",
       "norm_label": ".getallocationplan()",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L109"
+      "source_location": "L113"
     },
     {
       "id": "repository_allocationplanrdbmsrepository_insertallocationplanintransaction",
@@ -2740,7 +2740,7 @@
       "file_type": "code",
       "norm_label": ".insertallocationplanintransaction()",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L163"
+      "source_location": "L188"
     },
     {
       "id": "repository_allocationplanrdbmsrepository_insertplannedallocationsintemptable",
@@ -2751,7 +2751,7 @@
       "file_type": "code",
       "norm_label": ".insertplannedallocationsintemptable()",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L290"
+      "source_location": "L340"
     },
     {
       "id": "repository_allocationplanrdbmsrepository_mergeplannedallocations",
@@ -2762,7 +2762,7 @@
       "file_type": "code",
       "norm_label": ".mergeplannedallocations()",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L355"
+      "source_location": "L405"
     },
     {
       "id": "repository_allocationplanrdbmsrepository_mergeplannedallocationsintransaction",
@@ -2773,7 +2773,7 @@
       "file_type": "code",
       "norm_label": ".mergeplannedallocationsintransaction()",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L264"
+      "source_location": "L314"
     },
     {
       "id": "repository_allocationplanrdbmsrepository_prepareplannedallocationtempinserts",
@@ -2784,7 +2784,7 @@
       "file_type": "code",
       "norm_label": ".prepareplannedallocationtempinserts()",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L320"
+      "source_location": "L370"
     },
     {
       "id": "repository_allocationplanrdbmsrepository_updateallocationplanintransaction",
@@ -2795,7 +2795,7 @@
       "file_type": "code",
       "norm_label": ".updateallocationplanintransaction()",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L190"
+      "source_location": "L240"
     },
     {
       "id": "repository_allocationrdbmsrepository",
@@ -4973,7 +4973,7 @@
       "file_type": "code",
       "norm_label": "buildallocationplanfromrow()",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L82"
+      "source_location": "L86"
     },
     {
       "id": "domain_infra_repository_allocation_plan_repository_model_buildplannedallocationfromrow",
@@ -4984,7 +4984,7 @@
       "file_type": "code",
       "norm_label": "buildplannedallocationfromrow()",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L63"
+      "source_location": "L67"
     },
     {
       "id": "domain_infra_repository_allocation_plan_repository_model_mapplannedallocationrow",
@@ -4995,7 +4995,7 @@
       "file_type": "code",
       "norm_label": "mapplannedallocationrow()",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L45"
+      "source_location": "L49"
     },
     {
       "id": "domain_infra_repository_allocation_plan_repository_model_mapplannedallocationrows",
@@ -5006,7 +5006,7 @@
       "file_type": "code",
       "norm_label": "mapplannedallocationrows()",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L27"
+      "source_location": "L31"
     },
     {
       "id": "go_type_time_time",
@@ -5127,7 +5127,7 @@
       "file_type": "code",
       "norm_label": "plannedallocationjoinedrowdts",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L14"
+      "source_location": "L18"
     },
     {
       "id": "service_allocationplandomservice_getallallocationplanidentifiers",
@@ -13651,7 +13651,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L66",
+      "source_location": "L70",
       "weight": 1.0
     },
     {
@@ -13663,7 +13663,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L50",
+      "source_location": "L54",
       "weight": 1.0
     },
     {
@@ -13675,7 +13675,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L55",
+      "source_location": "L59",
       "weight": 1.0
     },
     {
@@ -13687,7 +13687,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L29",
+      "source_location": "L33",
       "weight": 1.0
     },
     {
@@ -13699,7 +13699,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L36",
+      "source_location": "L40",
       "weight": 1.0
     },
     {
@@ -18139,7 +18139,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L235",
+      "source_location": "L285",
       "weight": 1.0
     },
     {
@@ -18151,7 +18151,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L237",
+      "source_location": "L287",
       "weight": 1.0
     },
     {
@@ -18163,7 +18163,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L249",
+      "source_location": "L299",
       "weight": 1.0
     },
     {
@@ -18175,7 +18175,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L137",
+      "source_location": "L141",
       "weight": 1.0
     },
     {
@@ -18187,7 +18187,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L150",
+      "source_location": "L154",
       "weight": 1.0
     },
     {
@@ -18199,7 +18199,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L157",
+      "source_location": "L161",
       "weight": 1.0
     },
     {
@@ -18211,7 +18211,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L103",
+      "source_location": "L107",
       "weight": 1.0
     },
     {
@@ -18223,7 +18223,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L117",
+      "source_location": "L121",
       "weight": 1.0
     },
     {
@@ -18235,7 +18235,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L126",
+      "source_location": "L130",
       "weight": 1.0
     },
     {
@@ -18247,7 +18247,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L168",
+      "source_location": "L193",
       "weight": 1.0
     },
     {
@@ -18259,7 +18259,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L170",
+      "source_location": "L195",
       "weight": 1.0
     },
     {
@@ -18271,7 +18271,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L181",
+      "source_location": "L206",
       "weight": 1.0
     },
     {
@@ -18283,7 +18283,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L184",
+      "source_location": "L209",
       "weight": 1.0
     },
     {
@@ -18295,7 +18295,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L298",
+      "source_location": "L348",
       "weight": 1.0
     },
     {
@@ -18307,7 +18307,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L305",
+      "source_location": "L355",
       "weight": 1.0
     },
     {
@@ -18319,7 +18319,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L365",
+      "source_location": "L415",
       "weight": 1.0
     },
     {
@@ -18331,7 +18331,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L270",
+      "source_location": "L320",
       "weight": 1.0
     },
     {
@@ -18343,7 +18343,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L272",
+      "source_location": "L322",
       "weight": 1.0
     },
     {
@@ -18355,7 +18355,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L278",
+      "source_location": "L328",
       "weight": 1.0
     },
     {
@@ -18367,7 +18367,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L287",
+      "source_location": "L337",
       "weight": 1.0
     },
     {
@@ -18379,7 +18379,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L195",
+      "source_location": "L245",
       "weight": 1.0
     },
     {
@@ -18391,7 +18391,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L197",
+      "source_location": "L247",
       "weight": 1.0
     },
     {
@@ -18403,7 +18403,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L213",
+      "source_location": "L263",
       "weight": 1.0
     },
     {
@@ -18415,7 +18415,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L225",
+      "source_location": "L275",
       "weight": 1.0
     },
     {
@@ -22555,7 +22555,7 @@
       "confidence_score": 1.0,
       "context": "field",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L84",
+      "source_location": "L88",
       "weight": 1.0
     },
     {
@@ -22591,7 +22591,7 @@
       "confidence_score": 1.0,
       "context": "field",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L17",
+      "source_location": "L21",
       "weight": 1.0
     },
     {
@@ -22603,7 +22603,7 @@
       "confidence_score": 1.0,
       "context": "field",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L18",
+      "source_location": "L22",
       "weight": 1.0
     },
     {
@@ -22615,7 +22615,7 @@
       "confidence_score": 1.0,
       "context": "field",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L19",
+      "source_location": "L23",
       "weight": 1.0
     },
     {
@@ -22627,7 +22627,7 @@
       "confidence_score": 1.0,
       "context": "field",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L21",
+      "source_location": "L25",
       "weight": 1.0
     },
     {
@@ -22639,7 +22639,7 @@
       "confidence_score": 1.0,
       "context": "field",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L23",
+      "source_location": "L27",
       "weight": 1.0
     },
     {
@@ -22651,7 +22651,7 @@
       "confidence_score": 1.0,
       "context": "field",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L24",
+      "source_location": "L28",
       "weight": 1.0
     },
     {
@@ -31651,7 +31651,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L82",
+      "source_location": "L86",
       "weight": 1.0
     },
     {
@@ -31663,7 +31663,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L82",
+      "source_location": "L86",
       "weight": 1.0
     },
     {
@@ -31675,7 +31675,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L63",
+      "source_location": "L67",
       "weight": 1.0
     },
     {
@@ -31687,7 +31687,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L45",
+      "source_location": "L49",
       "weight": 1.0
     },
     {
@@ -31699,7 +31699,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L27",
+      "source_location": "L31",
       "weight": 1.0
     },
     {
@@ -31711,7 +31711,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L372",
+      "source_location": "L422",
       "weight": 1.0
     },
     {
@@ -36211,7 +36211,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L231",
+      "source_location": "L281",
       "weight": 1.0
     },
     {
@@ -36223,7 +36223,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L132",
+      "source_location": "L136",
       "weight": 1.0
     },
     {
@@ -36235,7 +36235,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L87",
+      "source_location": "L91",
       "weight": 1.0
     },
     {
@@ -36247,7 +36247,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L163",
+      "source_location": "L188",
       "weight": 1.0
     },
     {
@@ -36259,7 +36259,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L163",
+      "source_location": "L188",
       "weight": 1.0
     },
     {
@@ -36271,7 +36271,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L290",
+      "source_location": "L340",
       "weight": 1.0
     },
     {
@@ -36283,7 +36283,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L290",
+      "source_location": "L340",
       "weight": 1.0
     },
     {
@@ -36295,7 +36295,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L355",
+      "source_location": "L405",
       "weight": 1.0
     },
     {
@@ -36307,7 +36307,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L264",
+      "source_location": "L314",
       "weight": 1.0
     },
     {
@@ -36319,7 +36319,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L264",
+      "source_location": "L314",
       "weight": 1.0
     },
     {
@@ -36331,7 +36331,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L320",
+      "source_location": "L370",
       "weight": 1.0
     },
     {
@@ -36343,7 +36343,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L190",
+      "source_location": "L240",
       "weight": 1.0
     },
     {
@@ -36355,7 +36355,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L190",
+      "source_location": "L240",
       "weight": 1.0
     },
     {
@@ -38335,7 +38335,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L82",
+      "source_location": "L86",
       "weight": 1.0
     },
     {
@@ -38347,7 +38347,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L63",
+      "source_location": "L67",
       "weight": 1.0
     },
     {
@@ -38359,7 +38359,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L45",
+      "source_location": "L49",
       "weight": 1.0
     },
     {
@@ -38371,7 +38371,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L27",
+      "source_location": "L31",
       "weight": 1.0
     },
     {
@@ -38383,7 +38383,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L372",
+      "source_location": "L422",
       "weight": 1.0
     },
     {
@@ -39775,7 +39775,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L231",
+      "source_location": "L281",
       "weight": 1.0
     },
     {
@@ -39787,7 +39787,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L132",
+      "source_location": "L136",
       "weight": 1.0
     },
     {
@@ -39799,7 +39799,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L87",
+      "source_location": "L91",
       "weight": 1.0
     },
     {
@@ -39811,7 +39811,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L109",
+      "source_location": "L113",
       "weight": 1.0
     },
     {
@@ -42243,7 +42243,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L14",
+      "source_location": "L18",
       "weight": 1.0
     },
     {
@@ -42254,7 +42254,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L27",
+      "source_location": "L31",
       "weight": 1.0
     },
     {
@@ -42265,7 +42265,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L45",
+      "source_location": "L49",
       "weight": 1.0
     },
     {
@@ -42276,7 +42276,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L63",
+      "source_location": "L67",
       "weight": 1.0
     },
     {
@@ -42287,7 +42287,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/repository/allocation_plan_repository_model.go",
-      "source_location": "L82",
+      "source_location": "L86",
       "weight": 1.0
     },
     {
@@ -42298,7 +42298,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L372",
+      "source_location": "L422",
       "weight": 1.0
     },
     {
@@ -42309,7 +42309,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L83",
+      "source_location": "L87",
       "weight": 1.0
     },
     {
@@ -45081,7 +45081,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "inttest/infra/initial_db.go",
-      "source_location": "L553",
+      "source_location": "L557",
       "weight": 1.0
     },
     {
@@ -49184,7 +49184,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L109",
+      "source_location": "L113",
       "weight": 1.0
     },
     {
@@ -49195,7 +49195,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L132",
+      "source_location": "L136",
       "weight": 1.0
     },
     {
@@ -49206,7 +49206,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L163",
+      "source_location": "L188",
       "weight": 1.0
     },
     {
@@ -49217,7 +49217,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L190",
+      "source_location": "L240",
       "weight": 1.0
     },
     {
@@ -49228,7 +49228,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L231",
+      "source_location": "L281",
       "weight": 1.0
     },
     {
@@ -49239,7 +49239,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L264",
+      "source_location": "L314",
       "weight": 1.0
     },
     {
@@ -49250,7 +49250,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L290",
+      "source_location": "L340",
       "weight": 1.0
     },
     {
@@ -49261,7 +49261,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L320",
+      "source_location": "L370",
       "weight": 1.0
     },
     {
@@ -49272,7 +49272,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L355",
+      "source_location": "L405",
       "weight": 1.0
     },
     {
@@ -49283,7 +49283,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L87",
+      "source_location": "L91",
       "weight": 1.0
     },
     {
@@ -51646,7 +51646,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "inttest/infra/initial_db.go",
-      "source_location": "L554",
+      "source_location": "L558",
       "weight": 1.0
     },
     {
@@ -53206,7 +53206,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L106",
+      "source_location": "L110",
       "weight": 1.0
     },
     {
@@ -53218,7 +53218,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "domain/infra/repository/allocation_plan_repository_rdbms.go",
-      "source_location": "L120",
+      "source_location": "L124",
       "weight": 1.0
     },
     {
@@ -53281,5 +53281,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "ab1b728578092e9525a84e95db3df76f2eac4ba2"
+  "built_at_commit": "176cc7c75ac3a9ecb63fc10c52d8c4a4be24c079"
 }

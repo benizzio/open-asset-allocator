@@ -1,7 +1,7 @@
-# Graph Report - go  (2026-10-22)
+# Graph Report - go  (2026-10-31)
 
 ## Corpus Check
-- 123 files · ~66,412 words
+- 123 files · ~66,865 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 2 file(s) not represented in the graph (top: .toml 1, (none) 1)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `ab1b7285`
+- Built from commit: `176cc7c7`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -299,7 +299,7 @@ Nodes (4): AssetRepository, BuildAssetDomService(), TestGetKnownAssetsRejectsExc
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `App` connect `App` to `Adapter`, `go_pkg_github_com_benizzio_open_asset_allocator_langext`, `reflect.Type`, `.buildAppComponents`, `Configuration`, `infra.go`, `go_pkg_testing`, `go_pkg_net_http`, `GinServer`?**
-  _High betweenness centrality (0.054) - this node is a cross-community bridge._
+  _High betweenness centrality (0.052) - this node is a cross-community bridge._
 - **Why does `Asset` connect `Asset` to `go_pkg_github_com_benizzio_open_asset_allocator_langext`, `PortfolioAllocation`, `context.Context`, `BuildCleanupFunctionBuilder`, `AllocationPlan`?**
   _High betweenness centrality (0.047) - this node is a cross-community bridge._
 - **Why does `HierarchicalId` connect `HierarchicalId` to `AllocationPlan`?**
