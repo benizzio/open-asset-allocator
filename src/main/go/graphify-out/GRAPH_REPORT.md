@@ -1,9 +1,7 @@
 # Graph Report - go  (2026-11-01)
 
 ## Corpus Check
-- 132 files · ~74,714 words
-- Verdict: corpus is large enough that graph structure adds value.
-- Unclassified: 2 file(s) not represented in the graph (top: .toml 1, (none) 1)
+- cluster-only mode — file stats not available
 
 ## Summary
 - 1248 nodes · 3915 edges · 58 communities (47 shown, 11 thin omitted)
@@ -81,20 +79,20 @@
 6. `Asset` - 30 edges
 7. `ExecuteDBQuery()` - 29 edges
 8. `IsZeroValue()` - 29 edges
-9. `PortfolioObservationTimestamp` - 27 edges
-10. `PortfolioAllocationDomService` - 27 edges
+9. `PortfolioAllocationDomService` - 27 edges
+10. `NewMapTree()` - 27 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `ValueJsonColumn()` --calls--> `IsNilPointer()`  [EXTRACTED]
   infra/rdbms/sqlext/sqlext_utils.go → langext/golang_ext_util.go
-- `AllocationPlanRESTController` --references--> `AllocationPlanDomService`  [EXTRACTED]
-  api/rest/allocation_plan_controller.go → domain/service/allocation_plan_domain_service.go
-- `BuildAllocationPlanRESTController()` --references--> `AllocationPlanDomService`  [EXTRACTED]
-  api/rest/allocation_plan_controller.go → domain/service/allocation_plan_domain_service.go
-- `AssetRESTController` --references--> `AssetDomService`  [EXTRACTED]
-  api/rest/asset_controller.go → domain/service/asset_domain_service.go
 - `BuildAssetRESTController()` --references--> `AssetDomService`  [EXTRACTED]
   api/rest/asset_controller.go → domain/service/asset_domain_service.go
+- `readAllocationPlanPaginationCursor()` --references--> `AllocationPlanPageCursor`  [EXTRACTED]
+  api/rest/pagination_cursor.go → domain/allocation_plan.go
+- `readObservationPaginationCursor()` --references--> `ObservationPageCursor`  [EXTRACTED]
+  api/rest/pagination_cursor.go → domain/portfolio_allocation.go
+- `readHistoryObservationTimestampId()` --calls--> `PropagateAsAppErrorWithNewMessage()`  [EXTRACTED]
+  api/rest/portfolio_allocation_controller.go → infra/error.go
 
 ## Import Cycles
 - None detected.
@@ -290,22 +288,22 @@ Cohesion: 0.50
 Nodes (3): CustomSlice[T], T, joinAny()
 
 ## Knowledge Gaps
-- **17 isolated node(s):** `AssetSearchQueryDTS`, `ExternalAssetSearchQueryDTS`, `ErrorResponse`, `paginationCursorValidationDTS`, `contextKey` (+12 more)
+- **17 isolated node(s):** `paginationValidationResponse`, `malformedQueryBindingTarget`, `MapIterator`, `AssetSearchQueryDTS`, `ExternalAssetSearchQueryDTS` (+12 more)
   These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 105 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **11 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Adapter` connect `Adapter` to `T`, `SQLTransactionalContext`, `go_pkg_strings`, `testing.T`, `App`?**
-  _High betweenness centrality (0.054) - this node is a cross-community bridge._
 - **Why does `App` connect `App` to `.buildAppComponents`, `reflect.Type`, `go_pkg_fmt`, `go_pkg_net_http`, `go_pkg_testing`, `go_pkg_github_com_golang_glog`, `infra.go`, `Adapter`, `go_pkg_github_com_benizzio_open_asset_allocator_langext`?**
-  _High betweenness centrality (0.047) - this node is a cross-community bridge._
+  _High betweenness centrality (0.052) - this node is a cross-community bridge._
 - **Why does `Asset` connect `PropagateAsAppErrorWithNewMessage` to `IsZeroValue`, `PortfolioAllocation`, `asset_rest_model.go`, `BuildCleanupFunctionBuilder`, `AssetDomService`, `AllocationPlan`, `Adapter`?**
+  _High betweenness centrality (0.042) - this node is a cross-community bridge._
+- **Why does `Adapter` connect `Adapter` to `T`, `SQLTransactionalContext`, `go_pkg_strings`, `testing.T`, `App`?**
   _High betweenness centrality (0.035) - this node is a cross-community bridge._
 - **Are the 88 inferred relationships involving `deferCloseResponseBody()` (e.g. with `TestAllocationPlanReadsOrderByPlannedDateAndId()` and `TestGetAllocationPlans()`) actually correct?**
   _`deferCloseResponseBody()` has 88 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `AssetSearchQueryDTS`, `ExternalAssetSearchQueryDTS`, `ErrorResponse` to the rest of the system?**
+- **What connects `paginationValidationResponse`, `malformedQueryBindingTarget`, `MapIterator` to the rest of the system?**
   _17 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `github.com/gin-gonic/gin.Context` be split into smaller, more focused modules?**
   _Cohesion score 0.12804878048780488 - nodes in this community are weakly interconnected._
