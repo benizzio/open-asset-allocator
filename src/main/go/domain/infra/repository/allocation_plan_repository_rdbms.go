@@ -204,6 +204,32 @@ func (repository *AllocationPlanRDBMSRepository) InsertAllocationPlanInTransacti
 	return repository.mergePlannedAllocationsInTransaction(transactionalContext, id, plan.Details)
 }
 
+// UpdateAllocationPlanInTransaction updates a plan and merges its details in an
+// existing SQL transaction. transContext must be the *rdbms.SQLTransactionalContext
+// provided by the transaction manager. The caller must commit or roll back the
+// transaction. plan and each entry in plan.Details must be non-nil.
+//
+// The plan is selected by Id, and only Name and PlannedDate are updated; PortfolioId,
+// PlanType and PlannedExecutionDate are not updated. The method does not check whether
+// the plan update matched a row. Details are matched by ID: unmatched details are
+// inserted with the plan ID, hierarchical ID, cash reserve flag, slice size and
+// optional asset ID; matched details update only the hierarchical ID, cash reserve
+// flag and slice size, not the asset ID. Existing details belonging to the plan that
+// are absent from plan.Details are deleted.
+//
+// It returns an error for a non-SQL transactional context, a failed plan update,
+// temporary-table creation or population, or detail merge. For example, given a
+// transaction manager, repository and valid plan:
+//
+//	err := transactionManager.RunInTransaction(func(tx *rdbms.SQLTransactionalContext) error {
+//	    return repository.UpdateAllocationPlanInTransaction(tx, plan)
+//	})
+//	if err != nil {
+//	    return err
+//	}
+//
+// Co-authored by: benizzio and OpenCode
+// Co-authored by: GPT-6.1 Terra
 func (repository *AllocationPlanRDBMSRepository) UpdateAllocationPlanInTransaction(
 	transContext context.Context,
 	plan *domain.AllocationPlan,
