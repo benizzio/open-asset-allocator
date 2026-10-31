@@ -10079,7 +10079,7 @@
       "file_type": "code",
       "norm_label": "initializedbstate()",
       "source_file": "inttest/infra/initial_db.go",
-      "source_location": "L545"
+      "source_location": "L549"
     },
     {
       "id": "langext_golang_ext_iterator",
@@ -42122,7 +42122,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "inttest/infra/initial_db.go",
-      "source_location": "L545",
+      "source_location": "L549",
       "weight": 1.0
     },
     {
@@ -48234,7 +48234,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "inttest/infra/initial_db.go",
-      "source_location": "L546",
+      "source_location": "L550",
       "weight": 1.0
     },
     {
@@ -49557,5 +49557,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "9435eb1e51a39cebcab63e1f97151671cfa134fc"
+  "built_at_commit": "fa615d0e9346c5f5328474cb68b542985191d28c"
 }

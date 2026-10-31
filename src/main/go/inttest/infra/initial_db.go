@@ -1,6 +1,10 @@
 package infra
 
-// Co-authored by: OpenCode
+// initialStateSQL contains SQL fixtures used to initialize the integration test
+// database after migrations have run.
+//
+// Co-authored by: benizzio and OpenCode
+// Co-authored by: GPT-6.1 Terra
 const initialStateSQL = `
 	INSERT INTO portfolio (id, "name", allocation_structure)
 	VALUES (
