@@ -11,6 +11,10 @@ import (
 	"github.com/benizzio/open-asset-allocator/langext"
 )
 
+// plannedAllocationJoinedRowDTS holds a joined database row containing an allocation
+// plan, a planned allocation, and its associated asset for mapping to domain models.
+//
+// Co-authored by: benizzio, Copilot, OpenCode, and GPT-6.1 Terra
 type plannedAllocationJoinedRowDTS struct {
 	AllocationPlanId     int64
 	Name                 string

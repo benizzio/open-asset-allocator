@@ -1,7 +1,7 @@
-# Graph Report - go  (2026-10-18)
+# Graph Report - go  (2026-10-31)
 
 ## Corpus Check
-- 119 files · ~59,731 words
+- 119 files · ~59,765 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 2 file(s) not represented in the graph (top: .toml 1, (none) 1)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `8aca179e`
+- Built from commit: `aa4d0dc1`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -247,7 +247,7 @@ Nodes (7): TestHierarchicalIdValue_AllNonNil(), TestHierarchicalIdValue_WithNilL
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `App` connect `App` to `reflect.Type`, `portfolio_allocation_controller.go`, `GinServer`, `Configuration`, `rdbms_adapter.go`, `go_pkg_strings`, `PortfolioAllocation`, `go_pkg_github_com_benizzio_open_asset_allocator_langext`, `Adapter`?**
-  _High betweenness centrality (0.057) - this node is a cross-community bridge._
+  _High betweenness centrality (0.053) - this node is a cross-community bridge._
 - **Why does `Asset` connect `PropagateAsAppErrorWithNewMessage` to `allocation_plan_domain_service.go`, `asset_rest_model.go`, `rdbms_adapter.go`, `PortfolioAllocation`, `BuildCleanupFunctionBuilder`, `AssetDomService`?**
   _High betweenness centrality (0.052) - this node is a cross-community bridge._
 - **Why does `Adapter` connect `Adapter` to `Configuration`, `App`, `rdbms_adapter.go`?**
