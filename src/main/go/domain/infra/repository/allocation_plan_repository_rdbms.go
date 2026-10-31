@@ -10,7 +10,11 @@ import (
 	"github.com/benizzio/open-asset-allocator/langext"
 )
 
-// Co-authored by: OpenCode
+// These constants define SQL for reading allocation plans and their identifiers,
+// inserting and updating plans, and merging planned allocations using a temporary table.
+//
+// Co-authored by: benizzio and OpenCode
+// Co-authored by: GPT-6.1 Terra
 const (
 	allocationPlanIdentifierSQL = `
 		SELECT ap.id, ap.name, ap.planned_date
