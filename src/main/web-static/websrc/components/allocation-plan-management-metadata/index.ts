@@ -1,14 +1,13 @@
 /**
- * Prepares allocation-plan name and planned-date values for management-form POST requests.
+ * Prepares allocation-plan name and planned-date values in the management form before submission.
  *
- * Bind once to the allocation-plan management container. Existing editor fields are copied into the hidden canonical
- * form fields immediately before HTMX serializes the request, while untouched and new-plan forms keep their values.
- * Example: `bindAllocationPlanMetadataRequest(container)` installs the idempotent request hook.
+ * Active editor values are validated and copied to canonical form fields before HTMX collects parameters.
+ * Example: `prepareAllocationPlanMetadataForSubmit(form)` returns whether submission may proceed.
  * @author GPT-6 Luna
  * @author GPT-6.1 Sol
+ * @author GPT-6.1 Terra
  */
 
-import { RequestConfigEventDetail } from "../../infra/htmx";
 import {
     activateManagementMetadataEditor,
     isManagementMetadataEditorActive,
@@ -17,21 +16,40 @@ import {
 const FORM_PREFIX = "allocation-plan-management-form-";
 const boundContainers = new WeakSet<HTMLElement>();
 
-type PlanRequest = RequestConfigEventDetail & { formData: FormData; };
-
-/** Binds allocation-plan metadata serialization to one management-list container, at most once.
- *
- * @param container - Allocation-plan management root receiving bubbling HTMX request events.
- * @example `bindAllocationPlanMetadataRequest(managementContainer)` serializes active plan editor values.
- * @author GPT-6 Luna
+/** Installs an idempotent native-submit guard before HTMX collects form values.
+ * @param container - Management list containing the plan forms.
+ * @example `bindAllocationPlanMetadataSubmitGuard(container)` prepares native form submissions.
+ * @author GPT-6.1 Terra
  */
-export function bindAllocationPlanMetadataRequest(container: HTMLElement): void {
+export function bindAllocationPlanMetadataSubmitGuard(container: HTMLElement): void {
     if(boundContainers.has(container)) {
         return;
     }
 
     boundContainers.add(container);
-    container.addEventListener("htmx:configRequest", prepareAllocationPlanMetadataForPost);
+
+    container.addEventListener("submit", event => {
+        const form = event.target;
+
+        if(form instanceof HTMLFormElement && form.getAttribute("id")?.startsWith(FORM_PREFIX)
+            && !prepareAllocationPlanMetadataForSubmit(form)) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        }
+    }, true);
+}
+
+/** Synchronizes the visible plan name to its canonical form field during editing.
+ * @param nameInput - Visible plan name field.
+ * @param allocationPlanId - ID of the owning plan.
+ * @example `handleInputAllocationPlanName(input, 12)` updates plan 12's form.
+ * @author benizzio
+ * @author GPT-6.1 Terra
+ */
+export function handleInputAllocationPlanName(nameInput: HTMLInputElement, allocationPlanId: number): void {
+    const form = document.getElementById(`${ FORM_PREFIX }${ allocationPlanId }`) as HTMLFormElement;
+    const name = form.elements.namedItem("name") as HTMLInputElement;
+    name.value = nameInput.value;
 }
 
 /** Reveals one plan's persisted name/date editor and focuses its name field.
@@ -70,24 +88,15 @@ export function handleInputAllocationPlanDate(dateInput: HTMLInputElement, alloc
     }
 }
 
-/** Copies current allocation-plan values into the owning form's request payload.
+/** Validates and copies current metadata into the owning form before submission.
+ *
+ * Returns false for missing canonical fields or invalid active editors, reporting invalid controls to the browser.
+ * @param form - The allocation-plan management form to prepare.
+ * @example `if (prepareAllocationPlanMetadataForSubmit(form)) form.requestSubmit();`
  * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
  */
-function prepareAllocationPlanMetadataForPost(event: Event): void {
-    const request = (event as CustomEvent<PlanRequest>).detail;
-
-    if(request.verb.toLowerCase() !== "post") {
-        return;
-    }
-
-    const requestElement = request.elt;
-    const form = requestElement instanceof HTMLFormElement ? requestElement : requestElement.closest("form");
-    const formId = form instanceof HTMLFormElement ? form.getAttribute("id") : null;
-
-    if(!(form instanceof HTMLFormElement) || !formId?.startsWith(FORM_PREFIX)) {
-        return;
-    }
-
+export function prepareAllocationPlanMetadataForSubmit(form: HTMLFormElement): boolean {
     const item = form.closest<HTMLElement>(".accordion-item");
     const fields = item?.querySelector<HTMLElement>("[data-metadata-editor-active]");
     const nameEditor = item?.querySelector<HTMLInputElement>("[data-allocation-plan-editor-name]");
@@ -95,38 +104,39 @@ function prepareAllocationPlanMetadataForPost(event: Event): void {
     const namePayload = form.elements.namedItem("name");
     const datePayload = form.elements.namedItem("plannedDate");
 
-    if(!(namePayload instanceof HTMLInputElement) || !(datePayload instanceof HTMLInputElement)) {
-        event.preventDefault();
-        return;
+    if(!item || !(namePayload instanceof HTMLInputElement) || !(datePayload instanceof HTMLInputElement)) {
+        return false;
     }
 
     if(fields && isManagementMetadataEditorActive(fields)
-        && !copyEditedPlanMetadata(nameEditor, dateEditor, namePayload, datePayload, event)) {
-        return;
+        && !copyEditedPlanMetadata(nameEditor, dateEditor, namePayload, datePayload)) {
+        return false;
     }
 
-    request.formData.set(namePayload.name, namePayload.value);
-    request.formData.set(datePayload.name, datePayload.value);
+    if(form.dataset.persistedName === undefined) {
+        const newName = item.querySelector<HTMLInputElement>(".allocation-plan-management-new-name");
 
-    if(form.dataset.persistedName !== undefined) {
-        form.dataset.submittedMetadataChanged = String(
-            namePayload.value !== form.dataset.persistedName || datePayload.value !== form.dataset.persistedDate,
-        );
+        if(!newName) {
+            return false;
+        }
+
+        namePayload.value = newName.value;
     }
+
+    return true;
 }
 
 /** Validates and copies active name/date controls into the form's canonical payload fields.
  * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
  */
 function copyEditedPlanMetadata(
     nameEditor: HTMLInputElement | null,
     dateEditor: HTMLInputElement | null,
     namePayload: HTMLInputElement,
     datePayload: HTMLInputElement,
-    event: Event,
 ): boolean {
     if(!nameEditor || !dateEditor || !nameEditor.checkValidity() || !dateEditor.checkValidity()) {
-        event.preventDefault();
         nameEditor?.reportValidity();
         dateEditor?.reportValidity();
         return false;

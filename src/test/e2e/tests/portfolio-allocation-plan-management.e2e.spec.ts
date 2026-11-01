@@ -1583,6 +1583,7 @@ test.describe('portfolio allocation plan management', () => {
 
   /** Keeps invalid plan metadata and other entered values available without issuing a write.
    * @author GPT-6 Luna
+   * @author GPT-6.1 Terra
    */
   test('scenario 20.2: retains allocation-plan editor drafts when the required name is empty', async ({
     database,
@@ -1604,6 +1605,13 @@ test.describe('portfolio allocation plan management', () => {
     await nameInput.fill('');
     await dateInput.fill('2027-08-10');
     await draftClassInput.fill('UNSAVED_DRAFT_CLASS');
+    const requests: string[] = [];
+    page.on('request', request => {
+      if(request.method() === 'POST'
+        && new URL(request.url()).pathname === `/api/portfolio/${seededData.portfolio.id}/allocation-plan`) {
+        requests.push(request.url());
+      }
+    });
     await form.locator('tfoot button.btn-primary[type="button"]').click();
 
     await expect(nameInput).toBeVisible();
@@ -1621,6 +1629,7 @@ test.describe('portfolio allocation plan management', () => {
       name: seededData.allocationPlan.name,
       planned_date: seededData.allocationPlan.planned_date,
     }]);
+    expect(requests).toHaveLength(0);
   });
 
   /** Confirms read-only labels and header background toggle once without changing the pencil or chevron behavior.
@@ -1712,6 +1721,132 @@ test.describe('portfolio allocation plan management', () => {
     await expect(panel).not.toHaveClass(/\bcollapsing\b/);
     await expect(nameInput).toBeVisible();
     expect(await readAccordionTransitionCounts(panel)).toEqual({ show: 5, hide: 4 });
+  });
+
+  /** Saves the latest editor values without relying on input events.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 20.4: copies plan metadata into the form at Save time', async ({ database, page }) => {
+    const seededData = await seedAllocationPlanManagementData(database);
+    const updatedName = 'E2E Save Time Plan';
+    const updatedDate = '2028-04-12';
+    await page.goto(`/portfolio/${seededData.portfolio.id}/allocation/manage`);
+    const item = page.locator(`#allocation-plan-management-container-${seededData.allocationPlan.id}`);
+    await item.locator('[data-metadata-editor-trigger]').click();
+    const form = item.locator(`#allocation-plan-management-form-${seededData.allocationPlan.id}`);
+    await item.locator('[data-allocation-plan-editor-name]').evaluate((input: HTMLInputElement, value) => {
+      input.value = value;
+    }, updatedName);
+    await item.locator('[data-allocation-plan-editor-date]').evaluate((input: HTMLInputElement, value) => {
+      input.value = value;
+    }, updatedDate);
+    await form.evaluate((element: HTMLFormElement) => {
+      element.addEventListener('submit', () => {
+        const values = new FormData(element);
+        document.body.dataset.planSubmitValues = JSON.stringify([values.get('name'), values.get('plannedDate')]);
+      }, { capture: true, once: true });
+    });
+    const requests: string[] = [];
+    page.on('request', request => {
+      if(request.method() === 'POST'
+        && new URL(request.url()).pathname === `/api/portfolio/${seededData.portfolio.id}/allocation-plan`) {
+        requests.push(request.postData() ?? '');
+      }
+    });
+    await saveAllocationPlan(page, form, seededData.portfolio.id, updatedDate);
+    await expect(page.locator('body')).toHaveAttribute('data-plan-submit-values', JSON.stringify([updatedName, updatedDate]));
+    await expect(item.locator('[data-metadata-editor-label]')).toHaveText(allocationPlanManagementHeader(updatedName, updatedDate));
+    expect(requests).toHaveLength(1);
+    expect(JSON.parse(requests[0]).name).toBe(updatedName);
+    await expect(database.query<{ id: number; name: string; planned_date: string }>(
+      `SELECT id, name, planned_date::text AS planned_date FROM public.allocation_plan WHERE id = $1`,
+      [seededData.allocationPlan.id],
+    )).resolves.toEqual([{ id: seededData.allocationPlan.id, name: updatedName, planned_date: updatedDate }]);
+    expect(await queryPlannedAllocations(database, seededData.allocationPlan.id)).toHaveLength(seededData.plannedAllocations.length);
+  });
+
+  /** Prepares current editor values for a native requestSubmit without input events.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 20.5: prepares metadata for native requestSubmit', async ({ database, page }) => {
+    const seededData = await seedAllocationPlanManagementData(database);
+    const name = 'E2E Native Submit Plan';
+    const date = '2028-05-13';
+    await page.goto(`/portfolio/${seededData.portfolio.id}/allocation/manage`);
+    const item = page.locator(`#allocation-plan-management-container-${seededData.allocationPlan.id}`);
+    await item.locator('[data-metadata-editor-trigger]').click();
+    await expect(item.locator(`#allocation-plan-management-${seededData.allocationPlan.id}`)).toHaveClass(/\bshow\b/);
+    await item.locator('[data-allocation-plan-editor-name]').evaluate((input: HTMLInputElement, value) => {
+      input.value = value;
+    }, name);
+    await item.locator('[data-allocation-plan-editor-date]').evaluate((input: HTMLInputElement, value) => {
+      input.value = value;
+    }, date);
+    const requests: string[] = [];
+    page.on('request', request => {
+      if(request.method() === 'POST'
+        && new URL(request.url()).pathname === `/api/portfolio/${seededData.portfolio.id}/allocation-plan`) {
+        requests.push(request.postData() ?? '');
+      }
+    });
+    const response = page.waitForResponse(result => result.request().method() === 'POST'
+      && new URL(result.url()).pathname === `/api/portfolio/${seededData.portfolio.id}/allocation-plan`);
+    await item.locator('form').evaluate((form: HTMLFormElement) => form.requestSubmit());
+    expect((await response).status()).toBe(204);
+    await expect(item.locator('[data-metadata-editor-label]')).toHaveText(allocationPlanManagementHeader(name, date));
+    expect(requests).toHaveLength(1);
+    expect(JSON.parse(requests[0])).toEqual(expect.objectContaining({ name, plannedDate: date }));
+    await expect(database.query<{ id: number; name: string; planned_date: string }>(
+      `SELECT id, name, planned_date::text AS planned_date FROM public.allocation_plan WHERE id = $1`,
+      [seededData.allocationPlan.id],
+    )).resolves.toEqual([{ id: seededData.allocationPlan.id, name, planned_date: date }]);
+    expect(await queryPlannedAllocations(database, seededData.allocationPlan.id)).toHaveLength(seededData.plannedAllocations.length);
+  });
+
+  /** Saves by keyboard after a first save replaces the management list.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 20.6: saves by keyboard after the management list refreshes', async ({ database, page }) => {
+    const seededData = await seedAllocationPlanManagementData(database);
+    const firstName = 'E2E First Save Plan';
+    const finalName = 'E2E Keyboard Save Plan';
+    const finalDate = '2028-06-14';
+    await page.goto(`/portfolio/${seededData.portfolio.id}/allocation/manage`);
+    const item = page.locator(`#allocation-plan-management-container-${seededData.allocationPlan.id}`);
+    const form = item.locator(`#allocation-plan-management-form-${seededData.allocationPlan.id}`);
+    const requests: string[] = [];
+    page.on('request', request => {
+      if(request.method() === 'POST'
+        && new URL(request.url()).pathname === `/api/portfolio/${seededData.portfolio.id}/allocation-plan`) {
+        requests.push(request.postData() ?? '');
+      }
+    });
+    await item.locator('[data-metadata-editor-trigger]').click();
+    await item.locator('[data-allocation-plan-editor-name]').fill(firstName);
+    await saveAllocationPlan(page, form, seededData.portfolio.id, seededData.allocationPlan.planned_date);
+    await expect(item.locator('[data-metadata-editor-label]')).toHaveText(
+      allocationPlanManagementHeader(firstName, seededData.allocationPlan.planned_date),
+    );
+    await item.locator('[data-metadata-editor-trigger]').click();
+    await item.locator('[data-allocation-plan-editor-name]').evaluate((input: HTMLInputElement, value) => {
+      input.value = value;
+    }, finalName);
+    await item.locator('[data-allocation-plan-editor-date]').evaluate((input: HTMLInputElement, value) => {
+      input.value = value;
+    }, finalDate);
+    const response = page.waitForResponse(result => result.request().method() === 'POST'
+      && new URL(result.url()).pathname === `/api/portfolio/${seededData.portfolio.id}/allocation-plan`);
+    await form.locator('tfoot button.btn-primary[type="button"]').focus();
+    await page.keyboard.press('Enter');
+    expect((await response).status()).toBe(204);
+    await expect(item.locator('[data-metadata-editor-label]')).toHaveText(allocationPlanManagementHeader(finalName, finalDate));
+    expect(requests).toHaveLength(2);
+    expect(JSON.parse(requests[1])).toEqual(expect.objectContaining({ name: finalName, plannedDate: finalDate }));
+    await expect(database.query<{ id: number; name: string; planned_date: string }>(
+      `SELECT id, name, planned_date::text AS planned_date FROM public.allocation_plan WHERE id = $1`,
+      [seededData.allocationPlan.id],
+    )).resolves.toEqual([{ id: seededData.allocationPlan.id, name: finalName, planned_date: finalDate }]);
+    expect(await queryPlannedAllocations(database, seededData.allocationPlan.id)).toHaveLength(seededData.plannedAllocations.length);
   });
 });
 

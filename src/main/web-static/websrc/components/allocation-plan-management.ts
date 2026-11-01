@@ -5,6 +5,7 @@
  * @author GPT-6.1 Sol
  * @author GPT-6 Sol
  * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
  */
 import { PortfolioPage } from "../pages";
 import {
@@ -30,8 +31,10 @@ import { getBrowserLocalCalendarDate } from "../utils/calendar-date";
 import { bindReadOnlyManagementMetadataHeaderToggle } from "./management-metadata-editor";
 import {
     activateAllocationPlanEditor,
-    bindAllocationPlanMetadataRequest,
+    bindAllocationPlanMetadataSubmitGuard,
     handleInputAllocationPlanDate,
+    handleInputAllocationPlanName,
+    prepareAllocationPlanMetadataForSubmit,
 } from "./allocation-plan-management-metadata";
 
 type AllocationPlanningHierarchicalFormEntry = {
@@ -429,7 +432,7 @@ const allocationPlanManagement = {
 
         if(managementContainer) {
             bindReadOnlyManagementMetadataHeaderToggle(managementContainer);
-            bindAllocationPlanMetadataRequest(managementContainer);
+            bindAllocationPlanMetadataSubmitGuard(managementContainer);
         }
 
         HtmxInfra.htmxTransformResponse.registerTransformResponseFunction(
@@ -518,6 +521,13 @@ const allocationPlanManagement = {
         );
     },
 
+    /** Validates the plan and prepares its metadata before requesting native submission.
+     * @param form - Plan form to save.
+     * @param hierarchySize - Number of allocation hierarchy levels.
+     * @example `allocationPlanManagement.handleSubmit(form, 2)` validates and saves the form.
+     * @author GPT-6.1 Terra
+     * @author benizzio
+     */
     handleSubmit(form: HTMLFormElement, hierarchySize: number) {
 
         if(!AssetComposedColumnsInput.validateFormBeforePost(form)) {
@@ -537,7 +547,9 @@ const allocationPlanManagement = {
             return;
         }
 
-        form.requestSubmit();
+        if(prepareAllocationPlanMetadataForSubmit(form)) {
+            form.requestSubmit();
+        }
     },
 
     /** Refreshes allocation-plan views only after a successful POST from the owning plan form.
@@ -575,13 +587,7 @@ const allocationPlanManagement = {
         });
     },
 
-    handleInputAllocationPlanName(nameInput: HTMLInputElement, allocationPlanId: number) {
-        const formId = `${ ALLOCATION_PLAN_MANAGEMENT_FORM_PREFIX }${ allocationPlanId }`;
-        const form = window[formId] as HTMLFormElement;
-        const allocationPlanNameInput = form.elements.namedItem("name") as HTMLInputElement;
-        allocationPlanNameInput.value = nameInput.value;
-    },
-
+    handleInputAllocationPlanName,
     handleInputAllocationPlanDate,
 
     navigateToAllocationPlansViewing() {
