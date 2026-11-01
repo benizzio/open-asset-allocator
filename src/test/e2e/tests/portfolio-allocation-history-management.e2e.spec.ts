@@ -2564,6 +2564,49 @@ test.describe('portfolio allocation history management', () => {
       expect(await readAccordionTransitionCounts(firstPanel)).toEqual({ show: 5, hide: 4 });
     });
   });
+
+  /** Verifies that a failed details request can be retried without opening another observation.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 19.6: retries a failed observation details load', async ({ database, page }) => {
+    const seededData = await seedPortfolioHistoryData(database);
+    const observation = await seedManagementObservation(
+      database,
+      seededData.portfolio,
+      seededData.assets[EXISTING_BOND_TICKER],
+      'E2E_OBS_RETRY',
+      '2026-05-01T12:00:00.000Z',
+    );
+    const detailsPath = `/api/portfolio/${seededData.portfolio.id}/history`;
+    const matchesDetails = (url: URL): boolean => url.pathname === detailsPath
+      && url.searchParams.get('observationTimestampId') === String(observation.id);
+    let requests = 0;
+    await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+    await page.route(matchesDetails, async route => {
+      requests += 1;
+      if(requests === 1) {
+        await route.fulfill({ status: 500, body: 'Failed to load details' });
+      } else {
+        await route.continue();
+      }
+    });
+
+    const item = page.locator(`#portfolio-history-management-container-${observation.id}`);
+    const form = item.locator(`#portfolio-history-management-form-${observation.id}`);
+    const error = item.locator('[data-observation-details-error]');
+    const save = form.locator('button[type="submit"]');
+    await item.locator('[data-metadata-editor-label]').click();
+    await expect(form).toHaveAttribute('data-observation-details-state', 'failed');
+    await expect(error).toBeVisible();
+    await expect(save).toBeDisabled();
+    expect(requests).toBe(1);
+
+    await error.getByRole('button').click();
+    await expect(form).toHaveAttribute('data-observation-details-state', 'ready');
+    await expect(error).toBeHidden();
+    await expect(save).toBeEnabled();
+    expect(requests).toBe(2);
+  });
 });
 
 /** Creates a minimal observation for one calendar date and verifies the request and PostgreSQL timestamp.
