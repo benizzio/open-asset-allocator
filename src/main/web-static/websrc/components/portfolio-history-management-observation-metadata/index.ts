@@ -1,13 +1,13 @@
 /**
  * Prepares observation tag and timestamp metadata for the portfolio-history management POST form.
  *
- * Bind this module once to the management-list container. It preserves exact persisted instants when the browser-local
+ * Prepare the form before submission. It preserves exact persisted instants when the browser-local
  * calendar date is unchanged and converts only newly selected dates to UTC local-midnight timestamps.
- * Example: `bindObservationMetadataRequest(container)` installs the idempotent HTMX request hook.
+ * Example: `prepareObservationMetadataForSubmit(form)` copies the current editor values into the form.
  * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
  */
 
-import { RequestConfigEventDetail } from "../../infra/htmx";
 import { calendarDateToUtcTimestamp } from "../../utils/calendar-date";
 import { isManagementMetadataEditorActive } from "../management-metadata-editor";
 import { areObservationDetailsReady } from "../portfolio-history-management-observation-details";
@@ -16,47 +16,23 @@ const FORM_PREFIX = "portfolio-history-management-form-";
 const NEW_DATE_INPUT_ID = "portfolio-history-management-observation-date";
 const OBSERVATION_TAG_NAME = "observationTimestamp.timeTag";
 const OBSERVATION_TIMESTAMP_NAME = "observationTimestamp.timestamp";
-const boundContainers = new WeakSet<HTMLElement>();
 
-type ObservationRequest = RequestConfigEventDetail & { formData: FormData; };
-
-/** Binds observation metadata serialization to one management-list container, at most once.
+/** Validates and prepares canonical metadata inputs before native submission collects form values.
  *
- * @param container - Portfolio-history management root receiving bubbling HTMX request events.
- * @example `bindObservationMetadataRequest(managementContainer)` serializes active observation editor values.
+ * @param form - The owning observation management form.
+ * @returns Whether submission may proceed.
+ * @example `if (prepareObservationMetadataForSubmit(form)) form.requestSubmit();`
  * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
  */
-export function bindObservationMetadataRequest(container: HTMLElement): void {
-    if(boundContainers.has(container)) {
-        return;
+export function prepareObservationMetadataForSubmit(form: HTMLFormElement): boolean {
+    const formId = form.getAttribute("id");
+
+    if(!formId?.startsWith(FORM_PREFIX) || !areObservationDetailsReady(form)) {
+        return false;
     }
 
-    boundContainers.add(container);
-    container.addEventListener("htmx:configRequest", prepareObservationMetadataForPost);
-}
-
-/** Serializes metadata only for POSTs owned by one observation management form.
- * @author GPT-6 Luna
- */
-function prepareObservationMetadataForPost(event: Event): void {
-    const request = (event as CustomEvent<ObservationRequest>).detail;
-
-    if(request.verb.toLowerCase() !== "post") {
-        return;
-    }
-
-    const form = getObservationForm(request);
-
-    if(!form) {
-        return;
-    }
-
-    if(!areObservationDetailsReady(form)) {
-        event.preventDefault();
-        return;
-    }
-
-    const observationId = form.getAttribute("id")?.slice(FORM_PREFIX.length) ?? "";
+    const observationId = formId.slice(FORM_PREFIX.length);
     const isNewObservation = observationId === "0";
     const item = form.closest<HTMLElement>(".accordion-item");
     const fields = item?.querySelector<HTMLElement>("[data-metadata-editor-active]");
@@ -64,32 +40,27 @@ function prepareObservationMetadataForPost(event: Event): void {
     const tagInput = item?.querySelector<HTMLInputElement>("[data-observation-editor-tag]");
 
     const dateInput = isNewObservation
-        ? document.getElementById(NEW_DATE_INPUT_ID)
+        ? item?.querySelector<HTMLInputElement>(`#${ NEW_DATE_INPUT_ID }`)
         : item?.querySelector<HTMLInputElement>("[data-observation-editor-date]");
     const tagPayload = form.elements.namedItem(OBSERVATION_TAG_NAME);
     const timestampPayload = form.elements.namedItem(OBSERVATION_TIMESTAMP_NAME);
 
     if(!(tagPayload instanceof HTMLInputElement) || !(timestampPayload instanceof HTMLInputElement)) {
-        event.preventDefault();
-        return;
+        return false;
     }
 
-    if(isEditing && !copyEditedTag(tagInput, tagPayload, event)) {
-        return;
+    if(isEditing && !copyEditedTag(tagInput, tagPayload)) {
+        return false;
     }
 
     if((isNewObservation || isEditing)
-        && !setObservationTimestamp(form, dateInput, timestampPayload, isNewObservation, event)) {
-        return;
+        && !setObservationTimestamp(form, dateInput, timestampPayload, isNewObservation)) {
+        return false;
     }
 
     if(!tagPayload.value) {
-        event.preventDefault();
-        return;
+        return false;
     }
-
-    request.formData.set(tagPayload.name, tagPayload.value);
-    request.formData.set(timestampPayload.name, timestampPayload.value);
 
     if(!isNewObservation) {
         form.dataset.submittedMetadataChanged = String(
@@ -97,29 +68,18 @@ function prepareObservationMetadataForPost(event: Event): void {
                 || timestampPayload.value !== form.dataset.persistedTimestamp,
         );
     }
-}
-
-/** Finds the observation form that owns the current HTMX POST.
- * @author GPT-6 Luna
- */
-function getObservationForm(request: ObservationRequest): HTMLFormElement | null {
-    const requestElement = request.elt;
-    const form = requestElement instanceof HTMLFormElement ? requestElement : requestElement.closest("form");
-    const formId = form instanceof HTMLFormElement ? form.getAttribute("id") : null;
-
-    return form instanceof HTMLFormElement && formId?.startsWith(FORM_PREFIX) ? form : null;
+    return true;
 }
 
 /** Copies and validates the active observation-tag editor value.
  * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
  */
 function copyEditedTag(
     tagInput: HTMLInputElement | null,
     tagPayload: HTMLInputElement,
-    event: Event,
 ): boolean {
     if(!tagInput?.checkValidity()) {
-        event.preventDefault();
         tagInput?.reportValidity();
         return false;
     }
@@ -130,17 +90,15 @@ function copyEditedTag(
 
 /** Sets an observation timestamp from the selected date or exact persisted instant.
  * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
  */
 function setObservationTimestamp(
     form: HTMLFormElement,
     dateInput: HTMLElement | null,
     timestampPayload: HTMLInputElement,
     isNewObservation: boolean,
-    event: Event,
 ): boolean {
     if(!(dateInput instanceof HTMLInputElement) || !dateInput.value) {
-        event.preventDefault();
-
         if(dateInput instanceof HTMLInputElement) {
             dateInput.reportValidity();
         }
@@ -155,7 +113,6 @@ function setObservationTimestamp(
             throw error;
         }
 
-        event.preventDefault();
         dateInput.setCustomValidity("Observation date is not valid.");
         dateInput.reportValidity();
         dateInput.setCustomValidity("");

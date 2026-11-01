@@ -6,6 +6,7 @@
  * @author benizzio
  * @author GPT-6 Sol
  * @author GPT-6.1 Sol
+ * @author GPT-6.1 Terra
  */
 
 import htmx from "htmx.org";
@@ -43,7 +44,7 @@ import {
     reloadObservationDetails,
     retryObservationDetails,
 } from "./portfolio-history-management-observation-details";
-import { bindObservationMetadataRequest } from "./portfolio-history-management-observation-metadata";
+import { prepareObservationMetadataForSubmit } from "./portfolio-history-management-observation-metadata";
 
 const PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER = "accordion-portfolio-history-management";
 const PORTFOLIO_ALLOCATION_MANAGEMENT_TBODY_PREFIX = "portfolio-history-management-form-tbody-";
@@ -324,6 +325,7 @@ const portfolioHistoryManagement = {
      * @author GPT-6 Luna
      * @author benizzio
      * @author GPT-6 Sol
+     * @author GPT-6.1 Terra
      */
     init() {
 
@@ -333,7 +335,6 @@ const portfolioHistoryManagement = {
 
         if(managementContainer) {
             bindReadOnlyManagementMetadataHeaderToggle(managementContainer);
-            bindObservationMetadataRequest(managementContainer);
         }
 
         const newObservationDateInput = managementContainer?.querySelector<HTMLInputElement>(
@@ -499,11 +500,12 @@ const portfolioHistoryManagement = {
         }
     },
 
-    /** Prevents form writes until the persisted observation's allocation details have loaded.
+    /** Prepares metadata before native submission and prevents writes until details have loaded.
      *
      * @param form - Observation form receiving native and HTMX submission guards.
      * @example `portfolioHistoryManagement.bindObservationDetailsSubmissionGuard(form)` protects a persisted form.
      * @author GPT-6 Luna
+     * @author GPT-6.1 Terra
      */
     bindObservationDetailsSubmissionGuard(form: HTMLFormElement) {
         if(form.dataset.observationDetailsGuardBound === "true") {
@@ -513,7 +515,7 @@ const portfolioHistoryManagement = {
         form.dataset.observationDetailsGuardBound = "true";
 
         form.addEventListener("submit", event => {
-            if(areObservationDetailsReady(form)) {
+            if(prepareObservationMetadataForSubmit(form)) {
                 return;
             }
 

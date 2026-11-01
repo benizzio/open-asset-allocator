@@ -2607,6 +2607,121 @@ test.describe('portfolio allocation history management', () => {
     await expect(save).toBeEnabled();
     expect(requests).toBe(2);
   });
+
+  test.describe('scenario 19.7: prepares observation metadata on native Save', () => {
+    test.use({ timezoneId: 'America/Los_Angeles' });
+
+    /** Verifies event-free editor changes are in the DOM before HTMX collects one request.
+     * @author GPT-6.1 Terra
+     */
+    test('copies the latest draft and persists its local date', async ({ database, page }) => {
+      const seededData = await seedPortfolioHistoryData(database);
+      const observation = await seedManagementObservation(
+        database, seededData.portfolio, seededData.assets[EXISTING_BOND_TICKER],
+        'E2E_OBS_DOM_ORIGINAL', '2026-03-07T12:00:00.123456Z',
+      );
+      const path = `/api/portfolio/${seededData.portfolio.id}/history`;
+      const posts: Request[] = [];
+      page.on('request', request => {
+        if(request.method() === 'POST' && new URL(request.url()).pathname === path) posts.push(request);
+      });
+      await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+      const item = page.locator(`#portfolio-history-management-container-${observation.id}`);
+      await item.getByRole('button', { name: 'Edit observation E2E_OBS_DOM_ORIGINAL', exact: true }).click();
+      const form = item.locator(`#portfolio-history-management-form-${observation.id}`);
+      const save = form.locator('button[type="submit"]');
+      await expect(save).toBeEnabled();
+      await item.evaluate(element => {
+        const tag = element.querySelector<HTMLInputElement>('[data-observation-editor-tag]');
+        const date = element.querySelector<HTMLInputElement>('[data-observation-editor-date]');
+        if(!tag || !date) throw new Error('Observation editor is missing');
+        tag.value = 'E2E_OBS_DOM_UPDATED';
+        date.value = '2026-03-09';
+        element.addEventListener('htmx:configRequest', event => {
+          const form = (event.target as Element).closest('form');
+          if(!form) return;
+          const tagPayload = form.elements.namedItem('observationTimestamp.timeTag') as HTMLInputElement;
+          const datePayload = form.elements.namedItem('observationTimestamp.timestamp') as HTMLInputElement;
+          document.body.setAttribute('data-test-prepared', `${tagPayload.value}|${datePayload.value}`);
+        }, { once: true });
+      });
+      const response = page.waitForResponse(result => result.request().method() === 'POST'
+        && new URL(result.url()).pathname === path);
+      await save.focus();
+      await page.keyboard.press('Enter');
+      expect((await response).ok()).toBe(true);
+      expect(posts).toHaveLength(1);
+      await expect(page.locator('body')).toHaveAttribute(
+        'data-test-prepared', 'E2E_OBS_DOM_UPDATED|2026-03-09T07:00:00.000Z',
+      );
+      const payload = JSON.parse(posts[0].postData() ?? 'null') as {
+        observationTimestamp: { timeTag: string; timestamp: string };
+      };
+      expect(payload.observationTimestamp).toMatchObject({
+        timeTag: 'E2E_OBS_DOM_UPDATED', timestamp: '2026-03-09T07:00:00.000Z',
+      });
+      await expect(database.query<{ time_tag: string; timestamp_matches: boolean }>(
+        `SELECT observation_time_tag AS time_tag, observation_timestamp = $2::timestamptz AS timestamp_matches
+         FROM public.portfolio_allocation_obs_time WHERE id = $1`,
+        [observation.id, '2026-03-09T07:00:00.000Z'],
+      )).resolves.toEqual([{ time_tag: 'E2E_OBS_DOM_UPDATED', timestamp_matches: true }]);
+      await item.getByRole('button', { name: 'Edit observation E2E_OBS_DOM_UPDATED', exact: true }).click();
+      await expect(save).toBeEnabled();
+      await item.locator('[data-observation-editor-tag]').evaluate((input: HTMLInputElement) => {
+        input.value = 'E2E_OBS_DOM_AGAIN';
+      });
+      const secondResponse = page.waitForResponse(result => result.request().method() === 'POST'
+        && new URL(result.url()).pathname === path);
+      await form.evaluate((element: HTMLFormElement) => element.requestSubmit());
+      expect((await secondResponse).ok()).toBe(true);
+      expect(posts).toHaveLength(2);
+      await expect(database.query<{ time_tag: string; timestamp_matches: boolean }>(
+        `SELECT observation_time_tag AS time_tag, observation_timestamp = $2::timestamptz AS timestamp_matches
+         FROM public.portfolio_allocation_obs_time WHERE id = $1`,
+        [observation.id, '2026-03-09T07:00:00.000Z'],
+      )).resolves.toEqual([{ time_tag: 'E2E_OBS_DOM_AGAIN', timestamp_matches: true }]);
+    });
+  });
+
+  /** Blocks native submission while persisted observation details load or have failed.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 19.8: blocks native submission while details are not ready', async ({ database, page }) => {
+    const seededData = await seedPortfolioHistoryData(database);
+    const originalTimestamp = '2026-05-01T12:00:00.123456Z';
+    const observation = await seedManagementObservation(
+      database, seededData.portfolio, seededData.assets[EXISTING_BOND_TICKER],
+      'E2E_OBS_BLOCKED', originalTimestamp,
+    );
+    const path = `/api/portfolio/${seededData.portfolio.id}/history`;
+    const posts: Request[] = [];
+    page.on('request', request => {
+      if(request.method() === 'POST' && new URL(request.url()).pathname === path) posts.push(request);
+    });
+    await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+    let releaseDetails: () => void = () => {};
+    const detailsGate = new Promise<void>(resolve => { releaseDetails = resolve; });
+    await page.route(url => url.pathname === path
+      && url.searchParams.get('observationTimestampId') === String(observation.id),
+    async route => {
+      await detailsGate;
+      await route.fulfill({ status: 500, body: 'Failed to load details' });
+    });
+    const item = page.locator(`#portfolio-history-management-container-${observation.id}`);
+    const form = item.locator(`#portfolio-history-management-form-${observation.id}`);
+    await item.locator('[data-metadata-editor-label]').click();
+    await expect(form).toHaveAttribute('data-observation-details-state', 'loading');
+    await form.evaluate((element: HTMLFormElement) => element.requestSubmit());
+    expect(posts).toHaveLength(0);
+    releaseDetails();
+    await expect(form).toHaveAttribute('data-observation-details-state', 'failed');
+    await form.evaluate((element: HTMLFormElement) => element.requestSubmit());
+    expect(posts).toHaveLength(0);
+    await expect(database.query<{ time_tag: string; timestamp_matches: boolean }>(
+      `SELECT observation_time_tag AS time_tag, observation_timestamp = $2::timestamptz AS timestamp_matches
+       FROM public.portfolio_allocation_obs_time WHERE id = $1`, [observation.id, originalTimestamp],
+    )).resolves.toEqual([{ time_tag: 'E2E_OBS_BLOCKED', timestamp_matches: true }]);
+  });
 });
 
 /** Creates a minimal observation for one calendar date and verifies the request and PostgreSQL timestamp.
