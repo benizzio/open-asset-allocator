@@ -4,6 +4,7 @@
  * Scenarios 21.1–21.4 cover the four management and viewing lists using database-seeded records.
  *
  * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
  */
 import type { Locator, Page, Response } from '@playwright/test';
 import { expect, test } from '../support/fixtures';
@@ -672,6 +673,97 @@ test('scenario 21.10: keeps an initial-load retry visible and busy without a cur
     await expect(page.locator(`#${ownerId} [data-paginated-record-id]`)).toHaveCount(10);
   } finally {
     releaseRetryResponse();
+  }
+});
+
+/** Verifies an appended plan receives the DOM-first native submission guard.
+ * @author GPT-6.1 Terra
+ */
+test('scenario 21.11: saves event-free metadata on an appended allocation plan', async ({ database, page }) => {
+  const seeded = await seedPlans(database);
+  const endpoint = `/api/portfolio/${seeded.portfolio.id}/allocation-plan`;
+  const initial = waitForPageResponse(page, endpoint, '');
+  await page.goto(`/portfolio/${seeded.portfolio.id}/allocation/manage`);
+  const cursor = requireContinuationCursor(await readPage(await initial, endpoint, ''));
+  const appended = waitForPageResponse(page, endpoint, cursor);
+  await loadMoreButton(page, 'accordion-allocation-plan-management').click();
+  await appended;
+  const item = page.locator(`#allocation-plan-management-container-${seeded.records[10].id}`);
+  await item.locator('[data-metadata-editor-trigger]').click();
+  await item.locator('[data-allocation-plan-editor-name]').evaluate((input: HTMLInputElement) => {
+    input.value = 'Appended plan edited';
+  });
+  await item.locator('[data-allocation-plan-editor-date]').evaluate((input: HTMLInputElement) => {
+    input.value = '2028-05-13';
+  });
+  const form = item.locator('form');
+  await form.evaluate((element: HTMLFormElement) => {
+    element.addEventListener('submit', () => {
+      const values = new FormData(element);
+      document.body.dataset.appendedPlanValues = JSON.stringify([values.get('name'), values.get('plannedDate')]);
+    }, { capture: true, once: true });
+  });
+  const response = page.waitForResponse(result => result.request().method() === 'POST'
+    && new URL(result.url()).pathname === endpoint);
+  await form.evaluate((element: HTMLFormElement) => element.requestSubmit());
+  expect((await response).ok()).toBe(true);
+  await expect(page.locator('body')).toHaveAttribute('data-appended-plan-values',
+    JSON.stringify(['Appended plan edited', '2028-05-13']));
+  await expect(database.query<{ name: string; planned_date: string }>(
+    'SELECT name, planned_date::text AS planned_date FROM public.allocation_plan WHERE id = $1',
+    [seeded.records[10].id],
+  )).resolves.toEqual([{ name: 'Appended plan edited', planned_date: '2028-05-13' }]);
+});
+
+/** Verifies readiness and exact timestamp preservation for an appended observation.
+ * @author GPT-6.1 Terra
+ */
+test('scenario 21.12: guards and saves an appended observation', async ({ database, page }) => {
+  const seeded = await seedHistory(database);
+  const id = seeded.records[10].id;
+  const timestamp = '2026-01-22T12:00:00.123456Z';
+  await database.query('UPDATE public.portfolio_allocation_obs_time SET observation_timestamp = $2::timestamptz WHERE id = $1',
+    [id, timestamp]);
+  const endpoint = `/api/portfolio/${seeded.portfolio.id}/history/observation`;
+  const savePath = `/api/portfolio/${seeded.portfolio.id}/history`;
+  const initial = waitForPageResponse(page, endpoint, '');
+  await page.goto(`/portfolio/${seeded.portfolio.id}/history/manage`);
+  const cursor = requireContinuationCursor(await readPage(await initial, endpoint, ''));
+  const appended = waitForPageResponse(page, endpoint, cursor);
+  await loadMoreButton(page, 'accordion-portfolio-history-management').click();
+  await appended;
+  const item = page.locator(`#portfolio-history-management-container-${id}`);
+  const form = item.locator('form');
+  let release: () => void = () => {};
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  let posts = 0;
+  page.on('request', request => {
+    if(request.method() === 'POST' && new URL(request.url()).pathname === savePath) posts++;
+  });
+  await page.route(url => url.pathname === savePath && url.searchParams.get('observationTimestampId') === String(id),
+    async route => { await gate; await route.continue(); });
+  try {
+    await item.locator('[data-metadata-editor-label]').click();
+    await expect(form).toHaveAttribute('data-observation-details-state', 'loading');
+    await form.evaluate((element: HTMLFormElement) => element.requestSubmit());
+    expect(posts).toBe(0);
+    release();
+    await expect(form).toHaveAttribute('data-observation-details-state', 'ready');
+    await item.locator('[data-metadata-editor-trigger]').click();
+    await item.locator('[data-observation-editor-tag]').evaluate((input: HTMLInputElement) => {
+      input.value = 'APPENDED_OBSERVATION_EDITED';
+    });
+    const response = page.waitForResponse(result => result.request().method() === 'POST'
+      && new URL(result.url()).pathname === savePath);
+    await form.evaluate((element: HTMLFormElement) => element.requestSubmit());
+    expect((await response).ok()).toBe(true);
+    expect(posts).toBe(1);
+    await expect(database.query<{ tag: string; timestamp_matches: boolean }>(
+      `SELECT observation_time_tag AS tag, observation_timestamp = $2::timestamptz AS timestamp_matches
+       FROM public.portfolio_allocation_obs_time WHERE id = $1`, [id, timestamp],
+    )).resolves.toEqual([{ tag: 'APPENDED_OBSERVATION_EDITED', timestamp_matches: true }]);
+  } finally {
+    release();
   }
 });
 
