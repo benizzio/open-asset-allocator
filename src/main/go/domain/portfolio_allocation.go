@@ -80,6 +80,7 @@ type PortfolioAllocationRepository interface {
 	) ([]*PortfolioObservationTimestamp, error)
 	// FindAvailableObservationTimestampsPage returns up to ten headers using a timestamp/ID boundary.
 	// For example, pass nil for the first page and the last response's cursor for continuation.
+	// Co-authored by: GPT-6.1 Sol, OpenCode, and GPT-6.1 Terra
 	FindAvailableObservationTimestampsPage(
 		portfolioId int64,
 		cursor *ObservationPageCursor,
