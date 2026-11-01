@@ -3,6 +3,7 @@
  *
  * @example `bindAccordionFieldFocusInDescendants(document.body)` binds marked field groups.
  * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
  */
 
 import { Collapse } from "bootstrap";
@@ -26,6 +27,7 @@ type AccordionFieldFocusState = { pendingOpen: boolean };
  * @param element - Root whose marked field groups should be bound.
  * @example `bindAccordionFieldFocusInDescendants(container)` binds any marked groups below the container.
  * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
  */
 export function bindAccordionFieldFocusInDescendants(element: HTMLElement): void {
     const fieldGroups = Array.from(element.querySelectorAll<HTMLElement>(FIELD_GROUP_SELECTOR));
@@ -37,8 +39,9 @@ export function bindAccordionFieldFocusInDescendants(element: HTMLElement): void
     fieldGroups.forEach(bindAccordionFieldFocus);
 }
 
-/** Binds focus and transition listeners to one marked field group when it has a matching panel.
+/** Binds focus and transition listeners and handles focus received before binding.
  * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
  */
 function bindAccordionFieldFocus(fields: HTMLElement): void {
     if(fields.hasAttribute(BOUND_ATTRIBUTE)) {
@@ -58,6 +61,10 @@ function bindAccordionFieldFocus(fields: HTMLElement): void {
     panel.addEventListener(SHOWN_EVENT, () => showPanelIfFocusRemains(fields, panel, state));
     panel.addEventListener(HIDDEN_EVENT, () => showPanelIfFocusRemains(fields, panel, state));
     fields.setAttribute(BOUND_ATTRIBUTE, "true");
+
+    if(fields.contains(document.activeElement)) {
+        handleFieldFocus(fields, panel, state);
+    }
 }
 
 /** Requests opening when a field in the header receives focus.

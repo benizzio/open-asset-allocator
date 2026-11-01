@@ -18,6 +18,7 @@
  * @author GPT-6 Luna
  * @author GPT-6 Sol
  * @author GPT-6.1 Sol
+ * @author GPT-6.1 Terra
  */
 import type { Browser, Locator, Page, Request, Route } from '@playwright/test';
 import {
@@ -984,6 +985,7 @@ test.describe('portfolio allocation plan management', () => {
 
   /** Creates a plan, verifies PostgreSQL persistence, then tests refreshed field and group behavior.
    * @author GPT-6 Luna
+   * @author GPT-6.1 Terra
    */
   test('scenario 4.7: preserves accordion interactions after successful allocation-plan refresh', async ({
     database,
@@ -1002,6 +1004,7 @@ test.describe('portfolio allocation plan management', () => {
     const plannedDate = '2026-02-10';
     await initialNewItem.getByLabel('Planned date').fill(plannedDate);
     const initialForm = page.locator('#allocation-plan-management-form-0');
+    await expect(initialNewItem.locator('#allocation-plan-management-0')).toHaveClass(/\bshow\b/);
     const initialFormHandle = await initialForm.elementHandle();
     if(!initialFormHandle) {
       throw new Error('The new allocation-plan form was not rendered.');
@@ -1156,6 +1159,63 @@ test.describe('portfolio allocation plan management', () => {
       'SELECT id FROM public.allocation_plan WHERE portfolio_id = $1',
       [seededData.portfolio.id],
     )).resolves.toHaveLength(1);
+  });
+
+  /** Exercises focus before HTMX settlement on initial render and replacement, including cancellation on blur.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 4.8: handles header focus before accordion binding', async ({ database, page }) => {
+    const seededData = await seedAllocationPlanData(database);
+    await page.addInitScript(() => {
+      document.addEventListener('htmx:afterSwap', event => {
+        const target = event.target;
+        if(!(target instanceof HTMLElement) || target.id !== 'accordion-allocation-plan-management') return;
+        const fields = target.querySelector<HTMLElement>('#allocation-plan-management-container-0 [data-accordion-field-focus]');
+        const panel = target.querySelector<HTMLElement>('#allocation-plan-management-0');
+        const mode = document.documentElement.dataset.earlyAccordionFocus ?? 'name';
+        const field = fields?.querySelector<HTMLInputElement>(mode === 'date' ? 'input[type="date"]' : 'input[type="text"]');
+        if(!fields || !panel || !field) return;
+        fields.dataset.testBoundBeforeFocus = String(fields.hasAttribute('data-accordion-field-focus-bound'));
+        fields.dataset.testFocusMode = mode;
+        panel.dataset.testShows = '0';
+        panel.addEventListener('show.bs.collapse', () => {
+          panel.dataset.testShows = String(Number(panel.dataset.testShows) + 1);
+        });
+        field.focus();
+        fields.dataset.testFocusedBeforeBinding = String(document.activeElement === field);
+        if(mode === 'blur') field.blur();
+      });
+    });
+    await page.goto('/');
+    await expectRootShell(page);
+    await page.goto(`/portfolio/${seededData.portfolio.id}/allocation/manage`);
+
+    const accordion = page.locator('#accordion-allocation-plan-management');
+    const fields = accordion.locator('#allocation-plan-management-container-0 [data-accordion-field-focus]');
+    const panel = accordion.locator('#allocation-plan-management-0');
+    const assertEarlyFocus = async (mode: string, opens: boolean): Promise<void> => {
+      await expect(fields).toHaveAttribute('data-test-focus-mode', mode);
+      await expect(fields).toHaveAttribute('data-test-bound-before-focus', 'false');
+      await expect(fields).toHaveAttribute('data-test-focused-before-binding', 'true');
+      await expect(fields).toHaveAttribute('data-accordion-field-focus-bound', 'true');
+      if(opens) {
+        await expect(panel).toHaveClass(/\bshow\b/);
+        await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+        await expect(panel).toHaveAttribute('data-test-shows', '1');
+        await accordion.evaluate(element => element.dispatchEvent(new CustomEvent('htmx:afterSettle', { bubbles: true })));
+        await expect(panel).toHaveAttribute('data-test-shows', '1');
+      }
+      else {
+        await expect(panel).not.toHaveClass(/\bshow\b/);
+        await expect(panel).toHaveAttribute('data-test-shows', '0');
+      }
+    };
+    await assertEarlyFocus('name', true);
+    for(const mode of ['date', 'blur']) {
+      await page.evaluate(value => { document.documentElement.dataset.earlyAccordionFocus = value; }, mode);
+      await accordion.evaluate(element => element.dispatchEvent(new CustomEvent('reload-allocation-plan-management', { bubbles: true })));
+      await assertEarlyFocus(mode, mode !== 'blur');
+    }
   });
 
   /** Verifies the shared create-new ticker action works in an allocation-plan form.

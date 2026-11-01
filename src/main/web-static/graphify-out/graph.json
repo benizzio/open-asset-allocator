@@ -1098,7 +1098,7 @@
       "file_type": "code",
       "norm_label": "accordionfieldfocusstate",
       "source_file": "websrc/infra/dom/binding-accordion-field-focus.ts",
-      "source_location": "L20"
+      "source_location": "L21"
     },
     {
       "id": "websrc_components_asset_composed_columns_input_asset_row_controller_assetrowcontroller",
@@ -5155,7 +5155,7 @@
       "file_type": "code",
       "norm_label": "bindaccordionfieldfocus()",
       "source_file": "websrc/infra/dom/binding-accordion-field-focus.ts",
-      "source_location": "L43"
+      "source_location": "L46"
     },
     {
       "id": "websrc_infra_dom_binding_accordion_field_focus_bindaccordionfieldfocusindescendants",
@@ -5167,7 +5167,7 @@
       "file_type": "code",
       "norm_label": "bindaccordionfieldfocusindescendants()",
       "source_file": "websrc/infra/dom/binding-accordion-field-focus.ts",
-      "source_location": "L30"
+      "source_location": "L32"
     },
     {
       "id": "websrc_infra_dom_binding_accordion_field_focus_handlefieldblur",
@@ -5179,7 +5179,7 @@
       "file_type": "code",
       "norm_label": "handlefieldblur()",
       "source_file": "websrc/infra/dom/binding-accordion-field-focus.ts",
-      "source_location": "L78"
+      "source_location": "L85"
     },
     {
       "id": "websrc_infra_dom_binding_accordion_field_focus_handlefieldfocus",
@@ -5191,7 +5191,7 @@
       "file_type": "code",
       "norm_label": "handlefieldfocus()",
       "source_file": "websrc/infra/dom/binding-accordion-field-focus.ts",
-      "source_location": "L66"
+      "source_location": "L73"
     },
     {
       "id": "websrc_infra_dom_binding_accordion_field_focus_showpaneliffocusremains",
@@ -5203,7 +5203,7 @@
       "file_type": "code",
       "norm_label": "showpaneliffocusremains()",
       "source_file": "websrc/infra/dom/binding-accordion-field-focus.ts",
-      "source_location": "L91"
+      "source_location": "L98"
     },
     {
       "id": "websrc_infra_dom_binding_dom_bootstrap_form_bindbootstrapvalidationcleaning",
@@ -11401,7 +11401,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/infra/dom/binding-accordion-field-focus.ts",
-      "source_location": "L56",
+      "source_location": "L59",
       "weight": 1.0
     },
     {
@@ -11413,7 +11413,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/infra/dom/binding-accordion-field-focus.ts",
-      "source_location": "L57",
+      "source_location": "L60",
       "weight": 1.0
     },
     {
@@ -11425,7 +11425,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/infra/dom/binding-accordion-field-focus.ts",
-      "source_location": "L58",
+      "source_location": "L61",
       "weight": 1.0
     },
     {
@@ -11437,7 +11437,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/infra/dom/binding-accordion-field-focus.ts",
-      "source_location": "L72",
+      "source_location": "L79",
       "weight": 1.0
     },
     {
@@ -20579,7 +20579,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "websrc/infra/dom/binding-accordion-field-focus.ts",
-      "source_location": "L8",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -25878,7 +25878,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/infra/dom/binding-accordion-field-focus.ts",
-      "source_location": "L20",
+      "source_location": "L21",
       "weight": 1.0
     },
     {
@@ -25889,7 +25889,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/infra/dom/binding-accordion-field-focus.ts",
-      "source_location": "L30",
+      "source_location": "L32",
       "weight": 1.0
     },
     {
@@ -25900,7 +25900,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/infra/dom/binding-accordion-field-focus.ts",
-      "source_location": "L43",
+      "source_location": "L46",
       "weight": 1.0
     },
     {
@@ -25911,7 +25911,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/infra/dom/binding-accordion-field-focus.ts",
-      "source_location": "L66",
+      "source_location": "L73",
       "weight": 1.0
     },
     {
@@ -25922,7 +25922,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/infra/dom/binding-accordion-field-focus.ts",
-      "source_location": "L78",
+      "source_location": "L85",
       "weight": 1.0
     },
     {
@@ -25933,7 +25933,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/infra/dom/binding-accordion-field-focus.ts",
-      "source_location": "L91",
+      "source_location": "L98",
       "weight": 1.0
     },
     {
@@ -29403,7 +29403,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "websrc/infra/dom/binding-accordion-field-focus.ts",
-      "source_location": "L37",
+      "source_location": "L39",
       "weight": 1.0
     },
     {
@@ -30807,5 +30807,5 @@
       "source_file": "websrc/components/portfolio-navigation.html"
     }
   ],
-  "built_at_commit": "8504ff54fdbfc27fae5c906bfdc8b7916431563d"
+  "built_at_commit": "295635216a1a49675df28d938449e3700567a675"
 }
