@@ -163,7 +163,7 @@ func (controller *PortfolioAllocationRESTController) getPortfolioAllocationHisto
 }
 
 // getAvailableHistoryObservations returns the legacy summary list or an opt-in cursor page.
-// Co-authored by: GPT-6.1 Sol and OpenCode
+// Co-authored by: GPT-6.1 Sol, OpenCode, and benizzio
 func (controller *PortfolioAllocationRESTController) getAvailableHistoryObservations(context *gin.Context) {
 
 	var portfolioIdParamValue = context.Param(portfolioIdParam)
