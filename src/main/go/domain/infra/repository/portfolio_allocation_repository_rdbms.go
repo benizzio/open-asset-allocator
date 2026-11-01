@@ -127,6 +127,7 @@ const (
 	queryAllocationsError           = "Error querying portfolio allocations"
 	queryObservationTimestampsError = "Error querying observation timestamps"
 	observationTagUniqueConstraint  = "portfolio_allocation_obs_time_portfolio_tag_uk"
+	observationPortfolioConstraint  = "portfolio_allocation_obs_time_portfolio_fk"
 )
 
 type PortfolioAllocationRDBMSRepository struct {
@@ -331,7 +332,7 @@ func (repository *PortfolioAllocationRDBMSRepository) mergePortfolioAllocations(
 
 // InsertObservationTimestampInTransaction creates a new portfolio-owned observation timestamp.
 // For example, `repository.InsertObservationTimestampInTransaction(ctx, 42, observation)` inserts for portfolio 42.
-// Co-authored by: GPT-6.1 Sol, OpenCode and benizzio
+// Co-authored by: GPT-6.1 Sol, GPT-6.1 Terra, OpenCode and benizzio
 func (repository *PortfolioAllocationRDBMSRepository) InsertObservationTimestampInTransaction(
 	transContext context.Context,
 	portfolioId int64,
@@ -352,7 +353,7 @@ func (repository *PortfolioAllocationRDBMSRepository) InsertObservationTimestamp
 		Get(rdbms.ReturningIntIdSingleRowScanner)
 
 	if err != nil {
-		if classifiedError := classifyObservationWriteError(err); classifiedError != nil {
+		if classifiedError := classifyObservationWriteError(err, portfolioId); classifiedError != nil {
 			return nil, classifiedError
 		}
 		return nil, infra.PropagateAsAppErrorWithNewMessage(
@@ -373,7 +374,7 @@ func (repository *PortfolioAllocationRDBMSRepository) InsertObservationTimestamp
 // UpdateObservationTimestampInTransaction persists metadata already validated by the domain service.
 // A guarded update affecting no rows returns a persistence error rather than inserting an observation implicitly.
 // For example, `repository.UpdateObservationTimestampInTransaction(ctx, 42, observation)` updates portfolio 42.
-// Co-authored by: GPT-6.1 Sol and OpenCode
+// Co-authored by: GPT-6.1 Sol, GPT-6.1 Terra and OpenCode
 func (repository *PortfolioAllocationRDBMSRepository) UpdateObservationTimestampInTransaction(
 	transContext context.Context,
 	portfolioId int64,
@@ -393,7 +394,7 @@ func (repository *PortfolioAllocationRDBMSRepository) UpdateObservationTimestamp
 		portfolioId,
 	)
 	if err != nil {
-		if classifiedError := classifyObservationWriteError(err); classifiedError != nil {
+		if classifiedError := classifyObservationWriteError(err, portfolioId); classifiedError != nil {
 			return classifiedError
 		}
 		return infra.PropagateAsAppErrorWithNewMessage(
@@ -419,9 +420,9 @@ func (repository *PortfolioAllocationRDBMSRepository) UpdateObservationTimestamp
 	return nil
 }
 
-// classifyObservationWriteError classifies database uniqueness and foreign-key failures at the persistence boundary.
-// Co-authored by: GPT-6.1 Sol and OpenCode
-func classifyObservationWriteError(err error) error {
+// classifyObservationWriteError classifies database write failures and translates missing portfolio references.
+// Co-authored by: GPT-6.1 Sol, GPT-6.1 Terra and OpenCode
+func classifyObservationWriteError(err error, portfolioId int64) error {
 	if rdbms.IsUniqueConstraintViolation(err, observationTagUniqueConstraint) {
 		return infra.BuildUniqueConstraintViolationError(
 			observationTagUniqueConstraint,
@@ -432,6 +433,9 @@ func classifyObservationWriteError(err error) error {
 
 	var violation = rdbms.ClassifyForeignKeyViolation(err)
 	if violation != nil {
+		if violation.ConstraintName == observationPortfolioConstraint {
+			return &domain.PortfolioNotFoundError{PortfolioId: portfolioId, Cause: violation}
+		}
 		return violation
 	}
 	return nil

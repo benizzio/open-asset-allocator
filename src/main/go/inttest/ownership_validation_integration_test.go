@@ -17,7 +17,7 @@ import (
 
 // TestPostPortfolioHistoryOwnershipValidation verifies domain ownership failures retain the existing API contract.
 // Run with go test -count=1 -run '^TestPostPortfolioHistoryOwnershipValidation$' ./inttest.
-// Authored by: GPT-6.1 Sol
+// Co-authored by: GPT-6.1 Sol and GPT-6.1 Terra
 func TestPostPortfolioHistoryOwnershipValidation(t *testing.T) {
 	var testCases = []struct {
 		name          string
@@ -51,6 +51,11 @@ func TestPostPortfolioHistoryOwnershipValidation(t *testing.T) {
 				`SELECT COUNT(*)::text AS count FROM portfolio_allocation_obs_time
 				 WHERE observation_time_tag = 'ownership-rejected'`,
 				[]inttestutil.AssertableNullStringMap{{"count": inttestutil.ToAssertableNullString("0")}})
+			if testCase.name == "missing portfolio" {
+				inttestutil.AssertDBWithQueryMultipleRows(t,
+					`SELECT COUNT(*)::text AS count FROM portfolio_allocation_fact WHERE portfolio_id = 999999`,
+					[]inttestutil.AssertableNullStringMap{{"count": inttestutil.ToAssertableNullString("0")}})
+			}
 		})
 	}
 }

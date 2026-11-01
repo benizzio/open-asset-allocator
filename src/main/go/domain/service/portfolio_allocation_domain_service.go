@@ -155,7 +155,7 @@ func (service *PortfolioAllocationDomService) updateObservationTimestampInTransa
 }
 
 // createObservationTimestampInTransaction inserts an observation and translates a missing portfolio into validation.
-// Authored by: GPT-6.1 Sol
+// Co-authored by: GPT-6.1 Sol and GPT-6.1 Terra
 func (service *PortfolioAllocationDomService) createObservationTimestampInTransaction(
 	transContext context.Context,
 	portfolioId int64,
@@ -166,9 +166,8 @@ func (service *PortfolioAllocationDomService) createObservationTimestampInTransa
 		portfolioId,
 		observationTimestamp,
 	)
-	var foreignKeyError *infra.ForeignKeyConstraintViolationError
-	if errors.As(err, &foreignKeyError) &&
-		foreignKeyError.ConstraintName == "portfolio_allocation_obs_time_portfolio_fk" {
+	var portfolioNotFound *domain.PortfolioNotFoundError
+	if errors.As(err, &portfolioNotFound) {
 		return nil, service.observationValidationError("Portfolio does not exist")
 	}
 	return persistedObservation, err

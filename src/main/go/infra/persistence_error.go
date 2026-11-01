@@ -3,8 +3,8 @@ package infra
 import "fmt"
 
 // ForeignKeyConstraintViolationError identifies a rejected reference at the persistence boundary.
-// Domain services may translate a known constraint into a domain validation error without importing a database driver.
-// Authored by: GPT-6.1 Sol
+// Repositories may translate a known constraint into a domain-specific error while preserving its cause.
+// Co-authored by: GPT-6.1 Sol and GPT-6.1 Terra
 type ForeignKeyConstraintViolationError struct {
 	ConstraintName string
 	Cause          error
