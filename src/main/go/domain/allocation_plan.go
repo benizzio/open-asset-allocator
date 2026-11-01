@@ -76,6 +76,7 @@ type AllocationPlanRepository interface {
 	GetAllAllocationPlans(portfolioId int64, planType *allocation.PlanType) ([]*AllocationPlan, error)
 	// GetAllocationPlansPage returns complete plans of one type using a planned-date/ID boundary.
 	// For example, pass nil for the first page and the last response's cursor for continuation.
+	// Co-authored by: GPT-6.1 Sol, OpenCode, and GPT-6.1 Terra
 	GetAllocationPlansPage(
 		portfolioId int64,
 		planType allocation.PlanType,

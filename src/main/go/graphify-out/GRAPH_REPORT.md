@@ -1,7 +1,9 @@
 # Graph Report - go  (2026-11-01)
 
 ## Corpus Check
-- cluster-only mode — file stats not available
+- 132 files · ~74,724 words
+- Verdict: corpus is large enough that graph structure adds value.
+- Unclassified: 2 file(s) not represented in the graph (top: .toml 1, (none) 1)
 
 ## Summary
 - 1247 nodes · 3915 edges · 57 communities (47 shown, 10 thin omitted)
@@ -9,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f670338e`
+- Built from commit: `989d8937`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -71,27 +73,27 @@
 
 ## God Nodes (most connected - your core abstractions)
 1. `deferCloseResponseBody()` - 90 edges
-2. `BuildCleanupFunctionBuilder()` - 44 edges
-3. `PropagateAsAppErrorWithNewMessage()` - 44 edges
+2. `PropagateAsAppErrorWithNewMessage()` - 44 edges
+3. `BuildCleanupFunctionBuilder()` - 44 edges
 4. `App` - 35 edges
 5. `PortfolioAllocation` - 34 edges
 6. `Asset` - 30 edges
-7. `IsZeroValue()` - 29 edges
-8. `ExecuteDBQuery()` - 29 edges
-9. `NewMapTree()` - 27 edges
+7. `ExecuteDBQuery()` - 29 edges
+8. `IsZeroValue()` - 29 edges
+9. `PortfolioObservationTimestamp` - 27 edges
 10. `PortfolioAllocationDomService` - 27 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `IsNilPointer()` --calls--> `ValueJsonColumn()`  [EXTRACTED]
-  langext/golang_ext_util.go → infra/rdbms/sqlext/sqlext_utils.go
-- `validateAssetIdentification()` --references--> `CustomValidationErrorsBuilder`  [EXTRACTED]
-  api/rest/portfolio_allocation_controller.go → infra/validation/custom_validation_error_builder.go
-- `AllocationHierarchyLevel` --references--> `buildHierarchySubIterationContext()`  [EXTRACTED]
-  domain/allocation.go → application/portfolio_divergence_analysis_context.go
-- `AllocationHierarchyLevel` --references--> `getHierarchySubIterationContextValue()`  [EXTRACTED]
-  domain/allocation.go → application/portfolio_divergence_analysis_context.go
-- `appendLevelDescription()` --references--> `CustomSlice`  [EXTRACTED]
-  domain/service/allocation_plan_domain_service.go → langext/golang_ext_custom_slice.go
+- `ValueJsonColumn()` --calls--> `IsNilPointer()`  [EXTRACTED]
+  infra/rdbms/sqlext/sqlext_utils.go → langext/golang_ext_util.go
+- `AllocationPlanRESTController` --references--> `AllocationPlanDomService`  [EXTRACTED]
+  api/rest/allocation_plan_controller.go → domain/service/allocation_plan_domain_service.go
+- `BuildAllocationPlanRESTController()` --references--> `AllocationPlanDomService`  [EXTRACTED]
+  api/rest/allocation_plan_controller.go → domain/service/allocation_plan_domain_service.go
+- `AssetRESTController` --references--> `AssetDomService`  [EXTRACTED]
+  api/rest/asset_controller.go → domain/service/asset_domain_service.go
+- `BuildAssetRESTController()` --references--> `AssetDomService`  [EXTRACTED]
+  api/rest/asset_controller.go → domain/service/asset_domain_service.go
 
 ## Import Cycles
 - None detected.
@@ -287,24 +289,24 @@ Cohesion: 0.50
 Nodes (3): CustomSlice[T], T, joinAny()
 
 ## Knowledge Gaps
-- **17 isolated node(s):** `MapIterator`, `contextKey`, `AssetSearchQueryDTS`, `ExternalAssetSearchQueryDTS`, `paginationCursorValidationDTS` (+12 more)
+- **17 isolated node(s):** `AssetSearchQueryDTS`, `ExternalAssetSearchQueryDTS`, `ErrorResponse`, `paginationCursorValidationDTS`, `contextKey` (+12 more)
   These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 104 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **10 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
+- **Why does `Adapter` connect `Adapter` to `go_pkg_strings`, `SQLTransactionalContext`, `App`, `testing.T`, `T`?**
+  _High betweenness centrality (0.055) - this node is a cross-community bridge._
 - **Why does `App` connect `App` to `reflect.Type`, `Adapter`, `infra.go`, `.buildAppComponents`, `go_pkg_testing`, `go_pkg_github_com_golang_glog`, `go_pkg_github_com_benizzio_open_asset_allocator_langext`, `go_pkg_fmt`, `go_pkg_net_http`?**
-  _High betweenness centrality (0.037) - this node is a cross-community bridge._
+  _High betweenness centrality (0.048) - this node is a cross-community bridge._
 - **Why does `Asset` connect `PropagateAsAppErrorWithNewMessage` to `IsZeroValue`, `Adapter`, `AllocationPlan`, `BuildCleanupFunctionBuilder`, `PortfolioAllocation`, `asset_rest_model.go`, `AssetDomService`?**
-  _High betweenness centrality (0.030) - this node is a cross-community bridge._
+  _High betweenness centrality (0.035) - this node is a cross-community bridge._
 - **Are the 88 inferred relationships involving `deferCloseResponseBody()` (e.g. with `TestAllocationPlanReadsOrderByPlannedDateAndId()` and `TestGetAllocationPlans()`) actually correct?**
   _`deferCloseResponseBody()` has 88 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `MapIterator`, `contextKey`, `AssetSearchQueryDTS` to the rest of the system?**
+- **What connects `AssetSearchQueryDTS`, `ExternalAssetSearchQueryDTS`, `ErrorResponse` to the rest of the system?**
   _17 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `IsZeroValue` be split into smaller, more focused modules?**
   _Cohesion score 0.05427905427905428 - nodes in this community are weakly interconnected._
 - **Should `reflect.Type` be split into smaller, more focused modules?**
   _Cohesion score 0.061343204653622425 - nodes in this community are weakly interconnected._
-- **Should `Portfolio` be split into smaller, more focused modules?**
-  _Cohesion score 0.06836158192090395 - nodes in this community are weakly interconnected._
