@@ -58,6 +58,12 @@ type PortfolioAllocationRepository interface {
 		observationTimestamp *PortfolioObservationTimestamp,
 		allocations []*PortfolioAllocation,
 	) error
+	// InsertObservationTimestampInTransaction creates an observation owned by portfolioId in the active transaction
+	// carried by transContext. It returns the persisted timestamp with its generated ID, portfolio owner, and supplied
+	// metadata. An absent portfolio results in a PortfolioNotFoundError; other errors are propagated.
+	// For example, repository.InsertObservationTimestampInTransaction(ctx, 42, observation) creates an observation
+	// for portfolio 42.
+	// Co-authored by: GPT-6.1 Terra, OpenCode and Igor Benicio de Mesquita
 	InsertObservationTimestampInTransaction(
 		transContext context.Context,
 		portfolioId int64,
