@@ -5,6 +5,7 @@
         <div class="accordion"
              id="accordion-portfolio-history"
              data-paginated-list
+             data-paginated-list-context-selector="[name='portfolioId']"
              hx-get="/api/portfolio/:portfolioId/history"
              hx-include="[name='portfolioId']"
              hx-trigger="load, reload-portfolio-history, paginated-list-more queue:none"
@@ -85,10 +86,12 @@
 
     {{#each items}}
 
-        <div class="accordion-item" data-paginated-record-id="{{observationTimestamp.id}}">
+        <!-- Co-authored by: GPT-6.1 Terra and benizzio -->
+        <div class="accordion-item" data-paginated-record-id="{{observationTimestamp.id}}" data-paginated-record-persisted>
 
             <h2 class="accordion-header">
                 <button class="accordion-button {{#unless (and @root.initial @first)}}collapsed{{/unless}}"
+                        data-paginated-record-focus
                         type="button"
                         data-bs-toggle="collapse"
                         data-bs-target="#portfolio-allocation-{{observationTimestamp.id}}"

@@ -2,6 +2,7 @@
  * Renders owner-scoped pagination feedback and provides focus targets after a terminal append.
  * @module components/paginated-list
  * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
  */
 
 const LOAD_MORE_ATTRIBUTE = "data-paginated-list-more";
@@ -34,12 +35,13 @@ export type PaginationControlState = {
 /**
  * Updates only the continuation controls associated with the supplied list owner.
  *
- * @param owner - The paginated accordion whose controls should be rendered.
+ * @param owner - The paginated list whose controls should be rendered.
  * @param state - The minimal cursor/request state needed for presentation.
  * @param message - Optional owner-scoped live-region feedback.
  * @param isError - Whether the message is an actionable failure alert.
  * @example `renderControls(owner, state, "Could not load records. Try again.", true)` renders a retry state.
  * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
  */
 export function renderControls(
     owner: HTMLElement,
@@ -55,30 +57,31 @@ export function renderControls(
 }
 
 /**
- * Moves focus to a visible persisted record toggle after the final continuation page commits.
+ * Moves focus to a consumer-marked control on a persisted record after the final page commits.
  *
  * @param owner - The list whose accepted page has just settled.
  * @param acceptedIds - Persisted IDs accepted from the settled response, in response order.
  * @example `focusOnAcceptedRecord(owner, request.acceptedIds)` focuses the first newly appended record.
  * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
  */
 export function focusOnAcceptedRecord(owner: HTMLElement, acceptedIds: readonly string[]): void {
     if(owner.getClientRects().length === 0) {
         return;
     }
 
-    const records = Array.from(owner.querySelectorAll<HTMLElement>("[data-paginated-record-id]"));
+    const records = Array.from(owner.querySelectorAll<HTMLElement>(
+        "[data-paginated-record-id][data-paginated-record-persisted]",
+    ));
 
     const acceptedRecord = acceptedIds
         .map(id => records.find(record => record.getAttribute("data-paginated-record-id") === id))
         .find((record): record is HTMLElement => record !== undefined);
 
-    const lastPersistedRecord = records
-        .filter(record => record.getAttribute("data-paginated-record-id") !== "0")
-        .at(-1);
+    const lastPersistedRecord = records.at(-1);
 
     const toggle = (acceptedRecord ?? lastPersistedRecord)
-        ?.querySelector<HTMLButtonElement>(".accordion-button");
+        ?.querySelector<HTMLElement>("[data-paginated-record-focus]");
 
     if(toggle && toggle.getClientRects().length > 0) {
         toggle.focus();

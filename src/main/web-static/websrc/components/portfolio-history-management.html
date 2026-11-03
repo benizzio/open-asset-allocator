@@ -14,6 +14,7 @@
         <div id="accordion-portfolio-history-management"
              class="accordion container-fluid"
              data-paginated-list
+             data-paginated-list-context-selector="[name='portfolioId']"
              hx-get="/api/portfolio/:portfolioId/history/observation"
              hx-include="[name='portfolioId']"
              hx-trigger="load, reload-portfolio-history-management, paginated-list-more queue:none"
@@ -65,9 +66,11 @@
 
     {{#each .}}
 
+        <!-- Co-authored by: GPT-6.1 Terra and benizzio -->
         <div id="portfolio-history-management-container-{{id}}"
              class="accordion-item"
              data-paginated-record-id="{{id}}"
+             {{#if id}}data-paginated-record-persisted{{/if}}
         >
 
             <!-- Co-authored by: GPT-6 Luna and benizzio -->
@@ -153,6 +156,7 @@
                 >{{timeTag}} - {{formatTimestampLocalDate timestamp}}</span>
             {{/if}}
             <button class="accordion-button collapsed w-auto flex-shrink-0 management-metadata-header-toggle"
+                    data-paginated-record-focus
                     type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#portfolio-history-management-{{id}}"

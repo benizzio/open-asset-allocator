@@ -4,11 +4,13 @@
  * @module components/paginated-list
  * @author GPT-6 Luna
  * @author GPT-6 Sol
+ * @author GPT-6.1 Terra
  */
 
 import htmx from "htmx.org";
 import { HtmxInfra, type BeforeSwapEventDetail } from "../../infra/htmx";
 import { focusOnAcceptedRecord, renderControls } from "./controls";
+import { getContextId } from "./context";
 
 const PAGINATED_LIST_ATTRIBUTE = "data-paginated-list";
 const LOAD_MORE_ATTRIBUTE = "data-paginated-list-more";
@@ -21,20 +23,31 @@ const PAGE_CURSOR_PARAMETER = "pageCursor";
  * for cursor-based continuation requests.
  * @example `mode === PaginationMode.Initial` identifies a request that resets the list.
  * @author GPT-6 Sol
+ * @author GPT-6.1 Terra
  */
 export enum PaginationMode {
     Initial = "initial",
     Append = "append",
 }
 
+/**
+ * Describes the endpoint's cursor page envelope.
+ * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
+ */
 type PageEnvelope<T> = {
     items: T[];
     nextCursor: string | null;
 };
 
+/**
+ * Tracks committed and pending state for one list owner.
+ * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
+ */
 type ListState = {
     generation: number;
-    portfolioId: string;
+    contextId: string;
     cursor: string | null;
     recordIds: Set<string>;
     initialized: boolean;
@@ -47,10 +60,15 @@ type ListState = {
     activeRequest?: RequestContext;
 };
 
+/**
+ * Tracks one request through response preparation and settlement.
+ * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
+ */
 type RequestContext = {
     owner: HTMLElement;
     generation: number;
-    portfolioId: string;
+    contextId: string;
     mode: PaginationMode;
     cursor: string;
     acceptedIds: string[];
@@ -69,17 +87,18 @@ const requests = new WeakMap<XMLHttpRequest, RequestContext>();
 const focusTrackedRequests = new Set<RequestContext>();
 let initialized = false;
 
-type HistoryPageItem = { observationTimestamp?: { id?: number } };
-type AllocationPlanPageItem = { id?: number };
-
-/** Returns the state associated with a list owner, creating its initial state when needed. */
+/**
+ * Returns the state associated with a list owner, creating its initial state when needed.
+ * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
+ */
 function getState(owner: HTMLElement): ListState {
     let state = states.get(owner);
 
     if(!state) {
         state = {
             generation: 0,
-            portfolioId: getPortfolioId(),
+            contextId: getContextId(owner),
             cursor: null,
             recordIds: new Set<string>(),
             initialized: false,
@@ -92,12 +111,11 @@ function getState(owner: HTMLElement): ListState {
     return state;
 }
 
-/** Reads the active portfolio identity from the page's shared context field. */
-function getPortfolioId(): string {
-    return document.querySelector<HTMLInputElement>("[name='portfolioId']")?.value ?? "";
-}
-
-/** Resolves a list owner from an HTMX event target. */
+/**
+ * Resolves a list owner from an HTMX event target.
+ * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
+ */
 function getOwner(target: EventTarget | null): HTMLElement | undefined {
     if(!(target instanceof Element)) {
         return undefined;
@@ -110,6 +128,7 @@ function getOwner(target: EventTarget | null): HTMLElement | undefined {
 /**
  * Renders owner-scoped controls after a pagination state transition.
  * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
  */
 function updateControls(owner: HTMLElement, state: ListState, message = "", isError = false): void {
     renderControls(owner, {
@@ -124,6 +143,7 @@ function updateControls(owner: HTMLElement, state: ListState, message = "", isEr
 /**
  * Marks a pending keyboard continuation abandoned when focus moves elsewhere.
  * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
  */
 function trackPaginationFocusChange(event: FocusEvent): void {
     const target = event.target;
@@ -135,16 +155,24 @@ function trackPaginationFocusChange(event: FocusEvent): void {
     }
 }
 
-/** Returns whether a response still belongs to the connected list generation and portfolio. */
+/**
+ * Returns whether a response still belongs to the connected list generation and context.
+ * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
+ */
 function isCurrentRequest(context: RequestContext): boolean {
     const state = states.get(context.owner);
     return context.owner.isConnected
         && !!state
         && state.generation === context.generation
-        && getPortfolioId() === context.portfolioId;
+        && getContextId(context.owner) === context.contextId;
 }
 
-/** Stores request metadata against the XHR before its response can arrive. */
+/**
+ * Stores request metadata against the XHR before its response can arrive.
+ * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
+ */
 function bindRequestToXhr(event: CustomEvent): void {
     const detail = event.detail as { elt?: Element; xhr?: XMLHttpRequest };
     const requestElement = detail.elt ?? event.target;
@@ -174,6 +202,7 @@ function bindRequestToXhr(event: CustomEvent): void {
 /** Adds the explicit initial or continuation cursor to a paginated HTMX request.
  * @author GPT-6 Luna
  * @author GPT-6 Sol
+ * @author GPT-6.1 Terra
  */
 function configureRequest(event: CustomEvent): void {
     const requestDetail = event.detail as { elt?: Element };
@@ -194,15 +223,15 @@ function configureRequest(event: CustomEvent): void {
     }
 
     const state = getState(owner);
-    const portfolioId = getPortfolioId();
+    const contextId = getContextId(owner);
     let requestedMode = state.nextMode ?? PaginationMode.Initial;
     state.nextMode = undefined;
 
-    const portfolioChanged = portfolioId !== state.portfolioId;
+    const contextChanged = contextId !== state.contextId;
 
-    if(portfolioChanged) {
+    if(contextChanged) {
         requestedMode = PaginationMode.Initial;
-        state.portfolioId = portfolioId;
+        state.contextId = contextId;
         state.cursor = null;
         state.recordIds.clear();
         state.initialized = false;
@@ -213,7 +242,7 @@ function configureRequest(event: CustomEvent): void {
         return;
     }
 
-    if(portfolioChanged || requestedMode === PaginationMode.Initial) {
+    if(contextChanged || requestedMode === PaginationMode.Initial) {
         state.generation++;
     }
 
@@ -222,7 +251,7 @@ function configureRequest(event: CustomEvent): void {
     const context: RequestContext = {
         owner,
         generation: state.generation,
-        portfolioId,
+        contextId,
         mode: requestedMode,
         cursor,
         acceptedIds: [],
@@ -242,7 +271,11 @@ function configureRequest(event: CustomEvent): void {
     updateControls(owner, state);
 }
 
-/** Releases the active request after a completed append or full list refresh. */
+/**
+ * Releases the active request after a completed append or full list refresh.
+ * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
+ */
 function finishRequest(context: RequestContext, message?: string, isError = false): void {
     const state = states.get(context.owner);
 
@@ -262,6 +295,7 @@ function finishRequest(context: RequestContext, message?: string, isError = fals
 /** Commits a validated page only after HTMX has completed its DOM swap and settle lifecycle.
  * @author GPT-6 Luna
  * @author GPT-6 Sol
+ * @author GPT-6.1 Terra
  */
 function commitSettledPage(event: CustomEvent): void {
     const detail = event.detail as { xhr?: XMLHttpRequest };
@@ -291,7 +325,7 @@ function commitSettledPage(event: CustomEvent): void {
     }
 
     state.cursor = context.nextCursor;
-    state.portfolioId = context.portfolioId;
+    state.contextId = context.contextId;
     state.initialized = true;
     state.retryMode = undefined;
     context.committed = true;
@@ -314,6 +348,7 @@ function commitSettledPage(event: CustomEvent): void {
 /**
  * Returns whether a terminal append should restore focus to its first persisted record.
  * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
  */
 function shouldMoveFocusAfterTerminalAppend(context: RequestContext): boolean {
     if(context.mode !== PaginationMode.Append || context.nextCursor !== null) {
@@ -332,6 +367,7 @@ function shouldMoveFocusAfterTerminalAppend(context: RequestContext): boolean {
 /**
  * Releases failed or malformed requests without consuming their continuation cursor.
  * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
  */
 function handleRequestCompletion(event: CustomEvent): void {
     const detail = event.detail as { successful?: boolean; xhr?: XMLHttpRequest };
@@ -374,6 +410,7 @@ function handleRequestCompletion(event: CustomEvent): void {
 /** Starts a continuation request or retries a failed initial/continuation request.
  * @author GPT-6 Luna
  * @author GPT-6 Sol
+ * @author GPT-6.1 Terra
  */
 function requestNextPage(event: MouseEvent): void {
     const button = (event.target as Element | null)?.closest<HTMLButtonElement>(`[${ LOAD_MORE_ATTRIBUTE }]`);
@@ -409,7 +446,11 @@ function requestNextPage(event: MouseEvent): void {
     htmx.trigger(owner, LOAD_MORE_EVENT);
 }
 
-/** Invalidates a list when HTMX removes its owner from the document. */
+/**
+ * Invalidates a list when HTMX removes its owner from the document.
+ * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
+ */
 function invalidateRemovedList(event: CustomEvent): void {
     const detail = event.detail as { elt?: Element };
     const removedElement = detail.elt ?? event.target;
@@ -438,33 +479,11 @@ function invalidateRemovedList(event: CustomEvent): void {
     }
 }
 
-/** Prepares complete portfolio-history snapshots for the viewing template.
+/**
+ * Initializes the delegated HTMX lifecycle and control handlers once per page.
  * @author GPT-6 Luna
- * @author GPT-6 Sol
+ * @author GPT-6.1 Terra
  */
-function transformPortfolioHistoryView(responseBody: string, eventDetail: BeforeSwapEventDetail): string {
-    return transformPageResponse<HistoryPageItem, { items: HistoryPageItem[]; initial: boolean }>(
-        responseBody,
-        eventDetail,
-        item => item.observationTimestamp?.id,
-        (items, mode) => ({ items, initial: mode === PaginationMode.Initial }),
-    );
-}
-
-/** Prepares complete allocation-plan records for the viewing template.
- * @author GPT-6 Luna
- * @author GPT-6 Sol
- */
-function transformAllocationPlanView(responseBody: string, eventDetail: BeforeSwapEventDetail): string {
-    return transformPageResponse<AllocationPlanPageItem, { items: AllocationPlanPageItem[]; initial: boolean }>(
-        responseBody,
-        eventDetail,
-        item => item.id,
-        (items, mode) => ({ items, initial: mode === PaginationMode.Initial }),
-    );
-}
-
-/** Initializes the delegated HTMX lifecycle and control handlers once per page. */
 function init(): void {
     if(initialized) {
         return;
@@ -472,15 +491,6 @@ function init(): void {
 
     initialized = true;
 
-    HtmxInfra.htmxTransformResponse.registerTransformResponseFunction(
-        "paginatePortfolioHistoryView",
-        transformPortfolioHistoryView,
-    );
-
-    HtmxInfra.htmxTransformResponse.registerTransformResponseFunction(
-        "paginateAllocationPlanView",
-        transformAllocationPlanView,
-    );
     document.addEventListener("click", requestNextPage);
     document.addEventListener("htmx:configRequest", configureRequest);
     document.addEventListener("htmx:beforeRequest", bindRequestToXhr);
@@ -501,6 +511,7 @@ function init(): void {
  * @example `transformPageResponse(body, event, item => item.id, items => items)` prepares a plan page.
  * @author GPT-6 Luna
  * @author GPT-6 Sol
+ * @author GPT-6.1 Terra
  */
 function transformPageResponse<T, R>(
     responseBody: string,
@@ -582,6 +593,7 @@ function transformPageResponse<T, R>(
  * const response = paginatedList.transformPageResponse(body, event, item => item.id, items => items);
  * ```
  * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
  */
 const paginatedList = { init, transformPageResponse };
 

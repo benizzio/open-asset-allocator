@@ -5,6 +5,7 @@
         <div class="accordion"
              id="accordion-allocation-plan"
              data-paginated-list
+             data-paginated-list-context-selector="[name='portfolioId']"
              hx-get="/api/portfolio/:portfolioId/allocation-plan"
              hx-include="[name='portfolioId']"
              hx-trigger="load, reload-allocation-plans, paginated-list-more queue:none"
@@ -84,10 +85,12 @@
     {{/if}}
 
     {{#each items}}
-        <div class="accordion-item" data-paginated-record-id="{{id}}">
+        <!-- Co-authored by: GPT-6.1 Terra and benizzio -->
+        <div class="accordion-item" data-paginated-record-id="{{id}}" data-paginated-record-persisted>
 
             <h2 class="accordion-header">
                  <button class="accordion-button {{#unless (and @root.initial @first)}}collapsed{{/unless}}"
+                         data-paginated-record-focus
                          type="button"
                          data-bs-toggle="collapse"
                          data-bs-target="#allocation-plan-{{id}}"
