@@ -11,6 +11,8 @@ import htmx from "htmx.org";
 import { HtmxInfra, type BeforeSwapEventDetail } from "../../infra/htmx";
 import { focusOnAcceptedRecord, renderControls } from "./controls";
 import { getContextId } from "./context";
+import { bindPaginationLifecycle, trackRequestCompletion } from "./lifecycle";
+import { startTrackingFocus, stopTrackingFocus } from "./focus-tracking";
 
 const PAGINATED_LIST_ATTRIBUTE = "data-paginated-list";
 const LOAD_MORE_ATTRIBUTE = "data-paginated-list-more";
@@ -84,7 +86,6 @@ type RequestContext = {
 
 const states = new WeakMap<HTMLElement, ListState>();
 const requests = new WeakMap<XMLHttpRequest, RequestContext>();
-const focusTrackedRequests = new Set<RequestContext>();
 let initialized = false;
 
 /**
@@ -141,21 +142,6 @@ function updateControls(owner: HTMLElement, state: ListState, message = "", isEr
 }
 
 /**
- * Marks a pending keyboard continuation abandoned when focus moves elsewhere.
- * @author GPT-6 Luna
- * @author GPT-6.1 Terra
- */
-function trackPaginationFocusChange(event: FocusEvent): void {
-    const target = event.target;
-
-    for(const context of focusTrackedRequests) {
-        if(target !== context.focusButton && target !== document.body) {
-            context.focusChanged = true;
-        }
-    }
-}
-
-/**
  * Returns whether a response still belongs to the connected list generation and context.
  * @author GPT-6 Luna
  * @author GPT-6.1 Terra
@@ -193,10 +179,13 @@ function bindRequestToXhr(event: CustomEvent): void {
     state.activeRequest = context;
     state.preparingRequest = undefined;
 
-    if(context.focusButton) {
-        focusTrackedRequests.add(context);
-    }
+    startTrackingFocus(context);
     requests.set(detail.xhr, context);
+
+    trackRequestCompletion(owner, detail.xhr, event, handleRequestCompletion, () => {
+        stopTrackingFocus(context);
+        finishRequest(context);
+    });
 }
 
 /** Adds the explicit initial or continuation cursor to a paginated HTMX request.
@@ -288,7 +277,7 @@ function finishRequest(context: RequestContext, message?: string, isError = fals
     state.pendingFocusButton = undefined;
     state.activeRequest = undefined;
     state.preparingRequest = undefined;
-    focusTrackedRequests.delete(context);
+    stopTrackingFocus(context);
     updateControls(context.owner, state, message, isError);
 }
 
@@ -307,7 +296,7 @@ function commitSettledPage(event: CustomEvent): void {
 
     if(!isCurrentRequest(context)) {
         context.stale = true;
-        focusTrackedRequests.delete(context);
+        stopTrackingFocus(context);
         return;
     }
 
@@ -379,7 +368,7 @@ function handleRequestCompletion(event: CustomEvent): void {
 
     if(!isCurrentRequest(context)) {
         context.stale = true;
-        focusTrackedRequests.delete(context);
+        stopTrackingFocus(context);
 
         if(detail.xhr && !detail.successful) {
             HtmxInfra.suppressAfterRequestErrorNotification(detail.xhr);
@@ -463,11 +452,11 @@ function invalidateRemovedList(event: CustomEvent): void {
 
     if(state) {
         if(state.activeRequest) {
-            focusTrackedRequests.delete(state.activeRequest);
+            stopTrackingFocus(state.activeRequest);
         }
 
         if(state.preparingRequest) {
-            focusTrackedRequests.delete(state.preparingRequest);
+            stopTrackingFocus(state.preparingRequest);
         }
 
         state.generation++;
@@ -480,7 +469,7 @@ function invalidateRemovedList(event: CustomEvent): void {
 }
 
 /**
- * Initializes the delegated HTMX lifecycle and control handlers once per page.
+ * Initializes owner-scoped HTMX lifecycle and control handlers once per page.
  * @author GPT-6 Luna
  * @author GPT-6.1 Terra
  */
@@ -491,13 +480,13 @@ function init(): void {
 
     initialized = true;
 
-    document.addEventListener("click", requestNextPage);
-    document.addEventListener("htmx:configRequest", configureRequest);
-    document.addEventListener("htmx:beforeRequest", bindRequestToXhr);
-    document.addEventListener("htmx:afterSettle", commitSettledPage);
-    document.addEventListener("htmx:afterRequest", handleRequestCompletion);
-    document.addEventListener("htmx:beforeCleanupElement", invalidateRemovedList);
-    document.addEventListener("focusin", trackPaginationFocusChange);
+    bindPaginationLifecycle({
+        configure: configureRequest as EventListener,
+        beforeRequest: bindRequestToXhr as EventListener,
+        settle: commitSettledPage as EventListener,
+        cleanup: invalidateRemovedList as EventListener,
+        click: requestNextPage as EventListener,
+    });
 }
 
 /**

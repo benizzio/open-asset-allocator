@@ -35,19 +35,6 @@
   },
   "nodes": [
     {
-      "id": "websrc_api_api_apierror",
-      "label": "APIError",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "asset.ts",
-      "file_type": "code",
-      "norm_label": "apierror",
-      "source_file": "websrc/api/api.ts",
-      "source_location": "L8"
-    },
-    {
       "id": "websrc_components_notifications_bootstrapnotification",
       "label": "BootstrapNotification",
       "_callable": true,
@@ -59,19 +46,6 @@
       "norm_label": "bootstrapnotification",
       "source_file": "websrc/components/notifications.ts",
       "source_location": "L7"
-    },
-    {
-      "id": "websrc_domain_asset_index_asset",
-      "label": "Asset",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "asset.ts",
-      "file_type": "code",
-      "norm_label": "asset",
-      "source_file": "websrc/domain/asset/index.ts",
-      "source_location": "L21"
     },
     {
       "id": "websrc_domain_asset_index_externalasset",
@@ -282,19 +256,6 @@
       "source_location": "L40"
     },
     {
-      "id": "websrc_components_asset_composed_columns_input_types_assetsearchautocompleteoption",
-      "label": "AssetSearchAutocompleteOption",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "AssetSearchAutocompleteController",
-      "file_type": "code",
-      "norm_label": "assetsearchautocompleteoption",
-      "source_file": "websrc/components/asset-composed-columns-input/types.ts",
-      "source_location": "L11"
-    },
-    {
       "id": "websrc_components_asset_composed_columns_input_types_assetsearchautocompletestate",
       "label": "AssetSearchAutocompleteState",
       "_callable": true,
@@ -319,6 +280,19 @@
       "norm_label": "assettickerselectionhandler",
       "source_file": "websrc/components/asset-composed-columns-input/types.ts",
       "source_location": "L66"
+    },
+    {
+      "id": "websrc_api_api_apierror",
+      "label": "APIError",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 14,
+      "community_name": "htmx/index.ts",
+      "file_type": "code",
+      "norm_label": "apierror",
+      "source_file": "websrc/api/api.ts",
+      "source_location": "L8"
     },
     {
       "id": "websrc_api_api_apierrorresponse",
@@ -360,30 +334,17 @@
       "source_location": "L16"
     },
     {
-      "id": "websrc_infra_logging_level",
-      "label": "Level",
+      "id": "websrc_application_allocation_plan_chart_fractalplannedallocationmultichartdatasource",
+      "label": "FractalPlannedAllocationMultiChartDataSource",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 14,
-      "community_name": "htmx/index.ts",
+      "community": 16,
+      "community_name": "allocation-plan.ts",
       "file_type": "code",
-      "norm_label": "level",
-      "source_file": "websrc/infra/logging.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "websrc_infra_logging_levels",
-      "label": "Levels",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "htmx/index.ts",
-      "file_type": "code",
-      "norm_label": "levels",
-      "source_file": "websrc/infra/logging.ts",
-      "source_location": "L9"
+      "norm_label": "fractalplannedallocationmultichartdatasource",
+      "source_file": "websrc/application/allocation-plan-chart.ts",
+      "source_location": "L13"
     },
     {
       "id": "websrc_domain_allocation_allocationhierarchyleveldto",
@@ -464,6 +425,32 @@
       "source_location": "L55"
     },
     {
+      "id": "websrc_domain_allocation_plan_fractalhierarchicalallocationplan",
+      "label": "FractalHierarchicalAllocationPlan",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 16,
+      "community_name": "allocation-plan.ts",
+      "file_type": "code",
+      "norm_label": "fractalhierarchicalallocationplan",
+      "source_file": "websrc/domain/allocation-plan.ts",
+      "source_location": "L49"
+    },
+    {
+      "id": "websrc_domain_allocation_plan_fractalplannedallocation",
+      "label": "FractalPlannedAllocation",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 16,
+      "community_name": "allocation-plan.ts",
+      "file_type": "code",
+      "norm_label": "fractalplannedallocation",
+      "source_file": "websrc/domain/allocation-plan.ts",
+      "source_location": "L39"
+    },
+    {
       "id": "websrc_domain_allocation_plan_plannedallocation",
       "label": "PlannedAllocation",
       "_callable": true,
@@ -540,32 +527,6 @@
       "norm_label": "serializableportfoliocompleteallocationplanset",
       "source_file": "websrc/domain/allocation-plan.ts",
       "source_location": "L73"
-    },
-    {
-      "id": "websrc_domain_portfolio_portfolio",
-      "label": "Portfolio",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 16,
-      "community_name": "allocation-plan.ts",
-      "file_type": "code",
-      "norm_label": "portfolio",
-      "source_file": "websrc/domain/portfolio.ts",
-      "source_location": "L3"
-    },
-    {
-      "id": "websrc_domain_portfolio_portfoliodto",
-      "label": "PortfolioDTO",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 16,
-      "community_name": "allocation-plan.ts",
-      "file_type": "code",
-      "norm_label": "portfoliodto",
-      "source_file": "websrc/domain/portfolio.ts",
-      "source_location": "L9"
     },
     {
       "id": "websrc_application_portfolio_chart_portfolio_chart_datasource_fractalportfoliomultichartdatasource",
@@ -685,6 +646,19 @@
       "source_location": "L76"
     },
     {
+      "id": "websrc_components_asset_composed_columns_input_selection_events_assetrowselectionchangepayload",
+      "label": "AssetRowSelectionChangePayload",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "asset-composed-columns-input/index.ts",
+      "file_type": "code",
+      "norm_label": "assetrowselectionchangepayload",
+      "source_file": "websrc/components/asset-composed-columns-input/selection-events.ts",
+      "source_location": "L84"
+    },
+    {
       "id": "websrc_components_asset_composed_columns_input_selection_events_assetrowselectionchangestate",
       "label": "AssetRowSelectionChangeState",
       "_callable": true,
@@ -696,6 +670,19 @@
       "norm_label": "assetrowselectionchangestate",
       "source_file": "websrc/components/asset-composed-columns-input/selection-events.ts",
       "source_location": "L35"
+    },
+    {
+      "id": "websrc_domain_asset_index_asset",
+      "label": "Asset",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "asset-composed-columns-input/index.ts",
+      "file_type": "code",
+      "norm_label": "asset",
+      "source_file": "websrc/domain/asset/index.ts",
+      "source_location": "L21"
     },
     {
       "id": "websrc_components_asset_composed_columns_input_constants_assetselectionstate",
@@ -737,6 +724,19 @@
       "source_location": "L394"
     },
     {
+      "id": "websrc_components_asset_composed_columns_input_types_assetsearchautocompleteoption",
+      "label": "AssetSearchAutocompleteOption",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "autocomplete-interactions.ts",
+      "file_type": "code",
+      "norm_label": "assetsearchautocompleteoption",
+      "source_file": "websrc/components/asset-composed-columns-input/types.ts",
+      "source_location": "L11"
+    },
+    {
       "id": "websrc_components_asset_composed_columns_input_types_autocompletecontrolleractions",
       "label": "AutocompleteControllerActions",
       "_callable": true,
@@ -750,56 +750,56 @@
       "source_location": "L47"
     },
     {
-      "id": "websrc_application_allocation_plan_pagination_allocationplanpageitem",
-      "label": "AllocationPlanPageItem",
+      "id": "websrc_components_portfolio_history_management_observation_details_index_observationdetailsstate",
+      "label": "ObservationDetailsState",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 3,
-      "community_name": "application/index.ts",
+      "community": 27,
+      "community_name": "portfolio-history-management-observation-details/index.ts",
       "file_type": "code",
-      "norm_label": "allocationplanpageitem",
-      "source_file": "websrc/application/allocation-plan-pagination.ts",
-      "source_location": "L13"
+      "norm_label": "observationdetailsstate",
+      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
+      "source_location": "L21"
     },
     {
-      "id": "websrc_application_allocation_plan_pagination_allocationplanviewpage",
-      "label": "AllocationPlanViewPage",
+      "id": "websrc_components_portfolio_history_management_observation_details_index_requesteventdetail",
+      "label": "RequestEventDetail",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 3,
-      "community_name": "application/index.ts",
+      "community": 27,
+      "community_name": "portfolio-history-management-observation-details/index.ts",
       "file_type": "code",
-      "norm_label": "allocationplanviewpage",
-      "source_file": "websrc/application/allocation-plan-pagination.ts",
-      "source_location": "L18"
-    },
-    {
-      "id": "websrc_application_portfolio_history_pagination_historypageitem",
-      "label": "HistoryPageItem",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "application/index.ts",
-      "file_type": "code",
-      "norm_label": "historypageitem",
-      "source_file": "websrc/application/portfolio-history-pagination.ts",
-      "source_location": "L13"
-    },
-    {
-      "id": "websrc_components_paginated_list_pagination_paginationmode",
-      "label": "PaginationMode",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "application/index.ts",
-      "file_type": "code",
-      "norm_label": "paginationmode",
-      "source_file": "websrc/components/paginated-list/pagination.ts",
+      "norm_label": "requesteventdetail",
+      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
       "source_location": "L28"
+    },
+    {
+      "id": "websrc_infra_chart_chart_types_chartinteraction",
+      "label": "ChartInteraction",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "chart-utils.ts",
+      "file_type": "code",
+      "norm_label": "chartinteraction",
+      "source_file": "websrc/infra/chart/chart-types.ts",
+      "source_location": "L20"
+    },
+    {
+      "id": "websrc_infra_chart_chart_types_chartinteractions",
+      "label": "ChartInteractions",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "chart-utils.ts",
+      "file_type": "code",
+      "norm_label": "chartinteractions",
+      "source_file": "websrc/infra/chart/chart-types.ts",
+      "source_location": "L19"
     },
     {
       "id": "websrc_domain_portfolio_allocation_observationtimestamp",
@@ -808,11 +808,37 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 3,
-      "community_name": "application/index.ts",
+      "community_name": "bignumber.js",
       "file_type": "code",
       "norm_label": "observationtimestamp",
       "source_file": "websrc/domain/portfolio-allocation.ts",
       "source_location": "L9"
+    },
+    {
+      "id": "websrc_domain_portfolio_allocation_portfolioallocation",
+      "label": "PortfolioAllocation",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "bignumber.js",
+      "file_type": "code",
+      "norm_label": "portfolioallocation",
+      "source_file": "websrc/domain/portfolio-allocation.ts",
+      "source_location": "L15"
+    },
+    {
+      "id": "websrc_domain_portfolio_allocation_portfolioallocationdto",
+      "label": "PortfolioAllocationDTO",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "bignumber.js",
+      "file_type": "code",
+      "norm_label": "portfolioallocationdto",
+      "source_file": "websrc/domain/portfolio-allocation.ts",
+      "source_location": "L28"
     },
     {
       "id": "websrc_domain_portfolio_analysis_divergenceanalysis",
@@ -821,7 +847,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 3,
-      "community_name": "application/index.ts",
+      "community_name": "bignumber.js",
       "file_type": "code",
       "norm_label": "divergenceanalysis",
       "source_file": "websrc/domain/portfolio-analysis.ts",
@@ -834,63 +860,24 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 3,
-      "community_name": "application/index.ts",
+      "community_name": "bignumber.js",
       "file_type": "code",
       "norm_label": "potentialdivergence",
       "source_file": "websrc/domain/portfolio-analysis.ts",
       "source_location": "L3"
     },
     {
-      "id": "websrc_infra_htmx_index_beforeswapeventdetail",
-      "label": "BeforeSwapEventDetail",
+      "id": "websrc_components_paginated_list_focus_tracking_focuscontext",
+      "label": "FocusContext",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 3,
-      "community_name": "application/index.ts",
+      "community": 31,
+      "community_name": "focus-tracking.ts",
       "file_type": "code",
-      "norm_label": "beforeswapeventdetail",
-      "source_file": "websrc/infra/htmx/index.ts",
-      "source_location": "L23"
-    },
-    {
-      "id": "websrc_application_allocation_plan_chart_fractalplannedallocationmultichartdatasource",
-      "label": "FractalPlannedAllocationMultiChartDataSource",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "allocation-plan-chart.ts",
-      "file_type": "code",
-      "norm_label": "fractalplannedallocationmultichartdatasource",
-      "source_file": "websrc/application/allocation-plan-chart.ts",
-      "source_location": "L13"
-    },
-    {
-      "id": "websrc_domain_allocation_plan_fractalhierarchicalallocationplan",
-      "label": "FractalHierarchicalAllocationPlan",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "allocation-plan-chart.ts",
-      "file_type": "code",
-      "norm_label": "fractalhierarchicalallocationplan",
-      "source_file": "websrc/domain/allocation-plan.ts",
-      "source_location": "L49"
-    },
-    {
-      "id": "websrc_domain_allocation_plan_fractalplannedallocation",
-      "label": "FractalPlannedAllocation",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "allocation-plan-chart.ts",
-      "file_type": "code",
-      "norm_label": "fractalplannedallocation",
-      "source_file": "websrc/domain/allocation-plan.ts",
-      "source_location": "L39"
+      "norm_label": "focuscontext",
+      "source_file": "websrc/components/paginated-list/focus-tracking.ts",
+      "source_location": "L11"
     },
     {
       "id": "websrc_infra_htmx_binding_htmx_transform_response_transformresponsefunction",
@@ -919,6 +906,32 @@
       "source_location": "L4"
     },
     {
+      "id": "websrc_infra_logging_level",
+      "label": "Level",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 36,
+      "community_name": "logging.ts",
+      "file_type": "code",
+      "norm_label": "level",
+      "source_file": "websrc/infra/logging.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "websrc_infra_logging_levels",
+      "label": "Levels",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 36,
+      "community_name": "logging.ts",
+      "file_type": "code",
+      "norm_label": "levels",
+      "source_file": "websrc/infra/logging.ts",
+      "source_location": "L9"
+    },
+    {
       "id": "websrc_components_allocation_plan_management_allocationplanninghierarchicalformentry",
       "label": "AllocationPlanningHierarchicalFormEntry",
       "_callable": true,
@@ -945,43 +958,17 @@
       "source_location": "L40"
     },
     {
-      "id": "websrc_infra_chart_chart_types_chartdatatype",
-      "label": "ChartDataType",
+      "id": "websrc_domain_portfolio_portfolio",
+      "label": "Portfolio",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 44,
-      "community_name": "chart.ts",
+      "community": 42,
+      "community_name": "allocation-plan-management.ts",
       "file_type": "code",
-      "norm_label": "chartdatatype",
-      "source_file": "websrc/infra/chart/chart-types.ts",
-      "source_location": "L8"
-    },
-    {
-      "id": "websrc_infra_chart_chart_types_chartinteraction",
-      "label": "ChartInteraction",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 44,
-      "community_name": "chart.ts",
-      "file_type": "code",
-      "norm_label": "chartinteraction",
-      "source_file": "websrc/infra/chart/chart-types.ts",
-      "source_location": "L20"
-    },
-    {
-      "id": "websrc_infra_chart_chart_types_chartinteractions",
-      "label": "ChartInteractions",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 44,
-      "community_name": "chart.ts",
-      "file_type": "code",
-      "norm_label": "chartinteractions",
-      "source_file": "websrc/infra/chart/chart-types.ts",
-      "source_location": "L19"
+      "norm_label": "portfolio",
+      "source_file": "websrc/domain/portfolio.ts",
+      "source_location": "L3"
     },
     {
       "id": "websrc_infra_chart_chart_types_localchartoptions",
@@ -1010,6 +997,58 @@
       "source_location": "L3"
     },
     {
+      "id": "websrc_application_allocation_plan_pagination_allocationplanpageitem",
+      "label": "AllocationPlanPageItem",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "allocationplanpageitem",
+      "source_file": "websrc/application/allocation-plan-pagination.ts",
+      "source_location": "L13"
+    },
+    {
+      "id": "websrc_application_allocation_plan_pagination_allocationplanviewpage",
+      "label": "AllocationPlanViewPage",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "allocationplanviewpage",
+      "source_file": "websrc/application/allocation-plan-pagination.ts",
+      "source_location": "L18"
+    },
+    {
+      "id": "websrc_application_portfolio_history_pagination_historypageitem",
+      "label": "HistoryPageItem",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "historypageitem",
+      "source_file": "websrc/application/portfolio-history-pagination.ts",
+      "source_location": "L13"
+    },
+    {
+      "id": "websrc_components_paginated_list_pagination_paginationmode",
+      "label": "PaginationMode",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "paginationmode",
+      "source_file": "websrc/components/paginated-list/pagination.ts",
+      "source_location": "L30"
+    },
+    {
       "id": "websrc_components_portfolio_history_management_formrowvalueelements",
       "label": "FormRowValueElements",
       "_callable": true,
@@ -1021,32 +1060,6 @@
       "norm_label": "formrowvalueelements",
       "source_file": "websrc/components/portfolio-history-management.ts",
       "source_location": "L180"
-    },
-    {
-      "id": "websrc_components_portfolio_history_management_observation_details_index_observationdetailsstate",
-      "label": "ObservationDetailsState",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 47,
-      "community_name": "portfolio-history-management.ts",
-      "file_type": "code",
-      "norm_label": "observationdetailsstate",
-      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
-      "source_location": "L21"
-    },
-    {
-      "id": "websrc_components_portfolio_history_management_observation_details_index_requesteventdetail",
-      "label": "RequestEventDetail",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 47,
-      "community_name": "portfolio-history-management.ts",
-      "file_type": "code",
-      "norm_label": "requesteventdetail",
-      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
-      "source_location": "L28"
     },
     {
       "id": "websrc_components_portfolio_history_quote_quote_action_portfoliohistoryquoteaction",
@@ -1088,6 +1101,32 @@
       "source_location": "L21"
     },
     {
+      "id": "websrc_infra_htmx_index_beforeswapeventdetail",
+      "label": "BeforeSwapEventDetail",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "beforeswapeventdetail",
+      "source_file": "websrc/infra/htmx/index.ts",
+      "source_location": "L23"
+    },
+    {
+      "id": "websrc_components_paginated_list_lifecycle_lifecyclehandlers",
+      "label": "LifecycleHandlers",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "pagination.ts",
+      "file_type": "code",
+      "norm_label": "lifecyclehandlers",
+      "source_file": "websrc/components/paginated-list/lifecycle.ts",
+      "source_location": "L52"
+    },
+    {
       "id": "websrc_components_paginated_list_pagination_liststate",
       "label": "ListState",
       "_callable": true,
@@ -1098,7 +1137,7 @@
       "file_type": "code",
       "norm_label": "liststate",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L48"
+      "source_location": "L50"
     },
     {
       "id": "websrc_components_paginated_list_pagination_pageenvelope",
@@ -1111,7 +1150,7 @@
       "file_type": "code",
       "norm_label": "pageenvelope",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L38"
+      "source_location": "L40"
     },
     {
       "id": "websrc_components_paginated_list_pagination_requestcontext",
@@ -1124,20 +1163,7 @@
       "file_type": "code",
       "norm_label": "requestcontext",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L68"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_selection_events_assetrowselectionchangepayload",
-      "label": "AssetRowSelectionChangePayload",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "asset-composed-columns-input/constants.ts",
-      "file_type": "code",
-      "norm_label": "assetrowselectionchangepayload",
-      "source_file": "websrc/components/asset-composed-columns-input/selection-events.ts",
-      "source_location": "L84"
+      "source_location": "L70"
     },
     {
       "id": "websrc_infra_dom_binding_accordion_field_focus_accordionfieldfocusstate",
@@ -1153,43 +1179,30 @@
       "source_location": "L21"
     },
     {
-      "id": "websrc_domain_portfolio_allocation_portfolioallocation",
-      "label": "PortfolioAllocation",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "portfolio-chart.ts",
-      "file_type": "code",
-      "norm_label": "portfolioallocation",
-      "source_file": "websrc/domain/portfolio-allocation.ts",
-      "source_location": "L15"
-    },
-    {
-      "id": "websrc_domain_portfolio_allocation_portfolioallocationdto",
-      "label": "PortfolioAllocationDTO",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "portfolio-chart.ts",
-      "file_type": "code",
-      "norm_label": "portfolioallocationdto",
-      "source_file": "websrc/domain/portfolio-allocation.ts",
-      "source_location": "L28"
-    },
-    {
       "id": "websrc_domain_portfolio_allocation_portfoliosnapshotdto",
       "label": "PortfolioSnapshotDTO",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 8,
-      "community_name": "portfolio-chart.ts",
+      "community_name": "allocation-plan-chart.ts",
       "file_type": "code",
       "norm_label": "portfoliosnapshotdto",
       "source_file": "websrc/domain/portfolio-allocation.ts",
       "source_location": "L30"
+    },
+    {
+      "id": "websrc_domain_portfolio_portfoliodto",
+      "label": "PortfolioDTO",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "allocation-plan-chart.ts",
+      "file_type": "code",
+      "norm_label": "portfoliodto",
+      "source_file": "websrc/domain/portfolio.ts",
+      "source_location": "L9"
     },
     {
       "id": "websrc_infra_chart_chart_types_chartcontent",
@@ -1198,11 +1211,24 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 8,
-      "community_name": "portfolio-chart.ts",
+      "community_name": "allocation-plan-chart.ts",
       "file_type": "code",
       "norm_label": "chartcontent",
       "source_file": "websrc/infra/chart/chart-types.ts",
       "source_location": "L22"
+    },
+    {
+      "id": "websrc_infra_chart_chart_types_chartdatatype",
+      "label": "ChartDataType",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "allocation-plan-chart.ts",
+      "file_type": "code",
+      "norm_label": "chartdatatype",
+      "source_file": "websrc/infra/chart/chart-types.ts",
+      "source_location": "L8"
     },
     {
       "id": "websrc_components_notifications_buildbootstraperrornotification",
@@ -1601,30 +1627,6 @@
       "source_location": "L157"
     },
     {
-      "id": "websrc_root_after_request_error_handler",
-      "label": "AFTER_REQUEST_ERROR_HANDLER()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "asset.ts",
-      "file_type": "code",
-      "norm_label": "after_request_error_handler()",
-      "source_file": "websrc/root.ts",
-      "source_location": "L6"
-    },
-    {
-      "id": "websrc_root_general_uncaught_error_handler",
-      "label": "GENERAL_UNCAUGHT_ERROR_HANDLER()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "asset.ts",
-      "file_type": "code",
-      "norm_label": "general_uncaught_error_handler()",
-      "source_file": "websrc/root.ts",
-      "source_location": "L26"
-    },
-    {
       "id": "websrc_utils_lang_parsejsonornull",
       "label": "parseJSONOrNull()",
       "_callable": true,
@@ -1913,18 +1915,6 @@
       "source_location": "L177"
     },
     {
-      "id": "websrc_components_asset_composed_columns_input_asset_row_controller_assetrowcontroller_beginassetlookup",
-      "label": ".beginAssetLookup()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 12,
-      "community_name": "AssetRowController",
-      "file_type": "code",
-      "norm_label": ".beginassetlookup()",
-      "source_file": "websrc/components/asset-composed-columns-input/asset-row-controller.ts",
-      "source_location": "L390"
-    },
-    {
       "id": "websrc_components_asset_composed_columns_input_asset_row_controller_assetrowcontroller_clearsearcherrorfeedback",
       "label": ".clearSearchErrorFeedback()",
       "_callable": true,
@@ -2105,18 +2095,6 @@
       "source_location": "L301"
     },
     {
-      "id": "websrc_components_asset_composed_columns_input_types_autocompletecontrolleractions_close",
-      "label": ".close()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 12,
-      "community_name": "AssetRowController",
-      "file_type": "code",
-      "norm_label": ".close()",
-      "source_file": "websrc/components/asset-composed-columns-input/types.ts",
-      "source_location": "L51"
-    },
-    {
       "id": "websrc_components_asset_composed_columns_input_types_autocompletecontrolleractions_getstate",
       "label": ".getState()",
       "_callable": true,
@@ -2261,18 +2239,6 @@
       "source_location": "L294"
     },
     {
-      "id": "websrc_components_asset_composed_columns_input_index_loaddatalists",
-      "label": "loadDatalists()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "AssetSearchAutocompleteController",
-      "file_type": "code",
-      "norm_label": "loaddatalists()",
-      "source_file": "websrc/components/asset-composed-columns-input/index.ts",
-      "source_location": "L61"
-    },
-    {
       "id": "websrc_components_asset_composed_columns_input_outside_pointer_dismissal_bindoutsidepointerdismissal",
       "label": "bindOutsidePointerDismissal()",
       "_callable": true,
@@ -2415,6 +2381,90 @@
       "norm_label": "toerrorresponse()",
       "source_file": "websrc/infra/htmx/index.ts",
       "source_location": "L207"
+    },
+    {
+      "id": "websrc_application_allocation_plan_chart_fractalplannedallocationmultichartdatasource_constructor",
+      "label": ".constructor()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 16,
+      "community_name": "allocation-plan.ts",
+      "file_type": "code",
+      "norm_label": ".constructor()",
+      "source_file": "websrc/application/allocation-plan-chart.ts",
+      "source_location": "L17"
+    },
+    {
+      "id": "websrc_application_allocation_plan_chart_fractalplannedallocationmultichartdatasource_getchartdata",
+      "label": ".getChartData()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 16,
+      "community_name": "allocation-plan.ts",
+      "file_type": "code",
+      "norm_label": ".getchartdata()",
+      "source_file": "websrc/application/allocation-plan-chart.ts",
+      "source_location": "L25"
+    },
+    {
+      "id": "websrc_application_allocation_plan_chart_fractalplannedallocationmultichartdatasource_getcurrentaggregator",
+      "label": ".getCurrentAggregator()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 16,
+      "community_name": "allocation-plan.ts",
+      "file_type": "code",
+      "norm_label": ".getcurrentaggregator()",
+      "source_file": "websrc/application/allocation-plan-chart.ts",
+      "source_location": "L40"
+    },
+    {
+      "id": "websrc_application_allocation_plan_chart_fractalplannedallocationmultichartdatasource_getfractalhierarchicalplan",
+      "label": ".getFractalHierarchicalPlan()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 16,
+      "community_name": "allocation-plan.ts",
+      "file_type": "code",
+      "norm_label": ".getfractalhierarchicalplan()",
+      "source_file": "websrc/application/allocation-plan-chart.ts",
+      "source_location": "L36"
+    },
+    {
+      "id": "websrc_application_allocation_plan_chart_fractalplannedallocationmultichartdatasource_getsuballocationkeybyindex",
+      "label": ".getSubAllocationKeyByIndex()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 16,
+      "community_name": "allocation-plan.ts",
+      "file_type": "code",
+      "norm_label": ".getsuballocationkeybyindex()",
+      "source_file": "websrc/application/allocation-plan-chart.ts",
+      "source_location": "L30"
+    },
+    {
+      "id": "websrc_application_allocation_plan_chart_getselecteddatakey",
+      "label": "getSelectedDataKey()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 16,
+      "community_name": "allocation-plan.ts",
+      "file_type": "code",
+      "norm_label": "getselecteddatakey()",
+      "source_file": "websrc/application/allocation-plan-chart.ts",
+      "source_location": "L119"
+    },
+    {
+      "id": "websrc_application_allocation_plan_chart_interactionobservercallback",
+      "label": "interactionObserverCallback()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 16,
+      "community_name": "allocation-plan.ts",
+      "file_type": "code",
+      "norm_label": "interactionobservercallback()",
+      "source_file": "websrc/application/allocation-plan-chart.ts",
+      "source_location": "L134"
     },
     {
       "id": "websrc_components_allocation_plan_management_response_response_mapforallocationplanmanagement",
@@ -2897,6 +2947,18 @@
       "source_location": "L68"
     },
     {
+      "id": "websrc_components_asset_composed_columns_input_index_loaddatalists",
+      "label": "loadDatalists()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "asset-composed-columns-input/index.ts",
+      "file_type": "code",
+      "norm_label": "loaddatalists()",
+      "source_file": "websrc/components/asset-composed-columns-input/index.ts",
+      "source_location": "L61"
+    },
+    {
       "id": "websrc_components_asset_composed_columns_input_index_selectassetticker",
       "label": "selectAssetTicker()",
       "_callable": true,
@@ -2933,40 +2995,28 @@
       "source_location": "L229"
     },
     {
-      "id": "websrc_infra_handlebars_handlebars_format_handlebarsformatcurrency",
-      "label": "handlebarsFormatCurrency()",
+      "id": "websrc_infra_handlebars_handlebars_dom_domjsonhelper",
+      "label": "domJSONHelper()",
       "_callable": true,
       "_origin": "ast",
       "community": 2,
       "community_name": "handlebars-lang.ts",
       "file_type": "code",
-      "norm_label": "handlebarsformatcurrency()",
-      "source_file": "websrc/infra/handlebars/handlebars-format.ts",
-      "source_location": "L12"
+      "norm_label": "domjsonhelper()",
+      "source_file": "websrc/infra/handlebars/handlebars-dom.ts",
+      "source_location": "L16"
     },
     {
-      "id": "websrc_infra_handlebars_handlebars_format_handlebarsformattimestamplocaldate",
-      "label": "handlebarsFormatTimestampLocalDate()",
+      "id": "websrc_infra_handlebars_handlebars_dom_registerhandlebarsdomhelpers",
+      "label": "registerHandlebarsDOMHelpers()",
       "_callable": true,
       "_origin": "ast",
       "community": 2,
       "community_name": "handlebars-lang.ts",
       "file_type": "code",
-      "norm_label": "handlebarsformattimestamplocaldate()",
-      "source_file": "websrc/infra/handlebars/handlebars-format.ts",
-      "source_location": "L25"
-    },
-    {
-      "id": "websrc_infra_handlebars_handlebars_format_registerhandlebarsformathelper",
-      "label": "registerHandlebarsFormatHelper()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "handlebars-lang.ts",
-      "file_type": "code",
-      "norm_label": "registerhandlebarsformathelper()",
-      "source_file": "websrc/infra/handlebars/handlebars-format.ts",
-      "source_location": "L33"
+      "norm_label": "registerhandlebarsdomhelpers()",
+      "source_file": "websrc/infra/handlebars/handlebars-dom.ts",
+      "source_location": "L23"
     },
     {
       "id": "websrc_infra_handlebars_handlebars_lang_andhelper",
@@ -3269,42 +3319,6 @@
       "source_location": "L28"
     },
     {
-      "id": "websrc_utils_calendar_date_formatcalendardate",
-      "label": "formatCalendarDate()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "handlebars-lang.ts",
-      "file_type": "code",
-      "norm_label": "formatcalendardate()",
-      "source_file": "websrc/utils/calendar-date.ts",
-      "source_location": "L17"
-    },
-    {
-      "id": "websrc_utils_calendar_date_getbrowserlocalcalendardate",
-      "label": "getBrowserLocalCalendarDate()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "handlebars-lang.ts",
-      "file_type": "code",
-      "norm_label": "getbrowserlocalcalendardate()",
-      "source_file": "websrc/utils/calendar-date.ts",
-      "source_location": "L27"
-    },
-    {
-      "id": "websrc_utils_calendar_date_timestamptobrowserlocalcalendardate",
-      "label": "timestampToBrowserLocalCalendarDate()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "handlebars-lang.ts",
-      "file_type": "code",
-      "norm_label": "timestamptobrowserlocalcalendardate()",
-      "source_file": "websrc/utils/calendar-date.ts",
-      "source_location": "L41"
-    },
-    {
       "id": "websrc_utils_lang_assignvalueatpath",
       "label": "assignValueAtPath()",
       "_callable": true,
@@ -3581,6 +3595,18 @@
       "source_location": "L14"
     },
     {
+      "id": "websrc_components_asset_composed_columns_input_asset_row_controller_assetrowcontroller_beginassetlookup",
+      "label": ".beginAssetLookup()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "autocomplete-interactions.ts",
+      "file_type": "code",
+      "norm_label": ".beginassetlookup()",
+      "source_file": "websrc/components/asset-composed-columns-input/asset-row-controller.ts",
+      "source_location": "L390"
+    },
+    {
       "id": "websrc_components_asset_composed_columns_input_autocomplete_interactions_handleassetsearchkeydown",
       "label": "handleAssetSearchKeydown()",
       "_callable": true,
@@ -3641,6 +3667,18 @@
       "source_location": "L58"
     },
     {
+      "id": "websrc_components_asset_composed_columns_input_types_autocompletecontrolleractions_close",
+      "label": ".close()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "autocomplete-interactions.ts",
+      "file_type": "code",
+      "norm_label": ".close()",
+      "source_file": "websrc/components/asset-composed-columns-input/types.ts",
+      "source_location": "L51"
+    },
+    {
       "id": "websrc_components_asset_composed_columns_input_types_autocompletecontrolleractions_ensurestate",
       "label": ".ensureState()",
       "_callable": true,
@@ -3687,6 +3725,78 @@
       "norm_label": ".selectoption()",
       "source_file": "websrc/components/asset-composed-columns-input/types.ts",
       "source_location": "L59"
+    },
+    {
+      "id": "websrc_infra_dom_dom_utils_addremoveobserver",
+      "label": "addRemoveObserver()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "binding-htmx-trigger-on-route.ts",
+      "file_type": "code",
+      "norm_label": "addremoveobserver()",
+      "source_file": "websrc/infra/dom/dom-utils.ts",
+      "source_location": "L57"
+    },
+    {
+      "id": "websrc_infra_dom_dom_utils_ensuresharedobserver",
+      "label": "ensureSharedObserver()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "binding-htmx-trigger-on-route.ts",
+      "file_type": "code",
+      "norm_label": "ensuresharedobserver()",
+      "source_file": "websrc/infra/dom/dom-utils.ts",
+      "source_location": "L37"
+    },
+    {
+      "id": "websrc_infra_dom_dom_utils_escapehtmlvalue",
+      "label": "escapeHtmlValue()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "binding-htmx-trigger-on-route.ts",
+      "file_type": "code",
+      "norm_label": "escapehtmlvalue()",
+      "source_file": "websrc/infra/dom/dom-utils.ts",
+      "source_location": "L66"
+    },
+    {
+      "id": "websrc_infra_dom_dom_utils_escapehtmlvaluepreservequotes",
+      "label": "escapeHtmlValuePreserveQuotes()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "binding-htmx-trigger-on-route.ts",
+      "file_type": "code",
+      "norm_label": "escapehtmlvaluepreservequotes()",
+      "source_file": "websrc/infra/dom/dom-utils.ts",
+      "source_location": "L75"
+    },
+    {
+      "id": "websrc_infra_dom_dom_utils_getcacheablecontextdata",
+      "label": "getCacheableContextData()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "binding-htmx-trigger-on-route.ts",
+      "file_type": "code",
+      "norm_label": "getcacheablecontextdata()",
+      "source_file": "websrc/infra/dom/dom-utils.ts",
+      "source_location": "L15"
+    },
+    {
+      "id": "websrc_infra_dom_dom_utils_queryfirst",
+      "label": "queryFirst()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "binding-htmx-trigger-on-route.ts",
+      "file_type": "code",
+      "norm_label": "queryfirst()",
+      "source_file": "websrc/infra/dom/dom-utils.ts",
+      "source_location": "L62"
     },
     {
       "id": "websrc_infra_routing_binding_htmx_trigger_on_route_adddisablerouteremovalobserver",
@@ -3785,6 +3895,234 @@
       "source_location": "L102"
     },
     {
+      "id": "websrc_components_portfolio_history_management_observation_details_index_areobservationdetailsready",
+      "label": "areObservationDetailsReady()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "portfolio-history-management-observation-details/index.ts",
+      "file_type": "code",
+      "norm_label": "areobservationdetailsready()",
+      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
+      "source_location": "L101"
+    },
+    {
+      "id": "websrc_components_portfolio_history_management_observation_details_index_bindobservationdetailsloader",
+      "label": "bindObservationDetailsLoader()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "portfolio-history-management-observation-details/index.ts",
+      "file_type": "code",
+      "norm_label": "bindobservationdetailsloader()",
+      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
+      "source_location": "L44"
+    },
+    {
+      "id": "websrc_components_portfolio_history_management_observation_details_index_handleafterrequest",
+      "label": "handleAfterRequest()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "portfolio-history-management-observation-details/index.ts",
+      "file_type": "code",
+      "norm_label": "handleafterrequest()",
+      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
+      "source_location": "L134"
+    },
+    {
+      "id": "websrc_components_portfolio_history_management_observation_details_index_handlebeforerequest",
+      "label": "handleBeforeRequest()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "portfolio-history-management-observation-details/index.ts",
+      "file_type": "code",
+      "norm_label": "handlebeforerequest()",
+      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
+      "source_location": "L113"
+    },
+    {
+      "id": "websrc_components_portfolio_history_management_observation_details_index_readobservationdetailsstate",
+      "label": "readObservationDetailsState()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "portfolio-history-management-observation-details/index.ts",
+      "file_type": "code",
+      "norm_label": "readobservationdetailsstate()",
+      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
+      "source_location": "L150"
+    },
+    {
+      "id": "websrc_components_portfolio_history_management_observation_details_index_reloadobservationdetails",
+      "label": "reloadObservationDetails()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "portfolio-history-management-observation-details/index.ts",
+      "file_type": "code",
+      "norm_label": "reloadobservationdetails()",
+      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
+      "source_location": "L88"
+    },
+    {
+      "id": "websrc_components_portfolio_history_management_observation_details_index_retryobservationdetails",
+      "label": "retryObservationDetails()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "portfolio-history-management-observation-details/index.ts",
+      "file_type": "code",
+      "norm_label": "retryobservationdetails()",
+      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
+      "source_location": "L74"
+    },
+    {
+      "id": "websrc_components_portfolio_history_management_observation_details_index_setobservationdetailsstate",
+      "label": "setObservationDetailsState()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "portfolio-history-management-observation-details/index.ts",
+      "file_type": "code",
+      "norm_label": "setobservationdetailsstate()",
+      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
+      "source_location": "L169"
+    },
+    {
+      "id": "websrc_components_portfolio_history_management_observation_metadata_index_copyeditedtag",
+      "label": "copyEditedTag()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "portfolio-history-management-observation-details/index.ts",
+      "file_type": "code",
+      "norm_label": "copyeditedtag()",
+      "source_file": "websrc/components/portfolio-history-management-observation-metadata/index.ts",
+      "source_location": "L78"
+    },
+    {
+      "id": "websrc_components_portfolio_history_management_observation_metadata_index_getobservationtimestamp",
+      "label": "getObservationTimestamp()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "portfolio-history-management-observation-details/index.ts",
+      "file_type": "code",
+      "norm_label": "getobservationtimestamp()",
+      "source_file": "websrc/components/portfolio-history-management-observation-metadata/index.ts",
+      "source_location": "L126"
+    },
+    {
+      "id": "websrc_components_portfolio_history_management_observation_metadata_index_prepareobservationmetadataforsubmit",
+      "label": "prepareObservationMetadataForSubmit()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "portfolio-history-management-observation-details/index.ts",
+      "file_type": "code",
+      "norm_label": "prepareobservationmetadataforsubmit()",
+      "source_file": "websrc/components/portfolio-history-management-observation-metadata/index.ts",
+      "source_location": "L28"
+    },
+    {
+      "id": "websrc_components_portfolio_history_management_observation_metadata_index_setobservationtimestamp",
+      "label": "setObservationTimestamp()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "portfolio-history-management-observation-details/index.ts",
+      "file_type": "code",
+      "norm_label": "setobservationtimestamp()",
+      "source_file": "websrc/components/portfolio-history-management-observation-metadata/index.ts",
+      "source_location": "L95"
+    },
+    {
+      "id": "websrc_infra_handlebars_handlebars_format_handlebarsformatcurrency",
+      "label": "handlebarsFormatCurrency()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "portfolio-history-management-observation-details/index.ts",
+      "file_type": "code",
+      "norm_label": "handlebarsformatcurrency()",
+      "source_file": "websrc/infra/handlebars/handlebars-format.ts",
+      "source_location": "L12"
+    },
+    {
+      "id": "websrc_infra_handlebars_handlebars_format_handlebarsformattimestamplocaldate",
+      "label": "handlebarsFormatTimestampLocalDate()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "portfolio-history-management-observation-details/index.ts",
+      "file_type": "code",
+      "norm_label": "handlebarsformattimestamplocaldate()",
+      "source_file": "websrc/infra/handlebars/handlebars-format.ts",
+      "source_location": "L25"
+    },
+    {
+      "id": "websrc_infra_handlebars_handlebars_format_registerhandlebarsformathelper",
+      "label": "registerHandlebarsFormatHelper()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "portfolio-history-management-observation-details/index.ts",
+      "file_type": "code",
+      "norm_label": "registerhandlebarsformathelper()",
+      "source_file": "websrc/infra/handlebars/handlebars-format.ts",
+      "source_location": "L33"
+    },
+    {
+      "id": "websrc_utils_calendar_date_calendardatetoutctimestamp",
+      "label": "calendarDateToUtcTimestamp()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "portfolio-history-management-observation-details/index.ts",
+      "file_type": "code",
+      "norm_label": "calendardatetoutctimestamp()",
+      "source_file": "websrc/utils/calendar-date.ts",
+      "source_location": "L59"
+    },
+    {
+      "id": "websrc_utils_calendar_date_formatcalendardate",
+      "label": "formatCalendarDate()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "portfolio-history-management-observation-details/index.ts",
+      "file_type": "code",
+      "norm_label": "formatcalendardate()",
+      "source_file": "websrc/utils/calendar-date.ts",
+      "source_location": "L17"
+    },
+    {
+      "id": "websrc_utils_calendar_date_getbrowserlocalcalendardate",
+      "label": "getBrowserLocalCalendarDate()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "portfolio-history-management-observation-details/index.ts",
+      "file_type": "code",
+      "norm_label": "getbrowserlocalcalendardate()",
+      "source_file": "websrc/utils/calendar-date.ts",
+      "source_location": "L27"
+    },
+    {
+      "id": "websrc_utils_calendar_date_timestamptobrowserlocalcalendardate",
+      "label": "timestampToBrowserLocalCalendarDate()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "portfolio-history-management-observation-details/index.ts",
+      "file_type": "code",
+      "norm_label": "timestamptobrowserlocalcalendardate()",
+      "source_file": "websrc/utils/calendar-date.ts",
+      "source_location": "L41"
+    },
+    {
       "id": "websrc_infra_chart_chart_options_buildchartinteractions",
       "label": "buildChartInteractions()",
       "_callable": true,
@@ -3857,36 +4195,12 @@
       "source_location": "L71"
     },
     {
-      "id": "websrc_application_allocation_plan_pagination_registerallocationplanpagetransform",
-      "label": "registerAllocationPlanPageTransform()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "application/index.ts",
-      "file_type": "code",
-      "norm_label": "registerallocationplanpagetransform()",
-      "source_file": "websrc/application/allocation-plan-pagination.ts",
-      "source_location": "L40"
-    },
-    {
-      "id": "websrc_application_allocation_plan_pagination_transformallocationplanview",
-      "label": "transformAllocationPlanView()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "application/index.ts",
-      "file_type": "code",
-      "norm_label": "transformallocationplanview()",
-      "source_file": "websrc/application/allocation-plan-pagination.ts",
-      "source_location": "L26"
-    },
-    {
       "id": "websrc_application_portfolio_analysis_getvaluelabel",
       "label": "getValueLabel()",
       "_callable": true,
       "_origin": "ast",
       "community": 3,
-      "community_name": "application/index.ts",
+      "community_name": "bignumber.js",
       "file_type": "code",
       "norm_label": "getvaluelabel()",
       "source_file": "websrc/application/portfolio-analysis.ts",
@@ -3898,191 +4212,107 @@
       "_callable": true,
       "_origin": "ast",
       "community": 3,
-      "community_name": "application/index.ts",
+      "community_name": "bignumber.js",
       "file_type": "code",
       "norm_label": "registerportfolioanalysishandlebarshelpers()",
       "source_file": "websrc/application/portfolio-analysis.ts",
       "source_location": "L14"
     },
     {
-      "id": "websrc_application_portfolio_history_pagination_registerportfoliohistorypagetransform",
-      "label": "registerPortfolioHistoryPageTransform()",
+      "id": "websrc_components_paginated_list_context_getcontextid",
+      "label": "getContextId()",
       "_callable": true,
       "_origin": "ast",
-      "community": 3,
-      "community_name": "application/index.ts",
+      "community": 30,
+      "community_name": "getContextId",
       "file_type": "code",
-      "norm_label": "registerportfoliohistorypagetransform()",
-      "source_file": "websrc/application/portfolio-history-pagination.ts",
-      "source_location": "L35"
-    },
-    {
-      "id": "websrc_application_portfolio_history_pagination_transformportfoliohistoryview",
-      "label": "transformPortfolioHistoryView()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "application/index.ts",
-      "file_type": "code",
-      "norm_label": "transformportfoliohistoryview()",
-      "source_file": "websrc/application/portfolio-history-pagination.ts",
+      "norm_label": "getcontextid()",
+      "source_file": "websrc/components/paginated-list/context.ts",
       "source_location": "L21"
     },
     {
-      "id": "websrc_application_allocation_plan_chart_chartdataselectioneventhandler",
-      "label": "chartDataSelectionEventHandler()",
+      "id": "websrc_components_paginated_list_pagination_configurerequest",
+      "label": "configureRequest()",
       "_callable": true,
       "_origin": "ast",
       "community": 30,
-      "community_name": "allocation-plan-chart.ts",
+      "community_name": "getContextId",
       "file_type": "code",
-      "norm_label": "chartdataselectioneventhandler()",
-      "source_file": "websrc/application/allocation-plan-chart.ts",
-      "source_location": "L99"
+      "norm_label": "configurerequest()",
+      "source_file": "websrc/components/paginated-list/pagination.ts",
+      "source_location": "L196"
     },
     {
-      "id": "websrc_application_allocation_plan_chart_fractalplannedallocationmultichartdatasource_constructor",
-      "label": ".constructor()",
+      "id": "websrc_components_paginated_list_pagination_getowner",
+      "label": "getOwner()",
       "_callable": true,
       "_origin": "ast",
       "community": 30,
-      "community_name": "allocation-plan-chart.ts",
+      "community_name": "getContextId",
       "file_type": "code",
-      "norm_label": ".constructor()",
-      "source_file": "websrc/application/allocation-plan-chart.ts",
-      "source_location": "L17"
+      "norm_label": "getowner()",
+      "source_file": "websrc/components/paginated-list/pagination.ts",
+      "source_location": "L120"
     },
     {
-      "id": "websrc_application_allocation_plan_chart_fractalplannedallocationmultichartdatasource_getchartdata",
-      "label": ".getChartData()",
+      "id": "websrc_components_paginated_list_pagination_getstate",
+      "label": "getState()",
       "_callable": true,
       "_origin": "ast",
       "community": 30,
-      "community_name": "allocation-plan-chart.ts",
+      "community_name": "getContextId",
       "file_type": "code",
-      "norm_label": ".getchartdata()",
-      "source_file": "websrc/application/allocation-plan-chart.ts",
-      "source_location": "L25"
+      "norm_label": "getstate()",
+      "source_file": "websrc/components/paginated-list/pagination.ts",
+      "source_location": "L96"
     },
     {
-      "id": "websrc_application_allocation_plan_chart_fractalplannedallocationmultichartdatasource_getcurrentaggregator",
-      "label": ".getCurrentAggregator()",
+      "id": "websrc_components_paginated_list_pagination_requestnextpage",
+      "label": "requestNextPage()",
       "_callable": true,
       "_origin": "ast",
       "community": 30,
-      "community_name": "allocation-plan-chart.ts",
+      "community_name": "getContextId",
       "file_type": "code",
-      "norm_label": ".getcurrentaggregator()",
-      "source_file": "websrc/application/allocation-plan-chart.ts",
-      "source_location": "L40"
+      "norm_label": "requestnextpage()",
+      "source_file": "websrc/components/paginated-list/pagination.ts",
+      "source_location": "L404"
     },
     {
-      "id": "websrc_application_allocation_plan_chart_fractalplannedallocationmultichartdatasource_getfractalhierarchicalplan",
-      "label": ".getFractalHierarchicalPlan()",
+      "id": "websrc_components_paginated_list_pagination_updatecontrols",
+      "label": "updateControls()",
       "_callable": true,
       "_origin": "ast",
       "community": 30,
-      "community_name": "allocation-plan-chart.ts",
+      "community_name": "getContextId",
       "file_type": "code",
-      "norm_label": ".getfractalhierarchicalplan()",
-      "source_file": "websrc/application/allocation-plan-chart.ts",
-      "source_location": "L36"
-    },
-    {
-      "id": "websrc_application_allocation_plan_chart_fractalplannedallocationmultichartdatasource_getsuballocationkeybyindex",
-      "label": ".getSubAllocationKeyByIndex()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "allocation-plan-chart.ts",
-      "file_type": "code",
-      "norm_label": ".getsuballocationkeybyindex()",
-      "source_file": "websrc/application/allocation-plan-chart.ts",
-      "source_location": "L30"
-    },
-    {
-      "id": "websrc_application_allocation_plan_chart_getchartcontent",
-      "label": "getChartContent()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "allocation-plan-chart.ts",
-      "file_type": "code",
-      "norm_label": "getchartcontent()",
-      "source_file": "websrc/application/allocation-plan-chart.ts",
-      "source_location": "L111"
-    },
-    {
-      "id": "websrc_application_allocation_plan_chart_getselecteddatakey",
-      "label": "getSelectedDataKey()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "allocation-plan-chart.ts",
-      "file_type": "code",
-      "norm_label": "getselecteddatakey()",
-      "source_file": "websrc/application/allocation-plan-chart.ts",
-      "source_location": "L119"
-    },
-    {
-      "id": "websrc_application_allocation_plan_chart_interactionobservercallback",
-      "label": "interactionObserverCallback()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "allocation-plan-chart.ts",
-      "file_type": "code",
-      "norm_label": "interactionobservercallback()",
-      "source_file": "websrc/application/allocation-plan-chart.ts",
+      "norm_label": "updatecontrols()",
+      "source_file": "websrc/components/paginated-list/pagination.ts",
       "source_location": "L134"
     },
     {
-      "id": "websrc_application_allocation_plan_chart_mapchilddatasets",
-      "label": "mapChildDatasets()",
+      "id": "websrc_components_paginated_list_focus_tracking_onfocuschange",
+      "label": "onFocusChange()",
       "_callable": true,
       "_origin": "ast",
-      "community": 30,
-      "community_name": "allocation-plan-chart.ts",
+      "community": 31,
+      "community_name": "focus-tracking.ts",
       "file_type": "code",
-      "norm_label": "mapchilddatasets()",
-      "source_file": "websrc/application/allocation-plan-chart.ts",
-      "source_location": "L45"
+      "norm_label": "onfocuschange()",
+      "source_file": "websrc/components/paginated-list/focus-tracking.ts",
+      "source_location": "L18"
     },
     {
-      "id": "websrc_application_allocation_plan_chart_mapdataset",
-      "label": "mapDataset()",
+      "id": "websrc_components_paginated_list_focus_tracking_starttrackingfocus",
+      "label": "startTrackingFocus()",
       "_callable": true,
       "_origin": "ast",
-      "community": 30,
-      "community_name": "allocation-plan-chart.ts",
+      "community": 31,
+      "community_name": "focus-tracking.ts",
       "file_type": "code",
-      "norm_label": "mapdataset()",
-      "source_file": "websrc/application/allocation-plan-chart.ts",
-      "source_location": "L60"
-    },
-    {
-      "id": "websrc_application_allocation_plan_chart_tochartdatamap",
-      "label": "toChartDataMap()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "allocation-plan-chart.ts",
-      "file_type": "code",
-      "norm_label": "tochartdatamap()",
-      "source_file": "websrc/application/allocation-plan-chart.ts",
-      "source_location": "L86"
-    },
-    {
-      "id": "websrc_infra_chart_chart_utils_changechartdataondatasource",
-      "label": "changeChartDataOnDatasource()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "allocation-plan-chart.ts",
-      "file_type": "code",
-      "norm_label": "changechartdataondatasource()",
-      "source_file": "websrc/infra/chart/chart-utils.ts",
-      "source_location": "L50"
+      "norm_label": "starttrackingfocus()",
+      "source_file": "websrc/components/paginated-list/focus-tracking.ts",
+      "source_location": "L32"
     },
     {
       "id": "websrc_infra_dom_binding_percentage_input_bindpercentageinput",
@@ -4366,7 +4596,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 36,
-      "community_name": "dom-utils.ts",
+      "community_name": "logging.ts",
       "file_type": "code",
       "norm_label": "adddisplayobserver()",
       "source_file": "websrc/infra/dom/binding-dom-exclusive-display.ts",
@@ -4378,7 +4608,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 36,
-      "community_name": "dom-utils.ts",
+      "community_name": "logging.ts",
       "file_type": "code",
       "norm_label": "bindexclusivedisplay()",
       "source_file": "websrc/infra/dom/binding-dom-exclusive-display.ts",
@@ -4390,7 +4620,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 36,
-      "community_name": "dom-utils.ts",
+      "community_name": "logging.ts",
       "file_type": "code",
       "norm_label": "bindexclusivedisplaycontainerindescendants()",
       "source_file": "websrc/infra/dom/binding-dom-exclusive-display.ts",
@@ -4402,7 +4632,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 36,
-      "community_name": "dom-utils.ts",
+      "community_name": "logging.ts",
       "file_type": "code",
       "norm_label": "bindexclusivedisplayindescendants()",
       "source_file": "websrc/infra/dom/binding-dom-exclusive-display.ts",
@@ -4414,107 +4644,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 36,
-      "community_name": "dom-utils.ts",
+      "community_name": "logging.ts",
       "file_type": "code",
       "norm_label": "hideallsiblings()",
       "source_file": "websrc/infra/dom/binding-dom-exclusive-display.ts",
       "source_location": "L60"
-    },
-    {
-      "id": "websrc_infra_dom_dom_utils_addremoveobserver",
-      "label": "addRemoveObserver()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "dom-utils.ts",
-      "file_type": "code",
-      "norm_label": "addremoveobserver()",
-      "source_file": "websrc/infra/dom/dom-utils.ts",
-      "source_location": "L57"
-    },
-    {
-      "id": "websrc_infra_dom_dom_utils_ensuresharedobserver",
-      "label": "ensureSharedObserver()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "dom-utils.ts",
-      "file_type": "code",
-      "norm_label": "ensuresharedobserver()",
-      "source_file": "websrc/infra/dom/dom-utils.ts",
-      "source_location": "L37"
-    },
-    {
-      "id": "websrc_infra_dom_dom_utils_escapehtmlvalue",
-      "label": "escapeHtmlValue()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "dom-utils.ts",
-      "file_type": "code",
-      "norm_label": "escapehtmlvalue()",
-      "source_file": "websrc/infra/dom/dom-utils.ts",
-      "source_location": "L66"
-    },
-    {
-      "id": "websrc_infra_dom_dom_utils_escapehtmlvaluepreservequotes",
-      "label": "escapeHtmlValuePreserveQuotes()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "dom-utils.ts",
-      "file_type": "code",
-      "norm_label": "escapehtmlvaluepreservequotes()",
-      "source_file": "websrc/infra/dom/dom-utils.ts",
-      "source_location": "L75"
-    },
-    {
-      "id": "websrc_infra_dom_dom_utils_getcacheablecontextdata",
-      "label": "getCacheableContextData()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "dom-utils.ts",
-      "file_type": "code",
-      "norm_label": "getcacheablecontextdata()",
-      "source_file": "websrc/infra/dom/dom-utils.ts",
-      "source_location": "L15"
-    },
-    {
-      "id": "websrc_infra_dom_dom_utils_queryfirst",
-      "label": "queryFirst()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "dom-utils.ts",
-      "file_type": "code",
-      "norm_label": "queryfirst()",
-      "source_file": "websrc/infra/dom/dom-utils.ts",
-      "source_location": "L62"
-    },
-    {
-      "id": "websrc_infra_handlebars_handlebars_dom_domjsonhelper",
-      "label": "domJSONHelper()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "dom-utils.ts",
-      "file_type": "code",
-      "norm_label": "domjsonhelper()",
-      "source_file": "websrc/infra/handlebars/handlebars-dom.ts",
-      "source_location": "L16"
-    },
-    {
-      "id": "websrc_infra_handlebars_handlebars_dom_registerhandlebarsdomhelpers",
-      "label": "registerHandlebarsDOMHelpers()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "dom-utils.ts",
-      "file_type": "code",
-      "norm_label": "registerhandlebarsdomhelpers()",
-      "source_file": "websrc/infra/handlebars/handlebars-dom.ts",
-      "source_location": "L23"
     },
     {
       "id": "websrc_infra_htmx_binding_htmx_wait_for_ready_addreadyconditiontowaitingelement",
@@ -4913,6 +5047,18 @@
       "source_location": "L36"
     },
     {
+      "id": "websrc_components_management_metadata_editor_index_hidemanagementmetadataeditor",
+      "label": "hideManagementMetadataEditor()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 42,
+      "community_name": "allocation-plan-management.ts",
+      "file_type": "code",
+      "norm_label": "hidemanagementmetadataeditor()",
+      "source_file": "websrc/components/management-metadata-editor/index.ts",
+      "source_location": "L134"
+    },
+    {
       "id": "websrc_components_management_metadata_editor_index_ismanagementmetadataeditoractive",
       "label": "isManagementMetadataEditorActive()",
       "_callable": true,
@@ -4959,6 +5105,18 @@
       "norm_label": "updatemanagementmetadataheader()",
       "source_file": "websrc/components/management-metadata-editor/index.ts",
       "source_location": "L150"
+    },
+    {
+      "id": "websrc_components_portfolio_history_management_propagaterefreshdataafterpost",
+      "label": "propagateRefreshDataAfterPost()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 42,
+      "community_name": "allocation-plan-management.ts",
+      "file_type": "code",
+      "norm_label": "propagaterefreshdataafterpost()",
+      "source_file": "websrc/components/portfolio-history-management.ts",
+      "source_location": "L263"
     },
     {
       "id": "websrc_infra_chart_chart_destroydescendantcharts",
@@ -5069,16 +5227,52 @@
       "source_location": "L35"
     },
     {
-      "id": "websrc_components_management_metadata_editor_index_hidemanagementmetadataeditor",
-      "label": "hideManagementMetadataEditor()",
+      "id": "websrc_application_allocation_plan_pagination_registerallocationplanpagetransform",
+      "label": "registerAllocationPlanPageTransform()",
       "_callable": true,
       "_origin": "ast",
       "community": 47,
       "community_name": "portfolio-history-management.ts",
       "file_type": "code",
-      "norm_label": "hidemanagementmetadataeditor()",
-      "source_file": "websrc/components/management-metadata-editor/index.ts",
-      "source_location": "L134"
+      "norm_label": "registerallocationplanpagetransform()",
+      "source_file": "websrc/application/allocation-plan-pagination.ts",
+      "source_location": "L40"
+    },
+    {
+      "id": "websrc_application_allocation_plan_pagination_transformallocationplanview",
+      "label": "transformAllocationPlanView()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "transformallocationplanview()",
+      "source_file": "websrc/application/allocation-plan-pagination.ts",
+      "source_location": "L26"
+    },
+    {
+      "id": "websrc_application_portfolio_history_pagination_registerportfoliohistorypagetransform",
+      "label": "registerPortfolioHistoryPageTransform()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "registerportfoliohistorypagetransform()",
+      "source_file": "websrc/application/portfolio-history-pagination.ts",
+      "source_location": "L35"
+    },
+    {
+      "id": "websrc_application_portfolio_history_pagination_transformportfoliohistoryview",
+      "label": "transformPortfolioHistoryView()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "transformportfoliohistoryview()",
+      "source_file": "websrc/application/portfolio-history-pagination.ts",
+      "source_location": "L21"
     },
     {
       "id": "websrc_components_portfolio_history_management_focusonnewline",
@@ -5175,162 +5369,6 @@
       "norm_label": "normalizeportfoliohistoryrowswithin()",
       "source_file": "websrc/components/portfolio-history-management.ts",
       "source_location": "L170"
-    },
-    {
-      "id": "websrc_components_portfolio_history_management_observation_details_index_areobservationdetailsready",
-      "label": "areObservationDetailsReady()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 47,
-      "community_name": "portfolio-history-management.ts",
-      "file_type": "code",
-      "norm_label": "areobservationdetailsready()",
-      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
-      "source_location": "L101"
-    },
-    {
-      "id": "websrc_components_portfolio_history_management_observation_details_index_bindobservationdetailsloader",
-      "label": "bindObservationDetailsLoader()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 47,
-      "community_name": "portfolio-history-management.ts",
-      "file_type": "code",
-      "norm_label": "bindobservationdetailsloader()",
-      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
-      "source_location": "L44"
-    },
-    {
-      "id": "websrc_components_portfolio_history_management_observation_details_index_handleafterrequest",
-      "label": "handleAfterRequest()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 47,
-      "community_name": "portfolio-history-management.ts",
-      "file_type": "code",
-      "norm_label": "handleafterrequest()",
-      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
-      "source_location": "L134"
-    },
-    {
-      "id": "websrc_components_portfolio_history_management_observation_details_index_handlebeforerequest",
-      "label": "handleBeforeRequest()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 47,
-      "community_name": "portfolio-history-management.ts",
-      "file_type": "code",
-      "norm_label": "handlebeforerequest()",
-      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
-      "source_location": "L113"
-    },
-    {
-      "id": "websrc_components_portfolio_history_management_observation_details_index_readobservationdetailsstate",
-      "label": "readObservationDetailsState()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 47,
-      "community_name": "portfolio-history-management.ts",
-      "file_type": "code",
-      "norm_label": "readobservationdetailsstate()",
-      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
-      "source_location": "L150"
-    },
-    {
-      "id": "websrc_components_portfolio_history_management_observation_details_index_reloadobservationdetails",
-      "label": "reloadObservationDetails()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 47,
-      "community_name": "portfolio-history-management.ts",
-      "file_type": "code",
-      "norm_label": "reloadobservationdetails()",
-      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
-      "source_location": "L88"
-    },
-    {
-      "id": "websrc_components_portfolio_history_management_observation_details_index_retryobservationdetails",
-      "label": "retryObservationDetails()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 47,
-      "community_name": "portfolio-history-management.ts",
-      "file_type": "code",
-      "norm_label": "retryobservationdetails()",
-      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
-      "source_location": "L74"
-    },
-    {
-      "id": "websrc_components_portfolio_history_management_observation_details_index_setobservationdetailsstate",
-      "label": "setObservationDetailsState()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 47,
-      "community_name": "portfolio-history-management.ts",
-      "file_type": "code",
-      "norm_label": "setobservationdetailsstate()",
-      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
-      "source_location": "L169"
-    },
-    {
-      "id": "websrc_components_portfolio_history_management_observation_metadata_index_copyeditedtag",
-      "label": "copyEditedTag()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 47,
-      "community_name": "portfolio-history-management.ts",
-      "file_type": "code",
-      "norm_label": "copyeditedtag()",
-      "source_file": "websrc/components/portfolio-history-management-observation-metadata/index.ts",
-      "source_location": "L78"
-    },
-    {
-      "id": "websrc_components_portfolio_history_management_observation_metadata_index_getobservationtimestamp",
-      "label": "getObservationTimestamp()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 47,
-      "community_name": "portfolio-history-management.ts",
-      "file_type": "code",
-      "norm_label": "getobservationtimestamp()",
-      "source_file": "websrc/components/portfolio-history-management-observation-metadata/index.ts",
-      "source_location": "L126"
-    },
-    {
-      "id": "websrc_components_portfolio_history_management_observation_metadata_index_prepareobservationmetadataforsubmit",
-      "label": "prepareObservationMetadataForSubmit()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 47,
-      "community_name": "portfolio-history-management.ts",
-      "file_type": "code",
-      "norm_label": "prepareobservationmetadataforsubmit()",
-      "source_file": "websrc/components/portfolio-history-management-observation-metadata/index.ts",
-      "source_location": "L28"
-    },
-    {
-      "id": "websrc_components_portfolio_history_management_observation_metadata_index_setobservationtimestamp",
-      "label": "setObservationTimestamp()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 47,
-      "community_name": "portfolio-history-management.ts",
-      "file_type": "code",
-      "norm_label": "setobservationtimestamp()",
-      "source_file": "websrc/components/portfolio-history-management-observation-metadata/index.ts",
-      "source_location": "L95"
-    },
-    {
-      "id": "websrc_components_portfolio_history_management_propagaterefreshdataafterpost",
-      "label": "propagateRefreshDataAfterPost()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 47,
-      "community_name": "portfolio-history-management.ts",
-      "file_type": "code",
-      "norm_label": "propagaterefreshdataafterpost()",
-      "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L263"
     },
     {
       "id": "websrc_components_portfolio_history_management_recalculateportfoliohistoryallocation",
@@ -5537,28 +5575,76 @@
       "source_location": "L58"
     },
     {
-      "id": "websrc_utils_calendar_date_calendardatetoutctimestamp",
-      "label": "calendarDateToUtcTimestamp()",
+      "id": "websrc_root_after_request_error_handler",
+      "label": "AFTER_REQUEST_ERROR_HANDLER()",
       "_callable": true,
       "_origin": "ast",
       "community": 47,
       "community_name": "portfolio-history-management.ts",
       "file_type": "code",
-      "norm_label": "calendardatetoutctimestamp()",
-      "source_file": "websrc/utils/calendar-date.ts",
-      "source_location": "L59"
+      "norm_label": "after_request_error_handler()",
+      "source_file": "websrc/root.ts",
+      "source_location": "L6"
     },
     {
-      "id": "websrc_components_paginated_list_context_getcontextid",
-      "label": "getContextId()",
+      "id": "websrc_root_general_uncaught_error_handler",
+      "label": "GENERAL_UNCAUGHT_ERROR_HANDLER()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "general_uncaught_error_handler()",
+      "source_file": "websrc/root.ts",
+      "source_location": "L26"
+    },
+    {
+      "id": "websrc_components_paginated_list_focus_tracking_stoptrackingfocus",
+      "label": "stopTrackingFocus()",
       "_callable": true,
       "_origin": "ast",
       "community": 5,
       "community_name": "pagination.ts",
       "file_type": "code",
-      "norm_label": "getcontextid()",
-      "source_file": "websrc/components/paginated-list/context.ts",
-      "source_location": "L21"
+      "norm_label": "stoptrackingfocus()",
+      "source_file": "websrc/components/paginated-list/focus-tracking.ts",
+      "source_location": "L50"
+    },
+    {
+      "id": "websrc_components_paginated_list_lifecycle_bindpaginationlifecycle",
+      "label": "bindPaginationLifecycle()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "pagination.ts",
+      "file_type": "code",
+      "norm_label": "bindpaginationlifecycle()",
+      "source_file": "websrc/components/paginated-list/lifecycle.ts",
+      "source_location": "L68"
+    },
+    {
+      "id": "websrc_components_paginated_list_lifecycle_bindpaginationlifecycle_bind",
+      "label": "bind()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "pagination.ts",
+      "file_type": "code",
+      "norm_label": "bind()",
+      "source_file": "websrc/components/paginated-list/lifecycle.ts",
+      "source_location": "L74"
+    },
+    {
+      "id": "websrc_components_paginated_list_lifecycle_trackrequestcompletion",
+      "label": "trackRequestCompletion()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "pagination.ts",
+      "file_type": "code",
+      "norm_label": "trackrequestcompletion()",
+      "source_file": "websrc/components/paginated-list/lifecycle.ts",
+      "source_location": "L22"
     },
     {
       "id": "websrc_components_paginated_list_pagination_bindrequesttoxhr",
@@ -5570,7 +5656,7 @@
       "file_type": "code",
       "norm_label": "bindrequesttoxhr()",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L176"
+      "source_location": "L162"
     },
     {
       "id": "websrc_components_paginated_list_pagination_commitsettledpage",
@@ -5582,19 +5668,7 @@
       "file_type": "code",
       "norm_label": "commitsettledpage()",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L300"
-    },
-    {
-      "id": "websrc_components_paginated_list_pagination_configurerequest",
-      "label": "configureRequest()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "pagination.ts",
-      "file_type": "code",
-      "norm_label": "configurerequest()",
-      "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L207"
+      "source_location": "L289"
     },
     {
       "id": "websrc_components_paginated_list_pagination_finishrequest",
@@ -5606,31 +5680,7 @@
       "file_type": "code",
       "norm_label": "finishrequest()",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L279"
-    },
-    {
-      "id": "websrc_components_paginated_list_pagination_getowner",
-      "label": "getOwner()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "pagination.ts",
-      "file_type": "code",
-      "norm_label": "getowner()",
-      "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L119"
-    },
-    {
-      "id": "websrc_components_paginated_list_pagination_getstate",
-      "label": "getState()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "pagination.ts",
-      "file_type": "code",
-      "norm_label": "getstate()",
-      "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L95"
+      "source_location": "L268"
     },
     {
       "id": "websrc_components_paginated_list_pagination_handlerequestcompletion",
@@ -5642,7 +5692,7 @@
       "file_type": "code",
       "norm_label": "handlerequestcompletion()",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L372"
+      "source_location": "L361"
     },
     {
       "id": "websrc_components_paginated_list_pagination_init",
@@ -5654,7 +5704,7 @@
       "file_type": "code",
       "norm_label": "init()",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L487"
+      "source_location": "L476"
     },
     {
       "id": "websrc_components_paginated_list_pagination_invalidateremovedlist",
@@ -5666,7 +5716,7 @@
       "file_type": "code",
       "norm_label": "invalidateremovedlist()",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L454"
+      "source_location": "L443"
     },
     {
       "id": "websrc_components_paginated_list_pagination_iscurrentrequest",
@@ -5678,19 +5728,7 @@
       "file_type": "code",
       "norm_label": "iscurrentrequest()",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L163"
-    },
-    {
-      "id": "websrc_components_paginated_list_pagination_requestnextpage",
-      "label": "requestNextPage()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "pagination.ts",
-      "file_type": "code",
-      "norm_label": "requestnextpage()",
-      "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L415"
+      "source_location": "L149"
     },
     {
       "id": "websrc_components_paginated_list_pagination_shouldmovefocusafterterminalappend",
@@ -5702,19 +5740,7 @@
       "file_type": "code",
       "norm_label": "shouldmovefocusafterterminalappend()",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L353"
-    },
-    {
-      "id": "websrc_components_paginated_list_pagination_trackpaginationfocuschange",
-      "label": "trackPaginationFocusChange()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "pagination.ts",
-      "file_type": "code",
-      "norm_label": "trackpaginationfocuschange()",
-      "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L148"
+      "source_location": "L342"
     },
     {
       "id": "websrc_components_paginated_list_pagination_transformpageresponse",
@@ -5726,19 +5752,7 @@
       "file_type": "code",
       "norm_label": "transformpageresponse()",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L516"
-    },
-    {
-      "id": "websrc_components_paginated_list_pagination_updatecontrols",
-      "label": "updateControls()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "pagination.ts",
-      "file_type": "code",
-      "norm_label": "updatecontrols()",
-      "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L133"
+      "source_location": "L505"
     },
     {
       "id": "websrc_components_paginated_list_controls_focusonacceptedrecord",
@@ -6101,12 +6115,72 @@
       "source_location": "L653"
     },
     {
+      "id": "websrc_application_allocation_plan_chart_chartdataselectioneventhandler",
+      "label": "chartDataSelectionEventHandler()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "allocation-plan-chart.ts",
+      "file_type": "code",
+      "norm_label": "chartdataselectioneventhandler()",
+      "source_file": "websrc/application/allocation-plan-chart.ts",
+      "source_location": "L99"
+    },
+    {
+      "id": "websrc_application_allocation_plan_chart_getchartcontent",
+      "label": "getChartContent()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "allocation-plan-chart.ts",
+      "file_type": "code",
+      "norm_label": "getchartcontent()",
+      "source_file": "websrc/application/allocation-plan-chart.ts",
+      "source_location": "L111"
+    },
+    {
+      "id": "websrc_application_allocation_plan_chart_mapchilddatasets",
+      "label": "mapChildDatasets()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "allocation-plan-chart.ts",
+      "file_type": "code",
+      "norm_label": "mapchilddatasets()",
+      "source_file": "websrc/application/allocation-plan-chart.ts",
+      "source_location": "L45"
+    },
+    {
+      "id": "websrc_application_allocation_plan_chart_mapdataset",
+      "label": "mapDataset()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "allocation-plan-chart.ts",
+      "file_type": "code",
+      "norm_label": "mapdataset()",
+      "source_file": "websrc/application/allocation-plan-chart.ts",
+      "source_location": "L60"
+    },
+    {
+      "id": "websrc_application_allocation_plan_chart_tochartdatamap",
+      "label": "toChartDataMap()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "allocation-plan-chart.ts",
+      "file_type": "code",
+      "norm_label": "tochartdatamap()",
+      "source_file": "websrc/application/allocation-plan-chart.ts",
+      "source_location": "L86"
+    },
+    {
       "id": "websrc_application_chart_contents_tochartcontent",
       "label": "toChartContent()",
       "_callable": true,
       "_origin": "ast",
       "community": 8,
-      "community_name": "portfolio-chart.ts",
+      "community_name": "allocation-plan-chart.ts",
       "file_type": "code",
       "norm_label": "tochartcontent()",
       "source_file": "websrc/application/chart-contents.ts",
@@ -6118,7 +6192,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 8,
-      "community_name": "portfolio-chart.ts",
+      "community_name": "allocation-plan-chart.ts",
       "file_type": "code",
       "norm_label": "tounidimensionalmultichartcontent()",
       "source_file": "websrc/application/chart-contents.ts",
@@ -6130,7 +6204,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 8,
-      "community_name": "portfolio-chart.ts",
+      "community_name": "allocation-plan-chart.ts",
       "file_type": "code",
       "norm_label": "changechartdata()",
       "source_file": "websrc/application/portfolio-chart/portfolio-chart.ts",
@@ -6142,7 +6216,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 8,
-      "community_name": "portfolio-chart.ts",
+      "community_name": "allocation-plan-chart.ts",
       "file_type": "code",
       "norm_label": "chartdataselectioneventhandler()",
       "source_file": "websrc/application/portfolio-chart/portfolio-chart.ts",
@@ -6154,7 +6228,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 8,
-      "community_name": "portfolio-chart.ts",
+      "community_name": "allocation-plan-chart.ts",
       "file_type": "code",
       "norm_label": "getchartcontent()",
       "source_file": "websrc/application/portfolio-chart/portfolio-chart.ts",
@@ -6166,44 +6240,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 8,
-      "community_name": "portfolio-chart.ts",
+      "community_name": "allocation-plan-chart.ts",
       "file_type": "code",
       "norm_label": "interactionobservercallback()",
       "source_file": "websrc/application/portfolio-chart/portfolio-chart.ts",
       "source_location": "L43"
     },
     {
-      "id": "websrc_api_api",
-      "label": "api.ts",
+      "id": "websrc_infra_chart_chart_utils_changechartdataondatasource",
+      "label": "changeChartDataOnDatasource()",
+      "_callable": true,
       "_origin": "ast",
-      "community": 0,
-      "community_name": "asset.ts",
+      "community": 8,
+      "community_name": "allocation-plan-chart.ts",
       "file_type": "code",
-      "norm_label": "api.ts",
-      "source_file": "websrc/api/api.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "websrc_api_api_api",
-      "label": "api",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "asset.ts",
-      "file_type": "code",
-      "norm_label": "api",
-      "source_file": "websrc/api/api.ts",
-      "source_location": "L12"
-    },
-    {
-      "id": "websrc_application_index_application",
-      "label": "Application",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "asset.ts",
-      "file_type": "code",
-      "norm_label": "application",
-      "source_file": "websrc/application/index.ts",
-      "source_location": "L22"
+      "norm_label": "changechartdataondatasource()",
+      "source_file": "websrc/infra/chart/chart-utils.ts",
+      "source_location": "L50"
     },
     {
       "id": "websrc_components_notifications",
@@ -6226,17 +6279,6 @@
       "norm_label": "notification_type_bootstrap_classes",
       "source_file": "websrc/components/notifications.ts",
       "source_location": "L11"
-    },
-    {
-      "id": "websrc_domain_asset_index",
-      "label": "asset/index.ts",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "asset.ts",
-      "file_type": "code",
-      "norm_label": "asset/index.ts",
-      "source_file": "websrc/domain/asset/index.ts",
-      "source_location": "L1"
     },
     {
       "id": "websrc_infra_dom_index_dominfra",
@@ -6270,17 +6312,6 @@
       "norm_label": "infra.ts",
       "source_file": "websrc/infra/infra.ts",
       "source_location": "L1"
-    },
-    {
-      "id": "websrc_infra_infra_infra",
-      "label": "Infra",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "asset.ts",
-      "file_type": "code",
-      "norm_label": "infra",
-      "source_file": "websrc/infra/infra.ts",
-      "source_location": "L95"
     },
     {
       "id": "websrc_infra_infra_types",
@@ -6338,6 +6369,17 @@
       "source_location": "L5"
     },
     {
+      "id": "websrc_infra_routing_index_router",
+      "label": "Router",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "asset.ts",
+      "file_type": "code",
+      "norm_label": "router",
+      "source_file": "websrc/infra/routing/index.ts",
+      "source_location": "L12"
+    },
+    {
       "id": "websrc_pages_asset",
       "label": "asset.ts",
       "_origin": "ast",
@@ -6382,17 +6424,6 @@
       "source_location": "L25"
     },
     {
-      "id": "websrc_root",
-      "label": "root.ts",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "asset.ts",
-      "file_type": "code",
-      "norm_label": "root.ts",
-      "source_file": "websrc/root.ts",
-      "source_location": "L1"
-    },
-    {
       "id": "websrc_components_paginated_list_controls",
       "label": "controls.ts",
       "_origin": "ast",
@@ -6415,15 +6446,26 @@
       "source_location": "L1"
     },
     {
-      "id": "websrc_components_asset_composed_columns_input_types",
-      "label": "types.ts",
+      "id": "websrc_api_api",
+      "label": "api.ts",
       "_origin": "ast",
-      "community": 13,
-      "community_name": "AssetSearchAutocompleteController",
+      "community": 14,
+      "community_name": "htmx/index.ts",
       "file_type": "code",
-      "norm_label": "types.ts",
-      "source_file": "websrc/components/asset-composed-columns-input/types.ts",
+      "norm_label": "api.ts",
+      "source_file": "websrc/api/api.ts",
       "source_location": "L1"
+    },
+    {
+      "id": "websrc_api_api_api",
+      "label": "api",
+      "_origin": "ast",
+      "community": 14,
+      "community_name": "htmx/index.ts",
+      "file_type": "code",
+      "norm_label": "api",
+      "source_file": "websrc/api/api.ts",
+      "source_location": "L12"
     },
     {
       "id": "websrc_infra_htmx_index",
@@ -6479,39 +6521,6 @@
       "norm_label": "infratypesutils",
       "source_file": "websrc/infra/infra-types-utils.ts",
       "source_location": "L4"
-    },
-    {
-      "id": "websrc_infra_logging",
-      "label": "logging.ts",
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "htmx/index.ts",
-      "file_type": "code",
-      "norm_label": "logging.ts",
-      "source_file": "websrc/infra/logging.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "websrc_infra_logging_loglevel",
-      "label": "LogLevel",
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "htmx/index.ts",
-      "file_type": "code",
-      "norm_label": "loglevel",
-      "source_file": "websrc/infra/logging.ts",
-      "source_location": "L18"
-    },
-    {
-      "id": "websrc_infra_routing_index_router",
-      "label": "Router",
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "htmx/index.ts",
-      "file_type": "code",
-      "norm_label": "router",
-      "source_file": "websrc/infra/routing/index.ts",
-      "source_location": "L12"
     },
     {
       "id": "websrc_components_allocation_plan_management_response_index",
@@ -6599,17 +6608,6 @@
       "file_type": "code",
       "norm_label": "allocation-plan.ts",
       "source_file": "websrc/domain/allocation-plan.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "websrc_domain_portfolio",
-      "label": "domain/portfolio.ts",
-      "_origin": "ast",
-      "community": 16,
-      "community_name": "allocation-plan.ts",
-      "file_type": "code",
-      "norm_label": "domain/portfolio.ts",
-      "source_file": "websrc/domain/portfolio.ts",
       "source_location": "L1"
     },
     {
@@ -6734,39 +6732,6 @@
       "source_location": "L1"
     },
     {
-      "id": "websrc_pages_index",
-      "label": "pages/index.ts",
-      "_origin": "ast",
-      "community": 16,
-      "community_name": "allocation-plan.ts",
-      "file_type": "code",
-      "norm_label": "pages/index.ts",
-      "source_file": "websrc/pages/index.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "websrc_pages_portfolio",
-      "label": "pages/portfolio.ts",
-      "_origin": "ast",
-      "community": 16,
-      "community_name": "allocation-plan.ts",
-      "file_type": "code",
-      "norm_label": "pages/portfolio.ts",
-      "source_file": "websrc/pages/portfolio.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "websrc_pages_portfolio_portfoliopage",
-      "label": "PortfolioPage",
-      "_origin": "ast",
-      "community": 16,
-      "community_name": "allocation-plan.ts",
-      "file_type": "code",
-      "norm_label": "portfoliopage",
-      "source_file": "websrc/pages/portfolio.ts",
-      "source_location": "L6"
-    },
-    {
       "id": "websrc_application_portfolio_chart_portfolio_chart_datasource",
       "label": "portfolio-chart-datasource.ts",
       "_origin": "ast",
@@ -6798,6 +6763,17 @@
       "norm_label": "portfolio-chart-model.ts",
       "source_file": "websrc/application/portfolio-chart/portfolio-chart-model.ts",
       "source_location": "L1"
+    },
+    {
+      "id": "ref_chart_js",
+      "label": "chart.js",
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "portfolio-chart-datasource.ts",
+      "file_type": "concept",
+      "norm_label": "chart.js",
+      "source_file": "package.json",
+      "source_location": "L27"
     },
     {
       "id": "websrc_components_asset_composed_columns_input_constants_asset_id_input_selector",
@@ -6910,6 +6886,17 @@
       "source_location": "L38"
     },
     {
+      "id": "websrc_domain_asset_index",
+      "label": "asset/index.ts",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "asset-composed-columns-input/index.ts",
+      "file_type": "code",
+      "norm_label": "asset/index.ts",
+      "source_file": "websrc/domain/asset/index.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "websrc_components_asset_composed_columns_input_constants_assetselectionstate_existing",
       "label": "EXISTING",
       "_origin": "ast",
@@ -6954,14 +6941,25 @@
       "source_location": "L52"
     },
     {
-      "id": "websrc_infra_handlebars_handlebars_format",
-      "label": "handlebars-format.ts",
+      "id": "websrc_infra_dom_dom_utils_domutils",
+      "label": "DomUtils",
       "_origin": "ast",
       "community": 2,
       "community_name": "handlebars-lang.ts",
       "file_type": "code",
-      "norm_label": "handlebars-format.ts",
-      "source_file": "websrc/infra/handlebars/handlebars-format.ts",
+      "norm_label": "domutils",
+      "source_file": "websrc/infra/dom/dom-utils.ts",
+      "source_location": "L82"
+    },
+    {
+      "id": "websrc_infra_handlebars_handlebars_dom",
+      "label": "handlebars-dom.ts",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "handlebars-lang.ts",
+      "file_type": "code",
+      "norm_label": "handlebars-dom.ts",
+      "source_file": "websrc/infra/handlebars/handlebars-dom.ts",
       "source_location": "L1"
     },
     {
@@ -7039,17 +7037,6 @@
       "file_type": "code",
       "norm_label": "handlebars/index.ts",
       "source_file": "websrc/infra/handlebars/index.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "websrc_utils_calendar_date",
-      "label": "calendar-date.ts",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "handlebars-lang.ts",
-      "file_type": "code",
-      "norm_label": "calendar-date.ts",
-      "source_file": "websrc/utils/calendar-date.ts",
       "source_location": "L1"
     },
     {
@@ -7482,26 +7469,48 @@
       "source_location": "L1"
     },
     {
-      "id": "websrc_components_asset_composed_columns_input_constants_asset_action_button_identities",
-      "label": "ASSET_ACTION_BUTTON_IDENTITIES",
+      "id": "websrc_components_asset_composed_columns_input_types",
+      "label": "types.ts",
       "_origin": "ast",
       "community": 25,
       "community_name": "autocomplete-interactions.ts",
       "file_type": "code",
-      "norm_label": "asset_action_button_identities",
-      "source_file": "websrc/components/asset-composed-columns-input/constants.ts",
-      "source_location": "L58"
+      "norm_label": "types.ts",
+      "source_file": "websrc/components/asset-composed-columns-input/types.ts",
+      "source_location": "L1"
     },
     {
-      "id": "websrc_components_asset_composed_columns_input_constants_asset_action_button_selector",
-      "label": "ASSET_ACTION_BUTTON_SELECTOR",
+      "id": "websrc_infra_dom_dom_utils",
+      "label": "dom-utils.ts",
       "_origin": "ast",
-      "community": 25,
-      "community_name": "autocomplete-interactions.ts",
+      "community": 26,
+      "community_name": "binding-htmx-trigger-on-route.ts",
       "file_type": "code",
-      "norm_label": "asset_action_button_selector",
-      "source_file": "websrc/components/asset-composed-columns-input/constants.ts",
-      "source_location": "L17"
+      "norm_label": "dom-utils.ts",
+      "source_file": "websrc/infra/dom/dom-utils.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "websrc_infra_dom_dom_utils_contextdatacache",
+      "label": "contextDataCache",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "binding-htmx-trigger-on-route.ts",
+      "file_type": "code",
+      "norm_label": "contextdatacache",
+      "source_file": "websrc/infra/dom/dom-utils.ts",
+      "source_location": "L10"
+    },
+    {
+      "id": "websrc_infra_dom_dom_utils_observedelements",
+      "label": "observedElements",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "binding-htmx-trigger-on-route.ts",
+      "file_type": "code",
+      "norm_label": "observedelements",
+      "source_file": "websrc/infra/dom/dom-utils.ts",
+      "source_location": "L12"
     },
     {
       "id": "websrc_infra_routing_binding_htmx_trigger_on_route",
@@ -7537,15 +7546,92 @@
       "source_location": "L19"
     },
     {
-      "id": "ref_navigo",
-      "label": "navigo",
+      "id": "websrc_components_portfolio_history_management_observation_details_index",
+      "label": "portfolio-history-management-observation-details/index.ts",
       "_origin": "ast",
-      "community": 26,
-      "community_name": "binding-htmx-trigger-on-route.ts",
-      "file_type": "concept",
-      "norm_label": "navigo",
-      "source_file": "package.json",
-      "source_location": "L34"
+      "community": 27,
+      "community_name": "portfolio-history-management-observation-details/index.ts",
+      "file_type": "code",
+      "norm_label": "portfolio-history-management-observation-details/index.ts",
+      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "websrc_components_portfolio_history_management_observation_details_index_observationdetailsstate_failed",
+      "label": "FAILED",
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "portfolio-history-management-observation-details/index.ts",
+      "file_type": "code",
+      "norm_label": "failed",
+      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
+      "source_location": "L25"
+    },
+    {
+      "id": "websrc_components_portfolio_history_management_observation_details_index_observationdetailsstate_loading",
+      "label": "LOADING",
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "portfolio-history-management-observation-details/index.ts",
+      "file_type": "code",
+      "norm_label": "loading",
+      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
+      "source_location": "L23"
+    },
+    {
+      "id": "websrc_components_portfolio_history_management_observation_details_index_observationdetailsstate_ready",
+      "label": "READY",
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "portfolio-history-management-observation-details/index.ts",
+      "file_type": "code",
+      "norm_label": "ready",
+      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
+      "source_location": "L24"
+    },
+    {
+      "id": "websrc_components_portfolio_history_management_observation_details_index_observationdetailsstate_unloaded",
+      "label": "UNLOADED",
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "portfolio-history-management-observation-details/index.ts",
+      "file_type": "code",
+      "norm_label": "unloaded",
+      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
+      "source_location": "L22"
+    },
+    {
+      "id": "websrc_components_portfolio_history_management_observation_metadata_index",
+      "label": "portfolio-history-management-observation-metadata/index.ts",
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "portfolio-history-management-observation-details/index.ts",
+      "file_type": "code",
+      "norm_label": "portfolio-history-management-observation-metadata/index.ts",
+      "source_file": "websrc/components/portfolio-history-management-observation-metadata/index.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "websrc_infra_handlebars_handlebars_format",
+      "label": "handlebars-format.ts",
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "portfolio-history-management-observation-details/index.ts",
+      "file_type": "code",
+      "norm_label": "handlebars-format.ts",
+      "source_file": "websrc/infra/handlebars/handlebars-format.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "websrc_utils_calendar_date",
+      "label": "calendar-date.ts",
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "portfolio-history-management-observation-details/index.ts",
+      "file_type": "code",
+      "norm_label": "calendar-date.ts",
+      "source_file": "websrc/utils/calendar-date.ts",
+      "source_location": "L1"
     },
     {
       "id": "tsconfig",
@@ -7702,6 +7788,17 @@
       "source_location": "L8"
     },
     {
+      "id": "websrc_infra_chart_chart_types_unidimensional_dataset_sum_field",
+      "label": "UNIDIMENSIONAL_DATASET_SUM_FIELD",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "chart-utils.ts",
+      "file_type": "code",
+      "norm_label": "unidimensional_dataset_sum_field",
+      "source_file": "websrc/infra/chart/chart-types.ts",
+      "source_location": "L17"
+    },
+    {
       "id": "websrc_infra_chart_chart_utils",
       "label": "chart-utils.ts",
       "_origin": "ast",
@@ -7779,17 +7876,6 @@
       "source_location": "L7"
     },
     {
-      "id": "ref_chart_js",
-      "label": "chart.js",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "chart-utils.ts",
-      "file_type": "concept",
-      "norm_label": "chart.js",
-      "source_file": "package.json",
-      "source_location": "L27"
-    },
-    {
       "id": "ref_chartjs_plugin_datalabels",
       "label": "chartjs-plugin-datalabels",
       "_origin": "ast",
@@ -7801,169 +7887,92 @@
       "source_location": "L28"
     },
     {
-      "id": "websrc_application_allocation_plan_pagination",
-      "label": "allocation-plan-pagination.ts",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "application/index.ts",
-      "file_type": "code",
-      "norm_label": "allocation-plan-pagination.ts",
-      "source_file": "websrc/application/allocation-plan-pagination.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "websrc_application_index",
-      "label": "application/index.ts",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "application/index.ts",
-      "file_type": "code",
-      "norm_label": "application/index.ts",
-      "source_file": "websrc/application/index.ts",
-      "source_location": "L1"
-    },
-    {
       "id": "websrc_application_portfolio_analysis",
       "label": "application/portfolio-analysis.ts",
       "_origin": "ast",
       "community": 3,
-      "community_name": "application/index.ts",
+      "community_name": "bignumber.js",
       "file_type": "code",
       "norm_label": "application/portfolio-analysis.ts",
       "source_file": "websrc/application/portfolio-analysis.ts",
       "source_location": "L1"
     },
     {
-      "id": "websrc_application_portfolio_history_pagination",
-      "label": "portfolio-history-pagination.ts",
+      "id": "websrc_domain_portfolio_allocation",
+      "label": "portfolio-allocation.ts",
       "_origin": "ast",
       "community": 3,
-      "community_name": "application/index.ts",
+      "community_name": "bignumber.js",
       "file_type": "code",
-      "norm_label": "portfolio-history-pagination.ts",
-      "source_file": "websrc/application/portfolio-history-pagination.ts",
+      "norm_label": "portfolio-allocation.ts",
+      "source_file": "websrc/domain/portfolio-allocation.ts",
       "source_location": "L1"
-    },
-    {
-      "id": "websrc_components_allocation_plan_management_allocationplanmanagement",
-      "label": "allocationPlanManagement",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "application/index.ts",
-      "file_type": "code",
-      "norm_label": "allocationplanmanagement",
-      "source_file": "websrc/components/allocation-plan-management.ts",
-      "source_location": "L365"
-    },
-    {
-      "id": "websrc_components_asset_composed_columns_input_index_assetcomposedcolumnsinput",
-      "label": "AssetComposedColumnsInput",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "application/index.ts",
-      "file_type": "code",
-      "norm_label": "assetcomposedcolumnsinput",
-      "source_file": "websrc/components/asset-composed-columns-input/index.ts",
-      "source_location": "L86"
-    },
-    {
-      "id": "websrc_components_paginated_list_index",
-      "label": "paginated-list/index.ts",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "application/index.ts",
-      "file_type": "code",
-      "norm_label": "paginated-list/index.ts",
-      "source_file": "websrc/components/paginated-list/index.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "websrc_components_paginated_list_pagination_paginatedlist",
-      "label": "paginatedList",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "application/index.ts",
-      "file_type": "code",
-      "norm_label": "paginatedlist",
-      "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L598"
-    },
-    {
-      "id": "websrc_components_paginated_list_pagination_paginationmode_append",
-      "label": "Append",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "application/index.ts",
-      "file_type": "code",
-      "norm_label": "append",
-      "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L30"
-    },
-    {
-      "id": "websrc_components_paginated_list_pagination_paginationmode_initial",
-      "label": "Initial",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "application/index.ts",
-      "file_type": "code",
-      "norm_label": "initial",
-      "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L29"
     },
     {
       "id": "websrc_domain_portfolio_analysis",
       "label": "domain/portfolio-analysis.ts",
       "_origin": "ast",
       "community": 3,
-      "community_name": "application/index.ts",
+      "community_name": "bignumber.js",
       "file_type": "code",
       "norm_label": "domain/portfolio-analysis.ts",
       "source_file": "websrc/domain/portfolio-analysis.ts",
       "source_location": "L1"
     },
     {
-      "id": "websrc_pages_asset_assetpage",
-      "label": "AssetPage",
+      "id": "websrc_domain_service_mapping_portfolio_allocation_mapping",
+      "label": "portfolio-allocation-mapping.ts",
       "_origin": "ast",
       "community": 3,
-      "community_name": "application/index.ts",
+      "community_name": "bignumber.js",
       "file_type": "code",
-      "norm_label": "assetpage",
-      "source_file": "websrc/pages/asset.ts",
-      "source_location": "L223"
-    },
-    {
-      "id": "websrc_application_allocation_plan_chart",
-      "label": "allocation-plan-chart.ts",
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "allocation-plan-chart.ts",
-      "file_type": "code",
-      "norm_label": "allocation-plan-chart.ts",
-      "source_file": "websrc/application/allocation-plan-chart.ts",
+      "norm_label": "portfolio-allocation-mapping.ts",
+      "source_file": "websrc/domain/service/mapping/portfolio-allocation-mapping.ts",
       "source_location": "L1"
     },
     {
-      "id": "websrc_application_allocation_plan_chart_allocationplanchart",
-      "label": "allocationPlanChart",
+      "id": "ref_bignumber_js",
+      "label": "bignumber.js",
       "_origin": "ast",
-      "community": 30,
-      "community_name": "allocation-plan-chart.ts",
-      "file_type": "code",
-      "norm_label": "allocationplanchart",
-      "source_file": "websrc/application/allocation-plan-chart.ts",
-      "source_location": "L157"
+      "community": 3,
+      "community_name": "bignumber.js",
+      "file_type": "concept",
+      "norm_label": "bignumber.js",
+      "source_file": "package.json",
+      "source_location": "L23"
     },
     {
-      "id": "websrc_domain_service_index_domainservice",
-      "label": "DomainService",
+      "id": "websrc_components_paginated_list_context",
+      "label": "context.ts",
       "_origin": "ast",
       "community": 30,
-      "community_name": "allocation-plan-chart.ts",
+      "community_name": "getContextId",
       "file_type": "code",
-      "norm_label": "domainservice",
-      "source_file": "websrc/domain/service/index.ts",
-      "source_location": "L10"
+      "norm_label": "context.ts",
+      "source_file": "websrc/components/paginated-list/context.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "websrc_components_paginated_list_focus_tracking",
+      "label": "focus-tracking.ts",
+      "_origin": "ast",
+      "community": 31,
+      "community_name": "focus-tracking.ts",
+      "file_type": "code",
+      "norm_label": "focus-tracking.ts",
+      "source_file": "websrc/components/paginated-list/focus-tracking.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "websrc_components_paginated_list_focus_tracking_tracked",
+      "label": "tracked",
+      "_origin": "ast",
+      "community": 31,
+      "community_name": "focus-tracking.ts",
+      "file_type": "code",
+      "norm_label": "tracked",
+      "source_file": "websrc/components/paginated-list/focus-tracking.ts",
+      "source_location": "L13"
     },
     {
       "id": "websrc_infra_dom_binding_percentage_input",
@@ -8025,66 +8034,33 @@
       "label": "binding-dom-exclusive-display.ts",
       "_origin": "ast",
       "community": 36,
-      "community_name": "dom-utils.ts",
+      "community_name": "logging.ts",
       "file_type": "code",
       "norm_label": "binding-dom-exclusive-display.ts",
       "source_file": "websrc/infra/dom/binding-dom-exclusive-display.ts",
       "source_location": "L1"
     },
     {
-      "id": "websrc_infra_dom_dom_utils",
-      "label": "dom-utils.ts",
+      "id": "websrc_infra_logging",
+      "label": "logging.ts",
       "_origin": "ast",
       "community": 36,
-      "community_name": "dom-utils.ts",
+      "community_name": "logging.ts",
       "file_type": "code",
-      "norm_label": "dom-utils.ts",
-      "source_file": "websrc/infra/dom/dom-utils.ts",
+      "norm_label": "logging.ts",
+      "source_file": "websrc/infra/logging.ts",
       "source_location": "L1"
     },
     {
-      "id": "websrc_infra_dom_dom_utils_contextdatacache",
-      "label": "contextDataCache",
+      "id": "websrc_infra_logging_loglevel",
+      "label": "LogLevel",
       "_origin": "ast",
       "community": 36,
-      "community_name": "dom-utils.ts",
+      "community_name": "logging.ts",
       "file_type": "code",
-      "norm_label": "contextdatacache",
-      "source_file": "websrc/infra/dom/dom-utils.ts",
-      "source_location": "L10"
-    },
-    {
-      "id": "websrc_infra_dom_dom_utils_domutils",
-      "label": "DomUtils",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "dom-utils.ts",
-      "file_type": "code",
-      "norm_label": "domutils",
-      "source_file": "websrc/infra/dom/dom-utils.ts",
-      "source_location": "L82"
-    },
-    {
-      "id": "websrc_infra_dom_dom_utils_observedelements",
-      "label": "observedElements",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "dom-utils.ts",
-      "file_type": "code",
-      "norm_label": "observedelements",
-      "source_file": "websrc/infra/dom/dom-utils.ts",
-      "source_location": "L12"
-    },
-    {
-      "id": "websrc_infra_handlebars_handlebars_dom",
-      "label": "handlebars-dom.ts",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "dom-utils.ts",
-      "file_type": "code",
-      "norm_label": "handlebars-dom.ts",
-      "source_file": "websrc/infra/handlebars/handlebars-dom.ts",
-      "source_location": "L1"
+      "norm_label": "loglevel",
+      "source_file": "websrc/infra/logging.ts",
+      "source_location": "L18"
     },
     {
       "id": "websrc_infra_htmx_binding_htmx_wait_for_ready",
@@ -8296,6 +8272,39 @@
       "source_location": "L15"
     },
     {
+      "id": "websrc_pages_index",
+      "label": "pages/index.ts",
+      "_origin": "ast",
+      "community": 42,
+      "community_name": "allocation-plan-management.ts",
+      "file_type": "code",
+      "norm_label": "pages/index.ts",
+      "source_file": "websrc/pages/index.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "websrc_pages_portfolio",
+      "label": "pages/portfolio.ts",
+      "_origin": "ast",
+      "community": 42,
+      "community_name": "allocation-plan-management.ts",
+      "file_type": "code",
+      "norm_label": "pages/portfolio.ts",
+      "source_file": "websrc/pages/portfolio.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "websrc_pages_portfolio_portfoliopage",
+      "label": "PortfolioPage",
+      "_origin": "ast",
+      "community": 42,
+      "community_name": "allocation-plan-management.ts",
+      "file_type": "code",
+      "norm_label": "portfoliopage",
+      "source_file": "websrc/pages/portfolio.ts",
+      "source_location": "L6"
+    },
+    {
       "id": "ref_bootstrap",
       "label": "bootstrap",
       "_origin": "ast",
@@ -8305,6 +8314,17 @@
       "norm_label": "bootstrap",
       "source_file": "package.json",
       "source_location": "L24"
+    },
+    {
+      "id": "ref_htmx_org",
+      "label": "htmx.org",
+      "_origin": "ast",
+      "community": 42,
+      "community_name": "allocation-plan-management.ts",
+      "file_type": "concept",
+      "norm_label": "htmx.org",
+      "source_file": "package.json",
+      "source_location": "L33"
     },
     {
       "id": "websrc_infra_chart_chart",
@@ -8373,28 +8393,6 @@
       "source_location": "L16"
     },
     {
-      "id": "websrc_infra_chart_chart_types_chartdatatype_asset_allocation_plan_1d",
-      "label": "ASSET_ALLOCATION_PLAN_1D",
-      "_origin": "ast",
-      "community": 44,
-      "community_name": "chart.ts",
-      "file_type": "code",
-      "norm_label": "asset_allocation_plan_1d",
-      "source_file": "websrc/infra/chart/chart-types.ts",
-      "source_location": "L10"
-    },
-    {
-      "id": "websrc_infra_chart_chart_types_chartdatatype_portfolio_history_1d",
-      "label": "PORTFOLIO_HISTORY_1D",
-      "_origin": "ast",
-      "community": 44,
-      "community_name": "chart.ts",
-      "file_type": "code",
-      "norm_label": "portfolio_history_1d",
-      "source_file": "websrc/infra/chart/chart-types.ts",
-      "source_location": "L9"
-    },
-    {
       "id": "websrc_infra_chart_chart_types_measuramentunit_currency",
       "label": "CURRENCY",
       "_origin": "ast",
@@ -8415,17 +8413,6 @@
       "norm_label": "percentage",
       "source_file": "websrc/infra/chart/chart-types.ts",
       "source_location": "L5"
-    },
-    {
-      "id": "websrc_infra_chart_chart_types_unidimensional_dataset_sum_field",
-      "label": "UNIDIMENSIONAL_DATASET_SUM_FIELD",
-      "_origin": "ast",
-      "community": 44,
-      "community_name": "chart.ts",
-      "file_type": "code",
-      "norm_label": "unidimensional_dataset_sum_field",
-      "source_file": "websrc/infra/chart/chart-types.ts",
-      "source_location": "L17"
     },
     {
       "id": "websrc_infra_chart_index",
@@ -8450,6 +8437,72 @@
       "source_location": "L1"
     },
     {
+      "id": "websrc_application_allocation_plan_pagination",
+      "label": "allocation-plan-pagination.ts",
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "allocation-plan-pagination.ts",
+      "source_file": "websrc/application/allocation-plan-pagination.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "websrc_application_index",
+      "label": "application/index.ts",
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "application/index.ts",
+      "source_file": "websrc/application/index.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "websrc_application_index_application",
+      "label": "Application",
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "application",
+      "source_file": "websrc/application/index.ts",
+      "source_location": "L22"
+    },
+    {
+      "id": "websrc_application_portfolio_history_pagination",
+      "label": "portfolio-history-pagination.ts",
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "portfolio-history-pagination.ts",
+      "source_file": "websrc/application/portfolio-history-pagination.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "websrc_components_allocation_plan_management_allocationplanmanagement",
+      "label": "allocationPlanManagement",
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "allocationplanmanagement",
+      "source_file": "websrc/components/allocation-plan-management.ts",
+      "source_location": "L365"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_index_assetcomposedcolumnsinput",
+      "label": "AssetComposedColumnsInput",
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "assetcomposedcolumnsinput",
+      "source_file": "websrc/components/asset-composed-columns-input/index.ts",
+      "source_location": "L86"
+    },
+    {
       "id": "websrc_components_notifications_notifications",
       "label": "notifications",
       "_origin": "ast",
@@ -8461,6 +8514,50 @@
       "source_location": "L46"
     },
     {
+      "id": "websrc_components_paginated_list_index",
+      "label": "paginated-list/index.ts",
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "paginated-list/index.ts",
+      "source_file": "websrc/components/paginated-list/index.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "websrc_components_paginated_list_pagination_paginatedlist",
+      "label": "paginatedList",
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "paginatedlist",
+      "source_file": "websrc/components/paginated-list/pagination.ts",
+      "source_location": "L587"
+    },
+    {
+      "id": "websrc_components_paginated_list_pagination_paginationmode_append",
+      "label": "Append",
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "append",
+      "source_file": "websrc/components/paginated-list/pagination.ts",
+      "source_location": "L32"
+    },
+    {
+      "id": "websrc_components_paginated_list_pagination_paginationmode_initial",
+      "label": "Initial",
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "initial",
+      "source_file": "websrc/components/paginated-list/pagination.ts",
+      "source_location": "L31"
+    },
+    {
       "id": "websrc_components_portfolio_history_management",
       "label": "portfolio-history-management.ts",
       "_origin": "ast",
@@ -8469,72 +8566,6 @@
       "file_type": "code",
       "norm_label": "portfolio-history-management.ts",
       "source_file": "websrc/components/portfolio-history-management.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "websrc_components_portfolio_history_management_observation_details_index",
-      "label": "portfolio-history-management-observation-details/index.ts",
-      "_origin": "ast",
-      "community": 47,
-      "community_name": "portfolio-history-management.ts",
-      "file_type": "code",
-      "norm_label": "portfolio-history-management-observation-details/index.ts",
-      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "websrc_components_portfolio_history_management_observation_details_index_observationdetailsstate_failed",
-      "label": "FAILED",
-      "_origin": "ast",
-      "community": 47,
-      "community_name": "portfolio-history-management.ts",
-      "file_type": "code",
-      "norm_label": "failed",
-      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
-      "source_location": "L25"
-    },
-    {
-      "id": "websrc_components_portfolio_history_management_observation_details_index_observationdetailsstate_loading",
-      "label": "LOADING",
-      "_origin": "ast",
-      "community": 47,
-      "community_name": "portfolio-history-management.ts",
-      "file_type": "code",
-      "norm_label": "loading",
-      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
-      "source_location": "L23"
-    },
-    {
-      "id": "websrc_components_portfolio_history_management_observation_details_index_observationdetailsstate_ready",
-      "label": "READY",
-      "_origin": "ast",
-      "community": 47,
-      "community_name": "portfolio-history-management.ts",
-      "file_type": "code",
-      "norm_label": "ready",
-      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
-      "source_location": "L24"
-    },
-    {
-      "id": "websrc_components_portfolio_history_management_observation_details_index_observationdetailsstate_unloaded",
-      "label": "UNLOADED",
-      "_origin": "ast",
-      "community": 47,
-      "community_name": "portfolio-history-management.ts",
-      "file_type": "code",
-      "norm_label": "unloaded",
-      "source_file": "websrc/components/portfolio-history-management-observation-details/index.ts",
-      "source_location": "L22"
-    },
-    {
-      "id": "websrc_components_portfolio_history_management_observation_metadata_index",
-      "label": "portfolio-history-management-observation-metadata/index.ts",
-      "_origin": "ast",
-      "community": 47,
-      "community_name": "portfolio-history-management.ts",
-      "file_type": "code",
-      "norm_label": "portfolio-history-management-observation-metadata/index.ts",
-      "source_file": "websrc/components/portfolio-history-management-observation-metadata/index.ts",
       "source_location": "L1"
     },
     {
@@ -8659,14 +8690,47 @@
       "source_location": "L218"
     },
     {
-      "id": "websrc_components_paginated_list_context",
-      "label": "context.ts",
+      "id": "websrc_infra_infra_infra",
+      "label": "Infra",
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "infra",
+      "source_file": "websrc/infra/infra.ts",
+      "source_location": "L95"
+    },
+    {
+      "id": "websrc_pages_asset_assetpage",
+      "label": "AssetPage",
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "assetpage",
+      "source_file": "websrc/pages/asset.ts",
+      "source_location": "L223"
+    },
+    {
+      "id": "websrc_root",
+      "label": "root.ts",
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "portfolio-history-management.ts",
+      "file_type": "code",
+      "norm_label": "root.ts",
+      "source_file": "websrc/root.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "websrc_components_paginated_list_lifecycle",
+      "label": "lifecycle.ts",
       "_origin": "ast",
       "community": 5,
       "community_name": "pagination.ts",
       "file_type": "code",
-      "norm_label": "context.ts",
-      "source_file": "websrc/components/paginated-list/context.ts",
+      "norm_label": "lifecycle.ts",
+      "source_file": "websrc/components/paginated-list/lifecycle.ts",
       "source_location": "L1"
     },
     {
@@ -8681,17 +8745,6 @@
       "source_location": "L1"
     },
     {
-      "id": "websrc_components_paginated_list_pagination_focustrackedrequests",
-      "label": "focusTrackedRequests",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "pagination.ts",
-      "file_type": "code",
-      "norm_label": "focustrackedrequests",
-      "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L87"
-    },
-    {
       "id": "websrc_components_paginated_list_pagination_requests",
       "label": "requests",
       "_origin": "ast",
@@ -8700,7 +8753,7 @@
       "file_type": "code",
       "norm_label": "requests",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L86"
+      "source_location": "L88"
     },
     {
       "id": "websrc_components_paginated_list_pagination_states",
@@ -8711,18 +8764,7 @@
       "file_type": "code",
       "norm_label": "states",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L85"
-    },
-    {
-      "id": "ref_htmx_org",
-      "label": "htmx.org",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "pagination.ts",
-      "file_type": "concept",
-      "norm_label": "htmx.org",
-      "source_file": "package.json",
-      "source_location": "L33"
+      "source_location": "L87"
     },
     {
       "id": "websrc_components_asset_composed_columns_input_asset_row_controller",
@@ -8800,6 +8842,28 @@
       "norm_label": "aria_selected_attribute",
       "source_file": "websrc/components/asset-composed-columns-input/constants.ts",
       "source_location": "L25"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_constants_asset_action_button_identities",
+      "label": "ASSET_ACTION_BUTTON_IDENTITIES",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "asset-composed-columns-input/constants.ts",
+      "file_type": "code",
+      "norm_label": "asset_action_button_identities",
+      "source_file": "websrc/components/asset-composed-columns-input/constants.ts",
+      "source_location": "L58"
+    },
+    {
+      "id": "websrc_components_asset_composed_columns_input_constants_asset_action_button_selector",
+      "label": "ASSET_ACTION_BUTTON_SELECTOR",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "asset-composed-columns-input/constants.ts",
+      "file_type": "code",
+      "norm_label": "asset_action_button_selector",
+      "source_file": "websrc/components/asset-composed-columns-input/constants.ts",
+      "source_location": "L17"
     },
     {
       "id": "websrc_components_asset_composed_columns_input_constants_asset_lookup_pending_error_message",
@@ -9047,8 +9111,8 @@
       "id": "websrc_infra_bootstrap_constants",
       "label": "bootstrap/constants.ts",
       "_origin": "ast",
-      "community": 6,
-      "community_name": "asset-composed-columns-input/constants.ts",
+      "community": 7,
+      "community_name": "binding-financial-input.ts",
       "file_type": "code",
       "norm_label": "bootstrap/constants.ts",
       "source_file": "websrc/infra/bootstrap/constants.ts",
@@ -9058,8 +9122,8 @@
       "id": "websrc_infra_bootstrap_constants_bootstrapclasses",
       "label": "BootstrapClasses",
       "_origin": "ast",
-      "community": 6,
-      "community_name": "asset-composed-columns-input/constants.ts",
+      "community": 7,
+      "community_name": "binding-financial-input.ts",
       "file_type": "code",
       "norm_label": "bootstrapclasses",
       "source_file": "websrc/infra/bootstrap/constants.ts",
@@ -9069,8 +9133,8 @@
       "id": "websrc_infra_bootstrap_constants_bootstrapiconclasses",
       "label": "BootstrapIconClasses",
       "_origin": "ast",
-      "community": 6,
-      "community_name": "asset-composed-columns-input/constants.ts",
+      "community": 7,
+      "community_name": "binding-financial-input.ts",
       "file_type": "code",
       "norm_label": "bootstrapiconclasses",
       "source_file": "websrc/infra/bootstrap/constants.ts",
@@ -9132,11 +9196,33 @@
       "source_location": "L1"
     },
     {
+      "id": "websrc_application_allocation_plan_chart",
+      "label": "allocation-plan-chart.ts",
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "allocation-plan-chart.ts",
+      "file_type": "code",
+      "norm_label": "allocation-plan-chart.ts",
+      "source_file": "websrc/application/allocation-plan-chart.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "websrc_application_allocation_plan_chart_allocationplanchart",
+      "label": "allocationPlanChart",
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "allocation-plan-chart.ts",
+      "file_type": "code",
+      "norm_label": "allocationplanchart",
+      "source_file": "websrc/application/allocation-plan-chart.ts",
+      "source_location": "L157"
+    },
+    {
       "id": "websrc_application_chart_contents",
       "label": "chart-contents.ts",
       "_origin": "ast",
       "community": 8,
-      "community_name": "portfolio-chart.ts",
+      "community_name": "allocation-plan-chart.ts",
       "file_type": "code",
       "norm_label": "chart-contents.ts",
       "source_file": "websrc/application/chart-contents.ts",
@@ -9147,7 +9233,7 @@
       "label": "portfolio-chart.ts",
       "_origin": "ast",
       "community": 8,
-      "community_name": "portfolio-chart.ts",
+      "community_name": "allocation-plan-chart.ts",
       "file_type": "code",
       "norm_label": "portfolio-chart.ts",
       "source_file": "websrc/application/portfolio-chart/portfolio-chart.ts",
@@ -9158,44 +9244,55 @@
       "label": "portfolioChart",
       "_origin": "ast",
       "community": 8,
-      "community_name": "portfolio-chart.ts",
+      "community_name": "allocation-plan-chart.ts",
       "file_type": "code",
       "norm_label": "portfoliochart",
       "source_file": "websrc/application/portfolio-chart/portfolio-chart.ts",
       "source_location": "L73"
     },
     {
-      "id": "websrc_domain_portfolio_allocation",
-      "label": "portfolio-allocation.ts",
+      "id": "websrc_domain_portfolio",
+      "label": "domain/portfolio.ts",
       "_origin": "ast",
       "community": 8,
-      "community_name": "portfolio-chart.ts",
+      "community_name": "allocation-plan-chart.ts",
       "file_type": "code",
-      "norm_label": "portfolio-allocation.ts",
-      "source_file": "websrc/domain/portfolio-allocation.ts",
+      "norm_label": "domain/portfolio.ts",
+      "source_file": "websrc/domain/portfolio.ts",
       "source_location": "L1"
     },
     {
-      "id": "websrc_domain_service_mapping_portfolio_allocation_mapping",
-      "label": "portfolio-allocation-mapping.ts",
+      "id": "websrc_domain_service_index_domainservice",
+      "label": "DomainService",
       "_origin": "ast",
       "community": 8,
-      "community_name": "portfolio-chart.ts",
+      "community_name": "allocation-plan-chart.ts",
       "file_type": "code",
-      "norm_label": "portfolio-allocation-mapping.ts",
-      "source_file": "websrc/domain/service/mapping/portfolio-allocation-mapping.ts",
-      "source_location": "L1"
+      "norm_label": "domainservice",
+      "source_file": "websrc/domain/service/index.ts",
+      "source_location": "L10"
     },
     {
-      "id": "ref_bignumber_js",
-      "label": "bignumber.js",
+      "id": "websrc_infra_chart_chart_types_chartdatatype_asset_allocation_plan_1d",
+      "label": "ASSET_ALLOCATION_PLAN_1D",
       "_origin": "ast",
       "community": 8,
-      "community_name": "portfolio-chart.ts",
-      "file_type": "concept",
-      "norm_label": "bignumber.js",
-      "source_file": "package.json",
-      "source_location": "L23"
+      "community_name": "allocation-plan-chart.ts",
+      "file_type": "code",
+      "norm_label": "asset_allocation_plan_1d",
+      "source_file": "websrc/infra/chart/chart-types.ts",
+      "source_location": "L10"
+    },
+    {
+      "id": "websrc_infra_chart_chart_types_chartdatatype_portfolio_history_1d",
+      "label": "PORTFOLIO_HISTORY_1D",
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "allocation-plan-chart.ts",
+      "file_type": "code",
+      "norm_label": "portfolio_history_1d",
+      "source_file": "websrc/infra/chart/chart-types.ts",
+      "source_location": "L9"
     },
     {
       "id": "eslint_config",
@@ -9317,6 +9414,17 @@
       "norm_label": "htmx-ext-form-json",
       "source_file": "package.json",
       "source_location": "L32"
+    },
+    {
+      "id": "ref_navigo",
+      "label": "navigo",
+      "_origin": "ast",
+      "community": 9,
+      "community_name": "package.json",
+      "file_type": "concept",
+      "norm_label": "navigo",
+      "source_file": "package.json",
+      "source_location": "L34"
     },
     {
       "id": "ref_parcel",
@@ -9620,8 +9728,8 @@
       "source_url": null
     },
     {
-      "id": "src_main_web_static_websrc_components_portfolio_history_management_persisted_record_focus_markers",
-      "label": "portfolio-history-management persisted record focus markers",
+      "id": "src_main_web_static_websrc_components_portfolio_history_management_portfolio_context_selector",
+      "label": "portfolio-history-management portfolio context selector",
       "_origin": "semantic",
       "author": null,
       "captured_at": null,
@@ -9629,7 +9737,7 @@
       "community_name": "Portfolio History Management Pagination",
       "contributor": null,
       "file_type": "concept",
-      "norm_label": "portfolio-history-management persisted record focus markers",
+      "norm_label": "portfolio-history-management portfolio context selector",
       "source_file": "websrc/components/portfolio-history-management.html",
       "source_location": null,
       "source_url": null
@@ -9860,6 +9968,21 @@
       "source_url": null
     },
     {
+      "id": "src_main_web_static_websrc_components_allocation_plan_portfolio_context_selector",
+      "label": "allocation-plan portfolio context selector",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 30,
+      "community_name": "getContextId",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "allocation-plan portfolio context selector",
+      "source_file": "websrc/components/allocation-plan.html",
+      "source_location": null,
+      "source_url": null
+    },
+    {
       "id": "src_main_web_static_websrc_components_allocation_plan_allocation_plan_pagination",
       "label": "Allocation Plan Pagination",
       "_origin": "semantic",
@@ -9935,8 +10058,8 @@
       "source_url": null
     },
     {
-      "id": "src_main_web_static_websrc_components_allocation_plan_portfolio_context_selector",
-      "label": "allocation-plan portfolio context selector",
+      "id": "src_main_web_static_websrc_components_allocation_plan_persisted_record_focus_markers",
+      "label": "allocation-plan persisted record focus markers",
       "_origin": "semantic",
       "author": null,
       "captured_at": null,
@@ -9944,7 +10067,7 @@
       "community_name": "Allocation Plan Pagination",
       "contributor": null,
       "file_type": "concept",
-      "norm_label": "allocation-plan portfolio context selector",
+      "norm_label": "allocation-plan persisted record focus markers",
       "source_file": "websrc/components/allocation-plan.html",
       "source_location": null,
       "source_url": null
@@ -10462,21 +10585,6 @@
       "source_url": null
     },
     {
-      "id": "src_main_web_static_websrc_components_portfolio_history_management_portfolio_context_selector",
-      "label": "portfolio-history-management portfolio context selector",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 5,
-      "community_name": "pagination.ts",
-      "contributor": null,
-      "file_type": "concept",
-      "norm_label": "portfolio-history-management portfolio context selector",
-      "source_file": "websrc/components/portfolio-history-management.html",
-      "source_location": null,
-      "source_url": null
-    },
-    {
       "id": "src_main_web_static_websrc_components_allocation_plan_management_allocation_plan_management_pagination",
       "label": "Allocation Plan Management Pagination",
       "_origin": "semantic",
@@ -10582,8 +10690,8 @@
       "source_url": null
     },
     {
-      "id": "src_main_web_static_websrc_components_allocation_plan_persisted_record_focus_markers",
-      "label": "allocation-plan persisted record focus markers",
+      "id": "src_main_web_static_websrc_components_portfolio_history_management_persisted_record_focus_markers",
+      "label": "portfolio-history-management persisted record focus markers",
       "_origin": "semantic",
       "author": null,
       "captured_at": null,
@@ -10591,8 +10699,8 @@
       "community_name": "Allocation Plan Management Pagination",
       "contributor": null,
       "file_type": "concept",
-      "norm_label": "allocation-plan persisted record focus markers",
-      "source_file": "websrc/components/allocation-plan.html",
+      "norm_label": "portfolio-history-management persisted record focus markers",
+      "source_file": "websrc/components/portfolio-history-management.html",
       "source_location": null,
       "source_url": null
     },
@@ -10624,18 +10732,6 @@
       "type": "external"
     },
     {
-      "id": "websrc_pages_index_assetpage",
-      "label": "websrc_pages_index_assetpage",
-      "_origin": "semantic",
-      "community": 3,
-      "community_name": "application/index.ts",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "websrc_pages_index_assetpage",
-      "source_file": "",
-      "type": "external"
-    },
-    {
       "id": "ref_fs",
       "label": "ref_fs",
       "_origin": "semantic",
@@ -10656,6 +10752,18 @@
       "external": true,
       "file_type": "concept",
       "norm_label": "ref_path",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "websrc_pages_index_assetpage",
+      "label": "websrc_pages_index_assetpage",
+      "_origin": "semantic",
+      "community": 47,
+      "community_name": "portfolio-history-management.ts",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "websrc_pages_index_assetpage",
       "source_file": "",
       "type": "external"
     }
@@ -11774,7 +11882,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L179",
+      "source_location": "L165",
       "weight": 1.0
     },
     {
@@ -11786,7 +11894,55 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
+      "source_location": "L171",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_paginated_list_pagination_bindrequesttoxhr",
+      "target": "websrc_components_paginated_list_focus_tracking_starttrackingfocus",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "websrc/components/paginated-list/pagination.ts",
+      "source_location": "L182",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_paginated_list_pagination_bindrequesttoxhr",
+      "target": "websrc_components_paginated_list_lifecycle_trackrequestcompletion",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "websrc/components/paginated-list/pagination.ts",
       "source_location": "L185",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_paginated_list_pagination_bindrequesttoxhr",
+      "target": "websrc_components_paginated_list_focus_tracking_stoptrackingfocus",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "websrc/components/paginated-list/pagination.ts",
+      "source_location": "L186",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_paginated_list_pagination_bindrequesttoxhr",
+      "target": "websrc_components_paginated_list_pagination_finishrequest",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "websrc/components/paginated-list/pagination.ts",
+      "source_location": "L187",
       "weight": 1.0
     },
     {
@@ -11798,7 +11954,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L308",
+      "source_location": "L297",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_paginated_list_pagination_commitsettledpage",
+      "target": "websrc_components_paginated_list_focus_tracking_stoptrackingfocus",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "websrc/components/paginated-list/pagination.ts",
+      "source_location": "L299",
       "weight": 1.0
     },
     {
@@ -11810,7 +11978,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L333",
+      "source_location": "L322",
       "weight": 1.0
     },
     {
@@ -11822,7 +11990,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L341",
+      "source_location": "L330",
       "weight": 1.0
     },
     {
@@ -11834,7 +12002,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L344",
+      "source_location": "L333",
       "weight": 1.0
     },
     {
@@ -11846,7 +12014,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L210",
+      "source_location": "L199",
       "weight": 1.0
     },
     {
@@ -11858,7 +12026,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L225",
+      "source_location": "L214",
       "weight": 1.0
     },
     {
@@ -11870,12 +12038,24 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L226",
+      "source_location": "L215",
       "weight": 1.0
     },
     {
       "source": "websrc_components_paginated_list_pagination_configurerequest",
       "target": "websrc_components_paginated_list_pagination_updatecontrols",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "websrc/components/paginated-list/pagination.ts",
+      "source_location": "L260",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_paginated_list_pagination_finishrequest",
+      "target": "websrc_components_paginated_list_pagination_iscurrentrequest",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -11887,14 +12067,14 @@
     },
     {
       "source": "websrc_components_paginated_list_pagination_finishrequest",
-      "target": "websrc_components_paginated_list_pagination_iscurrentrequest",
+      "target": "websrc_components_paginated_list_focus_tracking_stoptrackingfocus",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L282",
+      "source_location": "L280",
       "weight": 1.0
     },
     {
@@ -11906,7 +12086,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L292",
+      "source_location": "L281",
       "weight": 1.0
     },
     {
@@ -11918,7 +12098,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L101",
+      "source_location": "L102",
       "weight": 1.0
     },
     {
@@ -11930,7 +12110,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L380",
+      "source_location": "L369",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_paginated_list_pagination_handlerequestcompletion",
+      "target": "websrc_components_paginated_list_focus_tracking_stoptrackingfocus",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "websrc/components/paginated-list/pagination.ts",
+      "source_location": "L371",
       "weight": 1.0
     },
     {
@@ -11942,7 +12134,31 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L407",
+      "source_location": "L396",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_paginated_list_pagination_init",
+      "target": "websrc_components_paginated_list_lifecycle_bindpaginationlifecycle",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "websrc/components/paginated-list/pagination.ts",
+      "source_location": "L483",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_paginated_list_pagination_invalidateremovedlist",
+      "target": "websrc_components_paginated_list_focus_tracking_stoptrackingfocus",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "websrc/components/paginated-list/pagination.ts",
+      "source_location": "L455",
       "weight": 1.0
     },
     {
@@ -11954,7 +12170,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L168",
+      "source_location": "L154",
       "weight": 1.0
     },
     {
@@ -11966,7 +12182,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L428",
+      "source_location": "L417",
       "weight": 1.0
     },
     {
@@ -11978,7 +12194,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L445",
+      "source_location": "L434",
       "weight": 1.0
     },
     {
@@ -11990,7 +12206,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L528",
+      "source_location": "L517",
       "weight": 1.0
     },
     {
@@ -12002,7 +12218,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L134",
+      "source_location": "L135",
       "weight": 1.0
     },
     {
@@ -14814,6 +15030,18 @@
       "weight": 1.0
     },
     {
+      "source": "websrc_components_paginated_list_lifecycle_bindpaginationlifecycle",
+      "target": "websrc_components_paginated_list_lifecycle_bindpaginationlifecycle_bind",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "websrc/components/paginated-list/lifecycle.ts",
+      "source_location": "L74",
+      "weight": 1.0
+    },
+    {
       "source": "websrc_components_allocation_plan_management_response_index",
       "target": "websrc_components_allocation_plan_management_response_response",
       "relation": "re_exports",
@@ -17333,6 +17561,54 @@
       "context": "import",
       "source_file": "websrc/components/paginated-list/pagination.ts",
       "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_paginated_list_pagination",
+      "target": "websrc_components_paginated_list_lifecycle_bindpaginationlifecycle",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "websrc/components/paginated-list/pagination.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_paginated_list_pagination",
+      "target": "websrc_components_paginated_list_lifecycle_trackrequestcompletion",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "websrc/components/paginated-list/pagination.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_paginated_list_pagination",
+      "target": "websrc_components_paginated_list_focus_tracking_starttrackingfocus",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "websrc/components/paginated-list/pagination.ts",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_paginated_list_pagination",
+      "target": "websrc_components_paginated_list_focus_tracking_stoptrackingfocus",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "websrc/components/paginated-list/pagination.ts",
+      "source_location": "L15",
       "weight": 1.0
     },
     {
@@ -21566,6 +21842,30 @@
       "weight": 1.0
     },
     {
+      "source": "websrc_components_paginated_list_pagination",
+      "target": "websrc_components_paginated_list_lifecycle",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "websrc/components/paginated-list/pagination.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_paginated_list_pagination",
+      "target": "websrc_components_paginated_list_focus_tracking",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "websrc/components/paginated-list/pagination.ts",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
       "source": "websrc_components_portfolio_history_management",
       "target": "ref_htmx_org",
       "relation": "imports_from",
@@ -24406,7 +24706,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L29",
+      "source_location": "L31",
       "weight": 1.0
     },
     {
@@ -24417,7 +24717,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L30",
+      "source_location": "L32",
       "weight": 1.0
     },
     {
@@ -26643,6 +26943,94 @@
       "weight": 1.0
     },
     {
+      "source": "websrc_components_paginated_list_focus_tracking",
+      "target": "websrc_components_paginated_list_focus_tracking_focuscontext",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "websrc/components/paginated-list/focus-tracking.ts",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_paginated_list_focus_tracking",
+      "target": "websrc_components_paginated_list_focus_tracking_tracked",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "websrc/components/paginated-list/focus-tracking.ts",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_paginated_list_focus_tracking",
+      "target": "websrc_components_paginated_list_focus_tracking_onfocuschange",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "websrc/components/paginated-list/focus-tracking.ts",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_paginated_list_focus_tracking",
+      "target": "websrc_components_paginated_list_focus_tracking_starttrackingfocus",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "websrc/components/paginated-list/focus-tracking.ts",
+      "source_location": "L32",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_paginated_list_focus_tracking",
+      "target": "websrc_components_paginated_list_focus_tracking_stoptrackingfocus",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "websrc/components/paginated-list/focus-tracking.ts",
+      "source_location": "L50",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_paginated_list_lifecycle",
+      "target": "websrc_components_paginated_list_lifecycle_trackrequestcompletion",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "websrc/components/paginated-list/lifecycle.ts",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_paginated_list_lifecycle",
+      "target": "websrc_components_paginated_list_lifecycle_lifecyclehandlers",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "websrc/components/paginated-list/lifecycle.ts",
+      "source_location": "L52",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_paginated_list_lifecycle",
+      "target": "websrc_components_paginated_list_lifecycle_bindpaginationlifecycle",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "websrc/components/paginated-list/lifecycle.ts",
+      "source_location": "L68",
+      "weight": 1.0
+    },
+    {
       "source": "websrc_components_paginated_list_pagination",
       "target": "websrc_components_paginated_list_pagination_getowner",
       "relation": "contains",
@@ -26650,7 +27038,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L119",
+      "source_location": "L120",
       "weight": 1.0
     },
     {
@@ -26661,18 +27049,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L133",
-      "weight": 1.0
-    },
-    {
-      "source": "websrc_components_paginated_list_pagination",
-      "target": "websrc_components_paginated_list_pagination_trackpaginationfocuschange",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L148",
+      "source_location": "L134",
       "weight": 1.0
     },
     {
@@ -26683,7 +27060,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L163",
+      "source_location": "L149",
       "weight": 1.0
     },
     {
@@ -26694,7 +27071,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L176",
+      "source_location": "L162",
       "weight": 1.0
     },
     {
@@ -26705,7 +27082,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L207",
+      "source_location": "L196",
       "weight": 1.0
     },
     {
@@ -26716,18 +27093,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L279",
-      "weight": 1.0
-    },
-    {
-      "source": "websrc_components_paginated_list_pagination",
-      "target": "websrc_components_paginated_list_pagination_paginationmode",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L28",
+      "source_location": "L268",
       "weight": 1.0
     },
     {
@@ -26738,7 +27104,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L300",
+      "source_location": "L289",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_paginated_list_pagination",
+      "target": "websrc_components_paginated_list_pagination_paginationmode",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "websrc/components/paginated-list/pagination.ts",
+      "source_location": "L30",
       "weight": 1.0
     },
     {
@@ -26749,7 +27126,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L353",
+      "source_location": "L342",
       "weight": 1.0
     },
     {
@@ -26760,7 +27137,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L372",
+      "source_location": "L361",
       "weight": 1.0
     },
     {
@@ -26771,7 +27148,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L38",
+      "source_location": "L40",
       "weight": 1.0
     },
     {
@@ -26782,7 +27159,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L415",
+      "source_location": "L404",
       "weight": 1.0
     },
     {
@@ -26793,7 +27170,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L454",
+      "source_location": "L443",
       "weight": 1.0
     },
     {
@@ -26804,7 +27181,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L48",
+      "source_location": "L50",
       "weight": 1.0
     },
     {
@@ -26815,7 +27192,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L598",
+      "source_location": "L587",
       "weight": 1.0
     },
     {
@@ -26826,7 +27203,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L68",
+      "source_location": "L70",
       "weight": 1.0
     },
     {
@@ -26837,7 +27214,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L85",
+      "source_location": "L87",
       "weight": 1.0
     },
     {
@@ -26848,18 +27225,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L86",
-      "weight": 1.0
-    },
-    {
-      "source": "websrc_components_paginated_list_pagination",
-      "target": "websrc_components_paginated_list_pagination_focustrackedrequests",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L87",
+      "source_location": "L88",
       "weight": 1.0
     },
     {
@@ -26870,7 +27236,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L95",
+      "source_location": "L96",
       "weight": 1.0
     },
     {
@@ -31838,55 +32204,31 @@
       "weight": 1.0
     },
     {
-      "source": "websrc_components_paginated_list_pagination_init",
-      "target": "websrc_components_paginated_list_pagination_requestnextpage",
+      "source": "websrc_components_paginated_list_focus_tracking_starttrackingfocus",
+      "target": "websrc_components_paginated_list_focus_tracking_onfocuschange",
       "relation": "indirect_call",
       "_origin": "ast",
       "confidence": "INFERRED",
       "confidence_score": 0.85,
       "context": "argument",
-      "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L494",
+      "source_file": "websrc/components/paginated-list/focus-tracking.ts",
+      "source_location": "L38",
       "weight": 1.0
     },
     {
-      "source": "websrc_components_paginated_list_pagination_init",
-      "target": "websrc_components_paginated_list_pagination_configurerequest",
+      "source": "websrc_components_paginated_list_focus_tracking_stoptrackingfocus",
+      "target": "websrc_components_paginated_list_focus_tracking_onfocuschange",
       "relation": "indirect_call",
       "_origin": "ast",
       "confidence": "INFERRED",
       "confidence_score": 0.85,
       "context": "argument",
-      "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L495",
+      "source_file": "websrc/components/paginated-list/focus-tracking.ts",
+      "source_location": "L54",
       "weight": 1.0
     },
     {
-      "source": "websrc_components_paginated_list_pagination_init",
-      "target": "websrc_components_paginated_list_pagination_bindrequesttoxhr",
-      "relation": "indirect_call",
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "argument",
-      "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L496",
-      "weight": 1.0
-    },
-    {
-      "source": "websrc_components_paginated_list_pagination_init",
-      "target": "websrc_components_paginated_list_pagination_commitsettledpage",
-      "relation": "indirect_call",
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "argument",
-      "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L497",
-      "weight": 1.0
-    },
-    {
-      "source": "websrc_components_paginated_list_pagination_init",
+      "source": "websrc_components_paginated_list_pagination_bindrequesttoxhr",
       "target": "websrc_components_paginated_list_pagination_handlerequestcompletion",
       "relation": "indirect_call",
       "_origin": "ast",
@@ -31894,31 +32236,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L498",
-      "weight": 1.0
-    },
-    {
-      "source": "websrc_components_paginated_list_pagination_init",
-      "target": "websrc_components_paginated_list_pagination_invalidateremovedlist",
-      "relation": "indirect_call",
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "argument",
-      "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L499",
-      "weight": 1.0
-    },
-    {
-      "source": "websrc_components_paginated_list_pagination_init",
-      "target": "websrc_components_paginated_list_pagination_trackpaginationfocuschange",
-      "relation": "indirect_call",
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "argument",
-      "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L500",
+      "source_location": "L185",
       "weight": 1.0
     },
     {
@@ -32446,7 +32764,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L598",
+      "source_location": "L587",
       "weight": 1.0
     },
     {
@@ -32458,7 +32776,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "websrc/components/paginated-list/pagination.ts",
-      "source_location": "L598",
+      "source_location": "L587",
       "weight": 1.0
     },
     {
@@ -33869,5 +34187,5 @@
       "source_file": "websrc/components/portfolio-navigation.html"
     }
   ],
-  "built_at_commit": "64479782bee35af157a982e52d5396f9c08e6346"
+  "built_at_commit": "fc84e195914a54332438dd9be9b09c70cabcf0c7"
 }

@@ -767,6 +767,132 @@ test('scenario 21.12: guards and saves an appended observation', async ({ databa
   }
 });
 
+test('scenario 21.13: suppresses a failed request after its list owner is cleaned up', async ({ database, page }) => {
+  const seeded = await seedHistory(database);
+  await verifyStaleFailure(page, seeded.portfolio.id, 'detached');
+});
+
+test('scenario 21.14: suppresses a failed request after the list context changes', async ({ database, page }) => {
+  const seeded = await seedHistory(database);
+  await verifyStaleFailure(page, seeded.portfolio.id, 'context');
+});
+
+test('scenario 21.15: suppresses a failed request redispatched after response-time cleanup', async ({ database, page }) => {
+  const seeded = await seedHistory(database);
+  await verifyStaleFailure(page, seeded.portfolio.id, 'during-response');
+});
+
+test('scenario 21.16: does not steal focus after a delayed keyboard continuation', async ({ database, page }) => {
+  const seeded = await seedHistory(database, 11);
+  const endpoint = `/api/portfolio/${seeded.portfolio.id}/history`;
+  const initial = waitForPageResponse(page, endpoint, '');
+  await page.goto(`/portfolio/${seeded.portfolio.id}/history`);
+  const cursor = requireContinuationCursor(await readPage(await initial, endpoint, ''));
+  const button = loadMoreButton(page, 'accordion-portfolio-history');
+  await expect(button).toBeEnabled();
+
+  let release = () => {};
+  let started = () => {};
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  const requestStarted = new Promise<void>(resolve => { started = resolve; });
+  await page.route(`**${endpoint}?*`, async route => {
+    if(new URL(route.request().url()).searchParams.get('pageCursor') === cursor) {
+      started();
+      await gate;
+    }
+    await route.continue();
+  });
+
+  try {
+    const response = waitForPageResponse(page, endpoint, cursor);
+    await button.focus();
+    await page.keyboard.press('Enter');
+    await requestStarted;
+    await page.evaluate(() => {
+      const input = document.createElement('input');
+      input.id = 'pagination-focus-test';
+      document.body.appendChild(input);
+      input.focus();
+    });
+    release();
+    await response;
+    await expect(page.locator('#accordion-portfolio-history [data-paginated-record-id]')).toHaveCount(11);
+    await expect(page.locator('#pagination-focus-test')).toBeFocused();
+  } finally {
+    release();
+  }
+});
+
+/** Verifies stale failures still reach other HTMX listeners without producing global notifications.
+ * @author GPT-6.1 Terra
+ */
+async function verifyStaleFailure(
+  page: Page,
+  portfolioId: number,
+  change: 'detached' | 'context' | 'during-response',
+): Promise<void> {
+  const endpoint = `/api/portfolio/${portfolioId}/history`;
+  const initial = waitForPageResponse(page, endpoint, '');
+  await page.goto(`/portfolio/${portfolioId}/history`);
+  const cursor = requireContinuationCursor(await readPage(await initial, endpoint, ''));
+  const ownerId = 'accordion-portfolio-history';
+  const button = loadMoreButton(page, ownerId);
+  await expect(button).toBeEnabled();
+
+  let release = () => {};
+  let started = () => {};
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  const requestStarted = new Promise<void>(resolve => { started = resolve; });
+  await page.route(`**${endpoint}?*`, async route => {
+    if(new URL(route.request().url()).searchParams.get('pageCursor') === cursor) {
+      started();
+      await gate;
+      await route.fulfill({ status: 500, contentType: 'application/json', body: '{"errorMessage":"stale pagination failure"}' });
+      return;
+    }
+    await route.continue();
+  });
+
+  try {
+    await page.evaluate(({ ownerId, change }) => {
+      (window as unknown as { staleCompletions: number }).staleCompletions = 0;
+      const target = change === 'detached' ? document.getElementById(ownerId)! : document;
+      target.addEventListener('htmx:afterRequest', event => {
+        const detail = (event as CustomEvent<{ xhr?: XMLHttpRequest }>).detail;
+        if(detail?.xhr?.status === 500) {
+          (window as unknown as { staleCompletions: number }).staleCompletions++;
+        }
+      });
+    }, { ownerId, change });
+    await button.click();
+    await requestStarted;
+    await page.evaluate(({ ownerId, change }) => {
+      const owner = document.getElementById(ownerId)!;
+      const removeOwner = () => {
+        // Run the same cleanup event HTMX emits before removing the owner.
+        owner.dispatchEvent(new CustomEvent('htmx:beforeCleanupElement', { bubbles: true, detail: { elt: owner } }));
+        owner.remove();
+      };
+      if(change === 'detached') {
+        removeOwner();
+      } else if(change === 'during-response') {
+        owner.addEventListener('htmx:beforeSwap', removeOwner, { once: true });
+      } else {
+        const selector = owner.getAttribute('data-paginated-list-context-selector')!;
+        (document.querySelector(selector) as HTMLInputElement).value = 'different-context';
+      }
+    }, { ownerId, change });
+    const response = page.waitForResponse(result => result.url().includes(endpoint) && result.status() === 500);
+    release();
+    await response;
+    await expect.poll(() => page.evaluate(() => (window as unknown as { staleCompletions: number }).staleCompletions))
+      .toBeGreaterThan(0);
+    await expect(page.locator('#toast-notification-container')).not.toContainText('stale pagination failure');
+  } finally {
+    release();
+  }
+}
+
 /** Verifies icon-only button state, ownership, accessibility, and empty child markup. */
 async function expectReadyControl(page: Page, ownerId: string): Promise<void> {
   const button = loadMoreButton(page, ownerId);
