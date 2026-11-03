@@ -8,7 +8,21 @@ const LOAD_MORE_ATTRIBUTE = "data-paginated-list-more";
 const STATUS_ATTRIBUTE = "data-paginated-list-status";
 const CONTROLS_ATTRIBUTE = "data-paginated-list-controls";
 
-/** Describes the request state needed to render one list's pagination controls. */
+/**
+ * Describes the cursor and request state used to render one list's pagination controls.
+ *
+ * @example
+ * const state: PaginationControlState = {
+ *     initialized: true,
+ *     cursor: "next-page",
+ *     loading: false,
+ *     retryAvailable: false,
+ *     controlRequestPending: false,
+ * };
+ * renderControls(owner, state);
+ * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
+ */
 export type PaginationControlState = {
     initialized: boolean;
     cursor: string | null;
@@ -71,13 +85,21 @@ export function focusOnAcceptedRecord(owner: HTMLElement, acceptedIds: readonly 
     }
 }
 
-/** Returns whether the list currently has an action or a continuation cursor. */
+/**
+ * Returns whether the list currently has an action or a continuation cursor.
+ * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
+ */
 function shouldShowButton(state: PaginationControlState): boolean {
     const hasContinuation = state.initialized && state.cursor !== null;
     return state.retryAvailable || hasContinuation || state.controlRequestPending;
 }
 
-/** Updates the native button's visibility, busy state, accessible name, and icon state. */
+/**
+ * Updates the native button's visibility, busy state, accessible name, and icon state.
+ * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
+ */
 function updateButton(
     button: HTMLButtonElement | undefined,
     state: PaginationControlState,
@@ -101,7 +123,11 @@ function updateButton(
     setChildHidden(button, "[data-paginated-list-loading-indicator]", !loading);
 }
 
-/** Chooses the accessible name for the currently rendered pagination action. */
+/**
+ * Chooses the accessible name for the currently rendered pagination action.
+ * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
+ */
 function getButtonLabel(loading: boolean, retry: boolean): string {
     if(loading) {
         return "Loading records";
@@ -114,7 +140,11 @@ function getButtonLabel(loading: boolean, retry: boolean): string {
     return "Show more";
 }
 
-/** Hides one decorative icon or loading indicator when it is not the active state. */
+/**
+ * Hides one decorative icon or loading indicator when it is not the active state.
+ * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
+ */
 function setChildHidden(button: HTMLButtonElement, selector: string, hidden: boolean): void {
     const child = button.querySelector<HTMLElement>(selector);
 
@@ -123,7 +153,11 @@ function setChildHidden(button: HTMLButtonElement, selector: string, hidden: boo
     }
 }
 
-/** Updates the owner-specific live region without changing its DOM identity. */
+/**
+ * Updates the owner-specific live region without changing its DOM identity.
+ * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
+ */
 function updateStatus(status: HTMLElement | undefined, message: string, isError: boolean): void {
     if(!status) {
         return;
@@ -133,7 +167,11 @@ function updateStatus(status: HTMLElement | undefined, message: string, isError:
     status.setAttribute("role", isError ? "alert" : "status");
 }
 
-/** Removes the controls margin block when it contains neither a button nor feedback. */
+/**
+ * Removes the controls margin block when it contains neither a button nor feedback.
+ * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
+ */
 function updateControlsGroup(
     controls: HTMLElement | undefined,
     buttonVisible: boolean,
@@ -146,7 +184,11 @@ function updateControlsGroup(
     controls.hidden = !buttonVisible && message.length === 0;
 }
 
-/** Finds one pagination element by its exact owner ID. */
+/**
+ * Finds one pagination element by its exact owner ID.
+ * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
+ */
 function findOwnedElement<T extends HTMLElement>(attribute: string, ownerId: string): T | undefined {
     return Array.from(document.querySelectorAll<T>(`[${ attribute }]`))
         .find(element => element.getAttribute(attribute) === ownerId);

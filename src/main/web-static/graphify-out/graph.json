@@ -1059,7 +1059,7 @@
       "file_type": "code",
       "norm_label": "paginationcontrolstate",
       "source_file": "websrc/components/paginated-list/controls.ts",
-      "source_location": "L12"
+      "source_location": "L26"
     },
     {
       "id": "websrc_components_paginated_list_pagination_allocationplanpageitem",
@@ -5401,7 +5401,7 @@
       "file_type": "code",
       "norm_label": "findownedelement()",
       "source_file": "websrc/components/paginated-list/controls.ts",
-      "source_location": "L150"
+      "source_location": "L192"
     },
     {
       "id": "websrc_components_paginated_list_controls_focusonacceptedrecord",
@@ -5413,7 +5413,7 @@
       "file_type": "code",
       "norm_label": "focusonacceptedrecord()",
       "source_file": "websrc/components/paginated-list/controls.ts",
-      "source_location": "L51"
+      "source_location": "L65"
     },
     {
       "id": "websrc_components_paginated_list_controls_getbuttonlabel",
@@ -5425,7 +5425,7 @@
       "file_type": "code",
       "norm_label": "getbuttonlabel()",
       "source_file": "websrc/components/paginated-list/controls.ts",
-      "source_location": "L105"
+      "source_location": "L131"
     },
     {
       "id": "websrc_components_paginated_list_controls_rendercontrols",
@@ -5437,7 +5437,7 @@
       "file_type": "code",
       "norm_label": "rendercontrols()",
       "source_file": "websrc/components/paginated-list/controls.ts",
-      "source_location": "L30"
+      "source_location": "L44"
     },
     {
       "id": "websrc_components_paginated_list_controls_setchildhidden",
@@ -5449,7 +5449,7 @@
       "file_type": "code",
       "norm_label": "setchildhidden()",
       "source_file": "websrc/components/paginated-list/controls.ts",
-      "source_location": "L118"
+      "source_location": "L148"
     },
     {
       "id": "websrc_components_paginated_list_controls_shouldshowbutton",
@@ -5461,7 +5461,7 @@
       "file_type": "code",
       "norm_label": "shouldshowbutton()",
       "source_file": "websrc/components/paginated-list/controls.ts",
-      "source_location": "L75"
+      "source_location": "L93"
     },
     {
       "id": "websrc_components_paginated_list_controls_updatebutton",
@@ -5473,7 +5473,7 @@
       "file_type": "code",
       "norm_label": "updatebutton()",
       "source_file": "websrc/components/paginated-list/controls.ts",
-      "source_location": "L81"
+      "source_location": "L103"
     },
     {
       "id": "websrc_components_paginated_list_controls_updatecontrolsgroup",
@@ -5485,7 +5485,7 @@
       "file_type": "code",
       "norm_label": "updatecontrolsgroup()",
       "source_file": "websrc/components/paginated-list/controls.ts",
-      "source_location": "L137"
+      "source_location": "L175"
     },
     {
       "id": "websrc_components_paginated_list_controls_updatestatus",
@@ -5497,7 +5497,7 @@
       "file_type": "code",
       "norm_label": "updatestatus()",
       "source_file": "websrc/components/paginated-list/controls.ts",
-      "source_location": "L127"
+      "source_location": "L161"
     },
     {
       "id": "websrc_components_paginated_list_pagination_bindrequesttoxhr",
@@ -11500,7 +11500,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/controls.ts",
-      "source_location": "L36",
+      "source_location": "L50",
       "weight": 1.0
     },
     {
@@ -11512,7 +11512,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/controls.ts",
-      "source_location": "L38",
+      "source_location": "L52",
       "weight": 1.0
     },
     {
@@ -11524,7 +11524,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/controls.ts",
-      "source_location": "L38",
+      "source_location": "L52",
       "weight": 1.0
     },
     {
@@ -11536,7 +11536,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/controls.ts",
-      "source_location": "L39",
+      "source_location": "L53",
       "weight": 1.0
     },
     {
@@ -11548,7 +11548,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/controls.ts",
-      "source_location": "L40",
+      "source_location": "L54",
       "weight": 1.0
     },
     {
@@ -11560,7 +11560,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/controls.ts",
-      "source_location": "L92",
+      "source_location": "L114",
       "weight": 1.0
     },
     {
@@ -11572,7 +11572,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/paginated-list/controls.ts",
-      "source_location": "L99",
+      "source_location": "L121",
       "weight": 1.0
     },
     {
@@ -26064,13 +26064,24 @@
     },
     {
       "source": "websrc_components_paginated_list_controls",
+      "target": "websrc_components_paginated_list_controls_updatebutton",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "websrc/components/paginated-list/controls.ts",
+      "source_location": "L103",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_paginated_list_controls",
       "target": "websrc_components_paginated_list_controls_getbuttonlabel",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/controls.ts",
-      "source_location": "L105",
+      "source_location": "L131",
       "weight": 1.0
     },
     {
@@ -26081,18 +26092,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/controls.ts",
-      "source_location": "L118",
-      "weight": 1.0
-    },
-    {
-      "source": "websrc_components_paginated_list_controls",
-      "target": "websrc_components_paginated_list_controls_paginationcontrolstate",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "websrc/components/paginated-list/controls.ts",
-      "source_location": "L12",
+      "source_location": "L148",
       "weight": 1.0
     },
     {
@@ -26103,7 +26103,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/controls.ts",
-      "source_location": "L127",
+      "source_location": "L161",
       "weight": 1.0
     },
     {
@@ -26114,7 +26114,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/controls.ts",
-      "source_location": "L137",
+      "source_location": "L175",
       "weight": 1.0
     },
     {
@@ -26125,7 +26125,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/controls.ts",
-      "source_location": "L150",
+      "source_location": "L192",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_paginated_list_controls",
+      "target": "websrc_components_paginated_list_controls_paginationcontrolstate",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "websrc/components/paginated-list/controls.ts",
+      "source_location": "L26",
       "weight": 1.0
     },
     {
@@ -26136,7 +26147,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/controls.ts",
-      "source_location": "L30",
+      "source_location": "L44",
       "weight": 1.0
     },
     {
@@ -26147,7 +26158,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/controls.ts",
-      "source_location": "L51",
+      "source_location": "L65",
       "weight": 1.0
     },
     {
@@ -26158,18 +26169,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/paginated-list/controls.ts",
-      "source_location": "L75",
-      "weight": 1.0
-    },
-    {
-      "source": "websrc_components_paginated_list_controls",
-      "target": "websrc_components_paginated_list_controls_updatebutton",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "websrc/components/paginated-list/controls.ts",
-      "source_location": "L81",
+      "source_location": "L93",
       "weight": 1.0
     },
     {
@@ -33278,5 +33278,5 @@
       "source_file": "websrc/components/portfolio-navigation.html"
     }
   ],
-  "built_at_commit": "2b079b8966383ee214aed72dda0fa56d77050d50"
+  "built_at_commit": "be9bfe6b77be6fd4c232a59bdc9ad04f72423d5e"
 }
