@@ -1,7 +1,15 @@
-<!-- Co-authored by: GPT-6 Luna, GPT-6 Sol and benizzio -->
+<!-- Co-authored by: GPT-6 Luna, GPT-6 Sol, GPT-6.1 Terra and benizzio -->
 <div data-exclusive-display-container>
 
     <div class="portfolio-paginated-view" data-display-on-route="/portfolio/:portfolioId/allocation">
+        <!-- Reveal navigation only after the initial list response is swapped. -->
+        <button type="button"
+                class="btn btn-outline-primary mb-2"
+                onclick="navigateToPortfolioAllocationPlanManagement()"
+                hidden
+        >
+            <span class="h2 bi bi-database-gear"></span>
+        </button>
         <div class="accordion"
              id="accordion-allocation-plan"
              data-paginated-list
@@ -13,6 +21,7 @@
              hx-disinherit="hx-sync"
              hx-swap="innerHTML"
              handlebars-template="template-allocation-plan-item"
+             hx-on::after-swap="if (event.target === this) this.previousElementSibling.hidden = false"
              hx-on::after-settle="initAllocationPlanHierarchyLabels()"
              data-hx-transform-response="paginateAllocationPlanView"
              data-hx-transform-response-on-path-matching="^\/api\/portfolio\/.+\/allocation-plan(?:\?.*)?$"
@@ -74,15 +83,6 @@
 </div>
 
 <script id="template-allocation-plan-item" type="text/x-handlebars-template">
-
-    {{#if initial}}
-        <button type="button"
-                class="btn btn-outline-primary mb-2"
-                onclick="navigateToPortfolioAllocationPlanManagement()"
-        >
-            <span class="h2 bi bi-database-gear"></span>
-        </button>
-    {{/if}}
 
     {{#each items}}
         <!-- Co-authored by: GPT-6.1 Terra and benizzio -->

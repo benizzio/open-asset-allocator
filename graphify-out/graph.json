@@ -4123,7 +4123,7 @@
       "file_type": "code",
       "norm_label": "displayedids()",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L1161"
+      "source_location": "L1243"
     },
     {
       "id": "src_test_e2e_tests_historical_read_pagination_e2e_spec_expectpaginationgapatwidths",
@@ -4135,7 +4135,7 @@
       "file_type": "code",
       "norm_label": "expectpaginationgapatwidths()",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L916"
+      "source_location": "L998"
     },
     {
       "id": "src_test_e2e_tests_historical_read_pagination_e2e_spec_expectreadycontrol",
@@ -4147,7 +4147,7 @@
       "file_type": "code",
       "norm_label": "expectreadycontrol()",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L897"
+      "source_location": "L979"
     },
     {
       "id": "src_test_e2e_tests_historical_read_pagination_e2e_spec_historytimestamp",
@@ -4159,7 +4159,7 @@
       "file_type": "code",
       "norm_label": "historytimestamp()",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L1124"
+      "source_location": "L1206"
     },
     {
       "id": "src_test_e2e_tests_historical_read_pagination_e2e_spec_loadmorebutton",
@@ -4171,7 +4171,7 @@
       "file_type": "code",
       "norm_label": "loadmorebutton()",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L1166"
+      "source_location": "L1248"
     },
     {
       "id": "src_test_e2e_tests_historical_read_pagination_e2e_spec_plandate",
@@ -4183,7 +4183,7 @@
       "file_type": "code",
       "norm_label": "plandate()",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L1130"
+      "source_location": "L1212"
     },
     {
       "id": "src_test_e2e_tests_historical_read_pagination_e2e_spec_readpage",
@@ -4195,7 +4195,7 @@
       "file_type": "code",
       "norm_label": "readpage()",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L1146"
+      "source_location": "L1228"
     },
     {
       "id": "src_test_e2e_tests_historical_read_pagination_e2e_spec_requirecontinuationcursor",
@@ -4207,7 +4207,7 @@
       "file_type": "code",
       "norm_label": "requirecontinuationcursor()",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L1171"
+      "source_location": "L1253"
     },
     {
       "id": "src_test_e2e_tests_historical_read_pagination_e2e_spec_seedhistory",
@@ -4219,7 +4219,7 @@
       "file_type": "code",
       "norm_label": "seedhistory()",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L1026"
+      "source_location": "L1108"
     },
     {
       "id": "src_test_e2e_tests_historical_read_pagination_e2e_spec_seedplans",
@@ -4231,7 +4231,7 @@
       "file_type": "code",
       "norm_label": "seedplans()",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L1072"
+      "source_location": "L1154"
     },
     {
       "id": "src_test_e2e_tests_historical_read_pagination_e2e_spec_seedportfolio",
@@ -4243,7 +4243,7 @@
       "file_type": "code",
       "norm_label": "seedportfolio()",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L1112"
+      "source_location": "L1194"
     },
     {
       "id": "src_test_e2e_tests_historical_read_pagination_e2e_spec_verifylateviewresponseisolation",
@@ -4255,7 +4255,7 @@
       "file_type": "code",
       "norm_label": "verifylateviewresponseisolation()",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L941"
+      "source_location": "L1023"
     },
     {
       "id": "src_test_e2e_tests_historical_read_pagination_e2e_spec_verifystalefailure",
@@ -4267,7 +4267,7 @@
       "file_type": "code",
       "norm_label": "verifystalefailure()",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L829"
+      "source_location": "L911"
     },
     {
       "id": "src_test_e2e_tests_historical_read_pagination_e2e_spec_waitforpageresponse",
@@ -4279,7 +4279,7 @@
       "file_type": "code",
       "norm_label": "waitforpageresponse()",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L1136"
+      "source_location": "L1218"
     },
     {
       "id": "src_test_e2e_support_doughnut_chart_clickcanvaspoint",
@@ -13938,7 +13938,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L958",
+      "source_location": "L1040",
+      "weight": 1.0
+    },
+    {
+      "source": "src_test_e2e_tests_historical_read_pagination_e2e_spec_expectreadycontrol",
+      "target": "src_test_e2e_tests_historical_read_pagination_e2e_spec_verifylateviewresponseisolation",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
+      "source_location": "L1039",
       "weight": 1.0
     },
     {
@@ -13950,19 +13962,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L898",
-      "weight": 1.0
-    },
-    {
-      "source": "src_test_e2e_tests_historical_read_pagination_e2e_spec_expectreadycontrol",
-      "target": "src_test_e2e_tests_historical_read_pagination_e2e_spec_verifylateviewresponseisolation",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L957",
+      "source_location": "L980",
       "weight": 1.0
     },
     {
@@ -13974,19 +13974,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L1040",
-      "weight": 1.0
-    },
-    {
-      "source": "src_test_e2e_tests_historical_read_pagination_e2e_spec_loadmorebutton",
-      "target": "src_test_e2e_tests_historical_read_pagination_e2e_spec_verifystalefailure",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L839",
+      "source_location": "L1122",
       "weight": 1.0
     },
     {
@@ -13998,7 +13986,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L951",
+      "source_location": "L1033",
+      "weight": 1.0
+    },
+    {
+      "source": "src_test_e2e_tests_historical_read_pagination_e2e_spec_loadmorebutton",
+      "target": "src_test_e2e_tests_historical_read_pagination_e2e_spec_verifystalefailure",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
+      "source_location": "L921",
       "weight": 1.0
     },
     {
@@ -14010,19 +14010,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L1087",
-      "weight": 1.0
-    },
-    {
-      "source": "src_test_e2e_tests_historical_read_pagination_e2e_spec_readpage",
-      "target": "src_test_e2e_tests_historical_read_pagination_e2e_spec_verifystalefailure",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L837",
+      "source_location": "L1169",
       "weight": 1.0
     },
     {
@@ -14034,11 +14022,11 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L949",
+      "source_location": "L1031",
       "weight": 1.0
     },
     {
-      "source": "src_test_e2e_tests_historical_read_pagination_e2e_spec_requirecontinuationcursor",
+      "source": "src_test_e2e_tests_historical_read_pagination_e2e_spec_readpage",
       "target": "src_test_e2e_tests_historical_read_pagination_e2e_spec_verifystalefailure",
       "relation": "calls",
       "_origin": "ast",
@@ -14046,7 +14034,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L837",
+      "source_location": "L919",
       "weight": 1.0
     },
     {
@@ -14058,7 +14046,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L950",
+      "source_location": "L1032",
+      "weight": 1.0
+    },
+    {
+      "source": "src_test_e2e_tests_historical_read_pagination_e2e_spec_requirecontinuationcursor",
+      "target": "src_test_e2e_tests_historical_read_pagination_e2e_spec_verifystalefailure",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
+      "source_location": "L919",
       "weight": 1.0
     },
     {
@@ -14070,7 +14070,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L1030",
+      "source_location": "L1112",
       "weight": 1.0
     },
     {
@@ -14082,7 +14082,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L1073",
+      "source_location": "L1155",
       "weight": 1.0
     },
     {
@@ -14094,7 +14094,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L945",
+      "source_location": "L1027",
       "weight": 1.0
     },
     {
@@ -14106,7 +14106,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L835",
+      "source_location": "L917",
       "weight": 1.0
     },
     {
@@ -14143,6 +14143,18 @@
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-history-management.e2e.spec.ts",
       "source_location": "L2769",
+      "weight": 1.0
+    },
+    {
+      "source": "src_test_e2e_tests_portfolio_allocation_history_management_e2e_spec_browserlocalcalendardate",
+      "target": "src_test_e2e_tests_portfolio_allocation_history_management_e2e_spec_expectportfoliohistorymanagement",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/test/e2e/tests/portfolio-allocation-history-management.e2e.spec.ts",
+      "source_location": "L3233",
       "weight": 1.0
     },
     {
@@ -14291,18 +14303,6 @@
     },
     {
       "source": "src_test_e2e_tests_portfolio_allocation_history_management_e2e_spec_expectportfoliohistorymanagement",
-      "target": "src_test_e2e_tests_portfolio_allocation_history_management_e2e_spec_prepareassetsearchautocompleterow",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/test/e2e/tests/portfolio-allocation-history-management.e2e.spec.ts",
-      "source_location": "L2837",
-      "weight": 1.0
-    },
-    {
-      "source": "src_test_e2e_tests_portfolio_allocation_history_management_e2e_spec_expectportfoliohistorymanagement",
       "target": "src_test_e2e_tests_portfolio_allocation_history_management_e2e_spec_expectroute",
       "relation": "calls",
       "_origin": "ast",
@@ -14323,18 +14323,6 @@
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-history-management.e2e.spec.ts",
       "source_location": "L3210",
-      "weight": 1.0
-    },
-    {
-      "source": "src_test_e2e_tests_portfolio_allocation_history_management_e2e_spec_expectportfoliohistorymanagement",
-      "target": "src_test_e2e_tests_portfolio_allocation_history_management_e2e_spec_browserlocalcalendardate",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/test/e2e/tests/portfolio-allocation-history-management.e2e.spec.ts",
-      "source_location": "L3233",
       "weight": 1.0
     },
     {
@@ -14359,18 +14347,6 @@
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-history-management.e2e.spec.ts",
       "source_location": "L3118",
-      "weight": 1.0
-    },
-    {
-      "source": "src_test_e2e_tests_portfolio_allocation_history_management_e2e_spec_expectrootshell",
-      "target": "src_test_e2e_tests_portfolio_allocation_history_management_e2e_spec_prepareassetsearchautocompleterow",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/test/e2e/tests/portfolio-allocation-history-management.e2e.spec.ts",
-      "source_location": "L2835",
       "weight": 1.0
     },
     {
@@ -14471,18 +14447,6 @@
     },
     {
       "source": "src_test_e2e_tests_portfolio_allocation_history_management_e2e_spec_fillexistingassetdirectvalueallocation",
-      "target": "src_test_e2e_tests_portfolio_allocation_history_management_e2e_spec_submitobservationfordate",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/test/e2e/tests/portfolio-allocation-history-management.e2e.spec.ts",
-      "source_location": "L2747",
-      "weight": 1.0
-    },
-    {
-      "source": "src_test_e2e_tests_portfolio_allocation_history_management_e2e_spec_fillexistingassetdirectvalueallocation",
       "target": "src_test_e2e_tests_portfolio_allocation_history_management_e2e_spec_selectassetfromautocomplete",
       "relation": "calls",
       "_origin": "ast",
@@ -14555,6 +14519,30 @@
     },
     {
       "source": "src_test_e2e_tests_portfolio_allocation_history_management_e2e_spec_prepareassetsearchautocompleterow",
+      "target": "src_test_e2e_tests_portfolio_allocation_history_management_e2e_spec_expectrootshell",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/test/e2e/tests/portfolio-allocation-history-management.e2e.spec.ts",
+      "source_location": "L2835",
+      "weight": 1.0
+    },
+    {
+      "source": "src_test_e2e_tests_portfolio_allocation_history_management_e2e_spec_prepareassetsearchautocompleterow",
+      "target": "src_test_e2e_tests_portfolio_allocation_history_management_e2e_spec_expectportfoliohistorymanagement",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/test/e2e/tests/portfolio-allocation-history-management.e2e.spec.ts",
+      "source_location": "L2837",
+      "weight": 1.0
+    },
+    {
+      "source": "src_test_e2e_tests_portfolio_allocation_history_management_e2e_spec_prepareassetsearchautocompleterow",
       "target": "src_test_e2e_tests_portfolio_allocation_history_management_e2e_spec_preparetouchautocompleterow",
       "relation": "calls",
       "_origin": "ast",
@@ -14563,6 +14551,18 @@
       "context": "call",
       "source_file": "src/test/e2e/tests/portfolio-allocation-history-management.e2e.spec.ts",
       "source_location": "L2881",
+      "weight": 1.0
+    },
+    {
+      "source": "src_test_e2e_tests_portfolio_allocation_history_management_e2e_spec_submitobservationfordate",
+      "target": "src_test_e2e_tests_portfolio_allocation_history_management_e2e_spec_fillexistingassetdirectvalueallocation",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/test/e2e/tests/portfolio-allocation-history-management.e2e.spec.ts",
+      "source_location": "L2747",
       "weight": 1.0
     },
     {
@@ -15798,7 +15798,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L1161",
+      "source_location": "L1243",
       "weight": 1.0
     },
     {
@@ -15810,7 +15810,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L916",
+      "source_location": "L998",
       "weight": 1.0
     },
     {
@@ -15822,7 +15822,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L897",
+      "source_location": "L979",
       "weight": 1.0
     },
     {
@@ -15834,7 +15834,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L1166",
+      "source_location": "L1248",
       "weight": 1.0
     },
     {
@@ -15846,7 +15846,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L1146",
+      "source_location": "L1228",
       "weight": 1.0
     },
     {
@@ -15858,7 +15858,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L1171",
+      "source_location": "L1253",
       "weight": 1.0
     },
     {
@@ -15870,7 +15870,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L1026",
+      "source_location": "L1108",
       "weight": 1.0
     },
     {
@@ -15882,7 +15882,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L1072",
+      "source_location": "L1154",
       "weight": 1.0
     },
     {
@@ -15894,7 +15894,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L941",
+      "source_location": "L1023",
       "weight": 1.0
     },
     {
@@ -15906,7 +15906,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L829",
+      "source_location": "L911",
       "weight": 1.0
     },
     {
@@ -15918,7 +15918,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L1136",
+      "source_location": "L1218",
       "weight": 1.0
     },
     {
@@ -18346,6 +18346,18 @@
       "weight": 1.0
     },
     {
+      "source": "src_test_e2e_support_fixtures_test",
+      "target": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
       "source": "src_test_e2e_support_management_metadata_layout_expectmanagementmetadataheaderlayout",
       "target": "src_test_e2e_tests_portfolio_allocation_history_management_e2e_spec",
       "relation": "imports",
@@ -18574,18 +18586,6 @@
       "weight": 1.0
     },
     {
-      "source": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec",
-      "target": "src_test_e2e_support_fixtures_test",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L8",
-      "weight": 1.0
-    },
-    {
       "source": "src_test_e2e_tests_portfolio_visualization_e2e_spec",
       "target": "src_test_e2e_support_fixtures_expect",
       "relation": "imports",
@@ -18659,6 +18659,31 @@
     },
     {
       "source": "ref_playwright_test",
+      "target": "src_test_e2e_support_doughnut_chart",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/test/e2e/support/doughnut-chart.ts",
+      "source_location": "L11",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "source": "ref_playwright_test",
+      "target": "src_test_e2e_support_management_metadata_layout",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/test/e2e/support/management-metadata-layout.ts",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "ref_playwright_test",
       "target": "src_test_e2e_tests_historical_read_pagination_e2e_spec",
       "relation": "imports_from",
       "_origin": "ast",
@@ -18680,6 +18705,19 @@
       "context": "import",
       "source_file": "src/test/e2e/tests/portfolio-allocation-history-management.e2e.spec.ts",
       "source_location": "L22",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "source": "ref_playwright_test",
+      "target": "src_test_e2e_tests_portfolio_creation_e2e_spec",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/test/e2e/tests/portfolio-creation.e2e.spec.ts",
+      "source_location": "L9",
       "type_only": true,
       "weight": 1.0
     },
@@ -18818,6 +18856,18 @@
     },
     {
       "source": "src_test_e2e_support_accordion_field_interactions",
+      "target": "src_test_e2e_support_fixtures",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/test/e2e/support/accordion-field-interactions.ts",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "src_test_e2e_support_accordion_field_interactions",
       "target": "src_test_e2e_tests_portfolio_allocation_history_management_e2e_spec",
       "relation": "imports_from",
       "_origin": "ast",
@@ -18867,19 +18917,6 @@
     },
     {
       "source": "src_test_e2e_support_database",
-      "target": "src_test_e2e_tests_asset_external_management_e2e_spec",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/test/e2e/tests/asset-external-management.e2e.spec.ts",
-      "source_location": "L9",
-      "type_only": true,
-      "weight": 1.0
-    },
-    {
-      "source": "src_test_e2e_support_database",
       "target": "src_test_e2e_tests_historical_read_pagination_e2e_spec",
       "relation": "imports_from",
       "_origin": "ast",
@@ -18902,43 +18939,6 @@
       "source_file": "src/test/e2e/tests/portfolio-allocation-history-management.e2e.spec.ts",
       "source_location": "L34",
       "type_only": true,
-      "weight": 1.0
-    },
-    {
-      "source": "src_test_e2e_support_doughnut_chart",
-      "target": "ref_playwright_test",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/test/e2e/support/doughnut-chart.ts",
-      "source_location": "L11",
-      "type_only": true,
-      "weight": 1.0
-    },
-    {
-      "source": "src_test_e2e_support_doughnut_chart",
-      "target": "src_test_e2e_tests_portfolio_allocation_history_management_e2e_spec",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/test/e2e/tests/portfolio-allocation-history-management.e2e.spec.ts",
-      "source_location": "L35",
-      "weight": 1.0
-    },
-    {
-      "source": "src_test_e2e_support_fixtures",
-      "target": "src_test_e2e_support_accordion_field_interactions",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/test/e2e/support/accordion-field-interactions.ts",
-      "source_location": "L7",
       "weight": 1.0
     },
     {
@@ -19026,14 +19026,14 @@
       "weight": 1.0
     },
     {
-      "source": "src_test_e2e_support_management_metadata_layout",
-      "target": "ref_playwright_test",
+      "source": "src_test_e2e_support_fixtures",
+      "target": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "import",
-      "source_file": "src/test/e2e/support/management-metadata-layout.ts",
+      "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
       "source_location": "L8",
       "weight": 1.0
     },
@@ -19076,6 +19076,19 @@
       "weight": 1.0
     },
     {
+      "source": "src_test_e2e_tests_asset_external_management_e2e_spec",
+      "target": "src_test_e2e_support_database",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/test/e2e/tests/asset-external-management.e2e.spec.ts",
+      "source_location": "L9",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
       "source": "src_test_e2e_tests_asset_management_e2e_spec",
       "target": "src_test_e2e_support_fixtures",
       "relation": "imports_from",
@@ -19111,6 +19124,18 @@
       "source_file": "src/test/e2e/tests/asset-management.e2e.spec.ts",
       "source_location": "L9",
       "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "source": "src_test_e2e_tests_portfolio_allocation_history_management_e2e_spec",
+      "target": "src_test_e2e_support_doughnut_chart",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/test/e2e/tests/portfolio-allocation-history-management.e2e.spec.ts",
+      "source_location": "L35",
       "weight": 1.0
     },
     {
@@ -19238,19 +19263,6 @@
       "weight": 1.0
     },
     {
-      "source": "src_test_e2e_tests_portfolio_creation_e2e_spec",
-      "target": "ref_playwright_test",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/test/e2e/tests/portfolio-creation.e2e.spec.ts",
-      "source_location": "L9",
-      "type_only": true,
-      "weight": 1.0
-    },
-    {
       "source": "src_test_e2e_tests_portfolio_editing_e2e_spec",
       "target": "ref_playwright_test",
       "relation": "imports_from",
@@ -19299,18 +19311,6 @@
       "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
       "source_location": "L7",
       "type_only": true,
-      "weight": 1.0
-    },
-    {
-      "source": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec",
-      "target": "src_test_e2e_support_fixtures",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L8",
       "weight": 1.0
     },
     {
@@ -21342,7 +21342,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L1124",
+      "source_location": "L1206",
       "weight": 1.0
     },
     {
@@ -21375,7 +21375,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L1130",
+      "source_location": "L1212",
       "weight": 1.0
     },
     {
@@ -21441,7 +21441,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L1112",
+      "source_location": "L1194",
       "weight": 1.0
     },
     {
@@ -24027,7 +24027,7 @@
       "confidence_score": 0.8,
       "context": "call",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L1050",
+      "source_location": "L1132",
       "weight": 1.0
     },
     {
@@ -24039,7 +24039,7 @@
       "confidence_score": 0.8,
       "context": "call",
       "source_file": "src/test/e2e/tests/historical-read-pagination.e2e.spec.ts",
-      "source_location": "L1090",
+      "source_location": "L1172",
       "weight": 1.0
     },
     {
@@ -27723,5 +27723,5 @@
       "source_file": "src/main/docker/docker-compose-e2e.yml"
     }
   ],
-  "built_at_commit": "fc84e195914a54332438dd9be9b09c70cabcf0c7"
+  "built_at_commit": "f4ad530001761615a78976ba9b4055a20fdef5e0"
 }

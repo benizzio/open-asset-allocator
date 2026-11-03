@@ -285,13 +285,16 @@ test('scenario 21.3: paginates allocation-plan viewing records in backend order'
   const initialPage = await readPage(initialResponse, endpoint, '');
   const firstCursor = requireContinuationCursor(initialPage);
   const list = page.locator('#accordion-allocation-plan');
+  const managementButton = page.locator('button[onclick="navigateToPortfolioAllocationPlanManagement()"]');
   const moreButton = loadMoreButton(page, 'accordion-allocation-plan');
   const displayedRecords = list.locator('[data-paginated-record-id]');
   const expectedIds = seeded.records.map(({ id }) => String(id));
 
   await expect(displayedRecords).toHaveCount(10);
   await expect.poll(() => displayedIds(displayedRecords)).toEqual(expectedIds.slice(0, 10));
-  await expect(list.locator('[onclick="navigateToPortfolioAllocationPlanManagement()"]')).toHaveCount(1);
+  await expect(managementButton).toHaveCount(1);
+  await expect(managementButton).toBeVisible();
+  await expect(list.locator('[onclick="navigateToPortfolioAllocationPlanManagement()"]')).toHaveCount(0);
   await expectReadyControl(page, 'accordion-allocation-plan');
   await expectPaginationGapAtWidths(page, 'accordion-allocation-plan');
 
@@ -312,7 +315,7 @@ test('scenario 21.3: paginates allocation-plan viewing records in backend order'
   expect(await firstPanel.locator('canvas').evaluate((canvas, original) => canvas === original, originalCanvas))
     .toBe(true);
   await expect(page.locator(`#allocation-plan-${expectedIds[10]}`)).not.toHaveClass(/\bshow\b/);
-  await expect(list.locator('[onclick="navigateToPortfolioAllocationPlanManagement()"]')).toHaveCount(1);
+  await expect(managementButton).toHaveCount(1);
 
   const finalResponsePromise = waitForPageResponse(page, endpoint, secondCursor);
   await moreButton.click();
@@ -459,7 +462,7 @@ test('scenario 21.5: handles empty history and allocation-plan lists without con
     .toHaveText('No records found.');
 
   responsePromise = waitForPageResponse(page, plansEndpoint, '');
-  await page.locator('#accordion-allocation-plan > button[onclick="navigateToPortfolioAllocationPlanManagement()"]')
+  await page.locator('button[onclick="navigateToPortfolioAllocationPlanManagement()"]')
     .click();
   response = await responsePromise;
   responsePage = await readPage(response, plansEndpoint, '');
@@ -566,7 +569,7 @@ test('scenario 21.8: isolates allocation-plan controls when a hidden viewing pag
     managementEndpoint: `/api/portfolio/${seeded.portfolio.id}/allocation-plan`,
     viewingOwnerId: 'accordion-allocation-plan',
     managementOwnerId: 'accordion-allocation-plan-management',
-    viewingManagementButton: '#accordion-allocation-plan > button[onclick="navigateToPortfolioAllocationPlanManagement()"]',
+    viewingManagementButton: 'button[onclick="navigateToPortfolioAllocationPlanManagement()"]',
     managementViewingButton: 'button[onclick="allocationPlanManagement.navigateToAllocationPlansViewing()"]',
     managementDraftSelector: '.allocation-plan-management-new-name',
     draftValue: 'Late plan response draft',
@@ -818,6 +821,85 @@ test('scenario 21.16: does not steal focus after a delayed keyboard continuation
     await response;
     await expect(page.locator('#accordion-portfolio-history [data-paginated-record-id]')).toHaveCount(11);
     await expect(page.locator('#pagination-focus-test')).toBeFocused();
+  } finally {
+    release();
+  }
+});
+
+/** Verifies navigation visibility through initial loading, refresh, and route changes.
+ * @author GPT-6.1 Terra
+ */
+test('scenario 21.17: keeps allocation navigation outside the refreshed list', async ({ database, page }) => {
+  const seeded = await seedPlans(database);
+  const endpoint = `/api/portfolio/${seeded.portfolio.id}/allocation-plan`;
+  let release = () => {};
+  let started = () => {};
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  const requestStarted = new Promise<void>(resolve => { started = resolve; });
+  let delayInitial = true;
+  await page.route(`**${endpoint}?*`, async route => {
+    if(delayInitial && new URL(route.request().url()).searchParams.get('pageCursor') === '') {
+      delayInitial = false;
+      started();
+      await gate;
+    }
+    await route.continue();
+  });
+
+  try {
+    const initial = waitForPageResponse(page, endpoint, '');
+    await page.goto(`/portfolio/${seeded.portfolio.id}/allocation`);
+    await requestStarted;
+    const list = page.locator('#accordion-allocation-plan');
+    const button = page.locator('button[onclick="navigateToPortfolioAllocationPlanManagement()"]');
+    await expect(button).toBeHidden();
+    release();
+    await initial;
+    await expect(button).toBeVisible();
+    await expect(list.locator('[data-paginated-record-id]')).toHaveCount(10);
+
+    const originalViewport = page.viewportSize() ?? { width: 1280, height: 900 };
+    try {
+      for(const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
+        await page.setViewportSize(viewport);
+        const geometry = await list.evaluate(element => {
+          const navigation = element.previousElementSibling as HTMLElement;
+          const record = element.querySelector<HTMLElement>('[data-paginated-record-id]')!;
+          const parent = element.parentElement!;
+          const measure = () => [navigation, record].map(target => {
+            const { x, y, width, height } = target.getBoundingClientRect();
+            return { x, y, width, height };
+          });
+          const outside = measure();
+          try {
+            element.insertBefore(navigation, element.firstChild);
+            return { outside, inside: measure() };
+          } finally {
+            parent.insertBefore(navigation, element);
+          }
+        });
+        for(let index = 0; index < geometry.outside.length; index++) {
+          for(const dimension of ['x', 'y', 'width', 'height'] as const) {
+            expect(Math.abs(geometry.outside[index][dimension] - geometry.inside[index][dimension]))
+              .toBeLessThanOrEqual(1);
+          }
+        }
+      }
+    } finally {
+      await page.setViewportSize(originalViewport);
+    }
+    const original = await button.elementHandle();
+
+    const refreshed = waitForPageResponse(page, endpoint, '');
+    await list.evaluate(element => element.dispatchEvent(new CustomEvent('reload-allocation-plans', { bubbles: true })));
+    await refreshed;
+    await expect(list.locator('[data-paginated-record-id]')).toHaveCount(10);
+    await expect(button).toHaveCount(1);
+    expect(await button.evaluate((element, previous) => element === previous, original)).toBe(true);
+
+    await button.click();
+    await expect.poll(() => new URL(page.url()).pathname).toBe(`/portfolio/${seeded.portfolio.id}/allocation/manage`);
+    await expect(button).toBeHidden();
   } finally {
     release();
   }
