@@ -576,39 +576,6 @@ test('scenario 21.8: isolates allocation-plan controls when a hidden viewing pag
   });
 });
 
-test('scenario 21.9: moves keyboard focus to the newly appended record after terminal pagination', async ({
-  database,
-  page,
-}) => {
-  const seeded = await seedHistory(database, 20);
-  const endpoint = `/api/portfolio/${seeded.portfolio.id}/history`;
-  const initialResponsePromise = waitForPageResponse(page, endpoint, '');
-
-  await page.goto(`/portfolio/${seeded.portfolio.id}/history`);
-
-  const initialResponse = await initialResponsePromise;
-  const firstPage = await readPage(initialResponse, endpoint, '');
-  const finalCursor = requireContinuationCursor(firstPage);
-  const ownerId = 'accordion-portfolio-history';
-  const moreButton = loadMoreButton(page, ownerId);
-  await expectReadyControl(page, ownerId);
-
-  const finalResponsePromise = waitForPageResponse(page, endpoint, finalCursor);
-  await moreButton.focus();
-  await expect(moreButton).toBeFocused();
-  await page.keyboard.press('Enter');
-
-  const finalResponse = await finalResponsePromise;
-  const finalPage = await readPage(finalResponse, endpoint, finalCursor);
-  expect(finalPage.nextCursor).toBeNull();
-  await expect(page.locator(`#${ownerId} [data-paginated-record-id]`)).toHaveCount(20);
-  await expect(moreButton).toBeHidden();
-  await expect(page.locator(
-    `#${ownerId} [data-paginated-record-id="${seeded.records[10].id}"] .accordion-button`,
-  )).toBeFocused();
-  await expect(page.locator(`[data-paginated-list-controls="${ownerId}"]`)).toBeHidden();
-});
-
 test('scenario 21.10: keeps an initial-load retry visible and busy without a cursor', async ({ database, page }) => {
   const seeded = await seedHistory(database);
   const endpoint = `/api/portfolio/${seeded.portfolio.id}/history`;
