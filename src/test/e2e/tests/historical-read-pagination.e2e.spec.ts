@@ -84,7 +84,7 @@ test('scenario 21.1: paginates portfolio history viewing with retry and preserve
 
   await expect(displayedRecords).toHaveCount(10);
   await expect.poll(() => displayedIds(displayedRecords)).toEqual(expectedIds.slice(0, 10));
-  await expect(list.locator('[onclick="navigateToPortfolioAllocationManagement()"]')).toHaveCount(1);
+  await expect(page.locator('button[onclick="navigateToPortfolioAllocationManagement()"]')).toHaveCount(1);
   await expect(moreButton).toBeVisible();
   await expectReadyControl(page, 'accordion-portfolio-history');
   await expectPaginationGapAtWidths(page, 'accordion-portfolio-history');
@@ -173,7 +173,7 @@ test('scenario 21.1: paginates portfolio history viewing with retry and preserve
   await expect(firstPanel.locator('canvas')).toHaveCount(1);
   expect(await firstPanel.locator('canvas').evaluate((canvas, original) => canvas === original, originalCanvas))
     .toBe(true);
-  await expect(list.locator('[onclick="navigateToPortfolioAllocationManagement()"]')).toHaveCount(1);
+  await expect(page.locator('button[onclick="navigateToPortfolioAllocationManagement()"]')).toHaveCount(1);
 
   const finalResponsePromise = waitForPageResponse(page, endpoint, secondCursor);
   await moreButton.click();
@@ -185,7 +185,7 @@ test('scenario 21.1: paginates portfolio history viewing with retry and preserve
   await expect(moreButton).toBeHidden();
   await expect(page.locator('[data-paginated-list-controls="accordion-portfolio-history"]')).toBeHidden();
   await expect(status).toBeEmpty();
-  await expect(list.locator('[onclick="navigateToPortfolioAllocationManagement()"]')).toHaveCount(1);
+  await expect(page.locator('button[onclick="navigateToPortfolioAllocationManagement()"]')).toHaveCount(1);
 });
 
 test('scenario 21.2: appends history-management records without replacing drafts or editor state', async ({
@@ -433,7 +433,7 @@ test('scenario 21.5: handles empty history and allocation-plan lists without con
   const historyManagementEndpoint = `/api/portfolio/${emptyHistory.portfolio.id}/history/observation`;
   const historyManagementStatus = page.locator('[data-paginated-list-status="accordion-portfolio-history-management"]');
   responsePromise = waitForPageResponse(page, historyManagementEndpoint, '');
-  await page.locator('#accordion-portfolio-history > button[onclick="navigateToPortfolioAllocationManagement()"]')
+  await page.locator('button[onclick="navigateToPortfolioAllocationManagement()"]')
     .click();
   response = await responsePromise;
   responsePage = await readPage(response, historyManagementEndpoint, '');
@@ -549,7 +549,7 @@ test('scenario 21.7: isolates history controls when a hidden viewing page settle
     managementEndpoint: `/api/portfolio/${seeded.portfolio.id}/history/observation`,
     viewingOwnerId: 'accordion-portfolio-history',
     managementOwnerId: 'accordion-portfolio-history-management',
-    viewingManagementButton: '#accordion-portfolio-history > button[onclick="navigateToPortfolioAllocationManagement()"]',
+    viewingManagementButton: 'button[onclick="navigateToPortfolioAllocationManagement()"]',
     managementViewingButton: 'button[onclick="portfolioHistoryManagement.navigateToPortfolioAllocationViewing()"]',
     managementDraftSelector: '.portfolio-history-management-new-time-tag',
     draftValue: 'Late history response draft',
@@ -858,36 +858,7 @@ test('scenario 21.17: keeps allocation navigation outside the refreshed list', a
     await expect(button).toBeVisible();
     await expect(list.locator('[data-paginated-record-id]')).toHaveCount(10);
 
-    const originalViewport = page.viewportSize() ?? { width: 1280, height: 900 };
-    try {
-      for(const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
-        await page.setViewportSize(viewport);
-        const geometry = await list.evaluate(element => {
-          const navigation = element.previousElementSibling as HTMLElement;
-          const record = element.querySelector<HTMLElement>('[data-paginated-record-id]')!;
-          const parent = element.parentElement!;
-          const measure = () => [navigation, record].map(target => {
-            const { x, y, width, height } = target.getBoundingClientRect();
-            return { x, y, width, height };
-          });
-          const outside = measure();
-          try {
-            element.insertBefore(navigation, element.firstChild);
-            return { outside, inside: measure() };
-          } finally {
-            parent.insertBefore(navigation, element);
-          }
-        });
-        for(let index = 0; index < geometry.outside.length; index++) {
-          for(const dimension of ['x', 'y', 'width', 'height'] as const) {
-            expect(Math.abs(geometry.outside[index][dimension] - geometry.inside[index][dimension]))
-              .toBeLessThanOrEqual(1);
-          }
-        }
-      }
-    } finally {
-      await page.setViewportSize(originalViewport);
-    }
+    await expectNavigationGeometryUnchanged(page, list);
     const original = await button.elementHandle();
 
     const refreshed = waitForPageResponse(page, endpoint, '');
@@ -904,6 +875,92 @@ test('scenario 21.17: keeps allocation navigation outside the refreshed list', a
     release();
   }
 });
+
+/** Verifies navigation visibility through initial loading, refresh, and route changes.
+ * @author GPT-6.1 Terra
+ */
+test('scenario 21.18: keeps history navigation outside the refreshed list', async ({ database, page }) => {
+  const seeded = await seedHistory(database);
+  const endpoint = `/api/portfolio/${seeded.portfolio.id}/history`;
+  let release = () => {};
+  let started = () => {};
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  const requestStarted = new Promise<void>(resolve => { started = resolve; });
+  let delayInitial = true;
+  await page.route(`**${endpoint}?*`, async route => {
+    if(delayInitial && new URL(route.request().url()).searchParams.get('pageCursor') === '') {
+      delayInitial = false;
+      started();
+      await gate;
+    }
+    await route.continue();
+  });
+
+  try {
+    const initial = waitForPageResponse(page, endpoint, '');
+    await page.goto(`/portfolio/${seeded.portfolio.id}/history`);
+    await requestStarted;
+    const list = page.locator('#accordion-portfolio-history');
+    const button = page.locator('button[onclick="navigateToPortfolioAllocationManagement()"]');
+    await expect(button).toBeHidden();
+    release();
+    await initial;
+    await expect(button).toBeVisible();
+    await expect(list.locator('[data-paginated-record-id]')).toHaveCount(10);
+
+    await expectNavigationGeometryUnchanged(page, list);
+    const original = await button.elementHandle();
+
+    const refreshed = waitForPageResponse(page, endpoint, '');
+    await list.evaluate(element => element.dispatchEvent(new CustomEvent('reload-portfolio-history', { bubbles: true })));
+    await refreshed;
+    await expect(list.locator('[data-paginated-record-id]')).toHaveCount(10);
+    await expect(button).toHaveCount(1);
+    expect(await button.evaluate((element, previous) => element === previous, original)).toBe(true);
+
+    await button.click();
+    await expect.poll(() => new URL(page.url()).pathname).toBe(`/portfolio/${seeded.portfolio.id}/history/manage`);
+    await expect(button).toBeHidden();
+  } finally {
+    release();
+  }
+});
+
+/** Compares navigation and first-record geometry with the button inside and outside the list.
+ * @author GPT-6.1 Terra
+ */
+async function expectNavigationGeometryUnchanged(page: Page, list: Locator): Promise<void> {
+  const originalViewport = page.viewportSize() ?? { width: 1280, height: 900 };
+  try {
+    for(const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
+      await page.setViewportSize(viewport);
+      const geometry = await list.evaluate(element => {
+        const navigation = element.previousElementSibling as HTMLElement;
+        const record = element.querySelector<HTMLElement>('[data-paginated-record-id]')!;
+        const parent = element.parentElement!;
+        const measure = () => [navigation, record].map(target => {
+          const { x, y, width, height } = target.getBoundingClientRect();
+          return { x, y, width, height };
+        });
+        const outside = measure();
+        try {
+          element.insertBefore(navigation, element.firstChild);
+          return { outside, inside: measure() };
+        } finally {
+          parent.insertBefore(navigation, element);
+        }
+      });
+      for(let index = 0; index < geometry.outside.length; index++) {
+        for(const dimension of ['x', 'y', 'width', 'height'] as const) {
+          expect(Math.abs(geometry.outside[index][dimension] - geometry.inside[index][dimension]))
+            .toBeLessThanOrEqual(1);
+        }
+      }
+    }
+  } finally {
+    await page.setViewportSize(originalViewport);
+  }
+}
 
 /** Verifies stale failures still reach other HTMX listeners without producing global notifications.
  * @author GPT-6.1 Terra

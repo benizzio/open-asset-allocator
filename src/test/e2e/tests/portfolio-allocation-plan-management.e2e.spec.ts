@@ -176,7 +176,7 @@ test.describe('portfolio allocation plan management', () => {
     await expectAllocationPlan(page, seededData.portfolio, true);
 
     const managementButton = page.locator(
-      '#accordion-allocation-plan > button[onclick="navigateToPortfolioAllocationPlanManagement()"]',
+      'button[onclick="navigateToPortfolioAllocationPlanManagement()"]',
     );
     await navigateByClick(
       page,
@@ -413,7 +413,7 @@ test.describe('portfolio allocation plan management', () => {
     await exerciseInitialAllocationPlanChart(page, seededData.allocationPlan.id);
 
     const managementButton = page.locator(
-      '#accordion-allocation-plan > button[onclick="navigateToPortfolioAllocationPlanManagement()"]',
+      'button[onclick="navigateToPortfolioAllocationPlanManagement()"]',
     );
     await navigateByClick(
       page,
@@ -2098,13 +2098,14 @@ async function expectAllocationPlan(
   await expectPortfolioNavigation(page, 'Allocation Plan');
 
   const allocationPlan = page.locator('#accordion-allocation-plan');
-  await expect(allocationPlan).toBeVisible();
+  await expect(allocationPlan).toBeAttached();
+  await expect(allocationPlan.locator('..')).toBeVisible();
   if (expectEmpty) {
-    await expect(allocationPlan.locator(':scope > *')).toHaveCount(1);
+    await expect(allocationPlan.locator(':scope > *')).toHaveCount(0);
   }
 
-  const managementButton = allocationPlan.locator(
-    '> button[onclick="navigateToPortfolioAllocationPlanManagement()"]',
+  const managementButton = page.locator(
+    'button[onclick="navigateToPortfolioAllocationPlanManagement()"]',
   );
   await expect(managementButton).toBeVisible();
   await expect(managementButton.locator('.bi-database-gear')).toBeVisible();

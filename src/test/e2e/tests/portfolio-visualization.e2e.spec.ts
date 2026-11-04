@@ -5,6 +5,7 @@
  * application state without creating or changing domain data through the application API.
  *
  * Authored by: OpenCode
+ * @author GPT-6.1 Terra
  */
 import type { Locator, Page } from '@playwright/test';
 import { expect, test } from '../support/fixtures';
@@ -201,11 +202,11 @@ async function expectPortfolioHistory(page: Page, portfolio: SeededPortfolio): P
   await expectPortfolioShell(page, portfolio, 'Portfolio');
 
   const managementButton = page.locator(
-    '#accordion-portfolio-history > button[onclick="navigateToPortfolioAllocationManagement()"]',
+    'button[onclick="navigateToPortfolioAllocationManagement()"]',
   );
   await expect(managementButton).toBeVisible();
   await expect(managementButton.locator('.bi-database-gear')).toBeVisible();
-  await expect(page.locator('#accordion-portfolio-history > *')).toHaveCount(1);
+  await expect(page.locator('#accordion-portfolio-history > *')).toHaveCount(0);
 }
 
 /** Asserts the empty allocation-plan view and its management control. */
@@ -213,11 +214,11 @@ async function expectAllocationPlan(page: Page, portfolio: SeededPortfolio): Pro
   await expectPortfolioShell(page, portfolio, 'Allocation Plan');
 
   const managementButton = page.locator(
-    '#accordion-allocation-plan > button[onclick="navigateToPortfolioAllocationPlanManagement()"]',
+    'button[onclick="navigateToPortfolioAllocationPlanManagement()"]',
   );
   await expect(managementButton).toBeVisible();
   await expect(managementButton.locator('.bi-database-gear')).toBeVisible();
-  await expect(page.locator('#accordion-allocation-plan > *')).toHaveCount(1);
+  await expect(page.locator('#accordion-allocation-plan > *')).toHaveCount(0);
 }
 
 /** Asserts the empty allocation-map partial and its selected submenu state. */

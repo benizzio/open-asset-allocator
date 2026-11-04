@@ -18,6 +18,7 @@
  * @author GPT-6 Sol
  * @author GPT-6 Luna
  * @author benizzio
+ * @author GPT-6.1 Terra
  */
 import type { Browser, Locator, Page, Request, Route } from '@playwright/test';
 import {
@@ -851,7 +852,7 @@ test.describe('portfolio allocation history management', () => {
     await expectPortfolioHistory(page, seededData.portfolio, true);
 
     const managementButton = page.locator(
-      '#accordion-portfolio-history > button[onclick="navigateToPortfolioAllocationManagement()"]',
+      'button[onclick="navigateToPortfolioAllocationManagement()"]',
     );
     await navigateByClick(
       page,
@@ -1001,7 +1002,7 @@ test.describe('portfolio allocation history management', () => {
     await exerciseInitialPortfolioHistoryChart(page, seededData.observation.id);
 
     const managementButton = page.locator(
-      '#accordion-portfolio-history > button[onclick="navigateToPortfolioAllocationManagement()"]',
+      'button[onclick="navigateToPortfolioAllocationManagement()"]',
     );
     await navigateByClick(
       page,
@@ -3189,12 +3190,13 @@ async function expectPortfolioHistory(
   await expectPortfolioNavigation(page, 'Portfolio');
 
   const history = page.locator('#accordion-portfolio-history');
-  await expect(history).toBeVisible();
+  await expect(history).toBeAttached();
+  await expect(history.locator('..')).toBeVisible();
   if (expectEmpty) {
-    await expect(history.locator(':scope > *')).toHaveCount(1);
+    await expect(history.locator(':scope > *')).toHaveCount(0);
   }
 
-  const managementButton = history.locator('> button[onclick="navigateToPortfolioAllocationManagement()"]');
+  const managementButton = page.locator('button[onclick="navigateToPortfolioAllocationManagement()"]');
   await expect(managementButton).toBeVisible();
   await expect(managementButton.locator('.bi-database-gear')).toBeVisible();
 }
