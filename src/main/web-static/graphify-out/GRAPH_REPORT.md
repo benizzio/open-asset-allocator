@@ -1,7 +1,9 @@
 # Graph Report - web-static  (2026-11-04)
 
 ## Corpus Check
-- cluster-only mode — file stats not available
+- 104 files · ~47,069 words
+- Verdict: corpus is large enough that graph structure adds value.
+- Unclassified: 3 file(s) not represented in the graph (top: (none) 2, .scss 1)
 
 ## Summary
 - 895 nodes · 2017 edges · 53 communities (50 shown, 3 thin omitted)
@@ -9,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `fc84e195`
+- Built from commit: `072527f9`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -74,23 +76,23 @@
 3. `registerHandlebarsLangHelpers()` - 18 edges
 4. `createPortfolioHistoryQuoteAction()` - 16 edges
 5. `LogLevel` - 15 edges
-6. `AssetSearchAutocompleteController` - 14 edges
-7. `bignumber.js` - 14 edges
-8. `handlebars` - 14 edges
+6. `bignumber.js` - 14 edges
+7. `handlebars` - 14 edges
+8. `AssetSearchAutocompleteController` - 14 edges
 9. `FractalPortfolioMultiChartDataSource` - 13 edges
 10. `AutocompleteControllerActions` - 13 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `portfolio-history portfolio context selector` --conceptually_related_to--> `getContextId()`  [INFERRED]
   websrc/components/portfolio-history.html → websrc/components/paginated-list/context.ts
-- `allocation-plan-management persisted record focus markers` --references--> `focusOnAcceptedRecord()`  [EXTRACTED]
-  websrc/components/allocation-plan-management.html → websrc/components/paginated-list/controls.ts
-- `portfolio-history persisted record focus markers` --conceptually_related_to--> `focusOnAcceptedRecord()`  [INFERRED]
-  websrc/components/portfolio-history.html → websrc/components/paginated-list/controls.ts
 - `allocation-plan-management portfolio context selector` --references--> `getContextId()`  [EXTRACTED]
   websrc/components/allocation-plan-management.html → websrc/components/paginated-list/context.ts
 - `portfolio-history-management portfolio context selector` --references--> `getContextId()`  [EXTRACTED]
   websrc/components/portfolio-history-management.html → websrc/components/paginated-list/context.ts
+- `allocation-plan-management persisted record focus markers` --references--> `focusOnAcceptedRecord()`  [EXTRACTED]
+  websrc/components/allocation-plan-management.html → websrc/components/paginated-list/controls.ts
+- `portfolio-history persisted record focus markers` --conceptually_related_to--> `focusOnAcceptedRecord()`  [INFERRED]
+  websrc/components/portfolio-history.html → websrc/components/paginated-list/controls.ts
 
 ## Import Cycles
 - 3-file cycle: `websrc/infra/htmx/index.ts -> websrc/infra/routing/index.ts -> websrc/infra/routing/binding-htmx-trigger-on-route.ts -> websrc/infra/htmx/index.ts`
@@ -302,7 +304,7 @@ Cohesion: 0.67
 Nodes (3): Frontend Module Architecture, HTMX-First API Calls, index.ts Module API Boundaries
 
 ## Knowledge Gaps
-- **171 isolated node(s):** `AllocationHierarchyLevelDTO`, `PlannedAllocationDTO`, `AllocationPlanPageItem`, `AllocationPlanViewPage`, `HistoryPageItem` (+166 more)
+- **171 isolated node(s):** `{ createProxyMiddleware }`, `fs`, `path`, `@eslint/js`, `@parcel/transformer-raw` (+166 more)
   These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 213 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **3 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -317,7 +319,7 @@ _Questions this graph is uniquely positioned to answer:_
   _High betweenness centrality (0.050) - this node is a cross-community bridge._
 - **Are the 16 inferred relationships involving `registerHandlebarsLangHelpers()` (e.g. with `andHelper()` and `arrayHelper()`) actually correct?**
   _`registerHandlebarsLangHelpers()` has 16 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `AllocationHierarchyLevelDTO`, `PlannedAllocationDTO`, `AllocationPlanPageItem` to the rest of the system?**
+- **What connects `{ createProxyMiddleware }`, `fs`, `path` to the rest of the system?**
   _171 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `allocation-plan.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.06481481481481481 - nodes in this community are weakly interconnected._

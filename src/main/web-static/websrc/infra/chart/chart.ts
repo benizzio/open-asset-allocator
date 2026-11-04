@@ -2,6 +2,8 @@
  * Loads, tracks, and disposes Chart.js instances attached to HTMX-managed DOM subtrees.
  * @author GPT-6 Luna
  * @author GPT-6 Sol
+ * @author benizzio
+ * @author GPT-6.1 Terra
  */
 
 import { Chart, ChartType } from "chart.js";
@@ -29,6 +31,8 @@ function getChartContentFromChart(chart: Chart) {
 /** Creates a chart once for a canvas that has registered chart content.
  * @author GPT-6 Luna
  * @author GPT-6 Sol
+ * @author benizzio
+ * @author GPT-6.1 Terra
  */
 function loadChart(canvas: HTMLCanvasElement): void {
 
@@ -85,11 +89,36 @@ function destroyDescendantCharts(element: HTMLElement): void {
     });
 }
 
+/**
+ * Provides chart content registration, lookup, lifecycle management, and color helpers.
+ * Register content by canvas ID before loading charts in a DOM subtree. Destroy charts
+ * before removing their subtree; registered content is retained if a matching canvas
+ * replaces the removed canvas before the deferred cleanup runs.
+ *
+ * @example
+ * chart.saveChartContent(canvas.id, content);
+ * chart.loadDescendantCharts(container);
+ * chart.destroyDescendantCharts(container);
+ * @author benizzio
+ * @author GPT-6 Luna
+ * @author GPT-6 Sol
+ * @author GPT-6.1 Terra
+ */
 const chart = {
     saveChartContent,
     getChartContent,
     getChartContentFromChart,
     destroyDescendantCharts,
+    /**
+     * Loads registered charts in matching descendant canvases that have no chart yet.
+     * The element itself is not included, even if it is a matching canvas.
+     * @param element - Root whose descendant canvases should be loaded.
+     * @example
+     * chart.loadDescendantCharts(container);
+     * @author benizzio
+     * @author GPT-6 Luna
+     * @author GPT-6.1 Terra
+     */
     loadDescendantCharts(element: HTMLElement) {
         element.querySelectorAll(`canvas[${ CHART_ATTRIBUTE }]`).forEach((canvas: HTMLCanvasElement) => {
             loadChart(canvas);

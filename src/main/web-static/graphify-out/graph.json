@@ -4624,7 +4624,7 @@
       "file_type": "code",
       "norm_label": "destroydescendantcharts()",
       "source_file": "websrc/infra/chart/chart.ts",
-      "source_location": "L67"
+      "source_location": "L71"
     },
     {
       "id": "websrc_infra_chart_chart_getchartcontent",
@@ -4636,7 +4636,7 @@
       "file_type": "code",
       "norm_label": "getchartcontent()",
       "source_file": "websrc/infra/chart/chart.ts",
-      "source_location": "L19"
+      "source_location": "L21"
     },
     {
       "id": "websrc_infra_chart_chart_getchartcontentfromchart",
@@ -4648,7 +4648,7 @@
       "file_type": "code",
       "norm_label": "getchartcontentfromchart()",
       "source_file": "websrc/infra/chart/chart.ts",
-      "source_location": "L23"
+      "source_location": "L25"
     },
     {
       "id": "websrc_infra_chart_chart_loadchart",
@@ -4660,7 +4660,7 @@
       "file_type": "code",
       "norm_label": "loadchart()",
       "source_file": "websrc/infra/chart/chart.ts",
-      "source_location": "L33"
+      "source_location": "L37"
     },
     {
       "id": "websrc_infra_chart_chart_savechartcontent",
@@ -4672,7 +4672,7 @@
       "file_type": "code",
       "norm_label": "savechartcontent()",
       "source_file": "websrc/infra/chart/chart.ts",
-      "source_location": "L15"
+      "source_location": "L17"
     },
     {
       "id": "websrc_infra_chart_chart_utils_convertunidimensionaldatasetbackgroundtopattern",
@@ -8236,7 +8236,7 @@
       "file_type": "code",
       "norm_label": "chartcontentrepo",
       "source_file": "websrc/infra/chart/chart.ts",
-      "source_location": "L13"
+      "source_location": "L15"
     },
     {
       "id": "websrc_infra_chart_index",
@@ -9259,7 +9259,7 @@
       "file_type": "code",
       "norm_label": "chart",
       "source_file": "websrc/infra/chart/chart.ts",
-      "source_location": "L88"
+      "source_location": "L107"
     },
     {
       "id": "eslint_config",
@@ -13031,7 +13031,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/infra/chart/chart.ts",
-      "source_location": "L25",
+      "source_location": "L27",
       "weight": 1.0
     },
     {
@@ -13043,7 +13043,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/infra/chart/chart.ts",
-      "source_location": "L36",
+      "source_location": "L40",
       "weight": 1.0
     },
     {
@@ -13055,7 +13055,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/infra/chart/chart.ts",
-      "source_location": "L50",
+      "source_location": "L54",
       "weight": 1.0
     },
     {
@@ -18750,7 +18750,7 @@
     },
     {
       "source": "websrc_infra_chart_chart",
-      "target": "websrc_infra_dom_dom_utils_domutils",
+      "target": "websrc_infra_chart_chart_options_buildchartoptions",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -18762,18 +18762,6 @@
     },
     {
       "source": "websrc_infra_chart_chart",
-      "target": "websrc_infra_chart_chart_options_buildchartoptions",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "websrc/infra/chart/chart.ts",
-      "source_location": "L8",
-      "weight": 1.0
-    },
-    {
-      "source": "websrc_infra_chart_chart",
       "target": "websrc_infra_chart_chart_types_chart_attribute",
       "relation": "imports",
       "_origin": "ast",
@@ -18781,7 +18769,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "websrc/infra/chart/chart.ts",
-      "source_location": "L9",
+      "source_location": "L11",
       "weight": 1.0
     },
     {
@@ -18793,7 +18781,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "websrc/infra/chart/chart.ts",
-      "source_location": "L9",
+      "source_location": "L11",
       "weight": 1.0
     },
     {
@@ -18805,7 +18793,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "websrc/infra/chart/chart.ts",
-      "source_location": "L9",
+      "source_location": "L11",
       "weight": 1.0
     },
     {
@@ -18817,7 +18805,19 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "websrc/infra/chart/chart.ts",
-      "source_location": "L9",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_infra_chart_chart",
+      "target": "websrc_infra_dom_dom_utils_domutils",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "websrc/infra/chart/chart.ts",
+      "source_location": "L12",
       "weight": 1.0
     },
     {
@@ -22646,7 +22646,7 @@
     },
     {
       "source": "websrc_infra_chart_chart",
-      "target": "websrc_infra_dom_dom_utils",
+      "target": "websrc_infra_chart_chart_options",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -22658,7 +22658,7 @@
     },
     {
       "source": "websrc_infra_chart_chart",
-      "target": "websrc_infra_chart_chart_utils",
+      "target": "websrc_infra_chart_chart_types",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -22670,31 +22670,31 @@
     },
     {
       "source": "websrc_infra_chart_chart",
+      "target": "websrc_infra_dom_dom_utils",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "websrc/infra/chart/chart.ts",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_infra_chart_chart",
+      "target": "websrc_infra_chart_chart_utils",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "websrc/infra/chart/chart.ts",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_infra_chart_chart",
       "target": "ref_chart_js",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "websrc/infra/chart/chart.ts",
-      "source_location": "L7",
-      "weight": 1.0
-    },
-    {
-      "source": "websrc_infra_chart_chart",
-      "target": "websrc_infra_chart_chart_options",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "websrc/infra/chart/chart.ts",
-      "source_location": "L8",
-      "weight": 1.0
-    },
-    {
-      "source": "websrc_infra_chart_chart",
-      "target": "websrc_infra_chart_chart_types",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -28408,13 +28408,24 @@
     },
     {
       "source": "websrc_infra_chart_chart",
+      "target": "websrc_infra_chart_chart_chart",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "websrc/infra/chart/chart.ts",
+      "source_location": "L107",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_infra_chart_chart",
       "target": "websrc_infra_chart_chart_chartcontentrepo",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/infra/chart/chart.ts",
-      "source_location": "L13",
+      "source_location": "L15",
       "weight": 1.0
     },
     {
@@ -28425,18 +28436,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/infra/chart/chart.ts",
-      "source_location": "L33",
-      "weight": 1.0
-    },
-    {
-      "source": "websrc_infra_chart_chart",
-      "target": "websrc_infra_chart_chart_chart",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "websrc/infra/chart/chart.ts",
-      "source_location": "L88",
+      "source_location": "L37",
       "weight": 1.0
     },
     {
@@ -32905,7 +32905,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "websrc/infra/chart/chart.ts",
-      "source_location": "L89",
+      "source_location": "L108",
       "weight": 1.0
     },
     {
@@ -32917,7 +32917,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "websrc/infra/chart/chart.ts",
-      "source_location": "L90",
+      "source_location": "L109",
       "weight": 1.0
     },
     {
@@ -32929,7 +32929,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "websrc/infra/chart/chart.ts",
-      "source_location": "L91",
+      "source_location": "L110",
       "weight": 1.0
     },
     {
@@ -32941,7 +32941,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "websrc/infra/chart/chart.ts",
-      "source_location": "L92",
+      "source_location": "L111",
       "weight": 1.0
     },
     {
@@ -32953,7 +32953,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "websrc/infra/chart/chart.ts",
-      "source_location": "L98",
+      "source_location": "L127",
       "weight": 1.0
     },
     {
@@ -32965,7 +32965,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "websrc/infra/chart/chart.ts",
-      "source_location": "L99",
+      "source_location": "L128",
       "weight": 1.0
     },
     {
@@ -34298,5 +34298,5 @@
       "source_file": "websrc/components/portfolio-navigation.html"
     }
   ],
-  "built_at_commit": "fc84e195914a54332438dd9be9b09c70cabcf0c7"
+  "built_at_commit": "072527f97f76e13c294f6a69407d021e0d160fe9"
 }
