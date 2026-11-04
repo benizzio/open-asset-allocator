@@ -2,15 +2,16 @@
  * Maps paginated allocation-plan API records into the management template context.
  * @author GPT-6 Luna
  * @author GPT-6 Sol
+ * @author GPT-6.1 Terra
  */
 
-import { AllocationPlanDTO, SerializableCompleteAllocationPlan } from "../../domain/allocation-plan";
-import { AllocationPlanType } from "../../domain/allocation";
-import { DomainService } from "../../domain/service";
-import { PortfolioPage } from "../../pages";
-import { getBrowserLocalCalendarDate } from "../../utils/calendar-date";
-import { type BeforeSwapEventDetail } from "../../infra/htmx";
-import paginatedList, { PaginationMode } from "../paginated-list";
+import { AllocationPlanDTO, SerializableCompleteAllocationPlan } from "../../../domain/allocation-plan";
+import { AllocationPlanType } from "../../../domain/allocation";
+import { DomainService } from "../../../domain/service";
+import { PortfolioPage } from "../../../pages";
+import { getBrowserLocalCalendarDate } from "../../../utils/calendar-date";
+import { type BeforeSwapEventDetail } from "../../../infra/htmx";
+import paginatedList, { PaginationMode } from "../../paginated-list";
 
 /** Maps the current plan page and adds the synthetic new-plan form only to an initial/reset page.
  *

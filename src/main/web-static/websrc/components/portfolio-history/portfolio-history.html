@@ -61,7 +61,7 @@
 
     <div data-hx-trigger-on-route="/portfolio/:portfolioId/history/manage!load-portfolio-management"
          data-display-on-route="/portfolio/:portfolioId/history/manage"
-         hx-get="/websrc/components/portfolio-history-management.html"
+         hx-get="/websrc/components/portfolio-history/portfolio-history-management.html"
          hx-trigger="load-portfolio-management once"
          hx-on::after-settle="portfolioHistoryManagement.handleAfterSettle(event, this)"
     >

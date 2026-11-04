@@ -4,6 +4,7 @@
  * @author benizzio
  * @author GPT-6 Luna
  * @author GPT-6.1 Sol
+ * @author GPT-6.1 Terra
  */
 import globals from "globals";
 import pluginJs from "@eslint/js";
@@ -210,6 +211,22 @@ export default [
                                 "Import from the public API 'components/asset-composed-columns-input' (index.ts) only; " +
                                 "deep imports are not allowed.",
                         },
+                        // Block deep imports into feature modules from outside their public APIs.
+                        // Authored by: GPT-6.1 Terra
+                        {
+                            group: [
+                                "**/components/allocation-plan/**", "components/allocation-plan/**",
+                                "../components/allocation-plan/**", "../allocation-plan/**",
+                            ],
+                            message: "Import from the public API 'components/allocation-plan' (index.ts) only.",
+                        },
+                        {
+                            group: [
+                                "**/components/portfolio-history/**", "components/portfolio-history/**",
+                                "../components/portfolio-history/**", "../portfolio-history/**",
+                            ],
+                            message: "Import from the public API 'components/portfolio-history' (index.ts) only.",
+                        },
                         // Block deep imports into the portfolio-history-quote module; use its public entry point
                         // Authored by: GPT-6 Luna
                         {
@@ -224,7 +241,8 @@ export default [
                                 "../portfolio-history-quote/**",
                             ],
                             message:
-                                "Import from the public API 'components/portfolio-history-quote' (index.ts) only; " +
+                                "Import from the public API 'components/portfolio-history/portfolio-history-quote' " +
+                                "(index.ts) only; " +
                                 "deep imports are not allowed.",
                         },
                         // Block deep imports into the management metadata editor; use its public entry point
@@ -258,7 +276,7 @@ export default [
                                 "../allocation-plan-management-metadata/**",
                             ],
                             message:
-                                "Import from the public API 'components/allocation-plan-management-metadata' " +
+                                "Import from the public API 'components/allocation-plan/allocation-plan-management-metadata' " +
                                 "(index.ts) only; deep imports are not allowed.",
                         },
                         // Block deep imports into allocation-plan management response mapping; use its public API
@@ -275,7 +293,7 @@ export default [
                                 "../allocation-plan-management-response/**",
                             ],
                             message:
-                                "Import from the public API 'components/allocation-plan-management-response' " +
+                                "Import from the public API 'components/allocation-plan/allocation-plan-management-response' " +
                                 "(index.ts) only; deep imports are not allowed.",
                         },
                         // Block deep imports into shared paginated-list behavior; use its public entry point
@@ -321,7 +339,7 @@ export default [
                             ],
                             message:
                                 "Import from the public API " +
-                                "'components/portfolio-history-management-observation-details' (index.ts) only; " +
+                                "'components/portfolio-history/portfolio-history-management-observation-details' (index.ts) only; " +
                                 "deep imports are not allowed.",
                         },
                         // Block deep imports into history observation metadata; use its public entry point
@@ -339,7 +357,7 @@ export default [
                             ],
                             message:
                                 "Import from the public API " +
-                                "'components/portfolio-history-management-observation-metadata' (index.ts) only; " +
+                                "'components/portfolio-history/portfolio-history-management-observation-metadata' (index.ts) only; " +
                                 "deep imports are not allowed.",
                         },
                     ],

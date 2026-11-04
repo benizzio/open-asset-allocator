@@ -1,7 +1,7 @@
 import { registerPortfolioAnalysisHandlebarsHelpers } from "./portfolio-analysis";
 import { toChartContent } from "./chart-contents";
-import portfolioHistoryManagement from "../components/portfolio-history-management";
-import allocationPlanManagement from "../components/allocation-plan-management";
+import portfolioHistoryManagement from "../components/portfolio-history";
+import allocationPlanManagement from "../components/allocation-plan";
 import { AssetPage, PortfolioPage } from "../pages";
 import notifications from "../components/notifications";
 import AssetComposedColumnsInput from "../components/asset-composed-columns-input";

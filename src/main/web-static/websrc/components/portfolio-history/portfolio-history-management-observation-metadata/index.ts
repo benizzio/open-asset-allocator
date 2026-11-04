@@ -8,8 +8,8 @@
  * @author GPT-6.1 Terra
  */
 
-import { calendarDateToUtcTimestamp } from "../../utils/calendar-date";
-import { isManagementMetadataEditorActive } from "../management-metadata-editor";
+import { calendarDateToUtcTimestamp } from "../../../utils/calendar-date";
+import { isManagementMetadataEditorActive } from "../../management-metadata-editor";
 import { areObservationDetailsReady } from "../portfolio-history-management-observation-details";
 
 const FORM_PREFIX = "portfolio-history-management-form-";

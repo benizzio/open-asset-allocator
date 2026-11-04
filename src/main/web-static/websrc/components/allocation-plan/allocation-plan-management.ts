@@ -7,22 +7,22 @@
  * @author GPT-6 Luna
  * @author GPT-6.1 Terra
  */
-import { PortfolioPage } from "../pages";
-import { SerializableFractalPlannedAllocation } from "../domain/allocation-plan";
-import { Asset } from "../domain/asset";
-import { AfterRequestEventDetail, HtmxInfra } from "../infra/htmx";
-import DomInfra from "../infra/dom";
+import { PortfolioPage } from "../../pages";
+import { SerializableFractalPlannedAllocation } from "../../domain/allocation-plan";
+import { Asset } from "../../domain/asset";
+import { AfterRequestEventDetail, HtmxInfra } from "../../infra/htmx";
+import DomInfra from "../../infra/dom";
 import { BigNumber } from "bignumber.js";
 import * as handlebars from "handlebars";
-import { isNullish, toInt } from "../utils/lang";
-import { Portfolio } from "../domain/portfolio";
-import { AllocationHierarchyLevel } from "../domain/allocation";
-import AssetComposedColumnsInput, { AssetSelectionState } from "./asset-composed-columns-input";
+import { isNullish, toInt } from "../../utils/lang";
+import { Portfolio } from "../../domain/portfolio";
+import { AllocationHierarchyLevel } from "../../domain/allocation";
+import AssetComposedColumnsInput, { AssetSelectionState } from "../asset-composed-columns-input";
 import htmx from "htmx.org";
-import Router from "../infra/routing";
-import notifications from "./notifications";
-import { NotificationType } from "../infra/infra-types";
-import { bindReadOnlyManagementMetadataHeaderToggle } from "./management-metadata-editor";
+import Router from "../../infra/routing";
+import notifications from "../notifications";
+import { NotificationType } from "../../infra/infra-types";
+import { bindReadOnlyManagementMetadataHeaderToggle } from "../management-metadata-editor";
 import {
     activateAllocationPlanEditor,
     bindAllocationPlanMetadataSubmitGuard,

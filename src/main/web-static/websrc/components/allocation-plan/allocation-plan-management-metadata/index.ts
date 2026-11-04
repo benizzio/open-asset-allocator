@@ -11,7 +11,7 @@
 import {
     activateManagementMetadataEditor,
     isManagementMetadataEditorActive,
-} from "../management-metadata-editor";
+} from "../../management-metadata-editor";
 
 const FORM_PREFIX = "allocation-plan-management-form-";
 const boundContainers = new WeakSet<HTMLElement>();

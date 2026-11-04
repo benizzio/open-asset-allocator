@@ -12,9 +12,9 @@
 
 import htmx from "htmx.org";
 import { BigNumber } from "bignumber.js";
-import { AfterRequestEventDetail, HtmxInfra, type BeforeSwapEventDetail } from "../infra/htmx";
-import { ObservationTimestamp } from "../domain/portfolio-allocation";
-import Router from "../infra/routing";
+import { AfterRequestEventDetail, HtmxInfra, type BeforeSwapEventDetail } from "../../infra/htmx";
+import { ObservationTimestamp } from "../../domain/portfolio-allocation";
+import Router from "../../infra/routing";
 import {
     createPortfolioHistoryQuoteAction,
     readExternalAssetKeys,
@@ -28,17 +28,17 @@ import AssetComposedColumnsInput, {
     ASSET_ROW_SELECTION_CHANGE_EVENT,
     AssetRowSelectionChangeState,
     type AssetRowSelectionChangeEvent,
-} from "./asset-composed-columns-input";
-import { toInt } from "../utils/lang";
+} from "../asset-composed-columns-input";
+import { toInt } from "../../utils/lang";
 import type { TemplateDelegate } from "handlebars";
-import notifications from "./notifications";
-import { NotificationType } from "../infra/infra-types";
-import { getBrowserLocalCalendarDate } from "../utils/calendar-date";
+import notifications from "../notifications";
+import { NotificationType } from "../../infra/infra-types";
+import { getBrowserLocalCalendarDate } from "../../utils/calendar-date";
 import {
     activateManagementMetadataEditor,
     bindReadOnlyManagementMetadataHeaderToggle,
     hideManagementMetadataEditor,
-} from "./management-metadata-editor";
+} from "../management-metadata-editor";
 import {
     areObservationDetailsReady,
     bindObservationDetailsLoader,
@@ -46,7 +46,7 @@ import {
     retryObservationDetails,
 } from "./portfolio-history-management-observation-details";
 import { prepareObservationMetadataForSubmit } from "./portfolio-history-management-observation-metadata";
-import paginatedList, { PaginationMode } from "./paginated-list";
+import paginatedList, { PaginationMode } from "../paginated-list";
 
 const PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER = "accordion-portfolio-history-management";
 const PORTFOLIO_ALLOCATION_MANAGEMENT_TBODY_PREFIX = "portfolio-history-management-form-tbody-";
