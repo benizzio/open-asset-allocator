@@ -1,6 +1,7 @@
 # Containerized Playwright E2E tests
 
 <!-- Authored by: OpenCode -->
+<!-- Co-authored by: GPT-6.1 Terra -->
 
 This package tests the complete application through browser, HTTP API, and PostgreSQL boundaries. Docker Compose starts
 the application topology, Flyway migrations, a disposable PostgreSQL database, and a Playwright runner. The host only
@@ -95,6 +96,24 @@ build; the orchestration command invokes a cache-aware build on every run.
 
 This topology tests the production image boundary rather than the development Parcel proxy.
 
+### CI policy for stacked pull requests
+
+The `Playwright E2E` job runs and blocks on failure for standalone pull requests and the tip of a native GitHub stack,
+including a one-PR stack. It skips lower native stack layers, where the complete integration may not yet be present.
+A skipped job is not a passing E2E test: it has no runner, diagnostics artifact, or cleanup steps. GitHub accepts the
+conditionally skipped job as a required check. Missing stack metadata, including an ordinary chain of PR base branches
+without native stack metadata, does not skip E2E. The job also runs for merge-queue `merge_group` events. Local
+`make e2e` and `make e2e-ci` remain unconditional.
+
+Other required checks and reviews still apply. A lower layer can become individually mergeable despite being incomplete;
+do not merge an integration-dependent layer alone. This policy does not guarantee a linear history, an atomic stack
+merge, or merge-queue compatibility for other required workflows.
+
+For rollout, confirm native stack metadata and make the updated workflow available to every affected layer while
+preserving linear history. Trigger fresh runs on the updated refs and verify lower jobs are skipped and the current tip
+actually passes. Rerunning an old workflow uses its original revision. After a stack topology change, obtain fresh runs
+and verify the new tip executes E2E; an earlier skipped result may not be invalidated automatically.
+
 ## Local ports
 
 Local bindings default to loopback. Override a port or bind address by setting the corresponding environment variable
@@ -152,8 +171,8 @@ cleanup:
 | `test-results/` | Per-test traces, screenshots, and videos retained on failure. |
 | `compose.log` | Timestamped PostgreSQL, Flyway, and application service logs captured before cleanup. |
 
-Use `make e2e-report` to serve `html-report/`. GitHub Actions uploads the complete directory for every workflow outcome
-and retains the workflow artifact for 14 days.
+Use `make e2e-report` to serve `html-report/`. For an executed E2E job, GitHub Actions attempts to upload the complete
+directory regardless of its outcome and retains the workflow artifact for 14 days.
 
 ## Dependency updates
 
