@@ -1,10 +1,13 @@
 # Runs containerized Playwright E2E tests against the immutable production monolith; cancels superseded runs per pull request/workflow.
 # Co-authored by: OpenCode and Igor Benicio de Mesquita
+# Co-authored by: GPT-6.1 Terra
 name: E2E Tests
 permissions:
   contents: read
 on:
   pull_request:
+  merge_group:
+    types: [checks_requested]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -13,6 +16,14 @@ concurrency:
 jobs:
   e2e:
     name: Playwright E2E
+    # Skip only lower native stack layers; GitHub accepts a conditionally skipped required job.
+    if: >-
+      ${{
+        github.event_name != 'pull_request' ||
+        github.event.pull_request.stack == null ||
+        !(github.event.pull_request.stack.position > 0 &&
+          github.event.pull_request.stack.position < github.event.pull_request.stack.size)
+      }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
