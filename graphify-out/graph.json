@@ -17733,6 +17733,19 @@
     },
     {
       "source": "src_test_e2e_support_database",
+      "target": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
+      "source_location": "L8",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "source": "src_test_e2e_support_database",
       "target": "src_test_e2e_tests_portfolio_visualization_e2e_spec",
       "relation": "imports_from",
       "_origin": "ast",
@@ -18063,19 +18076,6 @@
       "context": "import",
       "source_file": "src/test/e2e/tests/portfolio-editing.e2e.spec.ts",
       "source_location": "L12",
-      "type_only": true,
-      "weight": 1.0
-    },
-    {
-      "source": "src_test_e2e_tests_portfolio_history_external_quote_e2e_spec",
-      "target": "src_test_e2e_support_database",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/test/e2e/tests/portfolio-history-external-quote.e2e.spec.ts",
-      "source_location": "L8",
       "type_only": true,
       "weight": 1.0
     },
@@ -23445,6 +23445,16 @@
       "weight": 1.0
     },
     {
+      "source": "_github_workflows_e2e_e2e_tests_workflow",
+      "target": "src_test_e2e_readme_stack_tip_e2e_policy",
+      "relation": "references",
+      "_origin": "semantic",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/test/e2e/README.md",
+      "source_location": null
+    },
+    {
       "source": "_github_workflows_tests_external_integration_tests",
       "target": "_github_workflows_tests_go_test_workflow",
       "relation": "references",
@@ -25315,18 +25325,8 @@
       "weight": 1.0
     },
     {
-      "source": "src_test_e2e_readme_stack_tip_e2e_policy",
-      "target": "_github_workflows_e2e_e2e_tests_workflow",
-      "relation": "references",
-      "_origin": "semantic",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/test/e2e/README.md",
-      "source_location": null
-    },
-    {
-      "source": "src_test_e2e_readme_stack_tip_e2e_policy",
-      "target": "src_test_e2e_readme_containerized_playwright_e2e",
+      "source": "src_test_e2e_readme_containerized_playwright_e2e",
+      "target": "src_test_e2e_readme_stack_tip_e2e_policy",
       "relation": "references",
       "_origin": "semantic",
       "confidence": "EXTRACTED",
@@ -26080,5 +26080,5 @@
       "source_file": "src/main/docker/docker-compose-e2e.yml"
     }
   ],
-  "built_at_commit": "23cd19e4ce3284f418c01a3d9a5bdcf1beef5388"
+  "built_at_commit": "ef7eb813e709e072d3ae4bef4cd232b2c0e3c995"
 }
