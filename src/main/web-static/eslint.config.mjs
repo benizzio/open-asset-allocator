@@ -367,6 +367,34 @@ export default [
         },
     },
 
+    // Restrict sibling feature internals reached from nested components without affecting domain imports.
+    // Authored by: GPT-6.1 Terra
+    {
+        files: ["websrc/components/**/*.{js,jsx,mjs,cjs,ts,tsx}"],
+        ignores: ["websrc/components/allocation-plan/**"],
+        plugins: { allocationPlanBoundary: tseslint.plugin },
+        rules: {
+            "allocationPlanBoundary/no-restricted-imports": ["error", {
+                patterns: [{
+                    regex: "^(?:\\.\\./){2,}allocation-plan/",
+                    message: "Import from the public API 'components/allocation-plan' (index.ts) only.",
+                }],
+            }],
+        },
+    },
+    {
+        files: ["websrc/components/**/*.{js,jsx,mjs,cjs,ts,tsx}"],
+        ignores: ["websrc/components/portfolio-history/**"],
+        rules: {
+            "@typescript-eslint/no-restricted-imports": ["error", {
+                patterns: [{
+                    regex: "^(?:\\.\\./){2,}portfolio-history/",
+                    message: "Import from the public API 'components/portfolio-history' (index.ts) only.",
+                }],
+            }],
+        },
+    },
+
     // Apply core no-unused-vars to JavaScript files
     {
         files: ["**/*.{js,jsx,mjs,cjs}"],
