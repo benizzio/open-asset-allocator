@@ -2,6 +2,7 @@ package inttest
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 
 	dbx "github.com/go-ozzo/ozzo-dbx"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	inttestinfra "github.com/benizzio/open-asset-allocator/inttest/infra"
 	inttestutil "github.com/benizzio/open-asset-allocator/inttest/util"
@@ -364,6 +366,213 @@ func TestGetAvailableHistoryObservations(t *testing.T) {
 	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
 }
 
+// TestPortfolioHistoryOrderingIsChronologicalAndDeterministic verifies chronological observation ordering,
+// ID tie-breaking, limit-boundary selection, repeated-read stability, and ID-based reads outside the list limit.
+//
+// Authored by: OpenCode
+func TestPortfolioHistoryOrderingIsChronologicalAndDeterministic(t *testing.T) {
+	t.Cleanup(
+		inttestutil.BuildCleanupFunctionBuilder().
+			AddCleanupQuery(
+				`DELETE FROM portfolio_allocation_fact
+				 WHERE portfolio_id = 1 AND observation_time_id IN (
+					SELECT id FROM portfolio_allocation_obs_time WHERE portfolio_id = 1 AND observation_time_tag LIKE 'pr5-ordering-%'
+				 )`,
+				nil,
+			).
+			AddCleanupQuery(
+				`DELETE FROM portfolio_allocation_obs_time WHERE portfolio_id = 1 AND observation_time_tag LIKE 'pr5-ordering-%'`,
+				nil,
+			).
+			Build(t),
+	)
+
+	var insertObservationsSQL = `
+		INSERT INTO portfolio_allocation_obs_time (portfolio_id, observation_time_tag, observation_timestamp)
+		VALUES
+			(1, 'pr5-ordering-march', '2040-03-01T00:00:00Z'),
+			(1, 'pr5-ordering-feb-1', '2040-02-01T00:00:00Z'),
+			(1, 'pr5-ordering-april', '2040-04-01T00:00:00Z'),
+			(1, 'pr5-ordering-feb-2', '2040-02-01T00:00:00Z'),
+			(1, 'pr5-ordering-january', '2040-01-01T00:00:00Z'),
+			(1, 'pr5-ordering-feb-3', '2040-02-01T00:00:00Z'),
+			(1, 'pr5-ordering-may', '2040-05-01T00:00:00Z'),
+			(1, 'pr5-ordering-feb-4', '2040-02-01T00:00:00Z'),
+			(1, 'pr5-ordering-june', '2040-06-01T00:00:00Z'),
+			(1, 'pr5-ordering-july', '2040-07-01T00:00:00Z'),
+			(1, 'pr5-ordering-august', '2040-08-01T00:00:00Z'),
+			(1, 'pr5-ordering-september', '2040-09-01T00:00:00Z'),
+			(1, 'pr5-ordering-october', '2040-10-01T00:00:00Z')
+	`
+	var err = inttestinfra.ExecuteDBQuery(insertObservationsSQL, nil)
+	require.NoError(t, err)
+
+	var insertAllocationsSQL = `
+		INSERT INTO portfolio_allocation_fact (
+			asset_id, "class", cash_reserve, asset_quantity, asset_market_price,
+			total_market_value, portfolio_id, observation_time_id
+		)
+		SELECT 1, 'BONDS', FALSE, 1, 100, 100, 1, id
+		FROM portfolio_allocation_obs_time
+		WHERE portfolio_id = 1 AND observation_time_tag LIKE 'pr5-ordering-%'
+	`
+	err = inttestinfra.ExecuteDBQuery(insertAllocationsSQL, nil)
+	require.NoError(t, err)
+
+	var insertAdditionalOctoberAllocationsSQL = `
+		INSERT INTO portfolio_allocation_fact (
+			asset_id, "class", cash_reserve, asset_quantity, asset_market_price,
+			total_market_value, portfolio_id, observation_time_id
+		)
+		SELECT fixture.asset_id, fixture.class, fixture.cash_reserve, 1, fixture.total_market_value,
+			fixture.total_market_value, 1, observation.id
+		FROM (VALUES
+			(2, 'STOCKS', FALSE, 200),
+			(3, 'STOCKS', TRUE, 300)
+		) AS fixture(asset_id, class, cash_reserve, total_market_value)
+		CROSS JOIN portfolio_allocation_obs_time observation
+		WHERE observation.portfolio_id = 1 AND observation.observation_time_tag = 'pr5-ordering-october'
+	`
+	err = inttestinfra.ExecuteDBQuery(insertAdditionalOctoberAllocationsSQL, nil)
+	require.NoError(t, err)
+
+	var observationIds = make(map[string]int64)
+	err = inttestinfra.FetchWithDBQuery(
+		`SELECT id, observation_time_tag FROM portfolio_allocation_obs_time
+		 WHERE portfolio_id = 1 AND observation_time_tag LIKE 'pr5-ordering-%'`,
+		nil,
+		func(rows *dbx.Rows) error {
+			var id int64
+			var tag string
+			var scanError error
+			if scanError = rows.Scan(&id, &tag); scanError != nil {
+				return scanError
+			}
+			observationIds[tag] = id
+			return nil
+		},
+	)
+	require.NoError(t, err)
+	require.Len(t, observationIds, 13)
+
+	type observationProjection struct {
+		Id        int64  `json:"id"`
+		TimeTag   string `json:"timeTag"`
+		Timestamp string `json:"timestamp"`
+	}
+	type allocationProjection struct {
+		CashReserve      bool   `json:"cashReserve"`
+		TotalMarketValue string `json:"totalMarketValue"`
+	}
+	type snapshotProjection struct {
+		ObservationTimestamp observationProjection  `json:"observationTimestamp"`
+		Allocations          []allocationProjection `json:"allocations"`
+		TotalMarketValue     string                 `json:"totalMarketValue"`
+	}
+
+	var expectedTags = []string{
+		"pr5-ordering-october",
+		"pr5-ordering-september",
+		"pr5-ordering-august",
+		"pr5-ordering-july",
+		"pr5-ordering-june",
+		"pr5-ordering-may",
+		"pr5-ordering-april",
+		"pr5-ordering-march",
+		"pr5-ordering-feb-4",
+		"pr5-ordering-feb-3",
+	}
+	var timestampByTag = map[string]string{
+		"pr5-ordering-october":   "2040-10-01T00:00:00Z",
+		"pr5-ordering-september": "2040-09-01T00:00:00Z",
+		"pr5-ordering-august":    "2040-08-01T00:00:00Z",
+		"pr5-ordering-july":      "2040-07-01T00:00:00Z",
+		"pr5-ordering-june":      "2040-06-01T00:00:00Z",
+		"pr5-ordering-may":       "2040-05-01T00:00:00Z",
+		"pr5-ordering-april":     "2040-04-01T00:00:00Z",
+		"pr5-ordering-march":     "2040-03-01T00:00:00Z",
+		"pr5-ordering-feb-4":     "2040-02-01T00:00:00Z",
+		"pr5-ordering-feb-3":     "2040-02-01T00:00:00Z",
+		"pr5-ordering-feb-2":     "2040-02-01T00:00:00Z",
+	}
+	var expectedObservations = make([]observationProjection, 0, len(expectedTags))
+	for _, tag := range expectedTags {
+		expectedObservations = append(expectedObservations, observationProjection{
+			Id:        observationIds[tag],
+			TimeTag:   tag,
+			Timestamp: timestampByTag[tag],
+		})
+	}
+	expectedObservationsJSON, err := json.Marshal(expectedObservations)
+	require.NoError(t, err)
+
+	var readAttempt int
+	for readAttempt = 0; readAttempt < 2; readAttempt++ {
+		availableResponse, requestError := http.Get(
+			inttestinfra.TestAPIURLPrefix + "/portfolio/1/history/observation",
+		)
+		require.NoError(t, requestError)
+		availableBody, readError := io.ReadAll(availableResponse.Body)
+		closeError := availableResponse.Body.Close()
+		require.NoError(t, readError)
+		require.NoError(t, closeError)
+		require.Equal(t, http.StatusOK, availableResponse.StatusCode)
+		assert.JSONEq(t, string(expectedObservationsJSON), string(availableBody))
+
+		historyResponse, requestError := http.Get(inttestinfra.TestAPIURLPrefix + "/portfolio/1/history")
+		require.NoError(t, requestError)
+		historyBody, readError := io.ReadAll(historyResponse.Body)
+		closeError = historyResponse.Body.Close()
+		require.NoError(t, readError)
+		require.NoError(t, closeError)
+		require.Equal(t, http.StatusOK, historyResponse.StatusCode)
+
+		var snapshots []snapshotProjection
+		require.NoError(t, json.Unmarshal(historyBody, &snapshots))
+		require.Len(t, snapshots, len(expectedObservations))
+		var actualHistoryObservations = make([]observationProjection, 0, len(snapshots))
+		for _, snapshot := range snapshots {
+			actualHistoryObservations = append(actualHistoryObservations, snapshot.ObservationTimestamp)
+			if snapshot.ObservationTimestamp.TimeTag == "pr5-ordering-october" {
+				assert.Equal(t, "600", snapshot.TotalMarketValue)
+				assert.Equal(t, []allocationProjection{
+					{CashReserve: false, TotalMarketValue: "100"},
+					{CashReserve: true, TotalMarketValue: "300"},
+					{CashReserve: false, TotalMarketValue: "200"},
+				}, snapshot.Allocations)
+			} else {
+				assert.Equal(t, "100", snapshot.TotalMarketValue)
+				assert.Equal(t, []allocationProjection{{CashReserve: false, TotalMarketValue: "100"}}, snapshot.Allocations)
+			}
+		}
+		actualHistoryObservationsJSON, marshalError := json.Marshal(actualHistoryObservations)
+		require.NoError(t, marshalError)
+		assert.JSONEq(t, string(expectedObservationsJSON), string(actualHistoryObservationsJSON))
+	}
+
+	assert.Greater(t, observationIds["pr5-ordering-feb-4"], observationIds["pr5-ordering-feb-3"])
+	assert.Greater(t, observationIds["pr5-ordering-feb-3"], observationIds["pr5-ordering-feb-2"])
+
+	var olderObservationId = observationIds["pr5-ordering-january"]
+	olderResponse, err := http.Get(
+		inttestinfra.TestAPIURLPrefix + "/portfolio/1/history?observationTimestampId=" + strconv.FormatInt(olderObservationId, 10),
+	)
+	require.NoError(t, err)
+	defer deferCloseResponseBody(olderResponse)
+	require.Equal(t, http.StatusOK, olderResponse.StatusCode)
+	olderBody, err := io.ReadAll(olderResponse.Body)
+	require.NoError(t, err)
+	var olderSnapshots []snapshotProjection
+	require.NoError(t, json.Unmarshal(olderBody, &olderSnapshots))
+	require.Len(t, olderSnapshots, 1)
+	assert.Equal(t, observationProjection{
+		Id:        olderObservationId,
+		TimeTag:   "pr5-ordering-january",
+		Timestamp: "2040-01-01T00:00:00Z",
+	}, olderSnapshots[0].ObservationTimestamp)
+	assert.Equal(t, "100", olderSnapshots[0].TotalMarketValue)
+}
+
 // TestPostPortfolioAllocationHistoryInsertOnly tests the successful creation of portfolio allocation history,
 // only inserting records.
 //
@@ -429,13 +638,13 @@ func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 			AddCleanupQuery(
 				`
 				DELETE FROM portfolio_allocation_fact 
-				WHERE observation_time_id IN (
-					SELECT id FROM portfolio_allocation_obs_time WHERE observation_time_tag = '202505'
+				WHERE portfolio_id = 1 AND observation_time_id IN (
+					SELECT id FROM portfolio_allocation_obs_time WHERE portfolio_id = 1 AND observation_time_tag = '202505'
 				)`,
 				nil,
 			).
 			AddCleanupQuery("DELETE FROM asset WHERE ticker = 'Test:NEW'", nil).
-			AddCleanupQuery("DELETE FROM portfolio_allocation_obs_time WHERE observation_time_tag = '202505'", nil).
+			AddCleanupQuery("DELETE FROM portfolio_allocation_obs_time WHERE portfolio_id = 1 AND observation_time_tag = '202505'", nil).
 			Build(t),
 	)
 	// Verify that the response body is empty as expected for 204 No Content
@@ -464,8 +673,8 @@ func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 				o.observation_timestamp
 			FROM portfolio_allocation_fact p 
 			JOIN asset a ON p.asset_id = a.id
-			JOIN portfolio_allocation_obs_time o ON p.observation_time_id = o.id
-			WHERE p.portfolio_id=%s AND o.observation_time_tag='%s' 
+			JOIN portfolio_allocation_obs_time o ON p.portfolio_id = o.portfolio_id AND p.observation_time_id = o.id
+		WHERE p.portfolio_id=%s AND o.portfolio_id=p.portfolio_id AND o.observation_time_tag='%s'
 			ORDER BY p.asset_id`,
 		portfolioIdString,
 		"202505",
@@ -523,17 +732,18 @@ func TestPostPortfolioAllocationHistoryInsertOnly(t *testing.T) {
 	inttestutil.AssertDBWithQueryMultipleRows(t, allocationHistoryQuery, expectedRecords)
 }
 
-// TestPostPortfolioAllocationHistoryInsertEmptyZeroTimestamp verifies that a
-// zero observation timestamp id creates a new observation timestamp and
-// persists the posted allocation snapshot.
+// TestPostPortfolioAllocationHistoryInsertExplicitTimestamp verifies that an explicit offset-bearing
+// observation timestamp is persisted as the same UTC instant.
 //
 // Co-authored by: OpenCode and Igor Benicio de Mesquita
-func TestPostPortfolioAllocationHistoryInsertEmptyZeroTimestamp(t *testing.T) {
+func TestPostPortfolioAllocationHistoryInsertExplicitTimestamp(t *testing.T) {
 
 	var postPortfolioSnapshotJSON = `
 		{
 			"observationTimestamp": {
-				"id": 0
+				"id": 0,
+				"timeTag": "2025-05-01T02:00:00+02:00",
+				"timestamp": "2025-05-01T02:00:00+02:00"
 			},
 			"allocations": [
 				{
@@ -549,7 +759,6 @@ func TestPostPortfolioAllocationHistoryInsertEmptyZeroTimestamp(t *testing.T) {
 		}
 	`
 
-	var testTime = time.Now()
 	response, err := http.Post(
 		inttestinfra.TestAPIURLPrefix+"/portfolio/1/history",
 		"application/json",
@@ -561,13 +770,13 @@ func TestPostPortfolioAllocationHistoryInsertEmptyZeroTimestamp(t *testing.T) {
 			AddCleanupQuery(
 				`
 				DELETE FROM portfolio_allocation_fact 
-				WHERE observation_time_id IN (
-					SELECT id FROM portfolio_allocation_obs_time WHERE observation_time_tag LIKE '%T%'
+				WHERE portfolio_id = 1 AND observation_time_id IN (
+					SELECT id FROM portfolio_allocation_obs_time WHERE portfolio_id = 1 AND observation_time_tag LIKE '%T%'
 				)`,
 				nil,
 			).
 			AddCleanupQuery("DELETE FROM asset WHERE ticker = 'Test:NEW'", nil).
-			AddCleanupQuery("DELETE FROM portfolio_allocation_obs_time WHERE observation_time_tag LIKE '%T%'", nil).
+			AddCleanupQuery("DELETE FROM portfolio_allocation_obs_time WHERE portfolio_id = 1 AND observation_time_tag LIKE '%T%'", nil).
 			Build(t),
 	)
 
@@ -599,16 +808,14 @@ func TestPostPortfolioAllocationHistoryInsertEmptyZeroTimestamp(t *testing.T) {
 			"observation_time_id": inttestutil.NotNullAssertableNullString(),
 			"observation_time_tag": inttestutil.ToAssertableNullStringWithAssertion(
 				func(t *testing.T, actual sql.NullString) {
-					dateTime, dateErr := time.Parse(time.RFC3339, actual.String)
-					assert.NoError(t, dateErr)
-					assert.WithinDuration(t, testTime, dateTime, time.Second)
+					assert.Equal(t, "2025-05-01T02:00:00+02:00", actual.String)
 				},
 			),
 			"observation_timestamp": inttestutil.ToAssertableNullStringWithAssertion(
 				func(t *testing.T, actual sql.NullString) {
 					dateTime, dateErr := time.Parse(time.RFC3339Nano, actual.String)
 					assert.NoError(t, dateErr)
-					assert.WithinDuration(t, testTime, dateTime, time.Second)
+					assert.Equal(t, "2025-05-01T00:00:00Z", dateTime.Format(time.RFC3339))
 				},
 			),
 		},
@@ -632,7 +839,7 @@ func TestPostPortfolioAllocationHistoryInsertEmptyZeroTimestamp(t *testing.T) {
 				o.observation_timestamp
 			FROM portfolio_allocation_fact p 
 			JOIN asset a ON p.asset_id = a.id
-			JOIN portfolio_allocation_obs_time o ON p.observation_time_id = o.id
+			JOIN portfolio_allocation_obs_time o ON p.portfolio_id = o.portfolio_id AND p.observation_time_id = o.id
 			WHERE p.portfolio_id=%s AND o.observation_time_tag LIKE '%s' 
 			ORDER BY p.asset_id`,
 		portfolioIdString,
@@ -668,7 +875,7 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 			   100,
 			   100,
 			   1,
-			   3
+			   9
 			),
 		    (
 			   7,
@@ -678,7 +885,7 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 			   9,
 			   90,
 			   1,
-			   3
+			   9
 			)
 		;
 	`
@@ -691,8 +898,8 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 			AddCleanupQuery(
 				`
 				DELETE FROM portfolio_allocation_fact 
-				WHERE observation_time_id IN (
-					SELECT id FROM portfolio_allocation_obs_time WHERE id = 3
+				WHERE portfolio_id = 1 AND observation_time_id IN (
+					SELECT id FROM portfolio_allocation_obs_time WHERE portfolio_id = 1 AND id = 9
 				)`,
 				nil,
 			).
@@ -703,7 +910,9 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 	var postPortfolioSnapshotJSON = `
 		{
 			"observationTimestamp": {
-				"id": "3"
+				"id": "9",
+				"timeTag": "202504",
+				"timestamp": "2025-04-01T00:00:00Z"
 			},
 			"allocations": [
 				{
@@ -789,7 +998,7 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 			"name":                  inttestutil.ToAssertableNullString("SPDR Bloomberg 1-3 Month T-Bill ETF"),
 			"ticker":                inttestutil.ToAssertableNullString("ARCA:BIL"),
 			"external_data":         inttestutil.NullAssertableNullString(),
-			"observation_time_id":   inttestutil.ToAssertableNullString("3"),
+			"observation_time_id":   inttestutil.ToAssertableNullString("9"),
 			"observation_time_tag":  inttestutil.ToAssertableNullString("202504"),
 			"observation_timestamp": inttestutil.ToAssertableNullString("2025-04-01T00:00:00Z"),
 		},
@@ -804,7 +1013,7 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 			"name":                  inttestutil.ToAssertableNullString("SPDR Bloomberg 1-3 Month T-Bill ETF"),
 			"ticker":                inttestutil.ToAssertableNullString("ARCA:BIL"),
 			"external_data":         inttestutil.NullAssertableNullString(),
-			"observation_time_id":   inttestutil.ToAssertableNullString("3"),
+			"observation_time_id":   inttestutil.ToAssertableNullString("9"),
 			"observation_time_tag":  inttestutil.ToAssertableNullString("202504"),
 			"observation_timestamp": inttestutil.ToAssertableNullString("2025-04-01T00:00:00Z"),
 		},
@@ -819,7 +1028,7 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 			"name":                  inttestutil.ToAssertableNullString("iShares Msci Brazil ETF"),
 			"ticker":                inttestutil.ToAssertableNullString("ARCA:EWZ"),
 			"external_data":         inttestutil.NullAssertableNullString(),
-			"observation_time_id":   inttestutil.ToAssertableNullString("3"),
+			"observation_time_id":   inttestutil.ToAssertableNullString("9"),
 			"observation_time_tag":  inttestutil.ToAssertableNullString("202504"),
 			"observation_timestamp": inttestutil.ToAssertableNullString("2025-04-01T00:00:00Z"),
 		},
@@ -834,7 +1043,7 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 			"name":                  inttestutil.ToAssertableNullString("New Asset Repeat 2"),
 			"ticker":                inttestutil.ToAssertableNullString("Test:NEW"),
 			"external_data":         inttestutil.NullAssertableNullString(),
-			"observation_time_id":   inttestutil.ToAssertableNullString("3"),
+			"observation_time_id":   inttestutil.ToAssertableNullString("9"),
 			"observation_time_tag":  inttestutil.ToAssertableNullString("202504"),
 			"observation_timestamp": inttestutil.ToAssertableNullString("2025-04-01T00:00:00Z"),
 		},
@@ -849,7 +1058,7 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 			"name":                  inttestutil.ToAssertableNullString("New Asset Repeat 2"),
 			"ticker":                inttestutil.ToAssertableNullString("Test:NEW"),
 			"external_data":         inttestutil.NullAssertableNullString(),
-			"observation_time_id":   inttestutil.ToAssertableNullString("3"),
+			"observation_time_id":   inttestutil.ToAssertableNullString("9"),
 			"observation_time_tag":  inttestutil.ToAssertableNullString("202504"),
 			"observation_timestamp": inttestutil.ToAssertableNullString("2025-04-01T00:00:00Z"),
 		},
@@ -873,11 +1082,11 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 				o.observation_timestamp
 			FROM portfolio_allocation_fact p 
 			JOIN asset a ON p.asset_id = a.id
-			JOIN portfolio_allocation_obs_time o ON p.observation_time_id = o.id
+			JOIN portfolio_allocation_obs_time o ON p.portfolio_id = o.portfolio_id AND p.observation_time_id = o.id
 			WHERE p.portfolio_id=%s AND o.id=%d
 			ORDER BY p.asset_id, p.class`,
 		portfolioIdString,
-		3,
+		9,
 	)
 
 	inttestutil.AssertDBWithQueryMultipleRows(t, allocationHistoryQuery, expectedRecords)
@@ -898,7 +1107,7 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 			ORDER BY p.observation_time_id, p.asset_id
 		`,
 		portfolioIdString,
-		3,
+		9,
 	)
 
 	var expectedAllocationsOtherObservationsResult = []inttestutil.AssertableNullStringMap{
@@ -994,6 +1203,9 @@ func TestPostPortfolioAllocationHistoryFullMerge(t *testing.T) {
 
 }
 
+// TestPostPortfolioAllocationValidations verifies existing portfolio snapshot validation cases with explicit timestamps.
+//
+// Co-authored by: OpenCode and benizzio
 func TestPostPortfolioAllocationValidations(t *testing.T) {
 
 	t.Run(
@@ -1037,7 +1249,9 @@ func TestPostPortfolioAllocationValidations(t *testing.T) {
 			var postPortfolioSnapshotJSON = `
 				{
 					"observationTimestamp": {
-						"id": "3"
+						"id": "9",
+						"timeTag": "202504",
+						"timestamp": "2025-04-01T00:00:00Z"
 					},
 					"allocations": [
 						{
@@ -1074,7 +1288,9 @@ func TestPostPortfolioAllocationValidations(t *testing.T) {
 			var postPortfolioSnapshotJSON = `
 				{
 					"observationTimestamp": {
-						"id": "3"
+						"id": "9",
+						"timeTag": "202504",
+						"timestamp": "2025-04-01T00:00:00Z"
 					},
 					"allocations": [
 						{
@@ -1149,7 +1365,9 @@ func TestPostPortfolioAllocationValidations(t *testing.T) {
 			var postPortfolioSnapshotJSON = `
 				{
 					"observationTimestamp": {
-						"id": "3"
+						"id": "9",
+						"timeTag": "202504",
+						"timestamp": "2025-04-01T00:00:00Z"
 					}
 				}
 			`
@@ -1180,7 +1398,9 @@ func TestPostPortfolioAllocationValidations(t *testing.T) {
 			var postPortfolioSnapshotJSON = `
 				{
 					"observationTimestamp": {
-						"id": "3"
+						"id": "9",
+						"timeTag": "202504",
+						"timestamp": "2025-04-01T00:00:00Z"
 					},
 					"allocations": []
 				}
@@ -1203,6 +1423,107 @@ func TestPostPortfolioAllocationValidations(t *testing.T) {
 			`
 			assert.JSONEq(t, expectedResponseJSON, actualResponseJSONNullFields)
 		},
+	)
+}
+
+// TestPostPortfolioAllocationRequiresExplicitTimestamp rejects missing and invalid observation timestamps on creates and updates.
+// It asserts directly against the database that no observation or allocation is partially persisted.
+//
+// Co-authored by: GPT-6 Luna and OpenCode
+func TestPostPortfolioAllocationRequiresExplicitTimestamp(t *testing.T) {
+	t.Cleanup(
+		inttestutil.BuildCleanupFunctionBuilder().
+			AddCleanupQuery(
+				`DELETE FROM portfolio_allocation_fact WHERE portfolio_id = 1 AND (class = 'INVALID_TIMESTAMP_TEST' OR observation_time_id IN (SELECT id FROM portfolio_allocation_obs_time WHERE portfolio_id = 1 AND observation_time_tag LIKE 'invalid-observation-date-create-%'))`,
+				nil,
+			).
+			AddCleanupQuery(
+				`UPDATE portfolio_allocation_obs_time
+				 SET observation_time_tag = '202503', observation_timestamp = '2025-03-01 00:00:00'
+					 WHERE id = 2 AND portfolio_id = 1`,
+				nil,
+			).
+			AddCleanupQuery(`DELETE FROM portfolio_allocation_obs_time WHERE portfolio_id = 1 AND observation_time_tag LIKE 'invalid-observation-date-create-%'`, nil).
+			Build(t),
+	)
+
+	var invalidTimestamps = []struct {
+		name     string
+		property string
+	}{
+		{name: "missing"},
+		{name: "null", property: `"timestamp":null,`},
+		{name: "empty", property: `"timestamp":"",`},
+		{name: "malformed", property: `"timestamp":"not-a-timestamp",`},
+		{name: "zero", property: `"timestamp":"0001-01-01T00:00:00Z",`},
+	}
+
+	for _, invalidTimestamp := range invalidTimestamps {
+		for _, update := range []bool{false, true} {
+			var observationId = 0
+			var recordClass = "INVALID_TIMESTAMP_TEST"
+			var tag = "invalid-observation-date-create-" + invalidTimestamp.name
+			if update {
+				observationId = 2
+				tag = "invalid-observation-date-update-" + invalidTimestamp.name
+			}
+
+			var requestBody = fmt.Sprintf(`{
+				"observationTimestamp": {
+					"id":%d,
+					%s"timeTag":%q
+				},
+				"allocations":[{
+					"assetId":1,
+					"class":%q,
+					"cashReserve":false,
+					"totalMarketValue":"123"
+				}]
+			}`, observationId, invalidTimestamp.property, tag, recordClass)
+			var responseBody = postPortfolioAllocationForValidationFailure(t, requestBody)
+			assert.NotEmpty(t, responseBody)
+			if invalidTimestamp.name == "malformed" {
+				assert.JSONEq(
+					t,
+					`{"errorMessage":"Validation failed","details":["Field 'observationTimestamp.timestamp' failed validation: must be a valid RFC3339 timestamp"]}`,
+					string(responseBody),
+				)
+			}
+
+			inttestutil.AssertDBWithQueryMultipleRows(
+				t,
+				`SELECT count(*) AS fact_count FROM portfolio_allocation_fact WHERE class = 'INVALID_TIMESTAMP_TEST'`,
+				[]inttestutil.AssertableNullStringMap{{"fact_count": inttestutil.ToAssertableNullString("0")}},
+			)
+			inttestutil.AssertDBWithQueryMultipleRows(
+				t,
+				`SELECT count(*) AS observation_count FROM portfolio_allocation_obs_time WHERE portfolio_id = 1 AND observation_time_tag LIKE 'invalid-observation-date-create-%'`,
+				[]inttestutil.AssertableNullStringMap{{"observation_count": inttestutil.ToAssertableNullString("0")}},
+			)
+			if update {
+				inttestutil.AssertDBWithQueryMultipleRows(
+					t,
+					`SELECT observation_time_tag,
+					        to_char(observation_timestamp, 'YYYY-MM-DD"T"HH24:MI:SS') AS observation_timestamp
+					 FROM portfolio_allocation_obs_time
+					 WHERE id = 2 AND portfolio_id = 1`,
+					[]inttestutil.AssertableNullStringMap{{
+						"observation_time_tag":  inttestutil.ToAssertableNullString("202503"),
+						"observation_timestamp": inttestutil.ToAssertableNullString("2025-03-01T00:00:00"),
+					}},
+				)
+			}
+		}
+	}
+
+	var missingObservationTag = postPortfolioAllocationForValidationFailure(t, `{
+		"observationTimestamp":{"id":0,"timestamp":"2025-03-05T00:00:00Z"},
+		"allocations":[{"assetId":1,"class":"INVALID_TIMESTAMP_TEST","cashReserve":false,"totalMarketValue":"123"}]
+	}`)
+	assert.JSONEq(
+		t,
+		`{"errorMessage":"Validation failed","details":["Field 'observationTimestamp.timeTag' failed validation: is required"]}`,
+		string(missingObservationTag),
 	)
 }
 
@@ -1236,23 +1557,23 @@ func TestGetPortfolioAllocationHistoryWithMultiplePortfoliosAndManyObservations(
 	// for portfolio 2, ensuring they all get newer timestamps than portfolio 1
 	var setupSQL = `
 		-- Insert 15 observation timestamps for testing
-		INSERT INTO portfolio_allocation_obs_time (observation_time_tag, observation_timestamp)
+		INSERT INTO portfolio_allocation_obs_time (portfolio_id, observation_time_tag, observation_timestamp)
 		VALUES 
-			('test_obs_1', '2025-10-01 00:00:00'::TIMESTAMP),
-			('test_obs_2', '2025-10-02 00:00:00'::TIMESTAMP),
-			('test_obs_3', '2025-10-03 00:00:00'::TIMESTAMP),
-			('test_obs_4', '2025-10-04 00:00:00'::TIMESTAMP),
-			('test_obs_5', '2025-10-05 00:00:00'::TIMESTAMP),
-			('test_obs_6', '2025-10-06 00:00:00'::TIMESTAMP),
-			('test_obs_7', '2025-10-07 00:00:00'::TIMESTAMP),
-			('test_obs_8', '2025-10-08 00:00:00'::TIMESTAMP),
-			('test_obs_9', '2025-10-09 00:00:00'::TIMESTAMP),
-			('test_obs_10', '2025-10-10 00:00:00'::TIMESTAMP),
-			('test_obs_11', '2025-10-11 00:00:00'::TIMESTAMP),
-			('test_obs_12', '2025-10-12 00:00:00'::TIMESTAMP),
-			('test_obs_13', '2025-10-13 00:00:00'::TIMESTAMP),
-			('test_obs_14', '2025-10-14 00:00:00'::TIMESTAMP),
-			('test_obs_15', '2025-10-15 00:00:00'::TIMESTAMP)
+			(2, 'test_obs_1', '2025-10-01 00:00:00'::TIMESTAMP),
+			(2, 'test_obs_2', '2025-10-02 00:00:00'::TIMESTAMP),
+			(2, 'test_obs_3', '2025-10-03 00:00:00'::TIMESTAMP),
+			(2, 'test_obs_4', '2025-10-04 00:00:00'::TIMESTAMP),
+			(2, 'test_obs_5', '2025-10-05 00:00:00'::TIMESTAMP),
+			(2, 'test_obs_6', '2025-10-06 00:00:00'::TIMESTAMP),
+			(2, 'test_obs_7', '2025-10-07 00:00:00'::TIMESTAMP),
+			(2, 'test_obs_8', '2025-10-08 00:00:00'::TIMESTAMP),
+			(2, 'test_obs_9', '2025-10-09 00:00:00'::TIMESTAMP),
+			(2, 'test_obs_10', '2025-10-10 00:00:00'::TIMESTAMP),
+			(2, 'test_obs_11', '2025-10-11 00:00:00'::TIMESTAMP),
+			(2, 'test_obs_12', '2025-10-12 00:00:00'::TIMESTAMP),
+			(2, 'test_obs_13', '2025-10-13 00:00:00'::TIMESTAMP),
+			(2, 'test_obs_14', '2025-10-14 00:00:00'::TIMESTAMP),
+			(2, 'test_obs_15', '2025-10-15 00:00:00'::TIMESTAMP)
 		;
 
 		-- Add portfolio allocations for portfolio 2 with all 15 observation timestamps
@@ -1264,7 +1585,7 @@ func TestGetPortfolioAllocationHistoryWithMultiplePortfoliosAndManyObservations(
 			1, 'BONDS', FALSE, 100, 100, 10000, 2,
 			id
 		FROM portfolio_allocation_obs_time 
-		WHERE observation_time_tag ~ '^test_obs_'
+		WHERE portfolio_id = 2 AND observation_time_tag ~ '^test_obs_'
 		;
 	`
 
@@ -1275,12 +1596,12 @@ func TestGetPortfolioAllocationHistoryWithMultiplePortfoliosAndManyObservations(
 		inttestutil.BuildCleanupFunctionBuilder().
 			AddCleanupQuery(
 				`DELETE FROM portfolio_allocation_fact 
-				WHERE observation_time_id IN (
-					SELECT id FROM portfolio_allocation_obs_time WHERE observation_time_tag ~ '^test_obs_'
+				WHERE portfolio_id = 2 AND observation_time_id IN (
+					SELECT id FROM portfolio_allocation_obs_time WHERE portfolio_id = 2 AND observation_time_tag ~ '^test_obs_'
 				)`,
 				nil,
 			).
-			AddCleanupQuery(`DELETE FROM portfolio_allocation_obs_time WHERE observation_time_tag ~ '^test_obs_'`, nil).
+			AddCleanupQuery(`DELETE FROM portfolio_allocation_obs_time WHERE portfolio_id = 2 AND observation_time_tag ~ '^test_obs_'`, nil).
 			Build(t),
 	)
 
@@ -1508,11 +1829,11 @@ func TestPostPortfolioAllocationHistoryInsertOnlyWithExternalAsset(t *testing.T)
 	t.Cleanup(
 		inttestutil.BuildCleanupFunctionBuilder().
 			AddCleanupQuery(
-				`DELETE FROM portfolio_allocation_fact WHERE portfolio_id = 2 AND observation_time_id IN (SELECT id FROM portfolio_allocation_obs_time WHERE observation_time_tag = '202509')`,
+				`DELETE FROM portfolio_allocation_fact WHERE portfolio_id = 2 AND observation_time_id IN (SELECT id FROM portfolio_allocation_obs_time WHERE portfolio_id = 2 AND observation_time_tag = '202509')`,
 				nil,
 			).
 			AddCleanupQuery("DELETE FROM asset WHERE ticker = 'Test:EXT'", nil).
-			AddCleanupQuery("DELETE FROM portfolio_allocation_obs_time WHERE observation_time_tag = '202509'", nil).
+			AddCleanupQuery("DELETE FROM portfolio_allocation_obs_time WHERE portfolio_id = 2 AND observation_time_tag = '202509'", nil).
 			Build(t),
 	)
 
@@ -1542,7 +1863,7 @@ func TestPostPortfolioAllocationHistoryInsertOnlyWithExternalAsset(t *testing.T)
 	var historyQuery = dbx.Params{"ticker": "Test:EXT", "timeTag": "202509"}
 	var persistedObservationTimestampId string
 	err = inttestinfra.FetchWithDBQuery(
-		`SELECT o.id FROM portfolio_allocation_fact p JOIN asset a ON a.id = p.asset_id JOIN portfolio_allocation_obs_time o ON o.id = p.observation_time_id WHERE p.portfolio_id = 2 AND a.ticker = {:ticker} AND o.observation_time_tag = {:timeTag}`,
+		`SELECT o.id FROM portfolio_allocation_fact p JOIN asset a ON a.id = p.asset_id JOIN portfolio_allocation_obs_time o ON o.portfolio_id = p.portfolio_id AND o.id = p.observation_time_id WHERE p.portfolio_id = 2 AND a.ticker = {:ticker} AND o.observation_time_tag = {:timeTag}`,
 		historyQuery,
 		func(rows *dbx.Rows) error {
 			return rows.Scan(&persistedObservationTimestampId)
@@ -1609,7 +1930,7 @@ func TestPostPortfolioAllocationHistoryDoesNotOverwriteExistingAssetExternalData
 		addAssetExternalDataRestoreCleanup(
 			inttestutil.BuildCleanupFunctionBuilder().
 				AddCleanupQuery(
-					"DELETE FROM portfolio_allocation_fact WHERE portfolio_id = 2 AND observation_time_id = 3 AND asset_id = 1",
+					"DELETE FROM portfolio_allocation_fact WHERE portfolio_id = 2 AND observation_time_id = 8 AND asset_id = 1",
 					nil,
 				),
 			1,
@@ -1620,7 +1941,9 @@ func TestPostPortfolioAllocationHistoryDoesNotOverwriteExistingAssetExternalData
 	var postPortfolioSnapshotJSON = `
 		{
 			"observationTimestamp": {
-				"id": "3"
+				"id": "8",
+				"timeTag": "202504",
+				"timestamp": "2025-04-01T00:00:00Z"
 			},
 			"allocations": [
 				{
@@ -1670,7 +1993,9 @@ func TestPostPortfolioAllocationHistoryValidation_InvalidExternalAssetFields(t *
 	var postPortfolioSnapshotJSON = `
 		{
 			"observationTimestamp": {
-				"id": "3"
+				"id": "9",
+				"timeTag": "202504",
+				"timestamp": "2025-04-01T00:00:00Z"
 			},
 			"allocations": [
 				{
@@ -1699,4 +2024,270 @@ func TestPostPortfolioAllocationHistoryValidation_InvalidExternalAssetFields(t *
 	`
 
 	assert.JSONEq(t, expectedResponseJSON, actualResponseJSON)
+}
+
+// TestPostPortfolioAllocationHistoryUpdatesObservationMetadata verifies metadata updates retain the observation and
+// allocation identities while persisting explicit tag and timestamp changes in the owning portfolio.
+// Co-authored by: GPT-6 Luna, OpenCode and benizzio
+func TestPostPortfolioAllocationHistoryUpdatesObservationMetadata(t *testing.T) {
+	registerObservationFixtureRestore(t, 2, 1, "202503", "2025-03-01 00:00:00")
+
+	var tagUpdate = portfolioHistoryUpdateJSON(
+		2,
+		"202503-edited",
+		"2025-03-01T00:00:00Z",
+		`{"assetId":1,"class":"BONDS","cashReserve":false,"assetQuantity":"100.00009","assetMarketPrice":"100","totalMarketValue":"10000"}`,
+	)
+	response, err := postPortfolioHistoryRequest(1, tagUpdate)
+	require.NoError(t, err)
+	defer deferCloseResponseBody(response)
+	require.Equal(t, http.StatusNoContent, response.StatusCode)
+	assertPersistedObservationMetadata(t, 2, 1, "202503-edited", "2025-03-01T00:00:00.000000")
+	assertPersistedObservationAllocation(t, 2, 1)
+
+	var timestampUpdate = portfolioHistoryUpdateJSON(
+		2,
+		"202503-edited",
+		"2025-03-02T12:34:56.123456Z",
+		`{"assetId":1,"class":"BONDS","cashReserve":false,"assetQuantity":"100.00009","assetMarketPrice":"100","totalMarketValue":"10000"}`,
+	)
+	response, err = postPortfolioHistoryRequest(1, timestampUpdate)
+	require.NoError(t, err)
+	defer deferCloseResponseBody(response)
+	require.Equal(t, http.StatusNoContent, response.StatusCode)
+	assertPersistedObservationMetadata(t, 2, 1, "202503-edited", "2025-03-02T12:34:56.123456")
+	assertPersistedObservationAllocation(t, 2, 1)
+}
+
+// TestPostPortfolioAllocationHistoryScopesTagsAndUpdatesToPortfolio verifies portfolio-local tag uniqueness and
+// rejects attempts to update an observation owned by another portfolio.
+// Authored by: OpenCode
+func TestPostPortfolioAllocationHistoryScopesTagsAndUpdatesToPortfolio(t *testing.T) {
+	var duplicateTagRequest = portfolioHistoryUpdateJSON(
+		2,
+		"202501",
+		"2025-03-03T00:00:00Z",
+		`{"assetId":1,"class":"BONDS","cashReserve":false,"assetQuantity":"100.00009","assetMarketPrice":"100","totalMarketValue":"10000"}`,
+	)
+	response, err := postPortfolioHistoryRequest(1, duplicateTagRequest)
+	require.NoError(t, err)
+	defer deferCloseResponseBody(response)
+	assert.Equal(t, http.StatusConflict, response.StatusCode)
+	var duplicateTagResponse, readError = io.ReadAll(response.Body)
+	require.NoError(t, readError)
+	assert.JSONEq(
+		t,
+		`{"errorMessage":"Observation tag already exists in this portfolio.","details":["Choose a different observationTimestamp.timeTag."]}`,
+		string(duplicateTagResponse),
+	)
+
+	var foreignObservationRequest = portfolioHistoryUpdateJSON(
+		7,
+		"foreign-edit",
+		"2025-03-04T00:00:00Z",
+		`{"assetId":1,"class":"BONDS","cashReserve":false,"assetQuantity":"1","assetMarketPrice":"100","totalMarketValue":"100"}`,
+	)
+	response, err = postPortfolioHistoryRequest(1, foreignObservationRequest)
+	require.NoError(t, err)
+	defer deferCloseResponseBody(response)
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+	var foreignObservationResponse, foreignReadError = io.ReadAll(response.Body)
+	require.NoError(t, foreignReadError)
+	assert.JSONEq(
+		t,
+		`{"errorMessage":"Observation validation failed","details":["Observation does not exist in the requested portfolio"]}`,
+		string(foreignObservationResponse),
+	)
+
+	assertPersistedObservationMetadata(t, 2, 1, "202503", "2025-03-01T00:00:00.000000")
+	assertPersistedObservationMetadata(t, 7, 3, "202503", "2025-03-01T00:00:00.000000")
+}
+
+// TestPostPortfolioAllocationHistoryAllowsSameTagAcrossPortfolios verifies tags are unique per owner, not globally.
+// Authored by: OpenCode
+func TestPostPortfolioAllocationHistoryAllowsSameTagAcrossPortfolios(t *testing.T) {
+	t.Cleanup(
+		inttestutil.BuildCleanupFunctionBuilder().
+			AddCleanupQuery(
+				`DELETE FROM portfolio_allocation_fact
+				 WHERE portfolio_id = 3 AND observation_time_id IN (
+					SELECT id FROM portfolio_allocation_obs_time WHERE portfolio_id = 3 AND observation_time_tag = '202501'
+				 )`,
+				nil,
+			).
+			AddCleanupQuery(
+				`DELETE FROM portfolio_allocation_obs_time WHERE portfolio_id = 3 AND observation_time_tag = '202501'`,
+				nil,
+			).
+			Build(t),
+	)
+
+	var createRequest = portfolioHistoryUpdateJSON(
+		0,
+		"202501",
+		"2025-01-01T00:00:00Z",
+		`{"assetId":1,"class":"BONDS","cashReserve":false,"assetQuantity":"1","assetMarketPrice":"100","totalMarketValue":"100"}`,
+	)
+	response, err := postPortfolioHistoryRequest(3, createRequest)
+	require.NoError(t, err)
+	defer deferCloseResponseBody(response)
+	require.Equal(t, http.StatusNoContent, response.StatusCode)
+
+	inttestutil.AssertDBWithQueryMultipleRows(
+		t,
+		`SELECT portfolio_id::text AS portfolio_id, observation_time_tag, COUNT(*)::text AS observation_count
+		 FROM portfolio_allocation_obs_time
+		 WHERE observation_time_tag = '202501'
+		 GROUP BY portfolio_id, observation_time_tag
+		 ORDER BY portfolio_id`,
+		[]inttestutil.AssertableNullStringMap{
+			{
+				"portfolio_id":         inttestutil.ToAssertableNullString("1"),
+				"observation_time_tag": inttestutil.ToAssertableNullString("202501"),
+				"observation_count":    inttestutil.ToAssertableNullString("1"),
+			},
+			{
+				"portfolio_id":         inttestutil.ToAssertableNullString("3"),
+				"observation_time_tag": inttestutil.ToAssertableNullString("202501"),
+				"observation_count":    inttestutil.ToAssertableNullString("1"),
+			},
+		},
+	)
+}
+
+// TestPostPortfolioAllocationHistoryRollsBackMetadataAndAssets verifies a persistence failure rolls back an earlier
+// metadata update and asset insertion within the same transaction.
+// Authored by: OpenCode
+func TestPostPortfolioAllocationHistoryRollsBackMetadataAndAssets(t *testing.T) {
+	registerObservationFixtureRestore(t, 2, 1, "202503", "2025-03-01 00:00:00")
+	t.Cleanup(
+		inttestutil.BuildCleanupFunctionBuilder().
+			AddCleanupQuery(`DELETE FROM asset WHERE ticker = 'Test:ROLLBACK'`, nil).
+			AddCleanupQuery(
+				`DELETE FROM portfolio_allocation_fact WHERE portfolio_id = 1 AND class LIKE 'ROLLBACK_TEST%'`,
+				nil,
+			).
+			Build(t),
+	)
+
+	var requestBody = `{
+		"observationTimestamp":{"id":2,"timeTag":"rollback-attempt","timestamp":"2025-03-05T00:00:00Z"},
+		"allocations":[
+			{"assetName":"Rollback Asset","assetTicker":"Test:ROLLBACK","class":"ROLLBACK_TEST_NEW","cashReserve":false,"assetQuantity":"1","assetMarketPrice":"100","totalMarketValue":"100"},
+			{"assetId":999999,"class":"ROLLBACK_TEST_INVALID","cashReserve":false,"assetQuantity":"1","assetMarketPrice":"100","totalMarketValue":"100"}
+		]
+	}`
+	response, err := postPortfolioHistoryRequest(1, requestBody)
+	require.NoError(t, err)
+	defer deferCloseResponseBody(response)
+	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
+
+	assertPersistedObservationMetadata(t, 2, 1, "202503", "2025-03-01T00:00:00.000000")
+	inttestutil.AssertDBWithQueryMultipleRows(
+		t,
+		`SELECT COUNT(*)::text AS asset_count FROM asset WHERE ticker = 'Test:ROLLBACK'`,
+		[]inttestutil.AssertableNullStringMap{{"asset_count": inttestutil.ToAssertableNullString("0")}},
+	)
+	inttestutil.AssertDBWithQueryMultipleRows(
+		t,
+		`SELECT COUNT(*)::text AS fact_count FROM portfolio_allocation_fact WHERE portfolio_id = 1 AND class LIKE 'ROLLBACK_TEST%'`,
+		[]inttestutil.AssertableNullStringMap{{"fact_count": inttestutil.ToAssertableNullString("0")}},
+	)
+}
+
+// registerObservationFixtureRestore restores an owned observation after a test mutates fixture metadata.
+// Authored by: OpenCode
+func registerObservationFixtureRestore(t *testing.T, observationId, portfolioId int64, tag, timestamp string) {
+	t.Helper()
+	t.Cleanup(func() {
+		var err = inttestinfra.ExecuteDBQuery(
+			`UPDATE portfolio_allocation_obs_time
+			 SET observation_time_tag = {:tag}, observation_timestamp = {:timestamp}
+			 WHERE id = {:id} AND portfolio_id = {:portfolioId}`,
+			dbx.Params{
+				"id":          observationId,
+				"portfolioId": portfolioId,
+				"tag":         tag,
+				"timestamp":   timestamp,
+			},
+		)
+		assert.NoError(t, err)
+	})
+}
+
+// assertPersistedObservationMetadata checks the persisted identity, owner, tag, and timestamp at PostgreSQL precision.
+// Authored by: OpenCode
+func assertPersistedObservationMetadata(
+	t *testing.T,
+	observationId, portfolioId int64,
+	tag, timestamp string,
+) {
+	t.Helper()
+	inttestutil.AssertDBWithQueryMultipleRows(
+		t,
+		`SELECT id::text AS id, portfolio_id::text AS portfolio_id, observation_time_tag,
+		        to_char(observation_timestamp, 'YYYY-MM-DD"T"HH24:MI:SS.US') AS observation_timestamp
+		 FROM portfolio_allocation_obs_time WHERE id = `+strconv.FormatInt(observationId, 10),
+		[]inttestutil.AssertableNullStringMap{{
+			"id":                    inttestutil.ToAssertableNullString(strconv.FormatInt(observationId, 10)),
+			"portfolio_id":          inttestutil.ToAssertableNullString(strconv.FormatInt(portfolioId, 10)),
+			"observation_time_tag":  inttestutil.ToAssertableNullString(tag),
+			"observation_timestamp": inttestutil.ToAssertableNullString(timestamp),
+		}},
+	)
+}
+
+// assertPersistedObservationAllocation checks that a metadata-only edit leaves the portfolio facts unchanged.
+// Co-authored by: GPT-6 Luna and OpenCode
+func assertPersistedObservationAllocation(t *testing.T, observationId, portfolioId int64) {
+	t.Helper()
+	inttestutil.AssertDBWithQueryMultipleRows(
+		t,
+		`SELECT COUNT(*)::text AS fact_count,
+		        MIN(asset_id)::text AS asset_id,
+		        MIN(class) AS class,
+		        BOOL_OR(cash_reserve)::text AS cash_reserve,
+		        SUM(asset_quantity)::numeric(18,8)::text AS asset_quantity,
+		        SUM(asset_market_price)::numeric(18,8)::text AS asset_market_price,
+		        SUM(total_market_value)::text AS total_market_value
+		 FROM portfolio_allocation_fact
+		 WHERE observation_time_id = `+strconv.FormatInt(observationId, 10)+
+			` AND portfolio_id = `+strconv.FormatInt(portfolioId, 10),
+		[]inttestutil.AssertableNullStringMap{{
+			"fact_count":         inttestutil.ToAssertableNullString("1"),
+			"asset_id":           inttestutil.ToAssertableNullString("1"),
+			"class":              inttestutil.ToAssertableNullString("BONDS"),
+			"cash_reserve":       inttestutil.ToAssertableNullString("false"),
+			"asset_quantity":     inttestutil.ToAssertableNullString("100.00009000"),
+			"asset_market_price": inttestutil.ToAssertableNullString("100.00000000"),
+			"total_market_value": inttestutil.ToAssertableNullString("10000"),
+		}},
+	)
+}
+
+// portfolioHistoryUpdateJSON builds a full snapshot request with one allocation for observation update tests.
+// Authored by: OpenCode
+func portfolioHistoryUpdateJSON(observationId int, tag, timestamp, allocationJSON string) string {
+	return fmt.Sprintf(
+		`{"observationTimestamp":{"id":%d,"timeTag":%q,"timestamp":%q},"allocations":[%s]}`,
+		observationId,
+		tag,
+		timestamp,
+		allocationJSON,
+	)
+}
+
+// postPortfolioHistoryRequest posts a JSON snapshot to the portfolio history endpoint.
+// Authored by: OpenCode
+func postPortfolioHistoryRequest(portfolioId int64, requestBody string) (*http.Response, error) {
+	var request, err = http.NewRequest(
+		http.MethodPost,
+		inttestinfra.TestAPIURLPrefix+"/portfolio/"+strconv.FormatInt(portfolioId, 10)+"/history",
+		strings.NewReader(requestBody),
+	)
+	if err != nil {
+		return nil, err
+	}
+	request.Header.Set("Content-Type", "application/json")
+	return http.DefaultClient.Do(request)
 }

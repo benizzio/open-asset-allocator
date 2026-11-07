@@ -3,6 +3,8 @@
  * @author OpenCode
  * @author benizzio
  * @author GPT-6 Luna
+ * @author GPT-6.1 Sol
+ * @author GPT-6.1 Terra
  */
 import globals from "globals";
 import pluginJs from "@eslint/js";
@@ -209,6 +211,22 @@ export default [
                                 "Import from the public API 'components/asset-composed-columns-input' (index.ts) only; " +
                                 "deep imports are not allowed.",
                         },
+                        // Block deep imports into feature modules from outside their public APIs.
+                        // Authored by: GPT-6.1 Terra
+                        {
+                            group: [
+                                "**/components/allocation-plan/**", "components/allocation-plan/**",
+                                "../components/allocation-plan/**", "../allocation-plan/**",
+                            ],
+                            message: "Import from the public API 'components/allocation-plan' (index.ts) only.",
+                        },
+                        {
+                            group: [
+                                "**/components/portfolio-history/**", "components/portfolio-history/**",
+                                "../components/portfolio-history/**", "../portfolio-history/**",
+                            ],
+                            message: "Import from the public API 'components/portfolio-history' (index.ts) only.",
+                        },
                         // Block deep imports into the portfolio-history-quote module; use its public entry point
                         // Authored by: GPT-6 Luna
                         {
@@ -223,13 +241,157 @@ export default [
                                 "../portfolio-history-quote/**",
                             ],
                             message:
-                                "Import from the public API 'components/portfolio-history-quote' (index.ts) only; " +
+                                "Import from the public API 'components/portfolio-history/portfolio-history-quote' " +
+                                "(index.ts) only; " +
+                                "deep imports are not allowed.",
+                        },
+                        // Block deep imports into the management metadata editor; use its public entry point
+                        // Authored by: GPT-6.1 Sol
+                        {
+                            group: [
+                                "**/management-metadata-editor/*",
+                                "**/management-metadata-editor/**",
+                                "management-metadata-editor/*",
+                                "management-metadata-editor/**",
+                                "./management-metadata-editor/*",
+                                "./management-metadata-editor/**",
+                                "../management-metadata-editor/*",
+                                "../management-metadata-editor/**",
+                            ],
+                            message:
+                                "Import from the public API 'components/management-metadata-editor' (index.ts) only; " +
+                                "deep imports are not allowed.",
+                        },
+                        // Block deep imports into allocation plan management metadata; use its public entry point
+                        // Authored by: GPT-6.1 Sol
+                        {
+                            group: [
+                                "**/allocation-plan-management-metadata/*",
+                                "**/allocation-plan-management-metadata/**",
+                                "allocation-plan-management-metadata/*",
+                                "allocation-plan-management-metadata/**",
+                                "./allocation-plan-management-metadata/*",
+                                "./allocation-plan-management-metadata/**",
+                                "../allocation-plan-management-metadata/*",
+                                "../allocation-plan-management-metadata/**",
+                            ],
+                            message:
+                                "Import from the public API 'components/allocation-plan/allocation-plan-management-metadata' " +
+                                "(index.ts) only; deep imports are not allowed.",
+                        },
+                        // Block deep imports into allocation-plan management response mapping; use its public API
+                        // Authored by: GPT-6 Luna
+                        {
+                            group: [
+                                "**/allocation-plan-management-response/*",
+                                "**/allocation-plan-management-response/**",
+                                "allocation-plan-management-response/*",
+                                "allocation-plan-management-response/**",
+                                "./allocation-plan-management-response/*",
+                                "./allocation-plan-management-response/**",
+                                "../allocation-plan-management-response/*",
+                                "../allocation-plan-management-response/**",
+                            ],
+                            message:
+                                "Import from the public API 'components/allocation-plan/allocation-plan-management-response' " +
+                                "(index.ts) only; deep imports are not allowed.",
+                        },
+                        // Block deep imports into shared paginated-list behavior; use its public entry point
+                        // Authored by: GPT-6 Luna
+                        {
+                            group: [
+                                "**/paginated-list/*",
+                                "**/paginated-list/**",
+                                "paginated-list/*",
+                                "paginated-list/**",
+                                "./paginated-list/*",
+                                "./paginated-list/**",
+                                "../paginated-list/*",
+                                "../paginated-list/**",
+                            ],
+                            message:
+                                "Import from the public API 'components/paginated-list' (index.ts) only; " +
+                                "deep imports are not allowed.",
+                        },
+                        // Block deep imports into chart infrastructure; use its public entry point
+                        // Authored by: GPT-6 Luna
+                        {
+                            group: [
+                                "**/infra/chart/chart",
+                                "**/infra/chart/chart.ts",
+                                "./chart/chart",
+                                "./chart/chart.ts",
+                            ],
+                            message: "Import from the public API 'infra/chart' (index.ts) only; deep imports are not allowed.",
+                        },
+                        // Block deep imports into history observation details; use its public entry point
+                        // Authored by: GPT-6.1 Sol
+                        {
+                            group: [
+                                "**/portfolio-history-management-observation-details/*",
+                                "**/portfolio-history-management-observation-details/**",
+                                "portfolio-history-management-observation-details/*",
+                                "portfolio-history-management-observation-details/**",
+                                "./portfolio-history-management-observation-details/*",
+                                "./portfolio-history-management-observation-details/**",
+                                "../portfolio-history-management-observation-details/*",
+                                "../portfolio-history-management-observation-details/**",
+                            ],
+                            message:
+                                "Import from the public API " +
+                                "'components/portfolio-history/portfolio-history-management-observation-details' (index.ts) only; " +
+                                "deep imports are not allowed.",
+                        },
+                        // Block deep imports into history observation metadata; use its public entry point
+                        // Authored by: GPT-6.1 Sol
+                        {
+                            group: [
+                                "**/portfolio-history-management-observation-metadata/*",
+                                "**/portfolio-history-management-observation-metadata/**",
+                                "portfolio-history-management-observation-metadata/*",
+                                "portfolio-history-management-observation-metadata/**",
+                                "./portfolio-history-management-observation-metadata/*",
+                                "./portfolio-history-management-observation-metadata/**",
+                                "../portfolio-history-management-observation-metadata/*",
+                                "../portfolio-history-management-observation-metadata/**",
+                            ],
+                            message:
+                                "Import from the public API " +
+                                "'components/portfolio-history/portfolio-history-management-observation-metadata' (index.ts) only; " +
                                 "deep imports are not allowed.",
                         },
                     ],
                 },
             ],
 
+        },
+    },
+
+    // Restrict sibling feature internals reached from nested components without affecting domain imports.
+    // Authored by: GPT-6.1 Terra
+    {
+        files: ["websrc/components/**/*.{js,jsx,mjs,cjs,ts,tsx}"],
+        ignores: ["websrc/components/allocation-plan/**"],
+        plugins: { allocationPlanBoundary: tseslint.plugin },
+        rules: {
+            "allocationPlanBoundary/no-restricted-imports": ["error", {
+                patterns: [{
+                    regex: "^(?:\\.\\./){2,}allocation-plan/",
+                    message: "Import from the public API 'components/allocation-plan' (index.ts) only.",
+                }],
+            }],
+        },
+    },
+    {
+        files: ["websrc/components/**/*.{js,jsx,mjs,cjs,ts,tsx}"],
+        ignores: ["websrc/components/portfolio-history/**"],
+        rules: {
+            "@typescript-eslint/no-restricted-imports": ["error", {
+                patterns: [{
+                    regex: "^(?:\\.\\./){2,}portfolio-history/",
+                    message: "Import from the public API 'components/portfolio-history' (index.ts) only.",
+                }],
+            }],
         },
     },
 

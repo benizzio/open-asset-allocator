@@ -1,0 +1,159 @@
+<!-- Co-authored by: GPT-6 Luna, GPT-6 Sol, GPT-6.1 Terra and benizzio -->
+<div data-exclusive-display-container>
+
+    <div class="portfolio-paginated-view" data-display-on-route="/portfolio/:portfolioId/allocation">
+        <!-- Reveal navigation only after the initial list response is swapped. -->
+        <button type="button"
+                class="btn btn-outline-primary mb-2"
+                onclick="navigateToPortfolioAllocationPlanManagement()"
+                hidden
+        >
+            <span class="h2 bi bi-database-gear"></span>
+        </button>
+        <div class="accordion"
+             id="accordion-allocation-plan"
+             data-paginated-list
+             data-paginated-list-context-selector="[name='portfolioId']"
+             hx-get="/api/portfolio/:portfolioId/allocation-plan"
+             hx-include="[name='portfolioId']"
+             hx-trigger="load, reload-allocation-plans, paginated-list-more queue:none"
+             hx-sync="this:replace"
+             hx-disinherit="hx-sync"
+             hx-swap="innerHTML"
+             handlebars-template="template-allocation-plan-item"
+             hx-on::after-swap="if (event.target === this) this.previousElementSibling.hidden = false"
+             hx-on::after-settle="initAllocationPlanHierarchyLabels()"
+             data-hx-transform-response="paginateAllocationPlanView"
+             data-hx-transform-response-on-path-matching="^\/api\/portfolio\/.+\/allocation-plan(?:\?.*)?$"
+        >
+            <div class="accordion-item placeholder-glow">
+                <h2 class="accordion-header placeholder col-12">placeholder</h2>
+            </div>
+            <div class="accordion-item placeholder-glow">
+                <h2 class="accordion-header placeholder col-12">placeholder</h2>
+            </div>
+        </div>
+        <!-- Co-authored by: GPT-6 Luna and benizzio -->
+        <div class="text-center mt-4"
+             data-paginated-list-controls="accordion-allocation-plan"
+             hidden
+        >
+            <button type="button"
+                    class="btn btn-primary paginated-list-more-button"
+                    aria-label="Show more"
+                    title="Show more"
+                    aria-busy="false"
+                    aria-controls="accordion-allocation-plan"
+                    data-paginated-list-more="accordion-allocation-plan"
+                    hidden
+            >
+                <span class="bi bi-chevron-double-down" data-paginated-list-more-icon aria-hidden="true"></span>
+                <span class="bi bi-arrow-clockwise" data-paginated-list-retry-icon aria-hidden="true" hidden></span>
+                <span class="spinner-border spinner-border-sm" data-paginated-list-loading-indicator aria-hidden="true" hidden></span>
+            </button>
+            <span class="d-block"
+                  data-paginated-list-status="accordion-allocation-plan"
+                  role="status"
+                  aria-live="polite"
+            ></span>
+        </div>
+    </div>
+
+    <div data-hx-trigger-on-route="/portfolio/:portfolioId/allocation/manage!load-allocation-plan-management"
+         data-display-on-route="/portfolio/:portfolioId/allocation/manage"
+         hx-get="/websrc/components/allocation-plan/allocation-plan-management.html"
+         hx-trigger="load-allocation-plan-management once"
+         hx-on::after-settle="allocationPlanManagement.handleAfterSettle(event, this)"
+    >
+        <div class="card border-dark mb-3 placeholder-glow">
+            <div class="card-header placeholder col-6">placeholder</div>
+            <div class="card-body">
+                <div class="accordion container-fluid">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header placeholder col-12">placeholder</h2>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header placeholder col-12">placeholder</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script id="template-allocation-plan-item" type="text/x-handlebars-template">
+
+    {{#each items}}
+        <!-- Co-authored by: GPT-6.1 Terra and benizzio -->
+        <div class="accordion-item" data-paginated-record-id="{{id}}" data-paginated-record-persisted>
+
+            <h2 class="accordion-header">
+                 <button class="accordion-button {{#unless (and @root.initial @first)}}collapsed{{/unless}}"
+                         data-paginated-record-focus
+                         type="button"
+                         data-bs-toggle="collapse"
+                         data-bs-target="#allocation-plan-{{id}}"
+                         aria-expanded="{{#if (and @root.initial @first)}}true{{else}}false{{/if}}"
+                         aria-controls="allocation-plan-{{id}}"
+                >
+                    {{name}}
+                </button>
+            </h2>
+
+            <div id="allocation-plan-{{id}}"
+                 class="accordion-collapse collapse {{#if (and @root.initial @first)}}show{{/if}}"
+                 data-bs-parent="#accordion-allocation-plan"
+            >
+                <div class="accordion-body row justify-content-center">
+
+                    <div class="col-12 d-flex flex-column align-items-center">
+                        <div class="d-flex flex-row">
+                            <p class="h4">Level:&nbsp;</p>
+                            <p id="hierarchy-level-allocation-plan-chart-{{id}}" class="h4"></p>
+                        </div>
+                    </div>
+
+                    <div class="col-xxl-6 d-flex justify-content-center" style="max-height: 750px">
+                        {{{ chart
+                                this
+                                "ASSET_ALLOCATION_PLAN_1D"
+                                "allocation-plan-chart-options"
+                                "allocation-plan-chart"
+                                id
+                                "#portfolio-context #portfolio"
+                        }}}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    {{/each}}
+
+</script>
+
+<script type="text/javascript">
+
+    function initAllocationPlanHierarchyLabels() {
+        document.querySelectorAll("[id^='hierarchy-level-allocation-plan-chart-']")
+            .forEach(label => {
+                if(label.dataset.hierarchyLabelInitialized !== "true") {
+                    setTextContentWithTopHierarchyName(`#${ label.id }`);
+                    label.dataset.hierarchyLabelInitialized = "true";
+                }
+            });
+    }
+
+    function navigateToPortfolioAllocationPlanManagement() {
+        const portfolioId = document.querySelector("[name='portfolioId']").value;
+        navigateTo(`/portfolio/${portfolioId}/allocation/manage`);
+    }
+
+</script>
+
+<script id="allocation-plan-chart-options" type="application/json">
+    {
+        "type": "doughnut",
+        "measuramentUnit": "PERCENTAGE"
+    }
+</script>

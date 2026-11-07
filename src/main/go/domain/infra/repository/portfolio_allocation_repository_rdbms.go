@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/infra"
@@ -9,53 +11,106 @@ import (
 	"github.com/benizzio/open-asset-allocator/langext"
 )
 
+// Co-authored by: GPT-6.1 Sol, GPT-6 Luna and benizzio
 const (
+	// portfolioAllocationProjectionSQL standardizes joined rows using pa, ass and paot aliases.
+	// Authored by: GPT-6.1 Sol
+	portfolioAllocationProjectionSQL = `
+		    pa.*,
+		    ass.id AS "asset.id",
+		    ass.ticker AS "asset.ticker",
+		    coalesce(ass.name, '') AS "asset.name",
+		    coalesce(ass.external_data #>> '{data,0,source}', '') AS selected_external_asset_source,
+		    coalesce(ass.external_data #>> '{data,0,ticker}', '') AS selected_external_asset_ticker,
+		    coalesce(ass.external_data #>> '{data,0,exchangeId}', '') AS selected_external_asset_exchange_id,
+		    paot.id AS "observation_timestamp.id",
+		    paot.portfolio_id AS "observation_timestamp.portfolio_id",
+		    coalesce(paot.observation_time_tag, '') AS "observation_timestamp.time_tag",
+		    paot.observation_timestamp AS "observation_timestamp.timestamp"
+	`
+	historicalReadPageSize       = 10
+	historicalReadLookaheadLimit = historicalReadPageSize + 1
+	availableObservationPageSQL  = `
+		WITH observation_page AS (
+			SELECT paot.id, paot.portfolio_id, paot.observation_time_tag AS time_tag,
+				paot.observation_timestamp AS "timestamp"
+			FROM portfolio_allocation_obs_time paot
+			` + rdbms.WhereClausePlaceholder + `
+			AND EXISTS (
+				SELECT 1 FROM portfolio_allocation_fact pa
+				WHERE pa.portfolio_id = paot.portfolio_id
+				  AND pa.observation_time_id = paot.id
+			)
+			ORDER BY paot.observation_timestamp DESC, paot.id DESC
+			LIMIT {:pageLimit}
+		)
+		SELECT id, portfolio_id, time_tag, "timestamp"
+		FROM observation_page
+		ORDER BY "timestamp" DESC, id DESC
+	`
+	portfolioAllocationHistoryPageSQL = `
+		WITH observation_page AS (
+			SELECT paot.id, paot.portfolio_id, paot.observation_time_tag, paot.observation_timestamp
+			FROM portfolio_allocation_obs_time paot
+			` + rdbms.WhereClausePlaceholder + `
+			AND EXISTS (
+				SELECT 1 FROM portfolio_allocation_fact eligible_fact
+				WHERE eligible_fact.portfolio_id = paot.portfolio_id
+				  AND eligible_fact.observation_time_id = paot.id
+			)
+			ORDER BY paot.observation_timestamp DESC, paot.id DESC
+			LIMIT {:pageLimit}
+		)
+		SELECT ` + portfolioAllocationProjectionSQL + `
+		FROM observation_page paot
+		JOIN portfolio_allocation_fact pa
+		  ON pa.portfolio_id = paot.portfolio_id
+		 AND pa.observation_time_id = paot.id
+		JOIN asset ass ON ass.id = pa.asset_id
+		ORDER BY paot.observation_timestamp DESC, paot.id DESC,
+			pa.class ASC, pa.cash_reserve DESC, pa.total_market_value DESC
+	`
 	availableObservationTimestampsSQL = `
-		SELECT DISTINCT paot.id, paot.observation_time_tag AS time_tag, paot.observation_timestamp AS "timestamp"
+		SELECT DISTINCT paot.id, paot.portfolio_id, paot.observation_time_tag AS time_tag,
+			paot.observation_timestamp AS "timestamp"
 		FROM portfolio_allocation_fact pa
-		JOIN portfolio_allocation_obs_time paot ON pa.observation_time_id = paot.id
+		JOIN portfolio_allocation_obs_time paot
+		  ON pa.portfolio_id = paot.portfolio_id AND pa.observation_time_id = paot.id
 		` + rdbms.WhereClausePlaceholder + `
-		ORDER BY paot.observation_timestamp DESC LIMIT {:observationTimestampLimit}
+		ORDER BY paot.observation_timestamp DESC, paot.id DESC LIMIT {:observationTimestampLimit}
 	`
 	availableObservationTimestampsComplement = `
 		WITH observation_timestamps
 			AS (
 				SELECT DISTINCT paot.*
 				FROM portfolio_allocation_fact pa
-				JOIN portfolio_allocation_obs_time paot ON pa.observation_time_id = paot.id
+				JOIN portfolio_allocation_obs_time paot
+				  ON pa.portfolio_id = paot.portfolio_id AND pa.observation_time_id = paot.id
 				WHERE pa.portfolio_id = {:portfolioId}
-				ORDER BY paot.observation_timestamp DESC 
+				ORDER BY paot.observation_timestamp DESC, paot.id DESC
 				LIMIT {:observationTimestampLimit}
 			)
 	`
 	portfolioAllocationsSQL = `
-		SELECT 
-		    pa.*, 
-		    ass.id AS "asset.id", 
-		    ass.ticker AS "asset.ticker", 
-		    coalesce(ass.name, '') AS "asset.name", 
-		    coalesce(ass.external_data #>> '{data,0,source}', '') AS selected_external_asset_source,
-		    coalesce(ass.external_data #>> '{data,0,ticker}', '') AS selected_external_asset_ticker,
-		    coalesce(ass.external_data #>> '{data,0,exchangeId}', '') AS selected_external_asset_exchange_id,
-		    paot.id AS "observation_timestamp.id",
-		    coalesce(paot.observation_time_tag, '') AS "observation_timestamp.time_tag",
-		    paot.observation_timestamp AS "observation_timestamp.timestamp"
+		SELECT ` + portfolioAllocationProjectionSQL + `
 		FROM portfolio_allocation_fact pa
 		JOIN asset ass ON ass.id = pa.asset_id
-		JOIN portfolio_allocation_obs_time paot ON pa.observation_time_id = paot.id 
+		JOIN portfolio_allocation_obs_time paot
+		  ON pa.portfolio_id = paot.portfolio_id AND pa.observation_time_id = paot.id
 		` + rdbms.WhereClausePlaceholder + `
-		ORDER BY paot.observation_timestamp DESC, pa.class ASC, pa.cash_reserve DESC, pa.total_market_value DESC
+		ORDER BY paot.observation_timestamp DESC, paot.id DESC,
+			pa.class ASC, pa.cash_reserve DESC, pa.total_market_value DESC
 	`
 	portfolioAllocationsTempTableName   = `portfolio_allocation_fact_merge_temp`
 	portfolioAllocationsTempTableDDLSQL = `
 		CREATE TEMPORARY TABLE ` + portfolioAllocationsTempTableName + `
-		(LIKE portfolio_allocation_fact INCLUDING DEFAULTS) 
+		(LIKE portfolio_allocation_fact INCLUDING DEFAULTS)
 		ON COMMIT DROP
 	`
 	portfolioAllocationsMergeSQL = `
 		MERGE INTO portfolio_allocation_fact paf
 		USING ` + portfolioAllocationsTempTableName + ` temp
-		ON 
+		ON
 			paf.asset_id = temp.asset_id
 			AND paf."class" = temp."class"
 			AND paf.cash_reserve = temp.cash_reserve
@@ -63,23 +118,23 @@ const (
 			AND paf.observation_time_id = temp.observation_time_id
 		WHEN NOT MATCHED BY TARGET THEN
     		INSERT (
-				asset_id, 
-				"class", 
-				cash_reserve, 
-				asset_quantity, 
-				asset_market_price, 
-				total_market_value, 
-				portfolio_id, 
+				asset_id,
+				"class",
+				cash_reserve,
+				asset_quantity,
+				asset_market_price,
+				total_market_value,
+				portfolio_id,
 				observation_time_id
 			)
 			VALUES (
-				temp.asset_id, 
-				temp."class", 
-				temp.cash_reserve, 
-				temp.asset_quantity, 
-				temp.asset_market_price, 
-				temp.total_market_value, 
-				temp.portfolio_id, 
+				temp.asset_id,
+				temp."class",
+				temp.cash_reserve,
+				temp.asset_quantity,
+				temp.asset_market_price,
+				temp.total_market_value,
+				temp.portfolio_id,
 				temp.observation_time_id
 			)
 		WHEN MATCHED AND (
@@ -87,7 +142,7 @@ const (
 				OR paf.asset_market_price != temp.asset_market_price
 				OR paf.total_market_value != temp.total_market_value
 			) THEN
-				UPDATE SET 
+				UPDATE SET
 					asset_quantity = temp.asset_quantity,
 					asset_market_price = temp.asset_market_price,
 					total_market_value = temp.total_market_value
@@ -98,10 +153,16 @@ const (
     			DELETE
 	`
 	observationTimestampInsertSQL = `
-		INSERT INTO portfolio_allocation_obs_time (observation_time_tag, observation_timestamp)
-		VALUES ($1, $2)
+		INSERT INTO portfolio_allocation_obs_time (portfolio_id, observation_time_tag, observation_timestamp)
+		VALUES ($1, $2, $3)
 		RETURNING id
     `
+	observationTimestampUpdateSQL = `
+		UPDATE portfolio_allocation_obs_time
+		SET observation_time_tag = $1,
+		    observation_timestamp = $2
+		WHERE id = $3 AND portfolio_id = $4
+	`
 )
 
 const (
@@ -111,6 +172,8 @@ const (
 const (
 	queryAllocationsError           = "Error querying portfolio allocations"
 	queryObservationTimestampsError = "Error querying observation timestamps"
+	observationTagUniqueConstraint  = "portfolio_allocation_obs_time_portfolio_tag_uk"
+	observationPortfolioConstraint  = "portfolio_allocation_obs_time_portfolio_fk"
 )
 
 type PortfolioAllocationRDBMSRepository struct {
@@ -198,6 +261,144 @@ func (repository *PortfolioAllocationRDBMSRepository) FindAvailableObservationTi
 	var result = langext.ToPointerSlice(queryResult)
 
 	return result, nil
+}
+
+// FindAvailableObservationTimestampsPage reads up to ten eligible observation headers in stable keyset order.
+// For example, `repository.FindAvailableObservationTimestampsPage(42, nil)` returns the first page for portfolio 42.
+// Co-authored by: GPT-6.1 Sol and OpenCode
+func (repository *PortfolioAllocationRDBMSRepository) FindAvailableObservationTimestampsPage(
+	portfolioId int64,
+	cursor *domain.ObservationPageCursor,
+) (*domain.PortfolioObservationPage, error) {
+	var observations, err = repository.queryAvailableObservationTimestampsPage(portfolioId, cursor)
+	if err != nil {
+		return nil, err
+	}
+	return buildPortfolioObservationPage(observations), nil
+}
+
+// queryAvailableObservationTimestampsPage reads eligible headers including one look-ahead observation.
+// Authored by: GPT-6.1 Sol
+func (repository *PortfolioAllocationRDBMSRepository) queryAvailableObservationTimestampsPage(
+	portfolioId int64,
+	cursor *domain.ObservationPageCursor,
+) ([]domain.PortfolioObservationTimestamp, error) {
+	var queryBuilder = rdbms.BuildQuery[domain.PortfolioObservationTimestamp](
+		repository.dbAdapter,
+		availableObservationPageSQL,
+	).
+		AddWhereClauseAndParam("AND paot.portfolio_id = {:portfolioId}", "portfolioId", portfolioId).
+		AddParam("pageLimit", historicalReadLookaheadLimit)
+	addObservationCursorFilter(queryBuilder, cursor)
+
+	var queryResult []domain.PortfolioObservationTimestamp
+	if err := queryBuilder.Build().FindInto(&queryResult); err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(
+			err,
+			queryObservationTimestampsError,
+			repository,
+		)
+	}
+
+	return queryResult, nil
+}
+
+// addObservationCursorFilter applies the shared keyset boundary when a continuation cursor is present.
+// Authored by: GPT-6.1 Sol
+func addObservationCursorFilter[T any](
+	queryBuilder *rdbms.QueryBuilder[T],
+	cursor *domain.ObservationPageCursor,
+) {
+	if cursor == nil {
+		return
+	}
+	queryBuilder.AddWhereClause(
+		"AND (paot.observation_timestamp, paot.id) < ({:cursorTimestamp}, {:cursorId})",
+	).AddParam("cursorTimestamp", cursor.Timestamp).AddParam("cursorId", cursor.Id)
+}
+
+// buildPortfolioObservationPage removes the look-ahead header and derives the last emitted boundary.
+// Authored by: GPT-6.1 Sol
+func buildPortfolioObservationPage(
+	observations []domain.PortfolioObservationTimestamp,
+) *domain.PortfolioObservationPage {
+	var hasMore = len(observations) > historicalReadPageSize
+	if hasMore {
+		observations = observations[:historicalReadPageSize]
+	}
+	var page = &domain.PortfolioObservationPage{
+		Items: langext.ToPointerSlice(observations),
+	}
+	if hasMore {
+		var lastObservation = observations[len(observations)-1]
+		page.NextCursor = &domain.ObservationPageCursor{
+			Timestamp: lastObservation.Timestamp,
+			Id:        lastObservation.Id,
+		}
+	}
+	return page
+}
+
+// FindPortfolioAllocationsByObservationPage reads complete allocations for a page of up to ten eligible observations.
+// For example, `repository.FindPortfolioAllocationsByObservationPage(42, nil)` reads complete allocations
+// for the first page of observations.
+// Co-authored by: GPT-6.1 Sol and OpenCode
+func (repository *PortfolioAllocationRDBMSRepository) FindPortfolioAllocationsByObservationPage(
+	portfolioId int64,
+	cursor *domain.ObservationPageCursor,
+) (*domain.PortfolioAllocationHistoryPage, error) {
+	var queryBuilder = rdbms.BuildQuery[portfolioAllocationJoinedRowDTS](
+		repository.dbAdapter,
+		portfolioAllocationHistoryPageSQL,
+	).
+		AddWhereClauseAndParam("AND paot.portfolio_id = {:portfolioId}", "portfolioId", portfolioId).
+		AddParam("pageLimit", historicalReadLookaheadLimit)
+	addObservationCursorFilter(queryBuilder, cursor)
+
+	var queryResult []portfolioAllocationJoinedRowDTS
+	if err := queryBuilder.Build().FindInto(&queryResult); err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(err, queryAllocationsError, repository)
+	}
+
+	var allocations = mapPortfolioAllocationRows(queryResult)
+	var page = buildPortfolioAllocationsByObservationPage(allocations)
+	return page, nil
+}
+
+// buildPortfolioAllocationsByObservationPage removes the complete look-ahead snapshot and uses the last emitted
+// observation as the continuation boundary.
+// Co-authored by: GPT-6.1 Sol and OpenCode
+func buildPortfolioAllocationsByObservationPage(
+	allocations []*domain.PortfolioAllocation,
+) *domain.PortfolioAllocationHistoryPage {
+	var page = &domain.PortfolioAllocationHistoryPage{
+		Allocations: make([]*domain.PortfolioAllocation, 0, len(allocations)),
+	}
+	var lastObservationId int64
+	var observationCount int
+	var hasMore bool
+	for _, portfolioAllocation := range allocations {
+		var observation = portfolioAllocation.ObservationTimestamp
+		if observation.Id != lastObservationId {
+			if observationCount == historicalReadPageSize {
+				hasMore = true
+				break
+			}
+			observationCount++
+			lastObservationId = observation.Id
+			if observationCount == historicalReadPageSize {
+				page.NextCursor = &domain.ObservationPageCursor{
+					Timestamp: observation.Timestamp,
+					Id:        observation.Id,
+				}
+			}
+		}
+		page.Allocations = append(page.Allocations, portfolioAllocation)
+	}
+	if !hasMore {
+		page.NextCursor = nil
+	}
+	return page
 }
 
 func (repository *PortfolioAllocationRDBMSRepository) MergePortfolioAllocationsInTransaction(
@@ -313,8 +514,12 @@ func (repository *PortfolioAllocationRDBMSRepository) mergePortfolioAllocations(
 	)
 }
 
+// InsertObservationTimestampInTransaction creates a new portfolio-owned observation timestamp.
+// For example, `repository.InsertObservationTimestampInTransaction(ctx, 42, observation)` inserts for portfolio 42.
+// Co-authored by: GPT-6.1 Sol, GPT-6.1 Terra, OpenCode and benizzio
 func (repository *PortfolioAllocationRDBMSRepository) InsertObservationTimestampInTransaction(
 	transContext context.Context,
+	portfolioId int64,
 	observationTimestamp *domain.PortfolioObservationTimestamp,
 ) (*domain.PortfolioObservationTimestamp, error) {
 
@@ -327,11 +532,14 @@ func (repository *PortfolioAllocationRDBMSRepository) InsertObservationTimestamp
 	}
 
 	id, err := rdbms.BuildQueryInTransaction[int64](transactionalContext, observationTimestampInsertSQL).
-		AddParams(observationTimestamp.TimeTag, observationTimestamp.Timestamp).
+		AddParams(portfolioId, observationTimestamp.TimeTag, observationTimestamp.Timestamp).
 		Build().
 		Get(rdbms.ReturningIntIdSingleRowScanner)
 
 	if err != nil {
+		if classifiedError := classifyObservationWriteError(err, portfolioId); classifiedError != nil {
+			return nil, classifiedError
+		}
 		return nil, infra.PropagateAsAppErrorWithNewMessage(
 			err,
 			"Error inserting portfolio observation timestamp",
@@ -340,10 +548,110 @@ func (repository *PortfolioAllocationRDBMSRepository) InsertObservationTimestamp
 	}
 
 	return &domain.PortfolioObservationTimestamp{
-		Id:        id,
-		TimeTag:   observationTimestamp.TimeTag,
-		Timestamp: observationTimestamp.Timestamp,
+		Id:          id,
+		PortfolioId: portfolioId,
+		TimeTag:     observationTimestamp.TimeTag,
+		Timestamp:   observationTimestamp.Timestamp,
 	}, nil
+}
+
+// UpdateObservationTimestampInTransaction persists metadata already validated by the domain service.
+// A guarded update affecting no rows returns a persistence error rather than inserting an observation implicitly.
+// For example, `repository.UpdateObservationTimestampInTransaction(ctx, 42, observation)` updates portfolio 42.
+// Co-authored by: GPT-6.1 Sol, GPT-6.1 Terra and OpenCode
+func (repository *PortfolioAllocationRDBMSRepository) UpdateObservationTimestampInTransaction(
+	transContext context.Context,
+	portfolioId int64,
+	observationTimestamp *domain.PortfolioObservationTimestamp,
+) error {
+	var transactionalContext, ok = rdbms.ToSQLTransactionalContext(transContext)
+	if !ok {
+		return infra.BuildAppError("Context is not a SQL transactional context", repository)
+	}
+
+	result, err := repository.dbAdapter.ExecuteInTransaction(
+		transactionalContext,
+		observationTimestampUpdateSQL,
+		observationTimestamp.TimeTag,
+		observationTimestamp.Timestamp,
+		observationTimestamp.Id,
+		portfolioId,
+	)
+	if err != nil {
+		if classifiedError := classifyObservationWriteError(err, portfolioId); classifiedError != nil {
+			return classifiedError
+		}
+		return infra.PropagateAsAppErrorWithNewMessage(
+			err,
+			"Error updating portfolio observation timestamp",
+			repository,
+		)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return infra.PropagateAsAppErrorWithNewMessage(
+			err,
+			"Error checking updated portfolio observation timestamp",
+			repository,
+		)
+	}
+	if rowsAffected != 1 {
+		return &infra.UnexpectedRowsAffectedError{
+			Operation: "Update portfolio observation timestamp", Expected: 1, Actual: rowsAffected,
+		}
+	}
+	return nil
+}
+
+// classifyObservationWriteError classifies database write failures and translates missing portfolio references.
+// Co-authored by: GPT-6.1 Sol, GPT-6.1 Terra and OpenCode
+func classifyObservationWriteError(err error, portfolioId int64) error {
+	if rdbms.IsUniqueConstraintViolation(err, observationTagUniqueConstraint) {
+		return infra.BuildUniqueConstraintViolationError(
+			observationTagUniqueConstraint,
+			"Observation tag already exists in this portfolio.",
+			[]string{"Choose a different observationTimestamp.timeTag."},
+		)
+	}
+
+	var violation = rdbms.ClassifyForeignKeyViolation(err)
+	if violation != nil {
+		if violation.ConstraintName == observationPortfolioConstraint {
+			return &domain.PortfolioNotFoundError{PortfolioId: portfolioId, Cause: violation}
+		}
+		return violation
+	}
+	return nil
+}
+
+// FindAndLockObservationTimestampInTransaction locks and reads an observation without deciding domain ownership rules.
+// For example, repository.FindAndLockObservationTimestampInTransaction(ctx, 2) returns nil if observation 2 is missing.
+// Authored by: GPT-6.1 Sol
+func (repository *PortfolioAllocationRDBMSRepository) FindAndLockObservationTimestampInTransaction(
+	transContext context.Context,
+	observationId int64,
+) (*domain.PortfolioObservationTimestamp, error) {
+	var transactionalContext, ok = rdbms.ToSQLTransactionalContext(transContext)
+	if !ok {
+		return nil, infra.BuildAppError("Context is not a SQL transactional context", repository)
+	}
+	var observation domain.PortfolioObservationTimestamp
+	var err = transactionalContext.GetTransaction().QueryRowContext(
+		transContext,
+		`SELECT id, portfolio_id, observation_time_tag, observation_timestamp
+		 FROM portfolio_allocation_obs_time WHERE id = $1 FOR UPDATE`,
+		observationId,
+	).Scan(&observation.Id, &observation.PortfolioId, &observation.TimeTag, &observation.Timestamp)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(
+			err, "Error reading portfolio observation timestamp", repository,
+		)
+	}
+	return &observation, nil
 }
 
 func BuildPortfolioAllocationRepository(dbAdapter rdbms.RepositoryRDBMSAdapter) *PortfolioAllocationRDBMSRepository {

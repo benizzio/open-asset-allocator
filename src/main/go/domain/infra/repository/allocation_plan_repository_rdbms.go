@@ -2,6 +2,10 @@ package repository
 
 import (
 	"context"
+	"database/sql"
+	"errors"
+
+	"github.com/lib/pq"
 
 	"github.com/benizzio/open-asset-allocator/domain"
 	"github.com/benizzio/open-asset-allocator/domain/allocation"
@@ -10,40 +14,71 @@ import (
 	"github.com/benizzio/open-asset-allocator/langext"
 )
 
+// These constants define SQL for reading allocation plans and their identifiers,
+// inserting and updating plans, and merging planned allocations using a temporary table.
+//
+// Co-authored by: benizzio and OpenCode
+// Co-authored by: GPT-6.1 Terra
+// Co-authored by: GPT-6.1 Sol
 const (
-	allocationPlanIdentifierSQL = `
-		SELECT ap.id, ap.name
-		FROM allocation_plan ap
-	` + rdbms.WhereClausePlaceholder + `
-		ORDER BY ap.create_timestamp DESC
-	`
-	allocationPlanSQL = `
-		SELECT 
+	// allocationPlanProjectionSQL keeps paginated and legacy joined read models aligned.
+	// Authored by: GPT-6.1 Sol
+	allocationPlanProjectionSQL = `
 		    ap.id AS allocation_plan_id,
-		    ap.name, 
-		    ap.type, 
+		    ap.name,
+		    ap.type,
+		    ap.planned_date,
 		    ap.planned_execution_date,
 		    pa.id AS planned_allocation_id,
-		    pa.hierarchical_id, 
-		    pa.cash_reserve, 
+		    pa.hierarchical_id,
+		    pa.cash_reserve,
 		    pa.slice_size_percentage,
-		    coalesce(ass.id, 0) AS "asset.id", 
-		    coalesce(ass.ticker, '') AS "asset.ticker", 
+		    coalesce(ass.id, 0) AS "asset.id",
+		    coalesce(ass.ticker, '') AS "asset.ticker",
 		    coalesce(ass.name, '') AS "asset.name"
+	`
+	allocationPlanPageSQL = `
+		WITH allocation_plan_page AS (
+			SELECT ap.id, ap.planned_date
+			FROM allocation_plan ap
+			` + rdbms.WhereClausePlaceholder + `
+			AND EXISTS (
+				SELECT 1 FROM planned_allocation eligible_detail
+				WHERE eligible_detail.allocation_plan_id = ap.id
+			)
+			ORDER BY ap.planned_date DESC, ap.id DESC
+			LIMIT {:pageLimit}
+		)
+		SELECT ` + allocationPlanProjectionSQL + `
+		FROM allocation_plan_page page
+		JOIN allocation_plan ap ON ap.id = page.id
+		JOIN planned_allocation pa ON pa.allocation_plan_id = ap.id
+		LEFT JOIN asset ass ON ass.id = pa.asset_id
+		ORDER BY page.planned_date DESC, page.id DESC,
+			pa.cash_reserve DESC, pa.slice_size_percentage DESC
+	`
+	allocationPlanIdentifierSQL = `
+		SELECT ap.id, ap.name, ap.planned_date
+		FROM allocation_plan ap
+	` + rdbms.WhereClausePlaceholder + `
+		ORDER BY ap.planned_date DESC, ap.id DESC
+	`
+	allocationPlanSQL = `
+		SELECT ` + allocationPlanProjectionSQL + `
 		FROM planned_allocation pa 
 		JOIN allocation_plan ap ON pa.allocation_plan_id = ap.id
 		LEFT JOIN asset ass ON ass.id = pa.asset_id
 	` + rdbms.WhereClausePlaceholder + `
-		ORDER BY ap.create_timestamp DESC, pa.cash_reserve DESC, pa.slice_size_percentage DESC
+		ORDER BY ap.planned_date DESC, ap.id DESC, pa.cash_reserve DESC, pa.slice_size_percentage DESC
 	`
 	allocationPlanInsertSQL = `
-		INSERT INTO allocation_plan (portfolio_id, name, type)
-		VALUES ($1, $2, $3) RETURNING id
+		INSERT INTO allocation_plan (portfolio_id, name, type, planned_date)
+		VALUES ($1, $2, $3, $4) RETURNING id
     `
 	allocationPlanUpdateSQL = `
 		UPDATE allocation_plan 
-		SET name = $1
-		WHERE id = $2
+		SET name = $1, planned_date = $2
+		WHERE id = $3 AND portfolio_id = $4 AND type = $5
 	`
 	plannedAllocationTempTableName   = "planned_allocation_merge_temp"
 	plannedAllocationTempTableDDLSQL = `
@@ -54,8 +89,8 @@ const (
 	plannedAllocationMergeSQL = `
 		MERGE INTO planned_allocation pa
 		USING ` + plannedAllocationTempTableName + ` temp
-		ON pa.id = temp.id
-		WHEN NOT MATCHED BY TARGET THEN
+		ON pa.id = temp.id AND pa.allocation_plan_id = temp.allocation_plan_id
+		WHEN NOT MATCHED BY TARGET AND temp.id = 0 THEN
 			INSERT (allocation_plan_id, hierarchical_id, cash_reserve, slice_size_percentage, asset_id)
 			VALUES (
 				temp.allocation_plan_id, 
@@ -98,6 +133,75 @@ func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlans(
 	}
 
 	return mapPlannedAllocationRows(queryResult)
+}
+
+// GetAllocationPlansPage reads up to ten complete plans of the requested type in stable keyset order.
+// For example, `repository.GetAllocationPlansPage(42, allocation.AssetAllocationPlan, nil)` returns the first page.
+// Co-authored by: GPT-6.1 Sol and OpenCode
+func (repository *AllocationPlanRDBMSRepository) GetAllocationPlansPage(
+	portfolioId int64,
+	planType allocation.PlanType,
+	cursor *domain.AllocationPlanPageCursor,
+) (*domain.AllocationPlanPage, error) {
+	var rows, err = repository.queryAllocationPlansPage(portfolioId, planType, cursor)
+	if err != nil {
+		return nil, err
+	}
+	plans, err := mapPlannedAllocationRows(rows)
+	if err != nil {
+		return nil, err
+	}
+	return buildAllocationPlanPage(plans), nil
+}
+
+// queryAllocationPlansPage retrieves complete joined rows for the parent page and one look-ahead plan.
+// Authored by: GPT-6.1 Sol
+func (repository *AllocationPlanRDBMSRepository) queryAllocationPlansPage(
+	portfolioId int64,
+	planType allocation.PlanType,
+	cursor *domain.AllocationPlanPageCursor,
+) ([]plannedAllocationJoinedRowDTS, error) {
+	var queryBuilder = rdbms.BuildQuery[plannedAllocationJoinedRowDTS](
+		repository.dbAdapter,
+		allocationPlanPageSQL,
+	).
+		AddWhereClauseAndParam("AND ap.portfolio_id = {:portfolioId}", "portfolioId", portfolioId).
+		AddWhereClauseAndParam("AND ap.type = {:planType}", "planType", planType.String()).
+		AddParam("pageLimit", historicalReadLookaheadLimit)
+	if cursor != nil {
+		queryBuilder.AddWhereClause(
+			"AND (ap.planned_date, ap.id) < ({:cursorDate}, {:cursorId})",
+		).AddParam("cursorDate", cursor.PlannedDate).AddParam("cursorId", cursor.Id)
+	}
+
+	var queryResult []plannedAllocationJoinedRowDTS
+	if err := queryBuilder.Build().FindInto(&queryResult); err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(
+			err,
+			"Error querying paginated allocation plans",
+			repository,
+		)
+	}
+
+	return queryResult, nil
+}
+
+// buildAllocationPlanPage removes the look-ahead plan and derives the last emitted plan's boundary.
+// Authored by: GPT-6.1 Sol
+func buildAllocationPlanPage(allocationPlans []*domain.AllocationPlan) *domain.AllocationPlanPage {
+	var hasMore = len(allocationPlans) > historicalReadPageSize
+	if hasMore {
+		allocationPlans = allocationPlans[:historicalReadPageSize]
+	}
+	var page = &domain.AllocationPlanPage{Items: allocationPlans}
+	if hasMore {
+		var lastPlan = allocationPlans[len(allocationPlans)-1]
+		page.NextCursor = &domain.AllocationPlanPageCursor{
+			PlannedDate: lastPlan.PlannedDate,
+			Id:          lastPlan.Id,
+		}
+	}
+	return page
 }
 
 func (repository *AllocationPlanRDBMSRepository) GetAllocationPlan(id int64) (*domain.AllocationPlan, error) {
@@ -151,6 +255,30 @@ func (repository *AllocationPlanRDBMSRepository) GetAllAllocationPlanIdentifiers
 	return langext.ToPointerSlice(queryResult), nil
 }
 
+// InsertAllocationPlanInTransaction inserts a plan and merges its planned allocations
+// within an existing SQL transaction. transContext must be the *rdbms.SQLTransactionalContext
+// provided by the transaction manager; the caller is responsible for committing or
+// rolling back the transaction. plan and each entry in plan.Details must be non-nil.
+//
+// The plan insert uses PortfolioId, Name, PlanType and PlannedDate. The generated
+// plan ID is used for the details but is not assigned to plan.Id; PlannedExecutionDate
+// is not inserted. Each detail supplies its ID, hierarchical ID, cash reserve flag,
+// slice size and optional asset ID to the merge.
+//
+// It returns an error if the context is not a SQL transactional context, the plan
+// insert fails, or the temporary-table preparation or detail merge fails. For example,
+// given a transaction manager, repository and valid plan:
+//
+//	err := transactionManager.RunInTransaction(func(tx *rdbms.SQLTransactionalContext) error {
+//	    return repository.InsertAllocationPlanInTransaction(tx, plan)
+//	})
+//	if err != nil {
+//	    return err
+//	}
+//
+// Co-authored by: benizzio and OpenCode
+// Co-authored by: GPT-6.1 Terra
+// Co-authored by: GPT-6.1 Sol
 func (repository *AllocationPlanRDBMSRepository) InsertAllocationPlanInTransaction(
 	transContext context.Context,
 	plan *domain.AllocationPlan,
@@ -165,7 +293,7 @@ func (repository *AllocationPlanRDBMSRepository) InsertAllocationPlanInTransacti
 	}
 
 	id, err := rdbms.BuildQueryInTransaction[int64](transactionalContext, allocationPlanInsertSQL).
-		AddParams(plan.PortfolioId, plan.Name, plan.PlanType.String()).
+		AddParams(plan.PortfolioId, plan.Name, plan.PlanType.String(), plan.PlannedDate).
 		Build().
 		Get(rdbms.ReturningIntIdSingleRowScanner)
 	if err != nil {
@@ -175,6 +303,34 @@ func (repository *AllocationPlanRDBMSRepository) InsertAllocationPlanInTransacti
 	return repository.mergePlannedAllocationsInTransaction(transactionalContext, id, plan.Details)
 }
 
+// UpdateAllocationPlanInTransaction updates a plan and merges its details in an
+// existing SQL transaction. transContext must be the *rdbms.SQLTransactionalContext
+// provided by the transaction manager. The caller must commit or roll back the
+// transaction. plan and each entry in plan.Details must be non-nil.
+//
+// The domain service must validate ownership before calling this method. The plan
+// is selected by Id, PortfolioId and PlanType, and exactly one plan must be updated.
+// Only Name and PlannedDate are updated; PortfolioId, PlanType and PlannedExecutionDate
+// are not changed. Details are matched by ID and plan ID: only new details with ID zero
+// are inserted with the plan ID, hierarchical ID, cash reserve flag, slice size and
+// optional asset ID. Matched details update only the hierarchical ID, cash reserve
+// flag and slice size, not the asset ID. Existing details belonging to the plan that
+// are absent from plan.Details are deleted.
+//
+// It returns an error for a non-SQL transactional context, a failed plan update,
+// an unexpected affected-row count, temporary-table creation or population, or detail merge.
+// For example, given a transaction manager, repository and valid plan:
+//
+//	err := transactionManager.RunInTransaction(func(tx *rdbms.SQLTransactionalContext) error {
+//	    return repository.UpdateAllocationPlanInTransaction(tx, plan)
+//	})
+//	if err != nil {
+//	    return err
+//	}
+//
+// Co-authored by: benizzio and OpenCode
+// Co-authored by: GPT-6.1 Terra
+// Co-authored by: GPT-6.1 Sol
 func (repository *AllocationPlanRDBMSRepository) UpdateAllocationPlanInTransaction(
 	transContext context.Context,
 	plan *domain.AllocationPlan,
@@ -188,17 +344,65 @@ func (repository *AllocationPlanRDBMSRepository) UpdateAllocationPlanInTransacti
 		)
 	}
 
-	_, err := repository.dbAdapter.ExecuteInTransaction(
+	var result, err = repository.dbAdapter.ExecuteInTransaction(
 		transactionalContext,
 		allocationPlanUpdateSQL,
 		plan.Name,
+		plan.PlannedDate,
 		plan.Id,
+		plan.PortfolioId,
+		plan.PlanType.String(),
 	)
 	if err != nil {
 		return infra.PropagateAsAppErrorWithNewMessage(err, "Error updating allocation plan", repository)
 	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return infra.PropagateAsAppErrorWithNewMessage(err, "Error checking updated allocation plan", repository)
+	}
+	if rowsAffected != 1 {
+		return &infra.UnexpectedRowsAffectedError{
+			Operation: "Update allocation plan", Expected: 1, Actual: rowsAffected,
+		}
+	}
 
 	return repository.mergePlannedAllocationsInTransaction(transactionalContext, int64(plan.Id), plan.Details)
+}
+
+// FindAndLockAllocationPlanOwnershipInTransaction locks a plan and reads its ownership and detail identifiers.
+// For example, repository.FindAndLockAllocationPlanOwnershipInTransaction(ctx, 6) returns nil if plan 6 is missing.
+// Authored by: GPT-6.1 Sol
+func (repository *AllocationPlanRDBMSRepository) FindAndLockAllocationPlanOwnershipInTransaction(
+	transContext context.Context,
+	allocationPlanId int64,
+) (*domain.AllocationPlanOwnership, error) {
+	var transactionalContext, ok = rdbms.ToSQLTransactionalContext(transContext)
+	if !ok {
+		return nil, infra.BuildAppError("Context is not a SQL transactional context", repository)
+	}
+	var ownership domain.AllocationPlanOwnership
+	var err = transactionalContext.GetTransaction().QueryRowContext(
+		transContext,
+		`SELECT portfolio_id, type FROM allocation_plan WHERE id = $1 FOR UPDATE`,
+		allocationPlanId,
+	).Scan(&ownership.PortfolioId, &ownership.PlanType)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(err, "Error reading allocation plan ownership", repository)
+	}
+	err = transactionalContext.GetTransaction().QueryRowContext(
+		transContext,
+		`SELECT COALESCE(array_agg(id::BIGINT), '{}'::BIGINT[]) FROM planned_allocation WHERE allocation_plan_id = $1`,
+		allocationPlanId,
+	).Scan(pq.Array(&ownership.DetailIds))
+	if err != nil {
+		return nil, infra.PropagateAsAppErrorWithNewMessage(
+			err, "Error reading planned allocation identifiers", repository,
+		)
+	}
+	return &ownership, nil
 }
 
 func (repository *AllocationPlanRDBMSRepository) mergePlannedAllocationsInTransaction(

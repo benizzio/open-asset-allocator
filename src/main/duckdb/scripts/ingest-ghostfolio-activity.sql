@@ -1,4 +1,5 @@
 -- DISCONTINUED: should be replaced by direct API ingestion from Ghostfolio
+-- Co-authored by: OpenCode and benizzio
 
 .bail on
 .changes on
@@ -197,11 +198,14 @@ INSERT INTO ghostf_symbol_aggegation
 SELECT * FROM ghostf_symbol_aggegation;
 
 .print '=> Creating portfolio observation time dimension record, if it does not exist'
-INSERT INTO pgsql.portfolio_allocation_obs_time (observation_time_tag, observation_timestamp)
-SELECT getenv('PORTFOLIO_ALLOCATION_OBS_TIME_TAG')::TEXT AS observation_time_tag, current_timestamp AS observation_timestamp
+INSERT INTO pgsql.portfolio_allocation_obs_time (portfolio_id, observation_time_tag, observation_timestamp)
+SELECT getenv('PORTFOLIO_ID')::INTEGER AS portfolio_id,
+       getenv('PORTFOLIO_ALLOCATION_OBS_TIME_TAG')::TEXT AS observation_time_tag,
+       current_timestamp AS observation_timestamp
 WHERE NOT EXISTS (
     SELECT 1 FROM pgsql.portfolio_allocation_obs_time
-    WHERE observation_time_tag = getenv('PORTFOLIO_ALLOCATION_OBS_TIME_TAG')::TEXT
+    WHERE portfolio_id = getenv('PORTFOLIO_ID')::INTEGER
+      AND observation_time_tag = getenv('PORTFOLIO_ALLOCATION_OBS_TIME_TAG')::TEXT
 )
 ;
 
@@ -219,7 +223,9 @@ CREATE TEMP VIEW portfolio_allocation_fact_insertion AS
     FROM ghostf_symbol_aggegation gsa
     LEFT JOIN pgsql.asset_price_last_market_data aplmd ON gsa.symbol = aplmd.ticker
     JOIN pgsql.asset ass ON aplmd.asset_id = ass.id
-    JOIN pgsql.portfolio_allocation_obs_time paot ON paot.observation_time_tag = getenv('PORTFOLIO_ALLOCATION_OBS_TIME_TAG')::TEXT
+    JOIN pgsql.portfolio_allocation_obs_time paot
+      ON paot.portfolio_id = getenv('PORTFOLIO_ID')::INTEGER
+     AND paot.observation_time_tag = getenv('PORTFOLIO_ALLOCATION_OBS_TIME_TAG')::TEXT
     WHERE aplmd.data_source = 'YAHOO'
 ;
 

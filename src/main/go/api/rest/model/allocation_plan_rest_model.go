@@ -32,12 +32,30 @@ type PlannedAllocationDTS struct {
 	Asset               *AllocationPlanAssetDTS `json:"asset,omitempty"`
 }
 
+// AllocationPlanDTS is the REST request and response representation of an allocation plan.
+// Create and update requests must include plannedDate in YYYY-MM-DD format, for example:
+// `{"name":"Long-term allocation","plannedDate":"2026-10-17","details":[...]}`.
+//
+// Co-authored by: OpenCode and benizzio
 type AllocationPlanDTS struct {
 	Id                   *langext.ParseableInt64 `json:"id,omitempty"`
 	Name                 string                  `json:"name,omitempty" validate:"required,max=100"`
 	Type                 string                  `json:"type,omitempty" validate:"max=50"`
 	PlannedExecutionDate *time.Time              `json:"plannedExecutionDate,omitempty"`
+	PlannedDate          AllocationPlanDate      `json:"plannedDate" validate:"required,datetime=2006-01-02"`
 	Details              []*PlannedAllocationDTS `json:"details,omitempty" validate:"required,min=1"`
+}
+
+// AllocationPlanDate is a calendar date serialized as YYYY-MM-DD without a timezone.
+// Use it for allocation-plan plannedDate values, for example `{"plannedDate":"2026-10-17"}`;
+// it keeps calendar days independent of browser and server timezones.
+//
+// Authored by: OpenCode
+type AllocationPlanDate string
+
+// newAllocationPlanDate wraps a stored calendar date for JSON serialization.
+func newAllocationPlanDate(value time.Time) AllocationPlanDate {
+	return AllocationPlanDate(value.Format(time.DateOnly))
 }
 
 // ================================================
@@ -53,6 +71,9 @@ func MapToAllocationPlanDTSs(allocationPlans []*domain.AllocationPlan) []*Alloca
 	return allocationPlansDTS
 }
 
+// mapToAllocationPlanDTS maps a domain allocation plan to the REST representation, preserving its calendar date.
+//
+// Co-authored by: OpenCode and benizzio
 func mapToAllocationPlanDTS(allocationPlan *domain.AllocationPlan) *AllocationPlanDTS {
 	var allocations = mapToPlannedAllocationDTSs(allocationPlan)
 	var allocationPlanId = langext.ParseableInt64(allocationPlan.Id)
@@ -61,6 +82,7 @@ func mapToAllocationPlanDTS(allocationPlan *domain.AllocationPlan) *AllocationPl
 		Name:                 allocationPlan.Name,
 		Type:                 allocationPlan.PlanType.String(),
 		PlannedExecutionDate: allocationPlan.PlannedExecutionDate,
+		PlannedDate:          newAllocationPlanDate(allocationPlan.PlannedDate),
 		Details:              allocations,
 	}
 }
@@ -89,6 +111,11 @@ func mapToPlannedAllocationDTS(allocation *domain.PlannedAllocation) *PlannedAll
 	}
 }
 
+// MapToAllocationPlan converts a validated REST allocation-plan request into a domain plan.
+// A request must provide plannedDate as YYYY-MM-DD; for example, `{"plannedDate":"2026-10-17"}`
+// maps to a UTC-midnight value that persists as a SQL DATE without timezone conversion.
+//
+// Co-authored by: OpenCode and benizzio
 func MapToAllocationPlan(
 	allocationPlanDTS *AllocationPlanDTS,
 	portfolioId int64,
@@ -97,6 +124,10 @@ func MapToAllocationPlan(
 
 	if allocationPlanDTS == nil {
 		return nil, nil
+	}
+	plannedDate, err := time.Parse(time.DateOnly, string(allocationPlanDTS.PlannedDate))
+	if err != nil {
+		return nil, err
 	}
 
 	var allocations = mapToPlannedAllocations(allocationPlanDTS.Details)
@@ -113,8 +144,9 @@ func MapToAllocationPlan(
 
 	return &domain.AllocationPlan{
 		AllocationPlanIdentifier: domain.AllocationPlanIdentifier{
-			Id:   allocationPlanId,
-			Name: allocationPlanDTS.Name,
+			Id:          allocationPlanId,
+			Name:        allocationPlanDTS.Name,
+			PlannedDate: plannedDate,
 		},
 		PortfolioId:          portfolioId,
 		PlanType:             planType,

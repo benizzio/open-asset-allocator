@@ -37,7 +37,7 @@
   "scripts": {
     "lint": "eslint websrc",
     "clean": "rimraf dist .parcel-cache",
-    "dev": "npm run clean && parcel ./root.html websrc/**/*.html --port 8000",
-    "build": "npm run clean && parcel build ./root.html websrc/**/*.html"
+    "dev": "npm run clean && parcel ./root.html \"websrc/**/*.html\" --port 8000",
+    "build": "npm run clean && parcel build ./root.html \"websrc/**/*.html\""
   }
 }

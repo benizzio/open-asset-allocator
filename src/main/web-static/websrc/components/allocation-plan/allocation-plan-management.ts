@@ -4,27 +4,33 @@
  * @author benizzio
  * @author GPT-6.1 Sol
  * @author GPT-6 Sol
+ * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
  */
-import { PortfolioPage } from "../pages";
-import {
-    AllocationPlanDTO,
-    SerializableCompleteAllocationPlan,
-    SerializableFractalPlannedAllocation,
-} from "../domain/allocation-plan";
-import { DomainService } from "../domain/service";
-import { Asset } from "../domain/asset";
-import { AfterRequestEventDetail, HtmxInfra } from "../infra/htmx";
-import DomInfra from "../infra/dom";
+import { PortfolioPage } from "../../pages";
+import { SerializableFractalPlannedAllocation } from "../../domain/allocation-plan";
+import { Asset } from "../../domain/asset";
+import { AfterRequestEventDetail, HtmxInfra } from "../../infra/htmx";
+import DomInfra from "../../infra/dom";
 import { BigNumber } from "bignumber.js";
 import * as handlebars from "handlebars";
-import { isNullish, toInt } from "../utils/lang";
-import { Portfolio } from "../domain/portfolio";
-import { AllocationHierarchyLevel, AllocationPlanType } from "../domain/allocation";
-import AssetComposedColumnsInput, { AssetSelectionState } from "./asset-composed-columns-input";
+import { isNullish, toInt } from "../../utils/lang";
+import { Portfolio } from "../../domain/portfolio";
+import { AllocationHierarchyLevel } from "../../domain/allocation";
+import AssetComposedColumnsInput, { AssetSelectionState } from "../asset-composed-columns-input";
 import htmx from "htmx.org";
-import Router from "../infra/routing";
-import notifications from "./notifications";
-import { NotificationType } from "../infra/infra-types";
+import Router from "../../infra/routing";
+import notifications from "../notifications";
+import { NotificationType } from "../../infra/infra-types";
+import { bindReadOnlyManagementMetadataHeaderToggle } from "../management-metadata-editor";
+import {
+    activateAllocationPlanEditor,
+    bindAllocationPlanMetadataSubmitGuard,
+    handleInputAllocationPlanDate,
+    handleInputAllocationPlanName,
+    prepareAllocationPlanMetadataForSubmit,
+} from "./allocation-plan-management-metadata";
+import { mapForAllocationPlanManagement } from "./allocation-plan-management-response";
 
 type AllocationPlanningHierarchicalFormEntry = {
     occurrences: number;
@@ -45,38 +51,10 @@ const ALLOCATION_PLAN_MANAGEMENT_FORM_PREFIX = "allocation-plan-management-form-
 
 const ASSET_TICKER_FIELD_NAME_SUFFIX = "[asset][ticker]";
 
-function mapForAllocationPlanManagement(originalServerResponseJSON: string): string {
-
-    const portfolioDTO = PortfolioPage.getContextPortfolio();
-    const allocationPlanDTOs = JSON.parse(originalServerResponseJSON) as AllocationPlanDTO[];
-
-    const completeAllocationPlanSet = DomainService.mapping.mapToSerializablePortfolioCompleteAllocationPlanSet(
-        portfolioDTO,
-        allocationPlanDTOs,
-    );
-
-    const portfolio = DomainService.mapping.mapToPortfolio(portfolioDTO);
-    const hierarchy = portfolio.allocationStructure.hierarchy;
-    const topHierarchyLevel = hierarchy.at(-1);
-
-    const planZero: SerializableCompleteAllocationPlan = {
-        allocationPlan: {
-            id: 0,
-            name: "",
-            type: AllocationPlanType.ASSET_ALLOCATION_PLAN,
-            details: [],
-        },
-        fractalHierarchicalPlan: {
-            subLevel: topHierarchyLevel,
-            topAllocations: [],
-        },
-        topLevelKey: topHierarchyLevel.name,
-    };
-
-    completeAllocationPlanSet.completeAllocationPlans.unshift(planZero);
-
-    return JSON.stringify(completeAllocationPlanSet);
-}
+HtmxInfra.htmxTransformResponse.registerTransformResponseFunction(
+    "mapForAllocationPlanManagement",
+    mapForAllocationPlanManagement,
+);
 
 function handleHierarchicalIdLevelChange(targetElement: HTMLInputElement) {
 
@@ -412,10 +390,12 @@ const allocationPlanManagement = {
 
     init() {
 
-        HtmxInfra.htmxTransformResponse.registerTransformResponseFunction(
-            "mapForAllocationPlanManagement",
-            mapForAllocationPlanManagement,
-        );
+        const managementContainer = document.getElementById(ALLOCATION_PLAN_MANAGEMENT_CONTAINER_ID);
+
+        if(managementContainer) {
+            bindReadOnlyManagementMetadataHeaderToggle(managementContainer);
+            bindAllocationPlanMetadataSubmitGuard(managementContainer);
+        }
 
         this.handlebarsAllocationPlanManagementRowTemplate = Handlebars.compile(
             window["template-allocation-plan-management-form-tbody-row"].innerHTML,
@@ -424,6 +404,8 @@ const allocationPlanManagement = {
 
     handleHierarchicalIdLevelChange,
     handleRemovePlannedAllocationRow,
+
+    activateAllocationPlanEditor,
 
     handleAddPlannedAllocationRow(
         allocationPlanId: number,
@@ -496,6 +478,13 @@ const allocationPlanManagement = {
         );
     },
 
+    /** Validates the plan and prepares its metadata before requesting native submission.
+     * @param form - Plan form to save.
+     * @param hierarchySize - Number of allocation hierarchy levels.
+     * @example `allocationPlanManagement.handleSubmit(form, 2)` validates and saves the form.
+     * @author GPT-6.1 Terra
+     * @author benizzio
+     */
     handleSubmit(form: HTMLFormElement, hierarchySize: number) {
 
         if(!AssetComposedColumnsInput.validateFormBeforePost(form)) {
@@ -515,14 +504,28 @@ const allocationPlanManagement = {
             return;
         }
 
-        form.requestSubmit();
+        if(prepareAllocationPlanMetadataForSubmit(form)) {
+            form.requestSubmit();
+        }
     },
 
-    handleAfterRequest(event: CustomEvent) {
+    /** Refreshes allocation-plan views only after a successful POST from the owning plan form.
+     *
+     * @param event - HTMX after-request event raised for the request.
+     * @param allocationPlanId - ID of the plan form expected to have submitted the request.
+     * @example `allocationPlanManagement.handleAfterRequest(event, 12)` handles plan 12's save response.
+     * @author GPT-6 Luna
+     * @author benizzio
+     */
+    handleAfterRequest(event: CustomEvent, allocationPlanId: number) {
 
         const eventDetail = event.detail as AfterRequestEventDetail;
+        const form = document.getElementById(`${ ALLOCATION_PLAN_MANAGEMENT_FORM_PREFIX }${ allocationPlanId }`);
 
-        if(!eventDetail.successful) {
+        if(!eventDetail.successful
+            || eventDetail.requestConfig.verb.toLowerCase() !== "post"
+            || !(form instanceof HTMLFormElement)
+            || eventDetail.requestConfig.elt !== form) {
             return;
         }
 
@@ -541,12 +544,8 @@ const allocationPlanManagement = {
         });
     },
 
-    handleInputAllocationPlanName(nameInput: HTMLInputElement, allocationPlanId: number) {
-        const formId = `${ ALLOCATION_PLAN_MANAGEMENT_FORM_PREFIX }${ allocationPlanId }`;
-        const form = window[formId] as HTMLFormElement;
-        const allocationPlanNameInput = form.elements.namedItem("name") as HTMLInputElement;
-        allocationPlanNameInput.value = nameInput.value;
-    },
+    handleInputAllocationPlanName,
+    handleInputAllocationPlanDate,
 
     navigateToAllocationPlansViewing() {
         const globalPortfolioIdField = document.querySelector("[name='portfolioId']") as HTMLInputElement;

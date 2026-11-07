@@ -1,3 +1,4 @@
+-- Co-authored by: OpenCode and benizzio
 .bail on
 .changes on
 
@@ -60,11 +61,14 @@ INSERT INTO pgsql.asset (ticker)
 ;
 
 .print '=> Creating portfolio observation time dimension record, if it does not exist'
-INSERT INTO pgsql.portfolio_allocation_obs_time (observation_time_tag, observation_timestamp)
-SELECT getenv('PORTFOLIO_ALLOCATION_OBS_TIME_TAG') AS observation_time_tag, current_timestamp AS observation_timestamp
+INSERT INTO pgsql.portfolio_allocation_obs_time (portfolio_id, observation_time_tag, observation_timestamp)
+SELECT getenv('PORTFOLIO_ID')::INTEGER AS portfolio_id,
+       getenv('PORTFOLIO_ALLOCATION_OBS_TIME_TAG') AS observation_time_tag,
+       current_timestamp AS observation_timestamp
     WHERE NOT EXISTS (
     SELECT 1 FROM pgsql.portfolio_allocation_obs_time
-    WHERE observation_time_tag = getenv('PORTFOLIO_ALLOCATION_OBS_TIME_TAG')
+    WHERE portfolio_id = getenv('PORTFOLIO_ID')::INTEGER
+      AND observation_time_tag = getenv('PORTFOLIO_ALLOCATION_OBS_TIME_TAG')
 )
 ;
 
@@ -86,7 +90,9 @@ CREATE TEMP VIEW portfolio_allocation_fact_insertion AS
     FROM sws_summary swss
     LEFT JOIN asset_dimension_mapping adm ON adm.ticker = swss.asset
     LEFT JOIN pgsql.asset ass ON ass.ticker = swss.asset
-    JOIN pgsql.portfolio_allocation_obs_time paot ON paot.observation_time_tag = getenv('PORTFOLIO_ALLOCATION_OBS_TIME_TAG')
+    JOIN pgsql.portfolio_allocation_obs_time paot
+      ON paot.portfolio_id = getenv('PORTFOLIO_ID')::INTEGER
+     AND paot.observation_time_tag = getenv('PORTFOLIO_ALLOCATION_OBS_TIME_TAG')
 ;
 
 SELECT * FROM portfolio_allocation_fact_insertion;

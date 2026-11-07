@@ -5,14 +5,33 @@
  * form, verifies the rendered history chart, and checks PostgreSQL persistence.
  * Scenario 3.1 verifies the history routes with direct browser URLs without
  * changing persisted data.
+ * Scenarios 3.2–3.10 cover date validation and conversion, responsive layout,
+ * focus-driven accordion behavior, repeated field interactions, and behavior after refresh.
+ * Scenario 17 covers dated headers, stable order, local-timezone formatting, escaped tags,
+ * post-submission refreshes, and saved observations outside the current list window.
+ * Scenarios 19.1–19.5 cover pencil editing, responsive header layout, lazy detail loading, exact timestamp preservation,
+ * edited-date ordering, read-only restoration, and whole-header accordion activation.
  * Scenario 5 modifies a seeded observation, creates a second observation, and
- * verifies both browser state and PostgreSQL persistence.
+ * verifies both browser state and PostgreSQL persistence, including the stored timestamp.
  *
  * @author OpenCode
  * @author GPT-6 Sol
+ * @author GPT-6 Luna
+ * @author benizzio
+ * @author GPT-6.1 Terra
  */
 import type { Browser, Locator, Page, Request, Route } from '@playwright/test';
+import {
+  exerciseAccordionFieldInteractions,
+  exerciseReadOnlyManagementHeaderToggle,
+  installAccordionTransitionCounter,
+  readAccordionTransitionCounts,
+} from '../support/accordion-field-interactions';
 import { expect, test } from '../support/fixtures';
+import {
+  expectManagementMetadataHeaderLayout,
+  expectManagementMetadataPencilAlignment,
+} from '../support/management-metadata-layout';
 import type { E2eDatabase } from '../support/database';
 import {
   clickCanvasPoint,
@@ -833,7 +852,7 @@ test.describe('portfolio allocation history management', () => {
     await expectPortfolioHistory(page, seededData.portfolio, true);
 
     const managementButton = page.locator(
-      '#accordion-portfolio-history > button[onclick="navigateToPortfolioAllocationManagement()"]',
+      'button[onclick="navigateToPortfolioAllocationManagement()"]',
     );
     await navigateByClick(
       page,
@@ -846,7 +865,7 @@ test.describe('portfolio allocation history management', () => {
     const newObservationTimeTag = newObservationItem.getByRole('textbox', { name: 'Time tag' });
     await newObservationTimeTag.fill(OBSERVATION_TIME_TAG);
     await expect(newObservationTimeTag).toHaveValue(OBSERVATION_TIME_TAG);
-    await newObservationItem.getByRole('button').click();
+    await expect(newObservationItem.locator('#portfolio-history-management-0')).toHaveClass(/\bshow\b/);
 
     const newObservationForm = page.locator('#portfolio-history-management-form-0');
     await expect(newObservationForm).toBeVisible();
@@ -895,36 +914,47 @@ test.describe('portfolio allocation history management', () => {
 
     await expectNewObservationRows(newObservationForm);
 
-    const saveStartedAt = Date.now();
+    const selectedObservationDate = await newObservationItem.getByLabel('Observation date').inputValue();
+    const expectedObservationTimestamp = await localMidnightTimestamp(page, selectedObservationDate);
+    const saveRequestPromise = page.waitForRequest((request) => {
+      return request.method() === 'POST'
+        && new URL(request.url()).pathname === `/api/portfolio/${seededData.portfolio.id}/history`;
+    });
     const saveResponsePromise = page.waitForResponse((response) => {
       return response.request().method() === 'POST'
         && new URL(response.url()).pathname === `/api/portfolio/${seededData.portfolio.id}/history`;
     });
     await newObservationForm.locator('tfoot button.btn-primary[type="submit"]').click();
+    const saveRequest = await saveRequestPromise;
     const saveResponse = await saveResponsePromise;
-    const saveFinishedAt = Date.now();
     expect(saveResponse.status()).toBe(204);
+    expect(JSON.parse(saveRequest.postData() ?? 'null').observationTimestamp.timestamp)
+      .toBe(expectedObservationTimestamp);
 
     const persistedObservation = await expectPersistedPortfolioHistory(
       database,
       seededData.portfolio,
       seededData.assets,
-      saveStartedAt,
-      saveFinishedAt,
+      expectedObservationTimestamp,
     );
 
     await expectSuccessNotification(page);
-    await expectReloadedManagementItems(page, persistedObservation.id);
+    await expectReloadedManagementItems(page, persistedObservation);
 
     const existingObservationItem = page.locator(
       `#portfolio-history-management-container-${persistedObservation.id}`,
     );
-    await existingObservationItem.getByRole('button', { name: OBSERVATION_TIME_TAG, exact: true }).click();
+    await existingObservationItem.getByRole('button', {
+      name: await expectedObservationHeaderName(page, persistedObservation),
+      exact: true,
+    }).click();
 
     const existingObservationForm = page.locator(
       `#portfolio-history-management-form-${persistedObservation.id}`,
     );
     await expect(existingObservationForm.locator('tbody tr')).toHaveCount(4);
+    expect(new Date(await existingObservationForm.locator('[name="observationTimestamp.timestamp"]').inputValue()))
+      .toEqual(persistedObservation.observation_timestamp);
     await expectReloadedObservationRows(existingObservationForm, persistedObservation.id);
     await expectHistoryManagementForm(existingObservationForm, persistedObservation.id);
 
@@ -972,7 +1002,7 @@ test.describe('portfolio allocation history management', () => {
     await exerciseInitialPortfolioHistoryChart(page, seededData.observation.id);
 
     const managementButton = page.locator(
-      '#accordion-portfolio-history > button[onclick="navigateToPortfolioAllocationManagement()"]',
+      'button[onclick="navigateToPortfolioAllocationManagement()"]',
     );
     await navigateByClick(
       page,
@@ -984,7 +1014,10 @@ test.describe('portfolio allocation history management', () => {
     const existingObservationItem = page.locator(
       `#portfolio-history-management-container-${seededData.observation.id}`,
     );
-    await existingObservationItem.getByRole('button', { name: OBSERVATION_TIME_TAG, exact: true }).click();
+    await existingObservationItem.getByRole('button', {
+      name: await expectedObservationHeaderName(page, seededData.observation),
+      exact: true,
+    }).click();
 
     const existingObservationForm = page.locator(
       `#portfolio-history-management-form-${seededData.observation.id}`,
@@ -1082,13 +1115,31 @@ test.describe('portfolio allocation history management', () => {
       },
     ]);
 
+    const originalObservationTimestamp = await existingObservationForm
+      .locator('[name="observationTimestamp.timestamp"]')
+      .inputValue();
+    expect(new Date(originalObservationTimestamp)).toEqual(seededData.observation.observation_timestamp);
+    const updateRequestPromise = page.waitForRequest((request) => {
+      return request.method() === 'POST'
+        && new URL(request.url()).pathname === `/api/portfolio/${seededData.portfolio.id}/history`;
+    });
     const updateResponsePromise = page.waitForResponse((response) => {
       return response.request().method() === 'POST'
         && new URL(response.url()).pathname === `/api/portfolio/${seededData.portfolio.id}/history`;
     });
     await existingObservationForm.locator('tfoot button.btn-primary[type="submit"]').click();
+    const updateRequest = await updateRequestPromise;
     const updateResponse = await updateResponsePromise;
     expect(updateResponse.status()).toBe(204);
+    expect(JSON.parse(updateRequest.postData() ?? 'null').observationTimestamp.timestamp)
+      .toBe(originalObservationTimestamp);
+    const unchangedObservationTimestamp = await database.query<{ observation_timestamp: Date }>(
+      'SELECT observation_timestamp FROM public.portfolio_allocation_obs_time WHERE id = $1',
+      [seededData.observation.id],
+    );
+    expect(unchangedObservationTimestamp).toEqual([{
+      observation_timestamp: seededData.observation.observation_timestamp,
+    }]);
 
     await expectRoute(page, `/portfolio/${seededData.portfolio.id}/history/manage`);
     await expectSuccessNotification(page);
@@ -1137,7 +1188,7 @@ test.describe('portfolio allocation history management', () => {
     const newObservationTimeTag = newObservationItem.getByRole('textbox', { name: 'Time tag' });
     await newObservationTimeTag.fill(SECOND_OBSERVATION_TIME_TAG);
     await expect(newObservationTimeTag).toHaveValue(SECOND_OBSERVATION_TIME_TAG);
-    await newObservationItem.locator('#portfolio-history-management-trigger-0 > button').click();
+    await expect(newObservationItem.locator('#portfolio-history-management-0')).toHaveClass(/\bshow\b/);
 
     const newObservationForm = page.locator('#portfolio-history-management-form-0');
     await expect(newObservationForm).toBeVisible();
@@ -1281,7 +1332,1445 @@ test.describe('portfolio allocation history management', () => {
     await expect(database.query('SELECT id FROM public.portfolio_allocation_obs_time')).resolves.toEqual([]);
     await expect(database.query('SELECT asset_id FROM public.portfolio_allocation_fact')).resolves.toEqual([]);
   });
+
+  test('scenario 3.2: requires an observation date and keeps the selected date after a failed save', async ({
+    database,
+    page,
+  }) => {
+    const seededData = await seedPortfolioHistoryData(database);
+    const baselineObservation = await seedManagementObservation(
+      database,
+      seededData.portfolio,
+      seededData.assets[EXISTING_BOND_TICKER],
+      'E2E_OBS_FAILED_DATE_BASELINE',
+      '2026-02-01T12:00:00.000Z',
+    );
+    await page.goto('/');
+    await expectRootShell(page);
+    await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+    await expectPortfolioHistoryManagement(page, seededData.portfolio, 1);
+    await expectManagementObservationOrder(page, [baselineObservation]);
+
+    const newObservationItem = page.locator('#portfolio-history-management-container-0');
+    const timeTagInput = newObservationItem.getByRole('textbox', { name: 'Time tag' });
+    const observationDateInput = newObservationItem.getByLabel('Observation date');
+    const accordionToggle = newObservationItem.getByRole('button', { name: 'New observation details' });
+
+    await timeTagInput.click();
+    await timeTagInput.fill('E2E_OBS_FAILED_DATE');
+    await expect(accordionToggle).toHaveAttribute('aria-expanded', 'true');
+    await observationDateInput.click();
+    await expect(accordionToggle).toHaveAttribute('aria-expanded', 'true');
+
+    const form = page.locator('#portfolio-history-management-form-0');
+    await observationDateInput.fill('');
+    expect(await form.evaluate(element => (element as HTMLFormElement).checkValidity())).toBe(false);
+    expect(await observationDateInput.evaluate(element => (element as HTMLInputElement).validity.valueMissing))
+      .toBe(true);
+
+    const savePath = `/api/portfolio/${seededData.portfolio.id}/history`;
+    const saveRequests: Request[] = [];
+    const trackSaveRequest = (request: Request): void => {
+      if(request.method() === 'POST' && new URL(request.url()).pathname === savePath) {
+        saveRequests.push(request);
+      }
+    };
+    const failSave = async (route: Route): Promise<void> => {
+      await route.fulfill({ status: 400, contentType: 'application/json', body: '{}' });
+    };
+    page.on('request', trackSaveRequest);
+    try {
+      await page.route(`**${savePath}`, failSave);
+      await form.locator('tfoot button.btn-primary[type="submit"]').click();
+      expect(saveRequests).toHaveLength(0);
+
+      const selectedDate = '2026-04-20';
+      await observationDateInput.fill(selectedDate);
+      const failedSaveResponse = page.waitForResponse(response => {
+        return response.request().method() === 'POST' && new URL(response.url()).pathname === savePath;
+      });
+      await form.locator('tfoot button.btn-primary[type="submit"]').click();
+      expect((await failedSaveResponse).status()).toBe(400);
+      expect(saveRequests).toHaveLength(1);
+      await expect(observationDateInput).toHaveValue(selectedDate);
+      await expectManagementObservationOrder(page, [baselineObservation], false);
+      await expect(database.query('SELECT id FROM public.portfolio_allocation_obs_time')).resolves.toEqual([
+        { id: baselineObservation.id },
+      ]);
+    } finally {
+      page.off('request', trackSaveRequest);
+      await page.unroute(`**${savePath}`, failSave);
+    }
+  });
+
+  test.describe('scenario 3.3: serializes past and future dates in a positive UTC offset', () => {
+    test.use({ timezoneId: 'Asia/Tokyo' });
+
+    test('persists each selected date at Tokyo local midnight', async ({ database, page }) => {
+      test.setTimeout(60_000);
+      const seededData = await seedPortfolioHistoryData(database);
+      await page.goto('/');
+      await expectRootShell(page);
+      await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+      await expectPortfolioHistoryManagement(page, seededData.portfolio);
+
+      const dates = [
+        { calendarDate: '2024-01-15', expectedTimestamp: '2024-01-14T15:00:00.000Z', timeTag: 'E2E_TOKYO_PAST' },
+        { calendarDate: '2030-06-01', expectedTimestamp: '2030-05-31T15:00:00.000Z', timeTag: 'E2E_TOKYO_FUTURE' },
+      ];
+
+      for(const selectedDate of dates) {
+        const persistedObservation = await submitObservationForDate(
+          page,
+          database,
+          seededData.portfolio,
+          seededData.assets[EXISTING_BOND_TICKER],
+          selectedDate.calendarDate,
+          selectedDate.timeTag,
+          selectedDate.expectedTimestamp,
+        );
+        expect(persistedObservation.observation_timestamp).toEqual(new Date(selectedDate.expectedTimestamp));
+      }
+    });
+  });
+
+  test.describe('scenario 3.4: applies the selected date timezone offset across daylight-saving transitions', () => {
+    test.use({ timezoneId: 'America/Los_Angeles' });
+
+    test('persists local midnight before and after both 2026 transitions', async ({ database, page }) => {
+      test.setTimeout(60_000);
+      const seededData = await seedPortfolioHistoryData(database);
+      await page.goto('/');
+      await expectRootShell(page);
+      await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+      await expectPortfolioHistoryManagement(page, seededData.portfolio);
+
+      const dates = [
+        { calendarDate: '2026-03-08', expectedTimestamp: '2026-03-08T08:00:00.000Z', timeTag: 'E2E_DST_SPRING_BEFORE' },
+        { calendarDate: '2026-03-09', expectedTimestamp: '2026-03-09T07:00:00.000Z', timeTag: 'E2E_DST_SPRING_AFTER' },
+        { calendarDate: '2026-11-01', expectedTimestamp: '2026-11-01T07:00:00.000Z', timeTag: 'E2E_DST_FALL_BEFORE' },
+        { calendarDate: '2026-11-02', expectedTimestamp: '2026-11-02T08:00:00.000Z', timeTag: 'E2E_DST_FALL_AFTER' },
+      ];
+
+      for(const selectedDate of dates) {
+        await submitObservationForDate(
+          page,
+          database,
+          seededData.portfolio,
+          seededData.assets[EXISTING_BOND_TICKER],
+          selectedDate.calendarDate,
+          selectedDate.timeTag,
+          selectedDate.expectedTimestamp,
+        );
+      }
+    });
+  });
+
+  test('scenario 3.5: keeps the observation fields beside the toggle until the header needs to wrap', async ({
+    database,
+    page,
+  }) => {
+    const seededData = await seedPortfolioHistoryData(database);
+    await page.goto('/');
+    await expectRootShell(page);
+    await page.setViewportSize({ width: 1024, height: 900 });
+    await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+    await expectPortfolioHistoryManagement(page, seededData.portfolio);
+
+    const newObservationItem = page.locator('#portfolio-history-management-container-0');
+    const timeTagInput = newObservationItem.getByRole('textbox', { name: 'Time tag' });
+    const observationDateInput = newObservationItem.getByLabel('Observation date');
+    const accordionToggle = newObservationItem.getByRole('button', { name: 'New observation details' });
+    const readHeaderLayout = async () => newObservationItem.locator('h2').evaluate(header => {
+      const timeTag = header.querySelector<HTMLInputElement>('[aria-label="Time tag"]');
+      const observationDate = header.querySelector<HTMLInputElement>('[aria-label="Observation date"]');
+      const toggle = header.querySelector<HTMLButtonElement>('.accordion-button');
+
+      if(!timeTag || !observationDate || !toggle) {
+        throw new Error('The new-observation header is missing a field or accordion toggle.');
+      }
+
+      const timeTagBounds = timeTag.getBoundingClientRect();
+      const observationDateBounds = observationDate.getBoundingClientRect();
+      const toggleBounds = toggle.getBoundingClientRect();
+
+      return {
+        headerClientWidth: header.clientWidth,
+        headerScrollWidth: header.scrollWidth,
+        timeTag: { left: timeTagBounds.left, right: timeTagBounds.right, top: timeTagBounds.top, width: timeTagBounds.width },
+        observationDate: {
+          left: observationDateBounds.left,
+          right: observationDateBounds.right,
+          top: observationDateBounds.top,
+          bottom: observationDateBounds.bottom,
+          width: observationDateBounds.width,
+        },
+        toggle: { left: toggleBounds.left, right: toggleBounds.right, top: toggleBounds.top },
+        headerBottom: header.getBoundingClientRect().bottom,
+      };
+    });
+
+    await expect(timeTagInput).toBeVisible();
+    await expect(observationDateInput).toBeVisible();
+
+    const expectSideBySide = async (): Promise<void> => {
+      const layout = await readHeaderLayout();
+      expect(Math.abs(layout.timeTag.top - layout.observationDate.top)).toBeLessThan(2);
+      expect(layout.observationDate.left).toBeGreaterThanOrEqual(layout.timeTag.right);
+      expect(layout.toggle.left).toBeGreaterThanOrEqual(layout.observationDate.right);
+      expect(layout.timeTag.width).toBeGreaterThan(layout.observationDate.width);
+      expect(layout.headerScrollWidth).toBeLessThanOrEqual(layout.headerClientWidth);
+    };
+
+    await expectSideBySide();
+    await page.setViewportSize({ width: 718, height: 900 });
+    await expectSideBySide();
+    await test.info().attach('observation-header-718px', {
+      body: await page.screenshot(),
+      contentType: 'image/png',
+    });
+
+    const expectFieldsToWrap = async (): Promise<void> => {
+      const layout = await readHeaderLayout();
+      expect(layout.observationDate.top).toBeGreaterThan(layout.timeTag.top);
+      expect(layout.observationDate.bottom).toBeLessThanOrEqual(layout.headerBottom);
+      expect(layout.toggle.left).toBeGreaterThan(layout.timeTag.left);
+      expect(layout.headerScrollWidth).toBeLessThanOrEqual(layout.headerClientWidth);
+    };
+
+    await page.setViewportSize({ width: 375, height: 812 });
+    await expectFieldsToWrap();
+    await test.info().attach('observation-header-375px', {
+      body: await page.screenshot(),
+      contentType: 'image/png',
+    });
+    await page.setViewportSize({ width: 320, height: 740 });
+    await expectFieldsToWrap();
+
+    await expect(accordionToggle).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  test('scenario 3.6: focusing either new-observation field opens the accordion item', async ({ database, page }) => {
+    const seededData = await seedPortfolioHistoryData(database);
+    await page.goto('/');
+    await expectRootShell(page);
+    await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+    await expectPortfolioHistoryManagement(page, seededData.portfolio);
+
+    const item = page.locator('#portfolio-history-management-container-0');
+    const timeTag = item.getByRole('textbox', { name: 'Time tag' });
+    const observationDate = item.getByLabel('Observation date');
+    const toggle = item.getByRole('button', { name: 'New observation details' });
+    const panel = item.locator('#portfolio-history-management-0');
+
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await timeTag.focus();
+    await expect(timeTag).toBeFocused();
+    await expect(panel).toHaveClass(/\bshow\b/);
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+
+    await toggle.click();
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+    await expect(panel).not.toHaveClass(/\bshow\b/);
+
+    await observationDate.focus();
+    await expect(observationDate).toBeFocused();
+    await expect(panel).toHaveClass(/\bshow\b/);
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  test('scenario 3.7: keeps the item open while keyboard focus moves between header fields', async ({
+    database,
+    page,
+  }) => {
+    const seededData = await seedPortfolioHistoryData(database);
+    await page.goto('/');
+    await expectRootShell(page);
+    await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+    await expectPortfolioHistoryManagement(page, seededData.portfolio);
+
+    const item = page.locator('#portfolio-history-management-container-0');
+    const timeTag = item.getByRole('textbox', { name: 'Time tag' });
+    const observationDate = item.getByLabel('Observation date');
+    const toggle = item.getByRole('button', { name: 'New observation details' });
+    const panel = item.locator('#portfolio-history-management-0');
+    const selectedDate = '2026-04-20';
+
+    await timeTag.focus();
+    await timeTag.fill('E2E_FOCUS_NAVIGATION');
+    await page.keyboard.press('Tab');
+    await expect(observationDate).toBeFocused();
+    await observationDate.fill(selectedDate);
+    await page.keyboard.press('Shift+Tab');
+    await expect(timeTag).toBeFocused();
+    await expect(timeTag).toHaveValue('E2E_FOCUS_NAVIGATION');
+    await expect(observationDate).toHaveValue(selectedDate);
+    await expect(panel).toHaveClass(/\bshow\b/);
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  /** Rejects a browser-valid date outside the supported year format without submitting a stale timestamp.
+   *
+   * @author GPT-6 Sol
+   */
+  test('scenario 3.8: cancels an unsupported observation date and allows a corrected date', async ({
+    database,
+    page,
+  }) => {
+    const seededData = await seedPortfolioHistoryData(database);
+    await page.goto('/');
+    await expectRootShell(page);
+    await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+    await expectPortfolioHistoryManagement(page, seededData.portfolio);
+
+    const newObservationItem = page.locator('#portfolio-history-management-container-0');
+    const form = page.locator('#portfolio-history-management-form-0');
+    const dateInput = newObservationItem.getByLabel('Observation date');
+    const timestampInput = form.locator('input[name="observationTimestamp.timestamp"]');
+    const staleTimestamp = '2020-01-01T00:00:00.000Z';
+    const savePath = `/api/portfolio/${seededData.portfolio.id}/history`;
+    const saveRequests: Request[] = [];
+    const trackSaveRequest = (request: Request): void => {
+      if(request.method() === 'POST' && new URL(request.url()).pathname === savePath) {
+        saveRequests.push(request);
+      }
+    };
+    const failSave = async (route: Route): Promise<void> => {
+      await route.fulfill({ status: 400, contentType: 'application/json', body: '{}' });
+    };
+
+    await newObservationItem.getByRole('textbox', { name: 'Time tag' }).fill('E2E_UNSUPPORTED_DATE');
+    await timestampInput.evaluate((element, value) => {
+      (element as HTMLInputElement).value = value;
+    }, staleTimestamp);
+    await dateInput.evaluate(element => {
+      const input = element as HTMLInputElement;
+      input.value = '10000-01-01';
+      input.addEventListener('invalid', () => {
+        input.dataset.reportedValidationMessage = input.validationMessage;
+      });
+    });
+    await expect(dateInput).toHaveValue('10000-01-01');
+    expect(await dateInput.evaluate(element => (element as HTMLInputElement).checkValidity())).toBe(true);
+
+    page.on('request', trackSaveRequest);
+    try {
+      await page.route(`**${savePath}`, failSave);
+      await form.locator('tfoot button.btn-primary[type="submit"]').click();
+      await expect(dateInput).toHaveAttribute('data-reported-validation-message', 'Observation date is not valid.');
+      expect(saveRequests).toHaveLength(0);
+      await expect(timestampInput).toHaveValue(staleTimestamp);
+
+      await dateInput.fill('2026-04-20');
+      const failedSaveResponse = page.waitForResponse(response => {
+        return response.request().method() === 'POST' && new URL(response.url()).pathname === savePath;
+      });
+      await form.locator('tfoot button.btn-primary[type="submit"]').click();
+      expect((await failedSaveResponse).status()).toBe(400);
+      expect(saveRequests).toHaveLength(1);
+      const payload = JSON.parse(saveRequests[0].postData() ?? 'null') as {
+        observationTimestamp?: { timestamp?: string };
+      };
+      const expectedTimestamp = await page.evaluate(() => new Date('2026-04-20T00:00:00').toISOString());
+      expect(payload.observationTimestamp?.timestamp).toBe(expectedTimestamp);
+      await expect(timestampInput).toHaveValue(expectedTimestamp);
+      await expect(database.query('SELECT id FROM public.portfolio_allocation_obs_time')).resolves.toEqual([]);
+    } finally {
+      page.off('request', trackSaveRequest);
+      await page.unroute(`**${savePath}`, failSave);
+    }
+  });
+
+  /** Repeats pointer, text, date, and keyboard interaction without closing the new-observation panel.
+   * @author GPT-6 Luna
+   */
+  test('scenario 3.9: keeps the new-observation panel open through repeated field interactions', async ({
+    database,
+    page,
+  }) => {
+    const seededData = await seedPortfolioHistoryData(database);
+    await page.goto('/');
+    await expectRootShell(page);
+    await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+    await expectPortfolioHistoryManagement(page, seededData.portfolio);
+
+    const item = page.locator('#portfolio-history-management-container-0');
+    await exerciseAccordionFieldInteractions(page, {
+      dateInput: item.getByLabel('Observation date'),
+      expectedDate: '2026-04-20',
+      expectedText: 'E2E_OBS_FIELD_39',
+      panel: item.locator('#portfolio-history-management-0'),
+      textInput: item.getByRole('textbox', { name: 'Time tag' }),
+      toggle: item.getByRole('button', { name: 'New observation details' }),
+    });
+
+    await expect(database.query('SELECT id FROM public.portfolio_allocation_obs_time')).resolves.toEqual([]);
+    await expect(database.query('SELECT observation_time_id FROM public.portfolio_allocation_fact')).resolves.toEqual([]);
+  });
+
+  /** Creates an observation, checks PostgreSQL persistence, then repeats header interactions after refresh.
+   * @author GPT-6 Luna
+   */
+  test('scenario 3.10: preserves accordion interactions after successful observation refresh', async ({
+    database,
+    page,
+  }) => {
+    test.setTimeout(60_000);
+    const seededData = await seedPortfolioHistoryData(database);
+    await page.goto('/');
+    await expectRootShell(page);
+    await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+    await expectPortfolioHistoryManagement(page, seededData.portfolio);
+
+    const initialNewItem = page.locator('#portfolio-history-management-container-0');
+    const initialTimeTag = initialNewItem.getByRole('textbox', { name: 'Time tag' });
+    await initialTimeTag.focus();
+    await expect(initialNewItem.locator('#portfolio-history-management-0')).toHaveClass(/\bshow\b/);
+    const initialDate = initialNewItem.getByLabel('Observation date');
+    const savedDate = '2026-04-20';
+    await initialDate.fill(savedDate);
+
+    const initialForm = page.locator('#portfolio-history-management-form-0');
+    const initialFormHandle = await initialForm.elementHandle();
+    if(!initialFormHandle) {
+      throw new Error('The new-observation form was not rendered.');
+    }
+    const row = await addAllocationRow(page, initialForm, 0);
+    await fillExistingAssetAllocation(
+      page,
+      row,
+      seededData.assets[EXISTING_BOND_TICKER],
+      'BONDS',
+      '2',
+      '100',
+      '200.00',
+    );
+
+    const timeTag = 'E2E_OBS_AFTER_REFRESH';
+    await initialTimeTag.fill(timeTag);
+    const expectedTimestamp = await localMidnightTimestamp(page, savedDate);
+    const saveResponsePromise = page.waitForResponse((response) => {
+      return response.request().method() === 'POST'
+        && new URL(response.url()).pathname === `/api/portfolio/${seededData.portfolio.id}/history`;
+    });
+    await initialForm.locator('tfoot button.btn-primary[type="submit"]').click();
+    expect((await saveResponsePromise).status()).toBe(204);
+
+    const persistedObservation = await findObservationByTag(database, seededData.portfolio, timeTag);
+    expect(persistedObservation.observation_timestamp).toEqual(new Date(expectedTimestamp));
+    const persistedAllocations = await database.query<PersistedAllocation>(
+      `SELECT paf.asset_id,
+              COALESCE(paf.asset_market_price, 0)::numeric(18,8)::text AS asset_market_price,
+              COALESCE(paf.asset_quantity, 0)::numeric(18,8)::text AS asset_quantity,
+              paf.cash_reserve,
+              paf.class,
+              a.name,
+              paf.observation_time_id,
+              a.ticker,
+              paf.total_market_value::text AS total_market_value
+       FROM public.portfolio_allocation_fact paf
+       JOIN public.asset a ON a.id = paf.asset_id
+       WHERE paf.portfolio_id = $1
+         AND paf.observation_time_id = $2`,
+      [seededData.portfolio.id, persistedObservation.id],
+    );
+    expect(persistedAllocations).toEqual([{
+      asset_id: seededData.assets[EXISTING_BOND_TICKER].id,
+      asset_market_price: '100.00000000',
+      asset_quantity: '2.00000000',
+      cash_reserve: false,
+      class: 'BONDS',
+      name: EXISTING_BOND_NAME,
+      observation_time_id: persistedObservation.id,
+      ticker: EXISTING_BOND_TICKER,
+      total_market_value: '200',
+    }]);
+
+    await expectSuccessNotification(page);
+    await expectReloadedManagementItems(page, persistedObservation);
+    expect(await initialFormHandle.evaluate((element) => element.isConnected)).toBe(false);
+    await initialFormHandle.dispose();
+
+    const refreshedNewItem = page.locator('#portfolio-history-management-container-0');
+    const refreshedTimeTag = refreshedNewItem.getByRole('textbox', { name: 'Time tag' });
+    const refreshedForm = page.locator('#portfolio-history-management-form-0');
+    await expect(refreshedTimeTag).toHaveValue('');
+    await expect(refreshedNewItem.getByLabel('Observation date')).toHaveValue(await browserLocalCalendarDate(page));
+
+    await refreshedTimeTag.focus();
+    await expect(refreshedNewItem.locator('#portfolio-history-management-0')).toHaveClass(/\bshow\b/);
+    const draftRow = await addAllocationRow(page, refreshedForm, 0);
+    await fillExistingAssetDirectValueAllocation(
+      page,
+      draftRow,
+      seededData.assets[EXISTING_STOCK_TICKER],
+      'STOCKS',
+      '750.00',
+    );
+    await expect(draftRow.getByRole('textbox', { name: 'Total market value' })).toHaveValue('750.00');
+
+    const newObservationToggle = refreshedNewItem.getByRole('button', { name: 'New observation details' });
+    await newObservationToggle.click();
+    await expect(newObservationToggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(refreshedNewItem.locator('#portfolio-history-management-0')).not.toHaveClass(/\bshow\b/);
+
+    await exerciseAccordionFieldInteractions(page, {
+      dateInput: refreshedNewItem.getByLabel('Observation date'),
+      expectedDate: '2026-04-21',
+      expectedText: 'E2E_OBS_FIELD_310',
+      panel: refreshedNewItem.locator('#portfolio-history-management-0'),
+      textInput: refreshedTimeTag,
+      toggle: newObservationToggle,
+    });
+    await expect(refreshedForm.locator('[name="observationTimestamp.timeTag"]')).toHaveValue('E2E_OBS_FIELD_310');
+    await expect(draftRow.getByRole('textbox', { name: 'Total market value' })).toHaveValue('750.00');
+
+    const savedObservationItem = page.locator(`#portfolio-history-management-container-${persistedObservation.id}`);
+    const savedObservationToggle = savedObservationItem.getByRole('button', {
+      name: await expectedObservationHeaderName(page, persistedObservation),
+      exact: true,
+    });
+    const savedObservationPanel = savedObservationItem.locator(`#portfolio-history-management-${persistedObservation.id}`);
+    const detailRequests: string[] = [];
+    const trackDetailRequest = (request: Request): void => {
+      const requestUrl = new URL(request.url());
+      if(request.method() === 'GET'
+        && requestUrl.pathname === `/api/portfolio/${seededData.portfolio.id}/history`
+        && requestUrl.searchParams.get('observationTimestampId') === String(persistedObservation.id)) {
+        detailRequests.push(request.url());
+      }
+    };
+    page.on('request', trackDetailRequest);
+    try {
+      const detailResponsePromise = page.waitForResponse((response) => {
+        const requestUrl = new URL(response.url());
+        return response.request().method() === 'GET'
+          && requestUrl.pathname === `/api/portfolio/${seededData.portfolio.id}/history`
+          && requestUrl.searchParams.get('observationTimestampId') === String(persistedObservation.id);
+      });
+      await savedObservationToggle.click();
+      expect((await detailResponsePromise).status()).toBe(200);
+      await expect(savedObservationPanel).toHaveClass(/\bshow\b/);
+      await expect(refreshedNewItem.locator('#portfolio-history-management-0')).not.toHaveClass(/\bshow\b/);
+      expect(detailRequests).toHaveLength(1);
+    } finally {
+      page.off('request', trackDetailRequest);
+    }
+
+    await exerciseAccordionFieldInteractions(page, {
+      dateInput: refreshedNewItem.getByLabel('Observation date'),
+      expectedDate: '2026-04-21',
+      expectedText: 'E2E_OBS_FIELD_310',
+      panel: refreshedNewItem.locator('#portfolio-history-management-0'),
+      textInput: refreshedTimeTag,
+      toggle: newObservationToggle,
+    });
+    await expect(savedObservationPanel).not.toHaveClass(/\bshow\b/);
+    await expect(draftRow.getByRole('textbox', { name: 'Total market value' })).toHaveValue('750.00');
+  });
+
+  /** Verifies escaped observation tags, date labels, timestamp tie order, and reload stability.
+   * @author GPT-6 Luna
+   */
+  test('scenario 17.1: renders escaped dated observation headers in stable chronological order', async ({
+    database,
+    page,
+  }) => {
+    const seededData = await seedPortfolioHistoryData(database);
+    const unsafeTag = '<img src=x onerror=alert(1)>';
+    const firstEqualTimestamp = await seedManagementObservation(
+      database,
+      seededData.portfolio,
+      seededData.assets[EXISTING_BOND_TICKER],
+      unsafeTag,
+      '2026-10-13T12:00:00.000Z',
+    );
+    const olderObservation = await seedManagementObservation(
+      database,
+      seededData.portfolio,
+      seededData.assets[EXISTING_BOND_TICKER],
+      'E2E_OBS_OLDER_HEADER',
+      '2024-02-29T12:00:00.000Z',
+    );
+    const secondEqualTimestamp = await seedManagementObservation(
+      database,
+      seededData.portfolio,
+      seededData.assets[EXISTING_BOND_TICKER],
+      'E2E_OBS_EQUAL_HEADER',
+      '2026-10-13T12:00:00.000Z',
+    );
+
+    await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+    await expectPortfolioHistoryManagement(page, seededData.portfolio, 3);
+    await expectManagementObservationOrder(page, [secondEqualTimestamp, firstEqualTimestamp, olderObservation]);
+
+    const unsafeItem = page.locator(`#portfolio-history-management-container-${firstEqualTimestamp.id}`);
+    const expectedHeader = await expectedObservationHeaderName(page, firstEqualTimestamp);
+    const unsafeHeader = unsafeItem.getByRole('button', {
+      name: expectedHeader,
+      exact: true,
+    });
+    const unsafeLabel = unsafeItem.locator('[data-metadata-editor-label]');
+    await expect(unsafeLabel).toBeVisible();
+    await expect(unsafeLabel).toHaveText(expectedHeader);
+    await expect(unsafeHeader).toHaveAccessibleName(expectedHeader);
+    await expect(unsafeItem.locator('img')).toHaveCount(0);
+
+    await page.reload();
+    await expectPortfolioHistoryManagement(page, seededData.portfolio, 3);
+    await expectManagementObservationOrder(page, [secondEqualTimestamp, firstEqualTimestamp, olderObservation]);
+  });
+
+  test.describe('scenario 17.2: formats observation headers in a positive UTC offset', () => {
+    test.use({ timezoneId: 'Asia/Tokyo' });
+
+    /** Verifies persisted instants render as browser-local dates in Tokyo.
+     * @author GPT-6 Luna
+     * @author benizzio
+     */
+    test('shows the timestamp’s Tokyo calendar date instead of its UTC date', async ({ database, page }) => {
+      const seededData = await seedPortfolioHistoryData(database);
+      const observation = await seedManagementObservation(
+        database,
+        seededData.portfolio,
+        seededData.assets[EXISTING_BOND_TICKER],
+        'E2E_OBS_TOKYO_HEADER',
+        '2026-10-12T15:30:00.000Z',
+      );
+
+      await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+      const item = page.locator(`#portfolio-history-management-container-${observation.id}`);
+      await expect(item.getByRole('button', { name: 'E2E_OBS_TOKYO_HEADER - 2026-10-13', exact: true }))
+        .toBeVisible();
+    });
+  });
+
+  test.describe('scenario 17.3: formats observation headers across daylight-saving transitions', () => {
+    test.use({ timezoneId: 'America/Los_Angeles' });
+
+    /** Verifies browser-local dates on both sides of the 2026 daylight-saving transitions.
+     * @author GPT-6 Luna
+     * @author benizzio
+     */
+    test('uses the browser-local date before and after spring and fall clock changes', async ({ database, page }) => {
+      const seededData = await seedPortfolioHistoryData(database);
+      const observations: PersistedObservation[] = [];
+      const fixtures = [
+        { tag: 'E2E_OBS_DST_SPRING_BEFORE', timestamp: '2026-03-08T07:30:00.000Z', date: '2026-03-07' },
+        { tag: 'E2E_OBS_DST_SPRING_AFTER', timestamp: '2026-03-09T07:30:00.000Z', date: '2026-03-09' },
+        { tag: 'E2E_OBS_DST_FALL_BEFORE', timestamp: '2026-11-01T07:30:00.000Z', date: '2026-11-01' },
+        { tag: 'E2E_OBS_DST_FALL_AFTER', timestamp: '2026-11-02T08:30:00.000Z', date: '2026-11-02' },
+      ];
+
+      for(const fixture of fixtures) {
+        observations.push(await seedManagementObservation(
+          database,
+          seededData.portfolio,
+          seededData.assets[EXISTING_BOND_TICKER],
+          fixture.tag,
+          fixture.timestamp,
+        ));
+      }
+
+      await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+      await expectManagementObservationOrder(page, [...observations].reverse());
+      for(const fixture of fixtures) {
+        await expect(page.getByRole('button', {
+          name: `${fixture.tag} - ${fixture.date}`,
+          exact: true,
+        })).toBeVisible();
+      }
+    });
+  });
+
+  test.describe('scenario 17.4: refreshes newly created observations in server order', () => {
+    test.use({ timezoneId: 'UTC' });
+
+    /** Verifies successful creation refreshes the list using server timestamp order.
+     * @author GPT-6 Luna
+     * @author benizzio
+     */
+    test('places backdated and future observations relative to existing records', async ({ database, page }) => {
+      test.setTimeout(60_000);
+      const seededData = await seedPortfolioHistoryModificationData(database);
+      await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+      await expectPortfolioHistoryManagement(page, seededData.portfolio, 1);
+
+      const backdatedDate = '2024-02-29';
+      const backdated = await submitObservationForDate(
+        page,
+        database,
+        seededData.portfolio,
+        seededData.assets[EXISTING_BOND_TICKER],
+        backdatedDate,
+        'E2E_OBS_BACKDATED_HEADER',
+        `${backdatedDate}T00:00:00.000Z`,
+      );
+      await expectManagementObservationOrder(page, [seededData.observation, backdated]);
+
+      const futureDate = '2030-06-01';
+      const future = await submitObservationForDate(
+        page,
+        database,
+        seededData.portfolio,
+        seededData.assets[EXISTING_BOND_TICKER],
+        futureDate,
+        'E2E_OBS_FUTURE_HEADER',
+        `${futureDate}T00:00:00.000Z`,
+      );
+      await expectManagementObservationOrder(page, [future, seededData.observation, backdated]);
+      await expect(database.query<{ id: number }>(
+        `SELECT id FROM public.portfolio_allocation_obs_time WHERE id = ANY($1::bigint[]) ORDER BY id`,
+        [[backdated.id, future.id]],
+      )).resolves.toHaveLength(2);
+    });
+  });
+
+  test.describe('scenario 17.5: keeps newly saved observations outside the record window persisted', () => {
+    test.use({ timezoneId: 'UTC' });
+
+    /** Verifies a saved observation outside the ten-record window remains persisted but not rendered.
+     * @author GPT-6 Luna
+     * @author benizzio
+     */
+    test('does not insert a backdated observation into the refreshed ten-record list', async ({ database, page }) => {
+      test.setTimeout(60_000);
+      const seededData = await seedPortfolioHistoryData(database);
+      const observations: PersistedObservation[] = [];
+      for(let index = 0; index < 10; index++) {
+        const day = String(index + 1).padStart(2, '0');
+        observations.push(await seedManagementObservation(
+          database,
+          seededData.portfolio,
+          seededData.assets[EXISTING_BOND_TICKER],
+          `E2E_OBS_WINDOW_${day}`,
+          `2026-01-${day}T12:00:00.000Z`,
+        ));
+      }
+
+      await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+      await expectPortfolioHistoryManagement(page, seededData.portfolio, 10);
+      await expectManagementObservationOrder(page, [...observations].reverse());
+
+      const outsideWindowDate = '2020-01-01';
+      const outsideWindowObservation = await submitObservationForDate(
+        page,
+        database,
+        seededData.portfolio,
+        seededData.assets[EXISTING_BOND_TICKER],
+        outsideWindowDate,
+        'E2E_OBS_SAVED_OUTSIDE_WINDOW',
+        `${outsideWindowDate}T00:00:00.000Z`,
+      );
+
+      await expectManagementObservationOrder(page, [...observations].reverse());
+      await expect(page.locator(
+        `#portfolio-history-management-container-${outsideWindowObservation.id}`,
+      )).toHaveCount(0);
+      await expect(database.query<{ count: string }>(
+        `SELECT COUNT(*)::text AS count
+         FROM public.portfolio_allocation_obs_time ot
+         JOIN public.portfolio_allocation_fact paf
+           ON paf.portfolio_id = ot.portfolio_id AND paf.observation_time_id = ot.id
+         WHERE paf.portfolio_id = $1`,
+        [seededData.portfolio.id],
+      )).resolves.toEqual([{ count: '11' }]);
+    });
+  });
+
+  test.describe('scenario 19.1: preserves exact timestamps during observation metadata edits', () => {
+    test.use({ timezoneId: 'Asia/Tokyo' });
+
+    /** Edits tag and allocation details while preserving an unchanged non-midnight timestamp exactly.
+     * @author GPT-6 Luna
+     */
+    test('opens the editor accessibly and saves tag and allocation changes without reloading details repeatedly', async ({
+      database,
+      page,
+    }) => {
+      const seededData = await seedPortfolioHistoryData(database);
+      const originalTimestamp = '2026-10-12T15:30:45.123456Z';
+      const observation = await seedManagementObservation(
+        database,
+        seededData.portfolio,
+        seededData.assets[EXISTING_BOND_TICKER],
+        'E2E_OBS_PENCIL_ORIGINAL',
+        originalTimestamp,
+      );
+      const detailsRequests: Request[] = [];
+      const detailsPath = `/api/portfolio/${seededData.portfolio.id}/history`;
+      const matchesDetailsRequest = (url: URL): boolean => url.pathname === detailsPath
+        && url.searchParams.get('observationTimestampId') === String(observation.id);
+      page.on('request', (request) => {
+        const url = new URL(request.url());
+        if(request.method() === 'GET' && matchesDetailsRequest(url)) {
+          detailsRequests.push(request);
+        }
+      });
+
+      await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+      let releaseDetailsRequest: () => void = () => {};
+      const detailRequestGate = new Promise<void>(resolve => {
+        releaseDetailsRequest = resolve;
+      });
+      const detailsRoute = (url: URL): boolean => matchesDetailsRequest(url);
+      await page.route(detailsRoute, async route => {
+        await detailRequestGate;
+        await route.continue();
+      });
+      const item = page.locator(`#portfolio-history-management-container-${observation.id}`);
+      const pencil = item.getByRole('button', { name: 'Edit observation E2E_OBS_PENCIL_ORIGINAL', exact: true });
+      const newItem = page.locator('#portfolio-history-management-container-0');
+      const readOnlyLabel = item.locator('[data-metadata-editor-label]');
+      const editorTrigger = item.locator('[data-metadata-editor-trigger]');
+      const toggle = item.locator('[data-metadata-editor-toggle]');
+      const expectedReadOnlyLabel = 'E2E_OBS_PENCIL_ORIGINAL - 2026-10-13';
+      await expect(readOnlyLabel).toHaveText(expectedReadOnlyLabel);
+      await expectManagementMetadataPencilAlignment(pencil, readOnlyLabel);
+      await expect(pencil).toHaveClass(/\bbtn-secondary\b/);
+      await expect(pencil).toHaveClass(/\bbtn-xs\b/);
+      const pencilBox = await pencil.boundingBox();
+      const pencilSizeStyle = await pencil.evaluate((element) => {
+        const style = window.getComputedStyle(element);
+        return { padding: style.padding, fontSize: style.fontSize, lineHeight: style.lineHeight };
+      });
+      const pencilColorStyle = await pencil.evaluate((element) => {
+        const style = window.getComputedStyle(element);
+        return {
+          background: style.getPropertyValue('--bs-btn-bg'),
+          color: style.getPropertyValue('--bs-btn-color'),
+          border: style.getPropertyValue('--bs-btn-border-color'),
+        };
+      });
+      if(!pencilBox) {
+        throw new Error('The persisted-observation pencil must have a rendered resting size.');
+      }
+      const detailsRequest = page.waitForRequest(request => request.method() === 'GET'
+        && matchesDetailsRequest(new URL(request.url())));
+      await pencil.focus();
+      await page.keyboard.press('Enter');
+
+      const tagInput = item.getByRole('textbox', { name: 'Observation tag', exact: true });
+      const dateInput = item.getByLabel('Observation date', { exact: true });
+      const form = item.locator(`#portfolio-history-management-form-${observation.id}`);
+      const panel = item.locator(`#portfolio-history-management-${observation.id}`);
+      const saveButton = form.locator('button[type="submit"]');
+      const rowRemoveButton = form.locator('tbody button.btn-danger.btn-xs').first();
+      const addButton = form.locator('tfoot button.btn-secondary');
+      await expect(readOnlyLabel).toBeHidden();
+      await expect(pencil).toBeHidden();
+      await expect(editorTrigger).toHaveAttribute('aria-expanded', 'true');
+      await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+      await expect(tagInput).toBeVisible();
+      await expect(tagInput).toBeFocused();
+      await expect(tagInput).toHaveValue('E2E_OBS_PENCIL_ORIGINAL');
+      await expect(dateInput).toHaveValue('2026-10-13');
+      await expect(panel).toHaveClass(/show/);
+      await detailsRequest;
+      await expect(saveButton).toBeDisabled();
+      releaseDetailsRequest();
+      await expect(saveButton).toBeEnabled();
+      await expect.poll(() => detailsRequests.length).toBe(1);
+      await expect(rowRemoveButton).toBeVisible();
+      await expect(addButton).toBeVisible();
+      const rowRemoveStyle = await rowRemoveButton.evaluate((element) => {
+        const style = window.getComputedStyle(element);
+        return { padding: style.padding, fontSize: style.fontSize, lineHeight: style.lineHeight };
+      });
+      const addButtonColorStyle = await addButton.evaluate((element) => {
+        const style = window.getComputedStyle(element);
+        return {
+          background: style.getPropertyValue('--bs-btn-bg'),
+          color: style.getPropertyValue('--bs-btn-color'),
+          border: style.getPropertyValue('--bs-btn-border-color'),
+        };
+      });
+      const rowRemoveBox = await rowRemoveButton.boundingBox();
+      if(!rowRemoveBox) {
+        throw new Error('The observation table action must have a rendered size while its panel is open.');
+      }
+      expect(pencilSizeStyle).toEqual(rowRemoveStyle);
+      expect(pencilColorStyle).toEqual(addButtonColorStyle);
+      expect(Math.abs(pencilBox.height - rowRemoveBox.height)).toBeLessThanOrEqual(1);
+
+      const originalViewport = page.viewportSize();
+      if(!originalViewport) {
+        throw new Error('The browser viewport must be available for responsive header assertions.');
+      }
+      const persistedHeaderControls = {
+        header: item.locator('[data-management-metadata-header]'),
+        textInput: tagInput,
+        dateInput,
+        toggle,
+      };
+      const newHeaderControls = {
+        header: newItem.locator('[data-management-metadata-header]'),
+        textInput: newItem.locator('.portfolio-history-management-new-time-tag'),
+        dateInput: newItem.locator('.portfolio-history-management-new-date'),
+        toggle: newItem.locator('.management-metadata-header-toggle'),
+      };
+      await expectManagementMetadataHeaderLayout(persistedHeaderControls, newHeaderControls);
+      await page.setViewportSize({ width: 375, height: originalViewport.height });
+      await expectManagementMetadataHeaderLayout(persistedHeaderControls, newHeaderControls);
+      await page.setViewportSize(originalViewport);
+      await page.unroute(detailsRoute);
+
+      const row = form.locator(`#portfolio-history-management-form-${observation.id}-row-0`);
+      await row.getByRole('spinbutton', { name: 'Quantity' }).fill('2');
+      await row.getByRole('textbox', { name: 'Market price' }).fill('150');
+      await expect(row.getByRole('textbox', { name: 'Total market value' })).toHaveValue('300.00');
+      await tagInput.fill('E2E_OBS_PENCIL_UPDATED');
+      await toggle.click();
+      await expect(panel).not.toHaveClass(/show/);
+      await expect(panel).toHaveClass(/(?:^|\s)collapse(?:\s|$)/);
+      await toggle.click();
+      await expect(panel).toHaveClass(/show/);
+      await expect(tagInput).toHaveValue('E2E_OBS_PENCIL_UPDATED');
+      await dateInput.focus();
+      await expect(panel).toHaveClass(/show/);
+      await expect.poll(() => detailsRequests.length).toBe(1);
+
+      const saveResponse = page.waitForResponse((response) => response.request().method() === 'POST'
+        && new URL(response.url()).pathname === detailsPath);
+      await saveButton.click();
+      expect((await saveResponse).ok()).toBe(true);
+
+      await expect(item.getByRole('button', {
+        name: 'E2E_OBS_PENCIL_UPDATED - 2026-10-13',
+        exact: true,
+      })).toBeVisible();
+      await expect(item.locator('[data-metadata-editor-label]')).toHaveText('E2E_OBS_PENCIL_UPDATED - 2026-10-13');
+      await expect(item.locator('[data-metadata-editor-label]')).toBeVisible();
+      await expect(item.locator('[data-metadata-editor-trigger]')).toBeVisible();
+      await expect(item.locator('[data-metadata-editor-trigger]')).toHaveAttribute('aria-expanded', 'false');
+      await expect(item.locator('[data-metadata-editor-active]')).toBeHidden();
+      await expect.poll(() => detailsRequests.length).toBe(1);
+      await expect(database.query<{ id: number; timestamp_preserved: boolean; time_tag: string; quantity_updated: boolean }>(
+        `SELECT ot.id,
+                ot.observation_timestamp = $2::timestamptz AS timestamp_preserved,
+                ot.observation_time_tag AS time_tag,
+                paf.asset_quantity = 2 AS quantity_updated
+         FROM public.portfolio_allocation_obs_time ot
+         JOIN public.portfolio_allocation_fact paf ON paf.observation_time_id = ot.id
+         WHERE ot.id = $1 AND paf.portfolio_id = ot.portfolio_id`,
+        [observation.id, originalTimestamp],
+      )).resolves.toEqual([{
+        id: observation.id,
+        timestamp_preserved: true,
+        time_tag: 'E2E_OBS_PENCIL_UPDATED',
+        quantity_updated: true,
+      }]);
+      await exerciseReadOnlyManagementHeaderToggle(
+        item.locator('[data-management-metadata-header]'),
+        readOnlyLabel,
+        panel,
+      );
+      await item.locator('[data-metadata-editor-trigger]').click();
+      await expect(tagInput).toBeVisible();
+      await expect(tagInput).toHaveValue('E2E_OBS_PENCIL_UPDATED');
+      await expect(dateInput).toHaveValue('2026-10-13');
+    });
+  });
+
+  test.describe('scenario 19.2: converts edited observation dates across timezone transitions', () => {
+    test.use({ timezoneId: 'America/Los_Angeles' });
+
+    /** Changes a record date over the spring daylight-saving boundary and verifies stable identity and ordering.
+     * @author GPT-6 Luna
+     */
+    test('uses the selected date offset and moves the same observation into server order', async ({ database, page }) => {
+      const seededData = await seedPortfolioHistoryData(database);
+      const editedObservation = await seedManagementObservation(
+        database,
+        seededData.portfolio,
+        seededData.assets[EXISTING_BOND_TICKER],
+        'E2E_OBS_PENCIL_DST',
+        '2026-03-07T12:00:00.000Z',
+      );
+      const latestObservation = await seedManagementObservation(
+        database,
+        seededData.portfolio,
+        seededData.assets[EXISTING_STOCK_TICKER],
+        'E2E_OBS_PENCIL_LATEST',
+        '2026-03-10T12:00:00.000Z',
+      );
+
+      await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+      const item = page.locator(`#portfolio-history-management-container-${editedObservation.id}`);
+      await item.getByRole('button', { name: 'Edit observation E2E_OBS_PENCIL_DST', exact: true }).click();
+      const dateInput = item.getByLabel('Observation date', { exact: true });
+      await expect(dateInput).toHaveValue('2026-03-07');
+      await expect(item.locator(`#portfolio-history-management-form-${editedObservation.id} button[type="submit"]`))
+        .toBeEnabled();
+      await dateInput.fill('2026-03-09');
+
+      const saveResponse = page.waitForResponse((response) => response.request().method() === 'POST'
+        && new URL(response.url()).pathname === `/api/portfolio/${seededData.portfolio.id}/history`);
+      await item.locator(`#portfolio-history-management-form-${editedObservation.id} button[type="submit"]`).click();
+      expect((await saveResponse).ok()).toBe(true);
+
+      const updatedObservation = await findObservationByTag(database, seededData.portfolio, 'E2E_OBS_PENCIL_DST');
+      expect(updatedObservation.id).toBe(editedObservation.id);
+      await expect(database.query<{ timestamp_matches: boolean }>(
+        `SELECT observation_timestamp = $2::timestamptz AS timestamp_matches
+         FROM public.portfolio_allocation_obs_time WHERE id = $1`,
+        [editedObservation.id, '2026-03-09T07:00:00.000Z'],
+      )).resolves.toEqual([{ timestamp_matches: true }]);
+      await expectManagementObservationOrder(page, [latestObservation, updatedObservation]);
+    });
+  });
+
+  /** Confirms a portfolio-scoped duplicate-tag rejection leaves the observation editor draft intact.
+   * @author GPT-6 Luna
+   */
+  test('scenario 19.3: preserves an observation edit after a duplicate-tag rejection', async ({ database, page }) => {
+    const seededData = await seedPortfolioHistoryData(database);
+    const observation = await seedManagementObservation(
+      database,
+      seededData.portfolio,
+      seededData.assets[EXISTING_BOND_TICKER],
+      'E2E_OBS_PENCIL_DUPLICATE_SOURCE',
+      '2026-05-01T12:00:00.000Z',
+    );
+    const duplicate = await seedManagementObservation(
+      database,
+      seededData.portfolio,
+      seededData.assets[EXISTING_STOCK_TICKER],
+      'E2E_OBS_PENCIL_DUPLICATE_TARGET',
+      '2026-05-02T12:00:00.000Z',
+    );
+
+    await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+    const item = page.locator(`#portfolio-history-management-container-${observation.id}`);
+    await item.getByRole('button', { name: 'Edit observation E2E_OBS_PENCIL_DUPLICATE_SOURCE', exact: true }).click();
+    const form = item.locator(`#portfolio-history-management-form-${observation.id}`);
+    const tagInput = item.getByRole('textbox', { name: 'Observation tag', exact: true });
+    const quantityInput = form.locator('tbody tr').first().getByRole('spinbutton', { name: 'Quantity' });
+    await expect(form.locator('button[type="submit"]')).toBeEnabled();
+    await quantityInput.fill('3');
+    await tagInput.fill(duplicate.observation_time_tag);
+
+    const saveResponse = page.waitForResponse((response) => response.request().method() === 'POST'
+      && new URL(response.url()).pathname === `/api/portfolio/${seededData.portfolio.id}/history`);
+    await form.locator('button[type="submit"]').click();
+    expect((await saveResponse).ok()).toBe(false);
+
+    await expect(tagInput).toBeVisible();
+    await expect(tagInput).toHaveValue(duplicate.observation_time_tag);
+    await expect(item.locator('[data-metadata-editor-label]')).toBeHidden();
+    await expect(item.locator('[data-metadata-editor-trigger]')).toBeHidden();
+    await expect(quantityInput).toHaveValue('3');
+    await expect(item.locator(`#portfolio-history-management-form-tbody-${observation.id} > tr`)).toHaveCount(1);
+    await expect(database.query<{
+      id: number;
+      observation_time_tag: string;
+      quantity_preserved: boolean;
+    }>(
+      `SELECT ot.id,
+              ot.observation_time_tag,
+              paf.asset_quantity = 1 AS quantity_preserved
+       FROM public.portfolio_allocation_obs_time ot
+       JOIN public.portfolio_allocation_fact paf ON paf.observation_time_id = ot.id
+       WHERE ot.id = ANY($1::bigint[]) ORDER BY ot.id`,
+      [[observation.id, duplicate.id]],
+    )).resolves.toEqual([
+      { id: observation.id, observation_time_tag: 'E2E_OBS_PENCIL_DUPLICATE_SOURCE', quantity_preserved: true },
+      { id: duplicate.id, observation_time_tag: 'E2E_OBS_PENCIL_DUPLICATE_TARGET', quantity_preserved: true },
+    ]);
+  });
+
+  test.describe('scenario 19.4: restores the observation header after an unchanged-metadata save', () => {
+    test.use({ timezoneId: 'Asia/Tokyo' });
+
+    /** Verifies the detail-only refresh returns the observation header to read-only mode without changing its timestamp.
+     * @author GPT-6 Luna
+     */
+    test('restores the pencil and label, then allows metadata editing again', async ({ database, page }) => {
+      const seededData = await seedPortfolioHistoryData(database);
+      const originalTimestamp = '2026-10-12T15:30:45.123456Z';
+      const observation = await seedManagementObservation(
+        database,
+        seededData.portfolio,
+        seededData.assets[EXISTING_BOND_TICKER],
+        'E2E_OBS_PENCIL_UNCHANGED',
+        originalTimestamp,
+      );
+
+      await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+      const item = page.locator(`#portfolio-history-management-container-${observation.id}`);
+      const editorTrigger = item.locator('[data-metadata-editor-trigger]');
+      const readOnlyLabel = item.locator('[data-metadata-editor-label]');
+      const fields = item.locator('.portfolio-history-management-edit-fields');
+      const tagInput = item.getByRole('textbox', { name: 'Observation tag', exact: true });
+      const dateInput = item.getByLabel('Observation date', { exact: true });
+      const form = item.locator(`#portfolio-history-management-form-${observation.id}`);
+      await editorTrigger.click();
+      await expect(form.locator('button[type="submit"]')).toBeEnabled();
+      await expect(tagInput).toHaveValue('E2E_OBS_PENCIL_UNCHANGED');
+      await expect(dateInput).toHaveValue('2026-10-13');
+
+      const firstAllocation = form.locator('tbody tr').first();
+      await firstAllocation.getByRole('spinbutton', { name: 'Quantity' }).fill('2');
+      await firstAllocation.getByRole('textbox', { name: 'Market price' }).fill('150');
+      const saveResponse = page.waitForResponse(response => response.request().method() === 'POST'
+        && new URL(response.url()).pathname === `/api/portfolio/${seededData.portfolio.id}/history`);
+      await form.locator('button[type="submit"]').click();
+      expect((await saveResponse).ok()).toBe(true);
+
+      await expect(fields).toBeHidden();
+      await expect(readOnlyLabel).toHaveText('E2E_OBS_PENCIL_UNCHANGED - 2026-10-13');
+      await expect(readOnlyLabel).toBeVisible();
+      await expect(editorTrigger).toBeVisible();
+      await expect(editorTrigger).toHaveAttribute('aria-expanded', 'false');
+      await expect(database.query<{ timestamp_preserved: boolean; quantity_updated: boolean }>(
+        `SELECT ot.observation_timestamp = $2::timestamptz AS timestamp_preserved,
+                paf.asset_quantity = 2 AS quantity_updated
+         FROM public.portfolio_allocation_obs_time ot
+         JOIN public.portfolio_allocation_fact paf ON paf.observation_time_id = ot.id
+         WHERE ot.id = $1 AND paf.portfolio_id = ot.portfolio_id`,
+        [observation.id, originalTimestamp],
+      )).resolves.toEqual([{ timestamp_preserved: true, quantity_updated: true }]);
+
+      await exerciseReadOnlyManagementHeaderToggle(
+        item.locator('[data-management-metadata-header]'),
+        readOnlyLabel,
+        item.locator(`#portfolio-history-management-${observation.id}`),
+      );
+      await editorTrigger.click();
+      await expect(tagInput).toBeVisible();
+      await expect(tagInput).toHaveValue('E2E_OBS_PENCIL_UNCHANGED');
+      await expect(dateInput).toHaveValue('2026-10-13');
+      await expect(readOnlyLabel).toBeHidden();
+    });
+  });
+
+  test.describe('scenario 19.5: toggles observation panels from read-only header surfaces', () => {
+    /** Verifies header clicks preserve lazy-loaded detail drafts and do not interfere with edit controls.
+     * @author GPT-6 Luna
+     */
+    test('toggles once from label and padding, while preserving accordion and editor behavior', async ({
+      database,
+      page,
+    }) => {
+      const seededData = await seedPortfolioHistoryData(database);
+      const firstObservation = await seedManagementObservation(
+        database,
+        seededData.portfolio,
+        seededData.assets[EXISTING_BOND_TICKER],
+        'E2E_OBS_HEADER_FIRST',
+        '2026-05-01T12:00:00.000Z',
+      );
+      const secondObservation = await seedManagementObservation(
+        database,
+        seededData.portfolio,
+        seededData.assets[EXISTING_STOCK_TICKER],
+        'E2E_OBS_HEADER_SECOND',
+        '2026-05-02T12:00:00.000Z',
+      );
+
+      await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+      const firstItem = page.locator(`#portfolio-history-management-container-${firstObservation.id}`);
+      const secondItem = page.locator(`#portfolio-history-management-container-${secondObservation.id}`);
+      const firstHeader = firstItem.locator('[data-management-metadata-header]');
+      const firstLabel = firstItem.locator('[data-metadata-editor-label]');
+      const firstPencil = firstItem.getByRole('button', {
+        name: `Edit observation ${firstObservation.observation_time_tag}`,
+        exact: true,
+      });
+      const firstToggle = firstItem.locator('[data-metadata-editor-toggle]');
+      const firstPanel = firstItem.locator(`#portfolio-history-management-${firstObservation.id}`);
+      const firstForm = firstItem.locator(`#portfolio-history-management-form-${firstObservation.id}`);
+      const secondLabel = secondItem.locator('[data-metadata-editor-label]');
+      const secondPanel = secondItem.locator(`#portfolio-history-management-${secondObservation.id}`);
+      const secondForm = secondItem.locator(`#portfolio-history-management-form-${secondObservation.id}`);
+      const tagInput = firstItem.getByRole('textbox', { name: 'Observation tag', exact: true });
+      const detailsPath = `/api/portfolio/${seededData.portfolio.id}/history`;
+      const detailsRequests = new Map<number, number>();
+
+      page.on('request', (request) => {
+        const url = new URL(request.url());
+        if(request.method() === 'GET' && url.pathname === detailsPath) {
+          const observationId = Number(url.searchParams.get('observationTimestampId'));
+          detailsRequests.set(observationId, (detailsRequests.get(observationId) ?? 0) + 1);
+        }
+      });
+      await installAccordionTransitionCounter(firstPanel);
+      await installAccordionTransitionCounter(secondPanel);
+      await expect(firstHeader).toHaveAttribute('data-metadata-editor-state', 'read-only');
+
+      await firstLabel.click();
+      await expect(firstPanel).toHaveClass(/\bshow\b/);
+      await expect(firstPanel).not.toHaveClass(/\bcollapsing\b/);
+      await expect(firstForm.locator('button[type="submit"]')).toBeEnabled();
+      expect(detailsRequests.get(firstObservation.id)).toBe(1);
+      expect(await readAccordionTransitionCounts(firstPanel)).toEqual({ show: 1, hide: 0 });
+
+      await firstLabel.click();
+      await expect(firstPanel).not.toHaveClass(/\bshow\b/);
+      await expect(firstPanel).not.toHaveClass(/\bcollapsing\b/);
+      expect(await readAccordionTransitionCounts(firstPanel)).toEqual({ show: 1, hide: 1 });
+
+      await firstHeader.click({ position: { x: 2, y: 10 } });
+      await expect(firstPanel).toHaveClass(/\bshow\b/);
+      await expect(firstPanel).not.toHaveClass(/\bcollapsing\b/);
+      expect(await readAccordionTransitionCounts(firstPanel)).toEqual({ show: 2, hide: 1 });
+      const draftQuantity = firstForm.locator('tbody tr').first().getByRole('spinbutton', { name: 'Quantity' });
+      await draftQuantity.fill('7');
+
+      await firstToggle.click();
+      await expect(firstPanel).not.toHaveClass(/\bshow\b/);
+      await expect(firstPanel).not.toHaveClass(/\bcollapsing\b/);
+      expect(await readAccordionTransitionCounts(firstPanel)).toEqual({ show: 2, hide: 2 });
+      await firstToggle.click();
+      await expect(firstPanel).toHaveClass(/\bshow\b/);
+      await expect(firstPanel).not.toHaveClass(/\bcollapsing\b/);
+      expect(await readAccordionTransitionCounts(firstPanel)).toEqual({ show: 3, hide: 2 });
+
+      await secondLabel.click();
+      await expect(firstPanel).not.toHaveClass(/\bshow\b/);
+      await expect(firstPanel).not.toHaveClass(/\bcollapsing\b/);
+      await expect(secondPanel).toHaveClass(/\bshow\b/);
+      await expect(secondPanel).not.toHaveClass(/\bcollapsing\b/);
+      await expect(secondForm.locator('button[type="submit"]')).toBeEnabled();
+      expect(detailsRequests.get(secondObservation.id)).toBe(1);
+      expect(await readAccordionTransitionCounts(firstPanel)).toEqual({ show: 3, hide: 3 });
+      expect(await readAccordionTransitionCounts(secondPanel)).toEqual({ show: 1, hide: 0 });
+
+      await firstLabel.click();
+      await expect(firstPanel).toHaveClass(/\bshow\b/);
+      await expect(firstPanel).not.toHaveClass(/\bcollapsing\b/);
+      await expect(secondPanel).not.toHaveClass(/\bshow\b/);
+      await expect(secondPanel).not.toHaveClass(/\bcollapsing\b/);
+      await expect(draftQuantity).toHaveValue('7');
+      expect(detailsRequests.get(firstObservation.id)).toBe(1);
+      expect(await readAccordionTransitionCounts(firstPanel)).toEqual({ show: 4, hide: 3 });
+      expect(await readAccordionTransitionCounts(secondPanel)).toEqual({ show: 1, hide: 1 });
+
+      await firstToggle.click();
+      await expect(firstPanel).not.toHaveClass(/\bshow\b/);
+      await expect(firstPanel).not.toHaveClass(/\bcollapsing\b/);
+      await firstPencil.click();
+      await expect(tagInput).toBeVisible();
+      await expect(tagInput).toBeFocused();
+      await expect(firstHeader).toHaveAttribute('data-metadata-editor-state', 'editing');
+      await expect(firstPanel).toHaveClass(/\bshow\b/);
+      await expect(firstPanel).not.toHaveClass(/\bcollapsing\b/);
+      expect(await readAccordionTransitionCounts(firstPanel)).toEqual({ show: 5, hide: 4 });
+
+      await firstHeader.click({ position: { x: 2, y: 10 } });
+      await expect(firstPanel).toHaveClass(/\bshow\b/);
+      await expect(firstPanel).not.toHaveClass(/\bcollapsing\b/);
+      await expect(tagInput).toBeVisible();
+      expect(await readAccordionTransitionCounts(firstPanel)).toEqual({ show: 5, hide: 4 });
+    });
+  });
+
+  /** Verifies that a failed details request can be retried without opening another observation.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 19.6: retries a failed observation details load', async ({ database, page }) => {
+    const seededData = await seedPortfolioHistoryData(database);
+    const observation = await seedManagementObservation(
+      database,
+      seededData.portfolio,
+      seededData.assets[EXISTING_BOND_TICKER],
+      'E2E_OBS_RETRY',
+      '2026-05-01T12:00:00.000Z',
+    );
+    const detailsPath = `/api/portfolio/${seededData.portfolio.id}/history`;
+    const matchesDetails = (url: URL): boolean => url.pathname === detailsPath
+      && url.searchParams.get('observationTimestampId') === String(observation.id);
+    let requests = 0;
+    await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+    await page.route(matchesDetails, async route => {
+      requests += 1;
+      if(requests === 1) {
+        await route.fulfill({ status: 500, body: 'Failed to load details' });
+      } else {
+        await route.continue();
+      }
+    });
+
+    const item = page.locator(`#portfolio-history-management-container-${observation.id}`);
+    const form = item.locator(`#portfolio-history-management-form-${observation.id}`);
+    const error = item.locator('[data-observation-details-error]');
+    const save = form.locator('button[type="submit"]');
+    await item.locator('[data-metadata-editor-label]').click();
+    await expect(form).toHaveAttribute('data-observation-details-state', 'failed');
+    await expect(error).toBeVisible();
+    await expect(save).toBeDisabled();
+    expect(requests).toBe(1);
+
+    await error.getByRole('button').click();
+    await expect(form).toHaveAttribute('data-observation-details-state', 'ready');
+    await expect(error).toBeHidden();
+    await expect(save).toBeEnabled();
+    expect(requests).toBe(2);
+  });
+
+  test.describe('scenario 19.7: prepares observation metadata on native Save', () => {
+    test.use({ timezoneId: 'America/Los_Angeles' });
+
+    /** Verifies event-free editor changes are in the DOM before HTMX collects one request.
+     * @author GPT-6.1 Terra
+     */
+    test('copies the latest draft and persists its local date', async ({ database, page }) => {
+      const seededData = await seedPortfolioHistoryData(database);
+      const observation = await seedManagementObservation(
+        database, seededData.portfolio, seededData.assets[EXISTING_BOND_TICKER],
+        'E2E_OBS_DOM_ORIGINAL', '2026-03-07T12:00:00.123456Z',
+      );
+      const path = `/api/portfolio/${seededData.portfolio.id}/history`;
+      const posts: Request[] = [];
+      page.on('request', request => {
+        if(request.method() === 'POST' && new URL(request.url()).pathname === path) posts.push(request);
+      });
+      await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+      const item = page.locator(`#portfolio-history-management-container-${observation.id}`);
+      await item.getByRole('button', { name: 'Edit observation E2E_OBS_DOM_ORIGINAL', exact: true }).click();
+      const form = item.locator(`#portfolio-history-management-form-${observation.id}`);
+      const save = form.locator('button[type="submit"]');
+      await expect(save).toBeEnabled();
+      await item.evaluate(element => {
+        const tag = element.querySelector<HTMLInputElement>('[data-observation-editor-tag]');
+        const date = element.querySelector<HTMLInputElement>('[data-observation-editor-date]');
+        if(!tag || !date) throw new Error('Observation editor is missing');
+        tag.value = 'E2E_OBS_DOM_UPDATED';
+        date.value = '2026-03-09';
+        element.addEventListener('htmx:configRequest', event => {
+          const form = (event.target as Element).closest('form');
+          if(!form) return;
+          const tagPayload = form.elements.namedItem('observationTimestamp.timeTag') as HTMLInputElement;
+          const datePayload = form.elements.namedItem('observationTimestamp.timestamp') as HTMLInputElement;
+          document.body.setAttribute('data-test-prepared', `${tagPayload.value}|${datePayload.value}`);
+        }, { once: true });
+      });
+      const response = page.waitForResponse(result => result.request().method() === 'POST'
+        && new URL(result.url()).pathname === path);
+      await save.focus();
+      await page.keyboard.press('Enter');
+      expect((await response).ok()).toBe(true);
+      expect(posts).toHaveLength(1);
+      await expect(page.locator('body')).toHaveAttribute(
+        'data-test-prepared', 'E2E_OBS_DOM_UPDATED|2026-03-09T07:00:00.000Z',
+      );
+      const payload = JSON.parse(posts[0].postData() ?? 'null') as {
+        observationTimestamp: { timeTag: string; timestamp: string };
+      };
+      expect(payload.observationTimestamp).toMatchObject({
+        timeTag: 'E2E_OBS_DOM_UPDATED', timestamp: '2026-03-09T07:00:00.000Z',
+      });
+      await expect(database.query<{ time_tag: string; timestamp_matches: boolean }>(
+        `SELECT observation_time_tag AS time_tag, observation_timestamp = $2::timestamptz AS timestamp_matches
+         FROM public.portfolio_allocation_obs_time WHERE id = $1`,
+        [observation.id, '2026-03-09T07:00:00.000Z'],
+      )).resolves.toEqual([{ time_tag: 'E2E_OBS_DOM_UPDATED', timestamp_matches: true }]);
+      await item.getByRole('button', { name: 'Edit observation E2E_OBS_DOM_UPDATED', exact: true }).click();
+      await expect(save).toBeEnabled();
+      await item.locator('[data-observation-editor-tag]').evaluate((input: HTMLInputElement) => {
+        input.value = 'E2E_OBS_DOM_AGAIN';
+      });
+      const secondResponse = page.waitForResponse(result => result.request().method() === 'POST'
+        && new URL(result.url()).pathname === path);
+      await form.evaluate((element: HTMLFormElement) => element.requestSubmit());
+      expect((await secondResponse).ok()).toBe(true);
+      expect(posts).toHaveLength(2);
+      await expect(database.query<{ time_tag: string; timestamp_matches: boolean }>(
+        `SELECT observation_time_tag AS time_tag, observation_timestamp = $2::timestamptz AS timestamp_matches
+         FROM public.portfolio_allocation_obs_time WHERE id = $1`,
+        [observation.id, '2026-03-09T07:00:00.000Z'],
+      )).resolves.toEqual([{ time_tag: 'E2E_OBS_DOM_AGAIN', timestamp_matches: true }]);
+    });
+  });
+
+  /** Blocks native submission while persisted observation details load or have failed.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 19.8: blocks native submission while details are not ready', async ({ database, page }) => {
+    const seededData = await seedPortfolioHistoryData(database);
+    const originalTimestamp = '2026-05-01T12:00:00.123456Z';
+    const observation = await seedManagementObservation(
+      database, seededData.portfolio, seededData.assets[EXISTING_BOND_TICKER],
+      'E2E_OBS_BLOCKED', originalTimestamp,
+    );
+    const path = `/api/portfolio/${seededData.portfolio.id}/history`;
+    const posts: Request[] = [];
+    page.on('request', request => {
+      if(request.method() === 'POST' && new URL(request.url()).pathname === path) posts.push(request);
+    });
+    await page.goto(`/portfolio/${seededData.portfolio.id}/history/manage`);
+    let releaseDetails: () => void = () => {};
+    const detailsGate = new Promise<void>(resolve => { releaseDetails = resolve; });
+    await page.route(url => url.pathname === path
+      && url.searchParams.get('observationTimestampId') === String(observation.id),
+    async route => {
+      await detailsGate;
+      await route.fulfill({ status: 500, body: 'Failed to load details' });
+    });
+    const item = page.locator(`#portfolio-history-management-container-${observation.id}`);
+    const form = item.locator(`#portfolio-history-management-form-${observation.id}`);
+    await item.locator('[data-metadata-editor-label]').click();
+    await expect(form).toHaveAttribute('data-observation-details-state', 'loading');
+    await form.evaluate((element: HTMLFormElement) => element.requestSubmit());
+    expect(posts).toHaveLength(0);
+    releaseDetails();
+    await expect(form).toHaveAttribute('data-observation-details-state', 'failed');
+    await form.evaluate((element: HTMLFormElement) => element.requestSubmit());
+    expect(posts).toHaveLength(0);
+    await expect(database.query<{ time_tag: string; timestamp_matches: boolean }>(
+      `SELECT observation_time_tag AS time_tag, observation_timestamp = $2::timestamptz AS timestamp_matches
+       FROM public.portfolio_allocation_obs_time WHERE id = $1`, [observation.id, originalTimestamp],
+    )).resolves.toEqual([{ time_tag: 'E2E_OBS_BLOCKED', timestamp_matches: true }]);
+  });
 });
+
+/** Creates a minimal observation for one calendar date and verifies the request and PostgreSQL timestamp.
+ *
+ * @author GPT-6 Luna
+ */
+async function submitObservationForDate(
+  page: Page,
+  database: E2eDatabase,
+  portfolio: SeededPortfolio,
+  asset: SeededAsset,
+  calendarDate: string,
+  timeTag: string,
+  expectedTimestamp: string,
+): Promise<PersistedObservation> {
+  const newObservationItem = page.locator('#portfolio-history-management-container-0');
+  await newObservationItem.getByRole('textbox', { name: 'Time tag' }).fill(timeTag);
+  await newObservationItem.getByLabel('Observation date').fill(calendarDate);
+  await expect(newObservationItem.locator('#portfolio-history-management-0')).toHaveClass(/\bshow\b/);
+
+  const form = page.locator('#portfolio-history-management-form-0');
+  const row = await addAllocationRow(page, form, 0);
+  await fillExistingAssetDirectValueAllocation(page, row, asset, 'BONDS', '100.00');
+
+  const savePath = `/api/portfolio/${portfolio.id}/history`;
+  const saveRequestPromise = page.waitForRequest(request => {
+    return request.method() === 'POST' && new URL(request.url()).pathname === savePath;
+  });
+  const saveResponsePromise = page.waitForResponse(response => {
+    return response.request().method() === 'POST' && new URL(response.url()).pathname === savePath;
+  });
+  await form.locator('tfoot button.btn-primary[type="submit"]').click();
+
+  const saveRequest = await saveRequestPromise;
+  const saveResponse = await saveResponsePromise;
+  expect(saveResponse.status()).toBe(204);
+  const payload = JSON.parse(saveRequest.postData() ?? 'null') as {
+    observationTimestamp?: { timestamp?: string };
+  };
+  expect(payload.observationTimestamp?.timestamp).toBe(expectedTimestamp);
+
+  const persistedObservation = await findObservationByTag(database, portfolio, timeTag);
+  expect(persistedObservation.observation_timestamp).toEqual(new Date(expectedTimestamp));
+  await expect(newObservationItem.getByLabel('Observation date'))
+    .toHaveValue(await browserLocalCalendarDate(page));
+
+  return persistedObservation;
+}
 
 /** Seeds the portfolio and asset catalog needed to exercise asset search filtering and scrolling.
  *
@@ -1350,7 +2839,6 @@ async function prepareAssetSearchAutocompleteRow(database: E2eDatabase, page: Pa
 
   const newObservationItem = page.locator('#portfolio-history-management-container-0');
   await newObservationItem.getByRole('textbox', { name: 'Time tag' }).fill('AUTOCOMPLETE');
-  await newObservationItem.locator('#portfolio-history-management-trigger-0 > button').click();
   const accordionBody = newObservationItem.locator('#portfolio-history-management-0');
   await expect(accordionBody).toHaveClass(/\bshow\b/);
   await expect(accordionBody).not.toHaveClass(/\bcollapsing\b/);
@@ -1506,7 +2994,49 @@ async function seedPortfolioHistoryData(database: E2eDatabase): Promise<{
   return { assets, portfolio: portfolioRows[0] };
 }
 
-/** Seeds the fixed four-asset observation required by scenario 5. */
+/** Seeds one persisted observation and a fact so it is eligible for management-list reads.
+ *
+ * @param database - Isolated E2E database receiving the fixture rows.
+ * @param portfolio - Portfolio that owns the observation allocation fact.
+ * @param asset - Existing asset referenced by the seeded fact.
+ * @param timeTag - Unique management-header tag for this observation.
+ * @param timestamp - Explicit observation instant stored in PostgreSQL.
+ * @returns The observation identity and values read back from PostgreSQL.
+ * @author GPT-6 Luna
+ * @author benizzio
+ * @author OpenCode
+  */
+async function seedManagementObservation(
+  database: E2eDatabase,
+  portfolio: SeededPortfolio,
+  asset: SeededAsset,
+  timeTag: string,
+  timestamp: string,
+): Promise<PersistedObservation> {
+  const observations = await database.query<PersistedObservation>(
+    `INSERT INTO public.portfolio_allocation_obs_time (portfolio_id, observation_time_tag, observation_timestamp)
+     VALUES ($1, $2, $3::timestamptz)
+     RETURNING id, observation_timestamp, observation_time_tag`,
+    [portfolio.id, timeTag, timestamp],
+  );
+  expect(observations).toHaveLength(1);
+
+  const observation = observations[0];
+  await database.query(
+    `INSERT INTO public.portfolio_allocation_fact
+       (portfolio_id, asset_id, class, cash_reserve, asset_quantity, asset_market_price,
+        total_market_value, observation_time_id)
+     VALUES ($1, $2, 'BONDS', false, 1, 100, 100, $3)`,
+    [portfolio.id, asset.id, observation.id],
+  );
+
+  return observation;
+}
+
+/** Seeds the fixed four-asset observation required by scenario 5.
+ *
+ * @author OpenCode
+ */
 async function seedPortfolioHistoryModificationData(
   database: E2eDatabase,
 ): Promise<SeededHistoryModificationData> {
@@ -1541,10 +3071,10 @@ async function seedPortfolioHistoryModificationData(
 
   const assets = Object.fromEntries(assetRows.map((asset) => [asset.ticker, asset])) as Record<string, SeededAsset>;
   const observationRows = await database.query<PersistedObservation>(
-    `INSERT INTO public.portfolio_allocation_obs_time (observation_time_tag, observation_timestamp)
-     VALUES ($1, $2::timestamptz)
+    `INSERT INTO public.portfolio_allocation_obs_time (portfolio_id, observation_time_tag, observation_timestamp)
+     VALUES ($1, $2, $3::timestamptz)
      RETURNING id, observation_timestamp, observation_time_tag`,
-    [OBSERVATION_TIME_TAG, FIXED_OBSERVATION_TIMESTAMP],
+    [portfolioRows[0].id, OBSERVATION_TIME_TAG, FIXED_OBSERVATION_TIMESTAMP],
   );
   expect(observationRows).toHaveLength(1);
 
@@ -1660,12 +3190,13 @@ async function expectPortfolioHistory(
   await expectPortfolioNavigation(page, 'Portfolio');
 
   const history = page.locator('#accordion-portfolio-history');
-  await expect(history).toBeVisible();
+  await expect(history).toBeAttached();
+  await expect(history.locator('..')).toBeVisible();
   if (expectEmpty) {
-    await expect(history.locator(':scope > *')).toHaveCount(1);
+    await expect(history.locator(':scope > *')).toHaveCount(0);
   }
 
-  const managementButton = history.locator('> button[onclick="navigateToPortfolioAllocationManagement()"]');
+  const managementButton = page.locator('button[onclick="navigateToPortfolioAllocationManagement()"]');
   await expect(managementButton).toBeVisible();
   await expect(managementButton.locator('.bi-database-gear')).toBeVisible();
 }
@@ -1698,6 +3229,10 @@ async function expectPortfolioHistoryManagement(
   const newObservationButton = newObservationItem.getByRole('button');
   await expect(newObservationButton).toHaveClass(/collapsed/);
   await expect(newObservationItem.getByRole('textbox', { name: 'Time tag' })).toBeVisible();
+  const observationDateInput = newObservationItem.getByLabel('Observation date');
+  await expect(observationDateInput).toHaveAttribute('required', '');
+  await expect(observationDateInput).toHaveAttribute('form', 'portfolio-history-management-form-0');
+  await expect(observationDateInput).toHaveValue(await browserLocalCalendarDate(page));
 }
 
 /** Asserts the history management table headers and icon controls. */
@@ -2015,41 +3550,78 @@ async function expectReadOnlyObservationRows(
   }
 }
 
-/** Verifies the management list refresh and collapsed new and persisted observation items. */
-async function expectReloadedManagementItems(page: Page, observationId: number): Promise<void> {
+/** Verifies the management list refresh and collapsed new and persisted observation items.
+ * @author GPT-6 Luna
+ * @author benizzio
+ */
+async function expectReloadedManagementItems(page: Page, observation: PersistedObservation): Promise<void> {
   const managementAccordion = page.locator('#accordion-portfolio-history-management');
   await expect(managementAccordion.locator(':scope > .accordion-item')).toHaveCount(2);
 
   const newObservationItem = page.locator('#portfolio-history-management-container-0');
   await expect(newObservationItem.locator('#portfolio-history-management-trigger-0 > button')).toHaveClass(/collapsed/);
   await expect(newObservationItem.getByRole('textbox', { name: 'Time tag' })).toBeVisible();
+  await expect(newObservationItem.getByLabel('Observation date')).toHaveValue(await browserLocalCalendarDate(page));
 
-  const observationItem = page.locator(`#portfolio-history-management-container-${observationId}`);
-  const observationButton = observationItem.getByRole('button', { name: OBSERVATION_TIME_TAG, exact: true });
+  const observationItem = page.locator(`#portfolio-history-management-container-${observation.id}`);
+  const observationButton = observationItem.getByRole('button', {
+    name: await expectedObservationHeaderName(page, observation),
+    exact: true,
+  });
   await expect(observationButton).toBeVisible();
   await expect(observationButton).toHaveClass(/collapsed/);
-  await expect(observationItem.locator(`#portfolio-history-management-${observationId}`)).not.toHaveClass(/\bshow\b/);
+  await expect(observationItem.locator(`#portfolio-history-management-${observation.id}`)).not.toHaveClass(/\bshow\b/);
 }
 
-/** Verifies the new item followed by persisted observations in timestamp order. */
+/** Verifies the synthetic new item followed by persisted observations in timestamp order.
+ * @author GPT-6 Luna
+ * @author benizzio
+ */
 async function expectManagementObservationOrder(
   page: Page,
   observations: readonly PersistedObservation[],
+  expectNewItemCollapsed = true,
 ): Promise<void> {
   const managementAccordion = page.locator('#accordion-portfolio-history-management');
   await expect(managementAccordion.locator(':scope > .accordion-item')).toHaveCount(1 + observations.length);
 
   const newObservationItem = page.locator('#portfolio-history-management-container-0');
-  await expect(newObservationItem.locator('#portfolio-history-management-trigger-0 > button')).toHaveClass(/collapsed/);
+  const newItemToggle = newObservationItem.locator('#portfolio-history-management-trigger-0 > button');
+  if(expectNewItemCollapsed) {
+    await expect(newItemToggle).toHaveClass(/collapsed/);
+  }
 
   for (const [index, observation] of observations.entries()) {
     const item = managementAccordion.locator(':scope > .accordion-item').nth(index + 1);
     await expect(item).toHaveAttribute('id', `portfolio-history-management-container-${observation.id}`);
-    await expect(item.getByRole('button', { name: observation.observation_time_tag, exact: true })).toBeVisible();
-    await expect(item.getByRole('button', { name: observation.observation_time_tag, exact: true }))
-      .toHaveClass(/collapsed/);
+    const button = item.getByRole('button', {
+      name: await expectedObservationHeaderName(page, observation),
+      exact: true,
+    });
+    await expect(button).toBeVisible();
+    await expect(button).toHaveClass(/collapsed/);
     await expect(item.locator(`#portfolio-history-management-${observation.id}`)).not.toHaveClass(/\bshow\b/);
   }
+}
+
+/** Builds the exact observation header using the browser's configured local timezone.
+ *
+ * @param page - Browser page with the timezone used to render the management header.
+ * @param observation - Persisted observation supplying the tag and timestamp.
+ * @returns The expected `<tag> - <YYYY-MM-DD>` accessible name.
+ * @author GPT-6 Luna
+ * @author benizzio
+ */
+async function expectedObservationHeaderName(page: Page, observation: PersistedObservation): Promise<string> {
+  const localDate = await page.evaluate((timestamp) => {
+    const date = new Date(timestamp);
+    const year = String(date.getFullYear()).padStart(4, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }, observation.observation_timestamp.toISOString());
+
+  return `${observation.observation_time_tag} - ${localDate}`;
 }
 
 /** Verifies the success notification shown after an observation is persisted. */
@@ -2063,7 +3635,10 @@ async function expectSuccessNotification(page: Page): Promise<void> {
   await expect(toast.locator('.toast-body')).toHaveText('Portfolio observation data saved successfully.');
 }
 
-/** Finds one persisted observation by its portfolio-scoped time tag. */
+/** Finds one persisted observation by its portfolio-scoped time tag.
+ *
+ * @author OpenCode
+ */
 async function findObservationByTag(
   database: E2eDatabase,
   portfolio: SeededPortfolio,
@@ -2072,7 +3647,8 @@ async function findObservationByTag(
   const observations = await database.query<PersistedObservation>(
     `SELECT DISTINCT ot.id, ot.observation_timestamp, ot.observation_time_tag
      FROM public.portfolio_allocation_obs_time ot
-     JOIN public.portfolio_allocation_fact paf ON paf.observation_time_id = ot.id
+     JOIN public.portfolio_allocation_fact paf
+       ON paf.portfolio_id = ot.portfolio_id AND paf.observation_time_id = ot.id
      WHERE paf.portfolio_id = $1
        AND ot.observation_time_tag = $2`,
     [portfolio.id, timeTag],
@@ -2106,18 +3682,21 @@ async function expectReloadedObservationRows(form: Locator, observationId: numbe
   }
 }
 
-/** Reads and verifies the observation, facts, assets, and unchanged portfolio in PostgreSQL. */
+/** Reads and verifies the observation, facts, assets, and unchanged portfolio in PostgreSQL.
+ *
+ * @author OpenCode
+ */
 async function expectPersistedPortfolioHistory(
   database: E2eDatabase,
   portfolio: SeededPortfolio,
   seededAssets: Record<string, SeededAsset>,
-  saveStartedAt: number,
-  saveFinishedAt: number,
+  expectedTimestamp: string,
 ): Promise<PersistedObservation> {
   const observations = await database.query<PersistedObservation>(
     `SELECT DISTINCT ot.id, ot.observation_timestamp, ot.observation_time_tag
      FROM public.portfolio_allocation_obs_time ot
-     JOIN public.portfolio_allocation_fact paf ON paf.observation_time_id = ot.id
+     JOIN public.portfolio_allocation_fact paf
+       ON paf.portfolio_id = ot.portfolio_id AND paf.observation_time_id = ot.id
      WHERE paf.portfolio_id = $1
        AND ot.observation_time_tag = $2`,
     [portfolio.id, OBSERVATION_TIME_TAG],
@@ -2126,9 +3705,7 @@ async function expectPersistedPortfolioHistory(
 
   const observation = observations[0];
   expect(observation.observation_time_tag).toBe(OBSERVATION_TIME_TAG);
-  expect(observation.observation_timestamp).toBeInstanceOf(Date);
-  expect(observation.observation_timestamp.getTime()).toBeGreaterThanOrEqual(saveStartedAt - 5_000);
-  expect(observation.observation_timestamp.getTime()).toBeLessThanOrEqual(saveFinishedAt + 5_000);
+  expect(observation.observation_timestamp).toEqual(new Date(expectedTimestamp));
 
   const allocations = await database.query<PersistedAllocation>(
     `SELECT paf.asset_id,
@@ -2232,6 +3809,27 @@ async function expectPersistedPortfolioHistory(
   }]);
 
   return observation;
+}
+
+/** Returns the date currently displayed by the browser in its configured local timezone.
+ *
+ * @author GPT-6 Luna
+ */
+async function browserLocalCalendarDate(page: Page): Promise<string> {
+  return page.evaluate(() => {
+    const today = new Date();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${today.getFullYear()}-${month}-${day}`;
+  });
+}
+
+/** Computes the expected UTC instant for browser-local midnight on a supplied calendar date.
+ *
+ * @author GPT-6 Luna
+ */
+async function localMidnightTimestamp(page: Page, calendarDate: string): Promise<string> {
+  return page.evaluate(date => new Date(`${date}T00:00:00`).toISOString(), calendarDate);
 }
 
 /** Verifies history items, their timestamp order, and the expanded observation. */
@@ -2427,7 +4025,10 @@ async function expectModifiedObservationChart(
   })).toBe(true);
 }
 
-/** Verifies final observation identities, allocation facts, assets, portfolio, and plan absence. */
+/** Verifies final observation identities, allocation facts, assets, portfolio, and plan absence.
+ *
+ * @author OpenCode
+ */
 async function expectPersistedModifiedPortfolioHistory(
   database: E2eDatabase,
   seededData: SeededHistoryModificationData,
@@ -2436,7 +4037,8 @@ async function expectPersistedModifiedPortfolioHistory(
   const observations = await database.query<PersistedObservation>(
     `SELECT DISTINCT ot.id, ot.observation_timestamp, ot.observation_time_tag
      FROM public.portfolio_allocation_obs_time ot
-     JOIN public.portfolio_allocation_fact paf ON paf.observation_time_id = ot.id
+     JOIN public.portfolio_allocation_fact paf
+       ON paf.portfolio_id = ot.portfolio_id AND paf.observation_time_id = ot.id
      WHERE paf.portfolio_id = $1
      ORDER BY ot.observation_timestamp ASC`,
     [seededData.portfolio.id],

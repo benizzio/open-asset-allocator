@@ -2,6 +2,7 @@
  * Covers the external quote action and its row-scoped submission contract.
  *
  * @author GPT-6 Luna
+ * @author GPT-6.1 Sol
  */
 import type { Locator, Page, Request, Route } from '@playwright/test';
 import { expect, test } from '../support/fixtures';
@@ -132,8 +133,11 @@ test.describe('scenario 16: external asset quote action and submission contract'
 
     const newObservationItem = page.locator('#portfolio-history-management-container-0');
     const timeTagInput = newObservationItem.getByRole('textbox', { name: 'Time tag' });
+    const observationDateInput = newObservationItem.getByLabel('Observation date');
     await timeTagInput.fill(EXTERNAL_QUOTE_TIME_TAG);
-    await newObservationItem.locator('#portfolio-history-management-trigger-0 > button').click();
+    const selectedDate = await observationDateInput.inputValue();
+    const expectedTimestamp = await localMidnightTimestamp(page, selectedDate);
+    await expect(newObservationItem.locator('#portfolio-history-management-0')).toHaveClass(/\bshow\b/);
 
     const form = page.locator('#portfolio-history-management-form-0');
     const row = await addAllocationRow(page, form, 0);
@@ -277,8 +281,10 @@ test.describe('scenario 16: external asset quote action and submission contract'
     const saveResponse = await saveResponsePromise;
     expect(saveResponse.status()).toBe(204);
     const savePayload = JSON.parse(saveRequest.postData() ?? 'null') as {
+      observationTimestamp?: { timestamp?: string };
       allocations?: Array<{ externalAsset?: unknown }>;
     };
+    expect(savePayload.observationTimestamp?.timestamp).toBe(expectedTimestamp);
     expect(savePayload.allocations).toHaveLength(1);
     expect(savePayload.allocations?.[0]?.externalAsset).toEqual(firstExternalAsset);
 
@@ -308,7 +314,8 @@ test.describe('scenario 16: external asset quote action and submission contract'
               paf.total_market_value::text AS total_market_value
        FROM public.portfolio_allocation_fact paf
        JOIN public.asset a ON a.id = paf.asset_id
-       JOIN public.portfolio_allocation_obs_time ot ON ot.id = paf.observation_time_id
+       JOIN public.portfolio_allocation_obs_time ot
+         ON ot.portfolio_id = paf.portfolio_id AND ot.id = paf.observation_time_id
        WHERE paf.portfolio_id = $1
          AND ot.id = $2`,
       [seededData.portfolio.id, persistedObservation.id],
@@ -351,7 +358,7 @@ test.describe('scenario 16: external asset quote action and submission contract'
       `#portfolio-history-management-container-${seededData.observation.id}`,
     );
     await loadedObservationItem.getByRole('button', {
-      name: EXTERNAL_QUOTE_LOADED_OBSERVATION_TAG,
+      name: await expectedManagementObservationHeader(page, seededData.observation),
       exact: true,
     }).click();
     const loadedRow = page.locator(
@@ -406,7 +413,8 @@ test.describe('scenario 16: external asset quote action and submission contract'
               ot.observation_time_tag,
               paf.total_market_value::text AS total_market_value
        FROM public.portfolio_allocation_fact paf
-       JOIN public.portfolio_allocation_obs_time ot ON ot.id = paf.observation_time_id
+       JOIN public.portfolio_allocation_obs_time ot
+         ON ot.portfolio_id = paf.portfolio_id AND ot.id = paf.observation_time_id
        WHERE paf.portfolio_id = $1`,
       [seededData.portfolio.id],
     );
@@ -904,6 +912,7 @@ test.describe('scenario 16: external asset quote action and submission contract'
   /** Ignores a delayed quote after the management list reload replaces its loaded observation row.
    *
    * @author GPT-6 Luna
+   * @author GPT-6.1 Sol
    */
   test('scenario 16.8: ignores a delayed quote after the portfolio-history management reload', async ({ database, page }) => {
     test.setTimeout(60_000);
@@ -926,7 +935,7 @@ test.describe('scenario 16: external asset quote action and submission contract'
         && url.searchParams.get('observationTimestampId') === String(seededData.observation.id);
     });
     await observationItem.getByRole('button', {
-      name: EXTERNAL_QUOTE_LOADED_OBSERVATION_TAG,
+      name: await expectedManagementObservationHeader(page, seededData.observation),
       exact: true,
     }).click();
     expect((await initialObservationResponsePromise).status()).toBe(200);
@@ -977,7 +986,7 @@ test.describe('scenario 16: external asset quote action and submission contract'
       const managementContainer = page.locator('#accordion-portfolio-history-management');
       await expect(managementContainer).toHaveAttribute(
         'hx-trigger',
-        'load, reload-portfolio-history-management',
+        /(?:^|,)\s*reload-portfolio-history-management\s*(?:,|$)/,
       );
       const observationListPath = `/api/portfolio/${seededData.portfolio.id}/history/observation`;
       const observationListResponsePromise = page.waitForResponse((response) => {
@@ -1011,7 +1020,7 @@ test.describe('scenario 16: external asset quote action and submission contract'
           && url.searchParams.get('observationTimestampId') === String(seededData.observation.id);
       });
       await reloadedObservationItem.getByRole('button', {
-        name: EXTERNAL_QUOTE_LOADED_OBSERVATION_TAG,
+        name: await expectedManagementObservationHeader(page, seededData.observation),
         exact: true,
       }).click();
       expect((await reloadedObservationResponsePromise).status()).toBe(200);
@@ -1105,6 +1114,7 @@ async function seedExternalAssetQuoteData(database: E2eDatabase): Promise<{
  * @returns The portfolio, both assets, and the persisted observation used to render a loaded row.
  *
  * @author GPT-6 Luna
+ * @author OpenCode
  */
 async function seedExternalQuoteLoadedHistory(database: E2eDatabase): Promise<{
   assetWithoutExternalData: SeededAsset;
@@ -1137,10 +1147,10 @@ async function seedExternalQuoteLoadedHistory(database: E2eDatabase): Promise<{
     assetRows.map((asset) => [asset.ticker, asset]),
   ) as Record<string, SeededAsset>;
   const observationRows = await database.query<PersistedObservation>(
-    `INSERT INTO public.portfolio_allocation_obs_time (observation_time_tag, observation_timestamp)
-     VALUES ($1, CURRENT_TIMESTAMP)
+    `INSERT INTO public.portfolio_allocation_obs_time (portfolio_id, observation_time_tag, observation_timestamp)
+     VALUES ($1, $2, CURRENT_TIMESTAMP)
      RETURNING id, observation_timestamp, observation_time_tag`,
-    [EXTERNAL_QUOTE_LOADED_OBSERVATION_TAG],
+    [portfolioRows[0].id, EXTERNAL_QUOTE_LOADED_OBSERVATION_TAG],
   );
   expect(observationRows).toHaveLength(1);
 
@@ -1234,7 +1244,6 @@ async function openNewExternalQuoteForm(
 
   const newObservationItem = page.locator('#portfolio-history-management-container-0');
   await newObservationItem.getByRole('textbox', { name: 'Time tag' }).fill(timeTag);
-  await newObservationItem.locator('#portfolio-history-management-trigger-0 > button').click();
 
   const form = page.locator('#portfolio-history-management-form-0');
   await expect(form).toBeVisible();
@@ -1392,6 +1401,31 @@ async function expectPortfolioHistoryManagement(
   await expect(newObservationItem.getByRole('button')).toHaveClass(/collapsed/);
   await expect(newObservationItem.getByRole('textbox', { name: 'Time tag' }))
     .toBeVisible();
+  const observationDateInput = newObservationItem.getByLabel('Observation date');
+  await expect(observationDateInput).toHaveAttribute('required', '');
+  await expect(observationDateInput).toHaveAttribute('form', 'portfolio-history-management-form-0');
+  await expect(observationDateInput).toHaveValue(await browserLocalCalendarDate(page));
+}
+
+/** Returns the browser's current calendar date in its configured local timezone.
+ *
+ * @author GPT-6 Luna
+ */
+async function browserLocalCalendarDate(page: Page): Promise<string> {
+  return page.evaluate(() => {
+    const today = new Date();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${today.getFullYear()}-${month}-${day}`;
+  });
+}
+
+/** Computes the expected UTC instant for browser-local midnight on a supplied date.
+ *
+ * @author GPT-6 Luna
+ */
+async function localMidnightTimestamp(page: Page, calendarDate: string): Promise<string> {
+  return page.evaluate(date => new Date(`${date}T00:00:00`).toISOString(), calendarDate);
 }
 
 /** Adds one allocation row to the new-observation form and waits for its financial inputs.
@@ -1546,6 +1580,7 @@ async function expectSuccessNotification(page: Page): Promise<void> {
  * @returns The matching persisted observation.
  *
  * @author GPT-6 Luna
+ * @author OpenCode
  */
 async function findObservationByTag(
   database: E2eDatabase,
@@ -1555,12 +1590,35 @@ async function findObservationByTag(
   const observations = await database.query<PersistedObservation>(
     `SELECT DISTINCT ot.id, ot.observation_timestamp, ot.observation_time_tag
      FROM public.portfolio_allocation_obs_time ot
-     JOIN public.portfolio_allocation_fact paf ON paf.observation_time_id = ot.id
+     JOIN public.portfolio_allocation_fact paf
+       ON paf.portfolio_id = ot.portfolio_id AND paf.observation_time_id = ot.id
      WHERE paf.portfolio_id = $1 AND ot.observation_time_tag = $2`,
     [portfolio.id, timeTag],
   );
   expect(observations).toHaveLength(1);
   return observations[0];
+}
+
+/** Builds the exact management header using the browser's local timezone.
+ *
+ * @param page - Browser page with the timezone used to display the header.
+ * @param observation - Persisted observation providing its timestamp and tag.
+ * @returns The exact `<tag> - <YYYY-MM-DD>` accessible name.
+ * @author GPT-6 Luna
+ */
+async function expectedManagementObservationHeader(
+  page: Page,
+  observation: PersistedObservation,
+): Promise<string> {
+  const localDate = await page.evaluate((timestamp) => {
+    const date = new Date(timestamp);
+    const year = String(date.getFullYear()).padStart(4, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }, observation.observation_timestamp.toISOString());
+
+  return `${observation.observation_time_tag} - ${localDate}`;
 }
 
 /** Verifies the new item followed by saved observation items in their displayed order.
@@ -1581,7 +1639,10 @@ async function expectManagementObservationOrder(
   for (const [index, observation] of observations.entries()) {
     const item = accordion.locator(':scope > .accordion-item').nth(index + 1);
     await expect(item).toHaveAttribute('id', `portfolio-history-management-container-${observation.id}`);
-    const button = item.getByRole('button', { name: observation.observation_time_tag, exact: true });
+    const button = item.getByRole('button', {
+      name: await expectedManagementObservationHeader(page, observation),
+      exact: true,
+    });
     await expect(button).toBeVisible();
     await expect(button).toHaveClass(/collapsed/);
     await expect(item.locator(`#portfolio-history-management-${observation.id}`)).not.toHaveClass(/\bshow\b/);

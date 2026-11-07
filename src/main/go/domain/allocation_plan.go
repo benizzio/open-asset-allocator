@@ -28,9 +28,14 @@ type PlannedAllocation struct {
 	Asset               *Asset
 }
 
+// AllocationPlanIdentifier identifies an allocation plan and carries its required calendar date for list reads.
+// For example, a repository identifier can be mapped to an API object with id, name, and plannedDate.
+//
+// Co-authored by: OpenCode and benizzio
 type AllocationPlanIdentifier struct {
-	Id   int64
-	Name string
+	Id          int64
+	Name        string
+	PlannedDate time.Time
 }
 
 type AllocationPlan struct {
@@ -45,8 +50,38 @@ func (allocationPlan *AllocationPlan) AddDetail(detail *PlannedAllocation) {
 	allocationPlan.Details = append(allocationPlan.Details, detail)
 }
 
+// AllocationPlanPage contains complete plans and the boundary for the next descending planned-date/ID page.
+// For example, an empty Items slice and nil NextCursor represents a terminal empty page.
+// Co-authored by: GPT-6.1 Sol and OpenCode
+type AllocationPlanPage struct {
+	Items      []*AllocationPlan
+	NextCursor *AllocationPlanPageCursor
+}
+
+// AllocationPlanPageCursor identifies the last emitted plan in a descending planned-date/ID traversal.
+// For example, a repository can use `AllocationPlanPageCursor{PlannedDate: date, Id: 9}` as a keyset boundary.
+// Co-authored by: GPT-6.1 Sol and OpenCode
+type AllocationPlanPageCursor struct {
+	PlannedDate time.Time
+	Id          int64
+}
+
+// AllocationPlanRepository provides persistence operations used by the allocation plan domain service.
+// Co-authored by: GPT-6.1 Sol and benizzio
 type AllocationPlanRepository interface {
+	// FindAndLockAllocationPlanOwnershipInTransaction locks a plan and reads its owner, type, and persisted detail IDs.
+	// For example, FindAndLockAllocationPlanOwnershipInTransaction(ctx, 6) returns nil if plan 6 is missing.
+	// Authored by: GPT-6.1 Sol
+	FindAndLockAllocationPlanOwnershipInTransaction(context.Context, int64) (*AllocationPlanOwnership, error)
 	GetAllAllocationPlans(portfolioId int64, planType *allocation.PlanType) ([]*AllocationPlan, error)
+	// GetAllocationPlansPage returns complete plans of one type using a planned-date/ID boundary.
+	// For example, pass nil for the first page and the last response's cursor for continuation.
+	// Co-authored by: GPT-6.1 Sol, OpenCode, and GPT-6.1 Terra
+	GetAllocationPlansPage(
+		portfolioId int64,
+		planType allocation.PlanType,
+		cursor *AllocationPlanPageCursor,
+	) (*AllocationPlanPage, error)
 	GetAllocationPlan(id int64) (*AllocationPlan, error)
 	GetAllAllocationPlanIdentifiers(
 		portfolioId int64,
@@ -54,4 +89,13 @@ type AllocationPlanRepository interface {
 	) ([]*AllocationPlanIdentifier, error)
 	InsertAllocationPlanInTransaction(transContext context.Context, plan *AllocationPlan) error
 	UpdateAllocationPlanInTransaction(transContext context.Context, plan *AllocationPlan) error
+}
+
+// AllocationPlanOwnership contains persisted identifiers needed for domain-service write validation.
+// It is read within the write transaction, with the plan locked until commit or rollback.
+// Authored by: GPT-6.1 Sol
+type AllocationPlanOwnership struct {
+	PortfolioId int64
+	PlanType    allocation.PlanType
+	DetailIds   []int64
 }

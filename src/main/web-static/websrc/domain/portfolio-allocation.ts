@@ -1,9 +1,15 @@
 import { BigNumber } from "bignumber.js";
 
+/**
+ * Observation timestamp returned by the portfolio history API and submitted unchanged for existing records.
+ * @example `{ id: 12, timeTag: "Monthly", timestamp: "2026-10-18T00:00:00.000Z" }`
+ * @author GPT-6 Luna
+ * @author benizzio
+ */
 export type ObservationTimestamp = {
     id: number;
     timeTag: string;
-    timestamp?: Date;
+    timestamp?: string;
 };
 
 export type PortfolioAllocation = {

@@ -1,5 +1,10 @@
 package infra
 
+// initialStateSQL contains SQL fixtures used to initialize the integration test
+// database after migrations have run.
+//
+// Co-authored by: benizzio and OpenCode
+// Co-authored by: GPT-6.1 Terra
 const initialStateSQL = `
 	INSERT INTO portfolio (id, "name", allocation_structure)
 	VALUES (
@@ -39,13 +44,12 @@ const initialStateSQL = `
 	-- ###################################################################
 	-- ALLOCATION OBSERVATION TIME TABLE
 	-- ###################################################################
-	INSERT INTO portfolio_allocation_obs_time (id, observation_time_tag, observation_timestamp)
+	INSERT INTO portfolio_allocation_obs_time (id, portfolio_id, observation_time_tag, observation_timestamp)
 	VALUES 
-	    (1, '202501', '2025-01-01 00:00:00'::TIMESTAMP),
-		(2, '202503', '2025-03-01 00:00:00'::TIMESTAMP),
-		(3, '202504', '2025-04-01 00:00:00'::TIMESTAMP),
-		(4, '202506', '2025-06-01 00:00:00'::TIMESTAMP),
-		(5, '202507', '2025-07-01 00:00:00'::TIMESTAMP) 
+	    (1, 1, '202501', '2025-01-01 00:00:00'::TIMESTAMP),
+		(2, 1, '202503', '2025-03-01 00:00:00'::TIMESTAMP),
+		(8, 2, '202504', '2025-04-01 00:00:00'::TIMESTAMP),
+		(9, 1, '202504', '2025-04-01 00:00:00'::TIMESTAMP)
 	;
 
 	-- ###################################################################
@@ -178,8 +182,8 @@ const initialStateSQL = `
 	-- ###################################################################
 	-- ALLOCATION PLAN TABLE
 	-- ###################################################################
-	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, portfolio_id)
-	VALUES (1, '60/40 Portfolio Classic - Example', 'ALLOCATION_PLAN', NULL, 1)
+	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, planned_date, portfolio_id)
+	VALUES (1, '60/40 Portfolio Classic - Example', 'ALLOCATION_PLAN', NULL, '2025-01-01', 1)
 	;
 	
 	-- ###################################################################
@@ -231,8 +235,8 @@ const initialStateSQL = `
 	;
 	
 	-- Add observation time for portfolio 4
-	INSERT INTO portfolio_allocation_obs_time (id, observation_time_tag, observation_timestamp)
-	VALUES (6, '202508', '2025-08-01 00:00:00'::TIMESTAMP)
+	INSERT INTO portfolio_allocation_obs_time (id, portfolio_id, observation_time_tag, observation_timestamp)
+	VALUES (6, 4, '202508', '2025-08-01 00:00:00'::TIMESTAMP)
 	;
 	
 	-- Add classes in portfolio_allocation_fact: BONDS, STOCKS, REALESTATE
@@ -253,8 +257,8 @@ const initialStateSQL = `
 	;
 	
 	-- Add allocation plan with classes: BONDS, STOCKS, COMMODITIES
-	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, portfolio_id)
-	VALUES (8, 'Portfolio 4 Test Plan', 'ALLOCATION_PLAN', NULL, 4)
+	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, planned_date, portfolio_id)
+	VALUES (8, 'Portfolio 4 Test Plan', 'ALLOCATION_PLAN', NULL, '2025-08-01', 4)
 	;
 	
 	INSERT INTO planned_allocation
@@ -265,19 +269,28 @@ const initialStateSQL = `
 		(27, 8, '{NULL, "COMMODITIES"}', NULL, FALSE, 0.2, NULL)
 	;
 
+	INSERT INTO portfolio (id, "name", allocation_structure)
+	VALUES (
+		3,
+		'Set difference test portfolio',
+		'{"hierarchy": [{"name": "Assets", "field": "assetTicker"}, {"name": "Classes", "field": "class"}]}'::jsonb
+	)
+	ON CONFLICT (id) DO UPDATE set "name" = EXCLUDED."name", allocation_structure = EXCLUDED.allocation_structure
+	;
+
+	INSERT INTO portfolio_allocation_obs_time (id, portfolio_id, observation_time_tag, observation_timestamp)
+	VALUES
+		(3, 3, '202504', '2025-04-01 00:00:00'::TIMESTAMP),
+		(4, 3, '202506', '2025-06-01 00:00:00'::TIMESTAMP),
+		(5, 3, '202507', '2025-07-01 00:00:00'::TIMESTAMP),
+		(7, 3, '202503', '2025-03-01 00:00:00'::TIMESTAMP)
+	;
+
 	-- ###################################################################
 	-- *******************************************************************
 	-- DIVERGENCE ANALYSIS SET DIFFERENCE TESTS
 	-- *******************************************************************
 	-- ###################################################################
-	
-	INSERT INTO portfolio (id, "name", allocation_structure)
-	VALUES (
-	    3,
-	   	'Set difference test portfolio',
-	   	'{"hierarchy": [{"name": "Assets", "field": "assetTicker"}, {"name": "Classes", "field": "class"}]}'::jsonb
-	)
-	;
 	
 	-- ==================================================================
 	-- Lower level set difference tests
@@ -302,7 +315,7 @@ const initialStateSQL = `
 			 100,
 			 5000,
 			 3,
-			 2
+			   7
 		),
 		(
 			6, --'ARCA:EWZ'
@@ -312,7 +325,7 @@ const initialStateSQL = `
 			 100,
 			 2500,
 			 3,
-			 2
+			   7
 		),
 		(
 			7, --'ARCA:SPY'
@@ -322,13 +335,13 @@ const initialStateSQL = `
 			 100,
 			 2500,
 			 3,
-			 2
+			   7
 		)
 	;
 
 	-- Dual bond and single stock portfolio allocation plan
-	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, portfolio_id)
-	VALUES (2, 'Dual bond single stock plan', 'ALLOCATION_PLAN', NULL, 3)
+	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, planned_date, portfolio_id)
+	VALUES (2, 'Dual bond single stock plan', 'ALLOCATION_PLAN', NULL, '2025-02-01', 3)
 	;
 
 	INSERT INTO planned_allocation
@@ -436,8 +449,8 @@ const initialStateSQL = `
 
 
 	-- Single bond and single stock portfolio allocation plan
-	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, portfolio_id)
-	VALUES (3, 'Single bond single stock plan', 'ALLOCATION_PLAN', NULL, 3)
+	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, planned_date, portfolio_id)
+	VALUES (3, 'Single bond single stock plan', 'ALLOCATION_PLAN', NULL, '2025-03-01', 3)
 	;
 
 	INSERT INTO planned_allocation
@@ -460,8 +473,8 @@ const initialStateSQL = `
 	;
 
 	-- Single bond and no stock portfolio allocation plan
-	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, portfolio_id)
-	VALUES (4, 'Single bond no stock plan', 'ALLOCATION_PLAN', NULL, 3)
+	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, planned_date, portfolio_id)
+	VALUES (4, 'Single bond no stock plan', 'ALLOCATION_PLAN', NULL, '2025-04-01', 3)
 	;
 
 	INSERT INTO planned_allocation
@@ -477,8 +490,8 @@ const initialStateSQL = `
 	;
 
 	-- Single bond for total divergence test
-	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, portfolio_id)
-	VALUES (5, 'Single bond total divergence test', 'ALLOCATION_PLAN', NULL, 3)
+	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, planned_date, portfolio_id)
+	VALUES (5, 'Single bond total divergence test', 'ALLOCATION_PLAN', NULL, '2025-05-01', 3)
 	;
 
 	INSERT INTO planned_allocation
@@ -509,8 +522,8 @@ const initialStateSQL = `
 	;
 
 	-- Pre-seeded allocation plan specifically for update tests
-	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, portfolio_id)
-	VALUES (6, 'Update Allocation Plan Fixture', 'ALLOCATION_PLAN', NULL, 5)
+	INSERT INTO allocation_plan (id, "name", "type", planned_execution_date, planned_date, portfolio_id)
+	VALUES (6, 'Update Allocation Plan Fixture', 'ALLOCATION_PLAN', NULL, '2025-06-01', 5)
 	;
 
 	-- Top-level categories

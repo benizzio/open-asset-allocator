@@ -3,6 +3,7 @@
 -- If records with the same name already exist, a timestamp suffix is appended.
 --
 -- Author: Github Copilot
+-- Co-authored by: OpenCode
 
 -- Assets (insert only if not present, comparison by ticker)
 INSERT INTO asset (ticker, "name")
@@ -44,9 +45,9 @@ BEGIN
     RETURNING id INTO v_portfolio_id;
 
     -- Observation time
-    INSERT INTO portfolio_allocation_obs_time (observation_timestamp, observation_time_tag)
-    VALUES (CURRENT_DATE, to_char(CURRENT_DATE, 'YYYYMM'))
-    ON CONFLICT (observation_time_tag) DO UPDATE SET
+    INSERT INTO portfolio_allocation_obs_time (portfolio_id, observation_timestamp, observation_time_tag)
+    VALUES (v_portfolio_id, CURRENT_DATE, to_char(CURRENT_DATE, 'YYYYMM'))
+    ON CONFLICT (portfolio_id, observation_time_tag) DO UPDATE SET
         observation_timestamp = EXCLUDED.observation_timestamp
     RETURNING id INTO v_obs_time_id;
 
@@ -144,11 +145,13 @@ BEGIN
     END IF;
 
     -- Allocation plan
-    INSERT INTO allocation_plan ("name", "type", planned_execution_date, portfolio_id)
+    -- Co-authored by: OpenCode
+    INSERT INTO allocation_plan ("name", "type", planned_execution_date, planned_date, portfolio_id)
     VALUES (
         v_plan_name,
         'ALLOCATION_PLAN',
         NULL,
+        '2025-01-01',
         v_portfolio_id
     )
     RETURNING id INTO v_plan_id;
@@ -241,4 +244,3 @@ BEGIN
     ;
 
 END $$;
-
