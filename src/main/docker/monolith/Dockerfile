@@ -27,7 +27,7 @@ COPY go/ ./
 RUN CGO_ENABLED=0 GOOS=linux go build -o /backend/bin/open-asset-allocator
 
 # Packages only the runtime dependencies and immutable application artifacts.
-FROM gcr.io/distroless/static-debian13:nonroot@sha256:e2e927ec666bae08560abb3c55d0659eceabb657f56b6782ab500a9fc7f555e3 AS runtime
+FROM gcr.io/distroless/static-debian13:nonroot@sha256:25ac8f0c3b2334a9eb05452266bd4697864a8c8ef0ef71e5e6480d7f92868329 AS runtime
 LABEL authors="OpenCode"
 
 COPY --from=backend-build /backend/bin/open-asset-allocator /backend/bin/open-asset-allocator
