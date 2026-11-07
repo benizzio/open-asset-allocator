@@ -1,6 +1,6 @@
 # Provides the containerized Parcel development environment for the frontend.
 # Authored by: OpenCode
-FROM node:24.22.0-bookworm-slim@sha256:91acba91b842bec0bf7ea6f5e09c644c7ccad72c4996ed9616d861d1c7cd60d4 AS dev
+FROM node:26.13.0-bookworm-slim@sha256:add5c17c14752c54d2f3d519ec46a3815684d41c33f198bcb09fb998f7dcbf68 AS dev
 LABEL authors="OpenCode"
 
 WORKDIR /frontend
