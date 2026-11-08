@@ -2203,6 +2203,7 @@ test.describe('portfolio allocation history management', () => {
         textInput: tagInput,
         dateInput,
         toggle,
+        extraAction: item.getByRole('button', { name: `Clone observation ${observation.observation_time_tag}` }),
       };
       const newHeaderControls = {
         header: newItem.locator('[data-management-metadata-header]'),
@@ -2724,6 +2725,981 @@ test.describe('portfolio allocation history management', () => {
     )).resolves.toEqual([{ time_tag: 'E2E_OBS_BLOCKED', timestamp_matches: true }]);
   });
 });
+
+/** Observation cloning uses independent drafts and the existing creation endpoint.
+ * @author GPT-6.1 Terra
+ */
+test.describe('scenario 22: observation cloning', () => {
+  test.use({ timezoneId: 'America/Los_Angeles' });
+
+  /** Copies unsaved source values and creates independent persisted facts only on Save.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.1: clones current editable values and saves a new observation', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_SOURCE', '2026-05-01T12:00:00Z',
+    );
+    await page.clock.setFixedTime('2026-11-08T12:00:00Z');
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    await item.getByRole('button', { name: 'Edit observation CLONE_SOURCE' }).click();
+    const sourceForm = item.locator('form');
+    await expect(sourceForm).toHaveAttribute('data-observation-details-state', 'ready');
+    await item.getByRole('textbox', { name: 'Observation tag' }).fill('Edited <source>');
+    await sourceForm.getByRole('spinbutton', { name: 'Quantity' }).fill('3');
+    const requests: Request[] = [];
+    page.on('request', request => {
+      if(['POST', 'PUT', 'DELETE'].includes(request.method())) requests.push(request);
+    });
+    const beforeClone = await historyWriteCounts(database, seed.portfolio.id);
+    await item.getByRole('button', { name: 'Clone observation CLONE_SOURCE' }).click();
+    const destination = page.locator('#portfolio-history-management-container-0');
+    const destinationForm = destination.locator('form');
+    await expect(destination.getByRole('textbox', { name: 'Time tag' })).toHaveValue('Edited <source> (CLONE)');
+    await expect(destination.getByLabel('Observation date')).toHaveValue('2026-11-08');
+    await expect(destinationForm.getByRole('spinbutton', { name: 'Quantity' })).toHaveValue('3');
+    await expect(destinationForm.locator('input[name="allocations[0][assetId]"]'))
+      .toHaveValue(String(seed.assets[EXISTING_BOND_TICKER].id));
+    expect(requests).toHaveLength(0);
+    await expect(historyWriteCounts(database, seed.portfolio.id)).resolves.toEqual(beforeClone);
+    const persistedBefore = await database.query(
+      'SELECT asset_quantity = 1 AS unchanged FROM public.portfolio_allocation_fact WHERE observation_time_id = $1',
+      [source.id],
+    );
+    expect(persistedBefore).toEqual([{ unchanged: true }]);
+    const response = page.waitForResponse(result => result.request().method() === 'POST'
+      && new URL(result.url()).pathname === `/api/portfolio/${seed.portfolio.id}/history`);
+    await destinationForm.locator('button[type="submit"]').click();
+    expect((await response).ok()).toBe(true);
+    const clone = await findObservationByTag(database, seed.portfolio, 'Edited <source> (CLONE)');
+    expect(clone.id).not.toBe(source.id);
+    await expect(database.query<{ asset_id: number; quantity_matches: boolean }>(
+      'SELECT asset_id, asset_quantity = 3 AS quantity_matches FROM public.portfolio_allocation_fact WHERE observation_time_id = $1',
+      [clone.id],
+    )).resolves.toEqual([{ asset_id: seed.assets[EXISTING_BOND_TICKER].id, quantity_matches: true }]);
+    await expect(database.query(
+      'SELECT asset_quantity = 1 AS unchanged FROM public.portfolio_allocation_fact WHERE observation_time_id = $1',
+      [source.id],
+    )).resolves.toEqual(persistedBefore);
+  });
+
+  /** A delayed detail response cannot overwrite a destination edited after activation.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.2: destination edits cancel a pending clone', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_DELAYED', '2026-05-01T12:00:00Z',
+    );
+    let release = () => {};
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    const path = `/api/portfolio/${seed.portfolio.id}/history`;
+    await page.route(url => url.pathname === path && url.searchParams.get('observationTimestampId') === String(source.id),
+      async route => { await gate; await route.continue(); });
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    await item.getByRole('button', { name: 'Clone observation CLONE_DELAYED' }).click();
+    await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'loading');
+    const tag = page.locator('#portfolio-history-management-container-0').getByRole('textbox', { name: 'Time tag' });
+    await tag.fill('KEEP_DRAFT');
+    release();
+    await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'ready');
+    await expect(tag).toHaveValue('KEEP_DRAFT');
+    await expect(item.locator('[data-observation-clone]')).not.toHaveAttribute('aria-busy', 'true');
+  });
+
+  /** Captures the activation date even when a lazy detail request crosses local midnight.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.3: activation date survives a delayed load across midnight', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_MIDNIGHT', '2026-05-01T12:00:00Z',
+    );
+    let release = () => {};
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    const path = `/api/portfolio/${seed.portfolio.id}/history`;
+    await page.route(url => url.pathname === path && url.searchParams.get('observationTimestampId') === String(source.id),
+      async route => { await gate; await route.continue(); });
+    await page.clock.setFixedTime('2026-11-08T06:59:00Z');
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    await item.getByRole('button', { name: 'Clone observation CLONE_MIDNIGHT' }).click();
+    await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'loading');
+    await page.clock.setFixedTime('2026-11-08T07:01:00Z');
+    release();
+    const destination = page.locator('#portfolio-history-management-container-0');
+    await expect(destination.getByRole('textbox', { name: 'Time tag' })).toHaveValue('CLONE_MIDNIGHT (CLONE)');
+    await expect(destination.getByLabel('Observation date')).toHaveValue('2026-11-07');
+  });
+
+  /** A failed lazy load leaves the previous draft intact and permits an explicit retry.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.4: detail failure preserves the draft and permits retry', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_RETRY', '2026-05-01T12:00:00Z',
+    );
+    const path = `/api/portfolio/${seed.portfolio.id}/history`;
+    let requests = 0;
+    await page.route(url => url.pathname === path && url.searchParams.get('observationTimestampId') === String(source.id),
+      async route => {
+        requests += 1;
+        if(requests === 1) await route.fulfill({ status: 500, body: 'details unavailable' });
+        else await route.continue();
+      });
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const destination = page.locator('#portfolio-history-management-container-0');
+    const tag = destination.getByRole('textbox', { name: 'Time tag' });
+    await tag.fill('KEEP_EXISTING');
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    const button = item.getByRole('button', { name: 'Clone observation CLONE_RETRY' });
+    await button.click();
+    await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'failed');
+    await expect(item.locator('[data-observation-clone-status]')).toContainText('Unable to clone');
+    await expect(tag).toHaveValue('KEEP_EXISTING');
+    await button.click();
+    await expect(tag).toHaveValue('CLONE_RETRY (CLONE)');
+    expect(requests).toBe(2);
+    await expect(database.query<{ count: string }>(
+      'SELECT COUNT(*)::text AS count FROM public.portfolio_allocation_obs_time WHERE portfolio_id = $1',
+      [seed.portfolio.id],
+    )).resolves.toEqual([{ count: '1' }]);
+  });
+
+  /** An overlong generated tag remains complete and is rejected until explicitly corrected.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.5: generated tags are not truncated and remain correctable', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const longTag = 'A'.repeat(98);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], longTag, '2026-05-01T12:00:00Z',
+    );
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    await page.locator(`#portfolio-history-management-container-${source.id}`)
+      .getByRole('button', { name: `Clone observation ${longTag}` }).click();
+    const destination = page.locator('#portfolio-history-management-container-0');
+    const tag = destination.getByRole('textbox', { name: 'Time tag' });
+    await expect(tag).toHaveValue(`${longTag} (CLONE)`);
+    expect(await tag.evaluate((input: HTMLInputElement) => input.validity.valid)).toBe(false);
+    await tag.fill(`${'A'.repeat(80)} (CLONE)`);
+    expect(await tag.evaluate((input: HTMLInputElement) => input.validity.valid)).toBe(true);
+  });
+
+  /** A pending asset lookup becomes an independent editable search in the clone.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.6: pending asset searches are not inherited', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_ASSET', '2026-05-01T12:00:00Z',
+    );
+    let release = () => {};
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    let lookups = 0;
+    await page.route(`**/api/asset/${EXISTING_STOCK_TICKER}`, async route => {
+      lookups += 1;
+      await gate;
+      await route.continue();
+    });
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    await item.locator('[data-metadata-editor-label]').click();
+    const form = item.locator('form');
+    await expect(form).toHaveAttribute('data-observation-details-state', 'ready');
+    await form.locator('tfoot button[type="button"]').click();
+    const added = form.locator('tbody tr').nth(1);
+    await added.getByRole('combobox', { name: 'Asset' }).fill(EXISTING_STOCK_TICKER);
+    await added.locator('[data-asset-action-button]').click();
+    await expect(added.locator('[data-asset-search-autocomplete]')).toHaveAttribute('data-asset-selection-state', 'pending');
+    await item.getByRole('button', { name: 'Clone observation CLONE_ASSET' }).click();
+    const destination = page.locator('#portfolio-history-management-container-0');
+    const clonedRow = destination.locator('tbody tr').nth(1);
+    await expect(clonedRow.locator('[data-asset-search-autocomplete]')).toHaveAttribute('data-asset-selection-state', 'search');
+    await expect(clonedRow.getByRole('combobox', { name: 'Asset' })).toHaveValue(EXISTING_STOCK_TICKER);
+    expect(lookups).toBe(1);
+    release();
+    await expect(added.locator('[data-asset-search-autocomplete]')).toHaveAttribute('data-asset-selection-state', 'existing');
+    await expect(clonedRow.locator('[data-asset-search-autocomplete]')).toHaveAttribute('data-asset-selection-state', 'search');
+  });
+
+  /** Financial raw and visible values are copied independently without recalculation.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.7: preserves financial raw and display strings', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_PRECISION', '2026-05-01T12:00:00Z',
+    );
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    await item.locator('[data-metadata-editor-label]').click();
+    const form = item.locator('form');
+    await expect(form).toHaveAttribute('data-observation-details-state', 'ready');
+    await form.getByRole('spinbutton', { name: 'Quantity' }).fill('0');
+    await form.getByRole('textbox', { name: 'Market price' }).evaluate((display: HTMLInputElement) => {
+      const raw = display.parentElement?.querySelector<HTMLInputElement>('input[type="hidden"]');
+      if(!raw) throw new Error('Missing financial raw input');
+      raw.value = '0.123456789123';
+      display.value = '0.123456789123 incomplete';
+    });
+    await form.getByRole('textbox', { name: 'Total market value' }).evaluate((display: HTMLInputElement) => {
+      const raw = display.parentElement?.querySelector<HTMLInputElement>('input[type="hidden"]');
+      if(!raw) throw new Error('Missing financial raw input');
+      raw.value = '';
+      display.value = '-';
+    });
+    await item.getByRole('button', { name: 'Clone observation CLONE_PRECISION' }).click();
+    const cloned = page.locator('#portfolio-history-management-container-0')
+      .getByRole('textbox', { name: 'Market price' });
+    await expect(cloned).toHaveValue('0.123456789123 incomplete');
+    await expect(cloned.locator('..').locator('input[type="hidden"]')).toHaveValue('0.123456789123');
+    const total = page.locator('#portfolio-history-management-container-0')
+      .getByRole('textbox', { name: 'Total market value' });
+    await expect(total).toHaveValue('-');
+    await expect(total.locator('..').locator('input[type="hidden"]')).toHaveValue('');
+    await expect(page.locator('#portfolio-history-management-container-0')
+      .getByRole('spinbutton', { name: 'Quantity' })).toHaveValue('0');
+  });
+
+  /** A newer clone supersedes an older pending request without accepting its late response.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.9: newer clone survives an older delayed response', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const older = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_OLD', '2026-05-01T12:00:00Z',
+    );
+    const newer = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_STOCK_TICKER], 'CLONE_NEW', '2026-05-02T12:00:00Z',
+    );
+    let release = () => {};
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    const endpoint = `/api/portfolio/${seed.portfolio.id}/history`;
+    await page.route(url => url.pathname === endpoint && url.searchParams.get('observationTimestampId') === String(older.id),
+      async route => { await gate; await route.continue(); });
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const oldItem = page.locator(`#portfolio-history-management-container-${older.id}`);
+    const newItem = page.locator(`#portfolio-history-management-container-${newer.id}`);
+    await oldItem.getByRole('button', { name: 'Clone observation CLONE_OLD' }).click();
+    await expect(oldItem.locator('form')).toHaveAttribute('data-observation-details-state', 'loading');
+    await newItem.getByRole('button', { name: 'Clone observation CLONE_NEW' }).click();
+    const tag = page.locator('#portfolio-history-management-container-0').getByRole('textbox', { name: 'Time tag' });
+    await expect(tag).toHaveValue('CLONE_NEW (CLONE)');
+    release();
+    await expect(oldItem.locator('form')).toHaveAttribute('data-observation-details-state', 'ready');
+    await expect(tag).toHaveValue('CLONE_NEW (CLONE)');
+  });
+
+  /** Rejects an HTTP-success response that does not contain the requested observation.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.10: unusable detail responses leave the destination intact', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_BAD_DETAILS', '2026-05-01T12:00:00Z',
+    );
+    const endpoint = `/api/portfolio/${seed.portfolio.id}/history`;
+    await page.route(url => url.pathname === endpoint && url.searchParams.get('observationTimestampId') === String(source.id),
+      route => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const destination = page.locator('#portfolio-history-management-container-0');
+    const tag = destination.getByRole('textbox', { name: 'Time tag' });
+    await tag.fill('KEEP_BAD_RESPONSE');
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    await item.getByRole('button', { name: 'Clone observation CLONE_BAD_DETAILS' }).click();
+    await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'failed');
+    await expect(tag).toHaveValue('KEEP_BAD_RESPONSE');
+    await expect(item.locator('[data-observation-clone]')).not.toHaveAttribute('aria-busy', 'true');
+  });
+
+  /** Leaving and returning cannot revive an older pending clone operation.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.11: route exit permanently cancels pending clone work', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_ROUTE', '2026-05-01T12:00:00Z',
+    );
+    let release = () => {};
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    const endpoint = `/api/portfolio/${seed.portfolio.id}/history`;
+    await page.route(url => url.pathname === endpoint && url.searchParams.get('observationTimestampId') === String(source.id),
+      async route => { await gate; await route.continue(); });
+    const management = `/portfolio/${seed.portfolio.id}/history/manage`;
+    await page.goto(management);
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    await item.getByRole('button', { name: 'Clone observation CLONE_ROUTE' }).click();
+    await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'loading');
+    await page.evaluate(path => (window as unknown as { navigateTo: (path: string) => void }).navigateTo(path),
+      `/portfolio/${seed.portfolio.id}/history`);
+    await expect(page).toHaveURL(new RegExp(`/portfolio/${seed.portfolio.id}/history$`));
+    await page.evaluate(path => (window as unknown as { navigateTo: (path: string) => void }).navigateTo(path), management);
+    await expect(page).toHaveURL(new RegExp(`/portfolio/${seed.portfolio.id}/history/manage$`));
+    const tag = page.locator('#portfolio-history-management-container-0').getByRole('textbox', { name: 'Time tag' });
+    await tag.fill('AFTER_RETURN');
+    const response = page.waitForResponse(result => new URL(result.url()).pathname === endpoint
+      && new URL(result.url()).searchParams.get('observationTimestampId') === String(source.id));
+    release();
+    await response;
+    await expect(tag).toHaveValue('AFTER_RETURN');
+  });
+
+  /** Copies incomplete new and search assets after source removals leave index gaps.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.12: clones incomplete new and search rows with fresh indexes', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_INCOMPLETE', '2026-05-01T12:00:00Z',
+    );
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    await item.locator('[data-metadata-editor-label]').click();
+    const form = item.locator('form');
+    await expect(form).toHaveAttribute('data-observation-details-state', 'ready');
+    const add = form.locator('tfoot button[type="button"]');
+    await add.click();
+    const newRow = form.locator('tbody tr').nth(1);
+    await newRow.getByRole('combobox', { name: 'Asset' }).fill('CLONE-NEW-UNIQUE');
+    await newRow.locator('[data-asset-action-button]').click();
+    await expect(newRow.locator('[data-asset-search-autocomplete]')).toHaveAttribute('data-asset-selection-state', 'new');
+    await expect(newRow.getByRole('textbox', { name: 'Asset name' })).toHaveValue('');
+    await add.click();
+    const searchRow = form.locator('tbody tr').nth(2);
+    await searchRow.getByRole('combobox', { name: 'Asset' }).fill('unresolved search');
+    await form.locator('tbody tr').first().locator('button.btn-danger').last().click();
+    await item.getByRole('button', { name: 'Clone observation CLONE_INCOMPLETE' }).click();
+    const rows = page.locator('#portfolio-history-management-form-0 tbody tr');
+    await expect(rows).toHaveCount(2);
+    await expect(rows.nth(0).locator('[data-asset-search-autocomplete]')).toHaveAttribute('data-asset-selection-state', 'new');
+    await expect(rows.nth(0).getByRole('textbox', { name: 'Asset name' })).toHaveValue('');
+    await expect(rows.nth(0).locator('input[name="allocations[0][assetTicker]"]')).toHaveValue('CLONE-NEW-UNIQUE');
+    await expect(rows.nth(1).getByRole('combobox', { name: 'Asset' })).toHaveValue('unresolved search');
+    await expect(rows.nth(1)).toHaveId('portfolio-history-management-form-0-row-1');
+    await expect(database.query<{ count: string }>('SELECT COUNT(*)::text AS count FROM public.asset'))
+      .resolves.toEqual([{ count: '2' }]);
+  });
+
+  /** Server-side duplicate-tag rejection keeps the clone editable without partial persistence.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.14: duplicate-tag failure retains the clone for correction', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_DUPLICATE', '2026-05-01T12:00:00Z',
+    );
+    await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_STOCK_TICKER], 'CLONE_DUPLICATE (CLONE)', '2026-05-02T12:00:00Z',
+    );
+    const before = await historyWriteCounts(database, seed.portfolio.id);
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    await page.locator(`#portfolio-history-management-container-${source.id}`)
+      .getByRole('button', { name: 'Clone observation CLONE_DUPLICATE', exact: true }).click();
+    const destination = page.locator('#portfolio-history-management-container-0');
+    const tag = destination.getByRole('textbox', { name: 'Time tag' });
+    await expect(tag).toHaveValue('CLONE_DUPLICATE (CLONE)');
+    const path = `/api/portfolio/${seed.portfolio.id}/history`;
+    const failed = page.waitForResponse(result => result.request().method() === 'POST'
+      && new URL(result.url()).pathname === path);
+    await destination.locator('form button[type="submit"]').click();
+    expect((await failed).ok()).toBe(false);
+    await expect(tag).toHaveValue('CLONE_DUPLICATE (CLONE)');
+    await expect(destination.locator('tbody tr')).toHaveCount(1);
+    await expect(database.query<{ count: string }>(
+      'SELECT COUNT(*)::text AS count FROM public.portfolio_allocation_obs_time WHERE portfolio_id = $1',
+      [seed.portfolio.id],
+    )).resolves.toEqual([{ count: '2' }]);
+    await expect(historyWriteCounts(database, seed.portfolio.id)).resolves.toEqual(before);
+    await tag.fill('CLONE_DUPLICATE_FIXED (CLONE)');
+    const succeeded = page.waitForResponse(result => result.request().method() === 'POST'
+      && new URL(result.url()).pathname === path);
+    await destination.locator('form').evaluate((form: HTMLFormElement) => form.requestSubmit());
+    expect((await succeeded).ok()).toBe(true);
+  });
+
+  /** Existing asset provider keys remain eligible without issuing a lookup or quote during cloning.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.15: preserves existing external quote association', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const asset = seed.assets[EXISTING_BOND_TICKER];
+    const provider = { source: 'YAHOO_FINANCE', exchangeId: 'PCX', ticker: 'IAU' };
+    await database.query('UPDATE public.asset SET external_data = $2::jsonb WHERE id = $1',
+      [asset.id, JSON.stringify({ data: [provider] })]);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, asset, 'CLONE_KEYS', '2026-05-01T12:00:00Z',
+    );
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    await expect(item.getByRole('button', { name: 'Clone observation CLONE_KEYS' })).toBeVisible();
+    const assetRequests: string[] = [];
+    page.on('request', request => {
+      if(new URL(request.url()).pathname.startsWith('/api/asset/')) assetRequests.push(request.url());
+    });
+    await item.getByRole('button', { name: 'Clone observation CLONE_KEYS' }).click();
+    const row = page.locator('#portfolio-history-management-form-0 tbody tr').first();
+    await expect.poll(() => row.locator('[data-external-asset-keys]')
+      .evaluate((fieldset: HTMLFieldSetElement) => fieldset.disabled)).toBe(false);
+    await expect(row.locator('[data-external-asset-key="source"]')).toHaveValue(provider.source);
+    await expect(row.locator('[data-external-asset-key="exchangeId"]')).toHaveValue(provider.exchangeId);
+    await expect(row.locator('[data-external-asset-key="ticker"]')).toHaveValue(provider.ticker);
+    await expect(row.getByRole('button', { name: 'Fetch latest closing price' })).toBeVisible();
+    expect(assetRequests).toEqual([]);
+  });
+
+  /** A loaded empty draft stays empty and accepts a new row with the correct destination index.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.16: clones an empty loaded draft without reloading it', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'EMPTY (CLONE)', '2026-05-01T12:00:00Z',
+    );
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    await item.locator('[data-metadata-editor-label]').click();
+    const form = item.locator('form');
+    await expect(form).toHaveAttribute('data-observation-details-state', 'ready');
+    await form.locator('tbody tr button.btn-danger').last().click();
+    let detailRequests = 0;
+    page.on('request', request => {
+      if(new URL(request.url()).searchParams.get('observationTimestampId') === String(source.id)) detailRequests += 1;
+    });
+    await item.getByRole('button', { name: 'Clone observation EMPTY (CLONE)' }).click();
+    const destination = page.locator('#portfolio-history-management-container-0');
+    await expect(destination.getByRole('textbox', { name: 'Time tag' })).toHaveValue('EMPTY (CLONE) (CLONE)');
+    await expect(destination.locator('tbody tr')).toHaveCount(0);
+    expect(detailRequests).toBe(0);
+    await destination.locator('tfoot button[type="button"]').click();
+    await expect(destination.locator('tbody tr')).toHaveCount(1);
+    await expect(destination.locator('tbody tr')).toHaveId('portfolio-history-management-form-0-row-0');
+    await expect(form.locator('tbody tr')).toHaveCount(0);
+  });
+
+  for(const [scenario, fail] of [['22.17', false], ['22.18', true]] as const) {
+    /** Late lookup success and failure must not affect a replaced destination row.
+     * @author GPT-6.1 Terra
+     */
+    test(`scenario ${scenario}: replaced destination ignores late lookup ${fail ? 'failure' : 'success'}`,
+      async ({ database, page }) => {
+        const seed = await seedPortfolioHistoryData(database);
+        const source = await seedManagementObservation(
+          database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_REPLACE_LOOKUP', '2026-05-01T12:00:00Z',
+        );
+        let release = () => {};
+        const gate = new Promise<void>(resolve => { release = resolve; });
+        await page.route(`**/api/asset/${EXISTING_STOCK_TICKER}`, async route => {
+          await gate;
+          if(fail) await route.fulfill({ status: 500, contentType: 'application/json', body: '{"errorMessage":"failed"}' });
+          else await route.continue();
+        });
+        await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+        const destination = page.locator('#portfolio-history-management-container-0');
+        await destination.locator('button[data-bs-toggle="collapse"]').click();
+        await expect(destination.locator('.accordion-collapse')).toHaveClass(/\bshow\b/);
+        await destination.locator('tfoot button[type="button"]').click();
+        const previousRow = destination.locator('tbody tr');
+        await previousRow.getByRole('combobox', { name: 'Asset' }).fill(EXISTING_STOCK_TICKER);
+        await previousRow.locator('[data-asset-action-button]').click();
+        await expect(previousRow.locator('[data-asset-search-autocomplete]'))
+          .toHaveAttribute('data-asset-selection-state', 'pending');
+        await page.locator(`#portfolio-history-management-container-${source.id}`)
+          .getByRole('button', { name: 'Clone observation CLONE_REPLACE_LOOKUP' }).click();
+        const tag = destination.getByRole('textbox', { name: 'Time tag' });
+        await expect(tag).toHaveValue('CLONE_REPLACE_LOOKUP (CLONE)');
+        await expect(tag).toBeFocused();
+        const lookup = page.waitForResponse(result => new URL(result.url()).pathname === `/api/asset/${EXISTING_STOCK_TICKER}`);
+        release();
+        await lookup;
+        const clonedRow = destination.locator('tbody tr');
+        await expect(clonedRow.locator('input[name="allocations[0][assetId]"]'))
+          .toHaveValue(String(seed.assets[EXISTING_BOND_TICKER].id));
+        await expect(tag).toBeFocused();
+      });
+  }
+
+  /** Switching portfolio IDs on the same route permanently cancels the old context's clone.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.19: portfolio context change invalidates pending work', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_CONTEXT', '2026-05-01T12:00:00Z',
+    );
+    const other = await database.query<SeededPortfolio>(
+      'INSERT INTO public.portfolio (name, allocation_structure) VALUES ($1, $2::jsonb) RETURNING id, name',
+      ['Clone Other Portfolio', JSON.stringify(DEFAULT_ALLOCATION_STRUCTURE)],
+    );
+    let release = () => {};
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    const endpoint = `/api/portfolio/${seed.portfolio.id}/history`;
+    await page.route(url => url.pathname === endpoint && url.searchParams.get('observationTimestampId') === String(source.id),
+      async route => { await gate; await route.continue(); });
+    const originalPath = `/portfolio/${seed.portfolio.id}/history/manage`;
+    await page.goto(originalPath);
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    await item.getByRole('button', { name: 'Clone observation CLONE_CONTEXT' }).click();
+    await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'loading');
+    await page.evaluate(path => (window as unknown as { navigateTo: (path: string) => void }).navigateTo(path),
+      `/portfolio/${other[0].id}/history/manage`);
+    await expect(page).toHaveURL(new RegExp(`/portfolio/${other[0].id}/history/manage$`));
+    await page.evaluate(path => (window as unknown as { navigateTo: (path: string) => void }).navigateTo(path), originalPath);
+    await expect(page).toHaveURL(new RegExp(`/portfolio/${seed.portfolio.id}/history/manage$`));
+    const tag = page.locator('#portfolio-history-management-container-0').getByRole('textbox', { name: 'Time tag' });
+    await tag.fill('RETURNED_CONTEXT');
+    const response = page.waitForResponse(result => new URL(result.url()).pathname === endpoint
+      && new URL(result.url()).searchParams.get('observationTimestampId') === String(source.id));
+    release();
+    await response;
+    await expect(tag).toHaveValue('RETURNED_CONTEXT');
+  });
+
+  for(const [scenario, action] of [['22.20', 'add'], ['22.21', 'submit']] as const) {
+    /** An add-row action or invalid native submit invalidates a delayed clone.
+     * @author GPT-6.1 Terra
+     */
+    test(`scenario ${scenario}: destination ${action} cancels a pending clone`, async ({ database, page }) => {
+      const seed = await seedPortfolioHistoryData(database);
+      const source = await seedManagementObservation(
+        database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_DEST_ACTION', '2026-05-01T12:00:00Z',
+      );
+      let release = () => {};
+      const gate = new Promise<void>(resolve => { release = resolve; });
+      const endpoint = `/api/portfolio/${seed.portfolio.id}/history`;
+      await page.route(url => url.pathname === endpoint && url.searchParams.get('observationTimestampId') === String(source.id),
+        async route => { await gate; await route.continue(); });
+      await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+      const destination = page.locator('#portfolio-history-management-container-0');
+      await destination.locator('button[data-bs-toggle="collapse"]').click();
+      await expect(destination.locator('.accordion-collapse')).toHaveClass(/\bshow\b/);
+      const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+      await item.getByRole('button', { name: 'Clone observation CLONE_DEST_ACTION' }).click();
+      await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'loading');
+      if(action === 'add') await destination.locator('tfoot button[type="button"]').click();
+      else await destination.locator('form').evaluate((form: HTMLFormElement) => form.requestSubmit());
+      release();
+      await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'ready');
+      await expect(destination.getByRole('textbox', { name: 'Time tag' })).toHaveValue('');
+      await expect(destination.locator('tbody tr')).toHaveCount(action === 'add' ? 1 : 0);
+    });
+  }
+
+  test.describe('positive timezone', () => {
+    test.use({ timezoneId: 'Asia/Tokyo' });
+
+    /** Captures the next local calendar date and persists its corresponding UTC midnight.
+     * @author GPT-6.1 Terra
+     */
+    test('scenario 22.13: positive offset creates local-midnight timestamp', async ({ database, page }) => {
+      const seed = await seedPortfolioHistoryData(database);
+      const source = await seedManagementObservation(
+        database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_TOKYO', '2026-05-01T12:00:00Z',
+      );
+      await page.clock.setFixedTime('2026-11-08T17:00:00Z');
+      await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+      await page.locator(`#portfolio-history-management-container-${source.id}`)
+        .getByRole('button', { name: 'Clone observation CLONE_TOKYO' }).click();
+      const destination = page.locator('#portfolio-history-management-container-0');
+      await expect(destination.getByRole('textbox', { name: 'Time tag' })).toHaveValue('CLONE_TOKYO (CLONE)');
+      await expect(destination.getByLabel('Observation date')).toHaveValue('2026-11-09');
+      const response = page.waitForResponse(result => result.request().method() === 'POST'
+        && new URL(result.url()).pathname === `/api/portfolio/${seed.portfolio.id}/history`);
+      await destination.locator('form button[type="submit"]').click();
+      expect((await response).ok()).toBe(true);
+      const saved = await findObservationByTag(database, seed.portfolio, 'CLONE_TOKYO (CLONE)');
+      expect(saved.observation_timestamp).toEqual(new Date('2026-11-08T15:00:00Z'));
+    });
+  });
+
+  test.describe('narrow viewport', () => {
+    test.use({ viewport: { width: 375, height: 760 } });
+
+    /** Keeps Clone reachable beside an active metadata editor and supports keyboard activation.
+     * @author GPT-6.1 Terra
+     */
+    test('scenario 22.24: keyboard cloning remains usable while editing on mobile', async ({ database, page }) => {
+      const seed = await seedPortfolioHistoryData(database);
+      const source = await seedManagementObservation(
+        database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_MOBILE', '2026-05-01T12:00:00Z',
+      );
+      await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+      const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+      await item.getByRole('button', { name: 'Edit observation CLONE_MOBILE' }).click();
+      await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'ready');
+      const clone = item.getByRole('button', { name: 'Clone observation CLONE_MOBILE' });
+      const bounds = await clone.boundingBox();
+      const header = await item.locator('[data-management-metadata-header]').boundingBox();
+      expect(bounds).not.toBeNull();
+      expect(header).not.toBeNull();
+      if(!bounds || !header) throw new Error('Missing mobile header geometry');
+      expect(bounds.x).toBeGreaterThanOrEqual(header.x);
+      expect(bounds.x + bounds.width).toBeLessThanOrEqual(header.x + header.width + 1);
+      await clone.focus();
+      await page.keyboard.press('Enter');
+      await expect(page.locator('#portfolio-history-management-container-0').getByRole('textbox', { name: 'Time tag' }))
+        .toHaveValue('CLONE_MOBILE (CLONE)');
+    });
+  });
+
+  /** Refuses destination replacement while the current creation request is in flight.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.25: creation in flight blocks clone replacement', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_BLOCK_POST', '2026-05-01T12:00:00Z',
+    );
+    let release = () => {};
+    let markStarted = () => {};
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    const started = new Promise<void>(resolve => { markStarted = resolve; });
+    const endpoint = `/api/portfolio/${seed.portfolio.id}/history`;
+    await page.route(url => url.pathname === endpoint, async route => {
+      if(route.request().method() !== 'POST') return route.continue();
+      markStarted();
+      await gate;
+      await route.continue();
+    });
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const destination = page.locator('#portfolio-history-management-container-0');
+    const tag = destination.getByRole('textbox', { name: 'Time tag' });
+    await tag.fill('POST_IN_FLIGHT');
+    const form = destination.locator('form');
+    const row = await addAllocationRow(page, form, 0);
+    await fillExistingAssetDirectValueAllocation(page, row, seed.assets[EXISTING_BOND_TICKER], 'BONDS', '100.00');
+    const response = page.waitForResponse(result => result.request().method() === 'POST'
+      && new URL(result.url()).pathname === endpoint);
+    await form.locator('button[type="submit"]').click();
+    await started;
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    await item.getByRole('button', { name: 'Clone observation CLONE_BLOCK_POST' }).click();
+    await expect(item.locator('[data-observation-clone-status]')).toContainText('Wait for the current save');
+    await expect(tag).toHaveValue('POST_IN_FLIGHT');
+    release();
+    expect((await response).ok()).toBe(true);
+  });
+
+  /** Aborted detail loads release clone state and permit a later retry.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.29: aborted details preserve the destination and can retry', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_ABORT', '2026-05-01T12:00:00Z',
+    );
+    const endpoint = `/api/portfolio/${seed.portfolio.id}/history`;
+    let requests = 0;
+    await page.route(url => url.pathname === endpoint && url.searchParams.get('observationTimestampId') === String(source.id),
+      async route => {
+        requests += 1;
+        if(requests === 1) await route.abort('failed');
+        else await route.continue();
+      });
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const tag = page.locator('#portfolio-history-management-container-0').getByRole('textbox', { name: 'Time tag' });
+    await tag.fill('PRESERVE_ABORT');
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    const clone = item.getByRole('button', { name: 'Clone observation CLONE_ABORT' });
+    await clone.click();
+    await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'failed');
+    await expect(tag).toHaveValue('PRESERVE_ABORT');
+    await expect(clone).not.toHaveAttribute('aria-busy', 'true');
+    await clone.click();
+    await expect(tag).toHaveValue('CLONE_ABORT (CLONE)');
+    expect(requests).toBe(2);
+  });
+
+  /** Repeated Clone activation joins the original lazy detail request.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.30: repeated activation shares one pending detail request', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_JOIN', '2026-05-01T12:00:00Z',
+    );
+    let release = () => {};
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    let requests = 0;
+    const endpoint = `/api/portfolio/${seed.portfolio.id}/history`;
+    await page.route(url => url.pathname === endpoint && url.searchParams.get('observationTimestampId') === String(source.id),
+      async route => { requests += 1; await gate; await route.continue(); });
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    const clone = item.getByRole('button', { name: 'Clone observation CLONE_JOIN' });
+    await clone.click();
+    await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'loading');
+    await clone.click();
+    expect(requests).toBe(1);
+    release();
+    await expect(page.locator('#portfolio-history-management-container-0').getByRole('textbox', { name: 'Time tag' }))
+      .toHaveValue('CLONE_JOIN (CLONE)');
+    expect(requests).toBe(1);
+  });
+
+  /** Joins a panel's already pending load and captures metadata only after details are ready.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.31: joins an accordion load and captures the latest editor tag', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_JOIN_PANEL', '2026-05-01T12:00:00Z',
+    );
+    let release = () => {};
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    let requests = 0;
+    const endpoint = `/api/portfolio/${seed.portfolio.id}/history`;
+    await page.route(url => url.pathname === endpoint && url.searchParams.get('observationTimestampId') === String(source.id),
+      async route => { requests += 1; await gate; await route.continue(); });
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    await item.getByRole('button', { name: 'Edit observation CLONE_JOIN_PANEL' }).click();
+    await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'loading');
+    await item.getByRole('textbox', { name: 'Observation tag' }).fill('LATEST_PANEL_DRAFT');
+    await item.getByRole('button', { name: 'Clone observation CLONE_JOIN_PANEL' }).click();
+    release();
+    await expect(page.locator('#portfolio-history-management-container-0').getByRole('textbox', { name: 'Time tag' }))
+      .toHaveValue('LATEST_PANEL_DRAFT (CLONE)');
+    expect(requests).toBe(1);
+  });
+
+  /** Sequential clones replace the same destination instead of accumulating forms or rows.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.32: repeated cloning replaces the destination', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_REPEAT', '2026-05-01T12:00:00Z',
+    );
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    const button = item.getByRole('button', { name: 'Clone observation CLONE_REPEAT' });
+    await button.click();
+    const destination = page.locator('#portfolio-history-management-container-0');
+    const tag = destination.getByRole('textbox', { name: 'Time tag' });
+    await expect(tag).toHaveValue('CLONE_REPEAT (CLONE)');
+    await tag.fill('REPLACED_DRAFT');
+    await button.click();
+    await expect(tag).toHaveValue('CLONE_REPEAT (CLONE)');
+    await expect(page.locator('#portfolio-history-management-form-0')).toHaveCount(1);
+    await expect(destination.locator('tbody tr')).toHaveCount(1);
+    await expect(destination.locator('#portfolio-history-management-form-0-row-0')).toHaveCount(1);
+  });
+
+  /** Removing a destination row while details load cancels the pending replacement.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.33: destination row removal cancels a pending clone', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_REMOVE', '2026-05-01T12:00:00Z',
+    );
+    let release = () => {};
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    const endpoint = `/api/portfolio/${seed.portfolio.id}/history`;
+    await page.route(url => url.pathname === endpoint && url.searchParams.get('observationTimestampId') === String(source.id),
+      async route => { await gate; await route.continue(); });
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const destination = page.locator('#portfolio-history-management-container-0');
+    const tag = destination.getByRole('textbox', { name: 'Time tag' });
+    await tag.fill('KEEP_REMOVAL');
+    await destination.locator('tfoot button[type="button"]').click();
+    await expect(destination.locator('tbody tr')).toHaveCount(1);
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    await item.getByRole('button', { name: 'Clone observation CLONE_REMOVE' }).click();
+    await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'loading');
+    await destination.locator('tbody tr button.btn-danger').last().click();
+    release();
+    await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'ready');
+    await expect(tag).toHaveValue('KEEP_REMOVAL');
+    await expect(destination.locator('tbody tr')).toHaveCount(0);
+  });
+
+  /** A failed draft render does not replace an existing destination.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.34: a render failure preserves the destination', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_RENDER', '2026-05-01T12:00:00Z',
+    );
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    await item.locator('[data-metadata-editor-label]').click();
+    await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'ready');
+    const tag = page.locator('#portfolio-history-management-container-0').getByRole('textbox', { name: 'Time tag' });
+    await tag.fill('KEEP_RENDER_FAILURE');
+    await page.evaluate(() => {
+      const template = document.getElementById('template-portfolio-history-management-form-tbody-row');
+      if(!template) throw new Error('Missing row template');
+      template.innerHTML = '<tr></tr>';
+      (window as unknown as { portfolioHistoryManagement: { init: () => void } }).portfolioHistoryManagement.init();
+    });
+    await item.getByRole('button', { name: 'Clone observation CLONE_RENDER' }).click();
+    await expect(item.locator('[data-observation-clone-status]')).toContainText('Unable to clone');
+    await expect(tag).toHaveValue('KEEP_RENDER_FAILURE');
+    await expect(page.locator('#portfolio-history-management-form-0 tbody tr')).toHaveCount(0);
+  });
+
+  /** A confirmed new asset is not created until the cloned observation is saved.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.35: creates a deliberately new asset only on clone Save', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_NEW_ASSET', '2026-05-01T12:00:00Z',
+    );
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    await item.locator('[data-metadata-editor-label]').click();
+    const form = item.locator('form');
+    await expect(form).toHaveAttribute('data-observation-details-state', 'ready');
+    await form.locator('tfoot button[type="button"]').click();
+    const newRow = form.locator('tbody tr').nth(1);
+    await searchForAsset(page, newRow, 'CLONE-NEW-ASSET', 404);
+    await newRow.getByRole('textbox', { name: 'Asset name' }).fill('Cloned New Asset');
+    await newRow.getByRole('combobox', { name: 'Class' }).fill('STOCKS');
+    await newRow.getByRole('textbox', { name: 'Total market value' }).fill('123.45');
+    await item.getByRole('button', { name: 'Clone observation CLONE_NEW_ASSET' }).click();
+    const destination = page.locator('#portfolio-history-management-container-0');
+    await expect(destination.getByRole('textbox', { name: 'Time tag' })).toHaveValue('CLONE_NEW_ASSET (CLONE)');
+    await expect(destination.locator('tbody tr').nth(1).getByRole('textbox', { name: 'Asset name' }))
+      .toHaveValue('Cloned New Asset');
+    await expect(database.query('SELECT id FROM public.asset WHERE ticker = $1', ['CLONE-NEW-ASSET']))
+      .resolves.toEqual([]);
+    const endpoint = `/api/portfolio/${seed.portfolio.id}/history`;
+    const response = page.waitForResponse(result => result.request().method() === 'POST'
+      && new URL(result.url()).pathname === endpoint);
+    await destination.locator('form button[type="submit"]').click();
+    expect((await response).ok()).toBe(true);
+    const clone = await findObservationByTag(database, seed.portfolio, 'CLONE_NEW_ASSET (CLONE)');
+    const assets = await database.query<{ id: number; name: string }>(
+      'SELECT id, name FROM public.asset WHERE ticker = $1', ['CLONE-NEW-ASSET'],
+    );
+    expect(assets).toHaveLength(1);
+    expect(assets[0].name).toBe('Cloned New Asset');
+    await expect(database.query<{ asset_id: number }>(
+      'SELECT asset_id FROM public.portfolio_allocation_fact WHERE observation_time_id = $1 AND asset_id = $2',
+      [clone.id, assets[0].id],
+    )).resolves.toEqual([{ asset_id: assets[0].id }]);
+    await expect(database.query<{ count: string }>(
+      'SELECT COUNT(*)::text AS count FROM public.portfolio_allocation_fact WHERE observation_time_id = $1', [source.id],
+    )).resolves.toEqual([{ count: '1' }]);
+  });
+
+  /** Clone waits for a source panel transition before opening and focusing the destination.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.36: clone completes while the source panel is opening', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_TRANSITION', '2026-05-01T12:00:00Z',
+    );
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    const panel = item.locator('.accordion-collapse');
+    const toggle = item.locator('[data-metadata-editor-toggle]');
+    await toggle.click();
+    await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'ready');
+    await expect(panel).toHaveClass(/\bshow\b/);
+    await toggle.click();
+    await expect(panel).not.toHaveClass(/\bshow\b/);
+    await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+    await item.evaluate(element => {
+      const edit = element.querySelector<HTMLButtonElement>('[data-metadata-editor-trigger]');
+      const clone = element.querySelector<HTMLButtonElement>('[data-observation-clone]');
+      if(!edit || !clone) throw new Error('Missing observation header controls');
+      edit.click();
+      clone.click();
+    });
+    const clone = item.getByRole('button', { name: 'Clone observation CLONE_TRANSITION' });
+    const tag = page.locator('#portfolio-history-management-container-0').getByRole('textbox', { name: 'Time tag' });
+    await expect(tag).toHaveValue('CLONE_TRANSITION (CLONE)');
+    await expect(tag).toBeFocused();
+    await expect(clone).not.toHaveAttribute('aria-busy', 'true');
+    await expect(panel).not.toHaveClass(/\bshow\b/);
+    await expect(panel).not.toHaveClass(/\bcollapsing\b/);
+  });
+
+  /** A list reset invalidates a clone even when its old detail response later succeeds.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.37: list reset invalidates pending detail work', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_RESET', '2026-05-01T12:00:00Z',
+    );
+    let release = () => {};
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    const endpoint = `/api/portfolio/${seed.portfolio.id}/history`;
+    await page.route(url => url.pathname === endpoint && url.searchParams.get('observationTimestampId') === String(source.id),
+      async route => { await gate; await route.continue(); });
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    await item.getByRole('button', { name: 'Clone observation CLONE_RESET' }).click();
+    await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'loading');
+    const oldDestination = await page.locator('#portfolio-history-management-container-0').elementHandle();
+    if(!oldDestination) throw new Error('Missing original destination');
+    const reset = page.waitForResponse(response => {
+      const url = new URL(response.url());
+      return url.pathname === `${endpoint}/observation` && url.searchParams.get('pageCursor') === '';
+    });
+    await page.locator('#accordion-portfolio-history-management').evaluate(element => {
+      (window as unknown as { htmx: { trigger: (target: Element, event: string) => void } }).htmx
+        .trigger(element, 'reload-portfolio-history-management');
+    });
+    expect((await reset).ok()).toBe(true);
+    await expect.poll(() => oldDestination.evaluate(element => element.isConnected)).toBe(false);
+    const tag = page.locator('#portfolio-history-management-container-0').getByRole('textbox', { name: 'Time tag' });
+    await tag.fill('AFTER_RESET');
+    const response = page.waitForResponse(result => new URL(result.url()).pathname === endpoint
+      && new URL(result.url()).searchParams.get('observationTimestampId') === String(source.id));
+    release();
+    await response;
+    await expect(tag).toHaveValue('AFTER_RESET');
+  });
+
+  /** A delayed clone does not steal focus after the user moves to another control.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.38: delayed clone respects later user focus', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_FOCUS', '2026-05-01T12:00:00Z',
+    );
+    let release = () => {};
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    const endpoint = `/api/portfolio/${seed.portfolio.id}/history`;
+    await page.route(url => url.pathname === endpoint && url.searchParams.get('observationTimestampId') === String(source.id),
+      async route => { await gate; await route.continue(); });
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    await item.getByRole('button', { name: 'Edit observation CLONE_FOCUS' }).click();
+    await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'loading');
+    await item.getByRole('button', { name: 'Clone observation CLONE_FOCUS' }).click();
+    const sourceTag = item.getByRole('textbox', { name: 'Observation tag' });
+    await sourceTag.focus();
+    await expect(sourceTag).toBeFocused();
+    release();
+    const destination = page.locator('#portfolio-history-management-container-0');
+    await expect(destination.getByRole('textbox', { name: 'Time tag' })).toHaveValue('CLONE_FOCUS (CLONE)');
+    await expect(item.locator('[data-observation-clone]')).not.toHaveAttribute('aria-busy', 'true');
+    await expect(sourceTag).toBeFocused();
+  });
+});
+
+/** Captures persisted observation, fact, and asset counts for no-write assertions.
+ * @author GPT-6.1 Terra
+ */
+async function historyWriteCounts(database: E2eDatabase, portfolioId: number): Promise<readonly unknown[]> {
+  return database.query(`SELECT
+    (SELECT COUNT(*)::text FROM public.portfolio_allocation_obs_time WHERE portfolio_id = $1) AS observations,
+    (SELECT COUNT(*)::text FROM public.portfolio_allocation_fact WHERE portfolio_id = $1) AS facts,
+    (SELECT COUNT(*)::text FROM public.asset) AS assets`, [portfolioId]);
+}
 
 /** Creates a minimal observation for one calendar date and verifies the request and PostgreSQL timestamp.
  *

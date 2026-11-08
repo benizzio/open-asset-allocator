@@ -3,6 +3,7 @@
  *
  * @author GPT-6 Luna
  * @author GPT-6.1 Sol
+ * @author GPT-6.1 Terra
  */
 import type { Locator, Page, Request, Route } from '@playwright/test';
 import { expect, test } from '../support/fixtures';
@@ -1068,6 +1069,50 @@ test.describe('scenario 16: external asset quote action and submission contract'
     }
   });
 });
+
+for(const [scenario, fail] of [['22.22', false], ['22.23', true]] as const) {
+  /** Late quote responses cannot update a newly cloned row that reuses a removed row's DOM ID.
+   * @author GPT-6.1 Terra
+   */
+  test(`scenario ${scenario}: clone ignores a replaced destination quote ${fail ? 'failure' : 'success'}`,
+    async ({ database, page }) => {
+      const seeded = await seedExternalQuoteLoadedHistory(database);
+      const [provider] = EXTERNAL_QUOTE_ASSOCIATIONS;
+      await page.goto(`/portfolio/${seeded.portfolio.id}/history/manage`);
+      await expectPortfolioHistoryManagement(page, seeded.portfolio, 1);
+      const destination = page.locator('#portfolio-history-management-container-0');
+      await destination.getByRole('textbox', { name: 'Time tag' }).fill('OLD_DRAFT');
+      const row = await addAllocationRow(page, destination.locator('form'), 0);
+      await selectAssetFromAutocomplete(page, row, seeded.quoteAsset.ticker);
+      await expectExternalQuoteEligibility(row, provider);
+      const gate = createQuoteResponseGate();
+      const path = externalAssetQuotePath(seeded.quoteAsset.id, provider);
+      await page.route(`**${path}`, async route => {
+        gate.markStarted();
+        await gate.wait;
+        if(fail) {
+          await route.fulfill({ status: 500, contentType: 'application/json', body: '{"errorMessage":"failed"}' });
+        } else {
+          await route.fulfill({ status: 200, contentType: 'application/json',
+            body: JSON.stringify(externalQuoteResponse(provider, '999')) });
+        }
+      });
+      const response = page.waitForResponse(result => new URL(result.url()).pathname === path);
+      await row.locator('[data-quote-action]').click();
+      await gate.started;
+      await page.locator(`#portfolio-history-management-container-${seeded.observation.id}`)
+        .getByRole('button', { name: `Clone observation ${seeded.observation.observation_time_tag}` }).click();
+      const tag = destination.getByRole('textbox', { name: 'Time tag' });
+      await expect(tag).toHaveValue(`${seeded.observation.observation_time_tag} (CLONE)`);
+      await expect(tag).toBeFocused();
+      const price = destination.locator('tbody tr').first().getByRole('textbox', { name: 'Market price' });
+      const before = await price.inputValue();
+      gate.release();
+      await response;
+      await expect(price).toHaveValue(before);
+      await expect(tag).toBeFocused();
+    });
+}
 
 /** Seeds the portfolio and persisted asset associations used by the external quote action scenario.
  *

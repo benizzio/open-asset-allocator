@@ -342,6 +342,17 @@ export default [
                                 "'components/portfolio-history/portfolio-history-management-observation-details' (index.ts) only; " +
                                 "deep imports are not allowed.",
                         },
+                        // Observation-clone internals are private to the clone module.
+                        // Authored by: GPT-6.1 Terra
+                        {
+                            group: [
+                                "**/portfolio-history-management-observation-clone/*",
+                                "**/portfolio-history-management-observation-clone/**",
+                                "./portfolio-history-management-observation-clone/*",
+                                "../portfolio-history-management-observation-clone/*",
+                            ],
+                            message: "Import observation cloning through its index.ts public API only.",
+                        },
                         // Block deep imports into history observation metadata; use its public entry point
                         // Authored by: GPT-6.1 Sol
                         {

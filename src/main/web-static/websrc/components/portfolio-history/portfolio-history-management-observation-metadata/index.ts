@@ -17,6 +17,29 @@ const NEW_DATE_INPUT_ID = "portfolio-history-management-observation-date";
 const OBSERVATION_TAG_NAME = "observationTimestamp.timeTag";
 const OBSERVATION_TIMESTAMP_NAME = "observationTimestamp.timestamp";
 
+/** Reads the current observation tag without changing or validating its source form.
+ * @param form - Persisted observation form and its associated header.
+ * @returns The active editor value or canonical persisted tag.
+ * @example `const tag = captureObservationTag(form);`
+ * @author GPT-6.1 Terra
+ */
+export function captureObservationTag(form: HTMLFormElement): string {
+    const item = form.closest<HTMLElement>(".accordion-item");
+    const fields = item?.querySelector<HTMLElement>("[data-metadata-editor-active]");
+    const tag = item?.querySelector<HTMLInputElement>("[data-observation-editor-tag]");
+    const payload = form.elements.namedItem(OBSERVATION_TAG_NAME);
+
+    if(fields && isManagementMetadataEditorActive(fields) && tag) {
+        return tag.value;
+    }
+
+    if(!(payload instanceof HTMLInputElement)) {
+        throw new Error("Observation tag payload is missing.");
+    }
+
+    return payload.value;
+}
+
 /** Validates and prepares canonical metadata inputs before native submission collects form values.
  *
  * @param form - The owning observation management form.
@@ -49,7 +72,7 @@ export function prepareObservationMetadataForSubmit(form: HTMLFormElement): bool
         return false;
     }
 
-    if(isEditing && !copyEditedTag(tagInput, tagPayload)) {
+    if((isNewObservation || isEditing) && !copyEditedTag(tagInput, tagPayload)) {
         return false;
     }
 
@@ -79,6 +102,12 @@ function copyEditedTag(
     tagInput: HTMLInputElement | null,
     tagPayload: HTMLInputElement,
 ): boolean {
+    if(tagInput) {
+        const overlong = Array.from(tagInput.value).length > 100;
+        const message = overlong ? "Observation tag must not exceed 100 characters." : "";
+        tagInput.setCustomValidity(message);
+    }
+
     if(!tagInput?.checkValidity()) {
         tagInput?.reportValidity();
         return false;

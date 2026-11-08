@@ -46,6 +46,7 @@ import {
     retryObservationDetails,
 } from "./portfolio-history-management-observation-details";
 import { prepareObservationMetadataForSubmit } from "./portfolio-history-management-observation-metadata";
+import { bindObservationCloning } from "./portfolio-history-management-observation-clone";
 import paginatedList, { PaginationMode } from "../paginated-list";
 
 const PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER = "accordion-portfolio-history-management";
@@ -345,6 +346,11 @@ const portfolioHistoryManagement = {
 
         if(managementContainer) {
             bindReadOnlyManagementMetadataHeaderToggle(managementContainer);
+
+            bindObservationCloning(
+                managementContainer, () => this.handlebarsPortfolioHistoryManagementRowTemplate,
+                normalizePortfolioHistoryRow,
+            );
         }
 
         const newObservationDateInput = managementContainer?.querySelector<HTMLInputElement>(
@@ -471,7 +477,15 @@ const portfolioHistoryManagement = {
         rowValueElements.handleInputTotalMarketValue();
     },
 
+    /** Synchronizes the visible new-observation tag and clears corrected validation feedback.
+     * @param newTimeTagInput - Visible tag input.
+     * @param observationTimestampId - Owning observation identity.
+     * @example `portfolioHistoryManagement.handleInputObservationTimeTag(input, 0)` updates the new form payload.
+     * @author benizzio
+     * @author GPT-6.1 Terra
+     */
     handleInputObservationTimeTag(newTimeTagInput: HTMLInputElement, observationTimestampId: number) {
+        newTimeTagInput.setCustomValidity("");
         const formId = `${ PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX }${ observationTimestampId }`;
         const form = window[formId] as HTMLFormElement;
         const observationTimeTagInput = form.elements.namedItem("observationTimestamp.timeTag") as HTMLInputElement;

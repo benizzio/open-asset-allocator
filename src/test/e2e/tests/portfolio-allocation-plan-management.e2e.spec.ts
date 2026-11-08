@@ -1368,6 +1368,9 @@ test.describe('portfolio allocation plan management', () => {
 
     await page.goto(`/portfolio/${seededData.portfolio.id}/allocation/manage`);
     await expectAllocationPlanManagement(page, seededData.portfolio);
+    // Synthetic HTMX events require the newly rendered form's handlers to have settled.
+    // Co-authored by: GPT-6.1 Terra and benizzio
+    await expect(page.locator('#accordion-allocation-plan-management')).not.toHaveClass(/\bhtmx-settling\b/);
     page.on('request', trackManagementRefresh);
     try {
       const managementRefresh = page.waitForRequest(

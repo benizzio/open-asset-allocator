@@ -22,6 +22,8 @@ import {
 import { bindAssetFormValidationGuards, invalidateSelectedAsset, validateAssetRowsForPost } from "./form-validation";
 
 export { AssetSelectionState } from "./constants";
+export { captureAssetDraft, restoreAssetDraft } from "./draft";
+export type { AssetDraft } from "./draft";
 export { ASSET_ROW_SELECTION_CHANGE_EVENT, AssetRowSelectionChangeState } from "./selection-events";
 export type {
     AssetRowSelectionChangeDetail,

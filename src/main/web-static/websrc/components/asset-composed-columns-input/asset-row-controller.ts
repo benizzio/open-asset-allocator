@@ -3,6 +3,7 @@
  *
  * @author GPT-6 Luna
  * @author GPT-6 Sol
+ * @author GPT-6.1 Terra
  */
 
 import { Asset } from "../../domain/asset";
@@ -126,6 +127,13 @@ export class AssetRowController {
         return selectionState === AssetSelectionState.EXISTING || selectionState === AssetSelectionState.NEW;
     }
 
+    /** Allows lookup completion to focus its row unless the user moved to another control.
+     * @author GPT-6.1 Terra
+     */
+    private mayFocusAfterLookup(): boolean {
+        return document.activeElement === document.body || this.container.contains(document.activeElement);
+    }
+
     /** Updates search/reset styling and icon without changing row selection state.
      *
      * @author GPT-6 Luna
@@ -140,10 +148,15 @@ export class AssetRowController {
      * @author benizzio
      * @author GPT-6 Luna
      * @author GPT-6 Sol
+     * @author GPT-6.1 Terra
      */
     private activateExistingAssetMode(asset: Asset): void {
+        const shouldFocus = this.mayFocusAfterLookup();
         this.completeAssetLookup();
-        this.assetActionButton.focus();
+
+        if(shouldFocus) {
+            this.assetActionButton.focus();
+        }
         this.autocompleteWrapper.dataset.assetSelectionState = AssetSelectionState.EXISTING;
         this.switchAssetActionButtonIdentity(ASSET_ACTION_BUTTON_IDENTITIES.reset);
 
@@ -173,10 +186,11 @@ export class AssetRowController {
      * @author benizzio
      * @author GPT-6 Luna
      * @author GPT-6 Sol
+     * @author GPT-6.1 Terra
      */
     private activateNewAssetMode(ticker: string): void {
+        const shouldFocus = this.mayFocusAfterLookup();
         this.completeAssetLookup();
-        this.assetActionButton.focus();
         this.autocompleteWrapper.dataset.assetSelectionState = AssetSelectionState.NEW;
         this.switchAssetActionButtonIdentity(ASSET_ACTION_BUTTON_IDENTITIES.reset);
 
@@ -198,7 +212,10 @@ export class AssetRowController {
         this.assetIdInput.value = "";
         this.newAssetTickerMessage.style.display = "";
         this.clearSearchErrorFeedback();
-        this.assetNameInput.focus();
+
+        if(shouldFocus) {
+            this.assetNameInput.focus();
+        }
         this.publishSelectionChange({ state: AssetRowSelectionChangeState.NEW });
     }
 
@@ -428,8 +445,10 @@ export class AssetRowController {
      *
      * @author GPT-6 Luna
      * @author GPT-6 Sol
+     * @author GPT-6.1 Terra
      */
     private restoreSearchModeAfterLookup(): void {
+        const shouldFocus = this.mayFocusAfterLookup();
         this.completeAssetLookup();
         this.autocompleteWrapper.dataset.assetSelectionState = AssetSelectionState.SEARCH;
         this.switchAssetActionButtonIdentity(ASSET_ACTION_BUTTON_IDENTITIES.search);
@@ -447,7 +466,10 @@ export class AssetRowController {
         this.assetNameInput.required = false;
         this.newAssetTickerMessage.style.display = "none";
         this.clearSearchFieldValidation();
-        this.assetSearchInput.focus();
+
+        if(shouldFocus) {
+            this.assetSearchInput.focus();
+        }
     }
 
     /** Clears validation feedback attached to the transient search control.

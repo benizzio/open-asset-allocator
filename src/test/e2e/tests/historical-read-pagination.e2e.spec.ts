@@ -252,7 +252,7 @@ test('scenario 21.2: appends history-management records without replacing drafts
   await expect.poll(() => displayedIds(displayedRecords).then(ids => ids.filter(id => id !== '0')))
     .toEqual(expectedIds.slice(0, 20));
   await expect(list.locator('[data-paginated-record-id="0"]')).toHaveCount(1);
-  await expect(draftTag).toHaveValue('UNSAVEDHISTORYDRAFT');
+  await expect(draftTag).toHaveValue('Unsaved history draft');
   await expect(draftDate).toHaveValue('2025-03-04');
   await expect(editorTag).toHaveValue('Unsaved metadata edit');
   await expect(firstRecord.locator('[data-metadata-editor-active="true"]')).toBeVisible();
@@ -269,6 +269,152 @@ test('scenario 21.2: appends history-management records without replacing drafts
     .toBeHidden();
   await expect(page.locator('[data-paginated-list-status="accordion-portfolio-history-management"]')).toBeEmpty();
   await expect(list.locator('[data-paginated-record-id="0"]')).toHaveCount(1);
+});
+
+/** Cloning an appended observation keeps pagination stable until normal creation resets the list.
+ * @author GPT-6.1 Terra
+ */
+test('scenario 22.8: clones an appended observation and resets after Save', async ({ database, page }) => {
+  const seeded = await seedHistory(database);
+  const endpoint = `/api/portfolio/${seeded.portfolio.id}/history/observation`;
+  const initialResponse = waitForPageResponse(page, endpoint, '');
+  await page.clock.setFixedTime('2030-01-15T12:00:00Z');
+  await page.goto(`/portfolio/${seeded.portfolio.id}/history/manage`);
+  const initial = await readPage(await initialResponse, endpoint, '');
+  const cursor = requireContinuationCursor(initial);
+  const list = page.locator('#accordion-portfolio-history-management');
+  const more = loadMoreButton(page, 'accordion-portfolio-history-management');
+  const continuation = waitForPageResponse(page, endpoint, cursor);
+  await more.click();
+  await continuation;
+  const source = seeded.records[10];
+  const sourceItem = page.locator(`#portfolio-history-management-container-${source.id}`);
+  await expect(sourceItem).toBeVisible();
+  const before = await list.locator('[data-paginated-record-id]').count();
+  const listRequests: string[] = [];
+  page.on('request', request => {
+    const url = new URL(request.url());
+    if(request.method() === 'GET' && url.pathname === endpoint) listRequests.push(url.searchParams.get('pageCursor') ?? '');
+  });
+  await sourceItem.getByRole('button', { name: `Clone observation ${source.timeTag}` }).click();
+  const destination = list.locator('#portfolio-history-management-container-0');
+  await expect(destination.getByRole('textbox', { name: 'Time tag' })).toHaveValue(`${source.timeTag} (CLONE)`);
+  await expect(list.locator('[data-paginated-record-id]')).toHaveCount(before);
+  expect(listRequests).toEqual([]);
+  const reset = waitForPageResponse(page, endpoint, '');
+  await destination.locator('form button[type="submit"]').click();
+  await reset;
+  expect(listRequests).toContain('');
+  const nextPage = loadMoreButton(page, 'accordion-portfolio-history-management');
+  await expect(nextPage).toBeVisible();
+  await nextPage.click();
+  await expect(sourceItem).toBeVisible();
+  await sourceItem.getByRole('button', { name: `Edit observation ${source.timeTag}` }).click();
+  await expect(sourceItem.locator('form')).toHaveAttribute('data-observation-details-state', 'ready');
+});
+
+/** A successful continuation response for an obsolete portfolio cannot append into the current list.
+ * @author GPT-6.1 Terra
+ */
+test('scenario 22.26: ignores late successful continuation after context change', async ({ database, page }) => {
+  const seeded = await seedHistory(database);
+  const endpoint = `/api/portfolio/${seeded.portfolio.id}/history/observation`;
+  const initial = waitForPageResponse(page, endpoint, '');
+  await page.goto(`/portfolio/${seeded.portfolio.id}/history/manage`);
+  const cursor = requireContinuationCursor(await readPage(await initial, endpoint, ''));
+  const list = page.locator('#accordion-portfolio-history-management');
+  await expect(list.locator('[data-paginated-record-id]')).toHaveCount(11);
+  let release = () => {};
+  let started = () => {};
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  const requestStarted = new Promise<void>(resolve => { started = resolve; });
+  await page.route(`**${endpoint}?*`, async route => {
+    if(new URL(route.request().url()).searchParams.get('pageCursor') === cursor) {
+      started();
+      await gate;
+    }
+    await route.continue();
+  });
+  await page.evaluate(({ endpoint, cursor }) => {
+    document.addEventListener('htmx:afterRequest', event => {
+      const xhr = (event as CustomEvent<{ xhr?: XMLHttpRequest }>).detail?.xhr;
+      if(!xhr?.responseURL) return;
+      const url = new URL(xhr.responseURL);
+      if(url.pathname === endpoint && url.searchParams.get('pageCursor') === cursor) {
+        document.body.dataset.staleSuccessSettled = String(xhr.status);
+      }
+    });
+  }, { endpoint, cursor });
+  await loadMoreButton(page, 'accordion-portfolio-history-management').click();
+  await requestStarted;
+  await list.evaluate(element => {
+    const selector = element.getAttribute('data-paginated-list-context-selector')!;
+    (document.querySelector(selector) as HTMLInputElement).value = 'different-context';
+  });
+  const response = waitForPageResponse(page, endpoint, cursor);
+  release();
+  expect((await response).ok()).toBe(true);
+  await expect(page.locator('body')).toHaveAttribute('data-stale-success-settled', '200');
+  await expect(list.locator('[data-paginated-record-id]')).toHaveCount(11);
+});
+
+/** A persisted metadata edit reloads the first management page and keeps older records reachable.
+ * @author GPT-6.1 Terra
+ */
+test('scenario 22.27: metadata save resets pagination to the first page', async ({ database, page }) => {
+  const seeded = await seedHistory(database);
+  const endpoint = `/api/portfolio/${seeded.portfolio.id}/history/observation`;
+  const initial = waitForPageResponse(page, endpoint, '');
+  await page.goto(`/portfolio/${seeded.portfolio.id}/history/manage`);
+  await initial;
+  const record = seeded.records[0];
+  const item = page.locator(`#portfolio-history-management-container-${record.id}`);
+  await item.getByRole('button', { name: `Edit observation ${record.timeTag}` }).click();
+  const form = item.locator('form');
+  await expect(form).toHaveAttribute('data-observation-details-state', 'ready');
+  await item.getByRole('textbox', { name: 'Observation tag' }).fill('EDITED_PAGINATION_TAG');
+  const reset = waitForPageResponse(page, endpoint, '');
+  await form.locator('button[type="submit"]').click();
+  const resetResponse = await reset;
+  const firstPage = await readPage(resetResponse, endpoint, '');
+  const cursor = requireContinuationCursor(firstPage);
+  await expect(database.query<{ observation_time_tag: string }>(
+    'SELECT observation_time_tag FROM public.portfolio_allocation_obs_time WHERE id = $1', [record.id],
+  )).resolves.toEqual([{ observation_time_tag: 'EDITED_PAGINATION_TAG' }]);
+  const continuation = waitForPageResponse(page, endpoint, cursor);
+  await loadMoreButton(page, 'accordion-portfolio-history-management').click();
+  await continuation;
+  await expect(page.locator(`#portfolio-history-management-container-${seeded.records[10].id}`)).toBeVisible();
+});
+
+/** A successful continuation already entering the swap lifecycle cannot outlive a list reset.
+ * @author GPT-6.1 Terra
+ */
+test('scenario 22.28: rejects a successful continuation when the list resets during response', async ({ database, page }) => {
+  const seeded = await seedHistory(database);
+  const endpoint = `/api/portfolio/${seeded.portfolio.id}/history/observation`;
+  const initial = waitForPageResponse(page, endpoint, '');
+  await page.goto(`/portfolio/${seeded.portfolio.id}/history/manage`);
+  const cursor = requireContinuationCursor(await readPage(await initial, endpoint, ''));
+  const list = page.locator('#accordion-portfolio-history-management');
+  await expect(list.locator('[data-paginated-record-id]')).toHaveCount(11);
+  await list.evaluate((element, cursor) => {
+    element.addEventListener('htmx:beforeSwap', event => {
+      const detail = (event as CustomEvent<{ xhr?: XMLHttpRequest }>).detail;
+      if(!detail.xhr?.responseURL || new URL(detail.xhr.responseURL).searchParams.get('pageCursor') !== cursor) return;
+      document.body.dataset.resetDuringSuccessfulContinuation = String(detail.xhr.status);
+      const htmx = (window as unknown as { htmx: { trigger: (target: Element, event: string) => void } }).htmx;
+      htmx.trigger(element, 'reload-portfolio-history-management');
+    }, { capture: true });
+  }, cursor);
+  const continuation = waitForPageResponse(page, endpoint, cursor);
+  const reset = waitForPageResponse(page, endpoint, '');
+  await loadMoreButton(page, 'accordion-portfolio-history-management').click();
+  expect((await continuation).ok()).toBe(true);
+  expect((await reset).ok()).toBe(true);
+  await expect(page.locator('body')).toHaveAttribute('data-reset-during-successful-continuation', '200');
+  await expect(list.locator('[data-paginated-record-id]')).toHaveCount(11);
+  await expect(page.locator(`#portfolio-history-management-container-${seeded.records[10].id}`)).toHaveCount(0);
 });
 
 test('scenario 21.3: paginates allocation-plan viewing records in backend order', async ({
