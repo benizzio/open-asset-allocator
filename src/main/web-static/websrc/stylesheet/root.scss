@@ -158,13 +158,24 @@
   overflow-wrap: anywhere;
 }
 
-.management-metadata-edit-button {
+/** Centers metadata actions and keeps their trailing spacing consistent.
+ * Co-authored by: GPT-6.1 Terra and benizzio
+ */
+.management-metadata-edit-button,
+.portfolio-history-management-clone-button {
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  // The existing header flex gap plus this margin matches the allocation-row `ms-2` gap and inline whitespace.
+  // Match the spacing between metadata actions and their adjacent label.
   margin-right: 0.5rem;
+}
+
+/** Allows a long observation label to wrap beside its actions on narrow screens.
+ * Authored by: GPT-6.1 Terra
+ */
+.portfolio-history-management-clone-button ~ .management-metadata-header-label {
+  flex-basis: 0;
 }
 
 .management-metadata-header-toggle {

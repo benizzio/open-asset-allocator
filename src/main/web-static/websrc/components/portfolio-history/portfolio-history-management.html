@@ -156,10 +156,13 @@
                 </button>
                 <!-- Clone remains available while the metadata editor is active. Authored by: GPT-6.1 Terra -->
                 <button type="button"
-                        class="btn btn-secondary btn-xs"
+                        class="btn btn-secondary btn-xs portfolio-history-management-clone-button"
                         aria-label="Clone observation {{timeTag}}"
+                        title="Clone observation"
                         data-observation-clone
-                >Clone</button>
+                >
+                    <span class="bi bi-copy" aria-hidden="true"></span>
+                </button>
                 <span data-observation-clone-status role="status" aria-live="polite" class="visually-hidden"></span>
                 <span class="management-metadata-header-label"
                       data-metadata-editor-label
