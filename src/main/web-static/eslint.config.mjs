@@ -353,6 +353,12 @@ export default [
                             ],
                             message: "Import observation cloning through its index.ts public API only.",
                         },
+                        // Form identifiers have a dependency-free public boundary.
+                        // Authored by: GPT-6.1 Sol
+                        {
+                            group: ["**/portfolio-history-management-form/*", "**/portfolio-history-management-form/**"],
+                            message: "Import history form identifiers through its index.ts public API only.",
+                        },
                         // Block deep imports into history observation metadata; use its public entry point
                         // Authored by: GPT-6.1 Sol
                         {

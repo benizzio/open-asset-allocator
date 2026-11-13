@@ -6,15 +6,16 @@
  * Example: `bindObservationDetailsLoader(header, panel, form)` wires one persisted observation.
  * @author GPT-6 Luna
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 
 import htmx from "htmx.org";
+import { PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX } from "../portfolio-history-management-form";
 
 const LOADER_ATTRIBUTE = "data-observation-details-loader";
 const BOUND_ATTRIBUTE = "data-observation-details-loader-bound";
 const DETAILS_EVENT = "load-observation-details";
 const PANEL_SHOWN_EVENT = "shown.bs.collapse";
-const STATE_CHANGED_EVENT = "observation-details-state-changed";
 const requests = new WeakMap<HTMLElement, XMLHttpRequest>();
 
 /** Lifecycle values persisted in observation detail loader datasets.
@@ -88,70 +89,6 @@ function handleBeforeSwap(event: Event, header: HTMLElement, form: HTMLFormEleme
     queueMicrotask(() => {
         if(requests.get(header) === xhr && (event.defaultPrevented || detail.shouldSwap === false)) {
             setObservationDetailsState(header, form, ObservationDetailsState.FAILED);
-        }
-    });
-}
-
-/** Ensures that an observation's matching detail request has settled and its row bindings are usable.
- * Existing requests are shared; cancelling this waiter does not abort the source request.
- * @param header - The bound HTMX detail request source.
- * @param form - The corresponding observation form.
- * @param signal - Optional cancellation signal for this waiter.
- * @example `await ensureObservationDetailsReady(header, form, abortController.signal);`
- * @author GPT-6.1 Terra
- */
-export function ensureObservationDetailsReady(
-    header: HTMLElement, form: HTMLFormElement, signal?: AbortSignal,
-): Promise<void> {
-    if(!header.isConnected || !form.isConnected || signal?.aborted) {
-        return Promise.reject(new DOMException("Observation details wait cancelled.", "AbortError"));
-    }
-
-    if(areObservationDetailsReady(form)) {
-        return Promise.resolve();
-    }
-
-    return new Promise((resolve, reject) => {
-        const observer = new MutationObserver(() => {
-            if(!header.isConnected || !form.isConnected) {
-                cancel();
-            }
-        });
-
-        const cleanup = () => {
-            observer.disconnect();
-            header.removeEventListener(STATE_CHANGED_EVENT, stateChanged);
-            signal?.removeEventListener("abort", cancel);
-        };
-
-        const cancel = () => {
-            cleanup();
-            reject(new DOMException("Observation details wait cancelled.", "AbortError"));
-        };
-
-        const stateChanged = () => {
-            const state = readObservationDetailsState(header);
-
-            if(state === ObservationDetailsState.READY) {
-                cleanup();
-                resolve();
-            }
-            else if(state === ObservationDetailsState.FAILED) {
-                cleanup();
-                reject(new Error("Observation details could not be loaded."));
-            }
-        };
-        header.addEventListener(STATE_CHANGED_EVENT, stateChanged);
-        signal?.addEventListener("abort", cancel, { once: true });
-        observer.observe(document, { childList: true, subtree: true });
-
-        if(readObservationDetailsState(header) !== ObservationDetailsState.LOADING) {
-            htmx.trigger(header, DETAILS_EVENT);
-
-            if(readObservationDetailsState(header) !== ObservationDetailsState.LOADING) {
-                cleanup();
-                reject(new Error("Observation detail request did not start."));
-            }
         }
     });
 }
@@ -249,6 +186,7 @@ function handleAfterRequest(event: Event, header: HTMLElement, form: HTMLFormEle
 
 /** Checks the response identity and allocation shape before accepting a settled swap.
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 function validDetailsResponse(xhr: XMLHttpRequest, form: HTMLFormElement): boolean {
     try {
@@ -261,8 +199,8 @@ function validDetailsResponse(xhr: XMLHttpRequest, form: HTMLFormElement): boole
             return false;
         }
         const snapshot = body[0] as { observationTimestamp?: { id?: unknown }; allocations?: unknown };
-        return String(snapshot.observationTimestamp?.id) === form.id.slice("portfolio-history-management-form-".length)
-            && Array.isArray(snapshot.allocations);
+        const observationId = form.id.slice(PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX.length);
+        return String(snapshot.observationTimestamp?.id) === observationId && Array.isArray(snapshot.allocations);
     } catch {
         return false;
     }
@@ -338,6 +276,7 @@ function readObservationDetailsState(header: HTMLElement): ObservationDetailsSta
 /** Updates loader status, editor feedback and detail-dependent form controls together.
  * @author GPT-6 Luna
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 function setObservationDetailsState(
     header: HTMLElement,
@@ -362,5 +301,16 @@ function setObservationDetailsState(
     form.querySelectorAll<HTMLButtonElement>("[data-requires-observation-details]").forEach(button => {
         button.disabled = state !== ObservationDetailsState.READY;
     });
-    header.dispatchEvent(new Event(STATE_CHANGED_EVENT));
+    const clone = item?.querySelector<HTMLButtonElement>("[data-observation-clone]");
+    const hint = item?.querySelector<HTMLElement>("[data-observation-clone-hint]");
+    const ready = state === ObservationDetailsState.READY;
+
+    if(clone && hint) {
+        clone.disabled = !ready;
+
+        hint.title = ready ? "Clone observation"
+            : "Cloning is only available after opening this panel at least once and loading its allocation data.";
+        hint.tabIndex = ready ? -1 : 0;
+        hint.setAttribute("aria-label", hint.title);
+    }
 }

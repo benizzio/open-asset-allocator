@@ -5,6 +5,7 @@
  *
  * @author GPT-6 Luna
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 import type { Locator, Page, Response } from '@playwright/test';
 import { expect, test } from '../support/fixtures';
@@ -273,6 +274,7 @@ test('scenario 21.2: appends history-management records without replacing drafts
 
 /** Cloning an appended observation keeps pagination stable until normal creation resets the list.
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 test('scenario 22.8: clones an appended observation and resets after Save', async ({ database, page }) => {
   const seeded = await seedHistory(database);
@@ -290,6 +292,8 @@ test('scenario 22.8: clones an appended observation and resets after Save', asyn
   const source = seeded.records[10];
   const sourceItem = page.locator(`#portfolio-history-management-container-${source.id}`);
   await expect(sourceItem).toBeVisible();
+  await sourceItem.locator('[data-metadata-editor-label]').click();
+  await expect(sourceItem.locator('form')).toHaveAttribute('data-observation-details-state', 'ready');
   const before = await list.locator('[data-paginated-record-id]').count();
   const listRequests: string[] = [];
   page.on('request', request => {

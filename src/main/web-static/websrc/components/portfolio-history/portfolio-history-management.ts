@@ -22,7 +22,6 @@ import {
     EXTERNAL_ASSET_SOURCE_SELECTOR,
     EXTERNAL_ASSET_EXCHANGE_ID_SELECTOR,
     EXTERNAL_ASSET_TICKER_SELECTOR,
-    PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX,
 } from "./portfolio-history-quote";
 import AssetComposedColumnsInput, {
     ASSET_ROW_SELECTION_CHANGE_EVENT,
@@ -48,6 +47,7 @@ import {
 import { prepareObservationMetadataForSubmit } from "./portfolio-history-management-observation-metadata";
 import { bindObservationCloning } from "./portfolio-history-management-observation-clone";
 import paginatedList, { PaginationMode } from "../paginated-list";
+import { PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX } from "./portfolio-history-management-form";
 
 const PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER = "accordion-portfolio-history-management";
 const PORTFOLIO_ALLOCATION_MANAGEMENT_TBODY_PREFIX = "portfolio-history-management-form-tbody-";

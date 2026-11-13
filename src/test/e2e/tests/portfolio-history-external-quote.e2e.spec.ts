@@ -1073,6 +1073,7 @@ test.describe('scenario 16: external asset quote action and submission contract'
 for(const [scenario, fail] of [['22.22', false], ['22.23', true]] as const) {
   /** Late quote responses cannot update a newly cloned row that reuses a removed row's DOM ID.
    * @author GPT-6.1 Terra
+   * @author GPT-6.1 Sol
    */
   test(`scenario ${scenario}: clone ignores a replaced destination quote ${fail ? 'failure' : 'success'}`,
     async ({ database, page }) => {
@@ -1080,6 +1081,9 @@ for(const [scenario, fail] of [['22.22', false], ['22.23', true]] as const) {
       const [provider] = EXTERNAL_QUOTE_ASSOCIATIONS;
       await page.goto(`/portfolio/${seeded.portfolio.id}/history/manage`);
       await expectPortfolioHistoryManagement(page, seeded.portfolio, 1);
+      const source = page.locator(`#portfolio-history-management-container-${seeded.observation.id}`);
+      await source.locator('[data-metadata-editor-label]').click();
+      await expect(source.locator('form')).toHaveAttribute('data-observation-details-state', 'ready');
       const destination = page.locator('#portfolio-history-management-container-0');
       await destination.getByRole('textbox', { name: 'Time tag' }).fill('OLD_DRAFT');
       const row = await addAllocationRow(page, destination.locator('form'), 0);
@@ -1100,8 +1104,7 @@ for(const [scenario, fail] of [['22.22', false], ['22.23', true]] as const) {
       const response = page.waitForResponse(result => new URL(result.url()).pathname === path);
       await row.locator('[data-quote-action]').click();
       await gate.started;
-      await page.locator(`#portfolio-history-management-container-${seeded.observation.id}`)
-        .getByRole('button', { name: `Clone observation ${seeded.observation.observation_time_tag}` }).click();
+      await source.getByRole('button', { name: `Clone observation ${seeded.observation.observation_time_tag}` }).click();
       const tag = destination.getByRole('textbox', { name: 'Time tag' });
       await expect(tag).toHaveValue(`${seeded.observation.observation_time_tag} (CLONE)`);
       await expect(tag).toBeFocused();

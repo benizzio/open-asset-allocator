@@ -6,13 +6,17 @@
  * Example: `prepareObservationMetadataForSubmit(form)` copies the current editor values into the form.
  * @author GPT-6 Luna
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 
 import { calendarDateToUtcTimestamp } from "../../../utils/calendar-date";
 import { isManagementMetadataEditorActive } from "../../management-metadata-editor";
 import { areObservationDetailsReady } from "../portfolio-history-management-observation-details";
+import {
+    NEW_OBSERVATION_FORM_ID,
+    PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX,
+} from "../portfolio-history-management-form";
 
-const FORM_PREFIX = "portfolio-history-management-form-";
 const NEW_DATE_INPUT_ID = "portfolio-history-management-observation-date";
 const OBSERVATION_TAG_NAME = "observationTimestamp.timeTag";
 const OBSERVATION_TIMESTAMP_NAME = "observationTimestamp.timestamp";
@@ -47,16 +51,16 @@ export function captureObservationTag(form: HTMLFormElement): string {
  * @example `if (prepareObservationMetadataForSubmit(form)) form.requestSubmit();`
  * @author GPT-6 Luna
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 export function prepareObservationMetadataForSubmit(form: HTMLFormElement): boolean {
     const formId = form.getAttribute("id");
 
-    if(!formId?.startsWith(FORM_PREFIX) || !areObservationDetailsReady(form)) {
+    if(!formId?.startsWith(PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX) || !areObservationDetailsReady(form)) {
         return false;
     }
 
-    const observationId = formId.slice(FORM_PREFIX.length);
-    const isNewObservation = observationId === "0";
+    const isNewObservation = formId === NEW_OBSERVATION_FORM_ID;
     const item = form.closest<HTMLElement>(".accordion-item");
     const fields = item?.querySelector<HTMLElement>("[data-metadata-editor-active]");
     const isEditing = fields instanceof HTMLElement && isManagementMetadataEditorActive(fields);

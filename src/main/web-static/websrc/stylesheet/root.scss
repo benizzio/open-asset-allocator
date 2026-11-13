@@ -159,10 +159,10 @@
 }
 
 /** Centers metadata actions and keeps their trailing spacing consistent.
- * Co-authored by: GPT-6.1 Terra and benizzio
+ * Co-authored by: GPT-6.1 Terra, GPT-6.1 Sol and benizzio
  */
 .management-metadata-edit-button,
-.portfolio-history-management-clone-button {
+.portfolio-history-management-clone-hint {
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
@@ -171,10 +171,20 @@
   margin-right: 0.5rem;
 }
 
+/** Keeps the disabled action's wrapper as its hover target without duplicating spacing.
+ * Authored by: GPT-6.1 Sol
+ */
+.portfolio-history-management-clone-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /** Allows a long observation label to wrap beside its actions on narrow screens.
  * Authored by: GPT-6.1 Terra
+ * Co-authored by: GPT-6.1 Sol
  */
-.portfolio-history-management-clone-button ~ .management-metadata-header-label {
+.portfolio-history-management-clone-hint ~ .management-metadata-header-label {
   flex-basis: 0;
 }
 

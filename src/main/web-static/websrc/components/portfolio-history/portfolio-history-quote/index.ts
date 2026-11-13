@@ -10,6 +10,7 @@
  *
  * @author GPT-6 Luna
  * @author GPT-6 Sol
+ * @author GPT-6.1 Sol
  */
 
 export {
@@ -19,7 +20,6 @@ export {
     EXTERNAL_ASSET_SOURCE_SELECTOR,
     EXTERNAL_ASSET_EXCHANGE_ID_SELECTOR,
     EXTERNAL_ASSET_TICKER_SELECTOR,
-    PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX,
 } from "./quote-action";
 export type {
     PortfolioHistoryQuoteAction,
