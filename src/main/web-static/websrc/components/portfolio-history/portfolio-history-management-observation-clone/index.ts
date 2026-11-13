@@ -10,6 +10,7 @@ import type { TemplateDelegate } from "handlebars";
 import { calendarDateToUtcTimestamp, getBrowserLocalCalendarDate } from "../../../utils/calendar-date";
 import { areObservationDetailsReady } from "../portfolio-history-management-observation-details";
 import { NEW_OBSERVATION_FORM_ID } from "../portfolio-history-management-form";
+import { observationTagValidationMessage } from "../portfolio-history-management-observation-metadata";
 import { captureObservationDraft, restoreObservationRows, type ObservationDraft } from "./draft";
 import { focusDestination, renderRows } from "./destination";
 import { bindCloneRequestGuards, trackCloneOpening, type CloneOperation } from "./operation";
@@ -54,7 +55,7 @@ function applyMetadata(
     form: HTMLFormElement, tag: HTMLInputElement, dateInput: HTMLInputElement, draft: ObservationDraft,
 ): void {
     tag.value = draft.tag;
-    tag.setCustomValidity(Array.from(draft.tag).length > 100 ? "Observation tag must not exceed 100 characters." : "");
+    tag.setCustomValidity(observationTagValidationMessage(draft.tag));
     tag.classList.remove("is-invalid", "is-valid");
     const payload = form.elements.namedItem("observationTimestamp.timeTag");
 

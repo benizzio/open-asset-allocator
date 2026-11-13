@@ -21,6 +21,19 @@ const NEW_DATE_INPUT_ID = "portfolio-history-management-observation-date";
 const OBSERVATION_TAG_NAME = "observationTimestamp.timeTag";
 const OBSERVATION_TIMESTAMP_NAME = "observationTimestamp.timestamp";
 
+/**
+ * Returns the observation-tag length error without changing the value or interacting with form controls.
+ * Tags of at most 100 Unicode code points return an empty message. Empty values remain subject to the
+ * control's native required validation; this helper does not validate requiredness or truncate tags.
+ * @param value - Complete observation tag to measure with `Array.from(value).length`.
+ * @returns The custom-validity message, or an empty string when the length is allowed.
+ * @example `tagInput.setCustomValidity(observationTagValidationMessage(tagInput.value));`
+ * @author GPT-6.1 Sol
+ */
+export function observationTagValidationMessage(value: string): string {
+    return Array.from(value).length > 100 ? "Observation tag must not exceed 100 characters." : "";
+}
+
 /** Reads the current observation tag without changing or validating its source form.
  * @param form - Persisted observation form and its associated header.
  * @returns The active editor value or canonical persisted tag.
@@ -101,15 +114,14 @@ export function prepareObservationMetadataForSubmit(form: HTMLFormElement): bool
 /** Copies and validates the active observation-tag editor value.
  * @author GPT-6 Luna
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 function copyEditedTag(
     tagInput: HTMLInputElement | null,
     tagPayload: HTMLInputElement,
 ): boolean {
     if(tagInput) {
-        const overlong = Array.from(tagInput.value).length > 100;
-        const message = overlong ? "Observation tag must not exceed 100 characters." : "";
-        tagInput.setCustomValidity(message);
+        tagInput.setCustomValidity(observationTagValidationMessage(tagInput.value));
     }
 
     if(!tagInput?.checkValidity()) {

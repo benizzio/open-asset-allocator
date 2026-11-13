@@ -2874,23 +2874,43 @@ test.describe('scenario 22: observation cloning', () => {
     )).resolves.toEqual([{ count: '1' }]);
   });
 
-  /** An overlong generated tag remains complete and is rejected until explicitly corrected.
+  /** A 101-code-point generated tag remains complete and silently invalid until submission or correction.
    * @author GPT-6.1 Terra
    * @author GPT-6.1 Sol
    */
   test('scenario 22.5: generated tags are not truncated and remain correctable', async ({ database, page }) => {
     const seed = await seedPortfolioHistoryData(database);
-    const longTag = 'A'.repeat(98);
+    const longTag = '😀'.repeat(93);
     const source = await seedManagementObservation(
       database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], longTag, '2026-05-01T12:00:00Z',
     );
     await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
     const item = await readyCloneSource(page, source.id);
-    await item.getByRole('button', { name: `Clone observation ${longTag}` }).click();
     const destination = page.locator('#portfolio-history-management-container-0');
     const tag = destination.getByRole('textbox', { name: 'Time tag' });
+    await tag.evaluate((input: HTMLInputElement) => {
+      input.dataset.validationEvents = '0';
+      for(const type of ['input', 'change', 'invalid']) {
+        input.addEventListener(type, () => {
+          input.dataset.validationEvents = String(Number(input.dataset.validationEvents) + 1);
+        });
+      }
+    });
+    const beforeClone = await historyWriteCounts(database, seed.portfolio.id);
+    await item.getByRole('button', { name: `Clone observation ${longTag}` }).click();
     await expect(tag).toHaveValue(`${longTag} (CLONE)`);
+    await expect(tag).toBeFocused();
+    await expect(tag).toHaveAttribute('data-validation-events', '0');
+    expect(await tag.evaluate((input: HTMLInputElement) => input.validationMessage))
+      .toBe('Observation tag must not exceed 100 characters.');
     expect(await tag.evaluate((input: HTMLInputElement) => input.validity.valid)).toBe(false);
+    // Force submission to re-evaluate the policy rather than rely on cloning's custom validity.
+    await tag.evaluate((input: HTMLInputElement) => input.setCustomValidity(''));
+    await destination.locator('button[type="submit"]').click();
+    expect(await tag.evaluate((input: HTMLInputElement) => input.validationMessage))
+      .toBe('Observation tag must not exceed 100 characters.');
+    expect(Number(await tag.getAttribute('data-validation-events'))).toBeGreaterThan(0);
+    await expect(historyWriteCounts(database, seed.portfolio.id)).resolves.toEqual(beforeClone);
     await tag.fill(`${'A'.repeat(80)} (CLONE)`);
     expect(await tag.evaluate((input: HTMLInputElement) => input.validity.valid)).toBe(true);
   });
@@ -3781,6 +3801,35 @@ test.describe('scenario 22: observation cloning', () => {
     release();
     await expect(form).toHaveAttribute('data-observation-details-state', 'ready');
     await expect(clone).toBeEnabled();
+  });
+
+  /** A generated tag of exactly 100 Unicode code points remains complete through cloning and submission.
+   * @author GPT-6.1 Sol
+   */
+  test('scenario 22.43: Unicode generated tags accept the 100-code-point boundary', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const sourceTag = '😀'.repeat(92);
+    const generatedTag = `${sourceTag} (CLONE)`;
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], sourceTag, '2026-05-01T12:00:00Z',
+    );
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = await readyCloneSource(page, source.id);
+    await item.getByRole('button', { name: `Clone observation ${sourceTag}` }).click();
+    const destination = page.locator('#portfolio-history-management-container-0');
+    const tag = destination.getByRole('textbox', { name: 'Time tag' });
+    await expect(tag).toHaveValue(generatedTag);
+    expect(await tag.evaluate((input: HTMLInputElement) => input.validity.valid)).toBe(true);
+    const response = page.waitForResponse(result => result.request().method() === 'POST'
+      && new URL(result.url()).pathname === `/api/portfolio/${seed.portfolio.id}/history`);
+    await destination.locator('button[type="submit"]').click();
+    expect((await response).ok()).toBe(true);
+    const persisted = await findObservationByTag(database, seed.portfolio, generatedTag);
+    expect(persisted.id).not.toBe(source.id);
+    await expect(database.query<{ time_tag: string }>(
+      'SELECT observation_time_tag AS time_tag FROM public.portfolio_allocation_obs_time WHERE id = $1',
+      [source.id],
+    )).resolves.toEqual([{ time_tag: sourceTag }]);
   });
 });
 
