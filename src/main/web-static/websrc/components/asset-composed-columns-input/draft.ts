@@ -3,9 +3,10 @@
  * Pending lookups are represented as editable searches in the independent draft.
  * @module components/asset-composed-columns-input/draft
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
+import { renderCommittedAssetSelection } from "./committed-selection-renderer";
 import {
-    ASSET_ACTION_BUTTON_IDENTITIES,
     ASSET_ACTION_BUTTON_SELECTOR,
     ASSET_ID_INPUT_SELECTOR,
     ASSET_NAME_INPUT_SELECTOR,
@@ -75,6 +76,7 @@ export function captureAssetDraft(row: HTMLElement): AssetDraft {
  * @param draft - The snapshot to restore.
  * @example `restoreAssetDraft(destinationRow, asset);`
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 export function restoreAssetDraft(row: HTMLElement, draft: AssetDraft): void {
     const wrapper = row.querySelector<HTMLElement>("[data-asset-search-autocomplete]");
@@ -89,25 +91,16 @@ export function restoreAssetDraft(row: HTMLElement, draft: AssetDraft): void {
         throw new Error("Missing asset selection controls.");
     }
 
-    wrapper.dataset.assetSelectionState = draft.state;
-
     if(draft.state === AssetSelectionState.SEARCH) {
+        wrapper.dataset.assetSelectionState = draft.state;
         search.value = draft.query;
         return;
     }
 
-    search.disabled = true;
-    search.hidden = true;
-    ticker.disabled = false;
-    ticker.hidden = false;
-    ticker.readOnly = true;
-    ticker.value = draft.ticker;
-    name.style.display = "";
-    name.value = draft.name;
-    name.readOnly = draft.state === AssetSelectionState.EXISTING;
-    name.required = draft.state === AssetSelectionState.NEW;
-    id.value = draft.state === AssetSelectionState.EXISTING ? draft.id : "";
-    message.style.display = draft.state === AssetSelectionState.NEW ? "" : "none";
-    button.className = ASSET_ACTION_BUTTON_IDENTITIES.reset.classes;
-    button.innerHTML = `<span class="${ ASSET_ACTION_BUTTON_IDENTITIES.reset.iconClasses }"></span>`;
+    renderCommittedAssetSelection({ wrapper, button, message, search, ticker, name, id }, {
+        state: draft.state,
+        id: draft.state === AssetSelectionState.EXISTING ? draft.id : "",
+        ticker: draft.ticker,
+        name: draft.name,
+    });
 }
