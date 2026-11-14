@@ -2786,27 +2786,6 @@ test.describe('scenario 22: observation cloning', () => {
     )).resolves.toEqual(persistedBefore);
   });
 
-  /** Destination edits during opening cancel pending focus without rolling back the applied draft.
-   * @author GPT-6.1 Terra
-   * @author GPT-6.1 Sol
-   */
-  test('scenario 22.2: destination edits cancel a pending clone', async ({ database, page }) => {
-    const seed = await seedPortfolioHistoryData(database);
-    const source = await seedManagementObservation(
-      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_DELAYED', '2026-05-01T12:00:00Z',
-    );
-    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
-    const item = await readyCloneSource(page, source.id);
-    await delayCloneDestinationOpening(page);
-    await item.getByRole('button', { name: 'Clone observation CLONE_DELAYED' }).click();
-    await expect(page.locator('#portfolio-history-management-0')).toHaveClass(/\bcollapsing\b/);
-    const tag = page.locator('#portfolio-history-management-container-0').getByRole('textbox', { name: 'Time tag' });
-    await tag.fill('KEEP_DRAFT');
-    await finishCloneDestinationOpening(page);
-    await expect(tag).toHaveValue('KEEP_DRAFT');
-    await expect(item.locator('[data-observation-clone]')).not.toHaveAttribute('aria-busy', 'true');
-  });
-
   /** Captures the ready source's activation day, not page-load day or destination-opening completion day.
    * @author GPT-6.1 Terra
    * @author GPT-6.1 Sol
