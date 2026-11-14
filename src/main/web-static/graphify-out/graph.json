@@ -1396,7 +1396,7 @@
       "file_type": "code",
       "norm_label": "bindallocationplancloning()",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management-clone/index.ts",
-      "source_location": "L99"
+      "source_location": "L95"
     },
     {
       "id": "websrc_components_allocation_plan_allocation_plan_management_clone_index_copydraft",
@@ -12286,7 +12286,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management-clone/index.ts",
-      "source_location": "L108",
+      "source_location": "L104",
       "weight": 1.0
     },
     {
@@ -12298,7 +12298,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management-clone/index.ts",
-      "source_location": "L146",
+      "source_location": "L143",
       "weight": 1.0
     },
     {
@@ -12310,7 +12310,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management-clone/index.ts",
-      "source_location": "L147",
+      "source_location": "L144",
       "weight": 1.0
     },
     {
@@ -12322,7 +12322,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management-clone/index.ts",
-      "source_location": "L152",
+      "source_location": "L149",
       "weight": 1.0
     },
     {
@@ -29582,7 +29582,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/allocation-plan/allocation-plan-management-clone/index.ts",
-      "source_location": "L99",
+      "source_location": "L95",
       "weight": 1.0
     },
     {
@@ -38503,5 +38503,5 @@
       "source_file": "websrc/components/portfolio-navigation.html"
     }
   ],
-  "built_at_commit": "6331a4a72272c4b7a17722c90f5b607ee56aa6d1"
+  "built_at_commit": "183096a795a4c0016973055b0c1d60235952567d"
 }

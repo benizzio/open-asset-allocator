@@ -188,6 +188,10 @@ test.describe('portfolio allocation plan management', () => {
     await source.getByRole('button', { name: `Clone allocation plan ${ALLOCATION_PLAN_NAME}` }).click();
     await expect(destination.getByRole('textbox', { name: 'New allocation plan name' }))
       .toHaveValue('Edited source (CLONE)');
+    await expect(destination.locator('.accordion-collapse')).toHaveClass(/\bshow\b/);
+    await expect(source.locator('[data-allocation-plan-clone]')).not.toHaveAttribute('aria-busy', 'true');
+    await expect(source.locator('[data-allocation-plan-clone-status]')).toBeEmpty();
+    await expect(source.locator('h2')).not.toContainText('Allocation plan copied to the new draft.');
     const rows = destination.locator('tbody > tr');
     await expect(rows).toHaveCount(6);
     await expect(rows.first().locator('[data-percentage-input]')).toHaveValue(displayed);
@@ -489,7 +493,7 @@ test.describe('portfolio allocation plan management', () => {
     expect(await queryPlannedAllocations(database, seeded.allocationPlan.id)).toEqual(seeded.plannedAllocations);
   });
 
-  /** Rejects structurally unusable source markup before replacing the previous draft.
+  /** Preserves the draft on preflight failure and clears the error on successful retry.
    * @author GPT-6.1 Terra
    */
   test('scenario 23.13: preserves the existing draft if source preflight fails', async ({ database, page }) => {
@@ -499,14 +503,28 @@ test.describe('portfolio allocation plan management', () => {
     const name = destination.locator('.allocation-plan-management-new-name');
     await name.fill('Existing draft');
     const source = page.locator(`#allocation-plan-management-container-${seeded.allocationPlan.id}`);
-    await source.locator('tbody > tr').first().locator('input[name*="[hierarchicalId]"]').evaluate(element => {
-      element.remove();
+    const control = await source.locator('tbody > tr').first()
+      .locator('input[name*="[hierarchicalId]"]').elementHandle();
+    if (!control) throw new Error('Missing hierarchy control');
+    await control.evaluate(element => {
+      const placeholder = document.createElement('span');
+      placeholder.setAttribute('data-test-hierarchy-placeholder', '');
+      element.replaceWith(placeholder);
     });
     await source.locator('[data-allocation-plan-clone]').click();
     await expect(source.locator('[data-allocation-plan-clone-status]'))
       .toHaveText('Unable to clone allocation plan. Please try again.');
     await expect(name).toHaveValue('Existing draft');
     await expect(destination.locator('tbody > tr')).toHaveCount(0);
+    await source.locator('[data-test-hierarchy-placeholder]').evaluate((placeholder, input) => {
+      placeholder.replaceWith(input);
+    }, control);
+    await source.locator('[data-allocation-plan-clone]').click();
+    await expect(name).toHaveValue(`${ALLOCATION_PLAN_NAME} (CLONE)`);
+    await expect(destination.locator('tbody > tr')).toHaveCount(6);
+    await expect(destination.locator('.accordion-collapse')).toHaveClass(/\bshow\b/);
+    await expect(source.locator('[data-allocation-plan-clone]')).not.toHaveAttribute('aria-busy', 'true');
+    await expect(source.locator('[data-allocation-plan-clone-status]')).toBeEmpty();
     expect(await queryPlannedAllocations(database, seeded.allocationPlan.id)).toEqual(seeded.plannedAllocations);
   });
 

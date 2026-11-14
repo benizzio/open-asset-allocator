@@ -75,10 +75,6 @@ async function presentDraft(
 
     try {
         await focusDraftDestination(destination, name, operation);
-
-        if(operation.owns()) {
-            status.textContent = "Allocation plan copied to the new draft.";
-        }
     } catch(error) {
         if(operation.owns()) {
             status.textContent = "Unable to open the new allocation plan. Please try again.";
@@ -141,6 +137,7 @@ export function bindAllocationPlanCloning(list: HTMLElement, template: () => Tem
         }
 
         cancel();
+        status.textContent = "";
 
         try {
             const name = copyDraft(source, destination, template());
