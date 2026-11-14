@@ -1,4 +1,4 @@
-# Graph Report - open-asset-allocator  (2026-11-13)
+# Graph Report - open-asset-allocator  (2026-11-14)
 
 ## Corpus Check
 - cluster-only mode — file stats not available
@@ -9,7 +9,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `d0dd1dde`
+- Built from commit: `c27890f2`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
