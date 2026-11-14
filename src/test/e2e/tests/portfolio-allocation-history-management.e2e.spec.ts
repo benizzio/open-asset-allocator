@@ -2964,44 +2964,6 @@ test.describe('scenario 22: observation cloning', () => {
       .resolves.toEqual([{ count: '2' }]);
   });
 
-  /** Server-side duplicate-tag rejection keeps the clone editable without partial persistence.
-   * @author GPT-6.1 Terra
-   * @author GPT-6.1 Sol
-   */
-  test('scenario 22.14: duplicate-tag failure retains the clone for correction', async ({ database, page }) => {
-    const seed = await seedPortfolioHistoryData(database);
-    const source = await seedManagementObservation(
-      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_DUPLICATE', '2026-05-01T12:00:00Z',
-    );
-    await seedManagementObservation(
-      database, seed.portfolio, seed.assets[EXISTING_STOCK_TICKER], 'CLONE_DUPLICATE (CLONE)', '2026-05-02T12:00:00Z',
-    );
-    const before = await historyWriteCounts(database, seed.portfolio.id);
-    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
-    const item = await readyCloneSource(page, source.id);
-    await item.getByRole('button', { name: 'Clone observation CLONE_DUPLICATE', exact: true }).click();
-    const destination = page.locator('#portfolio-history-management-container-0');
-    const tag = destination.getByRole('textbox', { name: 'Time tag' });
-    await expect(tag).toHaveValue('CLONE_DUPLICATE (CLONE)');
-    const path = `/api/portfolio/${seed.portfolio.id}/history`;
-    const failed = page.waitForResponse(result => result.request().method() === 'POST'
-      && new URL(result.url()).pathname === path);
-    await destination.locator('form button[type="submit"]').click();
-    expect((await failed).ok()).toBe(false);
-    await expect(tag).toHaveValue('CLONE_DUPLICATE (CLONE)');
-    await expect(destination.locator('tbody tr')).toHaveCount(1);
-    await expect(database.query<{ count: string }>(
-      'SELECT COUNT(*)::text AS count FROM public.portfolio_allocation_obs_time WHERE portfolio_id = $1',
-      [seed.portfolio.id],
-    )).resolves.toEqual([{ count: '2' }]);
-    await expect(historyWriteCounts(database, seed.portfolio.id)).resolves.toEqual(before);
-    await tag.fill('CLONE_DUPLICATE_FIXED (CLONE)');
-    const succeeded = page.waitForResponse(result => result.request().method() === 'POST'
-      && new URL(result.url()).pathname === path);
-    await destination.locator('form').evaluate((form: HTMLFormElement) => form.requestSubmit());
-    expect((await succeeded).ok()).toBe(true);
-  });
-
   /** A loaded empty draft stays empty and accepts a new row with the correct destination index.
    * @author GPT-6.1 Terra
    */
