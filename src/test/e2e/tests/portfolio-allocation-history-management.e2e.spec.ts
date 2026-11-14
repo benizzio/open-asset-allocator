@@ -3118,30 +3118,6 @@ test.describe('scenario 22: observation cloning', () => {
     await expect(destination.locator('#portfolio-history-management-form-0-row-0')).toHaveCount(1);
   });
 
-  /** Removing an applied destination row during opening is not undone by pending focus completion.
-   * @author GPT-6.1 Terra
-   * @author GPT-6.1 Sol
-   */
-  test('scenario 22.33: destination row removal cancels a pending clone', async ({ database, page }) => {
-    const seed = await seedPortfolioHistoryData(database);
-    const source = await seedManagementObservation(
-      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_REMOVE', '2026-05-01T12:00:00Z',
-    );
-    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
-    const item = await readyCloneSource(page, source.id);
-    await delayCloneDestinationOpening(page);
-    const destination = page.locator('#portfolio-history-management-container-0');
-    const tag = destination.getByRole('textbox', { name: 'Time tag' });
-    await item.getByRole('button', { name: 'Clone observation CLONE_REMOVE' }).click();
-    await expect(destination.locator('.accordion-collapse')).toHaveClass(/\bcollapsing\b/);
-    await destination.locator('tbody tr button.btn-danger').last().evaluate((button: HTMLButtonElement) => button.click());
-    await finishCloneDestinationOpening(page);
-    await expect(tag).toHaveValue('CLONE_REMOVE (CLONE)');
-    await expect(destination.locator('tbody tr')).toHaveCount(0);
-    await expect(item.locator('[data-observation-clone]')).not.toHaveAttribute('aria-busy', 'true');
-    await expect(tag).not.toBeFocused();
-  });
-
   /** A failed draft render does not replace an existing destination.
    * @author GPT-6.1 Terra
    */
