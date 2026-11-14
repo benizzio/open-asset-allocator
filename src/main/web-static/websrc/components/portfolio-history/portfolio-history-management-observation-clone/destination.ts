@@ -1,15 +1,11 @@
 /**
- * Validates fresh allocation markup and presents the cloned draft through Bootstrap's accordion lifecycle.
+ * Validates fresh allocation markup for an independently cloned observation draft.
  * @module components/portfolio-history/portfolio-history-management-observation-clone/destination
  * @author GPT-6.1 Sol
+ * @author GPT-6.1 Terra
  */
-import { Collapse } from "bootstrap";
 import type { TemplateDelegate } from "handlebars";
 import type { ObservationDraft } from "./draft";
-import type { CloneOperation } from "./operation";
-
-const COLLAPSE_SHOWN = "shown.bs.collapse";
-const COLLAPSE_HIDDEN = "hidden.bs.collapse";
 
 /**
  * Builds and validates destination-specific row markup before the existing draft is touched.
@@ -44,90 +40,4 @@ export function renderRows(template: TemplateDelegate, draft: ObservationDraft):
         }
     }
     return html;
-}
-
-/** Waits for the destination transition without retaining listeners after cancellation.
- * @author GPT-6.1 Sol
- */
-function openPanel(panel: HTMLElement, signal: AbortSignal): Promise<void> {
-    if(signal.aborted) {
-        return Promise.reject(new DOMException("Clone cancelled.", "AbortError"));
-    }
-
-    if(panel.classList.contains("show") && !panel.classList.contains("collapsing")) {
-        return Promise.resolve();
-    }
-    return new Promise((resolve, reject) => {
-        const accordion = panel.parentElement?.parentElement;
-
-        const cleanup = () => {
-            panel.removeEventListener(COLLAPSE_SHOWN, shown);
-            panel.removeEventListener(COLLAPSE_HIDDEN, hidden);
-            panel.removeEventListener("show.bs.collapse", showing);
-            accordion?.removeEventListener(COLLAPSE_SHOWN, siblingSettled);
-            accordion?.removeEventListener(COLLAPSE_HIDDEN, siblingSettled);
-            signal.removeEventListener("abort", aborted);
-        };
-        const shown = () => { cleanup(); resolve(); };
-
-        const showWhenReady = () => {
-            const transitioning = accordion?.querySelectorAll<HTMLElement>(
-                ":scope > .accordion-item > .accordion-collapse.collapsing",
-            );
-
-            if(Array.from(transitioning ?? []).some(element => element !== panel)
-                || panel.classList.contains("collapsing")) {
-                return;
-            }
-            Collapse.getOrCreateInstance(panel, { toggle: false }).show();
-        };
-        const hidden = () => showWhenReady();
-
-        const siblingSettled = (event: Event) => {
-            if(event.target !== panel) {
-                showWhenReady();
-            }
-        };
-
-        const showing = (event: Event) => {
-            queueMicrotask(() => {
-                if(event.defaultPrevented) {
-                    cleanup();
-                    reject(new Error("Observation destination could not be opened."));
-                }
-            });
-        };
-        const aborted = () => { cleanup(); reject(new DOMException("Clone cancelled.", "AbortError")); };
-        panel.addEventListener(COLLAPSE_SHOWN, shown);
-        panel.addEventListener(COLLAPSE_HIDDEN, hidden);
-        panel.addEventListener("show.bs.collapse", showing);
-        accordion?.addEventListener(COLLAPSE_SHOWN, siblingSettled);
-        accordion?.addEventListener(COLLAPSE_HIDDEN, siblingSettled);
-        signal.addEventListener("abort", aborted, { once: true });
-        showWhenReady();
-    });
-}
-
-/**
- * Opens the destination and focuses its tag only if the operation still owns the UI and focus.
- * @param destination - ID-0 item containing the newly applied draft.
- * @param tag - New observation's tag input.
- * @param operation - Ownership and lifetime checks for this opening.
- * @example `await focusDestination(destination, tag, operation);`
- * @author GPT-6.1 Sol
- */
-export async function focusDestination(
-    destination: HTMLElement, tag: HTMLInputElement, operation: CloneOperation,
-): Promise<void> {
-    const panel = destination.querySelector<HTMLElement>(".accordion-collapse");
-
-    if(!panel) {
-        throw new Error("Observation destination panel is missing.");
-    }
-    await openPanel(panel, operation.controller.signal);
-
-    if(operation.owns() && (operation.mayFocus() || document.activeElement === tag)) {
-        destination.scrollIntoView({ block: "center" });
-        tag.focus();
-    }
 }

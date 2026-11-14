@@ -478,6 +478,80 @@ test('scenario 21.3: paginates allocation-plan viewing records in backend order'
   await expect(page.locator('[data-paginated-list-status="accordion-allocation-plan"]')).toBeEmpty();
 });
 
+/** Clones a plan appended through pagination without resetting or reloading the list.
+ * @author GPT-6.1 Terra
+ */
+test('scenario 23.6: clones an appended allocation plan without resetting pagination', async ({ database, page }) => {
+  const seeded = await seedPlans(database);
+  const endpoint = `/api/portfolio/${seeded.portfolio.id}/allocation-plan`;
+  const initialResponse = waitForPageResponse(page, endpoint, '');
+  await page.goto(`/portfolio/${seeded.portfolio.id}/allocation/manage`);
+  const firstPage = await readPage(await initialResponse, endpoint, '');
+  const cursor = requireContinuationCursor(firstPage);
+  const more = loadMoreButton(page, 'accordion-allocation-plan-management');
+  const append = waitForPageResponse(page, endpoint, cursor);
+  await more.click();
+  await append;
+  const list = page.locator('#accordion-allocation-plan-management');
+  const records = list.locator('[data-paginated-record-id]');
+  await expect(records).toHaveCount(21);
+  const sourceRecord = seeded.records[10];
+  const source = list.locator(`#allocation-plan-management-container-${sourceRecord.id}`);
+  const requests: string[] = [];
+  page.on('request', request => {
+    if(new URL(request.url()).pathname === endpoint) requests.push(request.method());
+  });
+  await source.locator('[data-allocation-plan-clone]').click();
+  await expect(list.locator('.allocation-plan-management-new-name')).toHaveValue(`${sourceRecord.name} (CLONE)`);
+  await expect(records).toHaveCount(21);
+  await expect(more).toBeVisible();
+  expect(requests).toEqual([]);
+  const firstBatch = waitForPageResponse(page, endpoint, '');
+  const saved = page.waitForResponse(response => response.request().method() === 'POST'
+    && new URL(response.url()).pathname === endpoint);
+  await list.locator('#allocation-plan-management-form-0 button[onclick*="handleSubmit"]').click();
+  expect((await saved).ok()).toBe(true);
+  await firstBatch;
+  await expect(records).toHaveCount(11);
+  expect(await database.query('SELECT id FROM public.allocation_plan WHERE id = $1', [sourceRecord.id]))
+    .toHaveLength(1);
+  await expect(more).toBeVisible();
+  await more.click();
+  await expect(source.locator('[data-allocation-plan-clone]')).toBeVisible();
+  await source.locator('[data-metadata-editor-trigger]').click();
+  await expect(source.locator('[data-allocation-plan-editor-name]')).toHaveValue(sourceRecord.name);
+});
+
+/** Rejects an already-successful plan continuation when a reset supersedes its swap.
+ * @author GPT-6.1 Terra
+ */
+test('scenario 23.24: rejects a stale allocation-plan continuation after reset', async ({ database, page }) => {
+  const seeded = await seedPlans(database);
+  const endpoint = `/api/portfolio/${seeded.portfolio.id}/allocation-plan`;
+  const initial = waitForPageResponse(page, endpoint, '');
+  await page.goto(`/portfolio/${seeded.portfolio.id}/allocation/manage`);
+  const cursor = requireContinuationCursor(await readPage(await initial, endpoint, ''));
+  const list = page.locator('#accordion-allocation-plan-management');
+  await expect(list.locator('[data-paginated-record-id]')).toHaveCount(11);
+  await list.evaluate((element, pendingCursor) => {
+    element.addEventListener('htmx:beforeSwap', event => {
+      const detail = (event as CustomEvent<{ xhr?: XMLHttpRequest }>).detail;
+      if(!detail.xhr?.responseURL || new URL(detail.xhr.responseURL).searchParams.get('pageCursor') !== pendingCursor) return;
+      document.body.dataset.planResetDuringContinuation = String(detail.xhr.status);
+      const htmx = (window as unknown as { htmx: { trigger: (target: Element, event: string) => void } }).htmx;
+      htmx.trigger(element, 'reload-allocation-plan-management');
+    }, { capture: true });
+  }, cursor);
+  const continuation = waitForPageResponse(page, endpoint, cursor);
+  const reset = waitForPageResponse(page, endpoint, '');
+  await loadMoreButton(page, 'accordion-allocation-plan-management').click();
+  expect((await continuation).ok()).toBe(true);
+  expect((await reset).ok()).toBe(true);
+  await expect(page.locator('body')).toHaveAttribute('data-plan-reset-during-continuation', '200');
+  await expect(list.locator('[data-paginated-record-id]')).toHaveCount(11);
+  await expect(page.locator(`#allocation-plan-management-container-${seeded.records[10].id}`)).toHaveCount(0);
+});
+
 test('scenario 21.4: appends allocation-plan management records while keeping one draft form and active edits', async ({
   database,
   page,

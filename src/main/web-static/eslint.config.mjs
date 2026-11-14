@@ -262,6 +262,42 @@ export default [
                                 "Import from the public API 'components/management-metadata-editor' (index.ts) only; " +
                                 "deep imports are not allowed.",
                         },
+                        // Block deep imports into allocation plan cloning and shared draft presentation.
+                        // Authored by: GPT-6.1 Terra
+                        {
+                            group: [
+                                "**/allocation-plan-management-clone/*",
+                                "**/allocation-plan-management-clone/**",
+                                "./allocation-plan-management-clone/*",
+                                "./allocation-plan-management-clone/**",
+                                "../allocation-plan-management-clone/*",
+                                "../allocation-plan-management-clone/**",
+                                "**/management-draft-presentation/*",
+                                "**/management-draft-presentation/**",
+                                "./management-draft-presentation/*",
+                                "./management-draft-presentation/**",
+                                "../management-draft-presentation/*",
+                                "../management-draft-presentation/**",
+                            ],
+                            message: "Import from the module public API (index.ts); deep imports are not allowed.",
+                        },
+                        // Block deep imports into allocation plan hierarchy operations.
+                        // Authored by: GPT-6.1 Terra
+                        {
+                            group: [
+                                "**/allocation-plan-management-hierarchy/*",
+                                "**/allocation-plan-management-hierarchy/**",
+                                "allocation-plan-management-hierarchy/*",
+                                "allocation-plan-management-hierarchy/**",
+                                "./allocation-plan-management-hierarchy/*",
+                                "./allocation-plan-management-hierarchy/**",
+                                "../allocation-plan-management-hierarchy/*",
+                                "../allocation-plan-management-hierarchy/**",
+                            ],
+                            message:
+                                "Import from the public API 'components/allocation-plan/allocation-plan-management-hierarchy' " +
+                                "(index.ts) only; deep imports are not allowed.",
+                        },
                         // Block deep imports into allocation plan management metadata; use its public entry point
                         // Authored by: GPT-6.1 Sol
                         {

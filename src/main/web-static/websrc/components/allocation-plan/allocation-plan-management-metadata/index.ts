@@ -14,6 +14,7 @@ import {
 } from "../../management-metadata-editor";
 
 const FORM_PREFIX = "allocation-plan-management-form-";
+const NAME_EDITOR_SELECTOR = "[data-allocation-plan-editor-name]";
 const boundContainers = new WeakSet<HTMLElement>();
 
 /** Installs an idempotent native-submit guard before HTMX collects form values.
@@ -50,6 +51,42 @@ export function handleInputAllocationPlanName(nameInput: HTMLInputElement, alloc
     const form = document.getElementById(`${ FORM_PREFIX }${ allocationPlanId }`) as HTMLFormElement;
     const name = form.elements.namedItem("name") as HTMLInputElement;
     name.value = nameInput.value;
+    nameInput.setCustomValidity(allocationPlanNameValidationMessage(nameInput.value));
+}
+
+/** Returns the validation message for a plan name without modifying its value.
+ * @param value - Complete browser-exposed plan name.
+ * @returns An empty string for valid names, otherwise a validation message.
+ * @example `input.setCustomValidity(allocationPlanNameValidationMessage(input.value));`
+ * @author GPT-6.1 Terra
+ */
+export function allocationPlanNameValidationMessage(value: string): string {
+    if(!value) {
+        return "Allocation plan name is required.";
+    }
+    return Array.from(value).length > 100 ? "Allocation plan name must not exceed 100 characters." : "";
+}
+
+/** Reads the current name without validating or preparing the source form.
+ * @param form - Persisted plan form whose associated header may be edited.
+ * @returns The active editor value or canonical name.
+ * @example `const name = captureAllocationPlanName(sourceForm);`
+ * @author GPT-6.1 Terra
+ */
+export function captureAllocationPlanName(form: HTMLFormElement): string {
+    const item = form.closest<HTMLElement>(".accordion-item");
+    const fields = item?.querySelector<HTMLElement>("[data-metadata-editor-active]");
+    const editor = item?.querySelector<HTMLInputElement>(NAME_EDITOR_SELECTOR);
+    const payload = form.elements.namedItem("name");
+
+    if(fields && isManagementMetadataEditorActive(fields) && editor) {
+        return editor.value;
+    }
+
+    if(!(payload instanceof HTMLInputElement)) {
+        throw new Error("Allocation plan name payload is missing.");
+    }
+    return payload.value;
 }
 
 /** Reveals one plan's persisted name/date editor and focuses its name field.
@@ -63,7 +100,7 @@ export function handleInputAllocationPlanName(nameInput: HTMLInputElement, alloc
 export function activateAllocationPlanEditor(button: HTMLButtonElement, allocationPlanId: number): void {
     activateManagementMetadataEditor(
         document.getElementById(`allocation-plan-management-container-${ allocationPlanId }`),
-        "[data-allocation-plan-editor-name]",
+        NAME_EDITOR_SELECTOR,
         "[data-allocation-plan-editor-date]",
         button,
     );
@@ -99,7 +136,7 @@ export function handleInputAllocationPlanDate(dateInput: HTMLInputElement, alloc
 export function prepareAllocationPlanMetadataForSubmit(form: HTMLFormElement): boolean {
     const item = form.closest<HTMLElement>(".accordion-item");
     const fields = item?.querySelector<HTMLElement>("[data-metadata-editor-active]");
-    const nameEditor = item?.querySelector<HTMLInputElement>("[data-allocation-plan-editor-name]");
+    const nameEditor = item?.querySelector<HTMLInputElement>(NAME_EDITOR_SELECTOR);
     const dateEditor = item?.querySelector<HTMLInputElement>("[data-allocation-plan-editor-date]");
     const namePayload = form.elements.namedItem("name");
     const datePayload = form.elements.namedItem("plannedDate");
@@ -120,7 +157,12 @@ export function prepareAllocationPlanMetadataForSubmit(form: HTMLFormElement): b
             return false;
         }
 
+        newName.setCustomValidity(allocationPlanNameValidationMessage(newName.value));
         namePayload.value = newName.value;
+
+        if(!newName.reportValidity()) {
+            return false;
+        }
     }
 
     return true;
@@ -136,6 +178,10 @@ function copyEditedPlanMetadata(
     namePayload: HTMLInputElement,
     datePayload: HTMLInputElement,
 ): boolean {
+    if(nameEditor) {
+        nameEditor.setCustomValidity(allocationPlanNameValidationMessage(nameEditor.value));
+    }
+
     if(!nameEditor || !dateEditor || !nameEditor.checkValidity() || !dateEditor.checkValidity()) {
         nameEditor?.reportValidity();
         dateEditor?.reportValidity();
