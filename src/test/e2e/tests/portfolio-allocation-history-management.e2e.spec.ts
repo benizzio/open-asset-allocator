@@ -2747,6 +2747,13 @@ test.describe('scenario 22: observation cloning', () => {
     const source = await seedManagementObservation(
       database, seed.portfolio, asset, 'CLONE_SOURCE', '2026-05-01T12:00:00Z',
     );
+    const sourceMetadataBefore = await database.query(
+      'SELECT * FROM public.portfolio_allocation_obs_time WHERE id = $1', [source.id],
+    );
+    const sourceFactsBefore = await database.query(
+      'SELECT * FROM public.portfolio_allocation_fact WHERE observation_time_id = $1 ORDER BY class, cash_reserve, asset_id',
+      [source.id],
+    );
     await page.clock.setFixedTime('2026-11-08T12:00:00Z');
     await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
     const item = page.locator(`#portfolio-history-management-container-${source.id}`);
@@ -2821,6 +2828,13 @@ test.describe('scenario 22: observation cloning', () => {
       'SELECT asset_quantity = 1 AS unchanged FROM public.portfolio_allocation_fact WHERE observation_time_id = $1',
       [source.id],
     )).resolves.toEqual(persistedBefore);
+    expect(await database.query(
+      'SELECT * FROM public.portfolio_allocation_obs_time WHERE id = $1', [source.id],
+    )).toEqual(sourceMetadataBefore);
+    expect(await database.query(
+      'SELECT * FROM public.portfolio_allocation_fact WHERE observation_time_id = $1 ORDER BY class, cash_reserve, asset_id',
+      [source.id],
+    )).toEqual(sourceFactsBefore);
   });
 
   /** Captures the ready source's activation day, not page-load day or destination-opening completion day.

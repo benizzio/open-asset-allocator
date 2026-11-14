@@ -14,6 +14,8 @@ import DomUtils from "./dom-utils";
 
 export { captureFinancialInput, restoreFinancialInput } from "./financial-input-snapshot";
 export type { FinancialInputSnapshot } from "./financial-input-snapshot";
+export { capturePercentageInput, restorePercentageInput } from "./percentage-input-snapshot";
+export type { PercentageInputSnapshot } from "./percentage-input-snapshot";
 
 const DomInfra = {
 

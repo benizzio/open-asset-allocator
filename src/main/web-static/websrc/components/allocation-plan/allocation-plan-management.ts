@@ -31,6 +31,8 @@ import {
     prepareAllocationPlanMetadataForSubmit,
 } from "./allocation-plan-management-metadata";
 import { mapForAllocationPlanManagement } from "./allocation-plan-management-response";
+import { removePlannedAllocationSubtree } from "./allocation-plan-management-hierarchy";
+import { bindAllocationPlanCloning } from "./allocation-plan-management-clone";
 
 type AllocationPlanningHierarchicalFormEntry = {
     occurrences: number;
@@ -50,6 +52,7 @@ const ALLOCATION_PLAN_MANAGEMENT_CONTAINER_ID = "accordion-allocation-plan-manag
 const ALLOCATION_PLAN_MANAGEMENT_FORM_PREFIX = "allocation-plan-management-form-";
 
 const ASSET_TICKER_FIELD_NAME_SUFFIX = "[asset][ticker]";
+const nativeSubmitGuardContainers = new WeakSet<HTMLElement>();
 
 HtmxInfra.htmxTransformResponse.registerTransformResponseFunction(
     "mapForAllocationPlanManagement",
@@ -79,13 +82,6 @@ function handleHierarchicalIdLevelChange(targetElement: HTMLInputElement) {
     spansToUpdate.forEach((span) => {
         span.textContent = targetElement.value;
     });
-}
-
-function handleRemovePlannedAllocationRow(targetElement: HTMLElement) {
-    const row = targetElement.closest("tr");
-    const rowId = row.id;
-    row.closest("table").querySelectorAll(`[data-parent-row-id=${ rowId }]`).forEach(row => row.remove());
-    row.remove();
 }
 
 function createNewPlannedAllocation(
@@ -353,6 +349,45 @@ function validateDuplicateEntries(
     return containsDuplicates;
 }
 
+/** Prepares asset hierarchy values and rejects invalid or duplicate row entries.
+ * @author GPT-6.1 Terra
+ */
+function preparePlanRowsForSubmit(form: HTMLFormElement, hierarchySize: number): boolean {
+    if(!AssetComposedColumnsInput.validateFormBeforePost(form)) {
+        return false;
+    }
+
+    copyAssetTickersToHierarchicalIdFields(form);
+    const entries = mapPlannedAllocationFormEntriesPerHierarchicalKey(form, hierarchySize);
+    return !validateDuplicateEntries(entries);
+}
+
+/** Applies the same row preparation to native form submissions as the Save control.
+ * @author GPT-6.1 Terra
+ */
+function bindNativePlanRowSubmitGuard(container: HTMLElement): void {
+    if(nativeSubmitGuardContainers.has(container)) {
+        return;
+    }
+
+    nativeSubmitGuardContainers.add(container);
+
+    container.addEventListener("submit", event => {
+        const form = event.target;
+
+        if(!(form instanceof HTMLFormElement)
+            || !form.getAttribute("id")?.startsWith(ALLOCATION_PLAN_MANAGEMENT_FORM_PREFIX)) {
+            return;
+        }
+        const hierarchySize = PortfolioPage.getContextPortfolio().allocationStructure.hierarchy.length;
+
+        if(!preparePlanRowsForSubmit(form, hierarchySize)) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        }
+    }, true);
+}
+
 /** Binds validation to the forms produced by the latest allocation-plan list swap.
  *
  * @author GPT-6 Sol
@@ -395,6 +430,8 @@ const allocationPlanManagement = {
         if(managementContainer) {
             bindReadOnlyManagementMetadataHeaderToggle(managementContainer);
             bindAllocationPlanMetadataSubmitGuard(managementContainer);
+            bindNativePlanRowSubmitGuard(managementContainer);
+            bindAllocationPlanCloning(managementContainer, () => this.handlebarsAllocationPlanManagementRowTemplate);
         }
 
         this.handlebarsAllocationPlanManagementRowTemplate = Handlebars.compile(
@@ -403,7 +440,7 @@ const allocationPlanManagement = {
     },
 
     handleHierarchicalIdLevelChange,
-    handleRemovePlannedAllocationRow,
+    handleRemovePlannedAllocationRow: removePlannedAllocationSubtree,
 
     activateAllocationPlanEditor,
 
@@ -487,20 +524,7 @@ const allocationPlanManagement = {
      */
     handleSubmit(form: HTMLFormElement, hierarchySize: number) {
 
-        if(!AssetComposedColumnsInput.validateFormBeforePost(form)) {
-            return;
-        }
-
-        copyAssetTickersToHierarchicalIdFields(form);
-
-        const hierarchicalFormEntriesPerHierarchicalKey = mapPlannedAllocationFormEntriesPerHierarchicalKey(
-            form,
-            hierarchySize,
-        );
-
-        const containsDuplicateEntries = validateDuplicateEntries(hierarchicalFormEntriesPerHierarchicalKey);
-
-        if(containsDuplicateEntries) {
+        if(!preparePlanRowsForSubmit(form, hierarchySize)) {
             return;
         }
 
