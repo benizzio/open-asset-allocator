@@ -2734,13 +2734,18 @@ test.describe('portfolio allocation history management', () => {
 test.describe('scenario 22: observation cloning', () => {
   test.use({ timezoneId: 'America/Los_Angeles' });
 
-  /** Copies unsaved source values and creates independent persisted facts only on Save.
+  /** Copies unsaved source values and provider keys, then creates independent facts only on Save.
    * @author GPT-6.1 Terra
+   * @co-author GPT-6.1 Terra
    */
   test('scenario 22.1: clones current editable values and saves a new observation', async ({ database, page }) => {
     const seed = await seedPortfolioHistoryData(database);
+    const asset = seed.assets[EXISTING_BOND_TICKER];
+    const provider = { source: 'YAHOO_FINANCE', exchangeId: 'PCX', ticker: 'IAU' };
+    await database.query('UPDATE public.asset SET external_data = $2::jsonb WHERE id = $1',
+      [asset.id, JSON.stringify({ data: [provider] })]);
     const source = await seedManagementObservation(
-      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_SOURCE', '2026-05-01T12:00:00Z',
+      database, seed.portfolio, asset, 'CLONE_SOURCE', '2026-05-01T12:00:00Z',
     );
     await page.clock.setFixedTime('2026-11-08T12:00:00Z');
     await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
@@ -2749,10 +2754,24 @@ test.describe('scenario 22: observation cloning', () => {
     const sourceForm = item.locator('form');
     await expect(sourceForm).toHaveAttribute('data-observation-details-state', 'ready');
     await item.getByRole('textbox', { name: 'Observation tag' }).fill('Edited <source>');
-    await sourceForm.getByRole('spinbutton', { name: 'Quantity' }).fill('3');
+    await sourceForm.getByRole('spinbutton', { name: 'Quantity' }).fill('0');
+    await sourceForm.getByRole('textbox', { name: 'Market price' }).evaluate((display: HTMLInputElement) => {
+      const raw = display.parentElement?.querySelector<HTMLInputElement>('input[type="hidden"]');
+      if(!raw) throw new Error('Missing financial raw input');
+      raw.value = '0.123456789123';
+      display.value = '0.123456789123 incomplete';
+    });
+    await sourceForm.getByRole('textbox', { name: 'Total market value' }).evaluate((display: HTMLInputElement) => {
+      const raw = display.parentElement?.querySelector<HTMLInputElement>('input[type="hidden"]');
+      if(!raw) throw new Error('Missing financial raw input');
+      raw.value = '';
+      display.value = '-';
+    });
     const requests: Request[] = [];
+    const assetRequests: string[] = [];
     page.on('request', request => {
       if(['POST', 'PUT', 'DELETE'].includes(request.method())) requests.push(request);
+      if(new URL(request.url()).pathname.startsWith('/api/asset/')) assetRequests.push(request.url());
     });
     const beforeClone = await historyWriteCounts(database, seed.portfolio.id);
     await item.getByRole('button', { name: 'Clone observation CLONE_SOURCE' }).click();
@@ -2760,9 +2779,24 @@ test.describe('scenario 22: observation cloning', () => {
     const destinationForm = destination.locator('form');
     await expect(destination.getByRole('textbox', { name: 'Time tag' })).toHaveValue('Edited <source> (CLONE)');
     await expect(destination.getByLabel('Observation date')).toHaveValue('2026-11-08');
-    await expect(destinationForm.getByRole('spinbutton', { name: 'Quantity' })).toHaveValue('3');
+    const quantity = destinationForm.getByRole('spinbutton', { name: 'Quantity' });
+    const price = destinationForm.getByRole('textbox', { name: 'Market price' });
+    const total = destinationForm.getByRole('textbox', { name: 'Total market value' });
+    await expect(quantity).toHaveValue('0');
+    await expect(price).toHaveValue('0.123456789123 incomplete');
+    await expect(price.locator('..').locator('input[type="hidden"]')).toHaveValue('0.123456789123');
+    await expect(total).toHaveValue('-');
+    await expect(total.locator('..').locator('input[type="hidden"]')).toHaveValue('');
     await expect(destinationForm.locator('input[name="allocations[0][assetId]"]'))
-      .toHaveValue(String(seed.assets[EXISTING_BOND_TICKER].id));
+      .toHaveValue(String(asset.id));
+    const row = destinationForm.locator('tbody tr').first();
+    await expect.poll(() => row.locator('[data-external-asset-keys]')
+      .evaluate((fieldset: HTMLFieldSetElement) => fieldset.disabled)).toBe(false);
+    await expect(row.locator('[data-external-asset-key="source"]')).toHaveValue(provider.source);
+    await expect(row.locator('[data-external-asset-key="exchangeId"]')).toHaveValue(provider.exchangeId);
+    await expect(row.locator('[data-external-asset-key="ticker"]')).toHaveValue(provider.ticker);
+    await expect(row.getByRole('button', { name: 'Fetch latest closing price' })).toBeVisible();
+    expect(assetRequests).toEqual([]);
     expect(requests).toHaveLength(0);
     await expect(historyWriteCounts(database, seed.portfolio.id)).resolves.toEqual(beforeClone);
     const persistedBefore = await database.query(
@@ -2770,6 +2804,9 @@ test.describe('scenario 22: observation cloning', () => {
       [source.id],
     );
     expect(persistedBefore).toEqual([{ unchanged: true }]);
+    await quantity.fill('3');
+    await price.fill('150');
+    await expect(total).toHaveValue('450.00');
     const response = page.waitForResponse(result => result.request().method() === 'POST'
       && new URL(result.url()).pathname === `/api/portfolio/${seed.portfolio.id}/history`);
     await destinationForm.locator('button[type="submit"]').click();
@@ -2889,45 +2926,6 @@ test.describe('scenario 22: observation cloning', () => {
     release();
     await expect(added.locator('[data-asset-search-autocomplete]')).toHaveAttribute('data-asset-selection-state', 'existing');
     await expect(clonedRow.locator('[data-asset-search-autocomplete]')).toHaveAttribute('data-asset-selection-state', 'search');
-  });
-
-  /** Financial raw and visible values are copied independently without recalculation.
-   * @author GPT-6.1 Terra
-   */
-  test('scenario 22.7: preserves financial raw and display strings', async ({ database, page }) => {
-    const seed = await seedPortfolioHistoryData(database);
-    const source = await seedManagementObservation(
-      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_PRECISION', '2026-05-01T12:00:00Z',
-    );
-    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
-    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
-    await item.locator('[data-metadata-editor-label]').click();
-    const form = item.locator('form');
-    await expect(form).toHaveAttribute('data-observation-details-state', 'ready');
-    await form.getByRole('spinbutton', { name: 'Quantity' }).fill('0');
-    await form.getByRole('textbox', { name: 'Market price' }).evaluate((display: HTMLInputElement) => {
-      const raw = display.parentElement?.querySelector<HTMLInputElement>('input[type="hidden"]');
-      if(!raw) throw new Error('Missing financial raw input');
-      raw.value = '0.123456789123';
-      display.value = '0.123456789123 incomplete';
-    });
-    await form.getByRole('textbox', { name: 'Total market value' }).evaluate((display: HTMLInputElement) => {
-      const raw = display.parentElement?.querySelector<HTMLInputElement>('input[type="hidden"]');
-      if(!raw) throw new Error('Missing financial raw input');
-      raw.value = '';
-      display.value = '-';
-    });
-    await item.getByRole('button', { name: 'Clone observation CLONE_PRECISION' }).click();
-    const cloned = page.locator('#portfolio-history-management-container-0')
-      .getByRole('textbox', { name: 'Market price' });
-    await expect(cloned).toHaveValue('0.123456789123 incomplete');
-    await expect(cloned.locator('..').locator('input[type="hidden"]')).toHaveValue('0.123456789123');
-    const total = page.locator('#portfolio-history-management-container-0')
-      .getByRole('textbox', { name: 'Total market value' });
-    await expect(total).toHaveValue('-');
-    await expect(total.locator('..').locator('input[type="hidden"]')).toHaveValue('');
-    await expect(page.locator('#portfolio-history-management-container-0')
-      .getByRole('spinbutton', { name: 'Quantity' })).toHaveValue('0');
   });
 
   /** A newer ready clone supersedes the previous operation while destination opening is pending.
@@ -3078,37 +3076,6 @@ test.describe('scenario 22: observation cloning', () => {
       && new URL(result.url()).pathname === path);
     await destination.locator('form').evaluate((form: HTMLFormElement) => form.requestSubmit());
     expect((await succeeded).ok()).toBe(true);
-  });
-
-  /** Existing asset provider keys remain eligible without issuing a lookup or quote during cloning.
-   * @author GPT-6.1 Terra
-   * @author GPT-6.1 Sol
-   */
-  test('scenario 22.15: preserves existing external quote association', async ({ database, page }) => {
-    const seed = await seedPortfolioHistoryData(database);
-    const asset = seed.assets[EXISTING_BOND_TICKER];
-    const provider = { source: 'YAHOO_FINANCE', exchangeId: 'PCX', ticker: 'IAU' };
-    await database.query('UPDATE public.asset SET external_data = $2::jsonb WHERE id = $1',
-      [asset.id, JSON.stringify({ data: [provider] })]);
-    const source = await seedManagementObservation(
-      database, seed.portfolio, asset, 'CLONE_KEYS', '2026-05-01T12:00:00Z',
-    );
-    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
-    const item = await readyCloneSource(page, source.id);
-    await expect(item.getByRole('button', { name: 'Clone observation CLONE_KEYS' })).toBeVisible();
-    const assetRequests: string[] = [];
-    page.on('request', request => {
-      if(new URL(request.url()).pathname.startsWith('/api/asset/')) assetRequests.push(request.url());
-    });
-    await item.getByRole('button', { name: 'Clone observation CLONE_KEYS' }).click();
-    const row = page.locator('#portfolio-history-management-form-0 tbody tr').first();
-    await expect.poll(() => row.locator('[data-external-asset-keys]')
-      .evaluate((fieldset: HTMLFieldSetElement) => fieldset.disabled)).toBe(false);
-    await expect(row.locator('[data-external-asset-key="source"]')).toHaveValue(provider.source);
-    await expect(row.locator('[data-external-asset-key="exchangeId"]')).toHaveValue(provider.exchangeId);
-    await expect(row.locator('[data-external-asset-key="ticker"]')).toHaveValue(provider.ticker);
-    await expect(row.getByRole('button', { name: 'Fetch latest closing price' })).toBeVisible();
-    expect(assetRequests).toEqual([]);
   });
 
   /** A loaded empty draft stays empty and accepts a new row with the correct destination index.
