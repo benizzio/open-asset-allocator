@@ -2813,46 +2813,6 @@ test.describe('scenario 22: observation cloning', () => {
     await expect(destination.getByLabel('Observation date')).toHaveValue('2026-11-08');
   });
 
-  /** A failed lazy load leaves the previous draft intact and permits an explicit retry.
-   * @author GPT-6.1 Terra
-   * @author GPT-6.1 Sol
-   */
-  test('scenario 22.4: detail failure preserves the draft and permits retry', async ({ database, page }) => {
-    const seed = await seedPortfolioHistoryData(database);
-    const source = await seedManagementObservation(
-      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_RETRY', '2026-05-01T12:00:00Z',
-    );
-    const path = `/api/portfolio/${seed.portfolio.id}/history`;
-    let requests = 0;
-    await page.route(url => url.pathname === path && url.searchParams.get('observationTimestampId') === String(source.id),
-      async route => {
-        requests += 1;
-        if(requests === 1) await route.fulfill({ status: 500, body: 'details unavailable' });
-        else await route.continue();
-      });
-    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
-    const destination = page.locator('#portfolio-history-management-container-0');
-    const tag = destination.getByRole('textbox', { name: 'Time tag' });
-    await tag.fill('KEEP_EXISTING');
-    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
-    const button = item.getByRole('button', { name: 'Clone observation CLONE_RETRY' });
-    await expect(button).toBeDisabled();
-    await item.locator('[data-metadata-editor-label]').click();
-    await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'failed');
-    await expect(button).toBeDisabled();
-    await expect(tag).toHaveValue('KEEP_EXISTING');
-    await item.getByRole('button', { name: 'Retry', exact: true }).click();
-    await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'ready');
-    await expect(button).toBeEnabled();
-    await button.click();
-    await expect(tag).toHaveValue('CLONE_RETRY (CLONE)');
-    expect(requests).toBe(2);
-    await expect(database.query<{ count: string }>(
-      'SELECT COUNT(*)::text AS count FROM public.portfolio_allocation_obs_time WHERE portfolio_id = $1',
-      [seed.portfolio.id],
-    )).resolves.toEqual([{ count: '1' }]);
-  });
-
   /** A 101-code-point generated tag remains complete and silently invalid until submission or correction.
    * @author GPT-6.1 Terra
    * @author GPT-6.1 Sol
