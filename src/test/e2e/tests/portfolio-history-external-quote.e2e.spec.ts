@@ -3,6 +3,7 @@
  *
  * @author GPT-6 Luna
  * @author GPT-6.1 Sol
+ * @author GPT-6.1 Terra
  */
 import type { Locator, Page, Request, Route } from '@playwright/test';
 import { expect, test } from '../support/fixtures';

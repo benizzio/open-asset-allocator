@@ -3,11 +3,14 @@
  *
  * @author GPT-6 Luna
  * @author GPT-6 Sol
+ * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 
 import { Asset } from "../../domain/asset";
 import api from "../../api/api";
 import notifications from "../notifications";
+import { renderCommittedAssetSelection, type CommittedAssetSelection } from "./committed-selection-renderer";
 import { ASSET_ROW_SELECTION_CHANGE_EVENT, AssetRowSelectionChangeState } from "./selection-events";
 import type {
     AssetRowSelectionChangeDetail,
@@ -45,6 +48,7 @@ import type { AutocompleteControllerActions } from "./types";
  * @author benizzio
  * @author GPT-6 Luna
  * @author GPT-6 Sol
+ * @author GPT-6.1 Sol
  */
 export class AssetRowController {
     private container: HTMLElement;
@@ -126,6 +130,13 @@ export class AssetRowController {
         return selectionState === AssetSelectionState.EXISTING || selectionState === AssetSelectionState.NEW;
     }
 
+    /** Allows lookup completion to focus its row unless the user moved to another control.
+     * @author GPT-6.1 Terra
+     */
+    private mayFocusAfterLookup(): boolean {
+        return document.activeElement === document.body || this.container.contains(document.activeElement);
+    }
+
     /** Updates search/reset styling and icon without changing row selection state.
      *
      * @author GPT-6 Luna
@@ -135,35 +146,45 @@ export class AssetRowController {
         this.assetActionButton.innerHTML = `<span class="${ identity.iconClasses }"></span>`;
     }
 
+    /** Supplies this controller's resolved controls to the shared committed-selection renderer.
+     * @author GPT-6.1 Sol
+     */
+    private renderCommittedSelection(selection: CommittedAssetSelection): void {
+        renderCommittedAssetSelection({
+            wrapper: this.autocompleteWrapper,
+            button: this.assetActionButton,
+            message: this.newAssetTickerMessage,
+            search: this.assetSearchInput,
+            ticker: this.assetTickerInput,
+            name: this.assetNameInput,
+            id: this.assetIdInput,
+        }, selection);
+    }
+
     /** Changes the row to show a selected existing asset as read-only fields.
      *
      * @author benizzio
      * @author GPT-6 Luna
      * @author GPT-6 Sol
+     * @author GPT-6.1 Terra
+     * @author GPT-6.1 Sol
      */
     private activateExistingAssetMode(asset: Asset): void {
+        const shouldFocus = this.mayFocusAfterLookup();
         this.completeAssetLookup();
-        this.assetActionButton.focus();
-        this.autocompleteWrapper.dataset.assetSelectionState = AssetSelectionState.EXISTING;
-        this.switchAssetActionButtonIdentity(ASSET_ACTION_BUTTON_IDENTITIES.reset);
 
+        if(shouldFocus) {
+            this.assetActionButton.focus();
+        }
         this.assetSearchInput.setCustomValidity("");
         this.assetSearchInput.readOnly = false;
-        this.assetSearchInput.disabled = true;
-        this.assetSearchInput.hidden = true;
 
-        this.assetTickerInput.hidden = false;
-        this.assetTickerInput.disabled = false;
-        this.assetTickerInput.readOnly = true;
-        this.assetTickerInput.value = asset.ticker;
-
-        this.assetNameInput.style.display = "";
-        this.assetNameInput.readOnly = true;
-        this.assetNameInput.required = false;
-        this.assetNameInput.value = asset.name ?? "";
-
-        this.assetIdInput.value = asset.id?.toString() ?? "";
-        this.newAssetTickerMessage.style.display = "none";
+        this.renderCommittedSelection({
+            state: AssetSelectionState.EXISTING,
+            id: asset.id?.toString() ?? "",
+            ticker: asset.ticker,
+            name: asset.name ?? "",
+        });
         this.clearSearchErrorFeedback();
         this.publishSelectionChange({ state: AssetRowSelectionChangeState.EXISTING, asset });
     }
@@ -173,32 +194,21 @@ export class AssetRowController {
      * @author benizzio
      * @author GPT-6 Luna
      * @author GPT-6 Sol
+     * @author GPT-6.1 Terra
+     * @author GPT-6.1 Sol
      */
     private activateNewAssetMode(ticker: string): void {
+        const shouldFocus = this.mayFocusAfterLookup();
         this.completeAssetLookup();
-        this.assetActionButton.focus();
-        this.autocompleteWrapper.dataset.assetSelectionState = AssetSelectionState.NEW;
-        this.switchAssetActionButtonIdentity(ASSET_ACTION_BUTTON_IDENTITIES.reset);
-
         this.assetSearchInput.setCustomValidity("");
         this.assetSearchInput.readOnly = false;
-        this.assetSearchInput.disabled = true;
-        this.assetSearchInput.hidden = true;
 
-        this.assetTickerInput.value = ticker;
-        this.assetTickerInput.hidden = false;
-        this.assetTickerInput.disabled = false;
-        this.assetTickerInput.readOnly = true;
-
-        this.assetNameInput.style.display = "";
-        this.assetNameInput.readOnly = false;
-        this.assetNameInput.required = true;
-        this.assetNameInput.value = "";
-
-        this.assetIdInput.value = "";
-        this.newAssetTickerMessage.style.display = "";
+        this.renderCommittedSelection({ state: AssetSelectionState.NEW, id: "", ticker, name: "" });
         this.clearSearchErrorFeedback();
-        this.assetNameInput.focus();
+
+        if(shouldFocus) {
+            this.assetNameInput.focus();
+        }
         this.publishSelectionChange({ state: AssetRowSelectionChangeState.NEW });
     }
 
@@ -428,8 +438,10 @@ export class AssetRowController {
      *
      * @author GPT-6 Luna
      * @author GPT-6 Sol
+     * @author GPT-6.1 Terra
      */
     private restoreSearchModeAfterLookup(): void {
+        const shouldFocus = this.mayFocusAfterLookup();
         this.completeAssetLookup();
         this.autocompleteWrapper.dataset.assetSelectionState = AssetSelectionState.SEARCH;
         this.switchAssetActionButtonIdentity(ASSET_ACTION_BUTTON_IDENTITIES.search);
@@ -447,7 +459,10 @@ export class AssetRowController {
         this.assetNameInput.required = false;
         this.newAssetTickerMessage.style.display = "none";
         this.clearSearchFieldValidation();
-        this.assetSearchInput.focus();
+
+        if(shouldFocus) {
+            this.assetSearchInput.focus();
+        }
     }
 
     /** Clears validation feedback attached to the transient search control.

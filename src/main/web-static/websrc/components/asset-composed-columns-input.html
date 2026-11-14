@@ -1,6 +1,6 @@
 <!-- Shared asset search and committed ticker controls for portfolio form rows.
      Authored by: GPT-6 Luna and benizzio
-     Co-authored by: GPT-6 Sol and benizzio -->
+     Co-authored by: GPT-6 Sol, GPT-6.1 Terra and benizzio -->
 <body>
 <script id="asset-composed-columns-input" type="text/x-handlebars-template">
 
@@ -13,7 +13,7 @@
         />
 
         {{#if assetId}}
-            {{assetTicker}}
+            <span data-asset-static-ticker>{{assetTicker}}</span>
         {{else}}
 
             <div data-asset-search-autocomplete
@@ -94,7 +94,7 @@
     <td class="text-wrap-break-word">
 
         {{#if assetName}}
-            {{assetName}}
+            <span data-asset-static-name>{{assetName}}</span>
         {{else}}
             <input type="text"
                    name="{{assetNameFieldName}}"

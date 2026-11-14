@@ -4,12 +4,14 @@
  * @author GPT-6 Luna
  * @author GPT-6 Sol
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 
 import { BigNumber } from "bignumber.js";
 import { HtmxInfra } from "../../../infra/htmx";
 import type { AfterRequestEventDetail, RequestConfigEventDetail } from "../../../infra/htmx";
 import notifications from "../../notifications";
+import { PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX } from "../portfolio-history-management-form";
 
 /** Locates the hidden association fieldset. Example: `row.querySelector(EXTERNAL_ASSET_KEYS_SELECTOR)`.
  * @author GPT-6 Sol
@@ -27,11 +29,6 @@ export const EXTERNAL_ASSET_EXCHANGE_ID_SELECTOR = "[data-external-asset-key=\"e
  * @author GPT-6 Sol
  */
 export const EXTERNAL_ASSET_TICKER_SELECTOR = "[data-external-asset-key=\"ticker\"]";
-/** Prefix shared by observation forms and their allocation row IDs.
- * @example `const rowId = PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX + "12-row-0";`
- * @author GPT-6 Sol
- */
-export const PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX = "portfolio-history-management-form-";
 /** Matches observation and allocation coordinates in a history row ID.
  * @author GPT-6 Sol */
 const HISTORY_ROW_ID_PATTERN = new RegExp(`^${ PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX }(\\d+)-row-(\\d+)$`);

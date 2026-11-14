@@ -6,14 +6,17 @@
  * Example: `bindObservationDetailsLoader(header, panel, form)` wires one persisted observation.
  * @author GPT-6 Luna
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 
 import htmx from "htmx.org";
+import { PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX } from "../portfolio-history-management-form";
 
 const LOADER_ATTRIBUTE = "data-observation-details-loader";
 const BOUND_ATTRIBUTE = "data-observation-details-loader-bound";
 const DETAILS_EVENT = "load-observation-details";
 const PANEL_SHOWN_EVENT = "shown.bs.collapse";
+const requests = new WeakMap<HTMLElement, XMLHttpRequest>();
 
 /** Lifecycle values persisted in observation detail loader datasets.
  * @author GPT-6.1 Terra
@@ -31,6 +34,9 @@ type RequestEventDetail = {
         verb?: string;
     };
     successful?: boolean;
+    xhr?: XMLHttpRequest;
+    target?: Element;
+    shouldSwap?: boolean;
 };
 
 /** Binds one observation header and panel to an idempotent lazy-details lifecycle.
@@ -56,10 +62,33 @@ export function bindObservationDetailsLoader(
     setObservationDetailsState(header, form, readObservationDetailsState(header));
     header.addEventListener("htmx:beforeRequest", event => handleBeforeRequest(event, header, form));
     header.addEventListener("htmx:afterRequest", event => handleAfterRequest(event, header, form));
+    form.addEventListener("htmx:beforeSwap", event => handleBeforeSwap(event, header, form));
+    form.addEventListener("htmx:afterSettle", event => handleAfterSettle(event, header, form));
+    const fail = () => setObservationDetailsState(header, form, ObservationDetailsState.FAILED);
+    header.addEventListener("htmx:swapError", fail);
+    header.addEventListener("htmx:onLoadError", fail);
 
     panel.addEventListener(PANEL_SHOWN_EVENT, event => {
         if(event.target === panel) {
             htmx.trigger(header, DETAILS_EVENT);
+        }
+    });
+}
+
+/** Fails a matching detail load when another handler suppresses its swap.
+ * @author GPT-6.1 Terra
+ */
+function handleBeforeSwap(event: Event, header: HTMLElement, form: HTMLFormElement): void {
+    const detail = (event as CustomEvent<RequestEventDetail>).detail;
+    const xhr = detail?.xhr;
+
+    if(!xhr || requests.get(header) !== xhr || detail.target !== form.querySelector("tbody")) {
+        return;
+    }
+
+    queueMicrotask(() => {
+        if(requests.get(header) === xhr && (event.defaultPrevented || detail.shouldSwap === false)) {
+            setObservationDetailsState(header, form, ObservationDetailsState.FAILED);
         }
     });
 }
@@ -125,6 +154,17 @@ function handleBeforeRequest(event: Event, header: HTMLElement, form: HTMLFormEl
     }
 
     setObservationDetailsState(header, form, ObservationDetailsState.LOADING);
+
+    if(detail.xhr) {
+        requests.set(header, detail.xhr);
+        const xhr = detail.xhr;
+
+        queueMicrotask(() => {
+            if(event.defaultPrevented && requests.get(header) === xhr) {
+                setObservationDetailsState(header, form, ObservationDetailsState.FAILED);
+            }
+        });
+    }
 }
 
 /** Completes the matching detail request and updates the status and allocation controls.
@@ -134,13 +174,84 @@ function handleBeforeRequest(event: Event, header: HTMLElement, form: HTMLFormEl
 function handleAfterRequest(event: Event, header: HTMLElement, form: HTMLFormElement): void {
     const detail = (event as CustomEvent<RequestEventDetail>).detail;
 
-    if(detail?.requestConfig?.elt !== header || detail.requestConfig.verb?.toLowerCase() !== "get") {
+    if(detail?.requestConfig?.elt !== header || detail.requestConfig.verb?.toLowerCase() !== "get"
+        || !detail.xhr || requests.get(header) !== detail.xhr) {
         return;
     }
 
-    setObservationDetailsState(
-        header, form, detail.successful ? ObservationDetailsState.READY : ObservationDetailsState.FAILED,
-    );
+    if(!detail.successful || detail.target !== form.querySelector("tbody") || !validDetailsResponse(detail.xhr, form)) {
+        setObservationDetailsState(header, form, ObservationDetailsState.FAILED);
+    }
+}
+
+/** Checks the response identity and allocation shape before accepting a settled swap.
+ * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
+ */
+function validDetailsResponse(xhr: XMLHttpRequest, form: HTMLFormElement): boolean {
+    try {
+        if(xhr.status < 200 || xhr.status >= 300) {
+            return false;
+        }
+        const body: unknown = JSON.parse(xhr.responseText);
+
+        if(!Array.isArray(body) || body.length !== 1) {
+            return false;
+        }
+        const snapshot = body[0] as { observationTimestamp?: { id?: unknown }; allocations?: unknown };
+        const observationId = form.id.slice(PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX.length);
+        return String(snapshot.observationTimestamp?.id) === observationId && Array.isArray(snapshot.allocations);
+    } catch {
+        return false;
+    }
+}
+
+/** Verifies that the settled row count and required controls match the response.
+ * @author GPT-6.1 Terra
+ */
+function usableDetailsRows(xhr: XMLHttpRequest, target: HTMLElement): boolean {
+    const body = JSON.parse(xhr.responseText) as Array<{ allocations: unknown[] }>;
+    const rows = Array.from(target.querySelectorAll<HTMLTableRowElement>(":scope > tr"));
+
+    if(rows.length !== body[0].allocations.length) {
+        return false;
+    }
+    return rows.every(row => {
+        const financial = row.querySelectorAll<HTMLInputElement>("[data-financial-input]");
+
+        const financialReady = financial.length === 2
+            && Array.from(financial).every(input => input.dataset.financialInputBound === "true");
+
+        const basicFieldsReady = !!row.querySelector("input[name$='[assetId]']")
+            && !!row.querySelector("input[name$='[class]']")
+            && !!row.querySelector("input[name$='[assetQuantity]']");
+        return financialReady && basicFieldsReady;
+    });
+}
+
+/** Marks only the matching settled and initialized detail target ready.
+ * @author GPT-6.1 Terra
+ */
+function handleAfterSettle(event: Event, header: HTMLElement, form: HTMLFormElement): void {
+    const detail = (event as CustomEvent<RequestEventDetail>).detail;
+    const target = event.target;
+    const xhr = detail?.xhr;
+
+    const matchesRequest = xhr && requests.get(header) === xhr && detail.requestConfig?.elt === header;
+
+    if(!(target instanceof HTMLElement) || target !== form.querySelector("tbody") || !matchesRequest) {
+        return;
+    }
+
+    queueMicrotask(() => {
+        if(requests.get(header) !== xhr || !header.isConnected || !form.contains(target)) {
+            return;
+        }
+
+        const valid = validDetailsResponse(xhr, form) && usableDetailsRows(xhr, target);
+        const state = valid ? ObservationDetailsState.READY : ObservationDetailsState.FAILED;
+        setObservationDetailsState(header, form, state);
+    });
 }
 
 /** Reads the persisted lifecycle value, defaulting an uninitialized loader to its unloaded state.
@@ -165,6 +276,7 @@ function readObservationDetailsState(header: HTMLElement): ObservationDetailsSta
 /** Updates loader status, editor feedback and detail-dependent form controls together.
  * @author GPT-6 Luna
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 function setObservationDetailsState(
     header: HTMLElement,
@@ -189,4 +301,16 @@ function setObservationDetailsState(
     form.querySelectorAll<HTMLButtonElement>("[data-requires-observation-details]").forEach(button => {
         button.disabled = state !== ObservationDetailsState.READY;
     });
+    const clone = item?.querySelector<HTMLButtonElement>("[data-observation-clone]");
+    const hint = item?.querySelector<HTMLElement>("[data-observation-clone-hint]");
+    const ready = state === ObservationDetailsState.READY;
+
+    if(clone && hint) {
+        clone.disabled = !ready;
+
+        hint.title = ready ? "Clone observation"
+            : "Cloning is only available after opening this panel at least once and loading its allocation data.";
+        hint.tabIndex = ready ? -1 : 0;
+        hint.setAttribute("aria-label", hint.title);
+    }
 }

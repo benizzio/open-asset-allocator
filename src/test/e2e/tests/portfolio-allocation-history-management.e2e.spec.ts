@@ -19,6 +19,7 @@
  * @author GPT-6 Luna
  * @author benizzio
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 import type { Browser, Locator, Page, Request, Route } from '@playwright/test';
 import {
@@ -2203,6 +2204,7 @@ test.describe('portfolio allocation history management', () => {
         textInput: tagInput,
         dateInput,
         toggle,
+        extraAction: item.getByRole('button', { name: `Clone observation ${observation.observation_time_tag}` }),
       };
       const newHeaderControls = {
         header: newItem.locator('[data-management-metadata-header]'),
@@ -2724,6 +2726,545 @@ test.describe('portfolio allocation history management', () => {
     )).resolves.toEqual([{ time_tag: 'E2E_OBS_BLOCKED', timestamp_matches: true }]);
   });
 });
+
+/** Observation cloning uses independent drafts and the existing creation endpoint.
+ * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
+ */
+test.describe('scenario 22: observation cloning', () => {
+  test.use({ timezoneId: 'America/Los_Angeles' });
+
+  /** Copies unsaved source values and provider keys, then creates independent facts only on Save.
+   * @author GPT-6.1 Terra
+   * @co-author GPT-6.1 Terra
+   */
+  test('scenario 22.1: clones current editable values and saves a new observation', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const asset = seed.assets[EXISTING_BOND_TICKER];
+    const provider = { source: 'YAHOO_FINANCE', exchangeId: 'PCX', ticker: 'IAU' };
+    await database.query('UPDATE public.asset SET external_data = $2::jsonb WHERE id = $1',
+      [asset.id, JSON.stringify({ data: [provider] })]);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, asset, 'CLONE_SOURCE', '2026-05-01T12:00:00Z',
+    );
+    await page.clock.setFixedTime('2026-11-08T12:00:00Z');
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    await item.getByRole('button', { name: 'Edit observation CLONE_SOURCE' }).click();
+    const sourceForm = item.locator('form');
+    await expect(sourceForm).toHaveAttribute('data-observation-details-state', 'ready');
+    await item.getByRole('textbox', { name: 'Observation tag' }).fill('Edited <source>');
+    await sourceForm.getByRole('spinbutton', { name: 'Quantity' }).fill('0');
+    await sourceForm.getByRole('textbox', { name: 'Market price' }).evaluate((display: HTMLInputElement) => {
+      const raw = display.parentElement?.querySelector<HTMLInputElement>('input[type="hidden"]');
+      if(!raw) throw new Error('Missing financial raw input');
+      raw.value = '0.123456789123';
+      display.value = '0.123456789123 incomplete';
+    });
+    await sourceForm.getByRole('textbox', { name: 'Total market value' }).evaluate((display: HTMLInputElement) => {
+      const raw = display.parentElement?.querySelector<HTMLInputElement>('input[type="hidden"]');
+      if(!raw) throw new Error('Missing financial raw input');
+      raw.value = '';
+      display.value = '-';
+    });
+    const requests: Request[] = [];
+    const assetRequests: string[] = [];
+    page.on('request', request => {
+      if(['POST', 'PUT', 'DELETE'].includes(request.method())) requests.push(request);
+      if(new URL(request.url()).pathname.startsWith('/api/asset/')) assetRequests.push(request.url());
+    });
+    const beforeClone = await historyWriteCounts(database, seed.portfolio.id);
+    await item.getByRole('button', { name: 'Clone observation CLONE_SOURCE' }).click();
+    const destination = page.locator('#portfolio-history-management-container-0');
+    const destinationForm = destination.locator('form');
+    await expect(destination.getByRole('textbox', { name: 'Time tag' })).toHaveValue('Edited <source> (CLONE)');
+    await expect(destination.getByLabel('Observation date')).toHaveValue('2026-11-08');
+    const quantity = destinationForm.getByRole('spinbutton', { name: 'Quantity' });
+    const price = destinationForm.getByRole('textbox', { name: 'Market price' });
+    const total = destinationForm.getByRole('textbox', { name: 'Total market value' });
+    await expect(quantity).toHaveValue('0');
+    await expect(price).toHaveValue('0.123456789123 incomplete');
+    await expect(price.locator('..').locator('input[type="hidden"]')).toHaveValue('0.123456789123');
+    await expect(total).toHaveValue('-');
+    await expect(total.locator('..').locator('input[type="hidden"]')).toHaveValue('');
+    await expect(destinationForm.locator('input[name="allocations[0][assetId]"]'))
+      .toHaveValue(String(asset.id));
+    const row = destinationForm.locator('tbody tr').first();
+    await expect.poll(() => row.locator('[data-external-asset-keys]')
+      .evaluate((fieldset: HTMLFieldSetElement) => fieldset.disabled)).toBe(false);
+    await expect(row.locator('[data-external-asset-key="source"]')).toHaveValue(provider.source);
+    await expect(row.locator('[data-external-asset-key="exchangeId"]')).toHaveValue(provider.exchangeId);
+    await expect(row.locator('[data-external-asset-key="ticker"]')).toHaveValue(provider.ticker);
+    await expect(row.getByRole('button', { name: 'Fetch latest closing price' })).toBeVisible();
+    expect(assetRequests).toEqual([]);
+    expect(requests).toHaveLength(0);
+    await expect(historyWriteCounts(database, seed.portfolio.id)).resolves.toEqual(beforeClone);
+    const persistedBefore = await database.query(
+      'SELECT asset_quantity = 1 AS unchanged FROM public.portfolio_allocation_fact WHERE observation_time_id = $1',
+      [source.id],
+    );
+    expect(persistedBefore).toEqual([{ unchanged: true }]);
+    await quantity.fill('3');
+    await price.fill('150');
+    await expect(total).toHaveValue('450.00');
+    const response = page.waitForResponse(result => result.request().method() === 'POST'
+      && new URL(result.url()).pathname === `/api/portfolio/${seed.portfolio.id}/history`);
+    await destinationForm.locator('button[type="submit"]').click();
+    expect((await response).ok()).toBe(true);
+    const clone = await findObservationByTag(database, seed.portfolio, 'Edited <source> (CLONE)');
+    expect(clone.id).not.toBe(source.id);
+    await expect(database.query<{ asset_id: number; quantity_matches: boolean }>(
+      'SELECT asset_id, asset_quantity = 3 AS quantity_matches FROM public.portfolio_allocation_fact WHERE observation_time_id = $1',
+      [clone.id],
+    )).resolves.toEqual([{ asset_id: seed.assets[EXISTING_BOND_TICKER].id, quantity_matches: true }]);
+    await expect(database.query(
+      'SELECT asset_quantity = 1 AS unchanged FROM public.portfolio_allocation_fact WHERE observation_time_id = $1',
+      [source.id],
+    )).resolves.toEqual(persistedBefore);
+  });
+
+  /** Captures the ready source's activation day, not page-load day or destination-opening completion day.
+   * @author GPT-6.1 Terra
+   * @author GPT-6.1 Sol
+   */
+  test('scenario 22.3: ready-source activation date crosses genuine local midnight', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_MIDNIGHT', '2026-05-01T12:00:00Z',
+    );
+    await page.clock.setFixedTime('2026-11-08T07:59:00Z');
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = await readyCloneSource(page, source.id);
+    await delayCloneDestinationOpening(page);
+    expect(await browserLocalCalendarDate(page)).toBe('2026-11-07');
+    await item.getByRole('button', { name: 'Clone observation CLONE_MIDNIGHT' }).click();
+    await expect(page.locator('#portfolio-history-management-0')).toHaveClass(/\bcollapsing\b/);
+    await page.clock.setFixedTime('2026-11-08T08:01:00Z');
+    expect(await browserLocalCalendarDate(page)).toBe('2026-11-08');
+    await finishCloneDestinationOpening(page);
+    const destination = page.locator('#portfolio-history-management-container-0');
+    await expect(destination.getByRole('textbox', { name: 'Time tag' })).toHaveValue('CLONE_MIDNIGHT (CLONE)');
+    await expect(destination.getByLabel('Observation date')).toHaveValue('2026-11-07');
+    await expect(item.locator('[data-observation-clone]')).not.toHaveAttribute('aria-busy', 'true');
+    await item.getByRole('button', { name: 'Clone observation CLONE_MIDNIGHT' }).click();
+    await expect(destination.getByLabel('Observation date')).toHaveValue('2026-11-08');
+  });
+
+  /** A 101-code-point generated tag remains complete and silently invalid until submission or correction.
+   * @author GPT-6.1 Terra
+   * @author GPT-6.1 Sol
+   */
+  test('scenario 22.5: generated tags are not truncated and remain correctable', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const longTag = '😀'.repeat(93);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], longTag, '2026-05-01T12:00:00Z',
+    );
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = await readyCloneSource(page, source.id);
+    const destination = page.locator('#portfolio-history-management-container-0');
+    const tag = destination.getByRole('textbox', { name: 'Time tag' });
+    await tag.evaluate((input: HTMLInputElement) => {
+      input.dataset.validationEvents = '0';
+      for(const type of ['input', 'change', 'invalid']) {
+        input.addEventListener(type, () => {
+          input.dataset.validationEvents = String(Number(input.dataset.validationEvents) + 1);
+        });
+      }
+    });
+    const beforeClone = await historyWriteCounts(database, seed.portfolio.id);
+    await item.getByRole('button', { name: `Clone observation ${longTag}` }).click();
+    await expect(tag).toHaveValue(`${longTag} (CLONE)`);
+    await expect(tag).toBeFocused();
+    await expect(tag).toHaveAttribute('data-validation-events', '0');
+    expect(await tag.evaluate((input: HTMLInputElement) => input.validationMessage))
+      .toBe('Observation tag must not exceed 100 characters.');
+    expect(await tag.evaluate((input: HTMLInputElement) => input.validity.valid)).toBe(false);
+    // Force submission to re-evaluate the policy rather than rely on cloning's custom validity.
+    await tag.evaluate((input: HTMLInputElement) => input.setCustomValidity(''));
+    await destination.locator('button[type="submit"]').click();
+    expect(await tag.evaluate((input: HTMLInputElement) => input.validationMessage))
+      .toBe('Observation tag must not exceed 100 characters.');
+    expect(Number(await tag.getAttribute('data-validation-events'))).toBeGreaterThan(0);
+    await expect(historyWriteCounts(database, seed.portfolio.id)).resolves.toEqual(beforeClone);
+    await tag.fill(`${'A'.repeat(80)} (CLONE)`);
+    expect(await tag.evaluate((input: HTMLInputElement) => input.validity.valid)).toBe(true);
+  });
+
+  /** A pending asset lookup becomes an independent editable search in the clone.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.6: pending asset searches are not inherited', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_ASSET', '2026-05-01T12:00:00Z',
+    );
+    let release = () => {};
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    let lookups = 0;
+    await page.route(`**/api/asset/${EXISTING_STOCK_TICKER}`, async route => {
+      lookups += 1;
+      await gate;
+      await route.continue();
+    });
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    await item.locator('[data-metadata-editor-label]').click();
+    const form = item.locator('form');
+    await expect(form).toHaveAttribute('data-observation-details-state', 'ready');
+    await form.locator('tfoot button[type="button"]').click();
+    const added = form.locator('tbody tr').nth(1);
+    await added.getByRole('combobox', { name: 'Asset' }).fill(EXISTING_STOCK_TICKER);
+    await added.locator('[data-asset-action-button]').click();
+    await expect(added.locator('[data-asset-search-autocomplete]')).toHaveAttribute('data-asset-selection-state', 'pending');
+    await item.getByRole('button', { name: 'Clone observation CLONE_ASSET' }).click();
+    const destination = page.locator('#portfolio-history-management-container-0');
+    const clonedRow = destination.locator('tbody tr').nth(1);
+    await expect(clonedRow.locator('[data-asset-search-autocomplete]')).toHaveAttribute('data-asset-selection-state', 'search');
+    await expect(clonedRow.getByRole('combobox', { name: 'Asset' })).toHaveValue(EXISTING_STOCK_TICKER);
+    expect(lookups).toBe(1);
+    release();
+    await expect(added.locator('[data-asset-search-autocomplete]')).toHaveAttribute('data-asset-selection-state', 'existing');
+    await expect(clonedRow.locator('[data-asset-search-autocomplete]')).toHaveAttribute('data-asset-selection-state', 'search');
+  });
+
+  /** Copies incomplete new and search assets after source removals leave index gaps.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.12: clones incomplete new and search rows with fresh indexes', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_INCOMPLETE', '2026-05-01T12:00:00Z',
+    );
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    await item.locator('[data-metadata-editor-label]').click();
+    const form = item.locator('form');
+    await expect(form).toHaveAttribute('data-observation-details-state', 'ready');
+    const add = form.locator('tfoot button[type="button"]');
+    await add.click();
+    const newRow = form.locator('tbody tr').nth(1);
+    await newRow.getByRole('combobox', { name: 'Asset' }).fill('CLONE-NEW-UNIQUE');
+    await newRow.locator('[data-asset-action-button]').click();
+    await expect(newRow.locator('[data-asset-search-autocomplete]')).toHaveAttribute('data-asset-selection-state', 'new');
+    await expect(newRow.getByRole('textbox', { name: 'Asset name' })).toHaveValue('');
+    await add.click();
+    const searchRow = form.locator('tbody tr').nth(2);
+    await searchRow.getByRole('combobox', { name: 'Asset' }).fill('unresolved search');
+    await form.locator('tbody tr').first().locator('button.btn-danger').last().click();
+    await item.getByRole('button', { name: 'Clone observation CLONE_INCOMPLETE' }).click();
+    const rows = page.locator('#portfolio-history-management-form-0 tbody tr');
+    await expect(rows).toHaveCount(2);
+    await expect(rows.nth(0).locator('[data-asset-search-autocomplete]')).toHaveAttribute('data-asset-selection-state', 'new');
+    await expect(rows.nth(0).getByRole('textbox', { name: 'Asset name' })).toHaveValue('');
+    await expect(rows.nth(0).locator('input[name="allocations[0][assetTicker]"]')).toHaveValue('CLONE-NEW-UNIQUE');
+    await expect(rows.nth(1).getByRole('combobox', { name: 'Asset' })).toHaveValue('unresolved search');
+    await expect(rows.nth(1)).toHaveId('portfolio-history-management-form-0-row-1');
+    await expect(database.query<{ count: string }>('SELECT COUNT(*)::text AS count FROM public.asset'))
+      .resolves.toEqual([{ count: '2' }]);
+  });
+
+  test.describe('positive timezone', () => {
+    test.use({ timezoneId: 'Asia/Tokyo' });
+
+    /** Captures the next local calendar date and persists its corresponding UTC midnight.
+     * @author GPT-6.1 Terra
+     * @author GPT-6.1 Sol
+     */
+    test('scenario 22.13: positive offset creates local-midnight timestamp', async ({ database, page }) => {
+      const seed = await seedPortfolioHistoryData(database);
+      const source = await seedManagementObservation(
+        database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_TOKYO', '2026-05-01T12:00:00Z',
+      );
+      await page.clock.setFixedTime('2026-11-08T17:00:00Z');
+      await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+      const item = await readyCloneSource(page, source.id);
+      await item.getByRole('button', { name: 'Clone observation CLONE_TOKYO' }).click();
+      const destination = page.locator('#portfolio-history-management-container-0');
+      await expect(destination.getByRole('textbox', { name: 'Time tag' })).toHaveValue('CLONE_TOKYO (CLONE)');
+      await expect(destination.getByLabel('Observation date')).toHaveValue('2026-11-09');
+      const response = page.waitForResponse(result => result.request().method() === 'POST'
+        && new URL(result.url()).pathname === `/api/portfolio/${seed.portfolio.id}/history`);
+      await destination.locator('form button[type="submit"]').click();
+      expect((await response).ok()).toBe(true);
+      const saved = await findObservationByTag(database, seed.portfolio, 'CLONE_TOKYO (CLONE)');
+      expect(saved.observation_timestamp).toEqual(new Date('2026-11-08T15:00:00Z'));
+    });
+  });
+
+  /** Refuses destination replacement while the current creation request is in flight.
+   * @author GPT-6.1 Terra
+   * @author GPT-6.1 Sol
+   */
+  test('scenario 22.25: creation in flight blocks clone replacement', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_BLOCK_POST', '2026-05-01T12:00:00Z',
+    );
+    let release = () => {};
+    let markStarted = () => {};
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    const started = new Promise<void>(resolve => { markStarted = resolve; });
+    const endpoint = `/api/portfolio/${seed.portfolio.id}/history`;
+    await page.route(url => url.pathname === endpoint, async route => {
+      if(route.request().method() !== 'POST') return route.continue();
+      markStarted();
+      await gate;
+      await route.continue();
+    });
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = await readyCloneSource(page, source.id);
+    const destination = page.locator('#portfolio-history-management-container-0');
+    const tag = destination.getByRole('textbox', { name: 'Time tag' });
+    await tag.fill('POST_IN_FLIGHT');
+    const form = destination.locator('form');
+    const row = await addAllocationRow(page, form, 0);
+    await fillExistingAssetDirectValueAllocation(page, row, seed.assets[EXISTING_BOND_TICKER], 'BONDS', '100.00');
+    const response = page.waitForResponse(result => result.request().method() === 'POST'
+      && new URL(result.url()).pathname === endpoint);
+    await form.locator('button[type="submit"]').click();
+    await started;
+    await item.getByRole('button', { name: 'Clone observation CLONE_BLOCK_POST' }).click();
+    await expect(item.locator('[data-observation-clone-status]')).toContainText('Wait for the current save');
+    await expect(tag).toHaveValue('POST_IN_FLIGHT');
+    release();
+    expect((await response).ok()).toBe(true);
+  });
+
+  /** Aborted detail loads keep cloning disabled until an explicit successful retry.
+   * @author GPT-6.1 Terra
+   * @author GPT-6.1 Sol
+   */
+  test('scenario 22.29: aborted details preserve the destination and can retry', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_ABORT', '2026-05-01T12:00:00Z',
+    );
+    const endpoint = `/api/portfolio/${seed.portfolio.id}/history`;
+    let requests = 0;
+    await page.route(url => url.pathname === endpoint && url.searchParams.get('observationTimestampId') === String(source.id),
+      async route => {
+        requests += 1;
+        if(requests === 1) await route.abort('failed');
+        else await route.continue();
+      });
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const tag = page.locator('#portfolio-history-management-container-0').getByRole('textbox', { name: 'Time tag' });
+    await tag.fill('PRESERVE_ABORT');
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    const clone = item.getByRole('button', { name: 'Clone observation CLONE_ABORT' });
+    await item.locator('[data-metadata-editor-label]').click();
+    await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'failed');
+    await expect(tag).toHaveValue('PRESERVE_ABORT');
+    await expect(clone).toBeDisabled();
+    await item.getByRole('button', { name: 'Retry', exact: true }).click();
+    await expect(clone).toBeEnabled();
+    await clone.click();
+    await expect(tag).toHaveValue('CLONE_ABORT (CLONE)');
+    expect(requests).toBe(2);
+  });
+
+  /** Metadata remains editable while loading, but cloning requires explicit activation after readiness.
+   * @author GPT-6.1 Terra
+   * @author GPT-6.1 Sol
+   */
+  test('scenario 22.31: ready activation captures the latest loading-time editor tag', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_JOIN_PANEL', '2026-05-01T12:00:00Z',
+    );
+    let release = () => {};
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    let requests = 0;
+    const endpoint = `/api/portfolio/${seed.portfolio.id}/history`;
+    await page.route(url => url.pathname === endpoint && url.searchParams.get('observationTimestampId') === String(source.id),
+      async route => { requests += 1; await gate; await route.continue(); });
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    await item.getByRole('button', { name: 'Edit observation CLONE_JOIN_PANEL' }).click();
+    await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'loading');
+    await item.getByRole('textbox', { name: 'Observation tag' }).fill('LATEST_PANEL_DRAFT');
+    const clone = item.getByRole('button', { name: 'Clone observation CLONE_JOIN_PANEL' });
+    await expect(clone).toBeDisabled();
+    release();
+    await expect(clone).toBeEnabled();
+    await clone.click();
+    await expect(page.locator('#portfolio-history-management-container-0').getByRole('textbox', { name: 'Time tag' }))
+      .toHaveValue('LATEST_PANEL_DRAFT (CLONE)');
+    expect(requests).toBe(1);
+  });
+
+  /** Sequential clones replace the same destination instead of accumulating forms or rows.
+   * @author GPT-6.1 Terra
+   * @author GPT-6.1 Sol
+   */
+  test('scenario 22.32: repeated cloning replaces the destination', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_REPEAT', '2026-05-01T12:00:00Z',
+    );
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = await readyCloneSource(page, source.id);
+    const button = item.getByRole('button', { name: 'Clone observation CLONE_REPEAT' });
+    await button.click();
+    const destination = page.locator('#portfolio-history-management-container-0');
+    const tag = destination.getByRole('textbox', { name: 'Time tag' });
+    await expect(tag).toHaveValue('CLONE_REPEAT (CLONE)');
+    await tag.fill('REPLACED_DRAFT');
+    await button.click();
+    await expect(tag).toHaveValue('CLONE_REPEAT (CLONE)');
+    await expect(page.locator('#portfolio-history-management-form-0')).toHaveCount(1);
+    await expect(destination.locator('tbody tr')).toHaveCount(1);
+    await expect(destination.locator('#portfolio-history-management-form-0-row-0')).toHaveCount(1);
+  });
+
+  /** A failed draft render does not replace an existing destination.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.34: a render failure preserves the destination', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_RENDER', '2026-05-01T12:00:00Z',
+    );
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    await item.locator('[data-metadata-editor-label]').click();
+    await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'ready');
+    const tag = page.locator('#portfolio-history-management-container-0').getByRole('textbox', { name: 'Time tag' });
+    await tag.fill('KEEP_RENDER_FAILURE');
+    await page.evaluate(() => {
+      const template = document.getElementById('template-portfolio-history-management-form-tbody-row');
+      if(!template) throw new Error('Missing row template');
+      template.innerHTML = '<tr></tr>';
+      (window as unknown as { portfolioHistoryManagement: { init: () => void } }).portfolioHistoryManagement.init();
+    });
+    await item.getByRole('button', { name: 'Clone observation CLONE_RENDER' }).click();
+    await expect(item.locator('[data-observation-clone-status]')).toContainText('Unable to clone');
+    await expect(tag).toHaveValue('KEEP_RENDER_FAILURE');
+    await expect(page.locator('#portfolio-history-management-form-0 tbody tr')).toHaveCount(0);
+  });
+
+  /** A delayed clone does not steal focus after the user moves to another control.
+   * @author GPT-6.1 Terra
+   * @author GPT-6.1 Sol
+   */
+  test('scenario 22.38: delayed clone respects later user focus', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_FOCUS', '2026-05-01T12:00:00Z',
+    );
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    await item.getByRole('button', { name: 'Edit observation CLONE_FOCUS' }).click();
+    await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'ready');
+    await delayCloneDestinationOpening(page);
+    await item.getByRole('button', { name: 'Clone observation CLONE_FOCUS' }).click();
+    const sourceTag = item.getByRole('textbox', { name: 'Observation tag' });
+    await sourceTag.focus();
+    await expect(sourceTag).toBeFocused();
+    await finishCloneDestinationOpening(page);
+    const destination = page.locator('#portfolio-history-management-container-0');
+    await expect(destination.getByRole('textbox', { name: 'Time tag' })).toHaveValue('CLONE_FOCUS (CLONE)');
+    await expect(item.locator('[data-observation-clone]')).not.toHaveAttribute('aria-busy', 'true');
+    await expect(sourceTag).toBeFocused();
+  });
+
+  /** Ready details remain cloneable after collapse, and cloning performs no detail fetch.
+   * @author GPT-6.1 Sol
+   */
+  test('scenario 22.41: collapsed ready details remain available without an extra fetch', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_COLLAPSED', '2026-05-01T12:00:00Z',
+    );
+    let requests = 0;
+    page.on('request', request => {
+      if(new URL(request.url()).searchParams.get('observationTimestampId') === String(source.id)) requests += 1;
+    });
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = await readyCloneSource(page, source.id);
+    const clone = item.getByRole('button', { name: 'Clone observation CLONE_COLLAPSED' });
+    await expect(clone).toBeEnabled();
+    await item.locator('[data-metadata-editor-toggle]').click();
+    await expect(item.locator('.accordion-collapse')).not.toHaveClass(/\bshow\b|\bcollapsing\b/);
+    await expect(clone).toBeEnabled();
+    await expect(item.locator('[data-observation-clone-hint]')).toHaveAttribute('title', 'Clone observation');
+    await clone.click();
+    const tag = page.locator('#portfolio-history-management-container-0').getByRole('textbox', { name: 'Time tag' });
+    await expect(tag).toHaveValue('CLONE_COLLAPSED (CLONE)');
+    await expect(tag).toBeFocused();
+    expect(requests).toBe(1);
+  });
+
+  /** A successful detail-only save disables Clone throughout its replacement detail request.
+   * @author GPT-6.1 Sol
+   */
+  test('scenario 22.42: reloading details disables clone until the replacement settles', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const source = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_RELOAD', '2026-05-01T12:00:00Z',
+    );
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = await readyCloneSource(page, source.id);
+    const form = item.locator('form');
+    const clone = item.getByRole('button', { name: 'Clone observation CLONE_RELOAD' });
+    let release = () => {};
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    const endpoint = `/api/portfolio/${seed.portfolio.id}/history`;
+    await page.route(url => url.pathname === endpoint && url.searchParams.get('observationTimestampId') === String(source.id),
+      async route => { await gate; await route.continue(); });
+    await form.getByRole('spinbutton', { name: 'Quantity' }).fill('7');
+    await form.locator('button[type="submit"]').click();
+    await expect(form).toHaveAttribute('data-observation-details-state', 'loading');
+    await expect(clone).toBeDisabled();
+    await expect(database.query(
+      'SELECT asset_quantity = 7 AS updated FROM public.portfolio_allocation_fact WHERE observation_time_id = $1',
+      [source.id],
+    )).resolves.toEqual([{ updated: true }]);
+    release();
+    await expect(form).toHaveAttribute('data-observation-details-state', 'ready');
+    await expect(clone).toBeEnabled();
+  });
+});
+
+/** Opens the source explicitly so snapshot-focused tests do not use Clone as a detail loader.
+ * @author GPT-6.1 Sol
+ */
+async function readyCloneSource(page: Page, observationId: number): Promise<Locator> {
+  const item = page.locator(`#portfolio-history-management-container-${observationId}`);
+  await item.locator('[data-metadata-editor-label]').click();
+  await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'ready');
+  await expect(item.locator('.accordion-collapse')).toHaveClass(/\bshow\b/);
+  await expect(item.locator('.accordion-collapse')).not.toHaveClass(/\bcollapsing\b/);
+  return item;
+}
+
+/** Holds only Bootstrap's destination animation, leaving source capture and production code unchanged.
+ * @author GPT-6.1 Sol
+ */
+async function delayCloneDestinationOpening(page: Page): Promise<void> {
+  await page.addStyleTag({ content: '#portfolio-history-management-0.collapsing { transition-duration: 60s !important; }' });
+}
+
+/** Completes the deliberately held destination transition through Bootstrap's normal transition event.
+ * @author GPT-6.1 Sol
+ */
+async function finishCloneDestinationOpening(page: Page): Promise<void> {
+  const panel = page.locator('#portfolio-history-management-0');
+  await expect(panel).toHaveClass(/\bcollapsing\b/);
+  await panel.evaluate(element => element.dispatchEvent(new Event('transitionend', { bubbles: true })));
+  await expect(panel).toHaveClass(/\bshow\b/);
+}
+
+/** Captures persisted observation, fact, and asset counts for no-write assertions.
+ * @author GPT-6.1 Terra
+ */
+async function historyWriteCounts(database: E2eDatabase, portfolioId: number): Promise<readonly unknown[]> {
+  return database.query(`SELECT
+    (SELECT COUNT(*)::text FROM public.portfolio_allocation_obs_time WHERE portfolio_id = $1) AS observations,
+    (SELECT COUNT(*)::text FROM public.portfolio_allocation_fact WHERE portfolio_id = $1) AS facts,
+    (SELECT COUNT(*)::text FROM public.asset) AS assets`, [portfolioId]);
+}
 
 /** Creates a minimal observation for one calendar date and verifies the request and PostgreSQL timestamp.
  *

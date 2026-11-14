@@ -87,16 +87,19 @@
                 {{/if}}
             >
             {{#unless id}}
-                <!-- Co-authored by: GPT-6 Luna and benizzio -->
+                <!-- Co-authored by: GPT-6 Luna, GPT-6.1 Terra and benizzio -->
                 <span class="management-metadata-header-fields portfolio-history-management-new-fields" data-accordion-field-focus>
                     <input type="text"
+                           form="portfolio-history-management-form-{{id}}"
+                           data-observation-editor-tag
                            placeholder="New observation *"
                            aria-label="Time tag"
                            autocomplete="off"
                            class="form-control portfolio-history-management-new-time-tag"
-                           oninput="maskTagInput(this); portfolioHistoryManagement.handleInputObservationTimeTag(this, {{id}})"
+                           oninput="portfolioHistoryManagement.handleInputObservationTimeTag(this, {{id}})"
                            onkeyup="event.preventDefault()"
                            maxlength="100"
+                           required
                     />
                     <input id="portfolio-history-management-observation-date"
                            type="date"
@@ -151,6 +154,24 @@
                 >
                     <span class="bi bi-pencil" aria-hidden="true"></span>
                 </button>
+                <!-- The wrapper exposes the disabled action's native tooltip. Co-authored by: GPT-6.1 Sol and GPT-6.1 Terra -->
+                <span class="portfolio-history-management-clone-hint"
+                      data-observation-clone-hint
+                      onclick="if(event.target === this) event.stopPropagation()"
+                      tabindex="0"
+                      title="Cloning is only available after opening this panel at least once and loading its allocation data."
+                      aria-label="Cloning is only available after opening this panel at least once and loading its allocation data."
+                >
+                <button type="button"
+                        class="btn btn-secondary btn-xs portfolio-history-management-clone-button"
+                        aria-label="Clone observation {{timeTag}}"
+                        data-observation-clone
+                        disabled
+                >
+                    <span class="bi bi-copy" aria-hidden="true"></span>
+                </button>
+                </span>
+                <span data-observation-clone-status role="status" aria-live="polite" class="visually-hidden"></span>
                 <span class="management-metadata-header-label"
                       data-metadata-editor-label
                 >{{timeTag}} - {{formatTimestampLocalDate timestamp}}</span>

@@ -6,16 +6,56 @@
  * Example: `prepareObservationMetadataForSubmit(form)` copies the current editor values into the form.
  * @author GPT-6 Luna
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 
 import { calendarDateToUtcTimestamp } from "../../../utils/calendar-date";
 import { isManagementMetadataEditorActive } from "../../management-metadata-editor";
 import { areObservationDetailsReady } from "../portfolio-history-management-observation-details";
+import {
+    NEW_OBSERVATION_FORM_ID,
+    PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX,
+} from "../portfolio-history-management-form";
 
-const FORM_PREFIX = "portfolio-history-management-form-";
 const NEW_DATE_INPUT_ID = "portfolio-history-management-observation-date";
 const OBSERVATION_TAG_NAME = "observationTimestamp.timeTag";
 const OBSERVATION_TIMESTAMP_NAME = "observationTimestamp.timestamp";
+
+/**
+ * Returns the observation-tag length error without changing the value or interacting with form controls.
+ * Tags of at most 100 Unicode code points return an empty message. Empty values remain subject to the
+ * control's native required validation; this helper does not validate requiredness or truncate tags.
+ * @param value - Complete observation tag to measure with `Array.from(value).length`.
+ * @returns The custom-validity message, or an empty string when the length is allowed.
+ * @example `tagInput.setCustomValidity(observationTagValidationMessage(tagInput.value));`
+ * @author GPT-6.1 Sol
+ */
+export function observationTagValidationMessage(value: string): string {
+    return Array.from(value).length > 100 ? "Observation tag must not exceed 100 characters." : "";
+}
+
+/** Reads the current observation tag without changing or validating its source form.
+ * @param form - Persisted observation form and its associated header.
+ * @returns The active editor value or canonical persisted tag.
+ * @example `const tag = captureObservationTag(form);`
+ * @author GPT-6.1 Terra
+ */
+export function captureObservationTag(form: HTMLFormElement): string {
+    const item = form.closest<HTMLElement>(".accordion-item");
+    const fields = item?.querySelector<HTMLElement>("[data-metadata-editor-active]");
+    const tag = item?.querySelector<HTMLInputElement>("[data-observation-editor-tag]");
+    const payload = form.elements.namedItem(OBSERVATION_TAG_NAME);
+
+    if(fields && isManagementMetadataEditorActive(fields) && tag) {
+        return tag.value;
+    }
+
+    if(!(payload instanceof HTMLInputElement)) {
+        throw new Error("Observation tag payload is missing.");
+    }
+
+    return payload.value;
+}
 
 /** Validates and prepares canonical metadata inputs before native submission collects form values.
  *
@@ -24,16 +64,16 @@ const OBSERVATION_TIMESTAMP_NAME = "observationTimestamp.timestamp";
  * @example `if (prepareObservationMetadataForSubmit(form)) form.requestSubmit();`
  * @author GPT-6 Luna
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 export function prepareObservationMetadataForSubmit(form: HTMLFormElement): boolean {
     const formId = form.getAttribute("id");
 
-    if(!formId?.startsWith(FORM_PREFIX) || !areObservationDetailsReady(form)) {
+    if(!formId?.startsWith(PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX) || !areObservationDetailsReady(form)) {
         return false;
     }
 
-    const observationId = formId.slice(FORM_PREFIX.length);
-    const isNewObservation = observationId === "0";
+    const isNewObservation = formId === NEW_OBSERVATION_FORM_ID;
     const item = form.closest<HTMLElement>(".accordion-item");
     const fields = item?.querySelector<HTMLElement>("[data-metadata-editor-active]");
     const isEditing = fields instanceof HTMLElement && isManagementMetadataEditorActive(fields);
@@ -49,7 +89,7 @@ export function prepareObservationMetadataForSubmit(form: HTMLFormElement): bool
         return false;
     }
 
-    if(isEditing && !copyEditedTag(tagInput, tagPayload)) {
+    if((isNewObservation || isEditing) && !copyEditedTag(tagInput, tagPayload)) {
         return false;
     }
 
@@ -74,11 +114,16 @@ export function prepareObservationMetadataForSubmit(form: HTMLFormElement): bool
 /** Copies and validates the active observation-tag editor value.
  * @author GPT-6 Luna
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 function copyEditedTag(
     tagInput: HTMLInputElement | null,
     tagPayload: HTMLInputElement,
 ): boolean {
+    if(tagInput) {
+        tagInput.setCustomValidity(observationTagValidationMessage(tagInput.value));
+    }
+
     if(!tagInput?.checkValidity()) {
         tagInput?.reportValidity();
         return false;

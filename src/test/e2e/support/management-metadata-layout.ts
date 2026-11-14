@@ -3,6 +3,7 @@
  * Import the exported assertions to compare persisted metadata editors with new-record headers and verify the resting
  * pencil's alignment. Example: `await expectManagementMetadataHeaderLayout(persisted, newRecord)` checks the layout.
  * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
  */
 
 import { expect, type Locator } from '@playwright/test';
@@ -15,16 +16,19 @@ type MetadataHeaderControls = {
   textInput: Locator;
   dateInput: Locator;
   toggle: Locator;
+  extraAction?: Locator;
 };
 
 /** Verifies that a persisted editor matches its new-record header at the current viewport size.
  *
  * The helper compares field and chevron geometry, checks that each control stays inside its header, and rejects
- * overlapping text/date fields. Use it after revealing the persisted editor at both desktop and narrow viewports.
+ * overlapping text/date fields. When a persisted header has an extra action, verify the action and fields fit without
+ * requiring identical widths to the new-record header. Use it at both desktop and narrow viewports.
  * Example: `await expectManagementMetadataHeaderLayout(persistedControls, newRecordControls)` validates both layouts.
  * @param persisted - Header and controls for the persisted record being edited.
  * @param newRecord - Header and controls for the corresponding new-record entry.
  * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
  */
 export async function expectManagementMetadataHeaderLayout(
   persisted: MetadataHeaderControls,
@@ -47,19 +51,28 @@ export async function expectManagementMetadataHeaderLayout(
     throw new Error('Metadata header geometry requires all compared controls to be rendered.');
   }
 
-  expect(Math.abs(persistedText.width - newText.width)).toBeLessThanOrEqual(1);
-  expect(Math.abs(persistedDate.width - newDate.width)).toBeLessThanOrEqual(1);
-  expect(Math.abs(persistedToggle.width - newToggle.width)).toBeLessThanOrEqual(1);
-  expect(Math.abs(persistedHeader.height - newHeader.height)).toBeLessThanOrEqual(1);
-  expect(Math.abs(persistedText.height - newText.height)).toBeLessThanOrEqual(1);
-  expect(Math.abs(persistedDate.height - newDate.height)).toBeLessThanOrEqual(1);
-  expect(Math.abs(persistedToggle.height - newToggle.height)).toBeLessThanOrEqual(1);
-  expect(Math.abs(persistedText.x - persistedHeader.x - newText.x + newHeader.x)).toBeLessThanOrEqual(1);
-  expect(Math.abs(persistedDate.x - persistedHeader.x - newDate.x + newHeader.x)).toBeLessThanOrEqual(1);
-  expect(Math.abs(persistedToggle.x - persistedHeader.x - newToggle.x + newHeader.x)).toBeLessThanOrEqual(1);
-  expect(Math.abs(persistedText.y - persistedHeader.y - newText.y + newHeader.y)).toBeLessThanOrEqual(1);
-  expect(Math.abs(persistedDate.y - persistedHeader.y - newDate.y + newHeader.y)).toBeLessThanOrEqual(1);
-  expect(Math.abs(persistedToggle.y - persistedHeader.y - newToggle.y + newHeader.y)).toBeLessThanOrEqual(1);
+  if(persisted.extraAction) {
+    const action = await persisted.extraAction.boundingBox();
+    if(!action) throw new Error('The additional metadata action must be visible.');
+    assertContained(persistedHeader, [action]);
+    expect(areOrderedWithoutOverlap(persistedText, action)).toBe(true);
+    expect(areOrderedWithoutOverlap(persistedDate, action)).toBe(true);
+    expect(areOrderedWithoutOverlap(action, persistedToggle)).toBe(true);
+  } else {
+    expect(Math.abs(persistedText.width - newText.width)).toBeLessThanOrEqual(1);
+    expect(Math.abs(persistedDate.width - newDate.width)).toBeLessThanOrEqual(1);
+    expect(Math.abs(persistedToggle.width - newToggle.width)).toBeLessThanOrEqual(1);
+    expect(Math.abs(persistedHeader.height - newHeader.height)).toBeLessThanOrEqual(1);
+    expect(Math.abs(persistedText.height - newText.height)).toBeLessThanOrEqual(1);
+    expect(Math.abs(persistedDate.height - newDate.height)).toBeLessThanOrEqual(1);
+    expect(Math.abs(persistedToggle.height - newToggle.height)).toBeLessThanOrEqual(1);
+    expect(Math.abs(persistedText.x - persistedHeader.x - newText.x + newHeader.x)).toBeLessThanOrEqual(1);
+    expect(Math.abs(persistedDate.x - persistedHeader.x - newDate.x + newHeader.x)).toBeLessThanOrEqual(1);
+    expect(Math.abs(persistedToggle.x - persistedHeader.x - newToggle.x + newHeader.x)).toBeLessThanOrEqual(1);
+    expect(Math.abs(persistedText.y - persistedHeader.y - newText.y + newHeader.y)).toBeLessThanOrEqual(1);
+    expect(Math.abs(persistedDate.y - persistedHeader.y - newDate.y + newHeader.y)).toBeLessThanOrEqual(1);
+    expect(Math.abs(persistedToggle.y - persistedHeader.y - newToggle.y + newHeader.y)).toBeLessThanOrEqual(1);
+  }
 
   assertContained(persistedHeader, [persistedText, persistedDate, persistedToggle]);
   assertContained(newHeader, [newText, newDate, newToggle]);
