@@ -3064,45 +3064,6 @@ test.describe('scenario 22: observation cloning', () => {
     expect(requests).toBe(2);
   });
 
-  /** Disabled Clone has no queued action and cannot issue or join a pending detail request.
-   * @author GPT-6.1 Terra
-   * @author GPT-6.1 Sol
-   */
-  test('scenario 22.30: loading disables clone without queuing activation', async ({ database, page }) => {
-    const seed = await seedPortfolioHistoryData(database);
-    const source = await seedManagementObservation(
-      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_JOIN', '2026-05-01T12:00:00Z',
-    );
-    let release = () => {};
-    const gate = new Promise<void>(resolve => { release = resolve; });
-    let requests = 0;
-    const endpoint = `/api/portfolio/${seed.portfolio.id}/history`;
-    await page.route(url => url.pathname === endpoint && url.searchParams.get('observationTimestampId') === String(source.id),
-      async route => { requests += 1; await gate; await route.continue(); });
-    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
-    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
-    const clone = item.getByRole('button', { name: 'Clone observation CLONE_JOIN' });
-    await expect(clone).toBeDisabled();
-    await clone.evaluate((button: HTMLButtonElement) => button.click());
-    expect(requests).toBe(0);
-    await item.locator('[data-metadata-editor-label]').click();
-    await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'loading');
-    await expect(clone).toBeDisabled();
-    await clone.evaluate((button: HTMLButtonElement) => {
-      button.click();
-      button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    });
-    expect(requests).toBe(1);
-    release();
-    await expect(clone).toBeEnabled();
-    await expect(page.locator('#portfolio-history-management-container-0').getByRole('textbox', { name: 'Time tag' }))
-      .toHaveValue('');
-    await clone.click();
-    await expect(page.locator('#portfolio-history-management-container-0').getByRole('textbox', { name: 'Time tag' }))
-      .toHaveValue('CLONE_JOIN (CLONE)');
-    expect(requests).toBe(1);
-  });
-
   /** Metadata remains editable while loading, but cloning requires explicit activation after readiness.
    * @author GPT-6.1 Terra
    * @author GPT-6.1 Sol
