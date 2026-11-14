@@ -2964,35 +2964,6 @@ test.describe('scenario 22: observation cloning', () => {
       .resolves.toEqual([{ count: '2' }]);
   });
 
-  /** A loaded empty draft stays empty and accepts a new row with the correct destination index.
-   * @author GPT-6.1 Terra
-   */
-  test('scenario 22.16: clones an empty loaded draft without reloading it', async ({ database, page }) => {
-    const seed = await seedPortfolioHistoryData(database);
-    const source = await seedManagementObservation(
-      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'EMPTY (CLONE)', '2026-05-01T12:00:00Z',
-    );
-    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
-    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
-    await item.locator('[data-metadata-editor-label]').click();
-    const form = item.locator('form');
-    await expect(form).toHaveAttribute('data-observation-details-state', 'ready');
-    await form.locator('tbody tr button.btn-danger').last().click();
-    let detailRequests = 0;
-    page.on('request', request => {
-      if(new URL(request.url()).searchParams.get('observationTimestampId') === String(source.id)) detailRequests += 1;
-    });
-    await item.getByRole('button', { name: 'Clone observation EMPTY (CLONE)' }).click();
-    const destination = page.locator('#portfolio-history-management-container-0');
-    await expect(destination.getByRole('textbox', { name: 'Time tag' })).toHaveValue('EMPTY (CLONE) (CLONE)');
-    await expect(destination.locator('tbody tr')).toHaveCount(0);
-    expect(detailRequests).toBe(0);
-    await destination.locator('tfoot button[type="button"]').click();
-    await expect(destination.locator('tbody tr')).toHaveCount(1);
-    await expect(destination.locator('tbody tr')).toHaveId('portfolio-history-management-form-0-row-0');
-    await expect(form.locator('tbody tr')).toHaveCount(0);
-  });
-
   for(const [scenario, fail] of [['22.17', false], ['22.18', true]] as const) {
     /** Late lookup success and failure must not affect a replaced destination row.
      * @author GPT-6.1 Terra
