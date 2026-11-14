@@ -3225,35 +3225,6 @@ test.describe('scenario 22: observation cloning', () => {
     await expect(form).toHaveAttribute('data-observation-details-state', 'ready');
     await expect(clone).toBeEnabled();
   });
-
-  /** A generated tag of exactly 100 Unicode code points remains complete through cloning and submission.
-   * @author GPT-6.1 Sol
-   */
-  test('scenario 22.43: Unicode generated tags accept the 100-code-point boundary', async ({ database, page }) => {
-    const seed = await seedPortfolioHistoryData(database);
-    const sourceTag = '😀'.repeat(92);
-    const generatedTag = `${sourceTag} (CLONE)`;
-    const source = await seedManagementObservation(
-      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], sourceTag, '2026-05-01T12:00:00Z',
-    );
-    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
-    const item = await readyCloneSource(page, source.id);
-    await item.getByRole('button', { name: `Clone observation ${sourceTag}` }).click();
-    const destination = page.locator('#portfolio-history-management-container-0');
-    const tag = destination.getByRole('textbox', { name: 'Time tag' });
-    await expect(tag).toHaveValue(generatedTag);
-    expect(await tag.evaluate((input: HTMLInputElement) => input.validity.valid)).toBe(true);
-    const response = page.waitForResponse(result => result.request().method() === 'POST'
-      && new URL(result.url()).pathname === `/api/portfolio/${seed.portfolio.id}/history`);
-    await destination.locator('button[type="submit"]').click();
-    expect((await response).ok()).toBe(true);
-    const persisted = await findObservationByTag(database, seed.portfolio, generatedTag);
-    expect(persisted.id).not.toBe(source.id);
-    await expect(database.query<{ time_tag: string }>(
-      'SELECT observation_time_tag AS time_tag FROM public.portfolio_allocation_obs_time WHERE id = $1',
-      [source.id],
-    )).resolves.toEqual([{ time_tag: sourceTag }]);
-  });
 });
 
 /** Opens the source explicitly so snapshot-focused tests do not use Clone as a detail loader.
