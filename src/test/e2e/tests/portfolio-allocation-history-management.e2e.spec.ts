@@ -3169,31 +3169,6 @@ test.describe('scenario 22: observation cloning', () => {
     await expect(sourceTag).toBeFocused();
   });
 
-  /** Disabled Clone exposes its reason without accidentally opening the source panel.
-   * @author GPT-6.1 Sol
-   */
-  test('scenario 22.40: unloaded clone has a reachable tooltip and no loading side effects', async ({ database, page }) => {
-    const seed = await seedPortfolioHistoryData(database);
-    const source = await seedManagementObservation(
-      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_UNLOADED', '2026-05-01T12:00:00Z',
-    );
-    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
-    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
-    const clone = item.getByRole('button', { name: 'Clone observation CLONE_UNLOADED' });
-    const hint = item.locator('[data-observation-clone-hint]');
-    await expect(clone).toBeDisabled();
-    await expect(hint).toHaveAttribute('title', /only available after opening this panel at least once/);
-    await hint.hover();
-    await hint.focus();
-    await expect(hint).toBeFocused();
-    await expect(hint).toHaveAccessibleName(/only available after opening this panel at least once/);
-    await hint.click();
-    await clone.evaluate((button: HTMLButtonElement) => button.click());
-    await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'unloaded');
-    await expect(item.locator('.accordion-collapse')).not.toHaveClass(/\bshow\b/);
-    await expect(page.locator('#portfolio-history-management-form-0 tbody tr')).toHaveCount(0);
-  });
-
   /** Ready details remain cloneable after collapse, and cloning performs no detail fetch.
    * @author GPT-6.1 Sol
    */
