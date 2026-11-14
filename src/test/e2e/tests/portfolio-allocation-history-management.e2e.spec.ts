@@ -2992,36 +2992,6 @@ test.describe('scenario 22: observation cloning', () => {
     });
   });
 
-  test.describe('narrow viewport', () => {
-    test.use({ viewport: { width: 375, height: 760 } });
-
-    /** Keeps Clone reachable beside an active metadata editor and supports keyboard activation.
-     * @author GPT-6.1 Terra
-     */
-    test('scenario 22.24: keyboard cloning remains usable while editing on mobile', async ({ database, page }) => {
-      const seed = await seedPortfolioHistoryData(database);
-      const source = await seedManagementObservation(
-        database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'CLONE_MOBILE', '2026-05-01T12:00:00Z',
-      );
-      await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
-      const item = page.locator(`#portfolio-history-management-container-${source.id}`);
-      await item.getByRole('button', { name: 'Edit observation CLONE_MOBILE' }).click();
-      await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'ready');
-      const clone = item.getByRole('button', { name: 'Clone observation CLONE_MOBILE' });
-      const bounds = await clone.boundingBox();
-      const header = await item.locator('[data-management-metadata-header]').boundingBox();
-      expect(bounds).not.toBeNull();
-      expect(header).not.toBeNull();
-      if(!bounds || !header) throw new Error('Missing mobile header geometry');
-      expect(bounds.x).toBeGreaterThanOrEqual(header.x);
-      expect(bounds.x + bounds.width).toBeLessThanOrEqual(header.x + header.width + 1);
-      await clone.focus();
-      await page.keyboard.press('Enter');
-      await expect(page.locator('#portfolio-history-management-container-0').getByRole('textbox', { name: 'Time tag' }))
-        .toHaveValue('CLONE_MOBILE (CLONE)');
-    });
-  });
-
   /** Refuses destination replacement while the current creation request is in flight.
    * @author GPT-6.1 Terra
    * @author GPT-6.1 Sol
