@@ -27,29 +27,52 @@ import type { PlanDraft, PlanRowDraft } from "./draft";
 export function renderPlanRows(
     template: TemplateDelegate, hierarchy: AllocationHierarchyLevel[], draft: PlanDraft,
 ): string {
+    const markup = renderPlanMarkup(template, hierarchy, draft);
+    validatePlanMarkup(markup, draft);
+    return markup;
+}
+
+/**
+ * Builds an independent hierarchy context with bindings to already rendered ancestors.
+ * @author GPT-6.1 Sol
+ */
+function buildRowHierarchy(
+    hierarchy: AllocationHierarchyLevel[], row: PlanRowDraft,
+    rows: Map<string, PlanRowDraft>, indices: Map<string, number>,
+) {
+    if(row.level >= hierarchy.length || (!row.parent && row.level !== hierarchy.length - 1)) {
+        throw new Error("Plan row is outside the portfolio hierarchy.");
+    }
+    const levels = hierarchy.map(level => ({ ...level, currentManagingFieldName: "" }));
+    let parent = row.parent;
+
+    while (parent) {
+        const ancestor = rows.get(parent);
+        const ancestorIndex = indices.get(parent);
+
+        if(!ancestor || ancestorIndex === undefined) {
+            throw new Error("Plan row parent is missing.");
+        }
+
+        levels[ancestor.level].currentManagingFieldName =
+            hierarchyFieldName(ancestorIndex, ancestor.level);
+        parent = ancestor.parent;
+    }
+    return levels;
+}
+
+/**
+ * Renders rows in snapshot order while recording fresh row identities for descendant bindings.
+ * @author GPT-6.1 Sol
+ */
+function renderPlanMarkup(
+    template: TemplateDelegate, hierarchy: AllocationHierarchyLevel[], draft: PlanDraft,
+): string {
     const indices = new Map<string, number>();
     const rows = new Map<string, PlanRowDraft>();
 
-    const markup = draft.rows.map((row, index) => {
-        if(row.level >= hierarchy.length || (!row.parent && row.level !== hierarchy.length - 1)) {
-            throw new Error("Plan row is outside the portfolio hierarchy.");
-        }
-        const levels = hierarchy.map(level => ({ ...level, currentManagingFieldName: "" }));
-        let parent = row.parent;
-
-        while (parent) {
-            const ancestor = rows.get(parent);
-            const ancestorIndex = indices.get(parent);
-
-            if(!ancestor || ancestorIndex === undefined) {
-                throw new Error("Plan row parent is missing.");
-            }
-
-            levels[ancestor.level].currentManagingFieldName =
-                hierarchyFieldName(ancestorIndex, ancestor.level);
-            parent = ancestor.parent;
-        }
-
+    return draft.rows.map((row, index) => {
+        const levels = buildRowHierarchy(hierarchy, row, rows, indices);
         const level = levels[row.level];
 
         const html = template({
@@ -68,6 +91,13 @@ export function renderPlanRows(
         rows.set(row.id, row);
         return html;
     }).join("");
+}
+
+/**
+ * Checks detached row markup for the complete draft and its required controls before insertion.
+ * @author GPT-6.1 Sol
+ */
+function validatePlanMarkup(markup: string, draft: PlanDraft): void {
     const fragment = document.createElement("template");
     fragment.innerHTML = `<table><tbody>${ markup }</tbody></table>`;
     const rendered = fragment.content.querySelectorAll<HTMLTableRowElement>("tbody > tr");
@@ -93,5 +123,4 @@ export function renderPlanRows(
             throw new Error("Rendered plan draft row is incomplete.");
         }
     });
-    return markup;
 }
