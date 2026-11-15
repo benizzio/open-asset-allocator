@@ -4,12 +4,13 @@
  * is separately guarded against context changes, edits, and newer operations.
  * @module components/allocation-plan/allocation-plan-management-clone
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 import htmx from "htmx.org";
 import type { TemplateDelegate } from "handlebars";
 import { PortfolioPage } from "../../../pages";
 import { getBrowserLocalCalendarDate } from "../../../utils/calendar-date";
-import { bindCloneRequestGuards, focusDraftDestination, trackCloneOpening, type CloneOperation } from
+import { bindCloneRequestGuards, CloneCoordinator, focusDraftDestination, trackCloneOpening, type CloneOperation } from
     "../../management-draft-presentation";
 import { allocationPlanNameValidationMessage } from "../allocation-plan-management-metadata";
 import { capturePlanDraft, restorePlanRows } from "./draft";
@@ -91,17 +92,15 @@ async function presentDraft(
  * @param template - Returns the initialized row template.
  * @example `bindAllocationPlanCloning(list, () => rowTemplate);`
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 export function bindAllocationPlanCloning(list: HTMLElement, template: () => TemplateDelegate): void {
     if(boundLists.has(list)) {
         return;
     }
     boundLists.add(list);
-    let active: CloneOperation | undefined;
-    let pendingSource: HTMLElement | undefined;
-    const owners = new WeakMap<HTMLButtonElement, CloneOperation>();
-    const cancel = () => active?.controller.abort();
-    const isSaving = bindCloneRequestGuards(list, cancel, FORM_ID);
+    const coordinator = new CloneCoordinator();
+    const isSaving = bindCloneRequestGuards(list, () => coordinator.cancel(), FORM_ID);
 
     list.addEventListener("click", event => {
         const button = (event.target as Element)?.closest<HTMLButtonElement>("[data-allocation-plan-clone]");
@@ -132,30 +131,20 @@ export function bindAllocationPlanCloning(list: HTMLElement, template: () => Tem
             return;
         }
 
-        if(active && !active.controller.signal.aborted && pendingSource === item) {
+        if(coordinator.isPending(item)) {
             return;
         }
 
-        cancel();
+        coordinator.cancel();
         status.textContent = "";
 
         try {
             const name = copyDraft(source, destination, template());
             const operation = trackCloneOpening(list, item, destination, FORM_ID, ROUTE);
-            active = operation;
-            pendingSource = item;
-            owners.set(button, operation);
+            coordinator.register(item, button, operation);
 
             void presentDraft(destination, name, button, status, operation, () => {
-                if(owners.get(button) === operation) {
-                    button.removeAttribute("aria-busy");
-                    owners.delete(button);
-                }
-
-                if(active === operation) {
-                    active = undefined;
-                    pendingSource = undefined;
-                }
+                coordinator.finish(button, operation);
             });
         } catch(error) {
             status.textContent = "Unable to clone allocation plan. Please try again.";

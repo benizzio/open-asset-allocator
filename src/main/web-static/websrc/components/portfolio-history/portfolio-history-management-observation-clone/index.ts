@@ -13,7 +13,7 @@ import { NEW_OBSERVATION_FORM_ID } from "../portfolio-history-management-form";
 import { observationTagValidationMessage } from "../portfolio-history-management-observation-metadata";
 import { captureObservationDraft, restoreObservationRows, type ObservationDraft } from "./draft";
 import { renderRows } from "./destination";
-import { bindCloneRequestGuards, focusDraftDestination, trackCloneOpening, type CloneOperation } from
+import { bindCloneRequestGuards, CloneCoordinator, focusDraftDestination, trackCloneOpening, type CloneOperation } from
     "../../management-draft-presentation";
 
 const boundLists = new WeakSet<HTMLElement>();
@@ -139,11 +139,8 @@ export function bindObservationCloning(
         return;
     }
     boundLists.add(list);
-    let active: CloneOperation | undefined;
-    let pendingSource: HTMLElement | undefined;
-    const buttonOwners = new WeakMap<HTMLButtonElement, CloneOperation>();
-    const cancel = () => active?.controller.abort();
-    const isSaving = bindCloneRequestGuards(list, cancel, NEW_OBSERVATION_FORM_ID);
+    const coordinator = new CloneCoordinator();
+    const isSaving = bindCloneRequestGuards(list, () => coordinator.cancel(), NEW_OBSERVATION_FORM_ID);
 
     list.addEventListener("click", event => {
         const button = (event.target as Element)?.closest<HTMLButtonElement>("[data-observation-clone]");
@@ -173,10 +170,10 @@ export function bindObservationCloning(
             return;
         }
 
-        if(active && !active.controller.signal.aborted && pendingSource === item) {
+        if(coordinator.isPending(item)) {
             return;
         }
-        cancel();
+        coordinator.cancel();
 
         try {
             const tag = copyDraft(source, destination, rowTemplate(), normalize);
@@ -185,20 +182,10 @@ export function bindObservationCloning(
                 list, item, destination, NEW_OBSERVATION_FORM_ID, "/portfolio/:portfolioId/history/manage",
             );
 
-            active = operation;
-            pendingSource = item;
-            buttonOwners.set(button, operation);
+            coordinator.register(item, button, operation);
 
             void presentDraft(destination, tag, button, status, operation, () => {
-                if(buttonOwners.get(button) === operation) {
-                    button.removeAttribute("aria-busy");
-                    buttonOwners.delete(button);
-                }
-
-                if(active === operation) {
-                    active = undefined;
-                    pendingSource = undefined;
-                }
+                coordinator.finish(button, operation);
             });
         } catch(error) {
             status.textContent = "Unable to clone observation. Please try again.";
