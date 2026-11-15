@@ -1,15 +1,15 @@
-# Graph Report - open-asset-allocator  (2026-11-14)
+# Graph Report - open-asset-allocator  (2026-11-15)
 
 ## Corpus Check
 - cluster-only mode — file stats not available
 
 ## Summary
-- 918 nodes · 1330 edges · 110 communities (65 shown, 45 thin omitted)
+- 920 nodes · 1336 edges · 110 communities (65 shown, 45 thin omitted)
 - Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 58 edges (avg confidence: 0.87)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `183096a7`
+- Built from commit: `e8d4a211`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -191,7 +191,7 @@ Nodes (22): asset_price_last_market_data, asset_ticker_market_data_source, plann
 
 ### Community 5 - "historical-read-pagination.e2e.spec.ts"
 Cohesion: 0.14
-Nodes (21): ALLOCATION_STRUCTURE, expectPaginationGapAtWidths(), expectReadyControl(), historyTimestamp(), LateViewResponseIsolationConfig, loadMoreButton(), PaginatedResponse, planDate() (+13 more)
+Nodes (23): ALLOCATION_STRUCTURE, expectPaginationGapAtWidths(), expectReadyControl(), historyTimestamp(), LateViewResponseIsolationConfig, loadMoreButton(), PaginatedResponse, planDate() (+15 more)
 
 ### Community 6 - "package.json"
 Cohesion: 0.09
@@ -430,8 +430,8 @@ Cohesion: 0.67
 Nodes (3): Customizable Fractal Hierarchy, Multiple Portfolio Management, Fractal Portfolio Hierarchy
 
 ## Knowledge Gaps
-- **277 isolated node(s):** `CanvasPoint`, `CanvasTextRecorder`, `ExpectedAllocationRow`, `ExpectedManagedAllocationRow`, `NavigationOptionName` (+272 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 431 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **278 isolated node(s):** `CanvasPoint`, `CanvasTextRecorder`, `ExpectedAllocationRow`, `ExpectedManagedAllocationRow`, `NavigationOptionName` (+273 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 432 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **45 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
@@ -444,7 +444,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `test` connect `fixtures.ts` to `database.ts`, `portfolio-allocation-map.e2e.spec.ts`, `portfolio-allocation-plan-management.e2e.spec.ts`, `portfolio-allocation-history-management.e2e.spec.ts`, `portfolio-history-external-quote.e2e.spec.ts`, `historical-read-pagination.e2e.spec.ts`, `portfolio-visualization.e2e.spec.ts`, `portfolio-editing.e2e.spec.ts`, `asset-management.e2e.spec.ts`, `src_test_e2e_support_fixtures_expect`, `@playwright/test`?**
   _High betweenness centrality (0.016) - this node is a cross-community bridge._
 - **What connects `CanvasPoint`, `CanvasTextRecorder`, `ExpectedAllocationRow` to the rest of the system?**
-  _277 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _278 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `portfolio-allocation-plan-management.e2e.spec.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.05359831376091539 - nodes in this community are weakly interconnected._
 - **Should `portfolio-allocation-map.e2e.spec.ts` be split into smaller, more focused modules?**

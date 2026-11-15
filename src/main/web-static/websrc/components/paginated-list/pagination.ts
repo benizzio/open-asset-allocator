@@ -5,18 +5,18 @@
  * @author GPT-6 Luna
  * @author GPT-6 Sol
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 
 import htmx from "htmx.org";
 import { HtmxInfra, type BeforeSwapEventDetail } from "../../infra/htmx";
 import { focusOnAcceptedRecord, renderControls } from "./controls";
 import { getContextId } from "./context";
-import { bindPaginationLifecycle, trackRequestCompletion } from "./lifecycle";
+import { bindPaginationLifecycle, LOAD_MORE_EVENT, trackRequestCompletion } from "./lifecycle";
 import { startTrackingFocus, stopTrackingFocus } from "./focus-tracking";
 
 const PAGINATED_LIST_ATTRIBUTE = "data-paginated-list";
 const LOAD_MORE_ATTRIBUTE = "data-paginated-list-more";
-const LOAD_MORE_EVENT = "paginated-list-more";
 const PAGE_CURSOR_PARAMETER = "pageCursor";
 
 /** Selects whether a list request replaces the current page or appends another page.
@@ -472,6 +472,7 @@ function invalidateRemovedList(event: CustomEvent): void {
  * Initializes owner-scoped HTMX lifecycle and control handlers once per page.
  * @author GPT-6 Luna
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 function init(): void {
     if(initialized) {
@@ -481,6 +482,12 @@ function init(): void {
     initialized = true;
 
     bindPaginationLifecycle({
+        reset: owner => {
+            // Reset intent supersedes old work before HTMX synchronization or readiness can defer its request.
+            const state = getState(owner);
+            state.generation++;
+            state.nextMode = PaginationMode.Initial;
+        },
         configure: configureRequest as EventListener,
         beforeRequest: bindRequestToXhr as EventListener,
         settle: commitSettledPage as EventListener,
