@@ -148,6 +148,7 @@ test.describe('portfolio allocation plan management', () => {
 
   /** Copies current values without persisting or modifying the source plan.
    * @author GPT-6.1 Terra
+   * @author GPT-6.1 Sol
    */
   test('scenario 23.1: clones editable plan values into an independent new draft', async ({ database, page }) => {
     const seeded = await seedAllocationPlanManagementData(database);
@@ -190,8 +191,9 @@ test.describe('portfolio allocation plan management', () => {
       .toHaveValue('Edited source (CLONE)');
     await expect(destination.locator('.accordion-collapse')).toHaveClass(/\bshow\b/);
     await expect(source.locator('[data-allocation-plan-clone]')).not.toHaveAttribute('aria-busy', 'true');
-    await expect(source.locator('[data-allocation-plan-clone-status]')).toBeEmpty();
+    await expect(source.locator('[data-allocation-plan-clone-status]')).toHaveCount(0);
     await expect(source.locator('h2')).not.toContainText('Allocation plan copied to the new draft.');
+    await expect(page.locator('#toast-notification-container .toast')).toHaveCount(0);
     const rows = destination.locator('tbody > tr');
     await expect(rows).toHaveCount(6);
     await expect(rows.first().locator('[data-percentage-input]')).toHaveValue(displayed);
@@ -493,8 +495,9 @@ test.describe('portfolio allocation plan management', () => {
     expect(await queryPlannedAllocations(database, seeded.allocationPlan.id)).toEqual(seeded.plannedAllocations);
   });
 
-  /** Preserves the draft on preflight failure and clears the error on successful retry.
+  /** Preserves the draft on preflight failure and retries without a success notification.
    * @author GPT-6.1 Terra
+   * @author GPT-6.1 Sol
    */
   test('scenario 23.13: preserves the existing draft if source preflight fails', async ({ database, page }) => {
     const seeded = await seedAllocationPlanManagementData(database);
@@ -512,7 +515,11 @@ test.describe('portfolio allocation plan management', () => {
       element.replaceWith(placeholder);
     });
     await source.locator('[data-allocation-plan-clone]').click();
-    await expect(source.locator('[data-allocation-plan-clone-status]'))
+    const toasts = page.locator('#toast-notification-container .toast[role="alert"]');
+    const errorToast = toasts.filter({ hasText: 'Unable to clone allocation plan. Please try again.' });
+    await expect(errorToast).toBeVisible();
+    await expect(errorToast).toHaveClass(/text-bg-danger/);
+    await expect(errorToast.locator('.toast-body'))
       .toHaveText('Unable to clone allocation plan. Please try again.');
     await expect(name).toHaveValue('Existing draft');
     await expect(destination.locator('tbody > tr')).toHaveCount(0);
@@ -524,7 +531,7 @@ test.describe('portfolio allocation plan management', () => {
     await expect(destination.locator('tbody > tr')).toHaveCount(6);
     await expect(destination.locator('.accordion-collapse')).toHaveClass(/\bshow\b/);
     await expect(source.locator('[data-allocation-plan-clone]')).not.toHaveAttribute('aria-busy', 'true');
-    await expect(source.locator('[data-allocation-plan-clone-status]')).toBeEmpty();
+    await expect(toasts.filter({ hasNotText: 'Unable to clone allocation plan. Please try again.' })).toHaveCount(0);
     expect(await queryPlannedAllocations(database, seeded.allocationPlan.id)).toEqual(seeded.plannedAllocations);
   });
 
@@ -704,6 +711,7 @@ test.describe('portfolio allocation plan management', () => {
 
   /** Rejects another clone while the destination's creation request is in flight.
    * @author GPT-6.1 Terra
+   * @author GPT-6.1 Sol
    */
   test('scenario 23.21: creation in flight blocks draft replacement', async ({ database, page }) => {
     const seeded = await seedAllocationPlanManagementData(database);
@@ -731,7 +739,12 @@ test.describe('portfolio allocation plan management', () => {
       await destination.locator('form button[onclick*="handleSubmit"]').click();
       await request;
       await next.locator('[data-allocation-plan-clone]').click();
-      await expect(next.locator('[data-allocation-plan-clone-status]'))
+      const warningToast = page.locator('#toast-notification-container .toast[role="alert"]').filter({
+        hasText: 'Wait for the current save to finish, then try again.',
+      });
+      await expect(warningToast).toBeVisible();
+      await expect(warningToast).toHaveClass(/text-bg-warning/);
+      await expect(warningToast.locator('.toast-body'))
         .toHaveText('Wait for the current save to finish, then try again.');
       await expect(name).toHaveValue(`${ALLOCATION_PLAN_NAME} (CLONE)`);
       const response = page.waitForResponse(result => result.request().method() === 'POST'

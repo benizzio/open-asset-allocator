@@ -9,7 +9,9 @@
 import htmx from "htmx.org";
 import type { TemplateDelegate } from "handlebars";
 import { PortfolioPage } from "../../../pages";
+import { NotificationType } from "../../../infra/infra-types";
 import { getBrowserLocalCalendarDate } from "../../../utils/calendar-date";
+import notifications from "../../notifications";
 import { bindCloneRequestGuards, CloneCoordinator, focusDraftDestination, trackCloneOpening, type CloneOperation } from
     "../../management-draft-presentation";
 import {
@@ -23,7 +25,6 @@ import { renderPlanRows } from "./rendering";
 const FORM_ID = "allocation-plan-management-form-0";
 const ROUTE = "/portfolio/:portfolioId/allocation/manage";
 const CLONE_TRIGGER_ATTRIBUTE = "data-allocation-plan-clone";
-const CLONE_STATUS_ATTRIBUTE = "data-allocation-plan-clone-status";
 const boundLists = new WeakSet<HTMLElement>();
 
 /** Finds and validates the destination controls before changing the existing draft.
@@ -74,9 +75,10 @@ function copyDraft(source: HTMLFormElement, destination: HTMLElement, template: 
 
 /** Opens the replaced draft and releases this operation's listeners and busy state.
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 async function presentDraft(
-    destination: HTMLElement, name: HTMLInputElement, button: HTMLButtonElement, status: HTMLElement,
+    destination: HTMLElement, name: HTMLInputElement, button: HTMLButtonElement,
     operation: CloneOperation, finished: () => void,
 ): Promise<void> {
     button.setAttribute("aria-busy", "true");
@@ -85,7 +87,10 @@ async function presentDraft(
         await focusDraftDestination(destination, name, operation);
     } catch(error) {
         if(operation.owns()) {
-            status.textContent = "Unable to open the new allocation plan. Please try again.";
+            notifications.notify({
+                title: "Error", content: "Unable to open the new allocation plan. Please try again.",
+                type: NotificationType.ERROR,
+            });
             console.error(error);
         }
     } finally {
@@ -123,9 +128,7 @@ export function bindAllocationPlanCloning(list: HTMLElement, template: () => Tem
         const destination = list.querySelector<HTMLFormElement>(`#${ FORM_ID }`)
             ?.closest<HTMLElement>(".accordion-item");
 
-        const status = item?.querySelector<HTMLElement>(`[${ CLONE_STATUS_ATTRIBUTE }]`);
-
-        if(!item || !source || !destination || !status) {
+        if(!item || !source || !destination) {
             return;
         }
 
@@ -134,7 +137,10 @@ export function bindAllocationPlanCloning(list: HTMLElement, template: () => Tem
         }
 
         if(isSaving()) {
-            status.textContent = "Wait for the current save to finish, then try again.";
+            notifications.notify({
+                title: "Warning", content: "Wait for the current save to finish, then try again.",
+                type: NotificationType.WARNING,
+            });
             return;
         }
 
@@ -143,18 +149,20 @@ export function bindAllocationPlanCloning(list: HTMLElement, template: () => Tem
         }
 
         coordinator.cancel();
-        status.textContent = "";
 
         try {
             const name = copyDraft(source, destination, template());
             const operation = trackCloneOpening(list, item, destination, FORM_ID, ROUTE);
             coordinator.register(item, button, operation);
 
-            void presentDraft(destination, name, button, status, operation, () => {
+            void presentDraft(destination, name, button, operation, () => {
                 coordinator.finish(button, operation);
             });
         } catch(error) {
-            status.textContent = "Unable to clone allocation plan. Please try again.";
+            notifications.notify({
+                title: "Error", content: "Unable to clone allocation plan. Please try again.",
+                type: NotificationType.ERROR,
+            });
             console.error(error);
         }
     });
