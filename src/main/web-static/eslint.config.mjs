@@ -392,6 +392,10 @@ export default [
                         // Form identifiers have a dependency-free public boundary.
                         // Authored by: GPT-6.1 Sol
                         {
+                            group: ["**/allocation-plan-management-form/*", "**/allocation-plan-management-form/**"],
+                            message: "Import allocation-plan form identifiers through its index.ts public API only.",
+                        },
+                        {
                             group: ["**/portfolio-history-management-form/*", "**/portfolio-history-management-form/**"],
                             message: "Import history form identifiers through its index.ts public API only.",
                         },

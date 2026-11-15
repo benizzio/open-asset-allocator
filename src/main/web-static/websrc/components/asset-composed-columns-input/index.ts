@@ -4,6 +4,7 @@
  * @module components/asset-composed-columns-input
  * @author GPT-6 Luna
  * @author GPT-6 Sol
+ * @author GPT-6.1 Sol
  */
 
 import htmx from "htmx.org";
@@ -22,6 +23,7 @@ import {
 import { bindAssetFormValidationGuards, invalidateSelectedAsset, validateAssetRowsForPost } from "./form-validation";
 
 export { AssetSelectionState } from "./constants";
+export { ASSET_SEARCH_AUTOCOMPLETE_ATTRIBUTE, ASSET_SEARCH_INPUT_ATTRIBUTE } from "./constants";
 export { captureAssetDraft, restoreAssetDraft } from "./draft";
 export type { AssetDraft } from "./draft";
 export { ASSET_ROW_SELECTION_CHANGE_EVENT, AssetRowSelectionChangeState } from "./selection-events";

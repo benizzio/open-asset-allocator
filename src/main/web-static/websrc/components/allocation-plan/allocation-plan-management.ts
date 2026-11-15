@@ -33,6 +33,10 @@ import {
 import { mapForAllocationPlanManagement } from "./allocation-plan-management-response";
 import { removePlannedAllocationSubtree } from "./allocation-plan-management-hierarchy";
 import { bindAllocationPlanCloning } from "./allocation-plan-management-clone";
+import {
+    FORM_LAST_ROW_INDEX_INPUT_NAME, FORM_FIELD_DEPENDENT_ATTRIBUTE, FORM_FIELD_LABEL_ATTRIBUTE,
+    hierarchyFieldName, hierarchyFieldSuffix, PLAN_DETAILS_FIELD_NAME, PLAN_HIERARCHICAL_ID_FIELD_NAME,
+} from "./allocation-plan-management-form";
 
 type AllocationPlanningHierarchicalFormEntry = {
     occurrences: number;
@@ -43,9 +47,6 @@ type FormRowHierarchicalStructure = {
     formRowHierarchicalFields: HTMLInputElement[];
     formRowHierarchicalId: string
 };
-
-const FORM_LAST_ROW_INDEX_INPUT_NAME = "last-planned-allocation-row-index";
-const FORM_FIELD_DEPENDENT_ATTRIBUTE = "data-bind-to-name";
 
 const ALLOCATION_HIERARCHY_LEVEL_MANAGING_FIELD_TEMP_PROPERTY_NAME = "currentManagingFieldName";
 const ALLOCATION_PLAN_MANAGEMENT_CONTAINER_ID = "accordion-allocation-plan-management";
@@ -64,7 +65,6 @@ HtmxInfra.htmxTransformResponse.registerTransformResponseFunction(
  * @author benizzio
  */
 function handleHierarchicalIdLevelChange(targetElement: HTMLInputElement) {
-
     const ancestorTable = targetElement.closest("form");
 
     if(!ancestorTable) {
@@ -74,14 +74,16 @@ function handleHierarchicalIdLevelChange(targetElement: HTMLInputElement) {
     const targetElementName = targetElement.getAttribute("name");
 
     const fieldsToUpdate =
-        ancestorTable.querySelectorAll<HTMLInputElement>(`[data-bind-to-name$='${ targetElementName }']`);
+        ancestorTable.querySelectorAll<HTMLInputElement>(
+            `[${ FORM_FIELD_DEPENDENT_ATTRIBUTE }$='${ targetElementName }']`,
+        );
 
     fieldsToUpdate.forEach((field) => {
         field.value = targetElement.value;
     });
 
     const spansToUpdate =
-        ancestorTable.querySelectorAll<HTMLSpanElement>(`[data-label-for-name='${ targetElementName }']`);
+        ancestorTable.querySelectorAll<HTMLSpanElement>(`[${ FORM_FIELD_LABEL_ATTRIBUTE }='${ targetElementName }']`);
 
     spansToUpdate.forEach((span) => {
         span.textContent = targetElement.value;
@@ -129,14 +131,20 @@ function createNewPlannedAllocation(
     return newPlannedAllocation;
 }
 
+/** Inherits hierarchy values and their managing field identities from the parent row.
+ * @author benizzio
+ * @author GPT-6.1 Sol
+ */
 function setHierarchicalIdFromParentRow(
     newPlannedAllocation: SerializableFractalPlannedAllocation,
     formElement: HTMLFormElement,
     parentRowIndex: number,
     portfolioAllocationHierarchy: AllocationHierarchyLevel[],
 ) {
+    const hierarchyPath = `${ PLAN_DETAILS_FIELD_NAME }[${ parentRowIndex }][${ PLAN_HIERARCHICAL_ID_FIELD_NAME }]`;
+    const levelPrefix = `[${ PLAN_HIERARCHICAL_ID_FIELD_NAME }][`;
 
-    formElement.querySelectorAll(`[name^='details[${ parentRowIndex }][hierarchicalId]']`)
+    formElement.querySelectorAll(`[name^='${ hierarchyPath }']`)
         .forEach((hierarchicalIdInput: HTMLInputElement) => {
 
             const hierarchicalIdValue = hierarchicalIdInput.value;
@@ -144,7 +152,7 @@ function setHierarchicalIdFromParentRow(
 
             const hierarchicalIdIndexString = hierarchicalIdFieldName
                 .substring(
-                    hierarchicalIdFieldName.indexOf("[hierarchicalId][") + "[hierarchicalId][".length,
+                    hierarchicalIdFieldName.indexOf(levelPrefix) + levelPrefix.length,
                     hierarchicalIdFieldName.length - 1,
                 );
             const hierarchicalIdIndex = toInt(hierarchicalIdIndexString);
@@ -205,9 +213,9 @@ function addPlannedAllocationRow(
  *
  * @author GPT-6 Luna
  * @author GPT-6 Sol
+ * @author GPT-6.1 Sol
  */
 function copyAssetTickersToHierarchicalIdFields(form: HTMLFormElement) {
-
     form.querySelectorAll<HTMLInputElement>(`input[name$='${ ASSET_TICKER_FIELD_NAME_SUFFIX }']`)
         .forEach((assetTickerInput: HTMLInputElement) => {
 
@@ -227,7 +235,7 @@ function copyAssetTickersToHierarchicalIdFields(form: HTMLFormElement) {
                 : "";
 
             const assetIdInput = form.elements.namedItem(
-                `details[${ allocationIndexString }][hierarchicalId][0]`,
+                hierarchyFieldName(allocationIndexString, 0),
             ) as HTMLInputElement;
             assetIdInput.value = assetTickerValue;
         });
@@ -247,11 +255,14 @@ function getHierarchicalFieldForValidation(
     }
 }
 
+/** Collects each row's hierarchy identity and its validation controls.
+ * @author benizzio
+ * @author GPT-6.1 Sol
+ */
 function mapFormRowHierarchicalStructure(
     formTableRow: HTMLTableRowElement,
     hierarchySize: number,
 ): FormRowHierarchicalStructure {
-
     const lastHierarchyLevelIndex = hierarchySize - 1;
 
     const formRowHierarchicalStructure = {
@@ -261,7 +272,7 @@ function mapFormRowHierarchicalStructure(
 
     for(let hierarchyLevelIndex = lastHierarchyLevelIndex; hierarchyLevelIndex >= 0; hierarchyLevelIndex--) {
 
-        const allocationHierarchyLevelFieldNameSuffix = `[hierarchicalId][${ hierarchyLevelIndex }]`;
+        const allocationHierarchyLevelFieldNameSuffix = hierarchyFieldSuffix(hierarchyLevelIndex);
 
         const hierarchicalField = formTableRow.querySelector(
             `input[name$='${ allocationHierarchyLevelFieldNameSuffix }']`,

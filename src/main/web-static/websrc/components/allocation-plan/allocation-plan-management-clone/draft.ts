@@ -4,10 +4,20 @@
  * duplicated, or temporarily out of sync with their inherited labels.
  * @module components/allocation-plan/allocation-plan-management-clone/draft
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
-import { capturePercentageInput, restorePercentageInput, type PercentageInputSnapshot } from "../../../infra/dom";
+import {
+    capturePercentageInput, restorePercentageInput,
+    PERCENTAGE_INPUT_ATTRIBUTE, type PercentageInputSnapshot,
+} from "../../../infra/dom";
 import { captureAssetDraft, restoreAssetDraft, type AssetDraft } from "../../asset-composed-columns-input";
 import { captureAllocationPlanName } from "../allocation-plan-management-metadata";
+import {
+    FORM_FIELD_LABEL_ATTRIBUTE, hierarchyFieldSuffix,
+    PLAN_CASH_RESERVE_FIELD_NAME, PLAN_HIERARCHICAL_ID_FIELD_NAME,
+} from "../allocation-plan-management-form";
+
+const HIERARCHY_FIELD_PATTERN = new RegExp(`\\[${ PLAN_HIERARCHICAL_ID_FIELD_NAME }\\]\\[(\\d+)\\]$`);
 
 /** One hierarchy value and its separately displayed inherited label.
  * @author GPT-6.1 Terra
@@ -46,6 +56,7 @@ function input(row: HTMLElement, selector: string): HTMLInputElement {
 
 /** Captures one row and its current, potentially unsynchronized values.
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 function captureRow(row: HTMLTableRowElement): PlanRowDraft {
     const level = Number(row.dataset.hierarchyLevel);
@@ -54,8 +65,10 @@ function captureRow(row: HTMLTableRowElement): PlanRowDraft {
         throw new Error("Plan row has an invalid identity or hierarchy level.");
     }
 
-    const hierarchy = Array.from(row.querySelectorAll<HTMLInputElement>("input[name*='[hierarchicalId]']"), field => {
-        const match = field.name.match(/\[hierarchicalId\]\[(\d+)\]$/);
+    const hierarchy = Array.from(row.querySelectorAll<HTMLInputElement>(
+        `input[name*='[${ PLAN_HIERARCHICAL_ID_FIELD_NAME }]']`,
+    ), field => {
+        const match = field.name.match(HIERARCHY_FIELD_PATTERN);
 
         if(!match) {
             throw new Error("Plan hierarchy field has an invalid name.");
@@ -63,7 +76,8 @@ function captureRow(row: HTMLTableRowElement): PlanRowDraft {
         return {
             level: Number(match[1]),
             value: field.value,
-            label: field.parentElement?.querySelector<HTMLElement>("[data-label-for-name]")?.textContent ?? undefined,
+            label: field.parentElement?.querySelector<HTMLElement>(`[${ FORM_FIELD_LABEL_ATTRIBUTE }]`)
+                ?.textContent ?? undefined,
         };
     });
     return {
@@ -71,8 +85,8 @@ function captureRow(row: HTMLTableRowElement): PlanRowDraft {
         parent: row.dataset.parentRowId,
         level,
         hierarchy,
-        cash: input(row, "input[name$='[cashReserve]']").checked,
-        percentage: capturePercentageInput(input(row, "[data-percentage-input]")),
+        cash: input(row, `input[name$='[${ PLAN_CASH_RESERVE_FIELD_NAME }]']`).checked,
+        percentage: capturePercentageInput(input(row, `[${ PERCENTAGE_INPUT_ATTRIBUTE }]`)),
         asset: level === 0 ? captureAssetDraft(row) : undefined,
     };
 }
@@ -116,6 +130,7 @@ export function capturePlanDraft(form: HTMLFormElement, date: string, hierarchyS
  * @param draft - Captured source draft.
  * @example `restorePlanRows(tbody, draft);`
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 export function restorePlanRows(tbody: HTMLElement, draft: PlanDraft): void {
     const rows = Array.from(tbody.querySelectorAll<HTMLTableRowElement>(":scope > tr"));
@@ -126,17 +141,17 @@ export function restorePlanRows(tbody: HTMLElement, draft: PlanDraft): void {
 
     rows.forEach((row, index) => {
         const snapshot = draft.rows[index];
-        input(row, "input[name$='[cashReserve]']").checked = snapshot.cash;
-        restorePercentageInput(input(row, "[data-percentage-input]"), snapshot.percentage);
+        input(row, `input[name$='[${ PLAN_CASH_RESERVE_FIELD_NAME }]']`).checked = snapshot.cash;
+        restorePercentageInput(input(row, `[${ PERCENTAGE_INPUT_ATTRIBUTE }]`), snapshot.percentage);
 
         if(snapshot.asset) {
             restoreAssetDraft(row, snapshot.asset);
         }
 
         for(const value of snapshot.hierarchy) {
-            const field = input(row, `input[name$='[hierarchicalId][${ value.level }]']`);
+            const field = input(row, `input[name$='${ hierarchyFieldSuffix(value.level) }']`);
             field.value = value.value;
-            const label = field.parentElement?.querySelector<HTMLElement>("[data-label-for-name]");
+            const label = field.parentElement?.querySelector<HTMLElement>(`[${ FORM_FIELD_LABEL_ATTRIBUTE }]`);
 
             if(label && value.label !== undefined) {
                 label.textContent = value.label;

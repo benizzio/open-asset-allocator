@@ -1,3 +1,9 @@
+/**
+ * Binds visible percentage controls to their submitted decimal inputs.
+ * @module infra/dom/binding-percentage-input
+ * @author GitHub Copilot
+ * @author GPT-6.1 Sol
+ */
 import { logger, LogLevel } from "../logging";
 import { BigNumber } from "bignumber.js";
 
@@ -8,9 +14,9 @@ import { BigNumber } from "bignumber.js";
 // Attribute value format: data-percentage-input="fieldName"
 // =============================================================================
 
-const PERCENTAGE_INPUT_ATTRIBUTE = "data-percentage-input";
+export const PERCENTAGE_INPUT_ATTRIBUTE = "data-percentage-input";
 const PERCENTAGE_INPUT_BOUND_FLAG = "data-percentage-input-bound";
-const PERCENTAGE_INPUT_CONTAINER_ATTRIBUTE = "data-percentage-input-container";
+export const PERCENTAGE_INPUT_CONTAINER_ATTRIBUTE = "data-percentage-input-container";
 const PERCENTAGE_INPUT_NULL_IF_EMPTY_ATTRIBUTE = "data-null-if-empty";
 
 /**

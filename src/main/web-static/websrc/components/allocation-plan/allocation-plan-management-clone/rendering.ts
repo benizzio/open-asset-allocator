@@ -3,9 +3,16 @@
  * independent hierarchy contexts, new row indexes, and ancestor field bindings.
  * @module components/allocation-plan/allocation-plan-management-clone/rendering
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 import type { TemplateDelegate } from "handlebars";
 import type { AllocationHierarchyLevel } from "../../../domain/allocation";
+import { PERCENTAGE_INPUT_ATTRIBUTE } from "../../../infra/dom";
+import { ASSET_SEARCH_AUTOCOMPLETE_ATTRIBUTE, ASSET_SEARCH_INPUT_ATTRIBUTE } from "../../asset-composed-columns-input";
+import {
+    hierarchyFieldName, hierarchyFieldSuffix,
+    PLAN_CASH_RESERVE_FIELD_NAME,
+} from "../allocation-plan-management-form";
 import type { PlanDraft, PlanRowDraft } from "./draft";
 
 /** Builds fresh row markup and verifies its structural prerequisites.
@@ -15,6 +22,7 @@ import type { PlanDraft, PlanRowDraft } from "./draft";
  * @returns Markup for the destination body.
  * @example `const html = renderPlanRows(rowTemplate, hierarchy, draft);`
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 export function renderPlanRows(
     template: TemplateDelegate, hierarchy: AllocationHierarchyLevel[], draft: PlanDraft,
@@ -38,7 +46,7 @@ export function renderPlanRows(
             }
 
             levels[ancestor.level].currentManagingFieldName =
-                `details[${ ancestorIndex }][hierarchicalId][${ ancestor.level }]`;
+                hierarchyFieldName(ancestorIndex, ancestor.level);
             parent = ancestor.parent;
         }
 
@@ -69,14 +77,16 @@ export function renderPlanRows(
     }
 
     rendered.forEach((row, index) => {
-        const required = ["[data-percentage-input]", "input[name$='[cashReserve]']"];
+        const required = [
+            `[${ PERCENTAGE_INPUT_ATTRIBUTE }]`, `input[name$='[${ PLAN_CASH_RESERVE_FIELD_NAME }]']`,
+        ];
 
         if(draft.rows[index].asset) {
-            required.push("[data-asset-search-autocomplete]", "[data-asset-search-input]");
+            required.push(`[${ ASSET_SEARCH_AUTOCOMPLETE_ATTRIBUTE }]`, `[${ ASSET_SEARCH_INPUT_ATTRIBUTE }]`);
         }
 
         for(const value of draft.rows[index].hierarchy) {
-            required.push(`input[name$='[hierarchicalId][${ value.level }]']`);
+            required.push(`input[name$='${ hierarchyFieldSuffix(value.level) }']`);
         }
 
         if(required.some(selector => !row.querySelector(selector))) {

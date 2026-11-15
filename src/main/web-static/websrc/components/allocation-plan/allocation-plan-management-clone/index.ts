@@ -12,24 +12,31 @@ import { PortfolioPage } from "../../../pages";
 import { getBrowserLocalCalendarDate } from "../../../utils/calendar-date";
 import { bindCloneRequestGuards, CloneCoordinator, focusDraftDestination, trackCloneOpening, type CloneOperation } from
     "../../management-draft-presentation";
-import { allocationPlanNameValidationMessage } from "../allocation-plan-management-metadata";
+import {
+    allocationPlanNameValidationMessage,
+    NEW_PLAN_DATE_SELECTOR, NEW_PLAN_NAME_SELECTOR, PLAN_NAME_FIELD_NAME,
+} from "../allocation-plan-management-metadata";
+import { FORM_LAST_ROW_INDEX_INPUT_NAME } from "../allocation-plan-management-form";
 import { capturePlanDraft, restorePlanRows } from "./draft";
 import { renderPlanRows } from "./rendering";
 
 const FORM_ID = "allocation-plan-management-form-0";
 const ROUTE = "/portfolio/:portfolioId/allocation/manage";
+const CLONE_TRIGGER_ATTRIBUTE = "data-allocation-plan-clone";
+const CLONE_STATUS_ATTRIBUTE = "data-allocation-plan-clone-status";
 const boundLists = new WeakSet<HTMLElement>();
 
 /** Finds and validates the destination controls before changing the existing draft.
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 function destinationControls(item: HTMLElement) {
     const form = item.querySelector<HTMLFormElement>(`#${ FORM_ID }`);
     const tbody = form?.querySelector<HTMLElement>("tbody");
-    const name = item.querySelector<HTMLInputElement>(".allocation-plan-management-new-name");
-    const date = item.querySelector<HTMLInputElement>(".allocation-plan-management-new-date");
-    const payload = form?.elements.namedItem("name");
-    const counter = form?.elements.namedItem("last-planned-allocation-row-index");
+    const name = item.querySelector<HTMLInputElement>(NEW_PLAN_NAME_SELECTOR);
+    const date = item.querySelector<HTMLInputElement>(NEW_PLAN_DATE_SELECTOR);
+    const payload = form?.elements.namedItem(PLAN_NAME_FIELD_NAME);
+    const counter = form?.elements.namedItem(FORM_LAST_ROW_INDEX_INPUT_NAME);
 
     if(!form || !tbody || !name || !date) {
         throw new Error("Allocation plan destination controls are unavailable.");
@@ -103,7 +110,7 @@ export function bindAllocationPlanCloning(list: HTMLElement, template: () => Tem
     const isSaving = bindCloneRequestGuards(list, () => coordinator.cancel(), FORM_ID);
 
     list.addEventListener("click", event => {
-        const button = (event.target as Element)?.closest<HTMLButtonElement>("[data-allocation-plan-clone]");
+        const button = (event.target as Element)?.closest<HTMLButtonElement>(`[${ CLONE_TRIGGER_ATTRIBUTE }]`);
 
         if(!button || !list.contains(button)) {
             return;
@@ -116,7 +123,7 @@ export function bindAllocationPlanCloning(list: HTMLElement, template: () => Tem
         const destination = list.querySelector<HTMLFormElement>(`#${ FORM_ID }`)
             ?.closest<HTMLElement>(".accordion-item");
 
-        const status = item?.querySelector<HTMLElement>("[data-allocation-plan-clone-status]");
+        const status = item?.querySelector<HTMLElement>(`[${ CLONE_STATUS_ATTRIBUTE }]`);
 
         if(!item || !source || !destination || !status) {
             return;

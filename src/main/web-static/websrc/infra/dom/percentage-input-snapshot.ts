@@ -3,7 +3,9 @@
  * percentage input without invoking its conversion or validation handlers.
  * @module infra/dom/percentage-input-snapshot
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
+import { PERCENTAGE_INPUT_ATTRIBUTE, PERCENTAGE_INPUT_CONTAINER_ATTRIBUTE } from "./binding-percentage-input";
 
 /** Browser-exposed values of a bound percentage input.
  * @author GPT-6.1 Terra
@@ -15,20 +17,21 @@ export type PercentageInputSnapshot = {
 
 /** Finds and validates the hidden fraction associated with a visible input.
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 function fractionInputFor(display: HTMLInputElement): HTMLInputElement {
     const container = display.parentElement;
     const fraction = container?.children[1];
 
-    if(!container?.hasAttribute("data-percentage-input-container")
+    if(!container?.hasAttribute(PERCENTAGE_INPUT_CONTAINER_ATTRIBUTE)
         || container.children[0] !== display
         || !(fraction instanceof HTMLInputElement)
         || fraction.type !== "hidden") {
         throw new Error("Percentage input is not bound.");
     }
 
-    if(fraction.name !== display.getAttribute("data-percentage-input")
-        || container.getAttribute("data-percentage-input-container") !== fraction.name) {
+    if(fraction.name !== display.getAttribute(PERCENTAGE_INPUT_ATTRIBUTE)
+        || container.getAttribute(PERCENTAGE_INPUT_CONTAINER_ATTRIBUTE) !== fraction.name) {
         throw new Error("Percentage input is not bound.");
     }
 
