@@ -1,23 +1,23 @@
 # Graph Report - web-static  (2026-11-15)
 
 ## Corpus Check
-- 122 files · ~54,372 words
+- 122 files · ~54,398 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 3 file(s) not represented in the graph (top: (none) 2, .scss 1)
 
 ## Summary
-- 988 nodes · 2310 edges · 60 communities (54 shown, 6 thin omitted)
+- 988 nodes · 2312 edges · 58 communities (52 shown, 6 thin omitted)
 - Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 127 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `8bdcaa7a`
+- Built from commit: `3dc3c44d`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - bindObservationCloning
-- asset-external.ts
+- asset.ts
 - allocation-plan-management-metadata/index.ts
 - allocation-plan.ts
 - AssetRowController
@@ -48,8 +48,6 @@
 - Portfolio History Pagination
 - compilerOptions
 - application/index.ts
-- asset.ts
-- Allocation Plan Pagination
 - focusOnAcceptedRecord
 - AssetSearchAutocompleteController
 - controls.ts
@@ -90,16 +88,16 @@
 10. `AutocompleteControllerActions` - 13 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `portfolio-history portfolio context selector` --conceptually_related_to--> `getContextId()`  [INFERRED]
+  websrc/components/portfolio-history/portfolio-history.html → websrc/components/paginated-list/context.ts
 - `allocation-plan portfolio context selector` --references--> `getContextId()`  [EXTRACTED]
   websrc/components/allocation-plan/allocation-plan.html → websrc/components/paginated-list/context.ts
 - `allocation-plan-management portfolio context selector` --references--> `getContextId()`  [EXTRACTED]
   websrc/components/allocation-plan/allocation-plan-management.html → websrc/components/paginated-list/context.ts
-- `portfolio-history-management portfolio context selector` --references--> `getContextId()`  [EXTRACTED]
-  websrc/components/portfolio-history/portfolio-history-management.html → websrc/components/paginated-list/context.ts
-- `portfolio-history portfolio context selector` --conceptually_related_to--> `getContextId()`  [INFERRED]
-  websrc/components/portfolio-history/portfolio-history.html → websrc/components/paginated-list/context.ts
 - `allocation-plan-management persisted record focus markers` --references--> `focusOnAcceptedRecord()`  [EXTRACTED]
   websrc/components/allocation-plan/allocation-plan-management.html → websrc/components/paginated-list/controls.ts
+- `portfolio-history persisted record focus markers` --conceptually_related_to--> `focusOnAcceptedRecord()`  [INFERRED]
+  websrc/components/portfolio-history/portfolio-history.html → websrc/components/paginated-list/controls.ts
 
 ## Import Cycles
 - 3-file cycle: `websrc/infra/htmx/index.ts -> websrc/infra/routing/index.ts -> websrc/infra/routing/binding-htmx-trigger-on-route.ts -> websrc/infra/htmx/index.ts`
@@ -108,19 +106,19 @@
 - **Portfolio HTMX Route Flow** — src_main_web_static_root_htmx_lazy_route_loading, src_main_web_static_websrc_pages_portfolios_portfolio_list_page, websrc_pages_portfolio_portfolio_detail_page [EXTRACTED 1.00]
 - **Portfolio Allocation User Interface Flow** — src_main_web_static_websrc_components_portfolio_navigation_portfolio_section_navigation, websrc_components_portfolio_history_portfolio_history_portfolio_history_viewer, websrc_components_allocation_plan_allocation_plan_allocation_plan_viewer, src_main_web_static_websrc_components_allocation_map_allocation_map, src_main_web_static_websrc_components_asset_composed_columns_input_asset_composed_columns_input [INFERRED 0.85]
 
-## Communities (60 total, 6 thin omitted)
+## Communities (58 total, 6 thin omitted)
 
 ### Community 0 - "bindObservationCloning"
 Cohesion: 0.22
 Nodes (14): bootstrap, bindAllocationPlanCloning(), presentDraft(), CloneCoordinator, focusDraftDestination(), openPanel(), bindCloneRequestGuards(), CloneOperation (+6 more)
 
-### Community 1 - "asset-external.ts"
-Cohesion: 0.15
-Nodes (24): handlebarsInfra, addExternalAsset(), clearSearch(), Draft, drafts, fillEmptyAssetFields(), handleExternalSearchAfterRequest(), hasValidExternalData() (+16 more)
+### Community 1 - "asset.ts"
+Cohesion: 0.10
+Nodes (31): Asset, ExternalAsset, handlebarsInfra, AssetBeforeSwapEvent, AssetRequestEvent, addExternalAsset(), clearSearch(), Draft (+23 more)
 
 ### Community 2 - "allocation-plan-management-metadata/index.ts"
-Cohesion: 0.16
-Nodes (19): Allocation Plan Date Picker, Allocation Plan Header Field Focus Opens Accordion, Allocation Plan Management, Allocation Plan New Entry Header Field Group, Allocation Plan Pencil Metadata Editor, Allocation Plan Clone Control, Dated Allocation Plan Header, handleHierarchicalIdLevelChange() (+11 more)
+Cohesion: 0.11
+Nodes (27): Allocation Plan Consistent List-to-Control Gap, Allocation Plan Icon-Only Continuation Controls, Allocation Plan Management Navigation Outside Swapped List, Allocation Plan Pagination, Allocation Plan Pagination Retry and Loading Feedback, allocation-plan portfolio context selector, Allocation Plan Terminal State Without Completion Message, Allocation Plan Viewer (+19 more)
 
 ### Community 3 - "allocation-plan.ts"
 Cohesion: 0.16
@@ -151,8 +149,8 @@ Cohesion: 0.13
 Nodes (17): bignumber.js, toChartContent(), toUnidimensionalMultiChartContent(), getValueLabel(), registerPortfolioAnalysisHandlebarsHelpers(), portfolioChart, ObservationTimestamp, PortfolioAllocation (+9 more)
 
 ### Community 11 - "allocation-plan-management.ts"
-Cohesion: 0.13
-Nodes (18): htmx.org, AllocationPlanningHierarchicalFormEntry, bindNativePlanRowSubmitGuard(), copyAssetTickersToHierarchicalIdFields(), FormRowHierarchicalStructure, getHierarchicalFieldForValidation(), removePlannedAllocationSubtree(), mapFormRowHierarchicalStructure() (+10 more)
+Cohesion: 0.12
+Nodes (20): htmx.org, AllocationPlanningHierarchicalFormEntry, bindNativePlanRowSubmitGuard(), copyAssetTickersToHierarchicalIdFields(), FormRowHierarchicalStructure, getHierarchicalFieldForValidation(), handleHierarchicalIdLevelChange(), removePlannedAllocationSubtree() (+12 more)
 
 ### Community 12 - "chart-utils.ts"
 Cohesion: 0.10
@@ -219,8 +217,8 @@ Cohesion: 0.24
 Nodes (14): captureAssetDraft(), renderRows(), AllocationDraft, captureKeys(), captureObservationDraft(), captureRow(), field(), ObservationDraft (+6 more)
 
 ### Community 29 - "Portfolio History Pagination"
-Cohesion: 0.18
-Nodes (12): Allocation Map, Portfolio Section Navigation, History Management Navigation Outside Swapped List Revealed After List Swap, Portfolio History Consistent List-to-Control Gap, Portfolio History Icon-Only Continuation Controls, Portfolio History Item-Only Template, Portfolio History Pagination, Portfolio History Pagination Retry and Loading Feedback (+4 more)
+Cohesion: 0.17
+Nodes (13): Allocation Map, Portfolio Section Navigation, History Management Navigation Outside Swapped List Revealed After List Swap, Portfolio History Consistent List-to-Control Gap, Portfolio History Icon-Only Continuation Controls, Portfolio History Item-Only Template, Portfolio History Pagination, Portfolio History Pagination Retry and Loading Feedback (+5 more)
 
 ### Community 30 - "compilerOptions"
 Cohesion: 0.17
@@ -230,17 +228,9 @@ Nodes (11): compilerOptions, esModuleInterop, isolatedModules, lib, module, modu
 Cohesion: 0.14
 Nodes (16): AllocationPlanPageItem, AllocationPlanViewPage, registerAllocationPlanPageTransform(), transformAllocationPlanView(), HistoryPageItem, registerPortfolioHistoryPageTransform(), transformPortfolioHistoryView(), allocationPlanManagement (+8 more)
 
-### Community 32 - "asset.ts"
-Cohesion: 0.16
-Nodes (7): Asset, ExternalAsset, AssetBeforeSwapEvent, AssetRequestEvent, handleExternalSearchBeforeRequest(), getAssetIdentifierFromLocation(), getCurrentAssetIdentifierForResponse()
-
-### Community 33 - "Allocation Plan Pagination"
-Cohesion: 0.24
-Nodes (10): Allocation Plan Consistent List-to-Control Gap, Allocation Plan Icon-Only Continuation Controls, Allocation Plan Management Navigation Outside Swapped List, Allocation Plan Pagination, Allocation Plan Pagination Retry and Loading Feedback, allocation-plan portfolio context selector, Allocation Plan Terminal State Without Completion Message, Allocation Plan Viewer (+2 more)
-
 ### Community 34 - "focusOnAcceptedRecord"
-Cohesion: 0.20
-Nodes (10): allocation-plan persisted record focus markers, focusOnAcceptedRecord(), Portfolio History Management Consistent List-to-Control Gap, Portfolio History Management Icon-Only Continuation Controls, Portfolio History Management Pagination, Portfolio History Management Pagination Retry and Loading Feedback, portfolio-history-management persisted record focus markers, portfolio-history-management portfolio context selector (+2 more)
+Cohesion: 0.22
+Nodes (9): allocation-plan persisted record focus markers, focusOnAcceptedRecord(), Portfolio History Management Consistent List-to-Control Gap, Portfolio History Management Icon-Only Continuation Controls, Portfolio History Management Pagination, Portfolio History Management Pagination Retry and Loading Feedback, portfolio-history-management persisted record focus markers, Portfolio History Management Terminal State Without Completion Message (+1 more)
 
 ### Community 35 - "AssetSearchAutocompleteController"
 Cohesion: 0.17
@@ -344,7 +334,7 @@ _Questions this graph is uniquely positioned to answer:_
   _`registerHandlebarsLangHelpers()` has 16 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `{ createProxyMiddleware }`, `fs`, `path` to the rest of the system?**
   _182 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `asset-external.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.14666666666666667 - nodes in this community are weakly interconnected._
-- **Should `handlebars-lang.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.07407407407407407 - nodes in this community are weakly interconnected._
+- **Should `asset.ts` be split into smaller, more focused modules?**
+  _Cohesion score 0.09851551956815115 - nodes in this community are weakly interconnected._
+- **Should `allocation-plan-management-metadata/index.ts` be split into smaller, more focused modules?**
+  _Cohesion score 0.10582010582010581 - nodes in this community are weakly interconnected._

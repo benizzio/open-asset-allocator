@@ -59,6 +59,10 @@ HtmxInfra.htmxTransformResponse.registerTransformResponseFunction(
     mapForAllocationPlanManagement,
 );
 
+/** Propagates class changes and refreshes duplicate validity, including cleared classes.
+ * @author GPT-6.1 Sol
+ * @author benizzio
+ */
 function handleHierarchicalIdLevelChange(targetElement: HTMLInputElement) {
 
     const ancestorTable = targetElement.closest("form");
@@ -82,6 +86,10 @@ function handleHierarchicalIdLevelChange(targetElement: HTMLInputElement) {
     spansToUpdate.forEach((span) => {
         span.textContent = targetElement.value;
     });
+
+    targetElement.setCustomValidity("");
+    const hierarchySize = PortfolioPage.getContextPortfolio().allocationStructure.hierarchy.length;
+    validateDuplicateEntries(mapPlannedAllocationFormEntriesPerHierarchicalKey(ancestorTable, hierarchySize));
 }
 
 function createNewPlannedAllocation(

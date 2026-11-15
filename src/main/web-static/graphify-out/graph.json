@@ -61,13 +61,65 @@
       "source_location": "L15"
     },
     {
+      "id": "websrc_domain_asset_index_asset",
+      "label": "Asset",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "asset.ts",
+      "file_type": "code",
+      "norm_label": "asset",
+      "source_file": "websrc/domain/asset/index.ts",
+      "source_location": "L21"
+    },
+    {
+      "id": "websrc_domain_asset_index_externalasset",
+      "label": "ExternalAsset",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "asset.ts",
+      "file_type": "code",
+      "norm_label": "externalasset",
+      "source_file": "websrc/domain/asset/index.ts",
+      "source_location": "L39"
+    },
+    {
+      "id": "websrc_pages_asset_assetbeforeswapevent",
+      "label": "AssetBeforeSwapEvent",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "asset.ts",
+      "file_type": "code",
+      "norm_label": "assetbeforeswapevent",
+      "source_file": "websrc/pages/asset.ts",
+      "source_location": "L37"
+    },
+    {
+      "id": "websrc_pages_asset_assetrequestevent",
+      "label": "AssetRequestEvent",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "asset.ts",
+      "file_type": "code",
+      "norm_label": "assetrequestevent",
+      "source_file": "websrc/pages/asset.ts",
+      "source_location": "L32"
+    },
+    {
       "id": "websrc_pages_asset_external_draft",
       "label": "Draft",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "asset-external.ts",
+      "community_name": "asset.ts",
       "file_type": "code",
       "norm_label": "draft",
       "source_file": "websrc/pages/asset-external.ts",
@@ -80,7 +132,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "asset-external.ts",
+      "community_name": "asset.ts",
       "file_type": "code",
       "norm_label": "searchevent",
       "source_file": "websrc/pages/asset-external.ts",
@@ -906,58 +958,6 @@
       "source_location": "L30"
     },
     {
-      "id": "websrc_domain_asset_index_asset",
-      "label": "Asset",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "asset.ts",
-      "file_type": "code",
-      "norm_label": "asset",
-      "source_file": "websrc/domain/asset/index.ts",
-      "source_location": "L21"
-    },
-    {
-      "id": "websrc_domain_asset_index_externalasset",
-      "label": "ExternalAsset",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "asset.ts",
-      "file_type": "code",
-      "norm_label": "externalasset",
-      "source_file": "websrc/domain/asset/index.ts",
-      "source_location": "L39"
-    },
-    {
-      "id": "websrc_pages_asset_assetbeforeswapevent",
-      "label": "AssetBeforeSwapEvent",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "asset.ts",
-      "file_type": "code",
-      "norm_label": "assetbeforeswapevent",
-      "source_file": "websrc/pages/asset.ts",
-      "source_location": "L37"
-    },
-    {
-      "id": "websrc_pages_asset_assetrequestevent",
-      "label": "AssetRequestEvent",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "asset.ts",
-      "file_type": "code",
-      "norm_label": "assetrequestevent",
-      "source_file": "websrc/pages/asset.ts",
-      "source_location": "L32"
-    },
-    {
       "id": "websrc_components_asset_composed_columns_input_autocomplete_controller_assetsearchautocompletecontroller",
       "label": "AssetSearchAutocompleteController",
       "_callable": true,
@@ -1573,7 +1573,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "asset-external.ts",
+      "community_name": "asset.ts",
       "file_type": "code",
       "norm_label": "addexternalasset()",
       "source_file": "websrc/pages/asset-external.ts",
@@ -1585,7 +1585,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "asset-external.ts",
+      "community_name": "asset.ts",
       "file_type": "code",
       "norm_label": "clearsearch()",
       "source_file": "websrc/pages/asset-external.ts",
@@ -1597,7 +1597,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "asset-external.ts",
+      "community_name": "asset.ts",
       "file_type": "code",
       "norm_label": "fillemptyassetfields()",
       "source_file": "websrc/pages/asset-external.ts",
@@ -1609,11 +1609,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "asset-external.ts",
+      "community_name": "asset.ts",
       "file_type": "code",
       "norm_label": "handleexternalsearchafterrequest()",
       "source_file": "websrc/pages/asset-external.ts",
       "source_location": "L258"
+    },
+    {
+      "id": "websrc_pages_asset_external_handleexternalsearchbeforerequest",
+      "label": "handleExternalSearchBeforeRequest()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "asset.ts",
+      "file_type": "code",
+      "norm_label": "handleexternalsearchbeforerequest()",
+      "source_file": "websrc/pages/asset-external.ts",
+      "source_location": "L240"
     },
     {
       "id": "websrc_pages_asset_external_hasvalidexternaldata",
@@ -1621,7 +1633,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "asset-external.ts",
+      "community_name": "asset.ts",
       "file_type": "code",
       "norm_label": "hasvalidexternaldata()",
       "source_file": "websrc/pages/asset-external.ts",
@@ -1633,7 +1645,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "asset-external.ts",
+      "community_name": "asset.ts",
       "file_type": "code",
       "norm_label": "initializeexternaldraft()",
       "source_file": "websrc/pages/asset-external.ts",
@@ -1645,7 +1657,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "asset-external.ts",
+      "community_name": "asset.ts",
       "file_type": "code",
       "norm_label": "isexternalasset()",
       "source_file": "websrc/pages/asset-external.ts",
@@ -1657,7 +1669,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "asset-external.ts",
+      "community_name": "asset.ts",
       "file_type": "code",
       "norm_label": "moveexternalasset()",
       "source_file": "websrc/pages/asset-external.ts",
@@ -1669,7 +1681,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "asset-external.ts",
+      "community_name": "asset.ts",
       "file_type": "code",
       "norm_label": "persistedrecord()",
       "source_file": "websrc/pages/asset-external.ts",
@@ -1681,7 +1693,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "asset-external.ts",
+      "community_name": "asset.ts",
       "file_type": "code",
       "norm_label": "removeexternalasset()",
       "source_file": "websrc/pages/asset-external.ts",
@@ -1693,7 +1705,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "asset-external.ts",
+      "community_name": "asset.ts",
       "file_type": "code",
       "norm_label": "renderrecords()",
       "source_file": "websrc/pages/asset-external.ts",
@@ -1705,7 +1717,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "asset-external.ts",
+      "community_name": "asset.ts",
       "file_type": "code",
       "norm_label": "searchexternalassets()",
       "source_file": "websrc/pages/asset-external.ts",
@@ -1717,7 +1729,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "asset-external.ts",
+      "community_name": "asset.ts",
       "file_type": "code",
       "norm_label": "showerror()",
       "source_file": "websrc/pages/asset-external.ts",
@@ -1729,7 +1741,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "asset-external.ts",
+      "community_name": "asset.ts",
       "file_type": "code",
       "norm_label": "showinformation()",
       "source_file": "websrc/pages/asset-external.ts",
@@ -1741,7 +1753,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "asset-external.ts",
+      "community_name": "asset.ts",
       "file_type": "code",
       "norm_label": "showmessage()",
       "source_file": "websrc/pages/asset-external.ts",
@@ -1753,7 +1765,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "asset-external.ts",
+      "community_name": "asset.ts",
       "file_type": "code",
       "norm_label": "showwarning()",
       "source_file": "websrc/pages/asset-external.ts",
@@ -1765,11 +1777,47 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "asset-external.ts",
+      "community_name": "asset.ts",
       "file_type": "code",
       "norm_label": "updatepayload()",
       "source_file": "websrc/pages/asset-external.ts",
       "source_location": "L39"
+    },
+    {
+      "id": "websrc_pages_asset_getassetidentifierfromlocation",
+      "label": "getAssetIdentifierFromLocation()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "asset.ts",
+      "file_type": "code",
+      "norm_label": "getassetidentifierfromlocation()",
+      "source_file": "websrc/pages/asset.ts",
+      "source_location": "L89"
+    },
+    {
+      "id": "websrc_pages_asset_getcurrentassetidentifierforresponse",
+      "label": "getCurrentAssetIdentifierForResponse()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "asset.ts",
+      "file_type": "code",
+      "norm_label": "getcurrentassetidentifierforresponse()",
+      "source_file": "websrc/pages/asset.ts",
+      "source_location": "L99"
+    },
+    {
+      "id": "websrc_pages_asset_isassetformresponse",
+      "label": "isAssetFormResponse()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "asset.ts",
+      "file_type": "code",
+      "norm_label": "isassetformresponse()",
+      "source_file": "websrc/pages/asset.ts",
+      "source_location": "L48"
     },
     {
       "id": "websrc_pages_asset_normalizeasset",
@@ -1777,11 +1825,35 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "asset-external.ts",
+      "community_name": "asset.ts",
       "file_type": "code",
       "norm_label": "normalizeasset()",
       "source_file": "websrc/pages/asset.ts",
       "source_location": "L58"
+    },
+    {
+      "id": "websrc_pages_asset_notifysuccess",
+      "label": "notifySuccess()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "asset.ts",
+      "file_type": "code",
+      "norm_label": "notifysuccess()",
+      "source_file": "websrc/pages/asset.ts",
+      "source_location": "L141"
+    },
+    {
+      "id": "websrc_pages_asset_notifyunexpectedresponse",
+      "label": "notifyUnexpectedResponse()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "asset.ts",
+      "file_type": "code",
+      "norm_label": "notifyunexpectedresponse()",
+      "source_file": "websrc/pages/asset.ts",
+      "source_location": "L149"
     },
     {
       "id": "websrc_pages_asset_renderassetform",
@@ -1789,11 +1861,35 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "asset-external.ts",
+      "community_name": "asset.ts",
       "file_type": "code",
       "norm_label": "renderassetform()",
       "source_file": "websrc/pages/asset.ts",
       "source_location": "L115"
+    },
+    {
+      "id": "websrc_pages_asset_renderassetloaderror",
+      "label": "renderAssetLoadError()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "asset.ts",
+      "file_type": "code",
+      "norm_label": "renderassetloaderror()",
+      "source_file": "websrc/pages/asset.ts",
+      "source_location": "L178"
+    },
+    {
+      "id": "websrc_pages_asset_renderlisterror",
+      "label": "renderListError()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "asset.ts",
+      "file_type": "code",
+      "norm_label": "renderlisterror()",
+      "source_file": "websrc/pages/asset.ts",
+      "source_location": "L157"
     },
     {
       "id": "websrc_application_chart_contents_tochartcontent",
@@ -1865,7 +1961,7 @@
       "file_type": "code",
       "norm_label": "bindallocationplanformvalidationguards()",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L395"
+      "source_location": "L403"
     },
     {
       "id": "websrc_components_allocation_plan_allocation_plan_management_bindnativeplanrowsubmitguard",
@@ -1877,7 +1973,7 @@
       "file_type": "code",
       "norm_label": "bindnativeplanrowsubmitguard()",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L368"
+      "source_location": "L376"
     },
     {
       "id": "websrc_components_allocation_plan_allocation_plan_management_copyassettickerstohierarchicalidfields",
@@ -1889,7 +1985,7 @@
       "file_type": "code",
       "norm_label": "copyassettickerstohierarchicalidfields()",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L201"
+      "source_location": "L209"
     },
     {
       "id": "websrc_components_allocation_plan_allocation_plan_management_createnewplannedallocation",
@@ -1901,7 +1997,7 @@
       "file_type": "code",
       "norm_label": "createnewplannedallocation()",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L87"
+      "source_location": "L95"
     },
     {
       "id": "websrc_components_allocation_plan_allocation_plan_management_gethierarchicalfieldforvalidation",
@@ -1913,7 +2009,19 @@
       "file_type": "code",
       "norm_label": "gethierarchicalfieldforvalidation()",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L228"
+      "source_location": "L236"
+    },
+    {
+      "id": "websrc_components_allocation_plan_allocation_plan_management_handlehierarchicalidlevelchange",
+      "label": "handleHierarchicalIdLevelChange()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "allocation-plan-management.ts",
+      "file_type": "code",
+      "norm_label": "handlehierarchicalidlevelchange()",
+      "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
+      "source_location": "L66"
     },
     {
       "id": "websrc_components_allocation_plan_allocation_plan_management_hierarchy_index_removeplannedallocationsubtree",
@@ -1937,7 +2045,7 @@
       "file_type": "code",
       "norm_label": "mapformrowhierarchicalstructure()",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L242"
+      "source_location": "L250"
     },
     {
       "id": "websrc_components_allocation_plan_allocation_plan_management_mapplannedallocationformentriesperhierarchicalkey",
@@ -1949,7 +2057,7 @@
       "file_type": "code",
       "norm_label": "mapplannedallocationformentriesperhierarchicalkey()",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L284"
+      "source_location": "L292"
     },
     {
       "id": "websrc_components_allocation_plan_allocation_plan_management_prepareplanrowsforsubmit",
@@ -1961,7 +2069,7 @@
       "file_type": "code",
       "norm_label": "prepareplanrowsforsubmit()",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L355"
+      "source_location": "L363"
     },
     {
       "id": "websrc_components_allocation_plan_allocation_plan_management_response_response_mapforallocationplanmanagement",
@@ -1997,7 +2105,7 @@
       "file_type": "code",
       "norm_label": "validateduplicateentries()",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L319"
+      "source_location": "L327"
     },
     {
       "id": "websrc_infra_chart_chart_destroydescendantcharts",
@@ -2922,18 +3030,6 @@
       "norm_label": "parseintordefault()",
       "source_file": "websrc/utils/lang.ts",
       "source_location": "L653"
-    },
-    {
-      "id": "websrc_components_allocation_plan_allocation_plan_management_handlehierarchicalidlevelchange",
-      "label": "handleHierarchicalIdLevelChange()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "allocation-plan-management-metadata/index.ts",
-      "file_type": "code",
-      "norm_label": "handlehierarchicalidlevelchange()",
-      "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L62"
     },
     {
       "id": "websrc_components_allocation_plan_allocation_plan_management_metadata_index_activateallocationplaneditor",
@@ -4194,102 +4290,6 @@
       "norm_label": "transformportfoliohistoryview()",
       "source_file": "websrc/application/portfolio-history-pagination.ts",
       "source_location": "L21"
-    },
-    {
-      "id": "websrc_pages_asset_external_handleexternalsearchbeforerequest",
-      "label": "handleExternalSearchBeforeRequest()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "asset.ts",
-      "file_type": "code",
-      "norm_label": "handleexternalsearchbeforerequest()",
-      "source_file": "websrc/pages/asset-external.ts",
-      "source_location": "L240"
-    },
-    {
-      "id": "websrc_pages_asset_getassetidentifierfromlocation",
-      "label": "getAssetIdentifierFromLocation()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "asset.ts",
-      "file_type": "code",
-      "norm_label": "getassetidentifierfromlocation()",
-      "source_file": "websrc/pages/asset.ts",
-      "source_location": "L89"
-    },
-    {
-      "id": "websrc_pages_asset_getcurrentassetidentifierforresponse",
-      "label": "getCurrentAssetIdentifierForResponse()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "asset.ts",
-      "file_type": "code",
-      "norm_label": "getcurrentassetidentifierforresponse()",
-      "source_file": "websrc/pages/asset.ts",
-      "source_location": "L99"
-    },
-    {
-      "id": "websrc_pages_asset_isassetformresponse",
-      "label": "isAssetFormResponse()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "asset.ts",
-      "file_type": "code",
-      "norm_label": "isassetformresponse()",
-      "source_file": "websrc/pages/asset.ts",
-      "source_location": "L48"
-    },
-    {
-      "id": "websrc_pages_asset_notifysuccess",
-      "label": "notifySuccess()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "asset.ts",
-      "file_type": "code",
-      "norm_label": "notifysuccess()",
-      "source_file": "websrc/pages/asset.ts",
-      "source_location": "L141"
-    },
-    {
-      "id": "websrc_pages_asset_notifyunexpectedresponse",
-      "label": "notifyUnexpectedResponse()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "asset.ts",
-      "file_type": "code",
-      "norm_label": "notifyunexpectedresponse()",
-      "source_file": "websrc/pages/asset.ts",
-      "source_location": "L149"
-    },
-    {
-      "id": "websrc_pages_asset_renderassetloaderror",
-      "label": "renderAssetLoadError()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "asset.ts",
-      "file_type": "code",
-      "norm_label": "renderassetloaderror()",
-      "source_file": "websrc/pages/asset.ts",
-      "source_location": "L178"
-    },
-    {
-      "id": "websrc_pages_asset_renderlisterror",
-      "label": "renderListError()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "asset.ts",
-      "file_type": "code",
-      "norm_label": "renderlisterror()",
-      "source_file": "websrc/pages/asset.ts",
-      "source_location": "L157"
     },
     {
       "id": "websrc_components_paginated_list_controls_focusonacceptedrecord",
@@ -5717,7 +5717,7 @@
       "file_type": "code",
       "norm_label": "addplannedallocationrow()",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L154"
+      "source_location": "L162"
     },
     {
       "id": "websrc_components_allocation_plan_allocation_plan_management_sethierarchicalidfromparentrow",
@@ -5729,7 +5729,7 @@
       "file_type": "code",
       "norm_label": "sethierarchicalidfromparentrow()",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L124"
+      "source_location": "L132"
     },
     {
       "id": "websrc_components_portfolio_history_portfolio_history_management_getnextportfoliohistorymanagementindex",
@@ -7118,22 +7118,44 @@
       "source_location": "L24"
     },
     {
+      "id": "websrc_domain_asset_index",
+      "label": "asset/index.ts",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "asset.ts",
+      "file_type": "code",
+      "norm_label": "asset/index.ts",
+      "source_file": "websrc/domain/asset/index.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "websrc_infra_handlebars_index_handlebarsinfra",
       "label": "handlebarsInfra",
       "_origin": "ast",
       "community": 1,
-      "community_name": "asset-external.ts",
+      "community_name": "asset.ts",
       "file_type": "code",
       "norm_label": "handlebarsinfra",
       "source_file": "websrc/infra/handlebars/index.ts",
       "source_location": "L30"
     },
     {
+      "id": "websrc_pages_asset",
+      "label": "asset.ts",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "asset.ts",
+      "file_type": "code",
+      "norm_label": "asset.ts",
+      "source_file": "websrc/pages/asset.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "websrc_pages_asset_external",
       "label": "asset-external.ts",
       "_origin": "ast",
       "community": 1,
-      "community_name": "asset-external.ts",
+      "community_name": "asset.ts",
       "file_type": "code",
       "norm_label": "asset-external.ts",
       "source_file": "websrc/pages/asset-external.ts",
@@ -7144,7 +7166,7 @@
       "label": "drafts",
       "_origin": "ast",
       "community": 1,
-      "community_name": "asset-external.ts",
+      "community_name": "asset.ts",
       "file_type": "code",
       "norm_label": "drafts",
       "source_file": "websrc/pages/asset-external.ts",
@@ -7155,7 +7177,7 @@
       "label": "requestSequences",
       "_origin": "ast",
       "community": 1,
-      "community_name": "asset-external.ts",
+      "community_name": "asset.ts",
       "file_type": "code",
       "norm_label": "requestsequences",
       "source_file": "websrc/pages/asset-external.ts",
@@ -9073,7 +9095,7 @@
       "file_type": "code",
       "norm_label": "allocationplanmanagement",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L400"
+      "source_location": "L408"
     },
     {
       "id": "websrc_components_allocation_plan_index",
@@ -9173,28 +9195,6 @@
       "norm_label": "assetpage",
       "source_file": "websrc/pages/asset.ts",
       "source_location": "L223"
-    },
-    {
-      "id": "websrc_domain_asset_index",
-      "label": "asset/index.ts",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "asset.ts",
-      "file_type": "code",
-      "norm_label": "asset/index.ts",
-      "source_file": "websrc/domain/asset/index.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "websrc_pages_asset",
-      "label": "asset.ts",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "asset.ts",
-      "file_type": "code",
-      "norm_label": "asset.ts",
-      "source_file": "websrc/pages/asset.ts",
-      "source_location": "L1"
     },
     {
       "id": "websrc_components_asset_composed_columns_input_outside_pointer_dismissal",
@@ -10605,6 +10605,171 @@
       "source_location": "L34"
     },
     {
+      "id": "websrc_components_allocation_plan_allocation_plan_management_recursive_planned_allocation_rows",
+      "label": "Recursive Planned Allocation Rows",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 11,
+      "community_name": "allocation-plan-management.ts",
+      "contributor": null,
+      "file_type": "document",
+      "norm_label": "recursive planned allocation rows",
+      "source_file": "websrc/components/allocation-plan/allocation-plan-management.html",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "websrc_components_allocation_plan_allocation_plan_allocation_plan_consistent_list_to_control_gap",
+      "label": "Allocation Plan Consistent List-to-Control Gap",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 2,
+      "community_name": "allocation-plan-management-metadata/index.ts",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "allocation plan consistent list-to-control gap",
+      "source_file": "websrc/components/allocation-plan/allocation-plan.html",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "websrc_components_allocation_plan_allocation_plan_allocation_plan_icon_only_continuation_controls",
+      "label": "Allocation Plan Icon-Only Continuation Controls",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 2,
+      "community_name": "allocation-plan-management-metadata/index.ts",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "allocation plan icon-only continuation controls",
+      "source_file": "websrc/components/allocation-plan/allocation-plan.html",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "websrc_components_allocation_plan_allocation_plan_allocation_plan_management_navigation_outside_swapped_list",
+      "label": "Allocation Plan Management Navigation Outside Swapped List",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 2,
+      "community_name": "allocation-plan-management-metadata/index.ts",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "allocation plan management navigation outside swapped list",
+      "source_file": "websrc/components/allocation-plan/allocation-plan.html",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "websrc_components_allocation_plan_allocation_plan_allocation_plan_pagination",
+      "label": "Allocation Plan Pagination",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 2,
+      "community_name": "allocation-plan-management-metadata/index.ts",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "allocation plan pagination",
+      "source_file": "websrc/components/allocation-plan/allocation-plan.html",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "websrc_components_allocation_plan_allocation_plan_allocation_plan_pagination_retry_and_loading_feedback",
+      "label": "Allocation Plan Pagination Retry and Loading Feedback",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 2,
+      "community_name": "allocation-plan-management-metadata/index.ts",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "allocation plan pagination retry and loading feedback",
+      "source_file": "websrc/components/allocation-plan/allocation-plan.html",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "websrc_components_allocation_plan_allocation_plan_allocation_plan_portfolio_context_selector",
+      "label": "allocation-plan portfolio context selector",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 2,
+      "community_name": "allocation-plan-management-metadata/index.ts",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "allocation-plan portfolio context selector",
+      "source_file": "websrc/components/allocation-plan/allocation-plan.html",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "websrc_components_allocation_plan_allocation_plan_allocation_plan_terminal_state_without_completion_message",
+      "label": "Allocation Plan Terminal State Without Completion Message",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 2,
+      "community_name": "allocation-plan-management-metadata/index.ts",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "allocation plan terminal state without completion message",
+      "source_file": "websrc/components/allocation-plan/allocation-plan.html",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "websrc_components_allocation_plan_allocation_plan_allocation_plan_wrapper_owned_bottom_padding_of_half_the_bootstrap_horizontal_gutter_independent_of_hidden_pagination_controls",
+      "label": "Allocation Plan Wrapper-Owned Bottom Padding of Half the Bootstrap Horizontal Gutter, Independent of Hidden Pagination Controls",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 2,
+      "community_name": "allocation-plan-management-metadata/index.ts",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "allocation plan wrapper-owned bottom padding of half the bootstrap horizontal gutter, independent of hidden pagination controls",
+      "source_file": "websrc/components/allocation-plan/allocation-plan.html",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "websrc_components_allocation_plan_allocation_plan_route_controlled_allocation_plan_and_management_views",
+      "label": "Route-Controlled Allocation Plan and Management Views",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 2,
+      "community_name": "allocation-plan-management-metadata/index.ts",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "route-controlled allocation plan and management views",
+      "source_file": "websrc/components/allocation-plan/allocation-plan.html",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "websrc_components_allocation_plan_allocation_plan_allocation_plan_viewer",
+      "label": "Allocation Plan Viewer",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 2,
+      "community_name": "allocation-plan-management-metadata/index.ts",
+      "contributor": null,
+      "file_type": "document",
+      "norm_label": "allocation plan viewer",
+      "source_file": "websrc/components/allocation-plan/allocation-plan.html",
+      "source_location": null,
+      "source_url": null
+    },
+    {
       "id": "websrc_components_allocation_plan_allocation_plan_management_allocation_plan_date_picker",
       "label": "Allocation Plan Date Picker",
       "_origin": "semantic",
@@ -10690,21 +10855,6 @@
       "contributor": null,
       "file_type": "document",
       "norm_label": "dated allocation plan header",
-      "source_file": "websrc/components/allocation-plan/allocation-plan-management.html",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "websrc_components_allocation_plan_allocation_plan_management_recursive_planned_allocation_rows",
-      "label": "Recursive Planned Allocation Rows",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 2,
-      "community_name": "allocation-plan-management-metadata/index.ts",
-      "contributor": null,
-      "file_type": "document",
-      "norm_label": "recursive planned allocation rows",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.html",
       "source_location": null,
       "source_url": null
@@ -10995,6 +11145,21 @@
       "source_url": null
     },
     {
+      "id": "websrc_components_portfolio_history_portfolio_history_portfolio_history_portfolio_context_selector",
+      "label": "portfolio-history portfolio context selector",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 29,
+      "community_name": "Portfolio History Pagination",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "portfolio-history portfolio context selector",
+      "source_file": "websrc/components/portfolio-history/portfolio-history.html",
+      "source_location": null,
+      "source_url": null
+    },
+    {
       "id": "websrc_components_portfolio_history_portfolio_history_portfolio_history_terminal_state_without_completion_message",
       "label": "Portfolio History Terminal State Without Completion Message",
       "_origin": "semantic",
@@ -11085,156 +11250,6 @@
       "source_url": null
     },
     {
-      "id": "websrc_components_allocation_plan_allocation_plan_allocation_plan_consistent_list_to_control_gap",
-      "label": "Allocation Plan Consistent List-to-Control Gap",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 33,
-      "community_name": "Allocation Plan Pagination",
-      "contributor": null,
-      "file_type": "concept",
-      "norm_label": "allocation plan consistent list-to-control gap",
-      "source_file": "websrc/components/allocation-plan/allocation-plan.html",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "websrc_components_allocation_plan_allocation_plan_allocation_plan_icon_only_continuation_controls",
-      "label": "Allocation Plan Icon-Only Continuation Controls",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 33,
-      "community_name": "Allocation Plan Pagination",
-      "contributor": null,
-      "file_type": "concept",
-      "norm_label": "allocation plan icon-only continuation controls",
-      "source_file": "websrc/components/allocation-plan/allocation-plan.html",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "websrc_components_allocation_plan_allocation_plan_allocation_plan_management_navigation_outside_swapped_list",
-      "label": "Allocation Plan Management Navigation Outside Swapped List",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 33,
-      "community_name": "Allocation Plan Pagination",
-      "contributor": null,
-      "file_type": "concept",
-      "norm_label": "allocation plan management navigation outside swapped list",
-      "source_file": "websrc/components/allocation-plan/allocation-plan.html",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "websrc_components_allocation_plan_allocation_plan_allocation_plan_pagination",
-      "label": "Allocation Plan Pagination",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 33,
-      "community_name": "Allocation Plan Pagination",
-      "contributor": null,
-      "file_type": "concept",
-      "norm_label": "allocation plan pagination",
-      "source_file": "websrc/components/allocation-plan/allocation-plan.html",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "websrc_components_allocation_plan_allocation_plan_allocation_plan_pagination_retry_and_loading_feedback",
-      "label": "Allocation Plan Pagination Retry and Loading Feedback",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 33,
-      "community_name": "Allocation Plan Pagination",
-      "contributor": null,
-      "file_type": "concept",
-      "norm_label": "allocation plan pagination retry and loading feedback",
-      "source_file": "websrc/components/allocation-plan/allocation-plan.html",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "websrc_components_allocation_plan_allocation_plan_allocation_plan_portfolio_context_selector",
-      "label": "allocation-plan portfolio context selector",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 33,
-      "community_name": "Allocation Plan Pagination",
-      "contributor": null,
-      "file_type": "concept",
-      "norm_label": "allocation-plan portfolio context selector",
-      "source_file": "websrc/components/allocation-plan/allocation-plan.html",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "websrc_components_allocation_plan_allocation_plan_allocation_plan_terminal_state_without_completion_message",
-      "label": "Allocation Plan Terminal State Without Completion Message",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 33,
-      "community_name": "Allocation Plan Pagination",
-      "contributor": null,
-      "file_type": "concept",
-      "norm_label": "allocation plan terminal state without completion message",
-      "source_file": "websrc/components/allocation-plan/allocation-plan.html",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "websrc_components_allocation_plan_allocation_plan_allocation_plan_wrapper_owned_bottom_padding_of_half_the_bootstrap_horizontal_gutter_independent_of_hidden_pagination_controls",
-      "label": "Allocation Plan Wrapper-Owned Bottom Padding of Half the Bootstrap Horizontal Gutter, Independent of Hidden Pagination Controls",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 33,
-      "community_name": "Allocation Plan Pagination",
-      "contributor": null,
-      "file_type": "concept",
-      "norm_label": "allocation plan wrapper-owned bottom padding of half the bootstrap horizontal gutter, independent of hidden pagination controls",
-      "source_file": "websrc/components/allocation-plan/allocation-plan.html",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "websrc_components_allocation_plan_allocation_plan_route_controlled_allocation_plan_and_management_views",
-      "label": "Route-Controlled Allocation Plan and Management Views",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 33,
-      "community_name": "Allocation Plan Pagination",
-      "contributor": null,
-      "file_type": "concept",
-      "norm_label": "route-controlled allocation plan and management views",
-      "source_file": "websrc/components/allocation-plan/allocation-plan.html",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "websrc_components_allocation_plan_allocation_plan_allocation_plan_viewer",
-      "label": "Allocation Plan Viewer",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 33,
-      "community_name": "Allocation Plan Pagination",
-      "contributor": null,
-      "file_type": "document",
-      "norm_label": "allocation plan viewer",
-      "source_file": "websrc/components/allocation-plan/allocation-plan.html",
-      "source_location": null,
-      "source_url": null
-    },
-    {
       "id": "websrc_components_allocation_plan_allocation_plan_allocation_plan_persisted_record_focus_markers",
       "label": "allocation-plan persisted record focus markers",
       "_origin": "semantic",
@@ -11320,21 +11335,6 @@
       "contributor": null,
       "file_type": "concept",
       "norm_label": "portfolio-history-management persisted record focus markers",
-      "source_file": "websrc/components/portfolio-history/portfolio-history-management.html",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "websrc_components_portfolio_history_portfolio_history_management_portfolio_history_management_portfolio_context_selector",
-      "label": "portfolio-history-management portfolio context selector",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 34,
-      "community_name": "focusOnAcceptedRecord",
-      "contributor": null,
-      "file_type": "concept",
-      "norm_label": "portfolio-history-management portfolio context selector",
       "source_file": "websrc/components/portfolio-history/portfolio-history-management.html",
       "source_location": null,
       "source_url": null
@@ -11657,8 +11657,8 @@
       "source_url": null
     },
     {
-      "id": "websrc_components_portfolio_history_portfolio_history_portfolio_history_portfolio_context_selector",
-      "label": "portfolio-history portfolio context selector",
+      "id": "websrc_components_portfolio_history_portfolio_history_management_portfolio_history_management_portfolio_context_selector",
+      "label": "portfolio-history-management portfolio context selector",
       "_origin": "semantic",
       "author": null,
       "captured_at": null,
@@ -11666,8 +11666,8 @@
       "community_name": "pagination.ts",
       "contributor": null,
       "file_type": "concept",
-      "norm_label": "portfolio-history portfolio context selector",
-      "source_file": "websrc/components/portfolio-history/portfolio-history.html",
+      "norm_label": "portfolio-history-management portfolio context selector",
+      "source_file": "websrc/components/portfolio-history/portfolio-history-management.html",
       "source_location": null,
       "source_url": null
     },
@@ -12250,7 +12250,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L167",
+      "source_location": "L175",
       "weight": 1.0
     },
     {
@@ -12262,7 +12262,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L384",
+      "source_location": "L392",
       "weight": 1.0
     },
     {
@@ -12494,6 +12494,30 @@
       "weight": 1.0
     },
     {
+      "source": "websrc_components_allocation_plan_allocation_plan_management_handlehierarchicalidlevelchange",
+      "target": "websrc_components_allocation_plan_allocation_plan_management_mapplannedallocationformentriesperhierarchicalkey",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
+      "source_location": "L92",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_allocation_plan_allocation_plan_management_handlehierarchicalidlevelchange",
+      "target": "websrc_components_allocation_plan_allocation_plan_management_validateduplicateentries",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
+      "source_location": "L92",
+      "weight": 1.0
+    },
+    {
       "source": "websrc_components_allocation_plan_allocation_plan_management_mapformrowhierarchicalstructure",
       "target": "websrc_components_allocation_plan_allocation_plan_management_gethierarchicalfieldforvalidation",
       "relation": "calls",
@@ -12502,7 +12526,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L274",
+      "source_location": "L282",
       "weight": 1.0
     },
     {
@@ -12514,7 +12538,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L291",
+      "source_location": "L299",
       "weight": 1.0
     },
     {
@@ -12622,7 +12646,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L360",
+      "source_location": "L368",
       "weight": 1.0
     },
     {
@@ -12634,7 +12658,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L361",
+      "source_location": "L369",
       "weight": 1.0
     },
     {
@@ -12646,7 +12670,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L362",
+      "source_location": "L370",
       "weight": 1.0
     },
     {
@@ -12682,7 +12706,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L142",
+      "source_location": "L150",
       "weight": 1.0
     },
     {
@@ -29501,7 +29525,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L124",
+      "source_location": "L132",
       "weight": 1.0
     },
     {
@@ -29512,7 +29536,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L154",
+      "source_location": "L162",
       "weight": 1.0
     },
     {
@@ -29523,7 +29547,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L201",
+      "source_location": "L209",
       "weight": 1.0
     },
     {
@@ -29534,7 +29558,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L228",
+      "source_location": "L236",
       "weight": 1.0
     },
     {
@@ -29545,7 +29569,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L242",
+      "source_location": "L250",
       "weight": 1.0
     },
     {
@@ -29556,7 +29580,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L284",
+      "source_location": "L292",
       "weight": 1.0
     },
     {
@@ -29567,7 +29591,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L319",
+      "source_location": "L327",
       "weight": 1.0
     },
     {
@@ -29578,18 +29602,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L355",
-      "weight": 1.0
-    },
-    {
-      "source": "websrc_components_allocation_plan_allocation_plan_management",
-      "target": "websrc_components_allocation_plan_allocation_plan_management_bindnativeplanrowsubmitguard",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L368",
+      "source_location": "L363",
       "weight": 1.0
     },
     {
@@ -29605,13 +29618,24 @@
     },
     {
       "source": "websrc_components_allocation_plan_allocation_plan_management",
+      "target": "websrc_components_allocation_plan_allocation_plan_management_bindnativeplanrowsubmitguard",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
+      "source_location": "L376",
+      "weight": 1.0
+    },
+    {
+      "source": "websrc_components_allocation_plan_allocation_plan_management",
       "target": "websrc_components_allocation_plan_allocation_plan_management_bindallocationplanformvalidationguards",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L395",
+      "source_location": "L403",
       "weight": 1.0
     },
     {
@@ -29622,7 +29646,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L400",
+      "source_location": "L408",
       "weight": 1.0
     },
     {
@@ -29655,7 +29679,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L87",
+      "source_location": "L95",
       "weight": 1.0
     },
     {
@@ -37242,7 +37266,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L442",
+      "source_location": "L450",
       "weight": 1.0
     },
     {
@@ -37254,7 +37278,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L443",
+      "source_location": "L451",
       "weight": 1.0
     },
     {
@@ -37266,7 +37290,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L445",
+      "source_location": "L453",
       "weight": 1.0
     },
     {
@@ -37278,7 +37302,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L571",
+      "source_location": "L579",
       "weight": 1.0
     },
     {
@@ -37290,7 +37314,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "websrc/components/allocation-plan/allocation-plan-management.ts",
-      "source_location": "L572",
+      "source_location": "L580",
       "weight": 1.0
     },
     {
@@ -38859,5 +38883,5 @@
       "source_file": "websrc/components/portfolio-navigation.html"
     }
   ],
-  "built_at_commit": "8bdcaa7acc725fc89b02eae67614949c2c649c5a"
+  "built_at_commit": "3dc3c44dbd6f7018fac024eee91501a57e6de48b"
 }
