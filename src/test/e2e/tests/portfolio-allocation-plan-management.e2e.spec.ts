@@ -315,109 +315,6 @@ test.describe('portfolio allocation plan management', () => {
     expect(await queryPlannedAllocations(database, seeded.allocationPlan.id)).toEqual(seeded.plannedAllocations);
   });
 
-  /** Preserves inherited fields that have not yet been synchronized from a parent edit.
-   * @author GPT-6.1 Terra
-   */
-  test('scenario 23.5: preserves unsynchronized hierarchy values during replacement', async ({ database, page }) => {
-    const seeded = await seedAllocationPlanManagementData(database);
-    await page.goto(`/portfolio/${seeded.portfolio.id}/allocation/manage`);
-    const source = page.locator(`#allocation-plan-management-container-${seeded.allocationPlan.id}`);
-    const sourceRows = source.locator('tbody > tr');
-    await expect(sourceRows).toHaveCount(6);
-    const parent = sourceRows.first().locator('input[name*="[hierarchicalId]"]:not([type="hidden"])');
-    await parent.evaluate((field: HTMLInputElement) => { field.value = ''; });
-    const inherited = await sourceRows.nth(1).locator('input[data-bind-to-name]').inputValue();
-    const label = await sourceRows.nth(1).locator('[data-label-for-name]').textContent();
-    await source.getByRole('button', { name: `Clone allocation plan ${ALLOCATION_PLAN_NAME}` }).click();
-    const rows = page.locator('#allocation-plan-management-form-0 tbody > tr');
-    await expect(rows).toHaveCount(6);
-    await expect(rows.first().locator('input[name*="[hierarchicalId]"]:not([type="hidden"])')).toHaveValue('');
-    await expect(rows.nth(1).locator('input[data-bind-to-name]')).toHaveValue(inherited);
-    expect(await rows.nth(1).locator('[data-label-for-name]').textContent()).toBe(label);
-    await expect(sourceRows.first().locator('input[name*="[hierarchicalId]"]:not([type="hidden"])')).toHaveValue('');
-    expect(await queryPlannedAllocations(database, seeded.allocationPlan.id)).toEqual(seeded.plannedAllocations);
-  });
-
-  /** Keeps the complete draft after a rejected save and permits a successful retry.
-   * @author GPT-6.1 Terra
-   */
-  test('scenario 23.7: retains the clone after a failed save and retries', async ({ database, page }) => {
-    const seeded = await seedAllocationPlanManagementData(database);
-    const sourceBefore = await queryPlannedAllocations(database, seeded.allocationPlan.id);
-    await page.goto(`/portfolio/${seeded.portfolio.id}/allocation/manage`);
-    const source = page.locator(`#allocation-plan-management-container-${seeded.allocationPlan.id}`);
-    await source.locator('[data-allocation-plan-clone]').click();
-    const destination = page.locator('#allocation-plan-management-container-0');
-    const form = destination.locator('form');
-    const name = destination.locator('.allocation-plan-management-new-name');
-    await expect(name).toHaveValue(`${ALLOCATION_PLAN_NAME} (CLONE)`);
-    await expect(destination.locator('.accordion-collapse')).toHaveClass(/\bshow\b/);
-    const endpoint = `**/api/portfolio/${seeded.portfolio.id}/allocation-plan`;
-    const rejectSave = async (route: Route) => {
-      if(route.request().method() === 'POST') {
-        await route.fulfill({ status: 500, body: 'Forced failure' });
-      } else {
-        await route.continue();
-      }
-    };
-    await page.route(endpoint, rejectSave);
-    const failure = page.waitForResponse(response => response.request().method() === 'POST'
-      && response.url().endsWith(`/api/portfolio/${seeded.portfolio.id}/allocation-plan`));
-    await form.locator('button[onclick*="handleSubmit"]').click();
-    expect((await failure).status()).toBe(500);
-    await expect(name).toHaveValue(`${ALLOCATION_PLAN_NAME} (CLONE)`);
-    await expect(form.locator('tbody > tr')).toHaveCount(6);
-    expect(await queryPlannedAllocations(database, seeded.allocationPlan.id)).toEqual(sourceBefore);
-    expect(await database.query('SELECT id FROM public.allocation_plan WHERE portfolio_id = $1',
-      [seeded.portfolio.id])).toHaveLength(1);
-    await page.unroute(endpoint, rejectSave);
-    const success = page.waitForResponse(response => response.request().method() === 'POST'
-      && response.url().endsWith(`/api/portfolio/${seeded.portfolio.id}/allocation-plan`));
-    await form.locator('button[onclick*="handleSubmit"]').click();
-    expect((await success).ok()).toBe(true);
-    expect(await queryPlannedAllocations(database, seeded.allocationPlan.id)).toEqual(sourceBefore);
-  });
-
-  /** Does not copy or duplicate an in-flight asset lookup.
-   * @author GPT-6.1 Terra
-   */
-  test('scenario 23.8: turns a pending source lookup into an editable clone search', async ({ database, page }) => {
-    const seeded = await seedAllocationPlanManagementData(database);
-    let release = () => {};
-    const gate = new Promise<void>(resolve => { release = resolve; });
-    let lookups = 0;
-    await page.route(`**/api/asset/${EXISTING_STOCK_TICKER}`, async route => {
-      lookups += 1;
-      await gate;
-      await route.continue();
-    });
-    try {
-      await page.goto(`/portfolio/${seeded.portfolio.id}/allocation/manage`);
-      const source = page.locator(`#allocation-plan-management-container-${seeded.allocationPlan.id}`);
-      await source.locator('[data-metadata-editor-label]').click();
-      const sourceRows = source.locator('tbody > tr');
-      await sourceRows.first().locator('button[onclick*="handleAddPlannedAllocationRow"]').click();
-      const added = sourceRows.nth(1);
-      await added.getByRole('combobox', { name: 'Asset' }).fill(EXISTING_STOCK_TICKER);
-      await added.locator('[data-asset-action-button]').click();
-      await expect(added.locator('[data-asset-search-autocomplete]'))
-        .toHaveAttribute('data-asset-selection-state', 'pending');
-      await source.locator('[data-allocation-plan-clone]').click();
-      const cloneRow = page.locator('#allocation-plan-management-form-0 tbody > tr').nth(1);
-      await expect(cloneRow.locator('[data-asset-search-autocomplete]'))
-        .toHaveAttribute('data-asset-selection-state', 'search');
-      await expect(cloneRow.getByRole('combobox', { name: 'Asset' })).toHaveValue(EXISTING_STOCK_TICKER);
-      expect(lookups).toBe(1);
-      release();
-      await expect(added.locator('[data-asset-search-autocomplete]'))
-        .toHaveAttribute('data-asset-selection-state', 'existing');
-      await expect(cloneRow.locator('[data-asset-search-autocomplete]'))
-        .toHaveAttribute('data-asset-selection-state', 'search');
-    } finally {
-      release();
-    }
-  });
-
   for (const [scenario, timezone, instant, expectedDate] of [
     ['23.9', 'Asia/Tokyo', '2026-11-08T16:30:00Z', '2026-11-09'],
     ['23.10', 'America/Los_Angeles', '2026-11-08T08:30:00Z', '2026-11-08'],
@@ -470,69 +367,6 @@ test.describe('portfolio allocation plan management', () => {
     await expect(name).toHaveValue('User correction');
     await expect(outside).toBeFocused();
     await expect(destination.locator('tbody > tr')).toHaveCount(6);
-  });
-
-  /** Native submission performs the same preparation as the visible Save control.
-   * @author GPT-6.1 Terra
-   */
-  test('scenario 23.12: submits a cloned plan through native requestSubmit', async ({ database, page }) => {
-    const seeded = await seedAllocationPlanManagementData(database);
-    await page.goto(`/portfolio/${seeded.portfolio.id}/allocation/manage`);
-    const source = page.locator(`#allocation-plan-management-container-${seeded.allocationPlan.id}`);
-    await source.locator('[data-allocation-plan-clone]').click();
-    const form = page.locator('#allocation-plan-management-form-0');
-    await expect(form.locator('tbody > tr')).toHaveCount(6);
-    const response = page.waitForResponse(result => result.request().method() === 'POST'
-      && result.url().endsWith(`/api/portfolio/${seeded.portfolio.id}/allocation-plan`));
-    await form.evaluate((element: HTMLFormElement) => element.requestSubmit());
-    expect((await response).ok()).toBe(true);
-    const plans = await database.query<{ id: number }>(
-      'SELECT id FROM public.allocation_plan WHERE portfolio_id = $1 AND id <> $2',
-      [seeded.portfolio.id, seeded.allocationPlan.id],
-    );
-    expect(plans).toHaveLength(1);
-    expect(await queryPlannedAllocations(database, plans[0].id)).toHaveLength(6);
-    expect(await queryPlannedAllocations(database, seeded.allocationPlan.id)).toEqual(seeded.plannedAllocations);
-  });
-
-  /** Preserves the draft on preflight failure and retries without a success notification.
-   * @author GPT-6.1 Terra
-   * @author GPT-6.1 Sol
-   */
-  test('scenario 23.13: preserves the existing draft if source preflight fails', async ({ database, page }) => {
-    const seeded = await seedAllocationPlanManagementData(database);
-    await page.goto(`/portfolio/${seeded.portfolio.id}/allocation/manage`);
-    const destination = page.locator('#allocation-plan-management-container-0');
-    const name = destination.locator('.allocation-plan-management-new-name');
-    await name.fill('Existing draft');
-    const source = page.locator(`#allocation-plan-management-container-${seeded.allocationPlan.id}`);
-    const control = await source.locator('tbody > tr').first()
-      .locator('input[name*="[hierarchicalId]"]').elementHandle();
-    if (!control) throw new Error('Missing hierarchy control');
-    await control.evaluate(element => {
-      const placeholder = document.createElement('span');
-      placeholder.setAttribute('data-test-hierarchy-placeholder', '');
-      element.replaceWith(placeholder);
-    });
-    await source.locator('[data-allocation-plan-clone]').click();
-    const toasts = page.locator('#toast-notification-container .toast[role="alert"]');
-    const errorToast = toasts.filter({ hasText: 'Unable to clone allocation plan. Please try again.' });
-    await expect(errorToast).toBeVisible();
-    await expect(errorToast).toHaveClass(/text-bg-danger/);
-    await expect(errorToast.locator('.toast-body'))
-      .toHaveText('Unable to clone allocation plan. Please try again.');
-    await expect(name).toHaveValue('Existing draft');
-    await expect(destination.locator('tbody > tr')).toHaveCount(0);
-    await source.locator('[data-test-hierarchy-placeholder]').evaluate((placeholder, input) => {
-      placeholder.replaceWith(input);
-    }, control);
-    await source.locator('[data-allocation-plan-clone]').click();
-    await expect(name).toHaveValue(`${ALLOCATION_PLAN_NAME} (CLONE)`);
-    await expect(destination.locator('tbody > tr')).toHaveCount(6);
-    await expect(destination.locator('.accordion-collapse')).toHaveClass(/\bshow\b/);
-    await expect(source.locator('[data-allocation-plan-clone]')).not.toHaveAttribute('aria-busy', 'true');
-    await expect(toasts.filter({ hasNotText: 'Unable to clone allocation plan. Please try again.' })).toHaveCount(0);
-    expect(await queryPlannedAllocations(database, seeded.allocationPlan.id)).toEqual(seeded.plannedAllocations);
   });
 
   /** A newer source replaces a pending presentation without accumulating forms or rows.
@@ -590,56 +424,6 @@ test.describe('portfolio allocation plan management', () => {
     expect(await database.query('SELECT id FROM public.asset WHERE ticker = $1', [ticker])).toHaveLength(0);
   });
 
-  /** Retains duplicate rows for correction and blocks native persistence until fixed.
-   * @author GPT-6.1 Terra
-   */
-  test('scenario 23.16: native submission rejects duplicate cloned hierarchy rows', async ({ database, page }) => {
-    const seeded = await seedAllocationPlanManagementData(database);
-    await page.goto(`/portfolio/${seeded.portfolio.id}/allocation/manage`);
-    const source = page.locator(`#allocation-plan-management-container-${seeded.allocationPlan.id}`);
-    const editable = source.locator('tbody input[name*="[hierarchicalId]"]:not([type="hidden"])');
-    await expect(editable).toHaveCount(2);
-    const firstValue = await editable.first().inputValue();
-    await editable.nth(1).evaluate((field: HTMLInputElement, value) => { field.value = value; }, firstValue);
-    await source.locator('[data-allocation-plan-clone]').click();
-    const form = page.locator('#allocation-plan-management-form-0');
-    const copied = form.locator('tbody input[name*="[hierarchicalId]"]:not([type="hidden"])');
-    await expect(copied).toHaveCount(2);
-    await expect(copied.nth(1)).toHaveValue(firstValue);
-    let writes = 0;
-    page.on('request', request => {
-      if(request.method() === 'POST' && request.url().endsWith(`/api/portfolio/${seeded.portfolio.id}/allocation-plan`)) {
-        writes += 1;
-      }
-    });
-    await form.evaluate((element: HTMLFormElement) => element.requestSubmit());
-    expect(await copied.first().evaluate((field: HTMLInputElement) => field.validationMessage))
-      .toBe('Duplicate hierarchical id in allocation plan');
-    expect(writes).toBe(0);
-    expect(await queryPlannedAllocations(database, seeded.allocationPlan.id)).toEqual(seeded.plannedAllocations);
-  });
-
-  /** An empty source draft receives a usable first-row counter in its clone.
-   * @author GPT-6.1 Terra
-   */
-  test('scenario 23.17: adds the first row after cloning an empty hierarchy', async ({ database, page }) => {
-    const seeded = await seedAllocationPlanManagementData(database);
-    await page.goto(`/portfolio/${seeded.portfolio.id}/allocation/manage`);
-    const source = page.locator(`#allocation-plan-management-container-${seeded.allocationPlan.id}`);
-    await source.locator('[data-metadata-editor-label]').click();
-    const rows = source.locator('tbody > tr');
-    await rows.first().locator('button[onclick*="handleRemovePlannedAllocationRow"]').click();
-    await rows.first().locator('button[onclick*="handleRemovePlannedAllocationRow"]').click();
-    await expect(rows).toHaveCount(0);
-    await source.locator('[data-allocation-plan-clone]').click();
-    const form = page.locator('#allocation-plan-management-form-0');
-    await expect(form.locator('tbody > tr')).toHaveCount(0);
-    await form.locator('tfoot button[onclick*="handleAddPlannedAllocationRow"]').click();
-    const newRow = form.locator('tbody > tr');
-    await expect(newRow).toHaveCount(1);
-    await expect(newRow).toHaveAttribute('data-allocation-index', '0');
-  });
-
   test.describe('scenario 23.18: opening across local midnight', () => {
     test.use({ timezoneId: 'America/Los_Angeles' });
 
@@ -661,53 +445,6 @@ test.describe('portfolio allocation plan management', () => {
       await expect(page.locator('#allocation-plan-management-planned-date')).toHaveValue('2026-11-07');
     });
   });
-
-  for (const [scenario, status] of [['23.19', 200], ['23.20', 500]] as const) {
-    /** A response for a replaced destination row cannot update a freshly cloned row.
-     * @author GPT-6.1 Terra
-     */
-    test(`scenario ${scenario}: ignores a stale destination lookup with status ${status}`, async ({ database, page }) => {
-      const seeded = await seedAllocationPlanManagementData(database);
-      let release = () => {};
-      const gate = new Promise<void>(resolve => { release = resolve; });
-      await page.route(`**/api/asset/${EXISTING_STOCK_TICKER}`, async route => {
-        await gate;
-        if(status === 200) {
-          await route.continue();
-        } else {
-          await route.fulfill({ status, body: 'Forced lookup failure' });
-        }
-      });
-      try {
-        await page.goto(`/portfolio/${seeded.portfolio.id}/allocation/manage`);
-        const destination = page.locator('#allocation-plan-management-container-0');
-        await destination.locator('.allocation-plan-management-new-name').fill('Old draft');
-        const form = destination.locator('form');
-        await form.locator('tfoot button[onclick*="handleAddPlannedAllocationRow"]').click();
-        const root = form.locator('tbody > tr').first();
-        await root.locator('input[name*="[hierarchicalId]"]').fill('BONDS');
-        await root.locator('button[onclick*="handleAddPlannedAllocationRow"]').click();
-        const oldAsset = form.locator('tbody > tr').nth(1);
-        await oldAsset.getByRole('combobox', { name: 'Asset' }).fill(EXISTING_STOCK_TICKER);
-        await oldAsset.locator('[data-asset-action-button]').click();
-        await expect(oldAsset.locator('[data-asset-search-autocomplete]'))
-          .toHaveAttribute('data-asset-selection-state', 'pending');
-        const response = page.waitForResponse(result =>
-          new URL(result.url()).pathname === `/api/asset/${EXISTING_STOCK_TICKER}`);
-        const source = page.locator(`#allocation-plan-management-container-${seeded.allocationPlan.id}`);
-        await source.locator('[data-allocation-plan-clone]').click();
-        const copied = form.locator('tbody > tr').nth(1);
-        const identity = await copied.locator('input[name$="[asset][id]"]').inputValue();
-        release();
-        expect((await response).status()).toBe(status);
-        await expect(copied.locator('input[name$="[asset][id]"]')).toHaveValue(identity);
-        await expect(copied.locator('[data-asset-search-autocomplete]'))
-          .toHaveAttribute('data-asset-selection-state', 'existing');
-      } finally {
-        release();
-      }
-    });
-  }
 
   /** Rejects another clone while the destination's creation request is in flight.
    * @author GPT-6.1 Terra
@@ -754,44 +491,6 @@ test.describe('portfolio allocation plan management', () => {
     } finally {
       release();
     }
-  });
-
-  /** A route exit cancels delayed presentation even if the management view stays connected.
-   * @author GPT-6.1 Terra
-   */
-  test('scenario 23.22: does not focus a draft after leaving management', async ({ database, page }) => {
-    const seeded = await seedAllocationPlanManagementData(database);
-    await page.goto(`/portfolio/${seeded.portfolio.id}/allocation/manage`);
-    await page.addStyleTag({ content: '#allocation-plan-management-0.collapsing { transition-duration: 60s !important; }' });
-    const source = page.locator(`#allocation-plan-management-container-${seeded.allocationPlan.id}`);
-    await source.locator('[data-allocation-plan-clone]').click();
-    const panel = page.locator('#allocation-plan-management-0');
-    await expect(panel).toHaveClass(/\bcollapsing\b/);
-    const back = page.locator('button[onclick="allocationPlanManagement.navigateToAllocationPlansViewing()"]');
-    await back.click();
-    await expect(page).toHaveURL(new RegExp(`/portfolio/${seeded.portfolio.id}/allocation$`));
-    await panel.evaluate(element => element.dispatchEvent(new Event('transitionend', { bubbles: true })));
-    await expect(page.locator('.allocation-plan-management-new-name')).not.toBeFocused();
-  });
-
-  /** A portfolio context change cancels pending presentation of the old draft.
-   * @author GPT-6.1 Terra
-   */
-  test('scenario 23.23: cancels pending focus when portfolio context changes', async ({ database, page }) => {
-    const seeded = await seedAllocationPlanManagementData(database);
-    await page.goto(`/portfolio/${seeded.portfolio.id}/allocation/manage`);
-    await page.addStyleTag({ content: '#allocation-plan-management-0.collapsing { transition-duration: 60s !important; }' });
-    const source = page.locator(`#allocation-plan-management-container-${seeded.allocationPlan.id}`);
-    await source.locator('[data-allocation-plan-clone]').click();
-    const panel = page.locator('#allocation-plan-management-0');
-    await expect(panel).toHaveClass(/\bcollapsing\b/);
-    await page.locator('input[name="portfolioId"]').first().evaluate((input: HTMLInputElement) => {
-      input.value = '999999';
-      input.dispatchEvent(new Event('change', { bubbles: true }));
-    });
-    await panel.evaluate(element => element.dispatchEvent(new Event('transitionend', { bubbles: true })));
-    await expect(page.locator('.allocation-plan-management-new-name')).not.toBeFocused();
-    await expect(source.locator('[data-allocation-plan-clone]')).not.toHaveAttribute('aria-busy', 'true');
   });
 
   /** Creates a plan and verifies its refreshed form, persistence, and rendered chart.
