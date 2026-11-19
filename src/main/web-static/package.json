@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "bignumber.js": "^11.1.5",
-    "bootstrap": "^5.3.8",
+    "bootstrap": "^5.3.9",
     "bootstrap-icons": "^1.13.2",
     "bootswatch": "^5.3.8",
     "chart.js": "^4.6.1",
