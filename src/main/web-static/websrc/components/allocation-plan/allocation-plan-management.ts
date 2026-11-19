@@ -31,6 +31,12 @@ import {
     prepareAllocationPlanMetadataForSubmit,
 } from "./allocation-plan-management-metadata";
 import { mapForAllocationPlanManagement } from "./allocation-plan-management-response";
+import { removePlannedAllocationSubtree } from "./allocation-plan-management-hierarchy";
+import { bindAllocationPlanCloning } from "./allocation-plan-management-clone";
+import {
+    FORM_LAST_ROW_INDEX_INPUT_NAME, FORM_FIELD_DEPENDENT_ATTRIBUTE, FORM_FIELD_LABEL_ATTRIBUTE,
+    hierarchyFieldName, hierarchyFieldSuffix, PLAN_DETAILS_FIELD_NAME, PLAN_HIERARCHICAL_ID_FIELD_NAME,
+} from "./allocation-plan-management-form";
 
 type AllocationPlanningHierarchicalFormEntry = {
     occurrences: number;
@@ -42,22 +48,23 @@ type FormRowHierarchicalStructure = {
     formRowHierarchicalId: string
 };
 
-const FORM_LAST_ROW_INDEX_INPUT_NAME = "last-planned-allocation-row-index";
-const FORM_FIELD_DEPENDENT_ATTRIBUTE = "data-bind-to-name";
-
 const ALLOCATION_HIERARCHY_LEVEL_MANAGING_FIELD_TEMP_PROPERTY_NAME = "currentManagingFieldName";
 const ALLOCATION_PLAN_MANAGEMENT_CONTAINER_ID = "accordion-allocation-plan-management";
 const ALLOCATION_PLAN_MANAGEMENT_FORM_PREFIX = "allocation-plan-management-form-";
 
 const ASSET_TICKER_FIELD_NAME_SUFFIX = "[asset][ticker]";
+const nativeSubmitGuardContainers = new WeakSet<HTMLElement>();
 
 HtmxInfra.htmxTransformResponse.registerTransformResponseFunction(
     "mapForAllocationPlanManagement",
     mapForAllocationPlanManagement,
 );
 
+/** Propagates class changes and refreshes duplicate validity, including cleared classes.
+ * @author GPT-6.1 Sol
+ * @author benizzio
+ */
 function handleHierarchicalIdLevelChange(targetElement: HTMLInputElement) {
-
     const ancestorTable = targetElement.closest("form");
 
     if(!ancestorTable) {
@@ -67,25 +74,24 @@ function handleHierarchicalIdLevelChange(targetElement: HTMLInputElement) {
     const targetElementName = targetElement.getAttribute("name");
 
     const fieldsToUpdate =
-        ancestorTable.querySelectorAll<HTMLInputElement>(`[data-bind-to-name$='${ targetElementName }']`);
+        ancestorTable.querySelectorAll<HTMLInputElement>(
+            `[${ FORM_FIELD_DEPENDENT_ATTRIBUTE }$='${ targetElementName }']`,
+        );
 
     fieldsToUpdate.forEach((field) => {
         field.value = targetElement.value;
     });
 
     const spansToUpdate =
-        ancestorTable.querySelectorAll<HTMLSpanElement>(`[data-label-for-name='${ targetElementName }']`);
+        ancestorTable.querySelectorAll<HTMLSpanElement>(`[${ FORM_FIELD_LABEL_ATTRIBUTE }='${ targetElementName }']`);
 
     spansToUpdate.forEach((span) => {
         span.textContent = targetElement.value;
     });
-}
 
-function handleRemovePlannedAllocationRow(targetElement: HTMLElement) {
-    const row = targetElement.closest("tr");
-    const rowId = row.id;
-    row.closest("table").querySelectorAll(`[data-parent-row-id=${ rowId }]`).forEach(row => row.remove());
-    row.remove();
+    targetElement.setCustomValidity("");
+    const hierarchySize = PortfolioPage.getContextPortfolio().allocationStructure.hierarchy.length;
+    validateDuplicateEntries(mapPlannedAllocationFormEntriesPerHierarchicalKey(ancestorTable, hierarchySize));
 }
 
 function createNewPlannedAllocation(
@@ -125,14 +131,20 @@ function createNewPlannedAllocation(
     return newPlannedAllocation;
 }
 
+/** Inherits hierarchy values and their managing field identities from the parent row.
+ * @author benizzio
+ * @author GPT-6.1 Sol
+ */
 function setHierarchicalIdFromParentRow(
     newPlannedAllocation: SerializableFractalPlannedAllocation,
     formElement: HTMLFormElement,
     parentRowIndex: number,
     portfolioAllocationHierarchy: AllocationHierarchyLevel[],
 ) {
+    const hierarchyPath = `${ PLAN_DETAILS_FIELD_NAME }[${ parentRowIndex }][${ PLAN_HIERARCHICAL_ID_FIELD_NAME }]`;
+    const levelPrefix = `[${ PLAN_HIERARCHICAL_ID_FIELD_NAME }][`;
 
-    formElement.querySelectorAll(`[name^='details[${ parentRowIndex }][hierarchicalId]']`)
+    formElement.querySelectorAll(`[name^='${ hierarchyPath }']`)
         .forEach((hierarchicalIdInput: HTMLInputElement) => {
 
             const hierarchicalIdValue = hierarchicalIdInput.value;
@@ -140,7 +152,7 @@ function setHierarchicalIdFromParentRow(
 
             const hierarchicalIdIndexString = hierarchicalIdFieldName
                 .substring(
-                    hierarchicalIdFieldName.indexOf("[hierarchicalId][") + "[hierarchicalId][".length,
+                    hierarchicalIdFieldName.indexOf(levelPrefix) + levelPrefix.length,
                     hierarchicalIdFieldName.length - 1,
                 );
             const hierarchicalIdIndex = toInt(hierarchicalIdIndexString);
@@ -201,9 +213,9 @@ function addPlannedAllocationRow(
  *
  * @author GPT-6 Luna
  * @author GPT-6 Sol
+ * @author GPT-6.1 Sol
  */
 function copyAssetTickersToHierarchicalIdFields(form: HTMLFormElement) {
-
     form.querySelectorAll<HTMLInputElement>(`input[name$='${ ASSET_TICKER_FIELD_NAME_SUFFIX }']`)
         .forEach((assetTickerInput: HTMLInputElement) => {
 
@@ -223,7 +235,7 @@ function copyAssetTickersToHierarchicalIdFields(form: HTMLFormElement) {
                 : "";
 
             const assetIdInput = form.elements.namedItem(
-                `details[${ allocationIndexString }][hierarchicalId][0]`,
+                hierarchyFieldName(allocationIndexString, 0),
             ) as HTMLInputElement;
             assetIdInput.value = assetTickerValue;
         });
@@ -243,11 +255,14 @@ function getHierarchicalFieldForValidation(
     }
 }
 
+/** Collects each row's hierarchy identity and its validation controls.
+ * @author benizzio
+ * @author GPT-6.1 Sol
+ */
 function mapFormRowHierarchicalStructure(
     formTableRow: HTMLTableRowElement,
     hierarchySize: number,
 ): FormRowHierarchicalStructure {
-
     const lastHierarchyLevelIndex = hierarchySize - 1;
 
     const formRowHierarchicalStructure = {
@@ -257,7 +272,7 @@ function mapFormRowHierarchicalStructure(
 
     for(let hierarchyLevelIndex = lastHierarchyLevelIndex; hierarchyLevelIndex >= 0; hierarchyLevelIndex--) {
 
-        const allocationHierarchyLevelFieldNameSuffix = `[hierarchicalId][${ hierarchyLevelIndex }]`;
+        const allocationHierarchyLevelFieldNameSuffix = hierarchyFieldSuffix(hierarchyLevelIndex);
 
         const hierarchicalField = formTableRow.querySelector(
             `input[name$='${ allocationHierarchyLevelFieldNameSuffix }']`,
@@ -353,6 +368,45 @@ function validateDuplicateEntries(
     return containsDuplicates;
 }
 
+/** Prepares asset hierarchy values and rejects invalid or duplicate row entries.
+ * @author GPT-6.1 Terra
+ */
+function preparePlanRowsForSubmit(form: HTMLFormElement, hierarchySize: number): boolean {
+    if(!AssetComposedColumnsInput.validateFormBeforePost(form)) {
+        return false;
+    }
+
+    copyAssetTickersToHierarchicalIdFields(form);
+    const entries = mapPlannedAllocationFormEntriesPerHierarchicalKey(form, hierarchySize);
+    return !validateDuplicateEntries(entries);
+}
+
+/** Applies the same row preparation to native form submissions as the Save control.
+ * @author GPT-6.1 Terra
+ */
+function bindNativePlanRowSubmitGuard(container: HTMLElement): void {
+    if(nativeSubmitGuardContainers.has(container)) {
+        return;
+    }
+
+    nativeSubmitGuardContainers.add(container);
+
+    container.addEventListener("submit", event => {
+        const form = event.target;
+
+        if(!(form instanceof HTMLFormElement)
+            || !form.getAttribute("id")?.startsWith(ALLOCATION_PLAN_MANAGEMENT_FORM_PREFIX)) {
+            return;
+        }
+        const hierarchySize = PortfolioPage.getContextPortfolio().allocationStructure.hierarchy.length;
+
+        if(!preparePlanRowsForSubmit(form, hierarchySize)) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        }
+    }, true);
+}
+
 /** Binds validation to the forms produced by the latest allocation-plan list swap.
  *
  * @author GPT-6 Sol
@@ -395,6 +449,8 @@ const allocationPlanManagement = {
         if(managementContainer) {
             bindReadOnlyManagementMetadataHeaderToggle(managementContainer);
             bindAllocationPlanMetadataSubmitGuard(managementContainer);
+            bindNativePlanRowSubmitGuard(managementContainer);
+            bindAllocationPlanCloning(managementContainer, () => this.handlebarsAllocationPlanManagementRowTemplate);
         }
 
         this.handlebarsAllocationPlanManagementRowTemplate = Handlebars.compile(
@@ -403,7 +459,7 @@ const allocationPlanManagement = {
     },
 
     handleHierarchicalIdLevelChange,
-    handleRemovePlannedAllocationRow,
+    handleRemovePlannedAllocationRow: removePlannedAllocationSubtree,
 
     activateAllocationPlanEditor,
 
@@ -487,20 +543,7 @@ const allocationPlanManagement = {
      */
     handleSubmit(form: HTMLFormElement, hierarchySize: number) {
 
-        if(!AssetComposedColumnsInput.validateFormBeforePost(form)) {
-            return;
-        }
-
-        copyAssetTickersToHierarchicalIdFields(form);
-
-        const hierarchicalFormEntriesPerHierarchicalKey = mapPlannedAllocationFormEntriesPerHierarchicalKey(
-            form,
-            hierarchySize,
-        );
-
-        const containsDuplicateEntries = validateDuplicateEntries(hierarchicalFormEntriesPerHierarchicalKey);
-
-        if(containsDuplicateEntries) {
+        if(!preparePlanRowsForSubmit(form, hierarchySize)) {
             return;
         }
 

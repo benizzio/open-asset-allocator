@@ -2747,6 +2747,13 @@ test.describe('scenario 22: observation cloning', () => {
     const source = await seedManagementObservation(
       database, seed.portfolio, asset, 'CLONE_SOURCE', '2026-05-01T12:00:00Z',
     );
+    const sourceMetadataBefore = await database.query(
+      'SELECT * FROM public.portfolio_allocation_obs_time WHERE id = $1', [source.id],
+    );
+    const sourceFactsBefore = await database.query(
+      'SELECT * FROM public.portfolio_allocation_fact WHERE observation_time_id = $1 ORDER BY class, cash_reserve, asset_id',
+      [source.id],
+    );
     await page.clock.setFixedTime('2026-11-08T12:00:00Z');
     await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
     const item = page.locator(`#portfolio-history-management-container-${source.id}`);
@@ -2821,6 +2828,106 @@ test.describe('scenario 22: observation cloning', () => {
       'SELECT asset_quantity = 1 AS unchanged FROM public.portfolio_allocation_fact WHERE observation_time_id = $1',
       [source.id],
     )).resolves.toEqual(persistedBefore);
+    expect(await database.query(
+      'SELECT * FROM public.portfolio_allocation_obs_time WHERE id = $1', [source.id],
+    )).toEqual(sourceMetadataBefore);
+    expect(await database.query(
+      'SELECT * FROM public.portfolio_allocation_fact WHERE observation_time_id = $1 ORDER BY class, cash_reserve, asset_id',
+      [source.id],
+    )).toEqual(sourceFactsBefore);
+  });
+
+  /** A real fact foreign-key failure rolls back creation and leaves the complete clone retryable.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 22.44: rolls back a failed clone save and retries the unchanged draft', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const asset = seed.assets[EXISTING_BOND_TICKER];
+    await database.query('UPDATE public.asset SET external_data = $2::jsonb WHERE id = $1',
+      [asset.id, JSON.stringify({ data: [{ source: 'YAHOO_FINANCE', ticker: 'BOND' }] })]);
+    const source = await seedManagementObservation(database, seed.portfolio, asset, 'ROLLBACK_SOURCE', '2026-05-01T12:00:00Z');
+    const [stale] = await database.query<{ id: number }>(
+      `INSERT INTO public.asset (ticker, name) VALUES ('E2E:OBS-STALE', 'Stale observation asset') RETURNING id`,
+    );
+    const sourceMetadata = await database.query('SELECT * FROM public.portfolio_allocation_obs_time WHERE id = $1', [source.id]);
+    const sourceFacts = await database.query('SELECT * FROM public.portfolio_allocation_fact WHERE observation_time_id = $1',
+      [source.id]);
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const item = page.locator(`#portfolio-history-management-container-${source.id}`);
+    await item.getByRole('button', { name: 'Edit observation ROLLBACK_SOURCE' }).click();
+    await expect(item.locator('form')).toHaveAttribute('data-observation-details-state', 'ready');
+    await item.getByRole('button', { name: 'Clone observation ROLLBACK_SOURCE' }).click();
+    const destination = page.locator('#portfolio-history-management-container-0');
+    const form = destination.locator('form');
+    const rows = form.locator('tbody tr');
+    await expect(rows).toHaveCount(1);
+    const add = form.locator('tfoot button[type="button"]');
+    await add.click();
+    const staleRow = rows.nth(1);
+    await staleRow.getByRole('combobox', { name: 'Class' }).fill('STOCKS');
+    await searchForAsset(page, staleRow, 'E2E:OBS-STALE', 200);
+    await staleRow.getByRole('spinbutton', { name: 'Quantity' }).fill('2');
+    await staleRow.getByRole('textbox', { name: 'Market price' }).fill('10');
+    await add.click();
+    const newRow = rows.nth(2);
+    await newRow.getByRole('combobox', { name: 'Class' }).fill('STOCKS');
+    await searchForAsset(page, newRow, 'E2E:OBS-ROLLBACK', 404);
+    await newRow.getByRole('textbox', { name: 'Asset name' }).fill('Observation rollback asset');
+    await newRow.getByRole('spinbutton', { name: 'Quantity' }).fill('3');
+    await newRow.getByRole('textbox', { name: 'Market price' }).fill('20');
+    await database.query('DELETE FROM public.asset WHERE id = $1', [stale.id]);
+    const assetsBefore = await database.query<{ id: number }>('SELECT * FROM public.asset ORDER BY id');
+    const observationsBefore = await database.query('SELECT * FROM public.portfolio_allocation_obs_time ORDER BY id');
+    const factsBefore = await database.query('SELECT * FROM public.portfolio_allocation_fact ORDER BY observation_time_id, class, asset_id');
+    const snapshot = () => destination.locator('input').evaluateAll(inputs => inputs.map(input => {
+      const field = input as HTMLInputElement;
+      return { name: field.name, value: field.value, checked: field.checked };
+    }));
+    await form.evaluate(element => element.addEventListener('htmx:beforeRequest', () => {
+      const destination = element.closest('.accordion-item');
+      if (!destination) throw new Error('Missing destination');
+      destination.setAttribute('data-test-save-snapshot', JSON.stringify(Array.from(destination.querySelectorAll('input'), field => ({
+        name: field.name, value: field.value, checked: field.checked,
+      }))));
+    }, { once: true }));
+    const endpoint = `/api/portfolio/${seed.portfolio.id}/history`;
+    const failed = page.waitForResponse(response => response.request().method() === 'POST'
+      && new URL(response.url()).pathname === endpoint);
+    await form.locator('button[type="submit"]').click();
+    expect((await failed).status()).toBe(500);
+    const draftBefore = JSON.parse((await destination.getAttribute('data-test-save-snapshot')) ?? 'null');
+    expect(draftBefore).not.toBeNull();
+    expect(await snapshot()).toEqual(draftBefore);
+    expect(await database.query('SELECT * FROM public.asset ORDER BY id')).toEqual(assetsBefore);
+    expect(await database.query('SELECT * FROM public.portfolio_allocation_obs_time ORDER BY id')).toEqual(observationsBefore);
+    expect(await database.query('SELECT * FROM public.portfolio_allocation_fact ORDER BY observation_time_id, class, asset_id'))
+      .toEqual(factsBefore);
+    expect(await database.query('SELECT * FROM public.portfolio_allocation_obs_time WHERE id = $1', [source.id]))
+      .toEqual(sourceMetadata);
+    expect(await database.query('SELECT * FROM public.portfolio_allocation_fact WHERE observation_time_id = $1', [source.id]))
+      .toEqual(sourceFacts);
+    await staleRow.locator('[data-asset-action-button]').click();
+    await searchForAsset(page, staleRow, EXISTING_STOCK_TICKER, 200);
+    const saved = page.waitForResponse(response => response.request().method() === 'POST'
+      && new URL(response.url()).pathname === endpoint);
+    await form.evaluate((element: HTMLFormElement) => element.requestSubmit());
+    expect((await saved).ok()).toBe(true);
+    const created = await findObservationByTag(database, seed.portfolio, 'ROLLBACK_SOURCE (CLONE)');
+    expect(created.id).not.toBe(source.id);
+    const copied = await database.query<{ asset_id: number }>(
+      'SELECT asset_id FROM public.portfolio_allocation_fact WHERE observation_time_id = $1', [created.id],
+    );
+    const newAssets = await database.query<{ id: number }>('SELECT id FROM public.asset WHERE ticker = $1', ['E2E:OBS-ROLLBACK']);
+    expect(newAssets).toHaveLength(1);
+    expect(copied.map(row => row.asset_id).sort()).toEqual(
+      [asset.id, seed.assets[EXISTING_STOCK_TICKER].id, newAssets[0].id].sort(),
+    );
+    expect(await database.query('SELECT * FROM public.portfolio_allocation_obs_time WHERE id = $1', [source.id]))
+      .toEqual(sourceMetadata);
+    expect(await database.query('SELECT * FROM public.portfolio_allocation_fact WHERE observation_time_id = $1', [source.id]))
+      .toEqual(sourceFacts);
+    expect(await database.query('SELECT * FROM public.asset WHERE id = ANY($1::int[]) ORDER BY id',
+      [assetsBefore.map(row => row.id)])).toEqual(assetsBefore);
   });
 
   /** Captures the ready source's activation day, not page-load day or destination-opening completion day.

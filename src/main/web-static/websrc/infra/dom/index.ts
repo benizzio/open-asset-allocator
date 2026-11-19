@@ -3,6 +3,7 @@
  * @module infra/dom
  * @author benizzio
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 import { bindExclusiveDisplayContainerInDescendants } from "./binding-dom-exclusive-display";
 import { bindFormsInDescendants } from "./binding-dom-bootstrap-form";
@@ -14,6 +15,9 @@ import DomUtils from "./dom-utils";
 
 export { captureFinancialInput, restoreFinancialInput } from "./financial-input-snapshot";
 export type { FinancialInputSnapshot } from "./financial-input-snapshot";
+export { capturePercentageInput, restorePercentageInput } from "./percentage-input-snapshot";
+export type { PercentageInputSnapshot } from "./percentage-input-snapshot";
+export { PERCENTAGE_INPUT_ATTRIBUTE, PERCENTAGE_INPUT_CONTAINER_ATTRIBUTE } from "./binding-percentage-input";
 
 const DomInfra = {
 

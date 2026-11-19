@@ -2,11 +2,19 @@
  * Binds pagination event handlers to individual list owners and their associated controls.
  * @module components/paginated-list
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 
 const OWNER = "data-paginated-list";
 const CONTROL = "data-paginated-list-more";
 const AFTER_REQUEST = "htmx:afterRequest";
+
+/**
+ * Identifies control-driven continuation and retry requests, which must keep their selected pagination mode.
+ * @example `htmx.trigger(owner, LOAD_MORE_EVENT)` requests the next page or retries the selected page.
+ * @author GPT-6.1 Sol
+ */
+export const LOAD_MORE_EVENT = "paginated-list-more";
 
 /**
  * Tracks completion on the original owner, including after it has been detached by HTMX.
@@ -46,10 +54,12 @@ export function trackRequestCompletion(
 
 /**
  * Supplies the pagination handlers installed for each discovered owner.
- * @example `bindPaginationLifecycle({ configure, beforeRequest, settle, cleanup, click })`.
+ * @example `bindPaginationLifecycle({ reset, configure, beforeRequest, settle, cleanup, click })`.
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 type LifecycleHandlers = {
+    reset: (owner: HTMLElement) => void;
     configure: EventListener;
     beforeRequest: EventListener;
     settle: EventListener;
@@ -62,14 +72,16 @@ type LifecycleHandlers = {
  * Cleanup removes owner and control listeners; request-specific completion listeners remain independent.
  *
  * @param handlers - Callbacks for one pagination owner's lifecycle.
- * @example `bindPaginationLifecycle(handlers)` registers the discovery hook once during application startup.
+ * @example `bindPaginationLifecycle(handlers)` registers reset intent and request lifecycle hooks during startup.
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 export function bindPaginationLifecycle(handlers: LifecycleHandlers): void {
     const bound = new WeakSet<HTMLElement>();
 
     /** Binds one owner and its associated control once, and releases them on HTMX cleanup.
      * @author GPT-6.1 Terra
+     * @author GPT-6.1 Sol
      */
     function bind(owner: HTMLElement): void {
         if(bound.has(owner)) {
@@ -81,6 +93,19 @@ export function bindPaginationLifecycle(handlers: LifecycleHandlers): void {
         const control = Array.from(document.querySelectorAll<HTMLElement>(`[${ CONTROL }]`))
             .find(element => element.getAttribute(CONTROL) === owner.id);
 
+        /** Invalidates resets before HTMX's request lock can defer them; control retries keep their mode.
+         * @author GPT-6.1 Sol
+         */
+        const confirm: EventListener = event => {
+            const detail = (event as CustomEvent<{ verb?: string; triggeringEvent?: Event }>).detail;
+
+            if(event.target === owner && detail.verb?.toLowerCase() === "get"
+                && detail.triggeringEvent?.type !== LOAD_MORE_EVENT) {
+                handlers.reset(owner);
+            }
+        };
+
+        owner.addEventListener("htmx:confirm", confirm);
         owner.addEventListener("htmx:configRequest", handlers.configure);
         owner.addEventListener("htmx:beforeRequest", handlers.beforeRequest);
         owner.addEventListener("htmx:afterSettle", handlers.settle);
@@ -92,6 +117,7 @@ export function bindPaginationLifecycle(handlers: LifecycleHandlers): void {
             }
 
             handlers.cleanup(event);
+            owner.removeEventListener("htmx:confirm", confirm);
             owner.removeEventListener("htmx:configRequest", handlers.configure);
             owner.removeEventListener("htmx:beforeRequest", handlers.beforeRequest);
             owner.removeEventListener("htmx:afterSettle", handlers.settle);

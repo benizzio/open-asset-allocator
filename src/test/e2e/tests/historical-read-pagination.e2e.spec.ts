@@ -64,6 +64,19 @@ type LateViewResponseIsolationConfig = {
   draftValue: string;
 };
 
+/** Configures a database-seeded list's reset race without changing production request handling.
+ * @author GPT-6.1 Sol
+ */
+type ResetContinuationConfig = {
+  endpoint: string;
+  path: string;
+  ownerId: string;
+  resetEvent: string;
+  staleRecordSelector: string;
+  expectedRecordCount: number;
+  timing?: 'during-response' | 'in-flight';
+};
+
 test('scenario 21.1: paginates portfolio history viewing with retry and preserves existing charts', async ({
   database,
   page,
@@ -393,32 +406,18 @@ test('scenario 22.27: metadata save resets pagination to the first page', async 
 
 /** A successful continuation already entering the swap lifecycle cannot outlive a list reset.
  * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
  */
 test('scenario 22.28: rejects a successful continuation when the list resets during response', async ({ database, page }) => {
   const seeded = await seedHistory(database);
-  const endpoint = `/api/portfolio/${seeded.portfolio.id}/history/observation`;
-  const initial = waitForPageResponse(page, endpoint, '');
-  await page.goto(`/portfolio/${seeded.portfolio.id}/history/manage`);
-  const cursor = requireContinuationCursor(await readPage(await initial, endpoint, ''));
-  const list = page.locator('#accordion-portfolio-history-management');
-  await expect(list.locator('[data-paginated-record-id]')).toHaveCount(11);
-  await list.evaluate((element, cursor) => {
-    element.addEventListener('htmx:beforeSwap', event => {
-      const detail = (event as CustomEvent<{ xhr?: XMLHttpRequest }>).detail;
-      if(!detail.xhr?.responseURL || new URL(detail.xhr.responseURL).searchParams.get('pageCursor') !== cursor) return;
-      document.body.dataset.resetDuringSuccessfulContinuation = String(detail.xhr.status);
-      const htmx = (window as unknown as { htmx: { trigger: (target: Element, event: string) => void } }).htmx;
-      htmx.trigger(element, 'reload-portfolio-history-management');
-    }, { capture: true });
-  }, cursor);
-  const continuation = waitForPageResponse(page, endpoint, cursor);
-  const reset = waitForPageResponse(page, endpoint, '');
-  await loadMoreButton(page, 'accordion-portfolio-history-management').click();
-  expect((await continuation).ok()).toBe(true);
-  expect((await reset).ok()).toBe(true);
-  await expect(page.locator('body')).toHaveAttribute('data-reset-during-successful-continuation', '200');
-  await expect(list.locator('[data-paginated-record-id]')).toHaveCount(11);
-  await expect(page.locator(`#portfolio-history-management-container-${seeded.records[10].id}`)).toHaveCount(0);
+  await verifyResetContinuation(page, {
+    endpoint: `/api/portfolio/${seeded.portfolio.id}/history/observation`,
+    path: `/portfolio/${seeded.portfolio.id}/history/manage`,
+    ownerId: 'accordion-portfolio-history-management',
+    resetEvent: 'reload-portfolio-history-management',
+    staleRecordSelector: `#portfolio-history-management-container-${seeded.records[10].id}`,
+    expectedRecordCount: 11,
+  });
 });
 
 test('scenario 21.3: paginates allocation-plan viewing records in backend order', async ({
@@ -476,6 +475,66 @@ test('scenario 21.3: paginates allocation-plan viewing records in backend order'
   await expect(moreButton).toBeHidden();
   await expect(page.locator('[data-paginated-list-controls="accordion-allocation-plan"]')).toBeHidden();
   await expect(page.locator('[data-paginated-list-status="accordion-allocation-plan"]')).toBeEmpty();
+});
+
+/** Clones a plan appended through pagination without resetting or reloading the list.
+ * @author GPT-6.1 Terra
+ */
+test('scenario 23.6: clones an appended allocation plan without resetting pagination', async ({ database, page }) => {
+  const seeded = await seedPlans(database);
+  const endpoint = `/api/portfolio/${seeded.portfolio.id}/allocation-plan`;
+  const initialResponse = waitForPageResponse(page, endpoint, '');
+  await page.goto(`/portfolio/${seeded.portfolio.id}/allocation/manage`);
+  const firstPage = await readPage(await initialResponse, endpoint, '');
+  const cursor = requireContinuationCursor(firstPage);
+  const more = loadMoreButton(page, 'accordion-allocation-plan-management');
+  const append = waitForPageResponse(page, endpoint, cursor);
+  await more.click();
+  await append;
+  const list = page.locator('#accordion-allocation-plan-management');
+  const records = list.locator('[data-paginated-record-id]');
+  await expect(records).toHaveCount(21);
+  const sourceRecord = seeded.records[10];
+  const source = list.locator(`#allocation-plan-management-container-${sourceRecord.id}`);
+  const requests: string[] = [];
+  page.on('request', request => {
+    if(new URL(request.url()).pathname === endpoint) requests.push(request.method());
+  });
+  await source.locator('[data-allocation-plan-clone]').click();
+  await expect(list.locator('.allocation-plan-management-new-name')).toHaveValue(`${sourceRecord.name} (CLONE)`);
+  await expect(records).toHaveCount(21);
+  await expect(more).toBeVisible();
+  expect(requests).toEqual([]);
+  const firstBatch = waitForPageResponse(page, endpoint, '');
+  const saved = page.waitForResponse(response => response.request().method() === 'POST'
+    && new URL(response.url()).pathname === endpoint);
+  await list.locator('#allocation-plan-management-form-0 button[onclick*="handleSubmit"]').click();
+  expect((await saved).ok()).toBe(true);
+  await firstBatch;
+  await expect(records).toHaveCount(11);
+  expect(await database.query('SELECT id FROM public.allocation_plan WHERE id = $1', [sourceRecord.id]))
+    .toHaveLength(1);
+  await expect(more).toBeVisible();
+  await more.click();
+  await expect(source.locator('[data-allocation-plan-clone]')).toBeVisible();
+  await source.locator('[data-metadata-editor-trigger]').click();
+  await expect(source.locator('[data-allocation-plan-editor-name]')).toHaveValue(sourceRecord.name);
+});
+
+/** Rejects an already-successful plan continuation when a reset supersedes its swap.
+ * @author GPT-6.1 Terra
+ * @author GPT-6.1 Sol
+ */
+test('scenario 23.24: rejects a stale allocation-plan continuation after reset', async ({ database, page }) => {
+  const seeded = await seedPlans(database);
+  await verifyResetContinuation(page, {
+    endpoint: `/api/portfolio/${seeded.portfolio.id}/allocation-plan`,
+    path: `/portfolio/${seeded.portfolio.id}/allocation/manage`,
+    ownerId: 'accordion-allocation-plan-management',
+    resetEvent: 'reload-allocation-plan-management',
+    staleRecordSelector: `#allocation-plan-management-container-${seeded.records[10].id}`,
+    expectedRecordCount: 11,
+  });
 });
 
 test('scenario 21.4: appends allocation-plan management records while keeping one draft form and active edits', async ({
@@ -1042,6 +1101,143 @@ test('scenario 21.18: keeps history navigation outside the refreshed list', asyn
     release();
   }
 });
+
+for(const { scenario, kind, management, timing } of [
+  { scenario: '21.19', kind: 'history', management: false, timing: 'during-response' },
+  { scenario: '21.20', kind: 'plan', management: false, timing: 'during-response' },
+  { scenario: '21.21', kind: 'history', management: false, timing: 'in-flight' },
+  { scenario: '21.22', kind: 'history', management: true, timing: 'in-flight' },
+  { scenario: '21.23', kind: 'plan', management: false, timing: 'in-flight' },
+  { scenario: '21.24', kind: 'plan', management: true, timing: 'in-flight' },
+] as const) {
+  /** Exercises the same reset contract on each owner without relying on another list's request state.
+   * @author GPT-6.1 Sol
+   */
+  test(`scenario ${scenario}: rejects ${timing} ${kind} ${management ? 'management' : 'viewing'} continuation after reset`,
+    async ({ database, page }) => {
+      const seeded = kind === 'history' ? await seedHistory(database) : await seedPlans(database);
+      const resource = kind === 'history' ? 'history' : 'allocation';
+      const ownerName = kind === 'history' ? 'portfolio-history' : 'allocation-plan';
+      const ownerId = `accordion-${ownerName}${management ? '-management' : ''}`;
+      const resetEvent = management ? `reload-${ownerName}-management`
+        : kind === 'history' ? 'reload-portfolio-history' : 'reload-allocation-plans';
+      await verifyResetContinuation(page, {
+        endpoint: `/api/portfolio/${seeded.portfolio.id}/${kind === 'history'
+          ? `history${management ? '/observation' : ''}` : 'allocation-plan'}`,
+        path: `/portfolio/${seeded.portfolio.id}/${resource}${management ? '/manage' : ''}`,
+        ownerId,
+        resetEvent,
+        staleRecordSelector: `[data-paginated-record-id="${seeded.records[10].id}"]`,
+        expectedRecordCount: management ? 11 : 10,
+        timing,
+      });
+    });
+}
+
+/** Detects even transient stale insertions when a successful or still-pending continuation is reset.
+ * @author GPT-6.1 Sol
+ */
+async function verifyResetContinuation(page: Page, config: ResetContinuationConfig): Promise<void> {
+  const { endpoint, path, ownerId, resetEvent, staleRecordSelector, expectedRecordCount,
+    timing = 'during-response' } = config;
+  const initial = waitForPageResponse(page, endpoint, '');
+  await page.goto(path);
+  const cursor = requireContinuationCursor(await readPage(await initial, endpoint, ''));
+  const list = page.locator(`#${ownerId}`);
+  await expect(list.locator('[data-paginated-record-id]')).toHaveCount(expectedRecordCount);
+  const observation = await list.evaluateHandle((element, { pendingCursor, staleRecordSelector, resetEvent, timing }) => {
+    const insertedRecords: string[] = [];
+    /** Records stale nodes and descendants before a reset can remove evidence of their insertion.
+     * @author GPT-6.1 Sol
+     */
+    const observeInsertions = (mutations: MutationRecord[]): void => {
+      for(const mutation of mutations) {
+        for(const node of mutation.addedNodes) {
+          if(!(node instanceof Element)) continue;
+          if(node.matches(staleRecordSelector)) insertedRecords.push(node.id || node.getAttribute('data-paginated-record-id')!);
+          for(const record of node.querySelectorAll(staleRecordSelector)) {
+            insertedRecords.push(record.id || record.getAttribute('data-paginated-record-id')!);
+          }
+        }
+      }
+    };
+    const observer = new MutationObserver(observeInsertions);
+    observer.observe(element, { childList: true, subtree: true });
+    const state = { observer, observeInsertions, insertedRecords, resetSwapped: false };
+    element.addEventListener('htmx:afterSwap', event => {
+      const detail = (event as CustomEvent<{ xhr?: XMLHttpRequest; target?: Element }>).detail;
+      if(detail.target === element && detail.xhr?.responseURL
+        && new URL(detail.xhr.responseURL).searchParams.get('pageCursor') === '') state.resetSwapped = true;
+    });
+    if(timing === 'during-response') {
+      element.addEventListener('htmx:beforeSwap', event => {
+        const detail = (event as CustomEvent<{ xhr?: XMLHttpRequest }>).detail;
+        if(!detail.xhr?.responseURL
+          || new URL(detail.xhr.responseURL).searchParams.get('pageCursor') !== pendingCursor) return;
+        document.body.dataset.resetDuringSuccessfulContinuation = String(detail.xhr.status);
+        const htmx = (window as unknown as { htmx: { trigger: (target: Element, event: string) => void } }).htmx;
+        htmx.trigger(element, resetEvent);
+      }, { capture: true });
+    }
+    return state;
+  }, { pendingCursor: cursor, staleRecordSelector, resetEvent, timing });
+
+  let release = () => {};
+  let started = () => {};
+  let finished = () => {};
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  const requestStarted = new Promise<void>(resolve => { started = resolve; });
+  const routeFinished = new Promise<void>(resolve => { finished = resolve; });
+  if(timing === 'in-flight') {
+    await page.route(`**${endpoint}?*`, async route => {
+      if(new URL(route.request().url()).searchParams.get('pageCursor') !== cursor) {
+        await route.continue();
+        return;
+      }
+      const response = await route.fetch();
+      started();
+      await gate;
+      try {
+        await route.fulfill({ response });
+      } finally {
+        finished();
+      }
+    });
+  }
+  try {
+    const reset = waitForPageResponse(page, endpoint, '');
+    if(timing === 'during-response') {
+      const continuation = waitForPageResponse(page, endpoint, cursor);
+      await loadMoreButton(page, ownerId).click();
+      expect((await continuation).ok()).toBe(true);
+      await expect(page.locator('body')).toHaveAttribute('data-reset-during-successful-continuation', '200');
+    } else {
+      await loadMoreButton(page, ownerId).click();
+      await requestStarted;
+      const aborted = page.waitForEvent('requestfailed', request => {
+        const url = new URL(request.url());
+        return url.pathname === endpoint && url.searchParams.get('pageCursor') === cursor;
+      });
+      await list.evaluate((element, event) => element.dispatchEvent(new CustomEvent(event, { bubbles: true })), resetEvent);
+      await aborted;
+      release();
+      await routeFinished;
+    }
+    expect((await reset).ok()).toBe(true);
+    await expect.poll(() => observation.evaluate(state => state.resetSwapped)).toBe(true);
+    expect(await observation.evaluate(state => {
+      state.observeInsertions(state.observer.takeRecords());
+      state.observer.disconnect();
+      return state.insertedRecords;
+    })).toEqual([]);
+    await expect(list.locator('[data-paginated-record-id]')).toHaveCount(expectedRecordCount);
+    await expect(page.locator(staleRecordSelector)).toHaveCount(0);
+  } finally {
+    release();
+    await observation.evaluate(state => state.observer.disconnect());
+    await observation.dispose();
+  }
+}
 
 /** Compares navigation and first-record geometry with the button inside and outside the list.
  * @author GPT-6.1 Terra

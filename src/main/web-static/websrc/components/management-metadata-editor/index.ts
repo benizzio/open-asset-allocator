@@ -10,6 +10,8 @@
 
 import { Collapse } from "bootstrap";
 
+export const METADATA_EDITOR_ACTIVE_ATTRIBUTE = "data-metadata-editor-active";
+
 const boundHeaderToggleContainers = new WeakSet<HTMLElement>();
 
 const interactiveHeaderControlSelector = [
@@ -85,7 +87,7 @@ export function activateManagementMetadataEditor(
     dateInputSelector: string,
     editButton: HTMLButtonElement,
 ): void {
-    const fields = item?.querySelector<HTMLElement>("[data-metadata-editor-active]");
+    const fields = item?.querySelector<HTMLElement>(`[${ METADATA_EDITOR_ACTIVE_ATTRIBUTE }]`);
     const textInput = item?.querySelector<HTMLInputElement>(textInputSelector);
     const dateInput = item?.querySelector<HTMLInputElement>(dateInputSelector);
 
@@ -102,6 +104,7 @@ export function activateManagementMetadataEditor(
  * @param editButton - Pencil control whose visibility and expanded state follow the editor.
  * @example `revealManagementMetadataEditor(editorFields, tagInput, dateInput, pencil)` starts editing that record.
  * @author GPT-6 Luna
+ * @author GPT-6.1 Sol
  */
 export function revealManagementMetadataEditor(
     fields: HTMLElement,
@@ -110,7 +113,7 @@ export function revealManagementMetadataEditor(
     editButton: HTMLButtonElement,
 ): void {
     fields.hidden = false;
-    fields.dataset.metadataEditorActive = "true";
+    fields.setAttribute(METADATA_EDITOR_ACTIVE_ATTRIBUTE, "true");
     fields.setAttribute("aria-hidden", "false");
     textInput.disabled = false;
     dateInput.disabled = false;
@@ -130,6 +133,7 @@ export function revealManagementMetadataEditor(
  * @param dateInput - Date field to disable while the editor is hidden.
  * @example `hideManagementMetadataEditor(editorFields, tagInput, dateInput)` restores the read-only header.
  * @author GPT-6 Luna
+ * @author GPT-6.1 Sol
  */
 export function hideManagementMetadataEditor(
     fields: HTMLElement,
@@ -137,7 +141,7 @@ export function hideManagementMetadataEditor(
     dateInput: HTMLInputElement,
 ): void {
     fields.hidden = true;
-    fields.dataset.metadataEditorActive = "false";
+    fields.setAttribute(METADATA_EDITOR_ACTIVE_ATTRIBUTE, "false");
     fields.setAttribute("aria-hidden", "true");
     textInput.disabled = true;
     dateInput.disabled = true;
@@ -178,7 +182,8 @@ function updateManagementMetadataHeader(
  * @returns `true` when the editor has been activated and its draft should be submitted.
  * @example `isManagementMetadataEditorActive(editorFields)` selects draft or persisted values.
  * @author GPT-6 Luna
+ * @author GPT-6.1 Sol
  */
 export function isManagementMetadataEditorActive(fields: HTMLElement): boolean {
-    return fields.dataset.metadataEditorActive === "true";
+    return fields.getAttribute(METADATA_EDITOR_ACTIVE_ATTRIBUTE) === "true";
 }
