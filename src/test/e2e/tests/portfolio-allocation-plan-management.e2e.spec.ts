@@ -493,6 +493,93 @@ test.describe('portfolio allocation plan management', () => {
     }
   });
 
+  /** A real detail foreign-key failure rolls back creation and leaves the complete clone retryable.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 23.25: rolls back a failed clone save and retries the unchanged draft', async ({ database, page }) => {
+    const seeded = await seedAllocationPlanManagementData(database);
+    const [stale] = await database.query<{ id: number }>(
+      `INSERT INTO public.asset (ticker, name) VALUES ('E2E:PLAN-STALE', 'Stale plan asset') RETURNING id`,
+    );
+    await database.query('UPDATE public.asset SET external_data = $2::jsonb WHERE id = $1',
+      [seeded.assets[EXISTING_BOND_TICKER].id, JSON.stringify({ data: [{ source: 'YAHOO_FINANCE', ticker: 'BOND' }] })]);
+    const sourcePlan = await database.query('SELECT * FROM public.allocation_plan WHERE id = $1', [seeded.allocationPlan.id]);
+    const sourceDetails = await queryPlannedAllocations(database, seeded.allocationPlan.id);
+    await page.goto(`/portfolio/${seeded.portfolio.id}/allocation/manage`);
+    await page.locator(`#allocation-plan-management-container-${seeded.allocationPlan.id}`)
+      .locator('[data-allocation-plan-clone]').click();
+    const destination = page.locator('#allocation-plan-management-container-0');
+    const form = destination.locator('form');
+    const rows = form.locator('tbody > tr');
+    await expect(rows).toHaveCount(6);
+    await rows.first().locator('button[onclick*="handleAddPlannedAllocationRow"]').click();
+    const staleRow = rows.nth(1);
+    await searchForAsset(page, staleRow, 'E2E:PLAN-STALE', 200);
+    await rows.first().locator('button[onclick*="handleAddPlannedAllocationRow"]').click();
+    const newRow = rows.nth(1);
+    await searchForAsset(page, newRow, 'E2E:PLAN-ROLLBACK', 404);
+    await newRow.getByRole('textbox', { name: 'Asset name' }).fill('Plan rollback asset');
+    for (const row of [rows.nth(1), rows.nth(2), rows.nth(3), rows.nth(4)]) {
+      await row.getByRole('spinbutton', { name: 'Slice size percentage' }).fill('25');
+      await row.getByRole('spinbutton', { name: 'Slice size percentage' }).blur();
+    }
+    await database.query('DELETE FROM public.asset WHERE id = $1', [stale.id]);
+    const assetsBefore = await database.query<{ id: number }>('SELECT * FROM public.asset ORDER BY id');
+    const plansBefore = await database.query('SELECT * FROM public.allocation_plan ORDER BY id');
+    const detailsBefore = await database.query('SELECT * FROM public.planned_allocation ORDER BY id');
+    const snapshot = () => destination.locator('input').evaluateAll(inputs => inputs.map(input => {
+      const field = input as HTMLInputElement;
+      return { name: field.name, value: field.value, checked: field.checked };
+    }));
+    await form.evaluate(element => element.addEventListener('htmx:beforeRequest', () => {
+      const destination = element.closest('.accordion-item');
+      if (!destination) throw new Error('Missing destination');
+      destination.setAttribute('data-test-save-snapshot', JSON.stringify(Array.from(destination.querySelectorAll('input'), field => ({
+        name: field.name, value: field.value, checked: field.checked,
+      }))));
+    }, { once: true }));
+    const endpoint = `/api/portfolio/${seeded.portfolio.id}/allocation-plan`;
+    const failed = page.waitForResponse(response => response.request().method() === 'POST'
+      && new URL(response.url()).pathname === endpoint);
+    await form.locator('button[onclick*="handleSubmit"]').click();
+    expect((await failed).status()).toBe(500);
+    const draftBefore = JSON.parse((await destination.getAttribute('data-test-save-snapshot')) ?? 'null');
+    expect(draftBefore).not.toBeNull();
+    expect(await snapshot()).toEqual(draftBefore);
+    expect(await database.query('SELECT * FROM public.asset ORDER BY id')).toEqual(assetsBefore);
+    expect(await database.query('SELECT * FROM public.allocation_plan ORDER BY id')).toEqual(plansBefore);
+    expect(await database.query('SELECT * FROM public.planned_allocation ORDER BY id')).toEqual(detailsBefore);
+    expect(await database.query('SELECT * FROM public.allocation_plan WHERE id = $1', [seeded.allocationPlan.id]))
+      .toEqual(sourcePlan);
+    expect(await queryPlannedAllocations(database, seeded.allocationPlan.id)).toEqual(sourceDetails);
+    const retryRow = rows.nth(2);
+    await retryRow.locator('[data-asset-action-button]').click();
+    await searchForAsset(page, retryRow, EXISTING_BOND_TICKER, 200);
+    const saved = page.waitForResponse(response => response.request().method() === 'POST'
+      && new URL(response.url()).pathname === endpoint);
+    await form.evaluate((element: HTMLFormElement) => element.requestSubmit());
+    expect((await saved).ok()).toBe(true);
+    const created = await database.query<{ id: number }>(
+      'SELECT id FROM public.allocation_plan WHERE portfolio_id = $1 AND id <> $2',
+      [seeded.portfolio.id, seeded.allocationPlan.id],
+    );
+    expect(created).toHaveLength(1);
+    const copied = await queryPlannedAllocations(database, created[0].id);
+    expect(copied).toHaveLength(8);
+    expect(copied.every(row => sourceDetails.every(original => original.id !== row.id))).toBe(true);
+    expect(copied.some(row => row.asset_id === seeded.assets[EXISTING_BOND_TICKER].id)).toBe(true);
+    expect(copied.some(row => row.asset_id === seeded.assets[EXISTING_STOCK_TICKER].id)).toBe(true);
+    const newAssets = await database.query<{ id: number }>('SELECT id FROM public.asset WHERE ticker = $1',
+      ['E2E:PLAN-ROLLBACK']);
+    expect(newAssets).toHaveLength(1);
+    expect(copied.some(row => row.asset_id === newAssets[0].id)).toBe(true);
+    expect(await database.query('SELECT * FROM public.allocation_plan WHERE id = $1', [seeded.allocationPlan.id]))
+      .toEqual(sourcePlan);
+    expect(await queryPlannedAllocations(database, seeded.allocationPlan.id)).toEqual(sourceDetails);
+    expect(await database.query('SELECT * FROM public.asset WHERE id = ANY($1::int[]) ORDER BY id',
+      [assetsBefore.map(asset => asset.id)])).toEqual(assetsBefore);
+  });
+
   /** Creates a plan and verifies its refreshed form, persistence, and rendered chart.
    * @author GPT-6 Luna
    */
