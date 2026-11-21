@@ -46,13 +46,18 @@ export function guardNumericEdits(input: HTMLInputElement, financial: boolean): 
 
     guardedInputs.add(input);
     let accepted = input.value;
+    let initialDecimal = false;
 
     input.addEventListener("focus", () => {
         accepted = input.value;
+        initialDecimal = false;
     });
 
     input.addEventListener("beforeinput", event => {
         const edit = event as InputEvent;
+        const decimalInsertion = edit.inputType === "insertText" && edit.data === ".";
+
+        initialDecimal = !financial && decimalInsertion && input.value === "" && !input.validity.badInput;
 
         if(!edit.inputType.startsWith("insert") || edit.data === null) {
             return;
@@ -95,6 +100,11 @@ export function guardNumericEdits(input: HTMLInputElement, financial: boolean): 
         const valid = financial ? isFinancialDraft(input.value) : !input.validity.badInput;
 
         if(!valid) {
+            if(!financial && initialDecimal && input.validity.badInput) {
+                event.stopImmediatePropagation();
+                return;
+            }
+
             input.value = accepted;
             event.stopImmediatePropagation();
             return;

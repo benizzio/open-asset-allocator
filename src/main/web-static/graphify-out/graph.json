@@ -16221,7 +16221,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/infra/dom/numeric-edit-guard.ts",
-      "source_location": "L62",
+      "source_location": "L67",
       "weight": 1.0
     },
     {
@@ -16233,7 +16233,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/infra/dom/numeric-edit-guard.ts",
-      "source_location": "L62",
+      "source_location": "L67",
       "weight": 1.0
     },
     {
@@ -16245,7 +16245,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "websrc/infra/dom/numeric-edit-guard.ts",
-      "source_location": "L78",
+      "source_location": "L83",
       "weight": 1.0
     },
     {
@@ -40971,5 +40971,5 @@
       "source_file": "websrc/components/portfolio-navigation.html"
     }
   ],
-  "built_at_commit": "246e3e5ba8979964b006aa28271a22a00df49246"
+  "built_at_commit": "f2977f0d03d6680676a4a81e5c5d49bdb9f28896"
 }

@@ -204,6 +204,55 @@ test.describe('portfolio allocation history management', () => {
     }
   });
 
+  /** Preserves a native decimal draft without recalculating until it becomes a number.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 23.3: completes an initially empty decimal quantity', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const newItem = page.locator('#portfolio-history-management-container-0');
+    await newItem.getByRole('button', { name: 'New observation details' }).click();
+    const row = await addAllocationRow(page, newItem.locator('form'), 0);
+    const quantity = row.getByRole('spinbutton', { name: 'Quantity' });
+    const price = row.getByRole('textbox', { name: 'Market price' });
+    const totalRaw = row.locator('input[name$="[totalMarketValue]"]');
+
+    await quantity.fill('2');
+    await price.fill('100');
+    await expect(totalRaw).toHaveValue('200');
+    await quantity.focus();
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.press('Backspace');
+    await page.keyboard.type('.');
+    await expect(totalRaw).toHaveValue('200');
+    await page.keyboard.type('x5');
+    await expect.poll(() => quantity.evaluate((input: HTMLInputElement) => input.valueAsNumber)).toBe(0.5);
+    await expect(totalRaw).toHaveValue('50');
+
+    const clipboardSource = page.locator('[data-numeric-paste-source]');
+    await page.evaluate(() => {
+      const source = document.createElement('textarea');
+      source.dataset.numericPasteSource = '';
+      document.body.appendChild(source);
+    });
+    await clipboardSource.fill('12abc');
+    await clipboardSource.selectText();
+    await page.keyboard.press('ControlOrMeta+C');
+    await quantity.focus();
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.press('ControlOrMeta+V');
+    await expect.poll(() => quantity.evaluate((input: HTMLInputElement) => input.valueAsNumber)).toBe(0.5);
+    await expect(totalRaw).toHaveValue('50');
+
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.press('Backspace');
+    await page.keyboard.type('.');
+    await page.keyboard.press('Backspace');
+    await page.keyboard.type('5');
+    await expect(quantity).toHaveValue('5');
+    await expect(totalRaw).toHaveValue('500');
+  });
+
   test.describe('scenario 14: asset search autocomplete feedback and create action', () => {
     /** Verifies all matching assets remain available in a bounded, scrollable list.
      *
