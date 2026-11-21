@@ -11,7 +11,10 @@ import { BigNumber } from "bignumber.js";
 import { HtmxInfra } from "../../../infra/htmx";
 import type { AfterRequestEventDetail, RequestConfigEventDetail } from "../../../infra/htmx";
 import notifications from "../../notifications";
-import { PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX } from "../portfolio-history-management-form";
+import {
+    OBSERVATION_ASSET_QUANTITY_SELECTOR,
+    PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX,
+} from "../portfolio-history-management-form";
 
 /** Locates the hidden association fieldset. Example: `row.querySelector(EXTERNAL_ASSET_KEYS_SELECTOR)`.
  * @author GPT-6 Sol
@@ -38,7 +41,6 @@ const QUOTE_ICON_SELECTOR = "[data-quote-icon]";
 const QUOTE_SPINNER_SELECTOR = "[data-quote-spinner]";
 const QUOTE_MARKET_PRICE_DISPLAY_SELECTOR = "[data-financial-input][data-financial-input-decimals]";
 const QUOTE_MARKET_PRICE_RAW_SELECTOR = "input[type=\"hidden\"][name$=\"[assetMarketPrice]\"]";
-const QUOTE_QUANTITY_SELECTOR = "[name$=\"[assetQuantity]\"]";
 const QUOTE_TOTAL_MARKET_VALUE_RAW_SELECTOR = "input[type=\"hidden\"][name$=\"[totalMarketValue]\"]";
 const QUOTE_RESPONSE_ERROR_MESSAGE = "The latest closing price response was invalid.";
 const QUOTE_INPUT_ERROR_MESSAGE = "The market price input is unavailable.";
@@ -489,7 +491,7 @@ export function createPortfolioHistoryQuoteAction(
         const row = snapshot.row;
         const displayInput = row.querySelector<HTMLInputElement>(QUOTE_MARKET_PRICE_DISPLAY_SELECTOR);
         const rawInput = row.querySelector<HTMLInputElement>(QUOTE_MARKET_PRICE_RAW_SELECTOR);
-        const quantityInput = row.querySelector<HTMLInputElement>(QUOTE_QUANTITY_SELECTOR);
+        const quantityInput = row.querySelector<HTMLInputElement>(OBSERVATION_ASSET_QUANTITY_SELECTOR);
         const totalMarketValueInput = row.querySelector<HTMLInputElement>(QUOTE_TOTAL_MARKET_VALUE_RAW_SELECTOR);
         const decimalPlaces = Number(displayInput?.dataset.financialInputDecimals);
 

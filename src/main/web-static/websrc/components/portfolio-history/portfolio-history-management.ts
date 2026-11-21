@@ -47,7 +47,10 @@ import {
 import { prepareObservationMetadataForSubmit } from "./portfolio-history-management-observation-metadata";
 import { bindObservationCloning } from "./portfolio-history-management-observation-clone";
 import paginatedList, { PaginationMode } from "../paginated-list";
-import { PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX } from "./portfolio-history-management-form";
+import {
+    OBSERVATION_ASSET_QUANTITY_SELECTOR,
+    PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX,
+} from "./portfolio-history-management-form";
 import { guardNumericEdits } from "../../infra/dom";
 
 const PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER = "accordion-portfolio-history-management";
@@ -103,9 +106,10 @@ function synchronizeExternalAssetKeyGroup(
 /** Normalizes one server-rendered row without replacing valid first-provider values.
  *
  * @author GPT-6 Luna
+ * @author GPT-6.1 Terra
  */
 function normalizePortfolioHistoryRow(row: HTMLTableRowElement): void {
-    const quantity = row.querySelector<HTMLInputElement>("[name$='[assetQuantity]']");
+    const quantity = row.querySelector<HTMLInputElement>(OBSERVATION_ASSET_QUANTITY_SELECTOR);
 
     if(quantity) {
         guardNumericEdits(quantity, false);
@@ -196,7 +200,7 @@ class FormRowValueElements {
         const formRowId = `${ PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX }${ formUniqueId }-row-${ formRowIndex }`;
         const formRow = window[formRowId] as HTMLElement;
 
-        this.quantityInput = formRow.querySelector("[name$='[assetQuantity]']");
+        this.quantityInput = formRow.querySelector(OBSERVATION_ASSET_QUANTITY_SELECTOR);
         this.marketPriceInput = formRow.querySelector("[name$='[assetMarketPrice]']");
         this.totalMarketValueInput = formRow.querySelector("[name$='[totalMarketValue]']");
     }

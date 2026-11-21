@@ -6,6 +6,7 @@
  */
 import type { TemplateDelegate } from "handlebars";
 import type { ObservationDraft } from "./draft";
+import { OBSERVATION_ASSET_QUANTITY_SELECTOR } from "../portfolio-history-management-form";
 
 /**
  * Builds and validates destination-specific row markup before the existing draft is touched.
@@ -14,6 +15,7 @@ import type { ObservationDraft } from "./draft";
  * @returns Complete ID-0 row markup.
  * @example `const html = renderRows(template, draft);`
  * @author GPT-6.1 Sol
+ * @author GPT-6.1 Terra
  */
 export function renderRows(template: TemplateDelegate, draft: ObservationDraft): string {
     const html = draft.rows.map((_, allocationIndex) =>
@@ -31,7 +33,7 @@ export function renderRows(template: TemplateDelegate, draft: ObservationDraft):
             "[data-asset-search-autocomplete]", "[data-asset-search-input]", "[data-asset-ticker-input]",
             "[data-asset-action-button]", "[data-new-asset-ticker-message]", "[data-external-asset-keys]",
             "[aria-label='Asset name']", "[name$='[assetId]']", "[name$='[class]']", "[name$='[cashReserve]']",
-            "[name$='[assetQuantity]']", "[data-financial-input$='[assetMarketPrice]']",
+            OBSERVATION_ASSET_QUANTITY_SELECTOR, "[data-financial-input$='[assetMarketPrice]']",
             "[data-financial-input$='[totalMarketValue]']",
         ];
 

@@ -10,7 +10,10 @@
  */
 
 import htmx from "htmx.org";
-import { PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX } from "../portfolio-history-management-form";
+import {
+    OBSERVATION_ASSET_QUANTITY_SELECTOR,
+    PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX,
+} from "../portfolio-history-management-form";
 
 const LOADER_ATTRIBUTE = "data-observation-details-loader";
 const BOUND_ATTRIBUTE = "data-observation-details-loader-bound";
@@ -224,7 +227,7 @@ function usableDetailsRows(xhr: XMLHttpRequest, target: HTMLElement): boolean {
 
         const basicFieldsReady = !!row.querySelector("input[name$='[assetId]']")
             && !!row.querySelector("input[name$='[class]']")
-            && !!row.querySelector("input[name$='[assetQuantity]']");
+            && !!row.querySelector(`input${ OBSERVATION_ASSET_QUANTITY_SELECTOR }`);
         return financialReady && basicFieldsReady;
     });
 }

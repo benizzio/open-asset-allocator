@@ -8,6 +8,7 @@ import { captureFinancialInput, restoreFinancialInput, type FinancialInputSnapsh
 import { AssetSelectionState, captureAssetDraft, restoreAssetDraft } from "../../asset-composed-columns-input";
 import type { AssetDraft } from "../../asset-composed-columns-input";
 import { captureObservationTag } from "../portfolio-history-management-observation-metadata";
+import { OBSERVATION_ASSET_QUANTITY_FIELD } from "../portfolio-history-management-form";
 
 /** Independent allocation fields captured from one editable observation row.
  * @author GPT-6.1 Terra
@@ -65,7 +66,7 @@ function captureRow(row: HTMLTableRowElement): AllocationDraft {
         asset,
         className: field(row, "class").value,
         cashReserve: field(row, "cashReserve").checked,
-        quantity: field(row, "assetQuantity").value,
+        quantity: field(row, OBSERVATION_ASSET_QUANTITY_FIELD).value,
         price: captureFinancialInput(field(row, "assetMarketPrice", true)),
         total: captureFinancialInput(field(row, "totalMarketValue", true)),
         keys: captureKeys(row, asset),
@@ -94,7 +95,7 @@ function restoreRow(row: HTMLTableRowElement, draft: AllocationDraft): void {
     restoreAssetDraft(row, draft.asset);
     field(row, "class").value = draft.className;
     field(row, "cashReserve").checked = draft.cashReserve;
-    field(row, "assetQuantity").value = draft.quantity;
+    field(row, OBSERVATION_ASSET_QUANTITY_FIELD).value = draft.quantity;
     restoreFinancialInput(field(row, "assetMarketPrice", true), draft.price);
     restoreFinancialInput(field(row, "totalMarketValue", true), draft.total);
     const group = row.querySelector<HTMLFieldSetElement>("[data-external-asset-keys]");
