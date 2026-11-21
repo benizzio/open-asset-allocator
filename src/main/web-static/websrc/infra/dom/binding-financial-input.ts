@@ -1,6 +1,7 @@
 import { logger, LogLevel } from "../logging";
 import Format from "../format";
 import { parseIntOrDefault } from "../../utils/lang";
+import { guardNumericEdits } from "./numeric-edit-guard";
 
 // =============================================================================
 // FINANCIAL INPUT BINDING
@@ -99,6 +100,8 @@ function bindFinancialInput(financialInput: HTMLInputElement, fieldName: string)
 
     // Initialize display value from raw if present
     initializeFinancialDisplay(financialInput, hiddenRawInput, decimalPlaces);
+
+    guardNumericEdits(financialInput, true);
 
     // Set up synchronization on blur (when user finishes editing)
     financialInput.addEventListener("blur", () => {

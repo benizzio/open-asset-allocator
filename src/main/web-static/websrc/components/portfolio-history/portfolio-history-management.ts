@@ -48,6 +48,7 @@ import { prepareObservationMetadataForSubmit } from "./portfolio-history-managem
 import { bindObservationCloning } from "./portfolio-history-management-observation-clone";
 import paginatedList, { PaginationMode } from "../paginated-list";
 import { PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX } from "./portfolio-history-management-form";
+import { guardNumericEdits } from "../../infra/dom";
 
 const PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER = "accordion-portfolio-history-management";
 const PORTFOLIO_ALLOCATION_MANAGEMENT_TBODY_PREFIX = "portfolio-history-management-form-tbody-";
@@ -104,6 +105,12 @@ function synchronizeExternalAssetKeyGroup(
  * @author GPT-6 Luna
  */
 function normalizePortfolioHistoryRow(row: HTMLTableRowElement): void {
+    const quantity = row.querySelector<HTMLInputElement>("[name$='[assetQuantity]']");
+
+    if(quantity) {
+        guardNumericEdits(quantity, false);
+    }
+
     const generation = Number(row.dataset.assetSelectionGeneration);
 
     if(!Number.isSafeInteger(generation) || generation < 0) {

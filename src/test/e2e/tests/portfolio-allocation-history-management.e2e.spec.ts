@@ -121,6 +121,30 @@ type SeededHistoryModificationData = {
 };
 
 test.describe('portfolio allocation history management', () => {
+  /** Rejects invalid user edits before they can modify the row or its submitted raw values.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 23.1: rejects invalid observation numeric edits immediately', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const observation = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'NUMERIC_EDITS', '2026-05-01T12:00:00Z',
+    );
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const newItem = page.locator('#portfolio-history-management-container-0');
+    await newItem.getByRole('button', { name: 'New observation details' }).click();
+    const newRow = await addAllocationRow(page, newItem.locator('form'), 0);
+    await exerciseNumericEditGuard(page, newRow);
+
+    const persisted = page.locator(`#portfolio-history-management-container-${observation.id}`);
+    await persisted.locator('[data-metadata-editor-toggle]').click();
+    const form = persisted.locator('form');
+    await expect(form).toHaveAttribute('data-observation-details-state', 'ready');
+    await exerciseNumericEditGuard(page, form.locator('tbody tr').first());
+    await persisted.getByRole('button', { name: 'Clone observation NUMERIC_EDITS' }).click();
+    await expect(newItem.locator('form tbody tr')).toHaveCount(1);
+    await exerciseNumericEditGuard(page, newItem.locator('form tbody tr').first());
+  });
+
   test.describe('scenario 14: asset search autocomplete feedback and create action', () => {
     /** Verifies all matching assets remain available in a bounded, scrollable list.
      *
@@ -3613,6 +3637,62 @@ function trackAssetLookupRequests(page: Page, ticker: string): { requests: strin
     requests,
     stop: () => page.off('request', listener),
   };
+}
+
+/** Exercises rejection and accepted editing on one new or lazy-loaded observation row.
+ * @author GPT-6.1 Terra
+ */
+async function exerciseNumericEditGuard(page: Page, row: Locator): Promise<void> {
+  const quantity = row.getByRole('spinbutton', { name: 'Quantity' });
+  const price = row.getByRole('textbox', { name: 'Market price' });
+  const total = row.getByRole('textbox', { name: 'Total market value' });
+  const priceRaw = row.locator('input[name$="[assetMarketPrice]"]');
+  const totalRaw = row.locator('input[name$="[totalMarketValue]"]');
+
+  await quantity.fill('2');
+  await price.fill('125.50');
+  await expect(totalRaw).toHaveValue('251');
+  const clipboardSource = page.locator('[data-numeric-paste-source]');
+  await page.evaluate(() => {
+    if(!document.querySelector('[data-numeric-paste-source]')) {
+      const source = document.createElement('textarea');
+      source.dataset.numericPasteSource = '';
+      document.body.appendChild(source);
+    }
+  });
+  await clipboardSource.fill('12abc');
+  await clipboardSource.selectText();
+  await page.keyboard.press('ControlOrMeta+C');
+
+  for(const input of [quantity, price, total]) {
+    await input.focus();
+    const before = await input.inputValue();
+    await page.keyboard.press('End');
+    await page.keyboard.type('x');
+    await expect(input).toBeFocused();
+    await expect(input).toHaveValue(before);
+    await expect(quantity).toHaveValue('2');
+    await expect(priceRaw).toHaveValue('125.5');
+    await expect(totalRaw).toHaveValue('251');
+
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.press('ControlOrMeta+V');
+    await expect(input).toBeFocused();
+    await expect(input).toHaveValue(before);
+    await expect(quantity).toHaveValue('2');
+    await expect(priceRaw).toHaveValue('125.5');
+    await expect(totalRaw).toHaveValue('251');
+  }
+
+  await price.fill('1,234.50');
+  await expect(priceRaw).toHaveValue('1234.5');
+  await expect(totalRaw).toHaveValue('2469');
+  await total.fill('99.25');
+  await expect(totalRaw).toHaveValue('99.25');
+  await expect(quantity).toHaveValue('');
+  await expect(priceRaw).toHaveValue('');
+  await total.blur();
+  await expect(total).toHaveValue('99.25');
 }
 
 /** Seeds one portfolio and the two assets that scenario 3 must resolve as existing. */
