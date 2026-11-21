@@ -16249,18 +16249,6 @@
       "weight": 1.0
     },
     {
-      "source": "websrc_infra_dom_numeric_edit_guard_isfinancialpaste",
-      "target": "websrc_infra_dom_numeric_edit_guard_isfinancialdraft",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "websrc/infra/dom/numeric-edit-guard.ts",
-      "source_location": "L22",
-      "weight": 1.0
-    },
-    {
       "source": "websrc_infra_dom_percentage_input_snapshot_capturepercentageinput",
       "target": "websrc_infra_dom_percentage_input_snapshot_fractioninputfor",
       "relation": "calls",
@@ -40983,5 +40971,5 @@
       "source_file": "websrc/components/portfolio-navigation.html"
     }
   ],
-  "built_at_commit": "cb8f4aeedc31deba189323024cc198247dcda3ff"
+  "built_at_commit": "246e3e5ba8979964b006aa28271a22a00df49246"
 }

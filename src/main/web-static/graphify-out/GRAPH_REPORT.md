@@ -6,12 +6,12 @@
 - Unclassified: 3 file(s) not represented in the graph (top: (none) 2, .scss 1)
 
 ## Summary
-- 1027 nodes · 2458 edges · 67 communities (63 shown, 4 thin omitted)
+- 1027 nodes · 2457 edges · 67 communities (63 shown, 4 thin omitted)
 - Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 127 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `cb8f4aee`
+- Built from commit: `246e3e5b`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -378,11 +378,11 @@ Nodes (4): bindBootstrapValidationCleaning(), bindBootstrapValidationOnSubmit(),
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `htmx.org` connect `application/index.ts` to `htmx/index.ts`, `allocation-plan-management.ts`, `package.json`, `binding-htmx-trigger-on-route.ts`, `pagination.ts`, `portfolio-history-management.ts`, `allocation-plan-management-clone/index.ts`, `asset-composed-columns-input/index.ts`, `portfolio-history-management-observation-clone/index.ts`, `asset.ts`, `portfolio-history-management-observation-details/index.ts`?**
-  _High betweenness centrality (0.103) - this node is a cross-community bridge._
+  _High betweenness centrality (0.100) - this node is a cross-community bridge._
 - **Why does `bignumber.js` connect `chart-contents.ts` to `handlebars-lang.ts`, `chart-utils.ts`, `allocation-plan-management.ts`, `package.json`, `portfolio-history-management.ts`, `binding-percentage-input.ts`, `allocation-plan.ts`?**
-  _High betweenness centrality (0.062) - this node is a cross-community bridge._
-- **Why does `handlebars` connect `handlebars-lang.ts` to `rendering.ts`, `allocation-plan-management.ts`, `package.json`, `chart-contents.ts`, `portfolio-history-management.ts`, `allocation-plan-management-clone/index.ts`, `portfolio-history-management-observation-clone/draft.ts`, `portfolio-history-management-observation-clone/index.ts`, `notifications.ts`, `asset.ts`, `chart.ts`?**
   _High betweenness centrality (0.061) - this node is a cross-community bridge._
+- **Why does `handlebars` connect `handlebars-lang.ts` to `rendering.ts`, `allocation-plan-management.ts`, `package.json`, `chart-contents.ts`, `portfolio-history-management.ts`, `allocation-plan-management-clone/index.ts`, `portfolio-history-management-observation-clone/draft.ts`, `portfolio-history-management-observation-clone/index.ts`, `notifications.ts`, `asset.ts`, `chart.ts`?**
+  _High betweenness centrality (0.060) - this node is a cross-community bridge._
 - **Are the 16 inferred relationships involving `registerHandlebarsLangHelpers()` (e.g. with `andHelper()` and `arrayHelper()`) actually correct?**
   _`registerHandlebarsLangHelpers()` has 16 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `{ createProxyMiddleware }`, `fs`, `path` to the rest of the system?**

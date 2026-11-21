@@ -6,11 +6,11 @@
 
 const guardedInputs = new WeakSet<HTMLInputElement>();
 
-/** Identifies editable non-negative financial values, including partially typed groups.
+/** Identifies editable non-negative financial values without enforcing grouping positions.
  * @author GPT-6.1 Terra
  */
 function isFinancialDraft(value: string): boolean {
-    return /^(?:\d*|\d{1,3}(?:,\d{0,3})*)(?:\.\d*)?$/.test(value);
+    return /^\d*(?:,\d*)*(?:\.\d*)?$/.test(value);
 }
 
 /** Rejects incomplete grouping in pasted financial values.
@@ -19,7 +19,7 @@ function isFinancialDraft(value: string): boolean {
 function isFinancialPaste(value: string): boolean {
     return value.includes(",")
         ? /^\d{1,3}(?:,\d{3})+(?:\.\d*)?$/.test(value)
-        : isFinancialDraft(value);
+        : /^\d*(?:\.\d*)?$/.test(value);
 }
 
 /** Builds the value resulting from a text input's current selection and inserted text.

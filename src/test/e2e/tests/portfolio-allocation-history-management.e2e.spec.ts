@@ -145,6 +145,65 @@ test.describe('portfolio allocation history management', () => {
     await exerciseNumericEditGuard(page, newItem.locator('form tbody tr').first());
   });
 
+  /** Allows caret edits in formatted financial values while rejecting malformed pastes.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 23.2: edits digits in grouped financial values', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const newItem = page.locator('#portfolio-history-management-container-0');
+    await newItem.getByRole('button', { name: 'New observation details' }).click();
+    const row = await addAllocationRow(page, newItem.locator('form'), 0);
+    const quantity = row.getByRole('spinbutton', { name: 'Quantity' });
+    const price = row.getByRole('textbox', { name: 'Market price' });
+    const total = row.getByRole('textbox', { name: 'Total market value' });
+    const priceRaw = row.locator('input[name$="[assetMarketPrice]"]');
+    const totalRaw = row.locator('input[name$="[totalMarketValue]"]');
+
+    await total.fill('1234');
+    await total.blur();
+    await expect(total).toHaveValue('1,234.00');
+    await total.focus();
+    await total.evaluate((input: HTMLInputElement) => input.setSelectionRange(5, 5));
+    await page.keyboard.type('5');
+    await expect(total).toHaveValue('1,2345.00');
+    await expect(totalRaw).toHaveValue('12345');
+    await total.blur();
+    await expect(total).toHaveValue('12,345.00');
+    await expect(totalRaw).toHaveValue('12345');
+
+    await quantity.fill('2');
+    await price.fill('1234');
+    await price.blur();
+    await expect(price).toHaveValue('1,234.00000000');
+    await price.focus();
+    await price.evaluate((input: HTMLInputElement) => input.setSelectionRange(5, 5));
+    await page.keyboard.type('5');
+    await expect(price).toHaveValue('1,2345.00000000');
+    await expect(priceRaw).toHaveValue('12345');
+    await expect(totalRaw).toHaveValue('24690');
+    await price.blur();
+    await expect(price).toHaveValue('12,345.00000000');
+
+    const clipboardSource = page.locator('[data-numeric-paste-source]');
+    await page.evaluate(() => {
+      const source = document.createElement('textarea');
+      source.dataset.numericPasteSource = '';
+      document.body.appendChild(source);
+    });
+    for(const invalid of ['1,23.45', '12abc']) {
+      await clipboardSource.fill(invalid);
+      await clipboardSource.selectText();
+      await page.keyboard.press('ControlOrMeta+C');
+      await price.focus();
+      await page.keyboard.press('ControlOrMeta+A');
+      await page.keyboard.press('ControlOrMeta+V');
+      await expect(price).toHaveValue('12,345.00000000');
+      await expect(priceRaw).toHaveValue('12345');
+      await expect(totalRaw).toHaveValue('24690');
+    }
+  });
+
   test.describe('scenario 14: asset search autocomplete feedback and create action', () => {
     /** Verifies all matching assets remain available in a bounded, scrollable list.
      *
