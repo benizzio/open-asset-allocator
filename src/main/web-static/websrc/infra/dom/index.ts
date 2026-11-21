@@ -18,6 +18,8 @@ export type { FinancialInputSnapshot } from "./financial-input-snapshot";
 export { capturePercentageInput, restorePercentageInput } from "./percentage-input-snapshot";
 export type { PercentageInputSnapshot } from "./percentage-input-snapshot";
 export { guardNumericEdits } from "./numeric-edit-guard";
+export { FINANCIAL_INPUT_ATTRIBUTE, FINANCIAL_INPUT_BOUND_FLAG, FINANCIAL_INPUT_DECIMALS_ATTRIBUTE } from
+    "./binding-financial-input";
 export { PERCENTAGE_INPUT_ATTRIBUTE, PERCENTAGE_INPUT_CONTAINER_ATTRIBUTE } from "./binding-percentage-input";
 
 const DomInfra = {

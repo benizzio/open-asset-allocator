@@ -47,10 +47,9 @@ import {
 import { prepareObservationMetadataForSubmit } from "./portfolio-history-management-observation-metadata";
 import { bindObservationCloning } from "./portfolio-history-management-observation-clone";
 import paginatedList, { PaginationMode } from "../paginated-list";
-import {
-    OBSERVATION_ASSET_QUANTITY_SELECTOR,
-    PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX,
-} from "./portfolio-history-management-form";
+import { OBSERVATION_ASSET_QUANTITY_SELECTOR, OBSERVATION_ALLOCATION_SELECTORS } from
+    "./portfolio-history-management-form";
+import { PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX } from "./portfolio-history-management-form";
 import { guardNumericEdits } from "../../infra/dom";
 
 const PORTFOLIO_ALLOCATION_MANAGEMENT_PARENT_CONTAINER = "accordion-portfolio-history-management";
@@ -201,8 +200,8 @@ class FormRowValueElements {
         const formRow = window[formRowId] as HTMLElement;
 
         this.quantityInput = formRow.querySelector(OBSERVATION_ASSET_QUANTITY_SELECTOR);
-        this.marketPriceInput = formRow.querySelector("[name$='[assetMarketPrice]']");
-        this.totalMarketValueInput = formRow.querySelector("[name$='[totalMarketValue]']");
+        this.marketPriceInput = formRow.querySelector(OBSERVATION_ALLOCATION_SELECTORS.marketPrice);
+        this.totalMarketValueInput = formRow.querySelector(OBSERVATION_ALLOCATION_SELECTORS.total);
     }
 
     handleInputQuantityOrMarketPrice() {
