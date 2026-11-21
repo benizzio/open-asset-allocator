@@ -1,15 +1,15 @@
-# Graph Report - open-asset-allocator  (2026-11-19)
+# Graph Report - open-asset-allocator  (2026-11-21)
 
 ## Corpus Check
 - cluster-only mode — file stats not available
 
 ## Summary
-- 920 nodes · 1336 edges · 110 communities (65 shown, 45 thin omitted)
+- 921 nodes · 1337 edges · 110 communities (65 shown, 45 thin omitted)
 - Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 58 edges (avg confidence: 0.87)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `278a073e`
+- Built from commit: `f2977f0d`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -431,7 +431,7 @@ Nodes (3): Customizable Fractal Hierarchy, Multiple Portfolio Management, Fracta
 
 ## Knowledge Gaps
 - **278 isolated node(s):** `CanvasPoint`, `CanvasTextRecorder`, `ExpectedAllocationRow`, `ExpectedManagedAllocationRow`, `NavigationOptionName` (+273 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 432 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 433 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **45 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions

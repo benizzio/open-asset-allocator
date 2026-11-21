@@ -121,6 +121,138 @@ type SeededHistoryModificationData = {
 };
 
 test.describe('portfolio allocation history management', () => {
+  /** Rejects invalid user edits before they can modify the row or its submitted raw values.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 23.1: rejects invalid observation numeric edits immediately', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    const observation = await seedManagementObservation(
+      database, seed.portfolio, seed.assets[EXISTING_BOND_TICKER], 'NUMERIC_EDITS', '2026-05-01T12:00:00Z',
+    );
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const newItem = page.locator('#portfolio-history-management-container-0');
+    await newItem.getByRole('button', { name: 'New observation details' }).click();
+    const newRow = await addAllocationRow(page, newItem.locator('form'), 0);
+    await exerciseNumericEditGuard(page, newRow);
+
+    const persisted = page.locator(`#portfolio-history-management-container-${observation.id}`);
+    await persisted.locator('[data-metadata-editor-toggle]').click();
+    const form = persisted.locator('form');
+    await expect(form).toHaveAttribute('data-observation-details-state', 'ready');
+    await exerciseNumericEditGuard(page, form.locator('tbody tr').first());
+    await persisted.getByRole('button', { name: 'Clone observation NUMERIC_EDITS' }).click();
+    await expect(newItem.locator('form tbody tr')).toHaveCount(1);
+    await exerciseNumericEditGuard(page, newItem.locator('form tbody tr').first());
+  });
+
+  /** Allows caret edits in formatted financial values while rejecting malformed pastes.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 23.2: edits digits in grouped financial values', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const newItem = page.locator('#portfolio-history-management-container-0');
+    await newItem.getByRole('button', { name: 'New observation details' }).click();
+    const row = await addAllocationRow(page, newItem.locator('form'), 0);
+    const quantity = row.getByRole('spinbutton', { name: 'Quantity' });
+    const price = row.getByRole('textbox', { name: 'Market price' });
+    const total = row.getByRole('textbox', { name: 'Total market value' });
+    const priceRaw = row.locator('input[name$="[assetMarketPrice]"]');
+    const totalRaw = row.locator('input[name$="[totalMarketValue]"]');
+
+    await total.fill('1234');
+    await total.blur();
+    await expect(total).toHaveValue('1,234.00');
+    await total.focus();
+    await total.evaluate((input: HTMLInputElement) => input.setSelectionRange(5, 5));
+    await page.keyboard.type('5');
+    await expect(total).toHaveValue('1,2345.00');
+    await expect(totalRaw).toHaveValue('12345');
+    await total.blur();
+    await expect(total).toHaveValue('12,345.00');
+    await expect(totalRaw).toHaveValue('12345');
+
+    await quantity.fill('2');
+    await price.fill('1234');
+    await price.blur();
+    await expect(price).toHaveValue('1,234.00000000');
+    await price.focus();
+    await price.evaluate((input: HTMLInputElement) => input.setSelectionRange(5, 5));
+    await page.keyboard.type('5');
+    await expect(price).toHaveValue('1,2345.00000000');
+    await expect(priceRaw).toHaveValue('12345');
+    await expect(totalRaw).toHaveValue('24690');
+    await price.blur();
+    await expect(price).toHaveValue('12,345.00000000');
+
+    const clipboardSource = page.locator('[data-numeric-paste-source]');
+    await page.evaluate(() => {
+      const source = document.createElement('textarea');
+      source.dataset.numericPasteSource = '';
+      document.body.appendChild(source);
+    });
+    for(const invalid of ['1,23.45', '12abc']) {
+      await clipboardSource.fill(invalid);
+      await clipboardSource.selectText();
+      await page.keyboard.press('ControlOrMeta+C');
+      await price.focus();
+      await page.keyboard.press('ControlOrMeta+A');
+      await page.keyboard.press('ControlOrMeta+V');
+      await expect(price).toHaveValue('12,345.00000000');
+      await expect(priceRaw).toHaveValue('12345');
+      await expect(totalRaw).toHaveValue('24690');
+    }
+  });
+
+  /** Preserves a native decimal draft without recalculating until it becomes a number.
+   * @author GPT-6.1 Terra
+   */
+  test('scenario 23.3: completes an initially empty decimal quantity', async ({ database, page }) => {
+    const seed = await seedPortfolioHistoryData(database);
+    await page.goto(`/portfolio/${seed.portfolio.id}/history/manage`);
+    const newItem = page.locator('#portfolio-history-management-container-0');
+    await newItem.getByRole('button', { name: 'New observation details' }).click();
+    const row = await addAllocationRow(page, newItem.locator('form'), 0);
+    const quantity = row.getByRole('spinbutton', { name: 'Quantity' });
+    const price = row.getByRole('textbox', { name: 'Market price' });
+    const totalRaw = row.locator('input[name$="[totalMarketValue]"]');
+
+    await quantity.fill('2');
+    await price.fill('100');
+    await expect(totalRaw).toHaveValue('200');
+    await quantity.focus();
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.press('Backspace');
+    await page.keyboard.type('.');
+    await expect(totalRaw).toHaveValue('200');
+    await page.keyboard.type('x5');
+    await expect.poll(() => quantity.evaluate((input: HTMLInputElement) => input.valueAsNumber)).toBe(0.5);
+    await expect(totalRaw).toHaveValue('50');
+
+    const clipboardSource = page.locator('[data-numeric-paste-source]');
+    await page.evaluate(() => {
+      const source = document.createElement('textarea');
+      source.dataset.numericPasteSource = '';
+      document.body.appendChild(source);
+    });
+    await clipboardSource.fill('12abc');
+    await clipboardSource.selectText();
+    await page.keyboard.press('ControlOrMeta+C');
+    await quantity.focus();
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.press('ControlOrMeta+V');
+    await expect.poll(() => quantity.evaluate((input: HTMLInputElement) => input.valueAsNumber)).toBe(0.5);
+    await expect(totalRaw).toHaveValue('50');
+
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.press('Backspace');
+    await page.keyboard.type('.');
+    await page.keyboard.press('Backspace');
+    await page.keyboard.type('5');
+    await expect(quantity).toHaveValue('5');
+    await expect(totalRaw).toHaveValue('500');
+  });
+
   test.describe('scenario 14: asset search autocomplete feedback and create action', () => {
     /** Verifies all matching assets remain available in a bounded, scrollable list.
      *
@@ -3613,6 +3745,62 @@ function trackAssetLookupRequests(page: Page, ticker: string): { requests: strin
     requests,
     stop: () => page.off('request', listener),
   };
+}
+
+/** Exercises rejection and accepted editing on one new or lazy-loaded observation row.
+ * @author GPT-6.1 Terra
+ */
+async function exerciseNumericEditGuard(page: Page, row: Locator): Promise<void> {
+  const quantity = row.getByRole('spinbutton', { name: 'Quantity' });
+  const price = row.getByRole('textbox', { name: 'Market price' });
+  const total = row.getByRole('textbox', { name: 'Total market value' });
+  const priceRaw = row.locator('input[name$="[assetMarketPrice]"]');
+  const totalRaw = row.locator('input[name$="[totalMarketValue]"]');
+
+  await quantity.fill('2');
+  await price.fill('125.50');
+  await expect(totalRaw).toHaveValue('251');
+  const clipboardSource = page.locator('[data-numeric-paste-source]');
+  await page.evaluate(() => {
+    if(!document.querySelector('[data-numeric-paste-source]')) {
+      const source = document.createElement('textarea');
+      source.dataset.numericPasteSource = '';
+      document.body.appendChild(source);
+    }
+  });
+  await clipboardSource.fill('12abc');
+  await clipboardSource.selectText();
+  await page.keyboard.press('ControlOrMeta+C');
+
+  for(const input of [quantity, price, total]) {
+    await input.focus();
+    const before = await input.inputValue();
+    await page.keyboard.press('End');
+    await page.keyboard.type('x');
+    await expect(input).toBeFocused();
+    await expect(input).toHaveValue(before);
+    await expect(quantity).toHaveValue('2');
+    await expect(priceRaw).toHaveValue('125.5');
+    await expect(totalRaw).toHaveValue('251');
+
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.press('ControlOrMeta+V');
+    await expect(input).toBeFocused();
+    await expect(input).toHaveValue(before);
+    await expect(quantity).toHaveValue('2');
+    await expect(priceRaw).toHaveValue('125.5');
+    await expect(totalRaw).toHaveValue('251');
+  }
+
+  await price.fill('1,234.50');
+  await expect(priceRaw).toHaveValue('1234.5');
+  await expect(totalRaw).toHaveValue('2469');
+  await total.fill('99.25');
+  await expect(totalRaw).toHaveValue('99.25');
+  await expect(quantity).toHaveValue('');
+  await expect(priceRaw).toHaveValue('');
+  await total.blur();
+  await expect(total).toHaveValue('99.25');
 }
 
 /** Seeds one portfolio and the two assets that scenario 3 must resolve as existing. */
