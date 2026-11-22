@@ -170,7 +170,7 @@ assessing portfolio vs. plan situation through time, helping re-balancing decisi
         - [ ] show total market value for entire form
     - [x] market prices from external source (e.g. Yahoo Finance)
         - [ ] associate external source on Portfolio Allocation Management page
-    - [ ] allow past observations and clone an observation
+    - [x] allow past observations and clone an observation
         - [ ] block external source market price for past observations
     - [ ] template data from plan
     - [ ] no content message
