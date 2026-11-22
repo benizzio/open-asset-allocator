@@ -24,6 +24,12 @@ import { bindAssetFormValidationGuards, invalidateSelectedAsset, validateAssetRo
 
 export { AssetSelectionState } from "./constants";
 export { ASSET_SEARCH_AUTOCOMPLETE_ATTRIBUTE, ASSET_SEARCH_INPUT_ATTRIBUTE } from "./constants";
+export {
+    ASSET_TICKER_INPUT_ATTRIBUTE,
+    ASSET_ACTION_BUTTON_SELECTOR,
+    NEW_ASSET_TICKER_MESSAGE_SELECTOR,
+    ASSET_NAME_INPUT_SELECTOR,
+} from "./constants";
 export { captureAssetDraft, restoreAssetDraft } from "./draft";
 export type { AssetDraft } from "./draft";
 export { ASSET_ROW_SELECTION_CHANGE_EVENT, AssetRowSelectionChangeState } from "./selection-events";

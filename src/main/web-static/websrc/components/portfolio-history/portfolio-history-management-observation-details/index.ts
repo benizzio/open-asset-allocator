@@ -10,7 +10,13 @@
  */
 
 import htmx from "htmx.org";
-import { PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX } from "../portfolio-history-management-form";
+import { FINANCIAL_INPUT_ATTRIBUTE, FINANCIAL_INPUT_BOUND_FLAG } from "../../../infra/dom";
+import {
+    OBSERVATION_ALLOCATION_FIELDS,
+    OBSERVATION_ASSET_QUANTITY_SELECTOR,
+    PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX,
+    observationAllocationFieldSelector,
+} from "../portfolio-history-management-form";
 
 const LOADER_ATTRIBUTE = "data-observation-details-loader";
 const BOUND_ATTRIBUTE = "data-observation-details-loader-bound";
@@ -217,14 +223,22 @@ function usableDetailsRows(xhr: XMLHttpRequest, target: HTMLElement): boolean {
         return false;
     }
     return rows.every(row => {
-        const financial = row.querySelectorAll<HTMLInputElement>("[data-financial-input]");
+        const financial = row.querySelectorAll<HTMLInputElement>(`[${ FINANCIAL_INPUT_ATTRIBUTE }]`);
 
-        const financialReady = financial.length === 2
-            && Array.from(financial).every(input => input.dataset.financialInputBound === "true");
+        const expectedFinancialFields = [
+            OBSERVATION_ALLOCATION_FIELDS.marketPrice, OBSERVATION_ALLOCATION_FIELDS.total,
+        ];
 
-        const basicFieldsReady = !!row.querySelector("input[name$='[assetId]']")
-            && !!row.querySelector("input[name$='[class]']")
-            && !!row.querySelector("input[name$='[assetQuantity]']");
+        const financialReady = financial.length === expectedFinancialFields.length
+            && Array.from(financial).every(input => input.getAttribute(FINANCIAL_INPUT_BOUND_FLAG) === "true");
+
+        const basicFieldsReady = !!row.querySelector(`input${ observationAllocationFieldSelector(
+            OBSERVATION_ALLOCATION_FIELDS.assetId, "name",
+        ) }`)
+            && !!row.querySelector(`input${ observationAllocationFieldSelector(
+                OBSERVATION_ALLOCATION_FIELDS.className, "name",
+            ) }`)
+            && !!row.querySelector(`input${ OBSERVATION_ASSET_QUANTITY_SELECTOR }`);
         return financialReady && basicFieldsReady;
     });
 }
