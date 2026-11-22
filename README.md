@@ -178,8 +178,7 @@ assessing portfolio vs. plan situation through time, helping re-balancing decisi
     - [ ] Line chart with portfolio total market value over time - history progress chart and performance
 - Allocation Plan
     - [x] add form based data input (beginner-user-friendly)
-    - [ ] allow past plans and clone a plan
-    - [ ] copy data from other plans
+    - [x] allow past plans and clone a plan
     - [ ] no content message
 - Allocation map:
     - DIVERGENCE: last portfolio history from a timeframe, select an allocation plan to analyze
