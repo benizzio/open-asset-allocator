@@ -4,10 +4,16 @@
  * @module components/portfolio-history/portfolio-history-management-observation-clone/draft
  * @author GPT-6.1 Terra
  */
-import { captureFinancialInput, restoreFinancialInput, type FinancialInputSnapshot } from "../../../infra/dom";
+import { captureFinancialInput, restoreFinancialInput, FINANCIAL_INPUT_ATTRIBUTE } from "../../../infra/dom";
+import type { FinancialInputSnapshot } from "../../../infra/dom";
 import { AssetSelectionState, captureAssetDraft, restoreAssetDraft } from "../../asset-composed-columns-input";
 import type { AssetDraft } from "../../asset-composed-columns-input";
 import { captureObservationTag } from "../portfolio-history-management-observation-metadata";
+import {
+    OBSERVATION_ALLOCATION_FIELDS as fields,
+    observationAllocationFieldSelector,
+} from "../portfolio-history-management-form";
+import { EXTERNAL_ASSET_KEYS_SELECTOR } from "../portfolio-history-quote";
 
 /** Independent allocation fields captured from one editable observation row.
  * @author GPT-6.1 Terra
@@ -31,8 +37,8 @@ export type ObservationDraft = { tag: string; date: string; rows: AllocationDraf
  * @author GPT-6.1 Terra
  */
 function field(row: HTMLElement, suffix: string, financial = false): HTMLInputElement {
-    const attr = financial ? "data-financial-input" : "name";
-    const element = row.querySelector<HTMLInputElement>(`input[${ attr }$='[${ suffix }]']`);
+    const attr = financial ? FINANCIAL_INPUT_ATTRIBUTE : "name";
+    const element = row.querySelector<HTMLInputElement>(`input${ observationAllocationFieldSelector(suffix, attr) }`);
 
     if(!element) {
         throw new Error(`Missing observation field ${ suffix }.`);
@@ -44,7 +50,7 @@ function field(row: HTMLElement, suffix: string, financial = false): HTMLInputEl
  * @author GPT-6.1 Terra
  */
 function captureKeys(row: HTMLElement, asset: AssetDraft): AllocationDraft["keys"] {
-    const group = row.querySelector<HTMLFieldSetElement>("[data-external-asset-keys]");
+    const group = row.querySelector<HTMLFieldSetElement>(EXTERNAL_ASSET_KEYS_SELECTOR);
 
     if(asset.state !== AssetSelectionState.EXISTING || !group || group.disabled) {
         return undefined;
@@ -63,11 +69,11 @@ function captureRow(row: HTMLTableRowElement): AllocationDraft {
     const asset = captureAssetDraft(row);
     return {
         asset,
-        className: field(row, "class").value,
-        cashReserve: field(row, "cashReserve").checked,
-        quantity: field(row, "assetQuantity").value,
-        price: captureFinancialInput(field(row, "assetMarketPrice", true)),
-        total: captureFinancialInput(field(row, "totalMarketValue", true)),
+        className: field(row, fields.className).value,
+        cashReserve: field(row, fields.cashReserve).checked,
+        quantity: field(row, fields.quantity).value,
+        price: captureFinancialInput(field(row, fields.marketPrice, true)),
+        total: captureFinancialInput(field(row, fields.total, true)),
         keys: captureKeys(row, asset),
     };
 }
@@ -92,12 +98,12 @@ export function captureObservationDraft(form: HTMLFormElement, date: string): Ob
  */
 function restoreRow(row: HTMLTableRowElement, draft: AllocationDraft): void {
     restoreAssetDraft(row, draft.asset);
-    field(row, "class").value = draft.className;
-    field(row, "cashReserve").checked = draft.cashReserve;
-    field(row, "assetQuantity").value = draft.quantity;
-    restoreFinancialInput(field(row, "assetMarketPrice", true), draft.price);
-    restoreFinancialInput(field(row, "totalMarketValue", true), draft.total);
-    const group = row.querySelector<HTMLFieldSetElement>("[data-external-asset-keys]");
+    field(row, fields.className).value = draft.className;
+    field(row, fields.cashReserve).checked = draft.cashReserve;
+    field(row, fields.quantity).value = draft.quantity;
+    restoreFinancialInput(field(row, fields.marketPrice, true), draft.price);
+    restoreFinancialInput(field(row, fields.total, true), draft.total);
+    const group = row.querySelector<HTMLFieldSetElement>(EXTERNAL_ASSET_KEYS_SELECTOR);
 
     if(!group) {
         throw new Error("Missing external asset keys.");

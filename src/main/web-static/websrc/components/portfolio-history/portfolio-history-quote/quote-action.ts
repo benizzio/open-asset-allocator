@@ -11,7 +11,11 @@ import { BigNumber } from "bignumber.js";
 import { HtmxInfra } from "../../../infra/htmx";
 import type { AfterRequestEventDetail, RequestConfigEventDetail } from "../../../infra/htmx";
 import notifications from "../../notifications";
-import { PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX } from "../portfolio-history-management-form";
+import { OBSERVATION_ALLOCATION_FIELDS as fields } from "../portfolio-history-management-form";
+import { OBSERVATION_ASSET_QUANTITY_SELECTOR, PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX } from
+    "../portfolio-history-management-form";
+import { observationAllocationFieldSelector as fieldSelector } from "../portfolio-history-management-form";
+import { quoteSelectors } from "./selectors";
 
 /** Locates the hidden association fieldset. Example: `row.querySelector(EXTERNAL_ASSET_KEYS_SELECTOR)`.
  * @author GPT-6 Sol
@@ -32,14 +36,6 @@ export const EXTERNAL_ASSET_TICKER_SELECTOR = "[data-external-asset-key=\"ticker
 /** Matches observation and allocation coordinates in a history row ID.
  * @author GPT-6 Sol */
 const HISTORY_ROW_ID_PATTERN = new RegExp(`^${ PORTFOLIO_ALLOCATION_MANAGEMENT_FORM_PREFIX }(\\d+)-row-(\\d+)$`);
-const QUOTE_INPUT_GROUP_SELECTOR = ".portfolio-history-market-price";
-const QUOTE_ACTION_SELECTOR = "[data-quote-action]";
-const QUOTE_ICON_SELECTOR = "[data-quote-icon]";
-const QUOTE_SPINNER_SELECTOR = "[data-quote-spinner]";
-const QUOTE_MARKET_PRICE_DISPLAY_SELECTOR = "[data-financial-input][data-financial-input-decimals]";
-const QUOTE_MARKET_PRICE_RAW_SELECTOR = "input[type=\"hidden\"][name$=\"[assetMarketPrice]\"]";
-const QUOTE_QUANTITY_SELECTOR = "[name$=\"[assetQuantity]\"]";
-const QUOTE_TOTAL_MARKET_VALUE_RAW_SELECTOR = "input[type=\"hidden\"][name$=\"[totalMarketValue]\"]";
 const QUOTE_RESPONSE_ERROR_MESSAGE = "The latest closing price response was invalid.";
 const QUOTE_INPUT_ERROR_MESSAGE = "The market price input is unavailable.";
 const QUOTE_PATH_ERROR_MESSAGE = "The selected external-asset identifiers could not be encoded.";
@@ -166,7 +162,9 @@ export function createPortfolioHistoryQuoteAction(
      * @author GPT-6 Sol
      */
     function getQuoteRequestSnapshot(row: HTMLTableRowElement): QuoteRequestSnapshot | null {
-        const assetIdInput = row.querySelector<HTMLInputElement>("input[type=\"hidden\"][name$=\"[assetId]\"]");
+        const assetIdInput = row.querySelector<HTMLInputElement>(
+            `input[type="hidden"]${ fieldSelector(fields.assetId, "name") }`,
+        );
         const fieldset = row.querySelector<HTMLFieldSetElement>(EXTERNAL_ASSET_KEYS_SELECTOR);
         const sourceInput = fieldset?.querySelector<HTMLInputElement>(EXTERNAL_ASSET_SOURCE_SELECTOR);
         const exchangeIdInput = fieldset?.querySelector<HTMLInputElement>(EXTERNAL_ASSET_EXCHANGE_ID_SELECTOR);
@@ -237,7 +235,7 @@ export function createPortfolioHistoryQuoteAction(
      * @author GPT-6 Luna
      */
     function updateButtonVisibility(row: HTMLTableRowElement): void {
-        const quoteButton = row.querySelector<HTMLButtonElement>(QUOTE_ACTION_SELECTOR);
+        const quoteButton = row.querySelector<HTMLButtonElement>(quoteSelectors.action);
 
         if(!quoteButton) {
             return;
@@ -246,7 +244,7 @@ export function createPortfolioHistoryQuoteAction(
         const isAvailable = getQuoteRequestSnapshot(row) !== null;
         quoteButton.hidden = !isAvailable;
 
-        quoteButton.closest<HTMLElement>(QUOTE_INPUT_GROUP_SELECTOR)
+        quoteButton.closest<HTMLElement>(quoteSelectors.group)
             ?.classList.toggle("has-quote-action", isAvailable);
     }
 
@@ -281,8 +279,8 @@ export function createPortfolioHistoryQuoteAction(
     function restoreLoadingState(quoteButton: HTMLButtonElement): void {
         quoteButton.removeAttribute("aria-busy");
 
-        const icon = quoteButton.querySelector<HTMLElement>(QUOTE_ICON_SELECTOR);
-        const spinner = quoteButton.querySelector<HTMLElement>(QUOTE_SPINNER_SELECTOR);
+        const icon = quoteButton.querySelector<HTMLElement>(quoteSelectors.icon);
+        const spinner = quoteButton.querySelector<HTMLElement>(quoteSelectors.spinner);
 
         if(icon) {
             icon.hidden = false;
@@ -350,8 +348,8 @@ export function createPortfolioHistoryQuoteAction(
         request.xhr = detail.xhr;
         quoteButton.setAttribute("aria-busy", "true");
 
-        const icon = quoteButton.querySelector<HTMLElement>(QUOTE_ICON_SELECTOR);
-        const spinner = quoteButton.querySelector<HTMLElement>(QUOTE_SPINNER_SELECTOR);
+        const icon = quoteButton.querySelector<HTMLElement>(quoteSelectors.icon);
+        const spinner = quoteButton.querySelector<HTMLElement>(quoteSelectors.spinner);
 
         if(icon) {
             icon.hidden = true;
@@ -487,10 +485,10 @@ export function createPortfolioHistoryQuoteAction(
         }
 
         const row = snapshot.row;
-        const displayInput = row.querySelector<HTMLInputElement>(QUOTE_MARKET_PRICE_DISPLAY_SELECTOR);
-        const rawInput = row.querySelector<HTMLInputElement>(QUOTE_MARKET_PRICE_RAW_SELECTOR);
-        const quantityInput = row.querySelector<HTMLInputElement>(QUOTE_QUANTITY_SELECTOR);
-        const totalMarketValueInput = row.querySelector<HTMLInputElement>(QUOTE_TOTAL_MARKET_VALUE_RAW_SELECTOR);
+        const displayInput = row.querySelector<HTMLInputElement>(quoteSelectors.priceDisplay);
+        const rawInput = row.querySelector<HTMLInputElement>(quoteSelectors.priceRaw);
+        const quantityInput = row.querySelector<HTMLInputElement>(OBSERVATION_ASSET_QUANTITY_SELECTOR);
+        const totalMarketValueInput = row.querySelector<HTMLInputElement>(quoteSelectors.totalRaw);
         const decimalPlaces = Number(displayInput?.dataset.financialInputDecimals);
 
         if(!displayInput || !rawInput) {
@@ -563,7 +561,7 @@ export function createPortfolioHistoryQuoteAction(
      * @author GPT-6 Luna
      */
     function bindRow(row: HTMLTableRowElement): void {
-        const quoteButton = row.querySelector<HTMLButtonElement>(QUOTE_ACTION_SELECTOR);
+        const quoteButton = row.querySelector<HTMLButtonElement>(quoteSelectors.action);
 
         if(!quoteButton || boundQuoteButtons.has(quoteButton)) {
             return;

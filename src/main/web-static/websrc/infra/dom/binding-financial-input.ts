@@ -1,6 +1,7 @@
 import { logger, LogLevel } from "../logging";
 import Format from "../format";
 import { parseIntOrDefault } from "../../utils/lang";
+import { guardNumericEdits } from "./numeric-edit-guard";
 
 // =============================================================================
 // FINANCIAL INPUT BINDING
@@ -9,11 +10,26 @@ import { parseIntOrDefault } from "../../utils/lang";
 // Attribute value format: data-financial-input="fieldName"
 // =============================================================================
 
-const FINANCIAL_INPUT_ATTRIBUTE = "data-financial-input";
-const FINANCIAL_INPUT_BOUND_FLAG = "data-financial-input-bound";
+/** Attribute identifying a financial display input and its submitted field name.
+ * @example `element.querySelector(\`[${ FINANCIAL_INPUT_ATTRIBUTE }]\`)`.
+ * @author GitHub Copilot
+ * @author GPT-6.1 Terra
+ */
+export const FINANCIAL_INPUT_ATTRIBUTE = "data-financial-input";
+/** Attribute indicating whether the financial input has been bound.
+ * @example `input.getAttribute(FINANCIAL_INPUT_BOUND_FLAG) === "true"`.
+ * @author GitHub Copilot
+ * @author GPT-6.1 Terra
+ */
+export const FINANCIAL_INPUT_BOUND_FLAG = "data-financial-input-bound";
 const FINANCIAL_INPUT_CONTAINER_ATTRIBUTE = "data-financial-input-container";
 const FINANCIAL_INPUT_NULL_IF_EMPTY_ATTRIBUTE = "data-null-if-empty";
-const FINANCIAL_INPUT_DECIMALS_ATTRIBUTE = "data-financial-input-decimals";
+/** Attribute specifying the financial input's display precision.
+ * @example `input.getAttribute(FINANCIAL_INPUT_DECIMALS_ATTRIBUTE)`.
+ * @author GitHub Copilot
+ * @author GPT-6.1 Terra
+ */
+export const FINANCIAL_INPUT_DECIMALS_ATTRIBUTE = "data-financial-input-decimals";
 const FINANCIAL_INPUT_CONTAINER_DECIMALS_ATTRIBUTE = "data-financial-input-container-decimals";
 const DEFAULT_DECIMAL_PLACES = 2;
 
@@ -99,6 +115,8 @@ function bindFinancialInput(financialInput: HTMLInputElement, fieldName: string)
 
     // Initialize display value from raw if present
     initializeFinancialDisplay(financialInput, hiddenRawInput, decimalPlaces);
+
+    guardNumericEdits(financialInput, true);
 
     // Set up synchronization on blur (when user finishes editing)
     financialInput.addEventListener("blur", () => {
